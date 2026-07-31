@@ -3,9 +3,10 @@
 Emite una ficha por autor como archivo independiente (decisión D-21): la ficha
 de una persona no debe obligar a descargar el corpus completo.
 
-ALCANCE DE PUBLICACIÓN (pendiente T-11): se publican todas las firmas y el
-ranking se muestra por defecto filtrado a n >= 5 (decisión D-29). Ambos valores
-son parámetros de `config/publication.yml`; cambiarlos no requiere tocar código.
+ALCANCE DE PUBLICACIÓN (T-11, confirmado por el responsable): se publican todas
+las firmas y el ranking se muestra por defecto filtrado a n >= 5 (decisión
+D-29). Ambos valores son parámetros de `config/publication.yml`; cambiarlos no
+requiere tocar código.
 
 Salidas:
   data/processed/authors.json
@@ -20,6 +21,25 @@ from collections import Counter
 import common_build as b
 
 PUBLICATION = b.load_config("publication.yml")["fichas_autor"]
+
+
+def cargar_orcid() -> dict[str, dict]:
+    """Asignaciones de ORCID, si el enriquecimiento ya se ejecutó (V2-01).
+
+    El archivo es opcional: sin él las fichas muestran el placeholder declarado.
+    Nunca se inventa un ORCID ni se deja el campo en blanco silencioso.
+    """
+    path = b.INTERIM / "authors_orcid.csv"
+    if not path.exists():
+        return {}
+    import pandas as pd
+    df = pd.read_csv(path, dtype=str)
+    return {r["nombre_en_fuente"]: {
+        "orcid": r["orcid"],
+        "confianza": r["confianza"],
+        "publicaciones_de_respaldo": b.to_num(r["publicaciones_de_respaldo"]),
+        "fuente": r["fuente"],
+    } for _, r in df.iterrows()}
 
 
 def h_index(citas: list[int]) -> int:
@@ -42,6 +62,8 @@ def main() -> None:
     # archivo (ver common_build.unique_slugs y decisión D-08).
     slugs = b.unique_slugs(sorted(authorship["nombre_en_fuente"].unique()))
     colisiones = sum(1 for n, s in slugs.items() if s != b.slugify(n))
+
+    orcid_map = cargar_orcid()
 
     resumen, fichas = [], 0
     for nombre, grp in authorship.groupby("nombre_en_fuente"):
@@ -90,9 +112,16 @@ def main() -> None:
             "nombre_en_fuente": nombre,
             "unidades_academicas": unidades or ["No determinada"],
             "scopus_author_ids": scopus_ids.split("|") if scopus_ids else [],
-            # Placeholder declarado, nunca omitido (decisión D-07)
-            "orcid": None,
-            "orcid_estado": "No disponible en las fuentes actuales",
+            # Placeholder declarado, nunca omitido (decisión D-07). Cuando el
+            # enriquecimiento desde Crossref se ha ejecutado, el ORCID viaja con
+            # su confianza: una asignación por apellido e inicial es una
+            # hipótesis verificable, no un hecho.
+            "orcid": (orcid_map.get(nombre) or {}).get("orcid"),
+            "orcid_confianza": (orcid_map.get(nombre) or {}).get("confianza"),
+            "orcid_respaldo": (orcid_map.get(nombre) or {}).get("publicaciones_de_respaldo"),
+            "orcid_estado": ("Recuperado desde Crossref"
+                             if nombre in orcid_map
+                             else "No disponible en las fuentes actuales"),
             "identidad_no_consolidada": identidad_ambigua,
             "indicadores": {
                 "n_publicaciones": n_pub,
@@ -151,6 +180,8 @@ def main() -> None:
     print(f"  con n >= {umbral_interpretable} (interpretables): "
           f"{sum(1 for a in resumen if a['interpretable'])}")
     print(f"  identidad no consolidada: {sum(1 for a in resumen if a['identidad_no_consolidada'])}")
+    print(f"  con ORCID               : {len(orcid_map)}"
+          f"{'  (enriquecimiento no ejecutado)' if not orcid_map else ''}")
     print(f"  mediana de publicaciones: {statistics.median(n_pubs)}")
 
 
