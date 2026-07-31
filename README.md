@@ -5,7 +5,7 @@ colaboración y estructura temática de la actividad científica institucional.
 
 **Institución inicial:** Universidad Finis Terrae
 **Fuentes:** Scopus y SciVal
-**Estado:** Fase 1 completada — auditoría de datos y modelo lógico
+**Estado:** Fase 2 completada — indicadores, arquitectura y diseño UX/UI
 
 ---
 
@@ -14,7 +14,7 @@ colaboración y estructura temática de la actividad científica institucional.
 | Fase | Alcance | Estado |
 |---|---|---|
 | 1 | Fundamentos, auditoría de datos y validación | ✅ Completada |
-| 2 | Indicadores, arquitectura y UX/UI | ⏳ Pendiente |
+| 2 | Indicadores, arquitectura y UX/UI | ✅ Completada |
 | 3 | Implementación, despliegue y replicabilidad | ⏳ Pendiente |
 
 Ver `PLAN.md` para el detalle y los pendientes abiertos.
@@ -39,7 +39,8 @@ prompts/         Especificaciones de cada fase.
 
 ```bash
 pip install -r requirements.txt
-python3 src/audit/run_all.py
+python3 src/audit/run_all.py                    # Fase 1: auditoría y validación
+python3 src/analysis/indicator_feasibility.py   # Fase 2: factibilidad de indicadores
 ```
 
 La auditoría completa se reconstruye desde `data/raw/` sin pasos manuales.
@@ -62,6 +63,20 @@ Ver `docs/AUDIT_REPORT.md`.
 
 ---
 
+## Resultados de la Fase 2
+
+| | |
+|---|---|
+| Indicadores evaluados contra los datos | **40** |
+| Publicados en V1 | **27** (26 calculables + 1 placeholder) |
+| Diferidos a V2 | 8 |
+| No calculables, declarados | 5 |
+| KPIs de portada | 6 |
+
+Ver `docs/INDICATORS.md`.
+
+---
+
 ## Documentación
 
 | Documento | Contenido |
@@ -71,6 +86,12 @@ Ver `docs/AUDIT_REPORT.md`.
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
 | `docs/LIMITATIONS.md` | **Limitaciones declaradas. Leer antes de interpretar cualquier indicador** |
 | `docs/VALIDATION_REPORT.md` | Resultado de las reglas de validación |
+| `docs/INDICATORS.md` | Catálogo de 40 indicadores y selección V1 |
+| `docs/ARCHITECTURE.md` | Pipeline, artefactos, despliegue y rendimiento |
+| `docs/UX_UI.md` | Navegación, KPIs, módulos, filtros y estados |
+| `docs/LAYERS.md` | Qué es público y qué es interno |
+| `docs/AUTHOR_PROFILE.md` | Estructura de la ficha pública de autor |
+| `docs/GLOSSARY.md` | Glosario y ayuda contextual |
 
 ---
 
@@ -88,13 +109,14 @@ El proyecto separa estrictamente dos capas (`CLAUDE.md`, `<data_governance>`):
 ## Replicabilidad
 
 Adaptar la plataforma a otra institución no requiere tocar la lógica de `src/`.
-Se cambian tres archivos:
+Se cambian cuatro archivos de configuración:
 
 | Archivo | Qué se cambia |
 |---|---|
 | `config/institution.yml` | Nombre, `scopus_affiliation_id`, ventana temporal, branding |
 | `config/matching_rules.yml` | Patrones de detección y vocabulario de unidades |
 | `config/sources.yml` | Rutas, fechas de corte y roles de los archivos de datos |
+| `config/indicators.yml` | Qué indicadores se publican y con qué advertencias |
 
 ---
 
