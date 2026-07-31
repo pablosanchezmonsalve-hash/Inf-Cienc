@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Publicaciones — Informe Cienciométrico</title>
+<meta name="description" content="Tabla completa de publicaciones con filtros por año, tipo, área, unidad y acceso abierto.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body data-pagina="publicaciones">
+<a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+<header class="cabecera" id="cabecera"></header>
+<div class="vigencia" id="vigencia"></div>
+<main id="contenido" class="contenedor">
+  <p class="migas"><a href="index.html">Portada</a> › Publicaciones</p>
+  <h1>Publicaciones</h1>
+  <p class="intro">Los filtros combinan con Y entre categorías y con O dentro de
+  cada categoría. «Sin dato declarado» es una opción de filtro, no un hueco.</p>
+  <section class="filtros"><h2>Filtros</h2><div id="filtros"></div></section>
+  <div class="chips" id="chips"></div>
+  <p class="resumen-resultados" id="resumen"></p>
+  <div class="tabla-envoltura"><table>
+    <thead><tr><th>Año</th><th>Título y autores UFT</th><th>Fuente</th>
+      <th>Tipo</th><th class="num">Citas</th><th class="num">FWCI</th></tr></thead>
+    <tbody id="tabla-cuerpo"></tbody></table></div>
+  <div class="paginacion" id="paginacion"></div>
+</main>
+<footer class="pie" id="pie"></footer>
+<script type="module" src="assets/js/paginas.js"></script>
+</body>
+</html>

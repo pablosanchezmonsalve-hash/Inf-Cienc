@@ -97,6 +97,10 @@ fuentes:
       publicaciones_uft_detalle:
         header_row: 0
         n_registros: 862
+        # Nombre literal de la columna de autor en el archivo de validación.
+        # Es propio de este libro Excel, no del sistema: se declara aquí para
+        # que no quede escrito en el código (requisito de replicabilidad).
+        columna_autor: "Autores finis terrae afiliados"
       publicaciones_unificadas:
         header_row: 0
         n_registros: 589

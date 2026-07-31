@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autores — Informe Cienciométrico</title>
+<meta name="description" content="Ranking de autores afiliados con publicaciones, citas y presencia en el top de citación.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body data-pagina="autores">
+<a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+<header class="cabecera" id="cabecera"></header>
+<div class="vigencia" id="vigencia"></div>
+<main id="contenido" class="contenedor">
+  <p class="migas"><a href="index.html">Portada</a> › Autores</p>
+  <h1>Autores</h1>
+  <div id="aviso-autores"></div>
+  <section class="filtros">
+    <div class="grupo-filtro">
+      <label for="buscar-autor">Buscar autor</label>
+      <input type="search" id="buscar-autor" placeholder="Escriba un apellido…">
+    </div>
+    <label class="opcion"><input type="checkbox" id="solo-interpretables" checked>
+      Mostrar sólo firmas con 5 o más publicaciones</label>
+  </section>
+  <p class="resumen-resultados" id="resumen"></p>
+  <div class="tabla-envoltura"><table>
+    <thead><tr>
+      <th>Autor</th><th>Unidad académica</th>
+      <th class="num" data-orden="n_publicaciones" aria-sort="descending">Publicaciones</th>
+      <th class="num" data-orden="citas" aria-sort="none">Citas</th>
+      <th class="num" data-orden="citas_por_publicacion" aria-sort="none">Citas/pub.</th>
+      <th class="num" data-orden="publicaciones_top10" aria-sort="none">Top 10 %</th>
+    </tr></thead><tbody id="tabla-cuerpo"></tbody></table></div>
+</main>
+<footer class="pie" id="pie"></footer>
+<script type="module" src="assets/js/paginas.js"></script>
+</body>
+</html>

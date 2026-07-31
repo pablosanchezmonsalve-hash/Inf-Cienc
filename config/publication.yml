@@ -1,0 +1,38 @@
+# config/publication.yml
+# Parámetros de alcance de publicación de la capa pública.
+#
+# Materializa decisiones que son de política institucional, no técnicas, y por
+# eso viven en configuración: cambiarlas no debe requerir tocar código.
+
+fichas_autor:
+  # PENDIENTE T-11: decisión de alcance no confirmada por el responsable.
+  # Supuesto vigente (decisión D-29): se publican todas las firmas detectadas y
+  # el ranking se muestra por defecto filtrado a n >= 5, de modo que ninguna
+  # persona queda excluida del catálogo por un criterio arbitrario, pero la
+  # vista principal mantiene calidad informativa.
+  publicar_todas: true
+
+  # Umbral por defecto del ranking. El usuario puede quitarlo en la interfaz.
+  n_minimo_ranking_por_defecto: 5
+
+  # Campos que nunca se emiten en una ficha pública aunque existan aguas arriba.
+  campos_excluidos:
+    - afiliacion_declarada_raw
+    - metodo_blando
+    - metodo_duro_publicacion
+    - confianza
+    - clave_normalizada
+    - clave_apellido
+
+  # Las firmas con identidad ambigua se marcan, pero NO se enlazan entre sí:
+  # sugerir cuáles serían publicaría la cola interna de revisión.
+  declarar_identidad_no_consolidada: true
+  enlazar_firmas_sospechosas: false
+
+exportacion:
+  # <v1_scope_desirable>: exportación de subconjuntos.
+  habilitada: true
+  formatos: [csv]
+  # La exportación arrastra la procedencia: un CSV suelto sin fecha de corte
+  # deja de ser interpretable.
+  incluir_cabecera_procedencia: true

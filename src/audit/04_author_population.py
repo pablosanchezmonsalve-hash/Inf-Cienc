@@ -49,7 +49,9 @@ def main() -> None:
     solo_2023 = autores_full - autores_2425
 
     detalle = c.read_report_sheet("Publicaciones_UFT_detalle")
-    manual_detalle = set(detalle["Autores finis terrae afiliados"].dropna())
+    col_autor = (c.SOURCES["reporte_excel_2026"]["hojas_utiles"]
+                 ["publicaciones_uft_detalle"]["columna_autor"])
+    manual_detalle = set(detalle[col_autor].dropna())
     investigadores = c.read_report_sheet("Investigadores")
     manual_ranking = set(investigadores["Investigador"].dropna())
 
