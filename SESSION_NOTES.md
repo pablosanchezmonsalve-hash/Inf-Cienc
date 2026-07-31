@@ -264,3 +264,16 @@ V1 completa. Lo de mayor rendimiento para V2 es **V2-01: enriquecer ORCID desde
 Crossref por DOI** (cobertura 97,7 %): sin identificador persistente, las 589
 firmas no pueden consolidarse y tres indicadores siguen bloqueados. Ver
 `docs/V2_BACKLOG.md`.
+
+### Confirmaciones del usuario (cierre de sesión)
+
+| Decisión | Estado |
+|---|---|
+| T-11 · alcance de fichas de autor | **Confirmado**: se publican las 589 firmas, ranking por defecto n >= 5 |
+| Licencia del software | **Confirmada**: MIT |
+| Licencia de datos derivados | **Confirmada**: CC BY 4.0 |
+
+La aprobación de licencias fija la intención del proyecto. **No sustituye** la
+verificación con la unidad que administra la suscripción a Elsevier sobre qué
+métricas derivadas pueden publicarse abiertamente: eso es un hecho externo, no
+una decisión del proyecto, y sigue abierto.

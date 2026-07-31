@@ -86,9 +86,10 @@ alcance de publicación de fichas de autor (T-11).
 cero dependencias externas en el navegador · tres compuertas automáticas en el
 pipeline · verificado en navegador real sin errores de consola.
 
-**T-11 no fue confirmado por el usuario.** Se implementó el supuesto D-29
-(publicar las 589 firmas, ranking por defecto n >= 5), parametrizado en
-`config/publication.yml`. Cambiarlo no requiere tocar código.
+**T-11 confirmado por el usuario** (sesión 2026-07-31): se publican las 589
+firmas con el ranking filtrado por defecto a n >= 5, parametrizado en
+`config/publication.yml`. Licencias aprobadas: MIT para el software, CC BY 4.0
+para los datos derivados.
 
 ---
 
@@ -106,7 +107,7 @@ pipeline · verificado en navegador real sin errores de consola.
 | ~~T-08~~ | ~~Elegir stack de despliegue estático~~ | — | **Cerrado**: HTML/CSS/JS sin dependencias + build en Python |
 | ~~T-09~~ | ~~Excluir `internal/` del bundle público~~ | — | **Cerrado**: `06_assemble_site.py` lo excluye y lo verifica |
 | T-10 | Red de coautoría autor–autor derivada de `Autoria` | V2 | Diferido: depende de T-03 |
-| T-11 | Confirmar alcance de publicación de fichas de autor | V2 | **Supuesto vigente** en `config/publication.yml`, sin confirmar |
+| ~~T-11~~ | ~~Confirmar alcance de publicación de fichas de autor~~ | — | **Cerrado**: confirmado por el usuario (589 firmas, ranking n>=5) |
 | ~~T-12~~ | ~~Verificación automática de barrera pública/interna~~ | — | **Cerrado**: `05_verify_public_layer.py`, compuerta con código de salida |
 | T-13 | Confirmar semántica del percentil de citación con documentación SciVal | V2 | Determinada empíricamente, no documentalmente |
 

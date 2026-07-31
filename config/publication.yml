@@ -5,11 +5,10 @@
 # eso viven en configuración: cambiarlas no debe requerir tocar código.
 
 fichas_autor:
-  # PENDIENTE T-11: decisión de alcance no confirmada por el responsable.
-  # Supuesto vigente (decisión D-29): se publican todas las firmas detectadas y
-  # el ranking se muestra por defecto filtrado a n >= 5, de modo que ninguna
-  # persona queda excluida del catálogo por un criterio arbitrario, pero la
-  # vista principal mantiene calidad informativa.
+  # T-11 CONFIRMADO por el responsable del proyecto (sesión 2026-07-31).
+  # Se publican todas las firmas detectadas y el ranking se muestra por defecto
+  # filtrado a n >= 5: ninguna persona queda excluida del catálogo por un
+  # criterio arbitrario, y la vista principal mantiene calidad informativa.
   publicar_todas: true
 
   # Umbral por defecto del ranking. El usuario puede quitarlo en la interfaz.
