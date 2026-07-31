@@ -1,0 +1,119 @@
+# config/sources.yml
+# Registro de fuentes de datos. Materializa la entidad FuenteDeDatos del modelo
+# lógico. Requisito de trazabilidad de CLAUDE.md: todo indicador publicado debe
+# poder rastrearse hasta una entrada de este archivo.
+
+fuentes:
+
+  scopus_export:
+    nombre: "Scopus — export nativo"
+    archivo: "data/raw/export_1667ea7a-7c7a-4b10-ae93-6fca216096cc_2026-07-31T161030.249574865.csv"
+    formato: "csv"
+    encoding: "utf-8-sig"
+    header_row: 0
+    rol: "primaria"
+    aporta:
+      - autoria
+      - afiliacion_por_autor
+      - abstract
+      - referencias
+      - financiamiento
+    fecha_corte: null            # NO declarada por el export. Ambigüedad A-05.
+    fecha_export: "2026-07-31"
+    ventana_declarada: "2023-2025"
+    filtros_aplicados: "ninguno declarado"
+    n_registros_declarado: null
+    n_registros_leido: 818
+
+  scival_export:
+    nombre: "SciVal — export nativo"
+    archivo: "data/raw/Publications_at_Universidad_Finis_Terrae_2023_-_2025.xlsx"
+    formato: "xlsx"
+    hoja: "Sheet0"
+    header_row: 19               # filas 0-18 son metadatos del export
+    rol: "primaria"
+    aporta:
+      - metricas_normalizadas
+      - metricas_de_fuente
+      - clasificacion_tematica
+      - colaboracion
+      - scopus_affiliation_ids
+      - roles_autorales
+    fecha_corte: "2026-07-22"    # "Date last updated" declarado por el export
+    fecha_export: "2026-07-31"
+    ventana_declarada: "2023 to 2025"
+    filtros_aplicados: "not filtered; all publication types"
+    n_registros_declarado: 816
+    n_registros_leido: 818
+    advertencias_del_export:
+      - "Some Affiliation names cells are truncated"
+      - "Some publication dates might be approximate"
+
+  rdata_scopus:
+    nombre: "bibliometrix — Scopus normalizado"
+    archivo: "data/raw/Scopus_Normalizado.RData"
+    formato: "rdata"
+    objeto: "M"
+    rol: "referencia"            # NUNCA fuente de indicadores publicables (D-05)
+    aporta:
+      - afiliaciones_normalizadas_bibliometrix
+      - referencias_normalizadas
+    proceso_generador: null      # desconocido; no reproducible
+    n_registros_leido: 818
+
+  rdata_scival:
+    nombre: "bibliometrix — 'SciVal' normalizado"
+    archivo: "data/raw/Scival_Normalizado.RData"
+    formato: "rdata"
+    objeto: "M"
+    rol: "referencia"
+    nota: >-
+      Nombre engañoso: no contiene ninguna métrica de SciVal.
+      Es un objeto bibliometrixDB con DB=SCOPUS.
+    proceso_generador: null
+    n_registros_leido: 818
+
+  rdata_unificado:
+    nombre: "bibliometrix — unificado normalizado"
+    archivo: "data/raw/Unificado_Normalizado.RData"
+    formato: "rdata"
+    objeto: "M"
+    rol: "referencia"
+    nota: >-
+      Arrastra 6 columnas residuales de joins repetidos
+      (n_references_normalized.x, .y, .x.x, .y.y, .x.x.x, .y.y.y).
+    proceso_generador: null
+    n_registros_leido: 818
+
+  reporte_excel_2026:
+    nombre: "Reporte UFT 2026 — trabajo manual previo"
+    archivo: "data/raw/2026_Reporte-UFT.xlsx"
+    formato: "xlsx"
+    rol: "validacion"            # set de validación, no fuente de verdad (D-15)
+    hojas_utiles:
+      investigadores:
+        header_row: 3
+        n_registros: 396
+      publicaciones_uft_detalle:
+        header_row: 0
+        n_registros: 862
+        # Nombre literal de la columna de autor en el archivo de validación.
+        # Es propio de este libro Excel, no del sistema: se declara aquí para
+        # que no quede escrito en el código (requisito de replicabilidad).
+        columna_autor: "Autores finis terrae afiliados"
+      publicaciones_unificadas:
+        header_row: 0
+        n_registros: 589
+    ventana_declarada: "2024-2025"
+    nota: >-
+      Contiene fórmulas vivas, no valores materializados, en las columnas de
+      conteo. Cobertura temporal menor que las fuentes primarias.
+
+  informe_2024_2025:
+    nombre: "Informe 2024-2025"
+    archivo: "data/raw/Informe 2024-2025.xlsx"
+    formato: "xlsx"
+    rol: "documental"
+    nota: >-
+      Fórmulas rotas: referencian el libro externo [1]!PublicacionesUnicas,
+      ausente. Sin valores recuperables. Valor únicamente histórico.

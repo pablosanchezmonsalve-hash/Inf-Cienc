@@ -1,0 +1,88 @@
+name: Construir y desplegar
+
+# Reconstruye el sitio desde los datos versionados y lo publica en GitHub Pages.
+#
+# El pipeline es el mismo que en local (`make sitio`): auditoría → validación →
+# artefactos → ensamblado. Si una regla bloqueante falla o si la verificación de
+# capas encuentra material interno en un artefacto público, el job falla y NO se
+# publica nada. Es la misma compuerta, ejecutada por CI.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un despliegue a la vez; no cancela el que esté en curso.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Auditoría y validación
+        run: python3 src/audit/run_all.py
+
+      - name: Factibilidad de indicadores
+        run: python3 src/analysis/indicator_feasibility.py
+
+      - name: Verificar la lógica de emparejamiento de ORCID
+        run: python3 src/enrich/orcid_crossref.py --test
+
+      - name: Construir artefactos publicables
+        run: python3 src/build/build_all.py
+
+      - name: Ensamblar el sitio
+        run: python3 src/build/06_assemble_site.py
+
+      - name: Comprobar que la capa interna no viaja
+        run: |
+          set -e
+          for prohibido in matching_log ambiguities_ orcid_conflicts; do
+            if grep -rl "$prohibido" dist/ >/dev/null 2>&1; then
+              echo "FALLA: '$prohibido' aparece en dist/"
+              exit 1
+            fi
+          done
+          test ! -d dist/internal
+          test ! -d dist/data/raw
+          echo "Capa interna ausente de dist/ — verificado"
+
+      - name: Publicar informes de verificación
+        uses: actions/upload-artifact@v4
+        with:
+          name: informes-de-verificacion
+          path: |
+            docs/VALIDATION_REPORT.md
+            docs/BUILD_VERIFICATION.md
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  desplegar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

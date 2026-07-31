@@ -1,0 +1,210 @@
+# config/matching_rules.yml
+# Reglas de detección institucional, normalización de nombres y vocabulario de
+# unidades académicas.
+#
+# REPLICABILIDAD: junto a institution.yml, este archivo concentra todo lo que
+# otra institución debe adaptar. La lógica de src/ lee de aquí y no contiene
+# patrones institucionales escritos a mano.
+#
+# CAPA: interna. Las reglas de matching no se publican por defecto
+# (CLAUDE.md, <data_governance>).
+
+deteccion_institucional:
+
+  # Método duro (regla I-02). Confianza alta.
+  # Compara contra institucion.scopus_affiliation_id.
+  metodo_duro:
+    activo: true
+    campo: "Scopus Affiliation IDs"
+    fuente: "scival_export"
+    confianza: "alta"
+
+  # Método blando (regla I-03). Confianza media.
+  # Se aplica sobre las cadenas de afiliación del export de Scopus, que es la
+  # única fuente que permite saber QUÉ AUTOR está afiliado a la institución.
+  metodo_blando:
+    activo: true
+    campo: "Authors with affiliations"
+    fuente: "scopus_export"
+    confianza: "media"
+    # Patrón con límite de palabra, insensible a caso y a acentos.
+    # El separador admite espacio o guion: la variante "Universidad Finis-Terrae"
+    # existe en los datos y con '\s+' se perdía (falso negativo verificado).
+    patrones:
+      - '\bfinis[\s\-]+terrae\b'
+    # Regla I-05: prohibido el matching por subcadena suelta.
+    # Verificado empíricamente en Fase 1: la subcadena 'inis' produce 16 cadenas
+    # de falso positivo ("Ministerio de Salud", "Faculty of Business
+    # Administration", "Medizinische ...", "Department of Medicine and
+    # Geriatrics"). El patrón con límite de palabra no las captura.
+    patrones_prohibidos:
+      - 'inis'
+      - 'finis'      # sin límite de palabra ni exigencia de 'terrae'
+    normalizar_acentos: true
+    normalizar_caso: true
+
+  # Regla I-04: los dos métodos deben reconciliarse. Toda discrepancia se
+  # registra en internal/ y se revisa; no se resuelve en silencio.
+  reconciliacion_obligatoria: true
+
+unidad_academica:
+  # Regla I-06. Extracción por patrón sobre la cadena de afiliación
+  # institucional.
+  activo: true
+  patrones_extraccion:
+    - '(Facultad de [^,]+)'
+    - '(Faculty of [^,]+)'
+    - '(Escuela de [^,]+)'
+    - '(School of [^,]+)'
+
+  # La extracción se restringe a la ventana de texto que precede a la mención
+  # de la institución foco y se detiene ante cualquier marcador de OTRA
+  # institución. Sin esta restricción, un autor con doble afiliación recibía la
+  # facultad de la otra universidad: caso verificado en Fase 1, donde
+  # "Faculty of Medicine and Nursing" (Universidad del País Vasco) se atribuía
+  # a 30 pares autor x publicación de la UFT.
+  restringir_a_ventana_institucional: true
+  marcadores_otra_institucion:
+    - 'Universit'
+    - 'Universidad'
+    - 'Hospital'
+    - 'Institut'
+    - 'Clinic'
+    - 'Clínic'
+    - 'College'
+    - 'Centro Asistencial'
+
+  # El designador que precede al nombre de la institución foco ("Universidad"
+  # en "Universidad Finis Terrae") queda como token colgante al cortar la cadena
+  # en la posición del match. No es un marcador de OTRA institución: se descarta
+  # antes de recorrer la ventana, o la extracción se corta siempre en el primer
+  # paso y la cobertura cae a cero.
+  designadores_institucionales:
+    - 'Universidad'
+    - 'University'
+    - 'Univ'
+    - 'Univ.'
+    - 'la Universidad'
+    - 'de la Universidad'
+
+  # Restos de la cadena institucional que quedan pegados a la unidad cuando la
+  # fuente omite la coma separadora.
+  sufijos_a_limpiar:
+    - 'Universidad Finis Terrae'
+    - 'Univ. Finis Terrae'
+    - 'de la Universidad Finis Terrae'
+    - 'en la Univ. Finis Terrae'
+  # El ~30 % restante NO se imputa (decisión D-09).
+  etiqueta_sin_dato: "No determinada"
+
+  # Vocabulario controlado (regla I-07).
+  # ESTATUS: INFERIDO DE LOS DATOS, NO OFICIAL.
+  # El usuario confirmó (sesión 2026-07-31) que no existe catálogo oficial UFT
+  # disponible. Este vocabulario requiere validación institucional antes de
+  # cualquier publicación de comparaciones entre unidades.
+  vocabulario_validado_por_institucion: false
+  vocabulario:
+    "Facultad de Medicina":
+      - "Facultad de Medicina"
+      - "Faculty of Medicine"
+      - "Escuela de Medicina"
+      - "School of Medicine"
+    "Escuela de Kinesiología":
+      - "Escuela de Kinesiología"
+      - "School of Kinesiology"
+    "Escuela de Nutrición y Dietética":
+      - "Escuela de Nutrición y Dietética"
+      - "School of Nutrition and Dietetics"
+    "Facultad de Ingeniería":
+      - "Facultad de Ingeniería"
+      - "Faculty of Engineering"
+    "Facultad de Odontología":
+      - "Facultad de Odontología"
+      - "Faculty of Dentistry"
+      - "Escuela de Odontología"
+      - "School of Dentistry"
+    "Facultad de Educación, Psicología y Familia":
+      - "Facultad de Educación"
+      - "Faculty of Education"
+      - "Facultad de Educación Psicología y Familia"
+      - "Facultad de Educación, Psicología y Familia"
+      - "Escuela de Psicología"
+      - "School of Psychology"
+    "Facultad de Economía y Negocios":
+      - "Facultad de Economía y Negocios"
+      - "Faculty of Economics and Business"
+      - "School of Economics and Business"
+    "Facultad de Derecho":
+      - "Facultad de Derecho"
+      - "Faculty of Law"
+      - "Escuela de Derecho"
+      - "School of Law"
+    "Facultad de Artes":
+      - "Facultad de Artes"
+      - "Faculty of Arts"
+      - "Facultad de Artes Visuales"
+      - "Escuela de Artes Visuales"
+      - "School of Arts"
+    "Facultad de Arquitectura y Diseño":
+      - "Facultad de Arquitectura y Diseño"
+      - "Faculty of Architecture and Design"
+      - "Faculty of Archi-tecture and Design"
+      - "Escuela de Arquitectura"
+      - "School of Architecture"
+    "Facultad de Comunicaciones y Humanidades":
+      - "Facultad de Comunicaciones y Humanidades"
+      - "Facultad de Humanidades y Comunicaciones"
+      - "Faculty of Communications and Humanities"
+      - "Escuela de Historia"
+      - "School of History"
+    "Escuela de Enfermería":
+      - "Escuela de Enfermería"
+      - "School of Nursing"
+    "Escuela de Ciencias de la Familia":
+      - "Escuela de Ciencias de la Familia"
+      - "School of Family Sciences"
+
+identidad_autor:
+  # Clave de identidad disponible. ORCID no existe en las fuentes actuales.
+  clave_primaria: "scopus_author_id"
+
+  # Normalización de nombre para DETECTAR variantes. Nunca para fusionarlas
+  # automáticamente (restricción de PROMPT_FASE_1 y CLAUDE.md).
+  normalizacion_nombre:
+    minusculas: true
+    quitar_acentos: true
+    quitar_puntuacion: true
+    quitar_guiones: true
+
+  # Reglas P-03, P-04, P-05: se marcan como ambigüedad, no se resuelven.
+  colapso_automatico_de_variantes: false
+
+  ambiguedades_a_registrar:
+    - apellido_base_con_multiples_formas       # P-03
+    - nombre_completo_con_multiples_scopus_id  # P-04
+    - scopus_id_con_multiples_nombres          # P-05
+
+enriquecimiento_externo:
+  # Confirmado por el usuario (sesión 2026-07-31): ORCID puede recuperarse desde
+  # el repositorio institucional UFT, Crossref y otras fuentes.
+  # NO se ejecuta en Fase 1. Registrado como pendiente accionable para Fase 2/3.
+  orcid:
+    disponible_en_fuentes_actuales: false
+    estrategia_propuesta: "Crossref REST API por DOI (cobertura DOI: 97,7 %)"
+    fuentes_candidatas:
+      - "Crossref"
+      - "Repositorio institucional UFT"
+      - "ORCID Public API"
+    # Implementado en src/enrich/orcid_crossref.py. La lógica de emparejamiento
+    # está verificada con fixtures (`--test`), pero NO se ha ejecutado contra la
+    # API en vivo: la política de red del entorno de desarrollo bloquea
+    # api.crossref.org. Ejecutar desde un entorno con salida a red.
+    implementado: true
+    ejecutado_contra_api: false
+    # Crossref pide identificarse con un correo de contacto para su 'polite pool'.
+    mailto: "pablosanchezmonsalve@gmail.com"
+    # Un ORCID asignado por coincidencia de apellido e inicial es una hipótesis.
+    # Nunca se asigna si las iniciales se contradicen ni si hay homonimia dentro
+    # de la misma publicación.
+    exigir_inicial_coincidente: true
+    colapso_automatico_de_conflictos: false
