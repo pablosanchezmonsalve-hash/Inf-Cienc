@@ -1,9 +1,18 @@
-# Intermedios regenerables: se reconstruyen con `python3 src/audit/run_all.py`
+# Intermedios regenerables: se reconstruyen con `make auditoria`
 data/interim/
 
+# Artefactos publicables: se reconstruyen con `make artefactos`
+data/processed/
+
+# Sitio ensamblado y desplegable: se reconstruye con `make sitio`
+dist/
+
 # Nunca desplegar la capa interna en la web pública (CLAUDE.md, <data_governance>).
-# Se versiona en el repo de trabajo, pero queda excluida del build público de Fase 3.
-# (la exclusión efectiva del bundle se implementa en Fase 3)
+# Se versiona en el repositorio de trabajo, pero queda fuera del bundle: la
+# exclusión efectiva la aplica y verifica src/build/06_assemble_site.py.
+
+# Capturas de verificación local
+.shots/
 
 __pycache__/
 *.py[cod]

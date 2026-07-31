@@ -1,0 +1,40 @@
+"""Ejecuta el build completo de artefactos publicables.
+
+Uso:
+    python3 src/build/build_all.py
+
+Precondición: la auditoría debe haber corrido y no tener fallas bloqueantes
+(`python3 src/audit/run_all.py`). El build aborta si no se cumple.
+
+El paso 05 es una compuerta: si detecta capa interna en un artefacto público,
+el build falla con código distinto de cero.
+"""
+
+from __future__ import annotations
+
+import importlib
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+STEPS = ["01_publications", "02_indicators", "03_authors", "04_glossary"]
+
+
+def main() -> int:
+    for step in STEPS:
+        importlib.import_module(step).main()
+
+    codigo = importlib.import_module("05_verify_public_layer").main()
+
+    print("\n" + "=" * 78)
+    if codigo == 0:
+        print("BUILD COMPLETO · artefactos en data/processed/")
+    else:
+        print("BUILD FALLIDO · la verificación de capas encontró problemas")
+    print("=" * 78)
+    return codigo
+
+
+if __name__ == "__main__":
+    sys.exit(main())

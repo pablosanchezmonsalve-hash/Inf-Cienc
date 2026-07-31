@@ -49,11 +49,23 @@ def main() -> None:
     sc_idx = scopus.set_index("EID")
     sv_idx = scival.set_index("EID")
 
+    def sv_val(v, col):
+        """Valor de SciVal normalizando el guion, que es su marcador de ausencia."""
+        if v is None:
+            return None
+        raw = v.get(col)
+        if raw is None or (isinstance(raw, float) and pd.isna(raw)):
+            return None
+        raw = str(raw).strip()
+        return None if raw in ("-", "", "nan") else raw
+
     rows = []
     for eid in universo:
         in_sc, in_sv = eid in eid_scopus, eid in eid_scival
         s = sc_idx.loc[eid] if in_sc else None
         v = sv_idx.loc[eid] if in_sv else None
+        paises = sv_val(v, "Country/Region")
+        n_paises = sv_val(v, "Number of Countries/Regions")
         rows.append({
             "eid": eid,
             "titulo": (s["Title"] if in_sc else v["Title"]),
@@ -70,6 +82,37 @@ def main() -> None:
             "tiene_area_tematica": in_sv,
             "citas_scopus": (s["Cited by"] if in_sc else None),
             "citas_scival": (v["Citations"] if in_sv else None),
+            # --- atributos que consume el build (Fase 3) -------------------
+            # Se materializan aquí para que src/build/ no lea de data/raw/
+            # (decisión D-22). Se excluyen las columnas de cobertura nula
+            # detectadas por la regla E-06 (pendiente T-07).
+            "source_id": sv_val(v, "Source ID"),
+            "source_type": sv_val(v, "Source type"),
+            "issn": sv_val(v, "ISSN"),
+            "editorial": sv_val(v, "Publisher"),
+            "idioma": (s["Language of Original Document"] if in_sc else None),
+            "citas": sv_val(v, "Citations"),
+            "fwci": sv_val(v, "Field-Weighted Citation Impact"),
+            "percentil_citacion": sv_val(
+                v, "Outputs in Top Citation Percentiles, per percentile"),
+            "field_citation_average": sv_val(v, "Field-Citation Average"),
+            "sjr": sv_val(v, "SJR (publication year)"),
+            "sjr_percentil": sv_val(v, "SJR percentile (publication year) *"),
+            "citescore": sv_val(v, "CiteScore (publication year)"),
+            "citescore_percentil": sv_val(
+                v, "CiteScore percentile (publication year) *"),
+            "snip": sv_val(v, "SNIP (publication year)"),
+            "open_access": sv_val(v, "Open Access"),
+            "n_autores": sv_val(v, "Number of Authors"),
+            "n_paises": n_paises,
+            "paises": paises,
+            "n_instituciones": sv_val(v, "Number of Institutions"),
+            "instituciones": sv_val(v, "Institutions"),
+            "asjc": sv_val(v, "All Science Journal Classification (ASJC) field name"),
+            "qs_area": sv_val(v, "Quacquarelli Symonds (QS) Subject area field name"),
+            "topic": sv_val(v, "Topic name"),
+            "ods": sv_val(v, "Sustainable Development Goals (2025)"),
+            "es_internacional": (int(n_paises) > 1) if n_paises else None,
         })
     universe = pd.DataFrame(rows)
 

@@ -166,3 +166,101 @@ Las nueve heredadas de Fase 1 siguen abiertas. Se suman:
 
 Iniciar Fase 3 (`prompts/PROMPT_FASE_3.md`). Requiere antes la decisión T-11
 (alcance de fichas) y T-08 (stack). Ningún bloqueo técnico.
+
+---
+
+## Sesión 2026-07-31 — Fase 3
+
+**Estado inicial:** Fases 1 y 2 aprobadas. Universo de 823 publicaciones, 589
+formas de firma, catálogo de 40 indicadores con 27 seleccionados para V1.
+Faltaban las decisiones T-08 (stack) y T-11 (alcance de fichas).
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-30 | Stack: HTML/CSS/JS sin dependencias + build en Python | Cero dependencias en el navegador; el sitio debe poder servirse en red cerrada. Sin toolchain que mantener |
+| D-31 | Gráficos como SVG generados en el propio JS | Evita cargar una librería desde un CDN, cosa que el proyecto no puede permitirse |
+| D-32 | El sitio se sirve desde `dist/`, no desde `web/` | Sin los datos ensamblados, `web/` no debe aparentar estar completo |
+| D-33 | Tres compuertas con código de salida, no avisos | La separación de capas no puede depender de que nadie se equivoque |
+| D-34 | Los atributos de publicación se materializan en `data/interim/` | Permite que `src/build/` no lea nunca de `data/raw/` (respeta D-22) |
+| D-35 | Identificadores de autor únicos por firma, con sufijo de desambiguación | Dos variantes distintas nunca comparten archivo (ver hallazgo) |
+| D-36 | `load_authorship()` proyecta sólo columnas publicables en la lectura | Los campos internos no pueden filtrarse por descuido más adelante |
+| D-37 | Los denominadores se actualizan a mano en `config/indicators.yml` | Cambiar el denominador de todo lo publicado es una decisión, no un efecto secundario |
+| D-38 | Toda exportación CSV arrastra la procedencia en su cabecera | Un CSV suelto sin fecha de corte deja de ser interpretable |
+| D-39 | Licencia MIT para el software, separada de los datos | Permite adoptar el software sin heredar restricciones de Elsevier |
+| D-40 | T-11 se implementa como supuesto parametrizado, no se bloquea | Publicar las 589 con ranking por defecto n >= 5; cambiarlo no requiere código |
+
+### Archivos creados o modificados
+
+```
+Makefile, LICENSE, .gitignore, README.md          reescritos o nuevos
+config/publication.yml                            alcance de publicación
+src/audit/02_reconcile_sources.py                 enriquecido (38 columnas)
+src/audit/04_author_population.py                 columna de validación parametrizada
+config/sources.yml                                columna_autor declarada
+src/build/{common_build,01_publications,02_indicators,
+           03_authors,04_glossary,05_verify_public_layer,
+           06_assemble_site,build_all}.py         pipeline de build
+web/{9 páginas}.html, web/assets/{css,js,favicon} interfaz
+docs/{DEPLOYMENT,UPDATING,REPLICATION,DATA_LICENSE,
+      V2_BACKLOG,BUILD_VERIFICATION}.md           documentación de Fase 3
+PLAN.md, SESSION_NOTES.md                         actualizados
+```
+
+### Hallazgos
+
+- **Colisión de identificadores de autor.** La normalización del slug quita
+  acentos y guiones, de modo que `Orellana-Donoso M.` y `Orellana Donoso M.`
+  producían el mismo archivo: **589 firmas generaban sólo 552 fichas** y 37
+  quedaban sobrescritas. Era exactamente el colapso automático de variantes que
+  prohíbe D-08, ocurriendo por un detalle de nomenclatura de archivos.
+  Corregido con `unique_slugs()`: 68 firmas reciben un sufijo derivado del
+  nombre exacto, estable entre builds. Las tres variantes de `Orellana-Donoso`
+  ahora coexisten.
+- **`/favicon.ico` devolvía 404** en la portada. Chromium lo pide a nivel de
+  navegador, por lo que el listener de red de la página no lo captura y sólo
+  aparecía como error de consola. Resuelto con un favicon SVG local.
+- **El único resto institucional en el código** era el nombre de una columna del
+  Excel de validación. Movido a `config/sources.yml`:
+  `grep -ri "finis" src/ web/` devuelve 0.
+
+### Verificación
+
+Ejecutada en navegador real (Chromium vía Playwright):
+
+- Las 9 páginas cargan **sin un solo error de consola**.
+- Filtros: OR dentro de un filtro (2023 + 2024 = 504), AND entre filtros
+  (+ Article = 379), recuentos por faceta correctos.
+- Persistencia en URL sobrevive a la recarga.
+- Búsqueda insensible a acentos («nutricion» encuentra 6).
+- Tooltip accesible por foco de teclado, no sólo por puntero.
+- Exportación CSV incluye la fecha de corte en la cabecera.
+- Ficha de una variante desambiguada resuelve al autor correcto.
+- `05_verify_public_layer`: 596 artefactos revisados, **0 fallas**.
+- `06_assemble_site`: `data/raw/` e `internal/` ausentes de `dist/`, verificado.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «`slugify()` basta para identificar fichas de autor» | **Falso.** Colapsaba variantes distintas: 37 fichas se perdían. Requirió `unique_slugs()` |
+| «El 404 de la portada era un artefacto del test» | **Falso.** Era `/favicon.ico`, reproducible. Corregido |
+| «No queda ninguna cadena institucional en el código» | **Impreciso.** Quedaba una, en `04_author_population.py`. Parametrizada |
+
+### Ambigüedades abiertas
+
+Las heredadas de Fases 1 y 2 siguen abiertas. Se suman:
+
+- T-11 sin confirmar: se implementó el supuesto D-40.
+- Licencia de datos derivados (CC BY 4.0) propuesta, sin validación jurídica.
+- Alcance de publicación de métricas de Elsevier sin verificar.
+- Branding institucional (`color_primario`, `logo_path`) son placeholders.
+- Sin pruebas automatizadas del sitio en el repositorio (V2-17).
+
+### Próximo paso recomendado
+
+V1 completa. Lo de mayor rendimiento para V2 es **V2-01: enriquecer ORCID desde
+Crossref por DOI** (cobertura 97,7 %): sin identificador persistente, las 589
+firmas no pueden consolidarse y tres indicadores siguen bloqueados. Ver
+`docs/V2_BACKLOG.md`.

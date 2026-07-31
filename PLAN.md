@@ -1,7 +1,7 @@
 # PLAN.md
 # Plan maestro por fases
 
-**Última actualización:** 2026-07-31 (Fase 2)
+**Última actualización:** 2026-07-31 (Fase 3 — V1 completa)
 
 Orden de precedencia ante conflicto (definido en `CLAUDE.md`):
 decisión validada en sesión → `CLAUDE.md` → `PROJECT_SPEC.md` → `PLAN.md` →
@@ -15,7 +15,7 @@ decisión validada en sesión → `CLAUDE.md` → `PROJECT_SPEC.md` → `PLAN.md
 |---|---|---|
 | 1 | Fundamentos, auditoría de datos y validación | ✅ **Completada** (2026-07-31) |
 | 2 | Indicadores, arquitectura y UX/UI | ✅ **Completada** (2026-07-31) |
-| 3 | Implementación, despliegue, documentación y replicabilidad | ⏳ Pendiente |
+| 3 | Implementación, despliegue, documentación y replicabilidad | ✅ **Completada** (2026-07-31) |
 
 ---
 
@@ -70,17 +70,25 @@ alcance de publicación de fichas de autor (T-11).
 
 ---
 
-## Fase 3 — Pendiente
+## Fase 3 — Completada
 
-**Bloqueos conocidos:** ninguno técnico. Requiere la decisión T-11 (alcance de
-publicación de fichas) antes de generar las páginas de autor.
+**Definition of done** (`prompts/PROMPT_FASE_3.md`):
 
-**Objetivo:** estructura del proyecto, entregable funcional, documentación de
-despliegue, replicabilidad, licencia.
+- [x] Estructura del proyecto → `README.md`, `Makefile`
+- [x] Entregable funcional base → `src/build/`, `web/`, `dist/` (9 páginas, 589 fichas)
+- [x] Documentación de despliegue → `docs/DEPLOYMENT.md`
+- [x] Documentación de actualización → `docs/UPDATING.md`
+- [x] Estrategia de replicabilidad → `docs/REPLICATION.md`
+- [x] Propuesta de licencia → `LICENSE` (MIT) + `docs/DATA_LICENSE.md`
+- [x] Pendientes V2 → `docs/V2_BACKLOG.md`
 
-**Ya adelantado en Fase 1** (no repetir):
-`config/institution.yml`, `config/matching_rules.yml`, `config/sources.yml`,
-separación `data/raw` · `data/interim` · `src` · `docs` · `internal`.
+**Resultados:** sitio estático de 9 páginas y 589 fichas de autor · ~1,9 MB ·
+cero dependencias externas en el navegador · tres compuertas automáticas en el
+pipeline · verificado en navegador real sin errores de consola.
+
+**T-11 no fue confirmado por el usuario.** Se implementó el supuesto D-29
+(publicar las 589 firmas, ranking por defecto n >= 5), parametrizado en
+`config/publication.yml`. Cambiarlo no requiere tocar código.
 
 ---
 
@@ -94,10 +102,34 @@ separación `data/raw` · `data/interim` · `src` · `docs` · `internal`.
 | T-04 | Revisión humana de los 20 nombres con múltiples Scopus ID | 2 | Regla P-04 |
 | T-05 | Decidir tratamiento del duplicado probable Article/Letter | 2 | Regla P-01 |
 | T-06 | Reexportar Scopus con fecha de corte declarada | 2 | Ambigüedad de trazabilidad |
-| T-07 | Excluir `Molecular Sequence Numbers` del dataset procesado | 2 | Regla E-06 |
-| T-08 | Elegir stack de despliegue estático | 3 | No decidido |
-| T-09 | Excluir `internal/` del bundle público en el build | 3 | `CLAUDE.md` |
-| T-10 | Red de coautoría autor–autor derivada de `Autoria` | 3 | Diferido: depende de T-03 |
-| T-11 | Decidir alcance de publicación de fichas de autor (589 vs. subconjunto) | 3 | `docs/AUTHOR_PROFILE.md` §5 |
-| T-12 | Verificación automática de barrera pública/interna en el build | 3 | `docs/LAYERS.md` §6 |
-| T-13 | Confirmar semántica del percentil de citación con documentación SciVal | 3 | Determinada empíricamente, no documentalmente |
+| ~~T-07~~ | ~~Excluir `Molecular Sequence Numbers` del dataset procesado~~ | — | **Cerrado en Fase 3**: no se materializa en `publications_universe.csv` |
+| ~~T-08~~ | ~~Elegir stack de despliegue estático~~ | — | **Cerrado**: HTML/CSS/JS sin dependencias + build en Python |
+| ~~T-09~~ | ~~Excluir `internal/` del bundle público~~ | — | **Cerrado**: `06_assemble_site.py` lo excluye y lo verifica |
+| T-10 | Red de coautoría autor–autor derivada de `Autoria` | V2 | Diferido: depende de T-03 |
+| T-11 | Confirmar alcance de publicación de fichas de autor | V2 | **Supuesto vigente** en `config/publication.yml`, sin confirmar |
+| ~~T-12~~ | ~~Verificación automática de barrera pública/interna~~ | — | **Cerrado**: `05_verify_public_layer.py`, compuerta con código de salida |
+| T-13 | Confirmar semántica del percentil de citación con documentación SciVal | V2 | Determinada empíricamente, no documentalmente |
+
+---
+
+## Estado de la V1
+
+Los diez puntos obligatorios de `PROJECT_SPEC.md` `<v1_scope_required>`:
+
+| # | Requisito | Entregable |
+|---|---|---|
+| 1 | Auditoría de datos y modelo lógico | `docs/AUDIT_REPORT.md`, `docs/DATA_MODEL.md` |
+| 2 | Tabla maestra de autores | `data/interim/authors_master_draft.csv` (589) |
+| 3 | Catálogo de indicadores | `docs/INDICATORS.md` (40) |
+| 4 | Selección priorizada V1 | `config/indicators.yml` (27) |
+| 5 | Arquitectura técnica base | `docs/ARCHITECTURE.md`, `src/build/` |
+| 6 | Diseño UX/UI del dashboard | `docs/UX_UI.md`, `web/` |
+| 7 | Capa pública e interna | `docs/LAYERS.md` + verificación automática |
+| 8 | Ficha pública de autor | `docs/AUTHOR_PROFILE.md`, 589 fichas |
+| 9 | Tooltips o glosario | `docs/GLOSSARY.md`, 14 entradas |
+| 10 | Entregable técnico y documentación | `dist/`, 17 documentos |
+
+De `<v1_scope_desirable>`: implementados persistencia de filtros en URL,
+exportación de subconjuntos con procedencia, carga diferida por módulo y
+breadcrumbs. No implementados: navegación facetada avanzada más allá de la
+actual, y conectores a APIs (registrados como V2-01).
