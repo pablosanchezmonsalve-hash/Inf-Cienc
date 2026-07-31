@@ -1,8 +1,15 @@
 # Uso de datos institucionales
 
 **Capa:** pública · **Fase:** 3
-**Estado: propuesta.** Requiere validación jurídica institucional antes de una
-publicación abierta.
+
+**Estado:** la elección de licencias fue **aprobada por el responsable del
+proyecto** (sesión 2026-07-31): MIT para el software, CC BY 4.0 para los datos
+derivados.
+
+Esa aprobación fija la intención, **no sustituye la verificación jurídica** de
+qué permite publicar la licencia institucional de Elsevier (§2 y §5.1). Son dos
+cosas distintas: una es una decisión del proyecto, la otra es un hecho externo
+que hay que comprobar con quien administra la suscripción.
 
 ---
 
@@ -12,7 +19,7 @@ publicación abierta.
 |---|---|---|
 | `src/`, `web/`, estructura de `config/` | **MIT** (`LICENSE`) | Reutilizable libremente, incluso comercialmente |
 | `data/raw/` | **Términos de Elsevier** | No redistribuible |
-| `data/processed/`, `docs/` | **Propuesta: CC BY 4.0** | Ver §3 |
+| `data/processed/`, `docs/` | **CC BY 4.0** | Ver §3 |
 | `internal/` | **No publicable** | Capa interna |
 
 La separación es deliberada: permite que otra institución adopte el software
@@ -45,7 +52,8 @@ dictamen legal.
 
 ## 3. Datos derivados publicados
 
-Se propone **CC BY 4.0** para `data/processed/` y la documentación pública.
+**CC BY 4.0** para `data/processed/` y la documentación pública. Aprobado por
+el responsable del proyecto (sesión 2026-07-31).
 
 Justificación: los metadatos bibliográficos son de interés público, la
 atribución preserva la trazabilidad, y una licencia abierta es coherente con el
@@ -90,7 +98,7 @@ explícitamente en el sitio (pendiente V2-08).
 | # | Pendiente | Responsable |
 |---|---|---|
 | 1 | Confirmar con Elsevier o con la unidad de suscripción qué métricas derivadas pueden publicarse abiertamente | Institución |
-| 2 | Validar la licencia CC BY 4.0 para los datos derivados | Institución |
+| ~~2~~ | ~~Elegir la licencia de los datos derivados~~ | **Resuelto: CC BY 4.0** |
 | 3 | Definir y publicar el procedimiento de corrección de fichas | Institución |
 | 4 | Validar el vocabulario de unidades académicas | Institución |
 | 5 | Confirmar el titular del copyright del software | Institución |
