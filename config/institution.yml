@@ -1,0 +1,42 @@
+# config/institution.yml
+# Parámetros de la institución foco.
+#
+# REPLICABILIDAD: este es el archivo que otra institución debe cambiar para
+# reutilizar la plataforma. Ninguna de estas cadenas debe aparecer escrita
+# dentro del código de src/.
+
+institucion:
+  nombre_canonico: "Universidad Finis Terrae"
+  nombre_corto: "UFT"
+  pais: "Chile"
+
+  # Identificador duro de afiliación en Scopus/SciVal.
+  # Verificado en la auditoría de Fase 1: presente en 816/818 registros SciVal.
+  # Es el método de detección institucional de mayor confianza (regla I-02).
+  scopus_affiliation_id: "60105368"
+
+  # Identificadores adicionales. No disponibles en las fuentes actuales.
+  # Se declaran vacíos de forma explícita; no se infieren.
+  ror_id: null          # placeholder: no verificado en Fase 1
+  isni: null            # placeholder: no verificado en Fase 1
+
+ventana_temporal:
+  # Decisión del usuario, sesión 2026-07-31: cobertura completa de las fuentes.
+  anio_inicio: 2023
+  anio_fin: 2025
+
+universo_publicaciones:
+  # Decisión del usuario, sesión 2026-07-31: unión de ambas fuentes primarias.
+  # Se conservan los 12 registros que aparecen en una sola fuente, marcados con
+  # banderas de disponibilidad, en lugar de excluirlos.
+  # Motivo: los 7 exclusivos de Scopus son mayoritariamente humanidades y
+  # ciencias sociales; excluirlos agravaría el sesgo de cobertura que la
+  # plataforma debe advertir.
+  estrategia: "union"           # union | interseccion | scopus | scival
+  marcar_disponibilidad: true
+
+presentacion:
+  # Branding mínimo. Se consume en Fase 3; aquí solo se declara.
+  titulo_plataforma: "Informe Cienciométrico Institucional"
+  color_primario: "#00205B"     # placeholder: pendiente de validación institucional
+  logo_path: null               # placeholder: no provisto
