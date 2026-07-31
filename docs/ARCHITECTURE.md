@@ -1,0 +1,156 @@
+# Arquitectura técnica
+
+**Capa:** técnica · **Fase:** 2 · **Estado:** diseño aprobado, sin implementar
+
+---
+
+## 1. Principio rector
+
+Web **estática**, sin backend obligatorio (`CLAUDE.md` `<technical_guardrails>`,
+`PROJECT_SPEC` `<out_of_scope_for_v1>`). Todo el cálculo ocurre en el pipeline
+de datos, offline. El navegador consume artefactos ya agregados y no recalcula
+métricas.
+
+Razón: el corpus es pequeño y de actualización esporádica (un export por
+período). Preagregar en build elimina la necesidad de servidor, hace el
+despliegue trivial y garantiza que la cifra publicada sea idéntica a la
+auditada.
+
+---
+
+## 2. Pipeline de datos
+
+```
+data/raw/          →  src/audit/     →  data/interim/  →  src/build/  →  data/processed/  →  web/
+(inmutable)           (Fase 1)          (auditoría)       (Fase 3)       (artefactos)        (estático)
+```
+
+| Etapa | Responsabilidad | Estado |
+|---|---|---|
+| `data/raw/` | Exports originales. Nunca se modifican | ✅ Fase 1 |
+| `src/audit/` | Inventario, reconciliación, matching, validación | ✅ Fase 1 |
+| `data/interim/` | Universo, tabla maestra, log de matching, factibilidad | ✅ Fase 1–2 |
+| `src/build/` | Construcción de artefactos publicables | ⏳ Fase 3 |
+| `data/processed/` | JSON preagregados que consume la web | ⏳ Fase 3 |
+| `web/` | Sitio estático | ⏳ Fase 3 |
+
+**Regla de barrera:** `src/build/` no lee de `data/raw/`. Sólo consume
+`data/interim/`, que ya pasó las 29 reglas de validación. Si la validación
+falla con severidad bloqueante, el build no debe ejecutarse.
+
+---
+
+## 3. Archivo maestro y artefactos
+
+### Archivo maestro
+
+`data/interim/publications_universe.csv` (823 filas) es la tabla canónica de
+publicaciones, con las banderas `tiene_metricas`, `tiene_autoria_detallada` y
+`tiene_area_tematica` que determinan el denominador de cada indicador.
+
+`data/interim/authors_master_draft.csv` (589 filas) es la tabla maestra de
+autores. Pasa a `authors_master.csv` cuando se resuelvan T-03 y T-04.
+
+`internal/matching_log.csv` (1.207 filas) es la tabla de autoría — la entidad
+puente del modelo. **Capa interna:** contiene las cadenas de afiliación crudas y
+el método de detección.
+
+### Artefactos publicables (Fase 3)
+
+Diseñados para carga diferida: la portada no descarga el corpus completo.
+
+| Artefacto | Contenido | Tamaño estimado |
+|---|---|---|
+| `kpis.json` | Los 6 KPIs de portada + fecha de corte | < 2 KB |
+| `series.json` | Series anuales preagregadas de todos los módulos | ~20 KB |
+| `publications.json` | 823 registros, campos de tabla y filtro | ~400 KB |
+| `authors.json` | 589 autores con agregados | ~150 KB |
+| `author/<id>.json` | Ficha individual con sus publicaciones | ~5 KB × 589 |
+| `facets.json` | Valores de cada filtro con su recuento | ~15 KB |
+| `glossary.json` | Definiciones de métricas para tooltips | ~10 KB |
+| `meta.json` | Fuentes, cortes, ventana, versión del build | < 2 KB |
+
+**Decisión:** las fichas de autor se generan como archivos individuales, no
+como un único JSON de 589 entradas con todas sus publicaciones. Evita descargar
+~3 MB para ver una ficha.
+
+---
+
+## 4. Lógica de actualización
+
+Un nuevo período de datos se incorpora así:
+
+1. Depositar los nuevos exports en `data/raw/`.
+2. Registrarlos en `config/sources.yml` con su fecha de corte y ventana.
+3. `python3 src/audit/run_all.py` → revalida las 29 reglas.
+4. Revisar las colas nuevas en `internal/` (ambigüedades no resueltas).
+5. `python3 src/build/build_all.py` → regenera `data/processed/`.
+6. Desplegar.
+
+**Ningún paso requiere editar código.** La ventana temporal, el identificador
+institucional y las reglas de matching viven en `config/`.
+
+---
+
+## 5. Despliegue
+
+Sitio estático servible desde cualquier hosting de archivos. Sin base de datos,
+sin proceso servidor, sin variables de entorno en runtime.
+
+La elección concreta del generador (Astro, Eleventy, Quarto, Observable
+Framework o HTML+JS plano) **se difiere a Fase 3** y está registrada como
+pendiente T-08. Los requisitos que debe cumplir, y que condicionan la elección:
+
+- Salida completamente estática, sin runtime de servidor.
+- Generación de 589 páginas de autor en build.
+- Carga diferida por módulo.
+- Sin dependencia de CDN externo en runtime (los datos son institucionales).
+
+---
+
+## 6. Preparación para integraciones futuras
+
+No se implementan en V1, pero la arquitectura las admite sin reescritura:
+
+| Integración | Punto de entrada previsto | Pendiente |
+|---|---|---|
+| ORCID vía Crossref | Enriquecimiento entre `interim` y `build`, por DOI | T-01 |
+| API de Scopus/SciVal | Reemplaza el depósito manual en `data/raw/` | — |
+| Repositorio institucional | Fuente adicional en `config/sources.yml` | T-01 |
+
+El contrato es `config/sources.yml`: cualquier fuente nueva se declara ahí con
+su rol, fecha de corte y cobertura, y el pipeline la trata igual que a un
+export manual.
+
+---
+
+## 7. Rendimiento
+
+| Regla | Aplicación |
+|---|---|
+| Preagregación | Todo indicador se calcula en build, nunca en el navegador |
+| Carga diferida | Cada módulo pide su JSON al abrirse; la portada sólo `kpis.json` |
+| Debounce en filtros | 250 ms en el buscador de texto; inmediato en facetas |
+| Paginación | Tabla de publicaciones en páginas de 50; sin scroll infinito |
+| Fichas individuales | Un archivo por autor, no un bundle monolítico |
+
+El corpus (823 publicaciones, 589 autores) es lo bastante pequeño para filtrar
+en cliente sobre `publications.json` sin índice invertido. Se registra que este
+supuesto deja de valer alrededor de ~10.000 publicaciones, umbral a partir del
+cual haría falta un índice precomputado.
+
+---
+
+## 8. Replicabilidad
+
+Adaptar a otra institución no requiere tocar `src/`:
+
+| Archivo | Qué cambia |
+|---|---|
+| `config/institution.yml` | Nombre, `scopus_affiliation_id`, ventana, branding |
+| `config/matching_rules.yml` | Patrones de detección, vocabulario de unidades |
+| `config/sources.yml` | Rutas, fechas de corte, roles |
+| `config/indicators.yml` | Qué indicadores se publican y con qué advertencias |
+
+Separación software / datos institucionales: `src/`, `config/` y `web/` son
+reutilizables; `data/` e `internal/` son propios de cada institución.

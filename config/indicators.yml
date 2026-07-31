@@ -1,0 +1,176 @@
+# config/indicators.yml
+# Catálogo parametrizado de indicadores. Define QUÉ se publica, con qué
+# denominador y con qué advertencias.
+#
+# REPLICABILIDAD: otra institución puede activar o desactivar indicadores sin
+# tocar el código del build. Cambiar `publicar: false` retira el indicador de
+# la interfaz y de los artefactos.
+#
+# La evidencia de disponibilidad está en data/interim/indicator_feasibility.csv,
+# generada por src/analysis/indicator_feasibility.py.
+
+reglas_transversales:
+  # Todo indicador declara sobre cuántas publicaciones se calcula.
+  declarar_denominador: true
+  # Umbral bajo el cual un indicador individual se marca no interpretable.
+  n_minimo_interpretable: 5
+  # Cobertura mínima para publicar sin advertencia obligatoria.
+  cobertura_minima_sin_advertencia: 0.90
+  # Fecha de corte visible en todo indicador de impacto.
+  mostrar_fecha_corte: true
+  # Prohibido presentar campos multivaluados como partición porcentual.
+  multivaluados_no_suman_cien: true
+
+denominadores:
+  universo_total: 823          # todas las publicaciones
+  con_metricas: 816            # base de indicadores de impacto
+  con_autoria_detallada: 818   # base de rankings de autor
+  con_area_tematica: 816       # base de vistas temáticas
+
+kpis_portada:
+  - P-01   # Publicaciones totales
+  - I-01   # Citas totales
+  - I-02   # Citas por publicación
+  - I-03   # FWCI institucional
+  - C-01   # Colaboración internacional
+  - P-06   # Autores UFT
+
+indicadores:
+
+  # ------------------------------------------------ descriptivos / desempeño
+  P-01: {nombre: "Publicaciones totales", categoria: descriptivo, publicar: true,
+         denominador: universo_total, confiabilidad: alta, advertencia: null}
+  P-02: {nombre: "Producción anual", categoria: descriptivo, publicar: true,
+         denominador: universo_total, confiabilidad: alta,
+         advertencia: "Serie de 3 años: no sostiene tendencia de largo plazo."}
+  P-03: {nombre: "Distribución por tipo documental", categoria: descriptivo,
+         publicar: true, denominador: universo_total, confiabilidad: alta, advertencia: null}
+  P-04: {nombre: "Fuentes distintas", categoria: descriptivo, publicar: true,
+         denominador: con_metricas, confiabilidad: alta, advertencia: null}
+  P-05: {nombre: "Ranking de fuentes por volumen", categoria: descriptivo,
+         publicar: true, denominador: con_metricas, confiabilidad: alta,
+         advertencia: "Ordena por volumen, no por calidad."}
+  P-06: {nombre: "Autores UFT distintos", categoria: descriptivo, publicar: true,
+         denominador: con_autoria_detallada, confiabilidad: media,
+         advertencia: "589 formas de firma, no 589 personas: hay variantes de nombre sin consolidar."}
+  P-07: {nombre: "Producción por unidad académica", categoria: descriptivo,
+         publicar: true, denominador: con_autoria_detallada, confiabilidad: baja,
+         advertencia_destacada: true,
+         advertencia: "Cobertura 63,8 % y vocabulario no validado institucionalmente. La cobertura desigual de Scopus entre disciplinas distorsiona la comparación entre unidades."}
+  P-08: {nombre: "Distribución por idioma", categoria: descriptivo, publicar: false,
+         version: V2, denominador: con_autoria_detallada, confiabilidad: alta, advertencia: null}
+  A-01: {nombre: "Acceso abierto", categoria: descriptivo, publicar: true,
+         denominador: con_metricas, confiabilidad: media,
+         advertencia_destacada: true,
+         advertencia: "La ausencia de valor no equivale a acceso cerrado: 226 publicaciones sin estado declarado."}
+
+  # ------------------------------------------------------------- impacto
+  I-01: {nombre: "Citas totales", categoria: impacto, publicar: true,
+         denominador: con_metricas, confiabilidad: alta,
+         advertencia: "Corte 2026-07-22. Fuente única: SciVal."}
+  I-02: {nombre: "Citas por publicación", categoria: impacto, publicar: true,
+         denominador: con_metricas, confiabilidad: alta, advertencia: null}
+  I-03: {nombre: "FWCI institucional", categoria: impacto, publicar: true,
+         denominador: con_metricas, confiabilidad: media,
+         mostrar_mediana: true,
+         advertencia: "1,0 es el promedio mundial. Se calcula sobre el conjunto, no promediando valores individuales."}
+  I-04: {nombre: "FWCI por año", categoria: impacto, publicar: true,
+         denominador: con_metricas, confiabilidad: baja,
+         advertencia_destacada: true,
+         advertencia: "El 46 % de las publicaciones de 2025 aún no tiene citas: su FWCI no es comparable con el de 2023."}
+  I-05: {nombre: "Publicaciones en el top 10 % de citación", categoria: impacto,
+         publicar: true, denominador: con_metricas, confiabilidad: alta,
+         advertencia: null}
+  I-06: {nombre: "Visualizaciones", categoria: impacto, publicar: false,
+         version: V2, denominador: con_metricas, confiabilidad: media,
+         advertencia: "Mide visibilidad, no impacto."}
+  R-01: {nombre: "Publicaciones en revistas Q1", categoria: impacto, publicar: true,
+         denominador: con_metricas, confiabilidad: media,
+         advertencia: "Métrica de la revista, no del artículo. Cobertura 762 de 816."}
+  R-02: {nombre: "Percentil CiteScore de la fuente", categoria: impacto,
+         publicar: false, version: V2, denominador: con_metricas, confiabilidad: media,
+         advertencia: null}
+  R-03: {nombre: "SNIP de la fuente", categoria: impacto, publicar: false,
+         version: V2, denominador: con_metricas, confiabilidad: media, advertencia: null}
+
+  # --------------------------------------------------------- colaboración
+  C-01: {nombre: "Colaboración internacional", categoria: colaboracion, publicar: true,
+         denominador: con_metricas, confiabilidad: alta,
+         advertencia: "Definida como más de un país participante. No mide intensidad."}
+  C-02: {nombre: "Publicaciones sin colaboración institucional", categoria: colaboracion,
+         publicar: true, denominador: con_metricas, confiabilidad: alta, advertencia: null}
+  C-03: {nombre: "Países colaboradores", categoria: colaboracion, publicar: true,
+         denominador: con_metricas, confiabilidad: alta, multivaluado: true,
+         advertencia: "Multivaluado: no sumable al total."}
+  C-04: {nombre: "Instituciones colaboradoras", categoria: colaboracion, publicar: true,
+         denominador: con_metricas, confiabilidad: alta, multivaluado: true,
+         advertencia: "SciVal advierte truncamiento en los nombres de afiliación."}
+  C-05: {nombre: "Red de coautoría", categoria: colaboracion, publicar: false,
+         version: V2, confiabilidad: media,
+         advertencia: "Diferido: heredaría 123 variantes de nombre sin resolver (pendiente T-03)."}
+  C-06: {nombre: "Autores por publicación", categoria: colaboracion, publicar: true,
+         denominador: con_metricas, confiabilidad: alta, mostrar_mediana: true,
+         advertencia: null}
+  C-07: {nombre: "Liderazgo autoral", categoria: colaboracion, publicar: false,
+         version: V2, confiabilidad: media,
+         advertencia: "Diferido: depende de resolver los perfiles Scopus fragmentados (T-04)."}
+
+  # ------------------------------------------------------------ temático
+  T-05: {nombre: "Áreas QS", categoria: tematico, publicar: true,
+         denominador: con_area_tematica, confiabilidad: media, multivaluado: true,
+         advertencia: "Multivaluado: los porcentajes no suman 100 %."}
+  T-01: {nombre: "Áreas temáticas ASJC", categoria: tematico, publicar: true,
+         denominador: con_area_tematica, confiabilidad: media, multivaluado: true,
+         advertencia: "Clasifica la revista, no el artículo. 1.796 asignaciones para 816 publicaciones."}
+  T-02: {nombre: "Topics de SciVal", categoria: tematico, publicar: false,
+         version: V2, confiabilidad: media,
+         advertencia: "632 topics para 794 publicaciones: demasiado disperso para vista principal."}
+  T-03: {nombre: "Prominencia temática", categoria: tematico, publicar: false,
+         version: V2, confiabilidad: baja,
+         advertencia: "Mide la atención del campo, no el desempeño institucional."}
+  T-04: {nombre: "Objetivos de Desarrollo Sostenible", categoria: tematico,
+         publicar: true, denominador: con_metricas, confiabilidad: baja,
+         solo_recuento: true,
+         advertencia_destacada: true,
+         advertencia: "Cobertura 38 %. Se reporta como recuento, nunca como distribución porcentual del total."}
+
+  # -------------------------------------------------------- nivel autor
+  AU-01: {nombre: "Publicaciones por autor", categoria: descriptivo, publicar: true,
+          denominador: con_autoria_detallada, confiabilidad: media, conteo: completo,
+          advertencia: "Conteo completo: la suma por autor excede el total institucional."}
+  AU-02: {nombre: "Citas por autor", categoria: impacto, publicar: true,
+          denominador: con_autoria_detallada, confiabilidad: media, conteo: completo,
+          advertencia: "Atribución completa: no sumable a nivel institucional."}
+  AU-03: {nombre: "h-index en ventana 2023-2025", categoria: impacto, publicar: true,
+          solo_en: ficha_autor, n_minimo: 5, confiabilidad: baja,
+          advertencia_destacada: true,
+         advertencia: "No es el h-index de carrera. Con 3 años de ventana, 497 de 589 firmas tienen h menor o igual a 1."}
+  AU-06: {nombre: "Evolución temporal por autor", categoria: descriptivo, publicar: true,
+          solo_en: ficha_autor, confiabilidad: media,
+          advertencia: "Tres puntos: se presenta como barras, no como línea de tendencia."}
+
+  # --------------------------------------- no calculables: placeholders
+  AU-04: {nombre: "FWCI por autor", categoria: impacto, publicar: false,
+          estado: no_calculable,
+          razon: "El FWCI de un autor no es el promedio de los FWCI de sus publicaciones, y SciVal no lo entrega a nivel autor en este export.",
+          que_falta: "Export de SciVal a nivel autor, o los denominadores de campo."}
+  AU-05: {nombre: "ORCID", categoria: descriptivo, publicar: true,
+          estado: placeholder,
+          razon: "No existe en ninguna de las fuentes actuales.",
+          que_falta: "Enriquecimiento vía Crossref por DOI (cobertura 97,7 %) — pendiente T-01.",
+          mostrar_como: "No disponible en las fuentes actuales"}
+  X-01: {nombre: "Autocitas", categoria: impacto, publicar: false,
+         estado: no_calculable,
+         razon: "El export declara 'Self-citations: -'.",
+         que_falta: "Reexportar SciVal con autocitas activadas."}
+  X-02: {nombre: "Benchmarking interinstitucional", categoria: impacto, publicar: false,
+         estado: fuera_de_alcance,
+         razon: "Excluido por PROJECT_SPEC.md <out_of_scope_for_v1>."}
+  X-03: {nombre: "Indicadores de financiamiento", categoria: descriptivo, publicar: false,
+         estado: no_calculable,
+         razon: "Cobertura 37,4 %: insuficiente para reportar sin sesgo.",
+         que_falta: "Fuente complementaria de financiamiento."}
+  X-04: {nombre: "Tendencia de largo plazo", categoria: descriptivo, publicar: false,
+         estado: no_calculable,
+         razon: "La ventana 2023-2025 no sostiene una tendencia.",
+         que_falta: "Datos anteriores a 2023."}
