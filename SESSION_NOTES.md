@@ -87,3 +87,82 @@ Auditoría reproducible completa: `python3 src/audit/run_all.py`.
 
 Iniciar Fase 2 (`prompts/PROMPT_FASE_2.md`): catálogo de indicadores y
 selección V1. Sin bloqueos. Los pendientes T-01 a T-10 están en `PLAN.md`.
+
+---
+
+## Sesión 2026-07-31 — Fase 2
+
+**Estado inicial:** Fase 1 aprobada y en `main` de la rama de trabajo. Universo
+canónico de 823 publicaciones, 589 formas de firma, 29 reglas de validación sin
+fallas bloqueantes.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-16 | Cada indicador declara su propio denominador (823 / 818 / 816) | Las banderas de disponibilidad de Fase 1 no permiten un total único |
+| D-17 | Dos niveles de advertencia: nota contextual (19) y advertencia destacada (5) | Marcar todo por igual equivale a no marcar nada |
+| D-18 | `AU-04` (FWCI por autor) se descarta, no se aproxima | El FWCI de un autor no es el promedio de sus publicaciones; calcularlo sería inventar la métrica |
+| D-19 | La ficha de autor muestra «top 10 % de citación» en lugar de FWCI | Es normalizado por campo y sí está disponible por publicación |
+| D-20 | Web estática con preagregación total en build | Corpus pequeño y de actualización esporádica; garantiza que lo publicado sea idéntico a lo auditado |
+| D-21 | Fichas de autor como archivos individuales, no bundle único | Evita descargar ~3 MB para ver una ficha |
+| D-22 | `src/build/` no lee de `data/raw/`; sólo de `data/interim/` validado | Barrera de calidad: sin validación no hay build |
+| D-23 | La barrera pública/interna se verifica automáticamente post-build | No puede depender de que nadie se equivoque al escribir el build |
+| D-24 | «Sin dato declarado» nunca se representa como 0 ni se excluye del 100 % | Consecuencia directa de D-09 (no imputar) |
+| D-25 | Sin flechas de tendencia en los KPIs | Con 3 años y sin histórico previo, implicaría una tendencia que los datos no sostienen |
+| D-26 | El FWCI se muestra con media y mediana juntas | Sólo la media (0,87) ocultaría que la mediana es 0,41 |
+| D-27 | Los filtros incluyen «No determinada» y «Sin dato» como opciones reales | La ausencia de dato es información, no ruido a esconder |
+| D-28 | Mapa coroplético y nube de palabras descartados | 23 países sobre ~200 exagera visualmente; la nube no tiene lectura cuantitativa |
+| D-29 | Ranking de autores por defecto filtrado a n >= 5, sin excluir a nadie del catálogo | Calidad en la vista principal sin exclusión arbitraria |
+
+### Archivos creados o modificados
+
+```
+src/analysis/indicator_feasibility.py    verificación reproducible de 40 indicadores
+config/indicators.yml                    catálogo parametrizado
+docs/INDICATORS.md                       catálogo + selección V1
+docs/ARCHITECTURE.md                     pipeline, artefactos, despliegue, rendimiento
+docs/UX_UI.md                            navegación, KPIs, módulos, filtros, estados
+docs/LAYERS.md                           capa pública e interna
+docs/AUTHOR_PROFILE.md                   ficha pública de autor
+docs/GLOSSARY.md                         glosario y tooltips
+data/interim/indicator_feasibility.csv   evidencia medida
+PLAN.md, SESSION_NOTES.md                actualizados
+```
+
+### Hallazgos
+
+- **Semántica del percentil de citación determinada empíricamente.** El campo
+  `Outputs in Top Citation Percentiles, per percentile` no declara qué
+  representa. Correlación −0,66 con citas; las 3 más citadas tienen percentil
+  1–3 y las no citadas 56–78. Conclusión: es el percentil de la publicación,
+  menor = mejor. Habilita `I-05`. Queda como pendiente T-13 confirmarlo contra
+  la documentación oficial de SciVal.
+- **FWCI mediano 0,41 frente a media 0,87.** Distribución fuertemente
+  asimétrica. Mostrar sólo la media daría una imagen más uniforme que la real.
+- **El 46 % de las publicaciones de 2025 aún no tiene citas.** El FWCI del año
+  más reciente no es comparable con el de 2023.
+- **497 de 589 firmas tienen h-index en ventana <= 1.** El indicador casi no
+  discrimina en una ventana de 3 años.
+- **Colaboración es el bloque más robusto:** cobertura 100 % de las
+  publicaciones con métrica. 51,2 % internacional.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «21 indicadores en V1, 5 con advertencia» | **Impreciso.** El recuento real sobre `config/indicators.yml` es 27 publicados (26 calculables + 1 placeholder), 19 con nota contextual y 5 con advertencia destacada. Corregido en `docs/INDICATORS.md` |
+| «El percentil de citación es ambiguo y no usable» | **Descartado.** Es determinable empíricamente y habilita un indicador normalizado por campo, el único disponible a nivel de publicación |
+
+### Ambigüedades abiertas
+
+Las nueve heredadas de Fase 1 siguen abiertas. Se suman:
+
+- Alcance de publicación de fichas de autor: 589 o subconjunto (T-11).
+- Stack de despliegue no decidido (T-08).
+- Semántica del percentil verificada empíricamente pero no documentalmente (T-13).
+
+### Próximo paso recomendado
+
+Iniciar Fase 3 (`prompts/PROMPT_FASE_3.md`). Requiere antes la decisión T-11
+(alcance de fichas) y T-08 (stack). Ningún bloqueo técnico.
