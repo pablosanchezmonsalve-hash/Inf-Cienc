@@ -1,0 +1,5 @@
+# Auditoría de Fase 1. Python 3.11+
+pandas>=2.0
+openpyxl>=3.1
+PyYAML>=6.0
+rdata>=0.11        # lectura de los objetos bibliometrixDB (.RData) de referencia
