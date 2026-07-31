@@ -72,7 +72,17 @@ jobs:
             docs/VALIDATION_REPORT.md
             docs/BUILD_VERIFICATION.md
 
+      # `enablement: true` intenta activar Pages por API en la primera
+      # ejecución. Sin esto, el job falla con "Get Pages site failed" hasta que
+      # alguien lo active a mano en Settings.
+      #
+      # Nota: GitHub Pages en repositorios PRIVADOS requiere un plan de pago
+      # (Pro, Team o Enterprise). Si este repositorio es privado en plan
+      # gratuito, este paso seguirá fallando y el despliegue debe hacerse por
+      # otra vía — ver docs/DEPLOYMENT.md §4.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
