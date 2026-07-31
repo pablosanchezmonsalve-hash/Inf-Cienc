@@ -72,7 +72,7 @@ requiere cambios en el código.
 | Destino | Cómo |
 |---|---|
 | Servidor web institucional | Copiar `dist/` al directorio público (`rsync -av --delete dist/ servidor:/var/www/informe/`) |
-| GitHub Pages | Publicar `dist/` como raíz del sitio |
+| **GitHub Pages** | **Automatizado.** `.github/workflows/deploy.yml` reconstruye y publica en cada push a `main`. Requiere activar Pages en Settings → Pages → Source: GitHub Actions |
 | Netlify / Cloudflare Pages | Directorio de publicación: `dist`; comando de build: el del §2 |
 | Red interna sin salida | Copiar `dist/` a un recurso compartido y servirlo con cualquier servidor de archivos |
 
@@ -90,6 +90,22 @@ con una estricta, porque no carga nada externo:
 ```
 Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self'
 ```
+
+---
+
+## 4 bis. Despliegue automatizado
+
+`.github/workflows/deploy.yml` ejecuta el mismo pipeline que en local y publica
+en GitHub Pages con cada push a `main`.
+
+**Activación (una vez):** Settings → Pages → Source: **GitHub Actions**.
+Sin ese paso el workflow construye pero no publica.
+
+El workflow reproduce las mismas compuertas y añade una verificación extra en
+CI: falla si `internal/`, `data/raw/` o cualquier rastro de las colas de
+revisión aparece en `dist/`. Publica además `VALIDATION_REPORT.md` y
+`BUILD_VERIFICATION.md` como artefactos de cada ejecución, de modo que queda
+registro de qué se validó en cada despliegue.
 
 ---
 

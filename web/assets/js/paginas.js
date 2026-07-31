@@ -375,7 +375,13 @@ async function fichaAutor() {
       ? a.scopus_author_ids.map(s => `<a href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
           target="_blank" rel="noopener">${s}</a>`).join(' · ')
       : '<span class="sin-dato-txt">No resuelto</span>'}</div>
-    <div><span>ORCID</span><span class="sin-dato-txt">${c.escapar(a.orcid_estado)}</span></div>`;
+    <div><span>ORCID</span>${a.orcid
+      ? `<a href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`
+        // La confianza viaja visible: un ORCID emparejado por apellido e
+        // inicial es una hipótesis verificable, no un dato de la fuente.
+        + (a.orcid_confianza === 'media'
+          ? ` <span class="nota">correspondencia probable</span>` : '')
+      : `<span class="sin-dato-txt">${c.escapar(a.orcid_estado)}</span>`}</div>`;
 
   const kpi = (v, etq, dec = 0, ayuda = null) => `<article class="kpi">
     <div class="valor">${v === null ? '<span class="sin-dato-txt" style="font-size:1rem">No disponible</span>' : c.num(v, dec)}</div>

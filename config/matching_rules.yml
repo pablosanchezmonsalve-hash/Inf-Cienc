@@ -195,4 +195,16 @@ enriquecimiento_externo:
       - "Crossref"
       - "Repositorio institucional UFT"
       - "ORCID Public API"
-    implementado: false
+    # Implementado en src/enrich/orcid_crossref.py. La lógica de emparejamiento
+    # está verificada con fixtures (`--test`), pero NO se ha ejecutado contra la
+    # API en vivo: la política de red del entorno de desarrollo bloquea
+    # api.crossref.org. Ejecutar desde un entorno con salida a red.
+    implementado: true
+    ejecutado_contra_api: false
+    # Crossref pide identificarse con un correo de contacto para su 'polite pool'.
+    mailto: "pablosanchezmonsalve@gmail.com"
+    # Un ORCID asignado por coincidencia de apellido e inicial es una hipótesis.
+    # Nunca se asigna si las iniciales se contradicen ni si hay homonimia dentro
+    # de la misma publicación.
+    exigir_inicial_coincidente: true
+    colapso_automatico_de_conflictos: false
