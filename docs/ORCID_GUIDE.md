@@ -167,6 +167,7 @@ solos.
 |---|---|---|
 | `data/enriched/authors_orcid.csv` | pública, **versionada** | Firma → ORCID, con confianza y nº de publicaciones que lo respaldan |
 | `internal/orcid_conflicts.csv` | **interna** | Firmas con más de un ORCID, y homonimias dentro de una publicación |
+| `internal/identity_candidates.csv` | **interna** | Firmas distintas que comparten ORCID: candidatas a ser la misma persona |
 
 En las fichas de autor:
 
@@ -227,3 +228,27 @@ pendiente:
   una misma persona como varios nodos.
 
 Los casos que ORCID no cubra seguirán necesitando revisión humana.
+
+### Resultado de la primera corrida (2026-08-01)
+
+| | |
+|---|---|
+| Publicaciones consultadas | 804 de 823 (97,7 %) |
+| Errores de red | 0 |
+| Firmas con ORCID | **174 de 589 (29,5 %)** |
+| Confianza alta / media | 54 / 120 |
+| Grupos de firmas que comparten ORCID | **17** (21 firmas colapsables) |
+| De ellos, invisibles para la agrupación por apellido | **11** |
+| Conflictos encolados | 1 |
+
+Predomina la confianza media porque 538 de los 589 autores tienen menos de 5
+publicaciones: con un solo respaldo, la regla marca «media» por diseño.
+
+Los 11 hallazgos que la agrupación por apellido no detectaba son el aporte
+específico del identificador. Casos como `Gubbins V.` y `Foxley V.G.`, o
+`Hartmann D.` y `Hartmann Schatloff D.`, no comparten clave de apellido y
+ninguna heurística de nombre los habría unido.
+
+**Cota superior de personas distintas: 568**, frente a 589 formas de firma.
+Sigue siendo una cota: las 43 familias de variantes sin ORCID suficiente
+continúan pendientes de revisión humana.
