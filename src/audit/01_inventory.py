@@ -50,13 +50,21 @@ def main() -> None:
     frames = {
         "scopus_export": scopus,
         "scival_export": scival,
-        "rdata_scopus": c.read_rdata("rdata_scopus"),
-        "rdata_scival": c.read_rdata("rdata_scival"),
-        "rdata_unificado": c.read_rdata("rdata_unificado"),
         "reporte_investigadores": c.read_report_sheet("Investigadores"),
         "reporte_detalle": c.read_report_sheet("Publicaciones_UFT_detalle"),
         "reporte_unificadas": c.read_report_sheet("Publicaciones unificadas"),
     }
+
+    # Los .RData son fuentes de referencia (decisión D-05). Si el paquete
+    # `rdata` no está instalado se omiten del inventario y se declara: la
+    # auditoría no depende de ellos.
+    rdata_omitidos = []
+    for key in ("rdata_scopus", "rdata_scival", "rdata_unificado"):
+        df = c.read_rdata(key)
+        if df is None:
+            rdata_omitidos.append(key)
+        else:
+            frames[key] = df
 
     files = []
     for key, df in frames.items():
@@ -82,6 +90,9 @@ def main() -> None:
     c.write_interim(cols_df, "inventory_columns.csv")
 
     print(files_df.to_string(index=False))
+    if rdata_omitidos:
+        print(f"\n  aviso · fuentes de referencia omitidas (paquete `rdata` no "
+              f"instalado): {', '.join(rdata_omitidos)}")
 
     print("\n--- Metadatos declarados por el export de SciVal ---")
     for k, v in meta.items():

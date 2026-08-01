@@ -68,10 +68,16 @@ def main() -> None:
     check("E-06", "alta", "Sin columnas de cobertura nula en el universo activo",
           len(vacias) == 0, f"vacías={vacias}")
 
-    residuo = [col for col in c.read_rdata("rdata_unificado").columns
-               if re.search(r"\.(x|y)(\.(x|y))*$", str(col))]
-    check("E-07", "alta", "Sin columnas residuales de join en fuentes activas",
-          True, f"detectadas en rdata (fuente de referencia, no activa): {len(residuo)}")
+    rdata_unificado = c.read_rdata("rdata_unificado")
+    if rdata_unificado is None:
+        check("E-07", "alta", "Sin columnas residuales de join en fuentes activas",
+              True, "fuente de referencia no leída (paquete `rdata` ausente); "
+                    "no afecta a las fuentes activas")
+    else:
+        residuo = [col for col in rdata_unificado.columns
+                   if re.search(r"\.(x|y)(\.(x|y))*$", str(col))]
+        check("E-07", "alta", "Sin columnas residuales de join en fuentes activas",
+              True, f"detectadas en rdata (fuente de referencia, no activa): {len(residuo)}")
 
     declarado = c.SOURCES["scival_export"]["n_registros_declarado"]
     check("E-08", "media", "n de registros leído coincide con el declarado",
