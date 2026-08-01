@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `8f05a51` · Añade un punto de entrada generado para no depender de leer todo (#9)
+Último commit: `16ad444` · Registra la sesión post-V1 y materializa la cola de identidad
 Snapshot: 2026-08-01
 
 ---
@@ -53,7 +53,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Pendientes abiertos (9)
+## Pendientes abiertos (11)
 
 | # | Pendiente |
 |---|---|
@@ -66,10 +66,12 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 | `T-13` | Confirmar semántica del percentil de citación con documentación SciVal |
 | `T-14` | Revisión humana de los 17 grupos de firmas que comparten ORCID |
 | `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
+| `T-16` | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público |
+| `T-17` | Corregir las cadenas de unidad académica concatenadas sin separador |
 
 ---
 
-## Decisiones tomadas: 47
+## Decisiones tomadas: 55
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -112,6 +112,8 @@ para los datos derivados.
 | T-13 | Confirmar semántica del percentil de citación con documentación SciVal | V2 | Determinada empíricamente, no documentalmente |
 | T-14 | Revisión humana de los 17 grupos de firmas que comparten ORCID | V2 | `internal/identity_candidates.csv`; 11 no los detecta el apellido |
 | T-15 | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID | V2 | `internal/orcid_conflicts.csv` |
+| T-16 | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público | V2 | Auditoría 2026-08-01: contradice `internal/README.md` |
+| T-17 | Corregir las cadenas de unidad académica concatenadas sin separador | V2 | Visibles en `P-07`; alimenta T-02 |
 
 ---
 

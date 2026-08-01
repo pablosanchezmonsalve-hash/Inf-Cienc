@@ -38,9 +38,45 @@ export function celda(v, dec = 0) {
   return typeof v === 'number' ? num(v, dec) : escapar(v);
 }
 
+/** Un año es una etiqueta, no una cantidad: nunca lleva separador de millar.
+    Con el formato numérico de es-CL, 2025 se imprimía «2.025». */
+export function anio(v) {
+  if (v === null || v === undefined || v === '')
+    return '<span class="sin-dato-txt">Sin dato declarado</span>';
+  return escapar(String(v));
+}
+
 export function escapar(s) {
   return String(s).replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* ---------------------------------------------------------------- tema */
+
+/* Tres estados explícitos, no dos: «automático» sigue al sistema operativo y es
+   el de partida. La elección se recuerda; sin elección, no se escribe nada y el
+   sitio respeta la preferencia del sistema. */
+const TEMAS = [
+  ['auto', 'Auto', 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.5-6.5-.7.7M6.2 17.8l-.7.7m12.6 0-.7-.7M6.2 6.2l-.7-.7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z'],
+  ['claro', 'Claro', 'M12 4v1m0 14v1m8-8h-1M5 12H4m13.7-5.7-.7.7M6.9 17.1l-.7.7m11.5 0-.7-.7M6.9 6.9l-.7-.7M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z'],
+  ['oscuro', 'Oscuro', 'M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z'],
+];
+
+function aplicarTema(t) {
+  if (t === 'auto') document.documentElement.removeAttribute('data-tema');
+  else document.documentElement.setAttribute('data-tema', t);
+  try { t === 'auto' ? localStorage.removeItem('tema') : localStorage.setItem('tema', t); } catch { /* modo privado */ }
+  document.querySelectorAll('.tema button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.tema === t)));
+}
+
+/* Se aplica antes de pintar para no mostrar un destello del tema equivocado. */
+export function temaInicial() {
+  try {
+    const t = localStorage.getItem('tema');
+    if (t) document.documentElement.setAttribute('data-tema', t);
+    return t || 'auto';
+  } catch { return 'auto'; }
 }
 
 /* ------------------------------------------------------------ cabecera */
@@ -59,20 +95,36 @@ export async function montarCabecera(paginaActual) {
   const nav = paginas.map(([href, txt]) =>
     `<a href="${href}"${href === paginaActual ? ' aria-current="page"' : ''}>${txt}</a>`).join('');
 
+  const actual = temaInicial();
+  const selectorTema = `<div class="tema" role="group" aria-label="Tema de color">${
+    TEMAS.map(([id, txt, d]) => `<button type="button" data-tema="${id}"
+      aria-pressed="${String(id === actual)}" title="Tema ${txt.toLowerCase()}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ${txt}</button>`).join('')}</div>`;
+
   document.getElementById('cabecera').innerHTML = `
     <div class="contenedor">
-      <div class="marca">
-        <strong>${escapar(meta.institucion)}</strong>
-        <span>${escapar(meta.titulo_plataforma)}</span>
+      <div class="marca-fila">
+        <div class="marca">
+          <strong>${escapar(meta.institucion)}</strong>
+          <span>${escapar(meta.titulo_plataforma)}</span>
+        </div>
+        ${selectorTema}
       </div>
       <nav class="nav" aria-label="Secciones">${nav}</nav>
     </div>`;
 
+  document.querySelectorAll('.tema button').forEach(b =>
+    b.addEventListener('click', () => aplicarTema(b.dataset.tema)));
+
   document.getElementById('vigencia').innerHTML = `
     <div class="contenedor">
-      Datos: <strong>${meta.fuentes.join(' · ')}</strong> ·
-      Ventana <strong>${meta.ventana.inicio}–${meta.ventana.fin}</strong> ·
-      Citas actualizadas al <strong>${meta.fecha_corte_citas}</strong> ·
+      <span>Datos: <strong>${meta.fuentes.join(' · ')}</strong></span>
+      <span class="sep" aria-hidden="true">|</span>
+      <span>Ventana <strong>${meta.ventana.inicio}–${meta.ventana.fin}</strong></span>
+      <span class="sep" aria-hidden="true">|</span>
+      <span>Citas al <strong>${meta.fecha_corte_citas}</strong></span>
+      <span class="sep" aria-hidden="true">|</span>
       <a href="metodologia.html">Cómo leer estos indicadores</a>
     </div>`;
 
@@ -144,80 +196,232 @@ export function botonAyuda(termino) {
 }
 
 /* ------------------------------------------------------------ gráficos */
-const SIN_DATO = /sin dato/i;
+
+/* Una categoría que representa AUSENCIA de dato nunca se pinta como una que
+   representa una medición (decisión D-09). El nombre de esas categorías lo fija
+   el build, así que la lista vive aquí y no se adivina por color. */
+const SIN_DATO = /^(sin dato|no determinad|sin declarar|desconocid)/i;
+export const esSinDato = v => SIN_DATO.test(String(v).trim());
+
+/* Orden fijo de series. Nunca se cicla ni se reasigna según el ranking: el
+   color sigue a la entidad, no a su posición. Más allá de ocho, se agrupa. */
+export const SERIES = Array.from({ length: 8 }, (_, i) => `var(--serie-${i + 1})`);
+
+/* Rampa ordinal: un solo tono en cuatro pasos. Para escalas ORDENADAS
+   (cuartiles, tramos). Cuatro tonos distintos afirmarían que Q1 y Q4 son
+   categorías sin relación, cuando son posiciones de una misma escala. */
+const ORDINAL = ['var(--ord-1)', 'var(--ord-2)', 'var(--ord-3)', 'var(--ord-4)'];
+
+/** Color de una barra.
+
+    `escala` distingue los tres casos que el color puede estar codificando:
+      - null       una sola serie. El caso por defecto, y el correcto para un
+                   ranking por volumen: colorear por posición haría que el color
+                   siguiera al rank y repintara los supervivientes al filtrar.
+      - 'serie'    entidades distintas sin orden entre sí.
+      - 'ordinal'  posiciones de una escala ordenada.
+    La ausencia de dato ignora las tres y siempre sale gris (decisión D-09). */
+function colorDe(d, i, escala) {
+  if (esSinDato(d.valor)) return 'var(--sin-dato)';
+  if (escala === 'ordinal') return ORDINAL[Math.min(i, ORDINAL.length - 1)];
+  if (escala === 'serie') return SERIES[i % SERIES.length];
+  return 'var(--serie-1)';
+}
+
+/* Ancho aproximado de un texto a 11px en la fuente de sistema. No hay forma de
+   medir dentro de una cadena SVG que aún no está en el documento, y el error de
+   una estimación es preferible a que la etiqueta se salga del lienzo. */
+const anchoTexto = (s, px = 11) => String(s).length * px * 0.58;
+
+/** Recorta una etiqueta al ancho disponible, con puntos suspensivos. */
+function recortar(txt, maxPx, px = 11) {
+  const s = String(txt);
+  if (anchoTexto(s, px) <= maxPx) return s;
+  const maxCar = Math.max(4, Math.floor(maxPx / (px * 0.58)) - 1);
+  return s.slice(0, maxCar).trimEnd() + '…';
+}
+
+let idGrafico = 0;
 
 /** Barras horizontales. Elegidas cuando las etiquetas son largas o muchas. */
-export function barrasH(datos, { alto = 22, maxEtiqueta = 34 } = {}) {
-  if (!datos.length) return '<p class="vacio">Sin datos</p>';
+export function barrasH(datos, { alto = 26, escala = null, sufijo = '', ancho = 680 } = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
   const max = Math.max(...datos.map(d => d.n), 1);
-  const anchoEtiqueta = 210, anchoValor = 52, ancho = 640;
-  const total = datos.length * alto + 8;
+
+  // El ancho del lienzo se declara según el contexto. El SVG se escala al
+  // contenedor, así que un lienzo de 680 dentro de una columna de 330 reduce el
+  // texto a la mitad y lo vuelve ilegible: en una tarjeta estrecha se pide un
+  // lienzo estrecho, no un escalado.
+  //
+  // La columna de etiquetas se dimensiona con el contenido real y se acota a un
+  // tercio del lienzo. Antes era fija en 210 px y los nombres largos se salían
+  // del viewBox por la izquierda, apareciendo cortados por el lado equivocado.
+  const anchoValor = 56;
+  // En un lienzo estrecho la etiqueta puede ocupar una fracción mayor: si no,
+  // no cabe ni una palabra y la barra gana un espacio que no necesita.
+  const anchoEtiqueta = Math.min(
+    Math.max(96, Math.ceil(Math.max(...datos.map(d => anchoTexto(d.valor)))) + 14),
+    Math.round(ancho * (ancho < 420 ? 0.44 : 0.34)));
+  const anchoPista = ancho - anchoEtiqueta - anchoValor;
+  const total = datos.length * alto + 10;
+  const id = `g${++idGrafico}`;
+
   const filas = datos.map((d, i) => {
     const y = i * alto;
-    const w = (ancho - anchoEtiqueta - anchoValor) * (d.n / max);
-    const etq = d.valor.length > maxEtiqueta ? d.valor.slice(0, maxEtiqueta - 1) + '…' : d.valor;
-    const clase = SIN_DATO.test(d.valor) ? 'barra sin-dato' : 'barra';
-    return `<g><title>${escapar(d.valor)}: ${nf.format(d.n)}</title>
-      <text x="${anchoEtiqueta - 8}" y="${y + alto / 2 + 4}" text-anchor="end">${escapar(etq)}</text>
-      <rect class="${clase}" x="${anchoEtiqueta}" y="${y + 3}" width="${w}" height="${alto - 8}" rx="2"/>
-      <text class="valor" x="${anchoEtiqueta + w + 6}" y="${y + alto / 2 + 4}">${nf.format(d.n)}</text>
+    const w = Math.max(2, anchoPista * (d.n / max));
+    const etq = recortar(d.valor, anchoEtiqueta - 14);
+    const cy = y + alto / 2;
+    return `<g class="marca" tabindex="0" role="listitem"
+        aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}"
+        data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
+        ${d.nota ? `data-tip-n="${escapar(d.nota)}"` : ''}>
+      <text x="${anchoEtiqueta - 10}" y="${cy + 3.5}" text-anchor="end">${escapar(etq)}</text>
+      <rect class="barra" fill="${colorDe(d, i, escala)}" x="${anchoEtiqueta}" y="${y + 6}"
+        width="${w}" height="${alto - 12}" rx="4"/>
+      <text class="valor" x="${anchoEtiqueta + w + 7}" y="${cy + 3.5}">${nf.format(d.n)}${sufijo}</text>
     </g>`;
   }).join('');
-  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${total}"
-    role="img" aria-label="Gráfico de barras">${filas}</svg></div>`;
+
+  return `<div class="grafico"><svg class="chart" id="${id}" viewBox="0 0 ${ancho} ${total}"
+    role="list" aria-label="Gráfico de barras horizontales">${filas}</svg></div>`;
 }
 
 /** Barras verticales. Para series anuales cortas: 3 años no son una línea. */
-export function barrasV(datos, { etiquetaX = 'anio', etiquetaY = 'n', referencia = null } = {}) {
-  if (!datos.length) return '<p class="vacio">Sin datos</p>';
-  const ancho = 640, alto = 240, mIzq = 46, mAb = 34, mArr = 18;
-  const vals = datos.map(d => d[etiquetaY]);
-  const max = Math.max(...vals, referencia || 0) * 1.15 || 1;
-  const bw = (ancho - mIzq - 16) / datos.length;
-  const y = v => mArr + (alto - mArr - mAb) * (1 - v / max);
+export function barrasV(datos, {
+  etiquetaX = 'anio', etiquetaY = 'n', referencia = null,
+  refEtiqueta = '', decimales = 0, ancho = 680, alto = 260,
+} = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const mIzq = 52, mDer = 16, mAb = 38, mArr = 26;
+  const vals = datos.map(d => d[etiquetaY]).filter(v => v !== null && v !== undefined);
+  const max = Math.max(...vals, referencia || 0) * 1.18 || 1;
+  const bw = (ancho - mIzq - mDer) / datos.length;
+  const base = alto - mAb;
+  const y = v => mArr + (base - mArr) * (1 - v / max);
 
+  // Rejilla recesiva con tres marcas: da escala sin competir con las barras.
+  const pasos = [0, max / 2, max];
+  // El cero se rotula «0», no «0,0»: un decimal en el origen sugiere una
+  // precisión que la marca de escala no tiene.
+  const tick = v => (v === 0 ? '0' : num(v, max < 10 ? 1 : 0));
+  const red = pasos.map(v => `
+    <line class="red" x1="${mIzq}" x2="${ancho - mDer}" y1="${y(v)}" y2="${y(v)}"/>
+    <text class="tick" x="${mIzq - 8}" y="${y(v) + 3.5}" text-anchor="end">${tick(v)}</text>`
+  ).join('');
+
+  // Barras finas: como mucho 56 px, y nunca más de la mitad del hueco.
+  const w = Math.min(56, bw * 0.5);
   const barras = datos.map((d, i) => {
-    const x = mIzq + i * bw + bw * 0.18;
-    const w = bw * 0.64;
-    const yy = y(d[etiquetaY]);
-    return `<g><title>${escapar(String(d[etiquetaX]))}: ${nf.format(d[etiquetaY])}</title>
-      <rect class="barra" x="${x}" y="${yy}" width="${w}" height="${alto - mAb - yy}" rx="2"/>
-      <text class="valor" x="${x + w / 2}" y="${yy - 5}" text-anchor="middle">${nf.format(d[etiquetaY])}</text>
-      <text x="${x + w / 2}" y="${alto - mAb + 16}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text>
+    const v = d[etiquetaY];
+    const x = mIzq + i * bw + (bw - w) / 2;
+    if (v === null || v === undefined) {
+      return `<g class="marca" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
+        <text class="tick" x="${x + w / 2}" y="${base - 8}" text-anchor="middle">sin dato</text>
+        <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text>
+      </g>`;
+    }
+    const yy = y(v);
+    return `<g class="marca" tabindex="0" role="listitem"
+        aria-label="${escapar(String(d[etiquetaX]))}: ${num(v, decimales)}"
+        data-tip="${escapar(String(d[etiquetaX]))}" data-tip-v="${num(v, decimales)}"
+        ${d.nota ? `data-tip-n="${escapar(d.nota)}"` : ''}>
+      <rect class="barra" x="${x}" y="${yy}" width="${w}" height="${Math.max(2, base - yy)}" rx="4"/>
+      <text class="valor" x="${x + w / 2}" y="${yy - 7}" text-anchor="middle">${num(v, decimales)}</text>
+      <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text>
     </g>`;
   }).join('');
 
+  // La etiqueta de referencia va sobre la línea y alineada a la derecha, pero
+  // sin invadir la última barra: se sube un poco cuando queda muy arriba.
   const ref = referencia !== null ? `
-    <line class="ref" x1="${mIzq}" x2="${ancho - 8}" y1="${y(referencia)}" y2="${y(referencia)}"/>
-    <text x="${ancho - 10}" y="${y(referencia) - 5}" text-anchor="end">${referencia} (promedio mundial)</text>` : '';
+    <line class="ref" x1="${mIzq}" x2="${ancho - mDer}" y1="${y(referencia)}" y2="${y(referencia)}"/>
+    <text class="ref-etq" x="${ancho - mDer}" y="${Math.max(12, y(referencia) - 7)}"
+      text-anchor="end">${escapar(refEtiqueta || String(referencia))}</text>` : '';
 
   return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
-    role="img" aria-label="Gráfico de barras">
-    <line class="eje" x1="${mIzq}" x2="${ancho - 8}" y1="${alto - mAb}" y2="${alto - mAb}"/>
-    ${ref}${barras}</svg></div>`;
+    role="list" aria-label="Gráfico de barras verticales">
+    ${red}${ref}${barras}
+    <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
+  </svg></div>`;
 }
 
 /** Anillo. Reservado a proporciones binarias, que es donde se lee bien. */
 export function anillo(datos) {
   const total = datos.reduce((s, d) => s + d.n, 0) || 1;
-  const r = 62, c = 2 * Math.PI * r;
+  const r = 58, grosor = 22, c = 2 * Math.PI * r;
   let offset = 0;
-  const colores = ['var(--azul-claro)', 'var(--borde)', 'var(--sin-dato)'];
+  const color = (d, i) => colorDe(d, i, 'serie');
+
   const arcos = datos.map((d, i) => {
-    const len = c * (d.n / total);
-    const seg = `<circle r="${r}" cx="80" cy="80" fill="none" stroke="${colores[i % colores.length]}"
-      stroke-width="26" stroke-dasharray="${len} ${c - len}" stroke-dashoffset="${-offset}"
-      transform="rotate(-90 80 80)"><title>${escapar(d.valor)}: ${nf.format(d.n)}</title></circle>`;
-    offset += len;
+    // Un hueco de 2 px de superficie entre segmentos: separa sin inventar color.
+    const len = Math.max(0, c * (d.n / total) - 2);
+    const seg = `<circle r="${r}" cx="72" cy="72" fill="none" stroke="${color(d, i)}"
+      stroke-width="${grosor}" stroke-linecap="butt"
+      stroke-dasharray="${len} ${c - len}" stroke-dashoffset="${-offset}"
+      transform="rotate(-90 72 72)"><title>${escapar(d.valor)}: ${nf.format(d.n)}</title></circle>`;
+    offset += c * (d.n / total);
     return seg;
   }).join('');
+
+  const mayor = datos.reduce((a, b) => (b.n > a.n ? b : a), datos[0]);
+  const centro = `
+    <text x="72" y="68" text-anchor="middle" class="valor" style="font-size:20px">
+      ${(100 * mayor.n / total).toFixed(1).replace('.', ',')} %</text>
+    <text x="72" y="85" text-anchor="middle" style="font-size:10px">${escapar(recortar(mayor.valor, 92, 10))}</text>`;
+
   const leyenda = datos.map((d, i) =>
-    `<div><span style="display:inline-block;width:.7rem;height:.7rem;background:${colores[i % colores.length]};border-radius:2px"></span>
-     ${escapar(d.valor)}: <strong>${nf.format(d.n)}</strong> (${(100 * d.n / total).toFixed(1)} %)</div>`).join('');
-  return `<div style="display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap">
-    <svg class="chart" viewBox="0 0 160 160" style="width:160px;flex:none" role="img"
-      aria-label="Gráfico de anillo">${arcos}</svg>
-    <div style="font-size:.86rem;display:grid;gap:.35rem">${leyenda}</div></div>`;
+    `<div><span class="punto" style="background:${color(d, i)}"></span>${escapar(d.valor)}:
+     <strong>${nf.format(d.n)}</strong> (${(100 * d.n / total).toFixed(1).replace('.', ',')} %)</div>`).join('');
+
+  return `<div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
+    <svg class="chart" viewBox="0 0 144 144" style="width:144px;flex:none" role="img"
+      aria-label="Gráfico de anillo">${arcos}${centro}</svg>
+    <div class="leyenda" style="display:grid;gap:.4rem">${leyenda}</div></div>`;
+}
+
+/** Leyenda de series. Obligatoria desde dos series: la identidad no puede
+    depender sólo del color. */
+export function leyenda(datos, { escala = 'serie' } = {}) {
+  if (datos.length < 2) return '';
+  return `<div class="leyenda">${datos.map((d, i) =>
+    `<span><span class="punto" style="background:${colorDe(d, i, escala)}"></span>${escapar(d.valor)}</span>`
+  ).join('')}</div>`;
+}
+
+/* ------------------------------------------------------ tooltip común */
+
+/* Un gráfico HTML es interactivo por naturaleza: `<title>` sólo aparece tras
+   una pausa larga del puntero y no existe por teclado. Este panel responde a
+   ambos. Se instala una vez por página y sirve a todas las marcas. */
+export function montarTooltip() {
+  const tip = document.createElement('div');
+  tip.className = 'tip';
+  tip.hidden = true;
+  tip.setAttribute('role', 'tooltip');
+  document.body.appendChild(tip);
+
+  const mostrar = (el, x, y) => {
+    tip.innerHTML = `<span class="tip-t">${el.dataset.tip}</span>
+      <span class="tip-v">${el.dataset.tipV}</span>
+      ${el.dataset.tipN ? `<br><span class="tip-n">${el.dataset.tipN}</span>` : ''}`;
+    tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    tip.style.left = `${Math.min(Math.max(8, x + 14), window.innerWidth - r.width - 10)}px`;
+    tip.style.top = `${Math.max(8, y - r.height - 12)}px`;
+  };
+  const ocultar = () => { tip.hidden = true; };
+
+  document.addEventListener('pointermove', e => {
+    const m = e.target.closest?.('[data-tip]');
+    if (m) mostrar(m, e.clientX, e.clientY); else ocultar();
+  });
+  document.addEventListener('pointerleave', ocultar);
+  document.addEventListener('focusin', e => {
+    const m = e.target.closest?.('[data-tip]');
+    if (m) { const r = m.getBoundingClientRect(); mostrar(m, r.right, r.bottom); }
+  });
+  document.addEventListener('focusout', ocultar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') ocultar(); });
 }
 
 /** Tabla de datos equivalente: los gráficos no pueden ser la única vía. */

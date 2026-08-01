@@ -13,6 +13,10 @@ async function portada() {
     'P-06': 'Formas de firma', 'I-01': 'Fecha de corte',
   };
 
+  // El recuento gobierna la repartición de la rejilla: seis tarjetas en una
+  // rejilla automática dejaban cinco arriba y una huérfana abajo.
+  cont.dataset.n = String(kpis.length);
+
   cont.innerHTML = kpis.map(k => {
     const ayuda = AYUDA[k.codigo] ? c.botonAyuda(AYUDA[k.codigo]) : '';
     const sec = k.mediana !== undefined
@@ -31,6 +35,30 @@ async function portada() {
       <div class="denominador">sobre ${c.nf.format(k.denominador)} publicaciones</div>
       ${unidad}${sec}</article>`;
   }).join('');
+
+  // Panorama: la portada no puede ser sólo seis cifras. Tres cortes que
+  // responden «cuánto», «con quién» y «de qué», cada uno enlazado a su sección
+  // para que la portada oriente en vez de agotar.
+  const series = await c.cargar('series.json');
+  // Lienzos estrechos: estas tarjetas viven en una rejilla de tres columnas.
+  const panorama = [
+    ['P-02', 'produccion.html', s => c.barrasV(s.datos,
+      { etiquetaX: 'anio', etiquetaY: 'n', ancho: 330, alto: 210 })],
+    ['C-01', 'colaboracion.html', s => c.anillo(s.datos)],
+    ['T-05', 'tematica.html', s => c.barrasH(s.datos.slice(0, 6), { alto: 25, ancho: 330 })],
+  ].filter(([cod]) => series[cod]);
+
+  document.getElementById('panorama').innerHTML = `
+    <h2 class="titulo-seccion">Panorama</h2>
+    <div class="rejilla">${panorama.map(([cod, destino, dibujar]) => `
+      <section class="modulo">
+        <header>
+          <h2>${c.escapar(series[cod].nombre)}</h2>
+          <span class="codigo">${cod}</span>
+        </header>
+        ${dibujar(series[cod])}
+        <p class="nota"><a href="${destino}">Ver la sección completa →</a></p>
+      </section>`).join('')}</div>`;
 
   // El FWCI mediano (0,41) frente a la media (0,87) es el dato que más
   // fácilmente se malinterpreta: se explicita en portada, no sólo en el módulo.
@@ -54,37 +82,88 @@ async function portada() {
 }
 
 /* ============================================================== módulos */
+
+/* El color por serie se reserva a los cortes CATEGÓRICOS —vías de acceso
+   abierto, cuartiles, países— donde cada barra es una entidad distinta. Un
+   ranking por volumen se queda en una sola serie: colorear por posición haría
+   que el color siguiera al rank y no a la entidad, y repintaría los
+   supervivientes en cuanto cambiara el recorte. */
 const RENDER = {
   'P-02': s => c.barrasV(s.datos, { etiquetaX: 'anio', etiquetaY: 'n' }),
   'P-03': s => c.barrasH(s.datos),
   'P-05': s => c.barrasH(s.datos),
-  'P-07': s => c.barrasH(s.datos, { maxEtiqueta: 42 }),
+  'P-07': s => c.barrasH(s.datos),
   'I-01': s => c.barrasV(s.datos, { etiquetaX: 'anio', etiquetaY: 'n' }),
-  'I-04': s => c.barrasV(s.datos.map(d => ({ anio: d.anio, n: d.valor })),
-    { etiquetaX: 'anio', etiquetaY: 'n', referencia: 1 }),
+  'I-04': s => c.barrasV(s.datos.map(d => ({ anio: d.anio, n: d.valor })), {
+    etiquetaX: 'anio', etiquetaY: 'n', decimales: 2,
+    referencia: 1, refEtiqueta: '1,00 — promedio mundial',
+  }),
   'I-05': s => c.barrasH(s.datos),
-  'R-01': s => c.barrasH(s.datos),
+  // Q1–Q4 es una escala ORDENADA, no cuatro categorías sueltas: un solo tono en
+  // cuatro pasos, del más oscuro (mejor posición) al más claro.
+  'R-01': s => c.barrasH(s.datos, { escala: 'ordinal' }),
+  // Acceso abierto se queda en una sola serie a propósito: las categorías se
+  // llaman Gold, Green y Bronze, y pintarlas con la paleta categórica dejaría
+  // «Green» de color naranja. Cuando el nombre de la categoría ya es un color,
+  // el color deja de estar disponible para codificar.
   'A-01': s => c.barrasH(s.datos),
   'C-01': s => c.anillo(s.datos),
   'C-03': s => c.barrasH(s.datos),
-  'C-04': s => c.barrasH(s.datos, { maxEtiqueta: 40 }),
+  'C-04': s => c.barrasH(s.datos),
   'C-06': s => c.barrasH(s.datos),
-  'T-05': s => c.barrasH(s.datos, { maxEtiqueta: 40 }),
-  'T-01': s => c.barrasH(s.datos, { maxEtiqueta: 40 }),
-  'T-04': s => c.barrasH(s.datos, { maxEtiqueta: 40 }),
+  'T-05': s => c.barrasH(s.datos),
+  'T-01': s => c.barrasH(s.datos),
+  'T-04': s => c.barrasH(s.datos),
+};
+
+/* Advertencias que nacen de CÓMO se dibuja el indicador, no de cómo se calcula.
+   Por eso viven aquí y no en config/indicators.yml: describen una lectura que
+   el gráfico induce, y sólo existen mientras el gráfico sea ése. */
+const LECTURA = {
+  // Un gráfico de citas por año de publicación invita a leer «el impacto está
+  // cayendo». Lo que cae es el tiempo disponible para acumular citas.
+  'I-01': `<div class="nota-destacada"><b>Cómo se lee este gráfico</b>
+    Las barras cuentan las citas recibidas por las publicaciones de cada año, no
+    la actividad citadora de ese año. Un año reciente ha tenido menos tiempo para
+    acumular citas, así que <strong>la caída del último año no indica menor
+    impacto</strong>. Para comparar años use el FWCI, que está normalizado por
+    campo, año y tipo documental.</div>`,
+  // Cuatro barras crecientes parecen cuatro categorías; son cuatro umbrales
+  // encajados uno dentro del otro.
+  'I-05': `<p class="nota">Los umbrales son <strong>acumulativos y encajados</strong>:
+    las publicaciones del top 1 % también están contadas en el top 5 %, el 10 %
+    y el 25 %. Las barras no son categorías excluyentes y no se suman.</p>`,
 };
 
 const EXTRA = {
   'I-04': s => `<p class="nota">Publicaciones aún sin citas por año: ` +
-    s.sin_citas_pct.map(x => `${x.anio}: <strong>${x.pct} %</strong>`).join(' · ') + `</p>`,
+    s.sin_citas_pct.map(x => `${x.anio}: <strong>${x.pct === null ? 'sin dato' : x.pct + ' %'}</strong>`)
+      .join(' · ') + `</p>`,
   'C-06': s => `<p class="nota">Media ${s.media} · <strong>mediana ${s.mediana}</strong>.
     La distribución es asimétrica: la mediana describe mejor el caso típico.</p>`,
   'P-05': s => `<p class="nota">Se muestran las 20 fuentes con más publicaciones,
     de ${c.nf.format(s.total_fuentes)} distintas.</p>`,
+  'A-01': s => `<p class="nota"><strong>${c.nf.format(s.con_varias_etiquetas)}</strong>
+    publicaciones tienen más de una vía de acceso abierto declarada —típicamente
+    Gold en la revista y Green en un repositorio—, así que aparecen en más de una
+    barra.</p>`,
   'T-04': s => `<p class="nota"><strong>${c.nf.format(s.con_ods)}</strong> publicaciones
     tienen al menos un ODS asignado. Se reporta como recuento, no como
     distribución porcentual del total.</p>`,
+  'P-07': () => `<p class="nota">Las escuelas se agregan a su facultad según la
+    jerarquía declarada en configuración. Las unidades sin jerarquía declarada
+    aparecen tal como figuran en la afiliación.</p>`,
 };
+
+/* Un gráfico cuyas barras no suman el total tiene que decirlo junto al gráfico,
+   no sólo en la nota metodológica. La bandera la publica el build desde
+   config/indicators.yml. */
+function avisoMultivaluado(s) {
+  if (!s.multivaluado) return '';
+  return `<p class="nota"><strong>Multivaluado:</strong> una publicación puede
+    aparecer en varias barras, de modo que la suma de las barras supera el número
+    de publicaciones. Las barras no son partes de un total.</p>`;
+}
 
 async function modulos() {
   const cont = document.getElementById('modulos');
@@ -99,7 +178,9 @@ async function modulos() {
     return `<section class="modulo">
       <header><h2>${c.escapar(s.nombre)}</h2><span class="codigo">${cod}</span></header>
       ${s.nota && s.nota.destacada ? c.nota(s.nota) : ''}
+      ${LECTURA[cod] || ''}
       ${grafico}
+      ${avisoMultivaluado(s)}
       ${extra}
       ${s.nota && !s.nota.destacada ? c.nota(s.nota) : ''}
       ${c.tablaEquivalente(s.datos)}
@@ -219,7 +300,7 @@ async function publicaciones() {
       return;
     }
     cuerpo.innerHTML = pag.map(p => `<tr>
-      <td>${c.celda(p.anio)}</td>
+      <td>${c.anio(p.anio)}</td>
       <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>`
         : c.escapar(p.titulo)}
         ${p.autores_uft.length ? `<br><span class="nota">${c.escapar(p.autores_uft.join(' · '))}</span>` : ''}</td>
@@ -313,6 +394,10 @@ async function autores() {
   document.getElementById('aviso-autores').innerHTML = `
     <div class="nota-destacada"><b>Sobre estas cifras</b>${c.escapar(data.advertencia_identidad)}</div>`;
 
+  // El umbral estaba escrito en el HTML. Viene de config/publication.yml.
+  document.getElementById('etiqueta-umbral').textContent =
+    `Mostrar sólo firmas con ${parametros.n_minimo_interpretable} o más publicaciones`;
+
   function pintar() {
     let f = lista.filter(a => (!soloInterpretables || a.interpretable));
     if (q) {
@@ -322,19 +407,28 @@ async function autores() {
     f.sort((x, y) => (asc ? 1 : -1) * ((x[orden] ?? 0) - (y[orden] ?? 0)) ||
       x.nombre.localeCompare(y.nombre));
 
+    const conOrcid = f.filter(a => a.orcid).length;
     document.getElementById('resumen').innerHTML =
       `<strong>${c.nf.format(f.length)}</strong> de ${c.nf.format(parametros.total_firmas)} formas de firma` +
-      (soloInterpretables ? ` · mostrando sólo n ≥ ${parametros.n_minimo_interpretable}` : '');
+      (soloInterpretables ? ` · mostrando sólo n ≥ ${parametros.n_minimo_interpretable}` : '') +
+      ` · <strong>${c.nf.format(conOrcid)}</strong> con ORCID recuperado`;
 
     document.getElementById('tabla-cuerpo').innerHTML = f.length ? f.map(a => `<tr>
       <td><a href="autor.html?id=${encodeURIComponent(a.id)}">${c.escapar(a.nombre)}</a>
-        ${a.identidad_no_consolidada ? ' <span class="nota">identidad no consolidada</span>' : ''}</td>
+        ${a.identidad_no_consolidada
+          ? ' <span class="etiqueta-en-linea">identidad no consolidada</span>' : ''}</td>
+      <td>${a.orcid
+        ? `<a class="etiqueta-en-linea etiqueta-orcid" href="https://orcid.org/${c.escapar(a.orcid)}"
+             target="_blank" rel="noopener"
+             title="ORCID recuperado desde Crossref · confianza ${c.escapar(a.orcid_confianza || '')}"
+             >${c.escapar(a.orcid)}</a>`
+        : '<span class="sin-dato-txt">No disponible</span>'}</td>
       <td>${c.escapar(a.unidades.join(' · '))}</td>
       <td class="num">${c.celda(a.n_publicaciones)}</td>
       <td class="num">${c.celda(a.citas)}</td>
       <td class="num">${c.celda(a.citas_por_publicacion, 2)}</td>
       <td class="num">${c.celda(a.publicaciones_top10)}</td></tr>`).join('')
-      : `<tr><td colspan="6"><div class="vacio">Ningún autor coincide.</div></td></tr>`;
+      : `<tr><td colspan="7"><div class="vacio">Ningún autor coincide.</div></td></tr>`;
   }
 
   document.getElementById('solo-interpretables').addEventListener('change', e => {
@@ -403,7 +497,7 @@ async function fichaAutor() {
       Este informe adhiere a los principios de DORA y del Manifiesto de Leiden.</div>
 
     ${a.advertencia_muestra_reducida ? `<div class="nota-destacada"><b>Muestra reducida</b>
-      Con menos de ${a.meta.denominadores ? 5 : 5} publicaciones en la ventana, los indicadores
+      Con menos de ${a.umbral_interpretable} publicaciones en la ventana, los indicadores
       de impacto no son interpretables individualmente. Se muestran por transparencia,
       no para comparación.</div>` : ''}
 
@@ -435,7 +529,7 @@ async function fichaAutor() {
       <div class="tabla-envoltura"><table>
         <thead><tr><th>Año</th><th>Título</th><th>Fuente</th><th>Tipo</th><th class="num">Citas</th></tr></thead>
         <tbody>${a.publicaciones.map(p => `<tr>
-          <td>${c.celda(p.anio)}</td>
+          <td>${c.anio(p.anio)}</td>
           <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>` : c.escapar(p.titulo)}</td>
           <td>${c.celda(p.fuente)}</td>
           <td>${c.celda(p.tipo)}</td>
@@ -483,6 +577,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await c.montarCabecera(archivo);
     await c.montarAyuda();
+    c.montarTooltip();
     if (PAGINAS[pagina]) await PAGINAS[pagina]();
   } catch (e) {
     c.mostrarError(document.getElementById('contenido') || document.body, e);

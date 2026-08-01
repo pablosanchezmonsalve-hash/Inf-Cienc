@@ -7,6 +7,9 @@
 <meta name="description" content="Producción, impacto, colaboración y áreas temáticas de la actividad científica institucional.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/app.css">
+<script>/* Aplica el tema guardado antes de pintar: si se hiciera desde el módulo
+   diferido, la página aparecería un instante con el tema equivocado. */
+(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-tema',t)}catch(e){}})();</script>
 </head>
 <body data-pagina="portada">
 <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
@@ -18,6 +21,7 @@
   actividad científica institucional indexada en Scopus. Cada indicador declara
   su fuente, su fecha de corte y sobre cuántas publicaciones se calcula.</p>
   <div class="kpis" id="kpis"></div>
+  <div id="panorama"></div>
   <div id="lectura"></div>
 </main>
 <footer class="pie" id="pie"></footer>

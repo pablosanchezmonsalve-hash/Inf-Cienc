@@ -135,6 +135,10 @@ def main() -> None:
             "evolucion": [{"anio": a, "n": por_anio[a]} for a in sorted(por_anio)],
             "publicaciones": pubs,
             "advertencia_muestra_reducida": n_pub < umbral_interpretable,
+            # El umbral viaja con la ficha: el texto de la advertencia lo
+            # necesita, y hasta ahora el front lo tenía escrito a mano. Cambiarlo
+            # en config/publication.yml debe cambiar las 589 fichas.
+            "umbral_interpretable": umbral_interpretable,
         }
         b.write_json(ficha, f"{slug}.json", subdir="author")
         fichas += 1
@@ -151,6 +155,11 @@ def main() -> None:
             "anio_max": max(por_anio) if por_anio else None,
             "interpretable": n_pub >= umbral_interpretable,
             "identidad_no_consolidada": identidad_ambigua,
+            # El ORCID viaja también en el listado, no sólo en la ficha: es el
+            # único identificador persistente que distingue dos firmas parecidas,
+            # y esconderlo en el detalle obliga a abrir 589 fichas para usarlo.
+            "orcid": (orcid_map.get(nombre) or {}).get("orcid"),
+            "orcid_confianza": (orcid_map.get(nombre) or {}).get("confianza"),
         })
 
     resumen.sort(key=lambda a: (-a["n_publicaciones"], a["nombre"]))
@@ -163,6 +172,7 @@ def main() -> None:
             "n_minimo_interpretable": umbral_interpretable,
             "total_firmas": len(resumen),
             "firmas_interpretables": sum(1 for a in resumen if a["interpretable"]),
+            "firmas_con_orcid": sum(1 for a in resumen if a["orcid"]),
         },
         "nota": b.nota("P-06"),
         "advertencia_identidad": (

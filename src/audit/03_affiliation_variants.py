@@ -125,7 +125,7 @@ def main() -> None:
 
     print(f"\nI-02 · publicaciones detectadas por método duro  : {len(pub_hard)}")
     print(f"I-03 · publicaciones detectadas por método blando: {len(pub_soft)}")
-    print(f"I-04 · sólo por método duro   : {len(solo_duro)}  <- sin autor UFT identificable")
+    print(f"I-04 · sólo por método duro   : {len(solo_duro)}  <- sin autor de la institución identificable")
     print(f"I-04 · sólo por método blando : {len(solo_blando)}")
     print(f"I-01 · publicaciones sin ninguna detección: "
           f"{len(set(scopus['EID']) - pub_soft - pub_hard)}")
@@ -134,7 +134,7 @@ def main() -> None:
 
     recon = pd.DataFrame(
         [{"eid": e, "caso": "solo_metodo_duro",
-          "consecuencia": "afiliación institucional confirmada, pero ningún autor identificable como UFT",
+          "consecuencia": "afiliación institucional confirmada, pero ningún autor identificable como de la institución",
           "resolucion": "PENDIENTE_REVISION_HUMANA"} for e in sorted(solo_duro)]
         + [{"eid": e, "caso": "solo_metodo_blando",
             "consecuencia": "cadena de afiliación coincide, pero sin Scopus Affiliation ID institucional",

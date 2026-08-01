@@ -169,7 +169,7 @@ def main() -> None:
         amb.append({
             "tipo": "X-01_solo_en_scival", "severidad": "alta", "eid": eid,
             "anio": r["Year"], "detalle": str(r["Title"])[:150],
-            "consecuencia": "sin detalle de autoría; no atribuible a autores UFT",
+            "consecuencia": "sin detalle de autoría; no atribuible a autores de la institución",
             "resolucion": "PENDIENTE_REVISION_HUMANA",
         })
     for _, grp in dup_titles.groupby("_tnorm"):

@@ -370,3 +370,111 @@ Las heredadas siguen abiertas. Se suman o se precisan:
 Revisión humana de las colas de identidad, que es lo único que puede convertir
 174 asignaciones y 17 grupos en una tabla maestra de autores consolidada
 (`T-03`, `T-04`, `T-14`). Nada de eso es automatizable sin violar `D-08`.
+
+---
+
+## Sesión 2026-08-01 — Auditoría general y rediseño de la interfaz
+
+**Estado inicial:** V1 desplegada. Encargo: auditar todo el trabajo hecho,
+aplicar las correcciones que no requirieran decisión del usuario, y rediseñar la
+interfaz buscando una experiencia moderna con una paleta atractiva.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-48 | La compuerta de capas recorre los artefactos completos, sin muestrear | Revisaba los primeros 200 elementos de cada lista y la más larga tiene 823: el 76 % no se miraba. Una compuerta que muestrea no es una compuerta |
+| D-49 | Toda serie se calcula sobre el denominador que declara | `A-01` y `R-01` se calculaban sobre 823 y declaraban 816: el gráfico contradecía su propia nota en pantalla |
+| D-50 | La multivaluación se declara en config y el front la rotula junto al gráfico | Un gráfico cuyas barras no suman el total tiene que decirlo donde se lee, no sólo en la nota metodológica |
+| D-51 | Las advertencias de LECTURA viven en el front, separadas de las de cálculo | Describen un sesgo que induce el gráfico concreto; dejan de aplicar si cambia la forma. `config/indicators.yml` describe el cálculo, que no cambia con el dibujo |
+| D-52 | El color codifica una de tres cosas y se declara cuál: serie, ordinal o serie única | Cuatro tonos para Q1–Q4 afirmaban que son categorías sin relación, cuando son posiciones de una escala |
+| D-53 | Si el nombre de la categoría ya es un color, el color no codifica | `A-01` dibujaba «Green» de naranja. Se mantiene en una sola serie |
+| D-54 | Las dependencias se acotan por rango mayor | El workflow reconstruye y publica solo: con `>=` a secas, un cambio en pandas republica cifras distintas sin aviso |
+| D-55 | Modo oscuro con paleta re-escalonada y revalidada, no invertida | Invertir una paleta validada no produce una paleta validada |
+
+### Archivos creados o modificados
+
+```
+web/assets/css/app.css                    sistema de diseño completo (reescrito)
+web/assets/js/core.js                     motor de gráficos, tooltip, tema
+web/assets/js/paginas.js                  escalas, advertencias, ORCID, panorama
+web/*.html (9)                            arranque de tema sin destello
+web/index.html                            sección «Panorama»
+web/autores.html                          columna ORCID, umbral parametrizado
+src/build/02_indicators.py                denominadores y multivaluación
+src/build/03_authors.py                   ORCID en el listado; umbral en la ficha
+src/build/05_verify_public_layer.py       fin del muestreo
+src/audit/run_all.py                      código de salida distinto de cero
+src/audit/common.py                       hojas por clave lógica, no por nombre
+src/audit/04_author_population.py         ventana de validación desde config
+config/{indicators,sources}.yml           multivaluado A-01; hojas y ventana
+requirements.txt, .github/workflows/      rangos acotados; denylist completa
+docs/{LAYERS,UX_UI}.md, internal/README   excepciones y alcance declarados
+```
+
+### Hallazgos de la auditoría
+
+- **La capa interna está publicada.** `internal/README.md` dice «NO PUBLICAR» y
+  el directorio está versionado en un repositorio público, junto a 33 MB de
+  exportaciones brutas de Elsevier. Las tres compuertas cubren `dist/`; ninguna
+  cubre el repositorio. **Declarado, no resuelto**: es una decisión del usuario.
+- **`A-01` se contradecía en pantalla**: el gráfico mostraba 233 sin dato y su
+  propia nota destacada decía 226. Dos denominadores distintos, 823 y 816.
+- **`R-01` arrastraba el mismo descuadre**: 61 frente a los 54 de su nota.
+- **Etiquetas cortadas por el lado equivocado**: la columna de etiquetas era fija
+  en 210 px y los nombres largos se salían del lienzo por la izquierda.
+- **`No determinada` se pintaba como un dato medido.** 437 pares, la segunda
+  barra más larga de `P-07`, con el mismo azul que las facultades reales.
+- **Los años se imprimían «2.025»**: `Intl.NumberFormat('es-CL')` aplicado a algo
+  que es una etiqueta, no una cantidad.
+- **Un ternario muerto** (`a.meta.denominadores ? 5 : 5`) y el umbral escrito a
+  mano en `autores.html`, pese a estar parametrizado en config.
+- **Los nombres de hoja del Excel institucional vivían en `common.py`**, no en
+  config: la corrección de la sesión anterior parametrizó la columna y dejó el
+  nombre de la hoja. La afirmación del README se había validado contra la cadena
+  «finis», que nunca aparece en un nombre de hoja.
+- **El ORCID no aparecía en el listado de autores**, sólo dentro de cada ficha.
+- **`run_all.py` nunca salía con código distinto de cero**: el paso de CI llamado
+  «Auditoría y validación» quedaba verde con reglas bloqueantes rotas.
+
+### Verificación
+
+- Reconstrucción limpia desde `data/raw/`: artefactos **byte a byte idénticos**.
+- Recorrido exhaustivo de los 596 artefactos, sin el muestreo: **0 fugas**.
+- `unique_slugs`: 589 firmas → 589 identificadores, 0 colisiones residuales.
+- Paleta validada con la herramienta de `dataviz` contra las superficies reales:
+  claro (`#ffffff`) pasa las cinco comprobaciones con aviso de contraste; oscuro
+  (`#12151c`) las pasa todas.
+- **32 combinaciones** (8 páginas × 2 temas × 2 anchos) en Chromium: sin errores
+  de consola y sin desborde horizontal.
+- Tooltip verificado con puntero y con foco de teclado.
+- Escapado HTML confirmado sobre un título real con `c.2302A>G`.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Emitir el color como atributo `fill` basta» | **Falso.** Una regla CSS gana al atributo de presentación: `.barra { fill }` pintaba «Sin dato declarado» del color de una serie medida. Detectado en captura, no en revisión de código |
+| «Un lienzo SVG único sirve para cualquier contenedor» | **Falso.** Un lienzo de 680 dentro de una columna de 330 reduce el texto a la mitad. El ancho se declara según el contexto |
+| «Colorear cada barra distingue mejor» | **Falso** en dos casos: en una escala ordenada afirma que no hay orden, y en categorías que se llaman como colores produce «Green» en naranja |
+| «`grep -ri finis src/ web/` = 0 prueba que no hay literales institucionales» | **Insuficiente.** Quedaban `Publicaciones_UFT_detalle`, `Investigadores` y un `>= 2024` |
+| «Las compuertas del build protegen la capa interna» | **Parcial.** Protegen `dist/`. El repositorio público no lo cubre ninguna |
+
+### Ambigüedades abiertas
+
+Las heredadas siguen abiertas. Se suman:
+
+- **`internal/` y `data/raw/` publicados**: pendiente de decisión del usuario.
+  Borrarlos ahora no los saca del historial de git.
+- **`P-07` expone defectos de extracción** que hoy son visibles en el sitio:
+  `Facultad de MedicinaEscuela de Medicina` y `Faculty of MedicineUniver-sidad`
+  son cadenas concatenadas sin separador, y `Facultad de Ingeniería` aparece dos
+  veces. Es dato, no presentación: no se corrige en silencio. Alimenta `T-02`.
+- La estimación del ancho de texto en SVG es aproximada: no hay forma de medir
+  una cadena que aún no está en el documento.
+
+### Próximo paso recomendado
+
+Decidir sobre `internal/` y `data/raw/` en el repositorio público, que es lo
+único de la auditoría que quedó sin aplicar. Después, `T-02`: las cadenas
+concatenadas de unidad académica ya son visibles para cualquier visitante.

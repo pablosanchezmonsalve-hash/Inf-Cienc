@@ -1,6 +1,6 @@
 # Arquitectura UX/UI del dashboard
 
-**Capa:** pública · **Fase:** 2 · **Estado:** diseño, sin implementar
+**Capa:** pública · **Fase:** 2 · **Estado:** implementado en `web/`
 
 Referencia estructural: `dataciencia.anid.gob.cl`. Conceptual, no copia de
 diseño.
@@ -198,3 +198,82 @@ distintos.
 Prioridad de contenido en pantallas estrechas: KPIs → módulo actual → filtros
 en panel desplegable. Las tablas anchas scrollean horizontalmente dentro de su
 contenedor; la página nunca scrollea en horizontal.
+
+---
+
+## 12. Sistema visual
+
+Implementado en `web/assets/css/app.css`. Sin dependencias externas: ninguna
+fuente, hoja ni script se carga desde un CDN.
+
+### Tokens
+
+Todo el color pasa por variables CSS. Cambiar la identidad visual no requiere
+tocar ningún componente.
+
+| Grupo | Variables | Para qué |
+|---|---|---|
+| Superficies | `--plano`, `--superficie`, `--superficie-2/3` | Página, tarjetas, fondos secundarios |
+| Tinta | `--tinta`, `--tinta-2`, `--tinta-3` | Texto principal, secundario y apagado (ejes, metadatos) |
+| Marca | `--marca`, `--marca-2` | Identidad institucional. Nunca codifica un dato |
+| Acento | `--acento`, `--acento-suave` | Estado interactivo. Nunca codifica un dato |
+| Series | `--serie-1` … `--serie-8` | Paleta categórica, orden fijo |
+| Ordinal | `--ord-1` … `--ord-4` | Rampa de un solo tono para escalas ordenadas |
+| Ausencia | `--sin-dato` | Gris. Toda categoría que representa ausencia de dato |
+| Aviso | `--aviso-*` | Advertencia metodológica. Ámbar, distinto de toda serie |
+
+### Modo claro y oscuro
+
+El modo oscuro es una paleta **elegida**, no una inversión: las ocho series
+están re-escalonadas para la superficie oscura. El selector de la cabecera tiene
+tres estados —automático, claro, oscuro— y el automático sigue al sistema
+operativo. La elección se recuerda y se aplica antes de pintar, con un script en
+línea en el `<head>`, para que no aparezca un destello del tema equivocado.
+
+### Reglas de color en gráficos
+
+El color codifica **una** de tres cosas, y cuál se declara en la llamada:
+
+| `escala` | Cuándo | Ejemplo |
+|---|---|---|
+| (por defecto) | Una sola serie | Rankings por volumen: `P-03`, `P-05`, `C-03` |
+| `'serie'` | Entidades distintas sin orden entre sí | Anillo de `C-01` |
+| `'ordinal'` | Posiciones de una escala ordenada | Cuartiles de revista, `R-01` |
+
+Tres reglas que no se negocian:
+
+1. **La ausencia de dato siempre es gris**, ignorando la escala pedida
+   (decisión `D-09`). Un valor no medido no puede parecerse a uno medido.
+2. **El color sigue a la entidad, nunca a su posición.** Un ranking por volumen
+   no se colorea por rank: al filtrar, el color saltaría de una entidad a otra.
+3. **Si el nombre de la categoría ya es un color, el color deja de estar
+   disponible para codificar.** Por eso `A-01` (Gold, Green, Bronze) se dibuja
+   en una sola serie: la paleta categórica dejaría «Green» de color naranja.
+
+### Validación de daltonismo
+
+La paleta categórica se validó con la herramienta de la habilidad `dataviz`
+contra las superficies reales del sitio:
+
+- **Claro** (`#ffffff`): banda de luminosidad, piso de croma, separación CVD
+  (peor par adyacente ΔE 9,1) y piso de visión normal (ΔE 19,6) pasan. Tres
+  series quedan bajo 3:1 de contraste.
+- **Oscuro** (`#12151c`): las cinco comprobaciones pasan, contraste incluido.
+
+El contraste bajo en modo claro obliga a **relieve**: por eso todo gráfico lleva
+etiqueta de valor visible junto a la marca y una tabla equivalente desplegable.
+El color nunca es el único canal de identidad.
+
+### Advertencias de lectura
+
+Además de la nota metodológica de cada indicador —que describe cómo se
+*calcula*—, hay advertencias que describen cómo se *lee el gráfico*, y que sólo
+existen mientras el gráfico sea ése. Viven en `paginas.js`, no en config:
+
+- `I-01` **Citas por año**: las barras cuentan citas recibidas por las
+  publicaciones de cada año. Un año reciente ha tenido menos tiempo para
+  acumular citas, así que la caída del último año no indica menor impacto.
+- `I-05` **Top de citación**: los umbrales son acumulativos y encajados; el top
+  1 % también está contado en el 5 %, el 10 % y el 25 %.
+- Cualquier indicador con `multivaluado: true` en `config/indicators.yml`
+  declara junto al gráfico que las barras no son partes de un total.
