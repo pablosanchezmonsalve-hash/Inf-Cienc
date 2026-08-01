@@ -29,7 +29,7 @@ def cargar_orcid() -> dict[str, dict]:
     El archivo es opcional: sin él las fichas muestran el placeholder declarado.
     Nunca se inventa un ORCID ni se deja el campo en blanco silencioso.
     """
-    path = b.INTERIM / "authors_orcid.csv"
+    path = b.ROOT / "data" / "enriched" / "authors_orcid.csv"
     if not path.exists():
         return {}
     import pandas as pd

@@ -22,9 +22,14 @@ USO
     python3 src/enrich/orcid_crossref.py --limit 50 # prueba con pocos DOI
 
 Salidas:
-    data/interim/authors_orcid.csv     asignaciones publicables
+    data/enriched/authors_orcid.csv    asignaciones publicables (SE VERSIONA)
     internal/orcid_conflicts.csv       conflictos y ambigüedades (capa interna)
     data/cache/crossref/*.json         respuestas cacheadas (no versionadas)
+
+El resultado NO va a data/interim/: ese directorio contiene derivados que se
+regeneran sin salida a red, y por eso está fuera del control de versiones. Este
+archivo, en cambio, requiere ~800 consultas a Crossref para reconstruirse. Es
+dato nuevo, no un intermedio, y pertenece al repositorio.
 """
 
 from __future__ import annotations
@@ -46,6 +51,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "audit"))
 import common as c  # noqa: E402
 
 CACHE = c.ROOT / "data" / "cache" / "crossref"
+ENRICHED = c.ROOT / "data" / "enriched"
 API = "https://api.crossref.org/works/"
 
 CFG = c.MATCHING["enriquecimiento_externo"]["orcid"]
@@ -333,7 +339,8 @@ def main() -> int:
     df = pd.DataFrame(hallazgos)
     asignaciones, conflictos = consolidar(df)
 
-    c.write_interim(asignaciones, "authors_orcid.csv")
+    ENRICHED.mkdir(parents=True, exist_ok=True)
+    asignaciones.to_csv(ENRICHED / "authors_orcid.csv", index=False, encoding="utf-8")
     if len(conflictos):
         c.write_internal(conflictos, "orcid_conflicts.csv")
 
@@ -346,7 +353,7 @@ def main() -> int:
         print(f"    confianza alta : {int((asignaciones['confianza'] == 'alta').sum())}")
         print(f"    confianza media: {int((asignaciones['confianza'] == 'media').sum())}")
     print(f"  conflictos encolados         : {len(conflictos)}")
-    print("\n  OK · data/interim/authors_orcid.csv")
+    print("\n  OK · data/enriched/authors_orcid.csv  (recuerde versionarlo)")
     return 0
 
 

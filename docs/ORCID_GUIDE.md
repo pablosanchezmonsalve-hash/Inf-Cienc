@@ -136,13 +136,27 @@ el ORCID aparece enlazado donde antes decía «No disponible».
 
 ## Paso 8 — Publicar
 
+Si es la primera vez que usa git en esta máquina, identifíquese antes:
+
 ```bash
-git add data/interim/authors_orcid.csv internal/orcid_conflicts.csv .gitignore
+git config --global user.name "Su Nombre"
+git config --global user.email "su@correo.cl"
+```
+
+Luego:
+
+```bash
+git pull origin main
+git add data/enriched/authors_orcid.csv internal/orcid_conflicts.csv
 git commit -m "Enriquecimiento de ORCID desde Crossref"
 git push origin main
 ```
 
-El caché (`data/cache/`) no se versiona: son ~800 archivos que se regeneran
+El resultado va a `data/enriched/`, **no** a `data/interim/`: ese directorio
+está fuera del control de versiones porque contiene derivados que se regeneran
+sin red, y este archivo cuesta ~800 consultas a Crossref reconstruirlo.
+
+El caché (`data/cache/`) sí se queda fuera: son ~800 archivos que se regeneran
 solos.
 
 ---
@@ -151,7 +165,7 @@ solos.
 
 | Archivo | Capa | Contenido |
 |---|---|---|
-| `data/interim/authors_orcid.csv` | pública | Firma → ORCID, con confianza y nº de publicaciones que lo respaldan |
+| `data/enriched/authors_orcid.csv` | pública, **versionada** | Firma → ORCID, con confianza y nº de publicaciones que lo respaldan |
 | `internal/orcid_conflicts.csv` | **interna** | Firmas con más de un ORCID, y homonimias dentro de una publicación |
 
 En las fichas de autor:
@@ -196,6 +210,8 @@ siempre con su nivel de confianza.
 | `NameError: name 'python3' is not defined` | Se escribió en el intérprete de Python, no en la terminal | `exit()` y usar PowerShell |
 | HTTP 429 de Crossref | Límite de tasa | Esperar unos minutos y reejecutar |
 | Las fichas siguen sin ORCID | No se reconstruyó el sitio | Ejecutar `make sitio` |
+| `Author identity unknown` al hacer commit | git no sabe quién es usted | `git config --global user.name` y `user.email` |
+| `The following paths are ignored` al hacer add | Ruta antigua | El archivo está en `data/enriched/`, no en `data/interim/` |
 
 ---
 
