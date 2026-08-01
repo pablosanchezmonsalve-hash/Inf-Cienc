@@ -72,17 +72,20 @@ jobs:
             docs/VALIDATION_REPORT.md
             docs/BUILD_VERIFICATION.md
 
-      # `enablement: true` intenta activar Pages por API en la primera
-      # ejecución. Sin esto, el job falla con "Get Pages site failed" hasta que
-      # alguien lo active a mano en Settings.
+      # ACTIVACIÓN MANUAL REQUERIDA, UNA SOLA VEZ:
+      #   Settings -> Pages -> Build and deployment -> Source: GitHub Actions
       #
-      # Nota: GitHub Pages en repositorios PRIVADOS requiere un plan de pago
-      # (Pro, Team o Enterprise). Si este repositorio es privado en plan
-      # gratuito, este paso seguirá fallando y el despliegue debe hacerse por
-      # otra vía — ver docs/DEPLOYMENT.md §4.
+      # No se puede automatizar desde aquí. Se intentó `enablement: true` y el
+      # runner respondió "Create Pages site failed: Resource not accessible by
+      # integration": el GITHUB_TOKEN del workflow no tiene permiso para CREAR
+      # el sitio de Pages, sólo para publicar en uno que ya existe. Haría falta
+      # un token personal con permiso de administración, que no compensa
+      # introducir para un paso que se hace una vez.
+      #
+      # Mientras Pages no esté activado, este paso falla con
+      # "Get Pages site failed" y el resto del pipeline igual se ejecuta y
+      # valida: lo único que no ocurre es la publicación.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
