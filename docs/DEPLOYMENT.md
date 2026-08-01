@@ -98,18 +98,30 @@ Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'se
 `.github/workflows/deploy.yml` ejecuta el mismo pipeline que en local y publica
 en GitHub Pages con cada push a `main`.
 
-**Activación (una vez):** Settings → Pages → Source: **GitHub Actions**.
+### Activación: un paso manual, una sola vez
 
-El workflow intenta activarlo por API (`enablement: true`), pero eso no siempre
-basta. Dos condiciones deben cumplirse:
+> **Settings → Pages → Build and deployment → Source: `GitHub Actions`**
 
-1. **Pages habilitado** en el repositorio.
-2. **El repositorio es público, o la cuenta tiene un plan de pago.** GitHub
-   Pages en repositorios privados requiere Pro, Team o Enterprise. En un
-   repositorio privado con plan gratuito **el despliegue por Pages no es
-   posible**, y hay que usar otra de las opciones de §4.
+**Esto no se puede automatizar.** Se intentó con `enablement: true` en el
+workflow y GitHub respondió:
 
-Si el job falla con `Get Pages site failed`, es una de estas dos.
+```
+Create Pages site failed. Error: Resource not accessible by integration
+```
+
+El `GITHUB_TOKEN` del workflow puede **publicar** en un sitio de Pages que ya
+existe, pero no puede **crearlo**. Hacerlo requeriría un token personal con
+permiso de administración del repositorio, que no compensa introducir —y
+custodiar— para un paso que se hace una vez.
+
+La otra condición, ya cumplida en este repositorio: **Pages requiere que el
+repositorio sea público**, o una cuenta con plan de pago (Pro, Team o
+Enterprise).
+
+Mientras Pages no esté activado, el workflow **falla sólo en el último paso**.
+Todo lo anterior —auditoría, 29 reglas de validación, build y verificación de
+capas— se ejecuta igual, y los informes quedan disponibles como artefactos de
+la ejecución. Lo único que no ocurre es la publicación.
 
 El workflow reproduce las mismas compuertas y añade una verificación extra en
 CI: falla si `internal/`, `data/raw/` o cualquier rastro de las colas de
