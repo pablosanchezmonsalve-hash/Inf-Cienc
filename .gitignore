@@ -7,6 +7,11 @@ data/processed/
 # Sitio ensamblado y desplegable: se reconstruye con `make sitio`
 dist/
 
+# Respuestas cacheadas de Crossref: ~800 archivos, se regeneran solos.
+# Se conservan en disco para poder reejecutar el enriquecimiento sin volver a
+# golpear la API, pero no se versionan.
+data/cache/
+
 # Nunca desplegar la capa interna en la web pública (CLAUDE.md, <data_governance>).
 # Se versiona en el repositorio de trabajo, pero queda fuera del bundle: la
 # exclusión efectiva la aplica y verifica src/build/06_assemble_site.py.
