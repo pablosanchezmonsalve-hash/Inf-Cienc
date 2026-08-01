@@ -104,7 +104,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 |---|---|
 | Páginas | 9 |
 | Fichas de autor | **589**, una por archivo |
-| Peso total de `dist/` | ~1,9 MB |
+| Peso total de `dist/` | ~2,0 MB |
 | Carga de la portada | ~25 KB |
 | Dependencias externas en el navegador | **0** |
 
@@ -115,7 +115,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Documento | Contenido |
 |---|---|
 | **`STATE.md`** | **Punto de entrada: estado, cifras y mapa de lectura** |
-| `docs/DECISIONS.md` | Índice de las 47 decisiones, una línea cada una |
+| `docs/DECISIONS.md` | Índice de las 55 decisiones, una línea cada una |
 | `docs/AUDIT_REPORT.md` | Auditoría completa con cifras verificadas |
 | `docs/DATA_MODEL.md` | Modelo lógico, entidades y claves de enlace |
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
