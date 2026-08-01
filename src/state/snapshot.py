@@ -221,7 +221,7 @@ def main() -> None:
 
     s += ["", "---", "", f"## Decisiones tomadas: {len(dec)}", "",
           "Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:", ""]
-    clave = {"D-08", "D-09", "D-16", "D-18", "D-22", "D-23"}
+    clave = {"D-08", "D-09", "D-16", "D-18", "D-22", "D-23", "D-44"}
     s += [f"- **`{d['id']}`** — {d['decision']}" for d in dec if d["id"] in clave]
 
     s += ["", "---", "", "## Mapa de lectura", "",

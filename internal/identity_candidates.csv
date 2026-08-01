@@ -1,0 +1,18 @@
+tipo,severidad,orcid,firmas,n_firmas,hallazgo_nuevo,confianza_minima,consecuencia,resolucion
+V2-01_firmas_con_orcid_compartido,alta,0000-0001-6065-5218,Galleguillos R. | Galleguillos R.B.,2,True,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-0533-4531,Giglio A. | Giglio Jimenez A. | Giglio Jiménez A.,3,True,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-1781-062X,Orellana Donoso M. | Orellana-Donoso M.,2,False,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-2270-299X,Castro M. | Castro-Sepulveda M.,2,True,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-4312-1318,Lopez-Arana S. | López-Arana S.,2,False,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-4411-8655,Castillo O. | Castillo-Valenzuela O.,2,True,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-5832-7327,Strauss F.-J. | Strauss F.J.,2,True,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-6357-3469,Moyano C. | Moyano Davila C. | Moyano Dávila C.,3,True,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-7140-4294,Hartmann D. | Hartmann Schatloff D.,2,True,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0002-9315-9365,Henriquez-Olguin C. | Henriquez-Olguín C. | Henríquez-Olguín C.,3,False,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0003-0051-9833,Núnez-Lisboa M. | Núñez-Lisboa M.,2,False,media,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0003-0402-5072,Álvarez C. | Álvarez-Valdés C.,2,True,media,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0003-2175-2941,Foxley V.G. | Gubbins V. | Gubbins-Foxley V.,3,True,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0003-3454-4252,Pizarro S. | Pizarro S.I.,2,True,media,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0003-3620-9861,Cancino-Lopez J. | Cancino-López J.,2,False,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0000-0003-4763-074X,Diaz F. | Díaz F.,2,False,alta,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA
+V2-01_firmas_con_orcid_compartido,alta,0009-0008-1613-0156,Lomboy Finsterbusch M.I. | Lomboy M.,2,True,media,firmas distintas comparten identificador persistente,PENDIENTE_CONFIRMACION_HUMANA

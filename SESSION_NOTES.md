@@ -277,3 +277,96 @@ La aprobación de licencias fija la intención del proyecto. **No sustituye** la
 verificación con la unidad que administra la suscripción a Elsevier sobre qué
 métricas derivadas pueden publicarse abiertamente: eso es un hecho externo, no
 una decisión del proyecto, y sigue abierto.
+
+---
+
+## Sesión 2026-08-01 — Post-V1: ORCID, despliegue y estado
+
+**Estado inicial:** V1 completa y las tres fases cerradas. El sitio existía sólo
+en `dist/` local. `T-01` (enriquecimiento de ORCID) seguía abierto y bloqueaba
+la consolidación de identidad de autor.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-41 | El resultado del enriquecimiento vive en `data/enriched/`, versionado | `data/interim/` está en `.gitignore` por ser regenerable; esto no lo es: consultar 804 DOI a un servicio externo no es reproducible a voluntad |
+| D-42 | `rdata` pasa a dependencia opcional con degradación declarada | No hay ruedas para Python 3.14 y los `.RData` son fuentes de referencia (D-05). Una dependencia dura habría bloqueado la instalación por un archivo que no alimenta ningún indicador |
+| D-43 | El respaldo por apellido sólo se aplica si Crossref no declara nombre de pila | Sin esa condición el respaldo asigna el ORCID de una persona a la firma de otra (ver supuestos descartados) |
+| D-44 | Compartir ORCID **no** fusiona firmas: se encola en `internal/identity_candidates.csv` | La asignación firma→ORCID es a su vez una hipótesis. Encadenar dos hipótesis no produce un hecho (extiende D-08) |
+| D-45 | La jerarquía escuela→facultad se declara con estado `confirmada` o `inferida` | Permite publicar la agregación por facultad sin afirmar como oficial lo que se dedujo de las afiliaciones |
+| D-46 | `STATE.md` es una vista derivada generada, fuera del orden de precedencia | Un resumen mantenido a mano envejece y no se puede auditar. Si contradice a `config/` o `PLAN.md`, manda la fuente |
+| D-47 | La activación de GitHub Pages queda como paso manual documentado | El `GITHUB_TOKEN` del workflow puede publicar pero no crear el sitio. Se documenta en vez de dejar un `enablement: true` que falla |
+
+### Archivos creados o modificados
+
+```
+src/enrich/orcid_crossref.py                enriquecimiento desde Crossref (nuevo)
+src/state/snapshot.py                       generador de STATE.md y DECISIONS.md (nuevo)
+STATE.md, docs/DECISIONS.md                 generados
+data/enriched/authors_orcid.csv             174 firmas con ORCID
+internal/identity_candidates.csv            17 grupos que comparten ORCID
+internal/orcid_conflicts.csv                1 conflicto
+.github/workflows/deploy.yml                build y publicación en Pages (nuevo)
+docs/{ORCID_GUIDE,DEPLOYMENT}.md            guía de ejecución y paso manual de Pages
+config/matching_rules.yml                   jerarquía escuela→facultad; patrón con guion
+src/build/03_authors.py                     lee ORCID de data/enriched/
+src/build/02_indicators.py                  P-07 agrega por facultad, con detalle_escuelas
+src/build/common_build.py                   unique_slugs()
+requirements.txt, CLAUDE.md, README.md,
+Makefile (objetivo `estado`)                actualizados
+```
+
+### Hallazgos
+
+- **Enriquecimiento ejecutado por el usuario** sobre 804 DOI (97,7 % del
+  universo), **0 errores de red**: **174 de 589 firmas (29,5 %)** reciben ORCID,
+  54 con confianza alta y 120 con confianza media, sobre **153 ORCID distintos**.
+- **17 grupos de firmas comparten ORCID** (21 firmas colapsables). **11 de ellos
+  son invisibles para la heurística de apellido** que alimenta la cola `P-03`:
+  el caso claro es `Gubbins V.` / `Foxley V.G.`, que no comparten apellido. El
+  identificador persistente aporta evidencia que la comparación de cadenas no
+  puede producir.
+- **Cota superior de 568 personas distintas** para 589 firmas, si se confirmaran
+  las 21 colapsables. Es una cota, no un recuento.
+- **El patrón blando de detección institucional no cubría el guion**:
+  `Universidad Finis-Terrae` quedaba fuera. Corregido a `\bfinis[\s\-]+terrae\b`.
+- **Sitio publicado**: `.github/workflows/deploy.yml`, ejecución #11 en verde
+  sobre `8f05a51`, en
+  https://pablosanchezmonsalve-hash.github.io/Inf-Cienc/
+- **El costo de retomar el proyecto se midió**: leer `PLAN.md`,
+  `SESSION_NOTES.md` y `docs/` por adelantado son ~3.700 líneas / 155 KB, de las
+  que la mayoría es referencia puntual. `STATE.md` lo reduce a ~110 líneas con un
+  mapa de qué abrir para cada pregunta.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «`authors_orcid.csv` es una salida intermedia» | **Falso.** `.gitignore` impedía versionarlo y el resultado de 804 consultas externas se habría perdido al limpiar. Movido a `data/enriched/` |
+| «El respaldo por apellido es seguro cuando no hay coincidencia exacta» | **Falso.** Asignaba el ORCID de `Diaz, Marcela` a la firma `Diaz F.`. Restringido a los casos en que Crossref no declara nombre de pila |
+| «`enablement: true` crea el sitio de Pages desde el workflow» | **Falso.** `Resource not accessible by integration`: el token publica, no crea. Documentado como paso manual |
+| «`rdata` se instala en cualquier Python 3.11+» | **Falso.** No hay ruedas para 3.14. Dependencia marcada como opcional |
+| «La proporción alta/media se invertiría en la corrida completa» | **Falso.** La muestra de 20 DOI ya anticipaba el resultado: 54 alta / 120 media |
+| «Claude-Mem está disponible en esta sesión» | **Falso.** No hay binario, plugin ni servidor MCP. La memoria del proyecto es `SESSION_NOTES.md` + `STATE.md`, versionada y legible por cualquiera |
+
+### Ambigüedades abiertas
+
+Las heredadas siguen abiertas. Se suman o se precisan:
+
+- **415 firmas (70,5 %) sin ORCID.** El techo real es la cobertura de ORCID en
+  los registros de Crossref, no el método.
+- **`Castro-Sepúlveda M.` aparece con dos ORCID** (`0000-0001-7673-7269` y
+  `0000-0002-2270-299X`). Encolado, no resuelto.
+- **17 grupos de firmas con ORCID compartido** esperando confirmación humana.
+- **Los 13 nombres de unidad académica siguen sin catálogo oficial**, y tres de
+  las cuatro jerarquías escuela→facultad son `inferida`. Sólo Kinesiología →
+  Facultad de Medicina está confirmada por el usuario. El sitio de la
+  universidad no es alcanzable desde este entorno: la validación requiere una
+  fuente institucional.
+
+### Próximo paso recomendado
+
+Revisión humana de las colas de identidad, que es lo único que puede convertir
+174 asignaciones y 17 grupos en una tabla maestra de autores consolidada
+(`T-03`, `T-04`, `T-14`). Nada de eso es automatizable sin violar `D-08`.
