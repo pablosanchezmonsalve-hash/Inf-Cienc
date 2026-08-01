@@ -317,7 +317,14 @@ que hay que buscar. La atenuación se aplica al SVG que contiene la marca, así
 que dos gráficos en la misma pantalla no se interfieren.
 
 Cada marca es **enfocable por teclado** y muestra el mismo tooltip que con el
-puntero. `Escape` lo cierra. El tooltip salta abajo o a la izquierda cuando no
+puntero. `Escape` lo cierra. El `aria-label` del gráfico nombra **el indicador**,
+no la forma: cinco «gráfico de barras horizontales» seguidos no orientan a quien
+navega con lector de pantalla.
+
+En las barras la identidad no la lleva una leyenda sino la etiqueta de la propia
+barra y su valor visible al lado. Es relieve suficiente y evita repetir junto al
+gráfico lo que ya está escrito en la marca; sólo el anillo lleva leyenda, porque
+sus segmentos no admiten etiqueta interior. El tooltip salta abajo o a la izquierda cuando no
 cabe: uno recortado por el borde no informa de nada.
 
 El tooltip añade la **cuota sobre el total mostrado**, pero sólo donde las
@@ -328,7 +335,9 @@ recortados (`P-05`) se omite: ahí un porcentaje afirmaría algo falso.
 **Tablas.** La fila activa lleva fondo teñido **y** un filete de acción a la
 izquierda; el fondo solo es demasiado tenue en pantallas de bajo contraste. La
 regla responde a `:hover` y a `:focus-within`, de modo que existe navegando con
-teclado. Las cabeceras ordenables muestran su afordancia (`↕`) **antes** de
+teclado. Las cabeceras ordenables son **enfocables y se activan con `Enter` o
+`Espacio`**: un `<th>` no es un control operable por defecto, y sin eso la tabla
+no se podía ordenar sin ratón. Las cabeceras ordenables muestran su afordancia (`↕`) **antes** de
 pasar el puntero, y la columna por la que se ordena se marca **en todo su alto**:
 con 51 filas en pantalla, una flecha arriba del todo se pierde.
 
