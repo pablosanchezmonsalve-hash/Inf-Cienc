@@ -288,6 +288,19 @@ _VOCAB_LOOKUP = {
 }
 
 
+_JERARQUIA = MATCHING["unidad_academica"].get("jerarquia", {})
+
+
+def facultad_de(unidad: str) -> str:
+    """Facultad a la que pertenece una unidad, según config/matching_rules.yml.
+
+    Una escuela sin entrada en la jerarquía se devuelve tal cual: no se infiere
+    a qué facultad pertenece. La etiqueta de sin dato se preserva.
+    """
+    entrada = _JERARQUIA.get(unidad)
+    return entrada["facultad"] if entrada else unidad
+
+
 def canonical_academic_unit(raw_unit: str | None) -> str:
     """Mapea una variante al vocabulario controlado (regla I-07).
 
