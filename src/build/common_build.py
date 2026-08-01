@@ -136,6 +136,19 @@ def load_authors() -> pd.DataFrame:
     return pd.read_csv(INTERIM / "authors_master_draft.csv", dtype=str)
 
 
+_JERARQUIA = load_config("matching_rules.yml")["unidad_academica"].get("jerarquia", {})
+
+
+def facultad_de(unidad: str) -> str:
+    """Facultad a la que pertenece una unidad académica.
+
+    Una escuela sin entrada en la jerarquía se devuelve tal cual: no se infiere
+    a qué facultad pertenece.
+    """
+    entrada = _JERARQUIA.get(unidad)
+    return entrada["facultad"] if entrada else unidad
+
+
 def load_authorship() -> pd.DataFrame:
     """Pares autor x publicación, restringidos a las columnas publicables.
 

@@ -115,7 +115,12 @@ def main() -> None:
     equipo = [{"valor": f"{lo}" if lo == hi else (f"{lo}-{hi}" if hi < 1000 else f"{lo}+"),
                "n": sum(1 for x in n_aut if lo <= x <= hi)} for lo, hi in bins]
 
-    unidad = Counter(authorship["unidad_academica"].fillna("No determinada"))
+    unidades_raw = authorship["unidad_academica"].fillna("No determinada")
+    unidad = Counter(unidades_raw)
+    # Agregación a nivel de facultad: las escuelas suman a su facultad según la
+    # jerarquía declarada en config. Kinesiología y Nutrición cuentan dentro de
+    # Facultad de Medicina, no como unidades separadas.
+    facultad = Counter(unidades_raw.map(b.facultad_de))
 
     series = {
         "meta": b.build_meta(),
@@ -131,7 +136,9 @@ def main() -> None:
                  "nota": b.nota("P-05"),
                  "total_fuentes": int(uni["source_id"].nunique())},
         "P-07": {"nombre": b.indicador("P-07")["nombre"],
-                 "datos": [{"valor": k, "n": v} for k, v in unidad.most_common()],
+                 "datos": [{"valor": k, "n": v} for k, v in facultad.most_common()],
+                 "detalle_escuelas": [{"valor": k, "n": v, "facultad": b.facultad_de(k)}
+                                      for k, v in unidad.most_common()],
                  "nota": b.nota("P-07")},
         "I-01": {"nombre": b.indicador("I-01")["nombre"], "datos": citas_por_anio,
                  "nota": b.nota("I-01")},
