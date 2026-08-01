@@ -164,6 +164,10 @@ const EXTRA = {
    config/indicators.yml. */
 function avisoMultivaluado(s) {
   if (!s.multivaluado) return '';
+  // Varios indicadores ya lo dicen en su propia advertencia de config. Repetirlo
+  // debajo no refuerza nada: dos avisos idénticos se leen como un descuido y
+  // restan credibilidad al resto de las advertencias.
+  if (/multivaluad|no sumable/i.test(s.nota?.texto || '')) return '';
   return `<p class="nota"><strong>Multivaluado:</strong> una publicación puede
     aparecer en varias barras, de modo que la suma de las barras supera el número
     de publicaciones. Las barras no son partes de un total.</p>`;

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `fbace04` · Saca los últimos literales institucionales de src/
+Último commit: `be032e6` · Reancla el sistema visual en la paleta institucional
 Snapshot: 2026-08-01
 
 ---
