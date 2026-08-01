@@ -97,8 +97,8 @@ para los datos derivados.
 
 | # | Pendiente | Fase objetivo | Origen |
 |---|---|---|---|
-| T-01 | Enriquecer ORCID desde Crossref por DOI (cobertura 97,7 %) | 2/3 | Confirmado por el usuario |
-| T-02 | Validar institucionalmente el vocabulario de unidades académicas | 2 | Sin catálogo oficial |
+| ~~T-01~~ | ~~Enriquecer ORCID desde Crossref por DOI (cobertura 97,7 %)~~ | — | **Cerrado (2026-08-01)**: 174 de 589 firmas, 0 errores de red |
+| T-02 | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad | 2 | Sin catálogo oficial |
 | T-03 | Revisión humana de las 123 variantes de nombre encoladas | 2 | Regla P-03 |
 | T-04 | Revisión humana de los 20 nombres con múltiples Scopus ID | 2 | Regla P-04 |
 | T-05 | Decidir tratamiento del duplicado probable Article/Letter | 2 | Regla P-01 |
@@ -110,6 +110,10 @@ para los datos derivados.
 | ~~T-11~~ | ~~Confirmar alcance de publicación de fichas de autor~~ | — | **Cerrado**: confirmado por el usuario (589 firmas, ranking n>=5) |
 | ~~T-12~~ | ~~Verificación automática de barrera pública/interna~~ | — | **Cerrado**: `05_verify_public_layer.py`, compuerta con código de salida |
 | T-13 | Confirmar semántica del percentil de citación con documentación SciVal | V2 | Determinada empíricamente, no documentalmente |
+| T-14 | Revisión humana de los 17 grupos de firmas que comparten ORCID | V2 | `internal/identity_candidates.csv`; 11 no los detecta el apellido |
+| T-15 | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID | V2 | `internal/orcid_conflicts.csv` |
+| T-16 | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público | V2 | Auditoría 2026-08-01: contradice `internal/README.md` |
+| T-17 | Corregir las cadenas de unidad académica concatenadas sin separador | V2 | Visibles en `P-07`; alimenta T-02 |
 
 ---
 

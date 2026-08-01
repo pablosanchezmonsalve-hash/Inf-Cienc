@@ -86,6 +86,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Con autoría detallada | 818 |
 | Formas de firma de autor | **589** |
 | Pares autor × publicación | **1.207** |
+| Firmas con ORCID recuperado desde Crossref | **174** (29,5 %) |
 | Reglas de validación | **29** · 28 pasan · 0 fallas bloqueantes |
 
 ### Indicadores (Fase 2)
@@ -103,7 +104,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 |---|---|
 | Páginas | 9 |
 | Fichas de autor | **589**, una por archivo |
-| Peso total de `dist/` | ~1,9 MB |
+| Peso total de `dist/` | ~2,0 MB |
 | Carga de la portada | ~25 KB |
 | Dependencias externas en el navegador | **0** |
 
@@ -114,7 +115,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Documento | Contenido |
 |---|---|
 | **`STATE.md`** | **Punto de entrada: estado, cifras y mapa de lectura** |
-| `docs/DECISIONS.md` | Índice de las 40 decisiones, una línea cada una |
+| `docs/DECISIONS.md` | Índice de las 64 decisiones, una línea cada una |
 | `docs/AUDIT_REPORT.md` | Auditoría completa con cifras verificadas |
 | `docs/DATA_MODEL.md` | Modelo lógico, entidades y claves de enlace |
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
@@ -163,10 +164,22 @@ Se cambian cuatro archivos de configuración:
 | `config/sources.yml` | Rutas, fechas de corte y roles de los archivos |
 | `config/indicators.yml` | Qué indicadores se publican y con qué advertencias |
 
-No hay ninguna cadena institucional escrita en el código
-(`grep -ri "finis" src/ web/` devuelve 0). El límite honesto: **los textos
-metodológicos de `docs/` citan cifras de esta institución** y deben revisarse
-en un despliegue replicado. Ver `docs/REPLICATION.md` §4.
+Esto se verifica, no se afirma: `grep -ri "finis" src/ web/` devuelve 0, y
+también los nombres de hoja del libro Excel de validación, la columna de autor y
+la ventana de ese archivo viven en `config/sources.yml`. La auditoría del
+2026-08-01 encontró que sólo la cadena «finis» se había comprobado, y que
+`Publicaciones_UFT_detalle` y un `>= 2024` seguían escritos en `src/`; ambos
+están ahora en configuración.
+
+Dos límites honestos, ninguno resuelto por configuración:
+
+- **Los textos metodológicos de `docs/` citan cifras de esta institución** y
+  deben revisarse en un despliegue replicado.
+- **`src/audit/04_author_population.py` supone que existe un set de validación
+  manual** con la forma del libro Excel de esta institución. Otra institución
+  que no lo tenga no necesita reescribirlo, pero sí omitir ese paso.
+
+Ver `docs/REPLICATION.md` §4.
 
 ---
 

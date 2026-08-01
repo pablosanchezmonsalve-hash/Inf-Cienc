@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `94681da` · Emite la cola de firmas que comparten ORCID (#8)
+Último commit: `be032e6` · Reancla el sistema visual en la paleta institucional
 Snapshot: 2026-08-01
 
 ---
@@ -49,25 +49,29 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 | `internal/ambiguities_authors.csv` | 416 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/orcid_conflicts.csv` | 1 |
+| `internal/identity_candidates.csv` | 17 |
 
 ---
 
-## Pendientes abiertos (8)
+## Pendientes abiertos (11)
 
 | # | Pendiente |
 |---|---|
-| `T-01` | Enriquecer ORCID desde Crossref por DOI (cobertura 97,7 %) |
-| `T-02` | Validar institucionalmente el vocabulario de unidades académicas |
+| `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
 | `T-03` | Revisión humana de las 123 variantes de nombre encoladas |
 | `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID |
 | `T-05` | Decidir tratamiento del duplicado probable Article/Letter |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
 | `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
 | `T-13` | Confirmar semántica del percentil de citación con documentación SciVal |
+| `T-14` | Revisión humana de los 17 grupos de firmas que comparten ORCID |
+| `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
+| `T-16` | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público |
+| `T-17` | Corregir las cadenas de unidad académica concatenadas sin separador |
 
 ---
 
-## Decisiones tomadas: 40
+## Decisiones tomadas: 64
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
@@ -77,6 +81,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 - **`D-18`** — `AU-04` (FWCI por autor) se descarta, no se aproxima
 - **`D-22`** — `src/build/` no lee de `data/raw/`; sólo de `data/interim/` validado
 - **`D-23`** — La barrera pública/interna se verifica automáticamente post-build
+- **`D-44`** — Compartir ORCID **no** fusiona firmas: se encola en `internal/identity_candidates.csv`
 
 ---
 

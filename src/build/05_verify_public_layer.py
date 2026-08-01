@@ -31,7 +31,10 @@ def revisar(obj, ruta: str, archivo: str) -> None:
                 })
             revisar(v, f"{ruta}.{k}", archivo)
     elif isinstance(obj, list):
-        for i, v in enumerate(obj[:200]):  # muestreo suficiente en listas largas
+        # Sin muestreo: una compuerta que sólo mira una parte no es una
+        # compuerta. La lista más larga de los artefactos tiene 823 elementos y
+        # el recorrido completo de los 596 archivos cuesta menos de un segundo.
+        for i, v in enumerate(obj):
             revisar(v, f"{ruta}[{i}]", archivo)
 
 

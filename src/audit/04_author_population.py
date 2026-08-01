@@ -1,4 +1,4 @@
-"""04 — Población de autores UFT y descomposición de la brecha 585/440/396.
+"""04 — Población de autores afiliados y descomposición de la brecha 585/440/396.
 
 Construye el borrador de la tabla maestra de autores y explica la diferencia
 entre la extracción automática y el trabajo manual previo. Aplica P-03..P-05.
@@ -16,6 +16,7 @@ Salidas:
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 import pandas as pd
 
@@ -34,7 +35,7 @@ def scopus_id_map(scopus: pd.DataFrame) -> dict[str, set[str]]:
 
 
 def main() -> None:
-    c.banner("04 — POBLACIÓN DE AUTORES UFT")
+    c.banner("04 — POBLACIÓN DE AUTORES AFILIADOS")
 
     scopus = c.read_scopus()
     log = pd.read_csv(c.INTERNAL / "matching_log.csv", dtype=str)
@@ -44,43 +45,56 @@ def main() -> None:
     log = log[(log["anio"] >= ventana["anio_inicio"]) & (log["anio"] <= ventana["anio_fin"])]
 
     # ------------------------------------------- descomposición de la brecha
+    # La ventana del set de validación manual se declara en config: es una
+    # propiedad del archivo Excel, no del sistema, y comparar poblaciones exige
+    # igualar ventanas antes de restar.
+    val = c.SOURCES["reporte_excel_2026"]["ventana_validacion"]
+    v_ini, v_fin = val["anio_inicio"], val["anio_fin"]
+    etiqueta_val = f"{v_ini}-{v_fin}"
+
     autores_full = set(log["nombre_en_fuente"])
-    autores_2425 = set(log[log["anio"] >= 2024]["nombre_en_fuente"])
+    en_ventana_val = log[(log["anio"] >= v_ini) & (log["anio"] <= v_fin)]
+    autores_2425 = set(en_ventana_val["nombre_en_fuente"])
     solo_2023 = autores_full - autores_2425
 
-    detalle = c.read_report_sheet("Publicaciones_UFT_detalle")
-    col_autor = (c.SOURCES["reporte_excel_2026"]["hojas_utiles"]
-                 ["publicaciones_uft_detalle"]["columna_autor"])
-    manual_detalle = set(detalle[col_autor].dropna())
-    investigadores = c.read_report_sheet("Investigadores")
-    manual_ranking = set(investigadores["Investigador"].dropna())
+    hojas = c.SOURCES["reporte_excel_2026"]["hojas_utiles"]
+    detalle = c.read_report_sheet("publicaciones_detalle")
+    manual_detalle = set(detalle[hojas["publicaciones_detalle"]["columna_autor"]].dropna())
+    investigadores = c.read_report_sheet("investigadores")
+    manual_ranking = set(investigadores[hojas["investigadores"]["columna_autor"]].dropna())
 
-    print(f"Extracción automática 2023-2025 : {len(autores_full)}")
-    print(f"Extracción automática 2024-2025 : {len(autores_2425)}")
-    print(f"Excel · hoja detalle  (2024-25) : {len(manual_detalle)}")
-    print(f"Excel · hoja ranking  (2024-25) : {len(manual_ranking)}")
-    print(f"\nAutores presentes sólo en 2023  : {len(solo_2023)}")
+    ventana_sistema = f"{ventana['anio_inicio']}-{ventana['anio_fin']}"
+    archivo_val = Path(c.SOURCES["reporte_excel_2026"]["archivo"]).name
+    fuera_de_val = ", ".join(
+        str(a) for a in range(ventana["anio_inicio"], ventana["anio_fin"] + 1)
+        if not (v_ini <= a <= v_fin)) or "ninguno"
+
+    print(f"Extracción automática {ventana_sistema} : {len(autores_full)}")
+    print(f"Extracción automática {etiqueta_val} : {len(autores_2425)}")
+    print(f"Excel · hoja detalle  ({etiqueta_val}) : {len(manual_detalle)}")
+    print(f"Excel · hoja ranking  ({etiqueta_val}) : {len(manual_ranking)}")
+    print(f"\nAutores sólo en {fuera_de_val}  : {len(solo_2023)}")
     print(f"Ranking contenido en detalle     : "
           f"{len(manual_ranking - manual_detalle) == 0}")
     print(f"En detalle y no en ranking       : {len(manual_detalle - manual_ranking)}")
 
     gap = pd.DataFrame([
-        {"poblacion": "automatica_2023_2025", "n": len(autores_full),
-         "ventana": "2023-2025", "fuente": "extracción reproducible"},
-        {"poblacion": "automatica_2024_2025", "n": len(autores_2425),
-         "ventana": "2024-2025", "fuente": "extracción reproducible"},
+        {"poblacion": "automatica_ventana_sistema", "n": len(autores_full),
+         "ventana": ventana_sistema, "fuente": "extracción reproducible"},
+        {"poblacion": "automatica_ventana_validacion", "n": len(autores_2425),
+         "ventana": etiqueta_val, "fuente": "extracción reproducible"},
         {"poblacion": "manual_detalle", "n": len(manual_detalle),
-         "ventana": "2024-2025", "fuente": "2026_Reporte-UFT.xlsx"},
+         "ventana": etiqueta_val, "fuente": archivo_val},
         {"poblacion": "manual_ranking", "n": len(manual_ranking),
-         "ventana": "2024-2025", "fuente": "2026_Reporte-UFT.xlsx"},
-        {"poblacion": "delta_ventana_2023", "n": len(solo_2023),
-         "ventana": "2023", "fuente": "autores exclusivos de 2023"},
+         "ventana": etiqueta_val, "fuente": archivo_val},
+        {"poblacion": "delta_fuera_de_ventana_validacion", "n": len(solo_2023),
+         "ventana": fuera_de_val, "fuente": "autores exclusivos de esos años"},
         {"poblacion": "delta_automatica_vs_manual_misma_ventana",
          "n": len(autores_2425) - len(manual_detalle),
-         "ventana": "2024-2025", "fuente": "residuo tras igualar la ventana"},
+         "ventana": etiqueta_val, "fuente": "residuo tras igualar la ventana"},
         {"poblacion": "delta_detalle_vs_ranking",
          "n": len(manual_detalle) - len(manual_ranking),
-         "ventana": "2024-2025", "fuente": "deduplicación manual de variantes"},
+         "ventana": etiqueta_val, "fuente": "deduplicación manual de variantes"},
     ])
 
     # -------------------------------------------- borrador de tabla maestra
@@ -180,7 +194,7 @@ def main() -> None:
 
     print(f"\nBorrador de tabla maestra: {len(master)} autores")
     print(f"  con Scopus Author ID resuelto : {int(master['scopus_author_ids'].notna().sum())}")
-    print(f"  con ORCID                     : 0  (no existe en las fuentes)")
+    print("  con ORCID                     : 0  (no existe en las fuentes)")
     print(f"  con unidad académica          : "
           f"{int((master['unidades_academicas'] != 'No determinada').sum())}")
     print(f"  validados contra ranking manual: {int(master['en_ranking_manual'].sum())}")

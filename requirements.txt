@@ -1,7 +1,13 @@
 # Auditoría de Fase 1. Python 3.11+
-pandas>=2.0
-openpyxl>=3.1
-PyYAML>=6.0
+#
+# Versiones acotadas por rango mayor, no abiertas. El workflow reconstruye el
+# sitio desde data/raw/ y lo publica en cada push: con `>=` a secas, un cambio
+# de comportamiento en pandas republicaría cifras distintas sin que nada lo
+# advirtiera. La prioridad 1 del proyecto es correctitud metodológica y la 2
+# trazabilidad; ambas exigen que la misma entrada produzca la misma salida.
+pandas>=2.0,<3.0
+openpyxl>=3.1,<4.0
+PyYAML>=6.0,<7.0
 
 # OPCIONAL. Sólo para leer los .RData, que son fuentes de REFERENCIA y no
 # alimentan ningún indicador publicable (decisión D-05). Si no se instala, la

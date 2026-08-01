@@ -90,11 +90,16 @@ fuentes:
     archivo: "data/raw/2026_Reporte-UFT.xlsx"
     formato: "xlsx"
     rol: "validacion"            # set de validación, no fuente de verdad (D-15)
+    # Cada entrada es una hoja LÓGICA: el código la pide por esta clave y nunca
+    # por el nombre literal de la pestaña, que es propio de este libro Excel.
     hojas_utiles:
       investigadores:
+        nombre_hoja: "Investigadores"
+        columna_autor: "Investigador"
         header_row: 3
         n_registros: 396
-      publicaciones_uft_detalle:
+      publicaciones_detalle:
+        nombre_hoja: "Publicaciones_UFT_detalle"
         header_row: 0
         n_registros: 862
         # Nombre literal de la columna de autor en el archivo de validación.
@@ -102,9 +107,16 @@ fuentes:
         # que no quede escrito en el código (requisito de replicabilidad).
         columna_autor: "Autores finis terrae afiliados"
       publicaciones_unificadas:
+        nombre_hoja: "Publicaciones unificadas"
         header_row: 0
         n_registros: 589
     ventana_declarada: "2024-2025"
+    # Años que cubre el set de validación manual. La ventana del sistema vive en
+    # config/institution.yml; ésta es una propiedad del archivo, y hasta ahora
+    # estaba escrita a mano dentro de 04_author_population.py.
+    ventana_validacion:
+      anio_inicio: 2024
+      anio_fin: 2025
     nota: >-
       Contiene fórmulas vivas, no valores materializados, en las columnas de
       conteo. Cobertura temporal menor que las fuentes primarias.

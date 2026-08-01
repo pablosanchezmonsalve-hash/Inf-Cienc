@@ -50,9 +50,26 @@ la misma persona.
 2. **Colas de revisión nominal**: qué firmas se sospecha que son la misma
    persona. Publicarlo afirmaría una identidad no verificada sobre personas
    reales.
-3. **El método y la confianza de detección** por registro individual.
+3. **El método y la confianza de detección institucional** por registro
+   individual: con qué patrón se decidió que un par autor × publicación
+   pertenece a la institución.
 4. **Los exports originales** de Scopus y SciVal.
 5. **Notas de conciliación** y logs de proceso.
+
+### Excepción declarada: `orcid_confianza`
+
+La ficha pública de autor **sí** publica la confianza de la asignación de ORCID
+(`alta` o `media`), y eso es deliberado. No es la confianza del punto 3: aquella
+justifica una decisión interna del pipeline, ésta **cualifica una afirmación que
+la propia ficha hace sobre una persona real**. Publicar «ORCID 0000-…» sin decir
+que se dedujo por apellido e inicial presentaría una hipótesis como un hecho,
+que es justo lo que `D-08` prohíbe. Ocultarla sería menos honesto, no más
+prudente.
+
+Queda registrada aquí porque la verificación automática vigila el nombre exacto
+`confianza`: cualquier campo futuro terminado en `_confianza` la atravesaría sin
+ruido, y la excepción tiene que ser una decisión escrita, no un efecto del
+nombre que se le puso a la columna.
 
 ## 4. Qué sí se publica sobre la capa interna
 
@@ -76,22 +93,32 @@ plataforma publica **indicadores derivados y metadatos bibliográficos**
 (título, autores, año, DOI, fuente), no los archivos de origen.
 
 `data/raw/` permanece en el repositorio de trabajo pero **no forma parte del
-bundle desplegado**. La decisión de licencia del software y el tratamiento
-definitivo de los datos institucionales corresponde a Fase 3
-(`PROMPT_FASE_3` §8).
+bundle desplegado**. La licencia del software es MIT (`D-39`) y la de los datos
+derivados, CC BY 4.0.
+
+> **Limitación abierta.** «No forma parte del bundle» no equivale a «no es
+> público»: mientras `data/raw/` e `internal/` estén versionados en un
+> repositorio público, están publicados. Las compuertas del build protegen el
+> sitio, no el repositorio, y ninguna decisión de este documento cambia eso.
+> Ver `docs/LIMITATIONS.md`.
 
 ---
 
 ## 6. Implementación de la barrera
 
-Pendiente T-09, a ejecutar en Fase 3:
+Implementado en Fase 3 (T-09 cerrado):
 
-1. El build sólo lee de `data/interim/` y `config/`. **Nunca de `internal/`.**
-2. Verificación automática post-build: fallar si algún artefacto de
-   `data/processed/` contiene campos de la lista de §3
+1. El build sólo lee de `data/interim/` y `config/`. La única lectura de
+   `internal/` es `load_authorship()`, que proyecta las columnas publicables en
+   el momento de leer, no después.
+2. Verificación automática post-build (`05_verify_public_layer.py`): recorre
+   **todos** los artefactos de `data/processed/`, sin muestrear, y falla con
+   código distinto de cero si encuentra campos de la lista de §3
    (`afiliacion_declarada_raw`, `metodo_blando`, `confianza`, `resolucion`).
 3. `internal/` y `data/raw/` excluidos explícitamente del directorio de
-   despliegue.
+   despliegue, y comprobados de nuevo en el workflow antes de publicar.
+
+Las tres cubren `dist/`. Ninguna cubre el repositorio: ver el recuadro de §5.
 
 La verificación automática es deliberada: la separación de capas no puede
 depender de que nadie se equivoque al escribir un `build`.

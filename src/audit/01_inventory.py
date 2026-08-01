@@ -50,9 +50,9 @@ def main() -> None:
     frames = {
         "scopus_export": scopus,
         "scival_export": scival,
-        "reporte_investigadores": c.read_report_sheet("Investigadores"),
-        "reporte_detalle": c.read_report_sheet("Publicaciones_UFT_detalle"),
-        "reporte_unificadas": c.read_report_sheet("Publicaciones unificadas"),
+        "reporte_investigadores": c.read_report_sheet("investigadores"),
+        "reporte_detalle": c.read_report_sheet("publicaciones_detalle"),
+        "reporte_unificadas": c.read_report_sheet("publicaciones_unificadas"),
     }
 
     # Los .RData son fuentes de referencia (decisión D-05). Si el paquete

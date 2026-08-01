@@ -6,7 +6,7 @@ registros.
 
 QUÉ HACE
     Por cada DOI, consulta Crossref y extrae los ORCID declarados por autor.
-    Luego intenta asociarlos a las formas de firma UFT detectadas en esa misma
+    Luego intenta asociarlos a las formas de firma institucionales detectadas en esa misma
     publicación, comparando apellido normalizado e inicial del nombre.
 
 QUÉ NO HACE
@@ -136,7 +136,7 @@ def consultar(doi: str, mailto: str, pausa: float = 0.12) -> dict | None:
 # --------------------------------------------------------------------------- #
 
 def emparejar(firmas_uft: list[str], autores_crossref: list[dict]) -> list[dict]:
-    """Asocia firmas UFT con autores de Crossref dentro de UNA publicación.
+    """Asocia firmas institucionales con autores de Crossref dentro de UNA publicación.
 
     Sólo asigna cuando la coincidencia es inequívoca: exactamente un autor de
     Crossref comparte apellido e inicial con la firma. Si coinciden varios, el
@@ -251,7 +251,7 @@ def consolidar(hallazgos: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 # --------------------------------------------------------------------------- #
 
 FIXTURES = [
-    # (firmas UFT, autores Crossref, ORCID esperado por firma)
+    # (firmas institucionales, autores Crossref, ORCID esperado por firma)
     (["Mujika I."],
      [{"family": "Mujika", "given": "Iñigo", "ORCID": "https://orcid.org/0000-0002-1milk"},
       {"family": "Dergaa", "given": "Ismail"}],

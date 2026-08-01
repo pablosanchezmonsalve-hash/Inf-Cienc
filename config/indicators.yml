@@ -59,10 +59,12 @@ indicadores:
          advertencia: "Cobertura 63,8 % y vocabulario no validado institucionalmente. La cobertura desigual de Scopus entre disciplinas distorsiona la comparación entre unidades."}
   P-08: {nombre: "Distribución por idioma", categoria: descriptivo, publicar: false,
          version: V2, denominador: con_autoria_detallada, confiabilidad: alta, advertencia: null}
+  # Multivaluado y por partida doble: una misma publicación puede ser Gold en la
+  # revista y Green en el repositorio. Las barras no son partes de un total.
   A-01: {nombre: "Acceso abierto", categoria: descriptivo, publicar: true,
-         denominador: con_metricas, confiabilidad: media,
+         denominador: con_metricas, confiabilidad: media, multivaluado: true,
          advertencia_destacada: true,
-         advertencia: "La ausencia de valor no equivale a acceso cerrado: 226 publicaciones sin estado declarado."}
+         advertencia: "Multivaluado: una publicación puede tener varias vías de acceso abierto a la vez, así que las barras no suman el total. La ausencia de valor no equivale a acceso cerrado: 226 publicaciones sin estado declarado."}
 
   # ------------------------------------------------------------- impacto
   I-01: {nombre: "Citas totales", categoria: impacto, publicar: true,
@@ -104,7 +106,7 @@ indicadores:
          advertencia: "Multivaluado: no sumable al total."}
   C-04: {nombre: "Instituciones colaboradoras", categoria: colaboracion, publicar: true,
          denominador: con_metricas, confiabilidad: alta, multivaluado: true,
-         advertencia: "SciVal advierte truncamiento en los nombres de afiliación."}
+         advertencia: "Multivaluado: no sumable al total. SciVal advierte truncamiento en los nombres de afiliación."}
   C-05: {nombre: "Red de coautoría", categoria: colaboracion, publicar: false,
          version: V2, confiabilidad: media,
          advertencia: "Diferido: heredaría 123 variantes de nombre sin resolver (pendiente T-03)."}

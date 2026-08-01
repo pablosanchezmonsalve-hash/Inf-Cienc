@@ -13,6 +13,8 @@ import importlib
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 STEPS = [
@@ -24,13 +26,31 @@ STEPS = [
 ]
 
 
-def main() -> None:
+def main() -> int:
     for step in STEPS:
         importlib.import_module(step).main()
+
+    # Código de salida distinto de cero si hay reglas bloqueantes fallando. El
+    # build tiene su propia compuerta (`require_validation()`), pero este script
+    # también se ejecuta suelto y en un paso de CI llamado «validación»: que
+    # terminara en verde con una regla bloqueante rota haría que el fallo
+    # apareciera un paso más tarde y en otro sitio.
+    import common as c  # noqa: E402  (los pasos ajustan sys.path)
+
+    report = pd.read_csv(c.INTERIM / "validation_report.csv")
+    bloqueantes = report[(report["resultado"] == "FALLA")
+                         & (report["severidad"] == "bloqueante")]
+
     print("\n" + "=" * 78)
+    if len(bloqueantes):
+        print(f"AUDITORÍA DETENIDA · {len(bloqueantes)} regla(s) bloqueante(s) fallando")
+        print("=" * 78)
+        print(bloqueantes.to_string(index=False))
+        return 1
     print("AUDITORÍA DE FASE 1 COMPLETA")
     print("=" * 78)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

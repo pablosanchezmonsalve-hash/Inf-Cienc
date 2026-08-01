@@ -88,26 +88,45 @@ def main() -> None:
                 if b.to_num(y) == a and b.to_num(f) is not None]
         cs = [b.to_num(f) for f, y in zip(uni["citas"], uni["anio"])
               if b.to_num(y) == a and b.to_num(f) is not None]
-        fwci_por_anio.append({"anio": a, "valor": round(statistics.mean(vals), 2),
-                              "mediana": round(statistics.median(vals), 2), "n": len(vals)})
+        # Un año sin ninguna publicación con métricas es posible en una carga
+        # parcial. Se declara como año sin dato, que es lo que es; calcular una
+        # media sobre cero elementos aborta el build y no dice nada.
+        fwci_por_anio.append(
+            {"anio": a, "n": len(vals),
+             "valor": round(statistics.mean(vals), 2) if vals else None,
+             "mediana": round(statistics.median(vals), 2) if vals else None})
         citas_por_anio.append({"anio": a, "n": sum(cs)})
-        sin_citas.append({"anio": a, "pct": round(100 * sum(1 for c in cs if c == 0) / len(cs), 1)})
+        sin_citas.append(
+            {"anio": a,
+             "pct": round(100 * sum(1 for c in cs if c == 0) / len(cs), 1) if cs else None})
+
+    # Ambos indicadores declaran `con_metricas` como denominador, así que se
+    # calculan sobre esas filas y no sobre el universo entero: la diferencia son
+    # las 7 publicaciones sin métricas, que si no aparecían como «sin dato» y
+    # contradecían la propia nota del gráfico.
+    con_metricas = uni[uni["tiene_metricas"] == "True"]
 
     oa = Counter()
-    for v in uni["open_access"]:
+    for v in con_metricas["open_access"]:
         vals = b.split_multi(v)
         if not vals:
             oa["Sin dato declarado"] += 1
         for item in vals:
             oa[item] += 1
+    # Una publicación puede ser Gold en la revista y Green en el repositorio a la
+    # vez: las barras no son partes de un total y no deben leerse como tales.
+    oa_multi = sum(1 for v in con_metricas["open_access"] if len(b.split_multi(v)) > 1)
 
-    sjr_pct = [b.to_num(p) for p in uni["sjr_percentil"] if b.to_num(p) is not None]
+    sjr_pct = [b.to_num(p) for p in con_metricas["sjr_percentil"]
+               if b.to_num(p) is not None]
+    # Menor percentil = mejor posición: verificado contra el propio SJR
+    # (corr -0,50) y contra CiteScore (corr -0,58) sobre estos mismos datos.
     cuartiles = [
         {"valor": "Q1", "n": sum(1 for p in sjr_pct if p <= 25)},
         {"valor": "Q2", "n": sum(1 for p in sjr_pct if 25 < p <= 50)},
         {"valor": "Q3", "n": sum(1 for p in sjr_pct if 50 < p <= 75)},
         {"valor": "Q4", "n": sum(1 for p in sjr_pct if p > 75)},
-        {"valor": "Sin dato declarado", "n": len(uni) - len(sjr_pct)},
+        {"valor": "Sin dato declarado", "n": len(con_metricas) - len(sjr_pct)},
     ]
 
     n_aut = [b.to_num(x) for x in uni["n_autores"] if b.to_num(x) is not None]
@@ -152,26 +171,29 @@ def main() -> None:
                  "nota": b.nota("R-01")},
         "A-01": {"nombre": b.indicador("A-01")["nombre"],
                  "datos": [{"valor": k, "n": v} for k, v in oa.most_common()],
-                 "nota": b.nota("A-01")},
+                 "con_varias_etiquetas": oa_multi, "nota": b.nota("A-01")},
         "C-01": {"nombre": b.indicador("C-01")["nombre"],
                  "datos": [{"valor": "Internacional", "n": intl},
                            {"valor": "Nacional", "n": den["con_metricas"] - intl}],
                  "nota": b.nota("C-01")},
-        "C-03": {"nombre": b.indicador("C-03")["nombre"],
-                 "datos": multi_top("paises", 15), "nota": b.nota("C-03")},
-        "C-04": {"nombre": b.indicador("C-04")["nombre"],
-                 "datos": multi_top("instituciones", 15), "nota": b.nota("C-04")},
+        "C-03": {"nombre": b.indicador("C-03")["nombre"], "datos": multi_top("paises", 15), "nota": b.nota("C-03")},
+        "C-04": {"nombre": b.indicador("C-04")["nombre"], "datos": multi_top("instituciones", 15), "nota": b.nota("C-04")},
         "C-06": {"nombre": b.indicador("C-06")["nombre"], "datos": equipo,
                  "media": round(statistics.mean(n_aut), 1),
                  "mediana": statistics.median(n_aut), "nota": b.nota("C-06")},
-        "T-05": {"nombre": b.indicador("T-05")["nombre"],
-                 "datos": multi_top("qs_area", 10), "nota": b.nota("T-05")},
-        "T-01": {"nombre": b.indicador("T-01")["nombre"],
-                 "datos": multi_top("asjc", 20), "nota": b.nota("T-01")},
+        "T-05": {"nombre": b.indicador("T-05")["nombre"], "datos": multi_top("qs_area", 10), "nota": b.nota("T-05")},
+        "T-01": {"nombre": b.indicador("T-01")["nombre"], "datos": multi_top("asjc", 20), "nota": b.nota("T-01")},
         "T-04": {"nombre": b.indicador("T-04")["nombre"],
                  "datos": multi_top("ods", 20), "nota": b.nota("T-04"),
                  "con_ods": int(sum(1 for v in uni["ods"] if b.split_multi(v)))},
     }
+    # La multivaluación se declara en config/indicators.yml, no aquí: un gráfico
+    # cuyas barras no suman el total tiene que decirlo, y quién lo dice es la
+    # ficha del indicador. El front lo usa para rotular el eje.
+    for code, blk in series.items():
+        if code != "meta" and b.indicador(code).get("multivaluado"):
+            blk["multivaluado"] = True
+
     b.write_json(series, "series.json")
     b.write_json(b.build_meta(), "meta.json")
     print(f"  series: {len([k for k in series if k != 'meta'])} indicadores")
