@@ -121,6 +121,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | `docs/GLOSSARY.md` | Glosario y ayuda contextual |
 | `docs/DEPLOYMENT.md` | Cómo construir y publicar |
 | `docs/UPDATING.md` | Cómo incorporar una carga de datos nueva |
+| `docs/ORCID_GUIDE.md` | Cómo ejecutar el enriquecimiento de ORCID desde Crossref |
 | `docs/REPLICATION.md` | Cómo adaptar el sistema a otra institución |
 | `docs/DATA_LICENSE.md` | Uso de datos institucionales |
 | `docs/V2_BACKLOG.md` | Pendientes de la siguiente versión |
