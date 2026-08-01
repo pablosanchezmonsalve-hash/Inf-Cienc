@@ -67,7 +67,7 @@
   /* ---- Tinta. Tres niveles, todos derivados del azul de la marca. ---- */
   --tinta: #10222b;        /* 16,3:1 */
   --tinta-2: #4a5f68;      /*  6,7:1 · texto secundario */
-  --tinta-3: #75878f;      /*  3,7:1 · ejes, metadatos, sólo texto no esencial */
+  --tinta-3: #5a6b71;      /*  4,9:1 contra el peor fondo · ejes y metadatos */
 
   --linea: #dbe6e8;
   --linea-fuerte: #bccdd2;
@@ -112,6 +112,9 @@
   --aviso-fondo: #fdf6e7;
   --aviso-borde: #c8901a;
   --aviso-tinta: #6a4a05;
+  /* El ámbar del trazo (--aviso-borde) da 2,81:1 como texto. La línea de
+     referencia puede tenerlo; su ETIQUETA, que dice el promedio mundial, no. */
+  --aviso-tinta-grafico: #8a620b;   /* 5,5:1 sobre blanco */
 
   /* ---- Tipografía ---- */
   --f-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -155,7 +158,7 @@
 
     --tinta: #e8eff1;
     --tinta-2: #a4b6bd;
-    --tinta-3: #7b9099;
+    --tinta-3: #8a9ea6;
 
     --linea: #223944;
     --linea-fuerte: #365058;
@@ -192,6 +195,7 @@
     --aviso-fondo: #241d09;
     --aviso-borde: #c8901a;
     --aviso-tinta: #eed9a4;
+    --aviso-tinta-grafico: #d9a520;
 
     --sombra-1: 0 1px 2px rgba(0, 0, 0, .45);
     --sombra-2: 0 2px 8px rgba(0, 0, 0, .5);
@@ -208,7 +212,7 @@
   --superficie-3: #243c46;
   --tinta: #e8eff1;
   --tinta-2: #a4b6bd;
-  --tinta-3: #7b9099;
+  --tinta-3: #8a9ea6;
   --linea: #223944;
   --linea-fuerte: #365058;
   --marca: #0d1e26;
@@ -235,6 +239,7 @@
   --aviso-fondo: #241d09;
   --aviso-borde: #c8901a;
   --aviso-tinta: #eed9a4;
+  --aviso-tinta-grafico: #d9a520;
   --sombra-1: 0 1px 2px rgba(0, 0, 0, .45);
   --sombra-2: 0 2px 8px rgba(0, 0, 0, .5);
   --sombra-3: 0 8px 28px rgba(0, 0, 0, .6);
@@ -529,7 +534,10 @@ tbody tr:focus-within { background: var(--accion-suave); }
 tbody tr:focus-within td:first-child { box-shadow: inset 3px 0 0 var(--accion-viva); }
 
 /* Cabecera ordenable: la afordancia se ve ANTES de pasar el puntero. */
+/* Enfocable y operable con teclado: antes sólo respondía al clic, de modo que
+   la tabla no se podía ordenar sin ratón (WCAG 2.1.1). */
 th[aria-sort] { cursor: pointer; user-select: none; padding-right: 1.35rem; position: relative; }
+th[aria-sort]:focus-visible { outline: 2px solid var(--accion-viva); outline-offset: -2px; }
 th[aria-sort]::after {
   content: "↕"; position: absolute; right: var(--e2); top: 50%; transform: translateY(-50%);
   font-size: .95em; opacity: .35; transition: opacity .14s, color .14s;
@@ -639,12 +647,6 @@ input[type="checkbox"] { accent-color: var(--accion-viva); }
 .paginacion { display: flex; gap: var(--e2); align-items: center; justify-content: center; margin-top: var(--e4); }
 
 /* -------------------------------------------------------------- estados */
-.esqueleto {
-  background: linear-gradient(90deg, var(--superficie-2) 25%, var(--superficie-3) 50%, var(--superficie-2) 75%);
-  background-size: 200% 100%; animation: brillo 1.4s infinite;
-  border-radius: var(--radio-s); height: 1rem; margin: var(--e2) 0;
-}
-@keyframes brillo { to { background-position: -200% 0; } }
 .vacio, .error {
   border: 1px dashed var(--linea-fuerte); border-radius: var(--radio);
   padding: var(--e6) var(--e4); text-align: center; color: var(--tinta-2);
@@ -690,10 +692,11 @@ svg.chart text { fill: var(--tinta-2); font: 400 11px/1 var(--f-ui); }
 svg.chart text.valor { fill: var(--tinta); font-weight: 650; font-variant-numeric: tabular-nums; }
 svg.chart text.tick { fill: var(--tinta-3); font-size: 10px; font-variant-numeric: tabular-nums; }
 svg.chart .ref { stroke: var(--aviso-borde); stroke-dasharray: 5 4; stroke-width: 1.5; }
-svg.chart text.ref-etq { fill: var(--aviso-borde); font-weight: 650; font-size: 10px; }
+svg.chart text.ref-etq { fill: var(--aviso-tinta-grafico); font-weight: 650; font-size: 10px; }
 
-/* Leyenda: siempre presente con dos o más series; la identidad nunca depende
-   sólo del color. */
+/* Leyenda del anillo. En las barras la identidad no la lleva una leyenda sino
+   la etiqueta de la propia barra y su valor visible al lado: es relieve
+   suficiente, y una leyenda repetiría lo que ya está escrito junto a la marca. */
 .leyenda {
   display: flex; flex-wrap: wrap; gap: var(--e1) var(--e4);
   font-size: var(--t-s); color: var(--tinta-2); margin-top: var(--e3);

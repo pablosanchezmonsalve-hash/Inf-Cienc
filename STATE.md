@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `be032e6` · Reancla el sistema visual en la paleta institucional
+Último commit: `6147515` · Evita el aviso de multivaluación duplicado
 Snapshot: 2026-08-01
 
 ---
@@ -53,7 +53,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Pendientes abiertos (11)
+## Pendientes abiertos (12)
 
 | # | Pendiente |
 |---|---|
@@ -68,10 +68,11 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 | `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
 | `T-16` | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público |
 | `T-17` | Corregir las cadenas de unidad académica concatenadas sin separador |
+| `T-18` | Trocear o paginar `publications.json` (699 KB en una sola petición) |
 
 ---
 
-## Decisiones tomadas: 64
+## Decisiones tomadas: 69
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

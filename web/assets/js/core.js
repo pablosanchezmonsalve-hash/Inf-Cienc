@@ -251,6 +251,7 @@ let idGrafico = 0;
 /** Barras horizontales. Elegidas cuando las etiquetas son largas o muchas. */
 export function barrasH(datos, {
   alto = 26, escala = null, sufijo = '', ancho = 680, cuotaValida = false,
+  titulo = '',
 } = {}) {
   if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
   const max = Math.max(...datos.map(d => d.n), 1);
@@ -297,14 +298,19 @@ export function barrasH(datos, {
     </g>`;
   }).join('');
 
+  // La etiqueta accesible nombra el INDICADOR, no la forma del gráfico: cinco
+  // «gráfico de barras horizontales» seguidos no le dicen nada a quien navega
+  // con lector de pantalla.
+  const etq = titulo ? `${titulo} — gráfico de barras, ${datos.length} categorías`
+                     : `Gráfico de barras horizontales, ${datos.length} categorías`;
   return `<div class="grafico"><svg class="chart" id="${id}" viewBox="0 0 ${ancho} ${total}"
-    role="list" aria-label="Gráfico de barras horizontales">${filas}</svg></div>`;
+    role="list" aria-label="${escapar(etq)}">${filas}</svg></div>`;
 }
 
 /** Barras verticales. Para series anuales cortas: 3 años no son una línea. */
 export function barrasV(datos, {
   etiquetaX = 'anio', etiquetaY = 'n', referencia = null,
-  refEtiqueta = '', decimales = 0, ancho = 680, alto = 260,
+  refEtiqueta = '', decimales = 0, ancho = 680, alto = 260, titulo = '',
 } = {}) {
   if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
   const mIzq = 52, mDer = 16, mAb = 38, mArr = 26;
@@ -353,15 +359,17 @@ export function barrasV(datos, {
     <text class="ref-etq" x="${ancho - mDer}" y="${Math.max(12, y(referencia) - 7)}"
       text-anchor="end">${escapar(refEtiqueta || String(referencia))}</text>` : '';
 
+  const etq = titulo ? `${titulo} — gráfico de barras por año, ${datos.length} años`
+                     : `Gráfico de barras verticales, ${datos.length} valores`;
   return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
-    role="list" aria-label="Gráfico de barras verticales">
+    role="list" aria-label="${escapar(etq)}">
     ${red}${ref}${barras}
     <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
   </svg></div>`;
 }
 
 /** Anillo. Reservado a proporciones binarias, que es donde se lee bien. */
-export function anillo(datos) {
+export function anillo(datos, { titulo = '' } = {}) {
   const total = datos.reduce((s, d) => s + d.n, 0) || 1;
   const r = 58, grosor = 22, c = 2 * Math.PI * r;
   let offset = 0;
@@ -390,17 +398,9 @@ export function anillo(datos) {
 
   return `<div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
     <svg class="chart" viewBox="0 0 144 144" style="width:144px;flex:none" role="img"
-      aria-label="Gráfico de anillo">${arcos}${centro}</svg>
+      aria-label="${escapar(titulo ? titulo + ' — gráfico de anillo' : 'Gráfico de anillo')}"
+      >${arcos}${centro}</svg>
     <div class="leyenda" style="display:grid;gap:.4rem">${leyenda}</div></div>`;
-}
-
-/** Leyenda de series. Obligatoria desde dos series: la identidad no puede
-    depender sólo del color. */
-export function leyenda(datos, { escala = 'serie' } = {}) {
-  if (datos.length < 2) return '';
-  return `<div class="leyenda">${datos.map((d, i) =>
-    `<span><span class="punto" style="background:${colorDe(d, i, escala)}"></span>${escapar(d.valor)}</span>`
-  ).join('')}</div>`;
 }
 
 /* ------------------------------------------------------ tooltip común */
@@ -472,11 +472,6 @@ export function tablaEquivalente(datos, col = 'valor') {
   return `<details class="tabla-datos"><summary>Ver datos en tabla</summary>
     <table><thead><tr><th>Categoría</th><th class="num">n</th></tr></thead>
     <tbody>${filas}</tbody></table></details>`;
-}
-
-/* -------------------------------------------------------------- estados */
-export function esqueleto(n = 4) {
-  return Array.from({ length: n }, () => '<div class="esqueleto"></div>').join('');
 }
 
 export function mostrarError(contenedor, err) {

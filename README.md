@@ -105,8 +105,22 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Páginas | 9 |
 | Fichas de autor | **589**, una por archivo |
 | Peso total de `dist/` | ~2,0 MB |
-| Carga de la portada | ~25 KB |
 | Dependencias externas en el navegador | **0** |
+
+Peso transferido por página, medido en navegador (sin comprimir; el servidor
+aplica gzip y reduce el texto a menos de un tercio):
+
+| Página | KB | Qué domina |
+|---|---|---|
+| Portada | 107 | CSS 33 · `paginas.js` 30 · `core.js` 22 · `series.json` 11 |
+| Impacto y demás módulos | 105 | lo mismo, sin `kpis.json` |
+| Autores | 267 | `authors.json` 172 — las 589 firmas |
+| Publicaciones | 808 | `publications.json` 699 — las 823 publicaciones |
+
+Los 105 KB comunes son el armazón: hoja de estilo, motor de gráficos y glosario,
+que el navegador cachea entre páginas. Las dos tablas grandes cargan su conjunto
+completo porque el filtrado ocurre en el cliente, sin servidor que consultar.
+Trocear `publications.json` está anotado para V2.
 
 ---
 
@@ -115,7 +129,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Documento | Contenido |
 |---|---|
 | **`STATE.md`** | **Punto de entrada: estado, cifras y mapa de lectura** |
-| `docs/DECISIONS.md` | Índice de las 64 decisiones, una línea cada una |
+| `docs/DECISIONS.md` | Índice de las 69 decisiones, una línea cada una |
 | `docs/AUDIT_REPORT.md` | Auditoría completa con cifras verificadas |
 | `docs/DATA_MODEL.md` | Modelo lógico, entidades y claves de enlace |
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
