@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `16ad444` · Registra la sesión post-V1 y materializa la cola de identidad
+Último commit: `1a727e3` · Actualiza los recuentos derivados del README
 Snapshot: 2026-08-01
 
 ---

@@ -164,10 +164,22 @@ Se cambian cuatro archivos de configuración:
 | `config/sources.yml` | Rutas, fechas de corte y roles de los archivos |
 | `config/indicators.yml` | Qué indicadores se publican y con qué advertencias |
 
-No hay ninguna cadena institucional escrita en el código
-(`grep -ri "finis" src/ web/` devuelve 0). El límite honesto: **los textos
-metodológicos de `docs/` citan cifras de esta institución** y deben revisarse
-en un despliegue replicado. Ver `docs/REPLICATION.md` §4.
+Esto se verifica, no se afirma: `grep -ri "finis" src/ web/` devuelve 0, y
+también los nombres de hoja del libro Excel de validación, la columna de autor y
+la ventana de ese archivo viven en `config/sources.yml`. La auditoría del
+2026-08-01 encontró que sólo la cadena «finis» se había comprobado, y que
+`Publicaciones_UFT_detalle` y un `>= 2024` seguían escritos en `src/`; ambos
+están ahora en configuración.
+
+Dos límites honestos, ninguno resuelto por configuración:
+
+- **Los textos metodológicos de `docs/` citan cifras de esta institución** y
+  deben revisarse en un despliegue replicado.
+- **`src/audit/04_author_population.py` supone que existe un set de validación
+  manual** con la forma del libro Excel de esta institución. Otra institución
+  que no lo tenga no necesita reescribirlo, pero sí omitir ese paso.
+
+Ver `docs/REPLICATION.md` §4.
 
 ---
 
