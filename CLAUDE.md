@@ -70,10 +70,18 @@ Debes:
 Este proyecto usa Claude-Mem.
 
 Antes de retomar una sesión:
-1. revisa la memoria relevante del proyecto,
-2. revisa PLAN.md,
-3. revisa SESSION_NOTES.md,
+1. lee STATE.md — punto de entrada generado, ~120 líneas,
+2. abre sólo el documento que responda tu pregunta concreta (STATE.md trae el mapa),
+3. revisa la memoria relevante del proyecto si existe,
 4. alinea lo recuperado con este archivo.
+
+STATE.md es una VISTA DERIVADA del repositorio, no una fuente de autoridad: no
+entra en el orden de precedencia. Si contradice a PLAN.md o a config/, manda la
+fuente y STATE.md está viejo. Se regenera con `make estado`.
+
+Leer PLAN.md, SESSION_NOTES.md y docs/ por adelantado son ~3.700 líneas de las
+que la mayoría es referencia puntual. Hacerlo consume contexto que hará falta
+para el trabajo.
 
 Orden de precedencia si hay conflicto:
 1. decisión explícita validada por el usuario en la sesión actual,
