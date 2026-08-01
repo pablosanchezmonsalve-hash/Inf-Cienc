@@ -562,3 +562,86 @@ Las heredadas siguen abiertas, incluida `T-16`. Se suma:
 ### Próximo paso recomendado
 
 Sin cambios: `T-16` sigue siendo lo único que requiere decisión del usuario.
+
+---
+
+## Sesión 2026-08-01 — Segunda auditoría: accesibilidad medida
+
+**Estado inicial:** V1 desplegada en producción (`3cff716`, corrida #12 en
+verde). Encargo: volver a auditar el total del trabajo. Esta vez el objeto de la
+auditoría incluía lo escrito en las dos sesiones anteriores.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-65 | Todo texto de interfaz alcanza 4,5:1 contra el peor fondo en que aparece | `--tinta-3` se definió como «sólo texto no esencial» y acto seguido se usó para las marcas de eje, que son la escala del gráfico |
+| D-66 | La etiqueta de la línea de referencia tiene tinta propia, distinta del trazo | El ámbar del trazo da 2,81:1 como texto: sirve para una línea, no para leer «promedio mundial» |
+| D-67 | Toda cabecera ordenable es enfocable y se activa con `Enter` o `Espacio` | Un `<th>` no es un control operable por defecto: la tabla no se podía ordenar sin ratón |
+| D-68 | El `aria-label` de un gráfico nombra el indicador, no la forma | Cinco «gráfico de barras horizontales» seguidos no orientan a nadie |
+| D-69 | Un comentario que afirma una garantía debe corresponder a código que la implementa | El CSS prometía «leyenda siempre presente con dos o más series» y no había ninguna |
+
+### Archivos creados o modificados
+
+```
+web/assets/css/app.css        --tinta-3 legible; --aviso-tinta-grafico nuevo;
+                              foco visible en cabecera ordenable; se retira el
+                              esqueleto de carga que no usaba ninguna página
+web/assets/js/core.js         etiqueta accesible por indicador en las tres
+                              formas de gráfico; se retiran leyenda() y
+                              esqueleto(), muertas
+web/assets/js/paginas.js      activación por teclado de las cabeceras; título
+                              propagado a los 17 gráficos
+web/autores.html              tabindex en las cuatro cabeceras ordenables
+README.md                     peso real por página, medido en navegador
+docs/UX_UI.md                 teclado en tablas, etiquetado de gráficos y el
+                              criterio real sobre leyendas
+PLAN.md                       T-18
+```
+
+### Hallazgos
+
+- **La tabla de autores no se podía ordenar sin ratón.** Verificado tabulando:
+  25 pulsaciones de `Tab` desde el buscador y la cabecera nunca recibía foco.
+  Fallo de WCAG 2.1.1, y agravado porque `docs/UX_UI.md` describía la afordancia
+  de ordenamiento sin que la función existiera por teclado.
+- **Cuatro contrastes bajo el mínimo AA**, medidos en el navegador sobre lo
+  pintado: etiqueta de referencia 2,81:1, código de indicador 3,27:1 claro y
+  4,22:1 oscuro, marcas de eje 3,74:1, migas 3,41:1. Los dos primeros llevan
+  información: el promedio mundial del FWCI y la escala del gráfico.
+- **Los cinco gráficos se anunciaban igual**, con `aria-label` genérico.
+- **`leyenda()` y `esqueleto()` muertas**, y el CSS afirmaba una regla de
+  leyendas que ningún código implementaba.
+- **El README decía «carga de la portada ~25 KB»; son 107 KB.** La cifra era
+  correcta hasta que la sección «Panorama» hizo que la portada cargara
+  `series.json`, y el rediseño engordó CSS y JS. Deriva causada por el propio
+  trabajo de la sesión anterior.
+- **`publicaciones.html` transfiere 808 KB**, 699 de ellos `publications.json`.
+  Nadie lo había medido. Anotado como `T-18`.
+
+### Verificación
+
+- Los cuatro contrastes vuelven a medirse tras el arreglo: 5,56 · 5,48 · 5,07 ·
+  4,86 en claro, y 5,84 · 7,26 · 6,52 · 5,05 en oscuro. Todos sobre 4,5.
+- Cabecera ordenable alcanzable con `Tab` y operable con `Enter`: sí.
+- Los cinco gráficos anuncian su indicador y su número de categorías.
+- 32 combinaciones de página × tema × ancho sin errores ni desborde.
+- Reconstrucción limpia byte a byte idéntica; las tres compuertas en verde.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El texto SVG se mide con `color`» | **Falso.** Se colorea con `fill`, y mi primera medición dio 16,33:1 donde había 3,74:1. Los cuatro fallos sólo aparecieron al corregir el método |
+| «Documentar una afordancia equivale a haberla implementado» | **Falso.** Escribí que la ordenación se ve antes del hover sin comprobar que funcionara sin ratón |
+| «Marcar `--tinta-3` como “no esencial” evita usarlo donde importa» | **Falso.** Lo usé para las marcas de eje en la misma hoja donde lo etiqueté así |
+| «Una cifra de rendimiento del README sigue siendo válida tras un rediseño» | **Falso.** Pasó de 25 a 107 KB por cambios que hice yo |
+
+### Ambigüedades abiertas
+
+Las heredadas siguen abiertas, `T-16` incluida. Se suma `T-18`. Nada nuevo que
+requiera decisión.
+
+### Próximo paso recomendado
+
+`T-16` sigue siendo lo único que depende del usuario.

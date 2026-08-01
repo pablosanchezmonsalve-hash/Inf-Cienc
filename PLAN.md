@@ -114,6 +114,7 @@ para los datos derivados.
 | T-15 | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID | V2 | `internal/orcid_conflicts.csv` |
 | T-16 | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público | V2 | Auditoría 2026-08-01: contradice `internal/README.md` |
 | T-17 | Corregir las cadenas de unidad académica concatenadas sin separador | V2 | Visibles en `P-07`; alimenta T-02 |
+| T-18 | Trocear o paginar `publications.json` (699 KB en una sola petición) | V2 | Auditoría 2026-08-01: medido en navegador |
 
 ---
 

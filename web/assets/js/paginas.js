@@ -43,9 +43,10 @@ async function portada() {
   // Lienzos estrechos: estas tarjetas viven en una rejilla de tres columnas.
   const panorama = [
     ['P-02', 'produccion.html', s => c.barrasV(s.datos,
-      { etiquetaX: 'anio', etiquetaY: 'n', ancho: 330, alto: 210 })],
-    ['C-01', 'colaboracion.html', s => c.anillo(s.datos)],
-    ['T-05', 'tematica.html', s => c.barrasH(s.datos.slice(0, 6), { alto: 25, ancho: 330 })],
+      { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n', ancho: 330, alto: 210 })],
+    ['C-01', 'colaboracion.html', s => c.anillo(s.datos, { titulo: s.nombre })],
+    ['T-05', 'tematica.html', s => c.barrasH(s.datos.slice(0, 6),
+      { titulo: s.nombre, alto: 25, ancho: 330 })],
   ].filter(([cod]) => series[cod]);
 
   document.getElementById('panorama').innerHTML = `
@@ -93,31 +94,31 @@ async function portada() {
    (I-05), no en multivaluados (A-01, C-03, C-04, T-01, T-04, T-05) y no en
    rankings recortados (P-05), donde un porcentaje afirmaría algo falso. */
 const RENDER = {
-  'P-02': s => c.barrasV(s.datos, { etiquetaX: 'anio', etiquetaY: 'n' }),
-  'P-03': s => c.barrasH(s.datos, { cuotaValida: true }),
-  'P-05': s => c.barrasH(s.datos),
-  'P-07': s => c.barrasH(s.datos, { cuotaValida: true }),
-  'I-01': s => c.barrasV(s.datos, { etiquetaX: 'anio', etiquetaY: 'n' }),
+  'P-02': s => c.barrasV(s.datos, { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n' }),
+  'P-03': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true }),
+  'P-05': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'P-07': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true }),
+  'I-01': s => c.barrasV(s.datos, { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n' }),
   'I-04': s => c.barrasV(s.datos.map(d => ({ anio: d.anio, n: d.valor })), {
-    etiquetaX: 'anio', etiquetaY: 'n', decimales: 2,
+    titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n', decimales: 2,
     referencia: 1, refEtiqueta: '1,00 — promedio mundial',
   }),
-  'I-05': s => c.barrasH(s.datos),
+  'I-05': s => c.barrasH(s.datos, { titulo: s.nombre }),
   // Q1–Q4 es una escala ORDENADA, no cuatro categorías sueltas: un solo tono en
   // cuatro pasos, del más oscuro (mejor posición) al más claro.
-  'R-01': s => c.barrasH(s.datos, { escala: 'ordinal', cuotaValida: true }),
+  'R-01': s => c.barrasH(s.datos, { titulo: s.nombre, escala: 'ordinal', cuotaValida: true }),
   // Acceso abierto se queda en una sola serie a propósito: las categorías se
   // llaman Gold, Green y Bronze, y pintarlas con la paleta categórica dejaría
   // «Green» de color naranja. Cuando el nombre de la categoría ya es un color,
   // el color deja de estar disponible para codificar.
-  'A-01': s => c.barrasH(s.datos),
-  'C-01': s => c.anillo(s.datos),
-  'C-03': s => c.barrasH(s.datos),
-  'C-04': s => c.barrasH(s.datos),
-  'C-06': s => c.barrasH(s.datos, { cuotaValida: true }),
-  'T-05': s => c.barrasH(s.datos),
-  'T-01': s => c.barrasH(s.datos),
-  'T-04': s => c.barrasH(s.datos),
+  'A-01': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'C-01': s => c.anillo(s.datos, { titulo: s.nombre }),
+  'C-03': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'C-04': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'C-06': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true }),
+  'T-05': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'T-01': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'T-04': s => c.barrasH(s.datos, { titulo: s.nombre }),
 };
 
 /* Advertencias que nacen de CÓMO se dibuja el indicador, no de cómo se calcula.
@@ -181,7 +182,7 @@ async function modulos() {
   cont.innerHTML = codigos.map(cod => {
     const s = series[cod];
     if (!s) return '';
-    const grafico = (RENDER[cod] || (x => c.barrasH(x.datos)))(s);
+    const grafico = (RENDER[cod] || (x => c.barrasH(x.datos, { titulo: x.nombre })))(s);
     const extra = EXTRA[cod] ? EXTRA[cod](s) : '';
     return `<section class="modulo">
       <header><h2>${c.escapar(s.nombre)}</h2><span class="codigo">${cod}</span></header>
@@ -449,6 +450,11 @@ async function autores() {
   document.getElementById('buscar-autor').addEventListener('input',
     c.debounce(e => { q = e.target.value; pintar(); }, 250));
   document.querySelectorAll('th[data-orden]').forEach(th => {
+    // Enter y Espacio, además del clic: sin esto la tabla no se podía ordenar
+    // sin ratón, porque un <th> no es un control activable por defecto.
+    th.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); th.click(); }
+    });
     th.addEventListener('click', () => {
       const k = th.dataset.orden;
       asc = (orden === k) ? !asc : false;
@@ -532,7 +538,7 @@ async function fichaAutor() {
 
     <section class="modulo">
       <header><h2>Evolución temporal</h2><span class="codigo">AU-06</span></header>
-      ${c.barrasV(a.evolucion, { etiquetaX: 'anio', etiquetaY: 'n' })}
+      ${c.barrasV(a.evolucion, { titulo: 'Publicaciones por año', etiquetaX: 'anio', etiquetaY: 'n' })}
       <p class="nota">Tres años de ventana: se presenta como barras, no como línea de tendencia.</p>
     </section>
 
