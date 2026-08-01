@@ -478,3 +478,87 @@ Las heredadas siguen abiertas. Se suman:
 Decidir sobre `internal/` y `data/raw/` en el repositorio público, que es lo
 único de la auditoría que quedó sin aplicar. Después, `T-02`: las cadenas
 concatenadas de unidad académica ya son visibles para cualquier visitante.
+
+---
+
+## Sesión 2026-08-01 — Sistema visual sobre la paleta institucional
+
+**Estado inicial:** interfaz auditada y corregida en la sesión anterior, con
+identidad azul marino y cian. Encargo: reanclar el sistema visual en la paleta
+`#22577A · #38A3A5 · #57CC99 · #80ED99 · #C7F9CC`, refinar tipografía y
+jerarquía, y profundizar la interacción de gráficos y tablas.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-56 | La paleta entregada se usa para identidad, superficies y rampa ordinal, **no para series de datos** | Medida como categórica falla tres de cinco comprobaciones. `#80ED99` vs `#57CC99` dan ΔE 10,3 en visión **normal**, bajo el piso de 15 |
+| D-57 | Paleta categórica de seis ranuras que abre con el azul-teal de la referencia | Conserva el espíritu y separa de verdad: peor par CVD ΔE 8,7 claro / 8,0 oscuro |
+| D-58 | El **orden** de las ranuras es mecanismo de seguridad, no estética | Violeta va entre naranja y verde porque ese par caía en la banda de aviso. Reordenar lo arregla sin cambiar un solo color |
+| D-59 | Seis series, no ocho | Una séptima obligaría a meter un tono en la franja que ya ocupan otros. Más allá, se agrupa en «Otras» |
+| D-60 | Tipografía: pila del sistema con jerarquía por peso, tamaño e interletrado | El proyecto prohíbe CDN y autoalojar añadiría binarios y peso por una mejora que no cambia ninguna lectura analítica |
+| D-61 | Cifras tabulares sólo donde se alinean en columna | En un KPI suelto las proporcionales se leen mejor; forzar la tabulación sólo separa dígitos |
+| D-62 | La separación entre superficies la hace el filete, no la elevación | Radios de 6 px y sombra mínima. Una interfaz analítica no flota |
+| D-63 | Resaltar es atenuar el resto | Señalar sin apagar las demás no dirige la mirada: sólo añade un borde que hay que buscar |
+| D-64 | La cuota sobre el total sólo aparece donde las barras son partes de un total | En umbrales encajados, multivaluados y rankings recortados, un porcentaje afirmaría algo falso |
+
+### Archivos creados o modificados
+
+```
+web/assets/css/app.css        sistema completo reescrito sobre la paleta nueva
+web/assets/js/core.js         SERIES a seis; resaltado por atenuación; cuota en
+                              el tooltip; reposicionamiento cuando no cabe
+web/assets/js/paginas.js      cuotaValida por indicador; columna ordenada
+docs/UX_UI.md                 §12 reescrito: paleta medida, tipografía,
+                              espacio, interacción, responsive
+```
+
+### Hallazgos
+
+- **La paleta pedida es excelente como identidad y pésima como paleta de
+  datos**, y la causa es estructural: sus cinco tonos viven en la franja
+  cian-verde, que es donde la deuteranopía y la protanopía colapsan diferencias.
+  No es cuestión de afinar, ninguna paleta de datos honesta sale de ahí.
+- **Es, en cambio, una rampa ordinal natural.** Los cuartiles `R-01` usan ahora
+  una rampa de un tono anclada en `#38A3A5`: el orden se ve en el color mismo.
+- **`#38A3A5` da 3,02:1 sobre blanco**: vale para rellenos y bordes, no para
+  texto de enlace. Los enlaces usan `#1a6d78` (6,0:1).
+- **`#57CC99` rinde 2,00:1 sobre blanco y 8,15:1 sobre la superficie oscura.**
+  El mismo color es inservible en un modo y el color de acción natural en el
+  otro: la prueba más clara de que el modo oscuro no puede ser una inversión.
+- **La afordancia de ordenamiento sólo aparecía al pasar el puntero**, y la
+  columna ordenada no se distinguía en las 51 filas visibles.
+
+### Verificación
+
+- Paleta categórica revalidada contra las superficies reales: **cinco
+  comprobaciones en verde** en claro (`#ffffff`) y oscuro (`#12222a`).
+- Rampa ordinal: cuatro comprobaciones en verde en ambos modos.
+- Contrastes de texto calculados uno a uno antes de fijar los tokens.
+- **32 combinaciones** (8 páginas × 2 temas × 2 anchos): sin errores de consola
+  ni desborde horizontal.
+- Interacción comprobada en Chromium: atenuación al 34 %, una sola marca activa,
+  aislamiento entre gráficos de la misma página, foco por teclado con tooltip,
+  cierre con `Escape`, y 51 celdas marcadas al reordenar por otra columna.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Una paleta bonita de cinco tonos sirve para series» | **Falso, y medible.** Dos de sus verdes son indistinguibles incluso con visión normal |
+| «Basta oscurecer los tonos claros de la paleta para usarla en datos» | **Insuficiente.** El problema es el rango de tono, no la luminosidad: al separarlos deja de ser esa paleta |
+| «El modo oscuro se obtiene invirtiendo el claro» | **Falso.** `#57CC99` pasa de 2,00:1 a 8,15:1 según la superficie |
+| «El resalte por contorno basta para explorar» | **Insuficiente.** Sin atenuar el resto, el contorno hay que buscarlo |
+
+### Ambigüedades abiertas
+
+Las heredadas siguen abiertas, incluida `T-16`. Se suma:
+
+- El aviso de contraste de `#d4a017` (2,38:1 sobre blanco) se resuelve con
+  relieve —etiqueta de valor y tabla equivalente, que el sitio ya tiene—, pero
+  es un piso, no un margen: si en el futuro un gráfico prescinde de la etiqueta
+  de valor, ese color deja de ser legal.
+
+### Próximo paso recomendado
+
+Sin cambios: `T-16` sigue siendo lo único que requiere decisión del usuario.

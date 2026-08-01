@@ -88,11 +88,15 @@ async function portada() {
    ranking por volumen se queda en una sola serie: colorear por posición haría
    que el color siguiera al rank y no a la entidad, y repintaría los
    supervivientes en cuanto cambiara el recorte. */
+/* `cuotaValida` habilita el «% de lo mostrado» en el tooltip. Se activa SÓLO
+   donde las barras son realmente partes de un total: no en umbrales encajados
+   (I-05), no en multivaluados (A-01, C-03, C-04, T-01, T-04, T-05) y no en
+   rankings recortados (P-05), donde un porcentaje afirmaría algo falso. */
 const RENDER = {
   'P-02': s => c.barrasV(s.datos, { etiquetaX: 'anio', etiquetaY: 'n' }),
-  'P-03': s => c.barrasH(s.datos),
+  'P-03': s => c.barrasH(s.datos, { cuotaValida: true }),
   'P-05': s => c.barrasH(s.datos),
-  'P-07': s => c.barrasH(s.datos),
+  'P-07': s => c.barrasH(s.datos, { cuotaValida: true }),
   'I-01': s => c.barrasV(s.datos, { etiquetaX: 'anio', etiquetaY: 'n' }),
   'I-04': s => c.barrasV(s.datos.map(d => ({ anio: d.anio, n: d.valor })), {
     etiquetaX: 'anio', etiquetaY: 'n', decimales: 2,
@@ -101,7 +105,7 @@ const RENDER = {
   'I-05': s => c.barrasH(s.datos),
   // Q1–Q4 es una escala ORDENADA, no cuatro categorías sueltas: un solo tono en
   // cuatro pasos, del más oscuro (mejor posición) al más claro.
-  'R-01': s => c.barrasH(s.datos, { escala: 'ordinal' }),
+  'R-01': s => c.barrasH(s.datos, { escala: 'ordinal', cuotaValida: true }),
   // Acceso abierto se queda en una sola serie a propósito: las categorías se
   // llaman Gold, Green y Bronze, y pintarlas con la paleta categórica dejaría
   // «Green» de color naranja. Cuando el nombre de la categoría ya es un color,
@@ -110,7 +114,7 @@ const RENDER = {
   'C-01': s => c.anillo(s.datos),
   'C-03': s => c.barrasH(s.datos),
   'C-04': s => c.barrasH(s.datos),
-  'C-06': s => c.barrasH(s.datos),
+  'C-06': s => c.barrasH(s.datos, { cuotaValida: true }),
   'T-05': s => c.barrasH(s.datos),
   'T-01': s => c.barrasH(s.datos),
   'T-04': s => c.barrasH(s.datos),
@@ -407,6 +411,10 @@ async function autores() {
     f.sort((x, y) => (asc ? 1 : -1) * ((x[orden] ?? 0) - (y[orden] ?? 0)) ||
       x.nombre.localeCompare(y.nombre));
 
+    // La columna por la que se ordena se marca en todo su alto, no sólo en la
+    // cabecera: con 51 filas en pantalla, una flecha arriba del todo se pierde.
+    const ord = k => (k === orden ? ' ordenada' : '');
+
     const conOrcid = f.filter(a => a.orcid).length;
     document.getElementById('resumen').innerHTML =
       `<strong>${c.nf.format(f.length)}</strong> de ${c.nf.format(parametros.total_firmas)} formas de firma` +
@@ -424,10 +432,10 @@ async function autores() {
              >${c.escapar(a.orcid)}</a>`
         : '<span class="sin-dato-txt">No disponible</span>'}</td>
       <td>${c.escapar(a.unidades.join(' · '))}</td>
-      <td class="num">${c.celda(a.n_publicaciones)}</td>
-      <td class="num">${c.celda(a.citas)}</td>
-      <td class="num">${c.celda(a.citas_por_publicacion, 2)}</td>
-      <td class="num">${c.celda(a.publicaciones_top10)}</td></tr>`).join('')
+      <td class="num${ord('n_publicaciones')}">${c.celda(a.n_publicaciones)}</td>
+      <td class="num${ord('citas')}">${c.celda(a.citas)}</td>
+      <td class="num${ord('citas_por_publicacion')}">${c.celda(a.citas_por_publicacion, 2)}</td>
+      <td class="num${ord('publicaciones_top10')}">${c.celda(a.publicaciones_top10)}</td></tr>`).join('')
       : `<tr><td colspan="7"><div class="vacio">Ningún autor coincide.</div></td></tr>`;
   }
 

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `1a727e3` · Actualiza los recuentos derivados del README
+Último commit: `fbace04` · Saca los últimos literales institucionales de src/
 Snapshot: 2026-08-01
 
 ---
@@ -71,7 +71,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 55
+## Decisiones tomadas: 64
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

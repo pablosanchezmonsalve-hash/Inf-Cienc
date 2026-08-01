@@ -203,34 +203,93 @@ contenedor; la página nunca scrollea en horizontal.
 
 ## 12. Sistema visual
 
-Implementado en `web/assets/css/app.css`. Sin dependencias externas: ninguna
-fuente, hoja ni script se carga desde un CDN.
+Implementado en `web/assets/css/app.css`, hoja única. Sin dependencias externas:
+ninguna fuente, hoja ni script se carga desde un CDN.
 
-### Tokens
+### 12.1 Paleta: qué se usó y qué no
 
-Todo el color pasa por variables CSS. Cambiar la identidad visual no requiere
-tocar ningún componente.
+La paleta de referencia entregada es
+`#22577A` · `#38A3A5` · `#57CC99` · `#80ED99` · `#C7F9CC`. Se **midió antes de
+aplicarla**, y la medición decide dónde va cada cosa.
 
-| Grupo | Variables | Para qué |
+| Uso | ¿Se aplica la paleta? | Por qué |
 |---|---|---|
-| Superficies | `--plano`, `--superficie`, `--superficie-2/3` | Página, tarjetas, fondos secundarios |
-| Tinta | `--tinta`, `--tinta-2`, `--tinta-3` | Texto principal, secundario y apagado (ejes, metadatos) |
-| Marca | `--marca`, `--marca-2` | Identidad institucional. Nunca codifica un dato |
-| Acento | `--acento`, `--acento-suave` | Estado interactivo. Nunca codifica un dato |
-| Series | `--serie-1` … `--serie-8` | Paleta categórica, orden fijo |
-| Ordinal | `--ord-1` … `--ord-4` | Rampa de un solo tono para escalas ordenadas |
-| Ausencia | `--sin-dato` | Gris. Toda categoría que representa ausencia de dato |
-| Aviso | `--aviso-*` | Advertencia metodológica. Ámbar, distinto de toda serie |
+| Marca, cabecera, superficies | **Sí, literal** | `#22577A` da 7,74:1 sobre blanco; `#C7F9CC` da 6,58:1 sobre la marca |
+| Estado interactivo | **Sí, con matiz** | `#38A3A5` da 3,02:1 sobre blanco: sirve para rellenos y bordes, no para texto de enlace. Los enlaces usan `#1a6d78` (6,0:1) |
+| Escalas ordenadas | **Sí, es lo que mejor hace** | Rampa de un tono anclada en `#38A3A5`. Pasa las cuatro comprobaciones ordinales |
+| **Series de datos** | **No** | Ver abajo |
 
-### Modo claro y oscuro
+**Por qué no sirve para series.** Medida como paleta categórica falla tres de
+cinco comprobaciones:
 
-El modo oscuro es una paleta **elegida**, no una inversión: las ocho series
-están re-escalonadas para la superficie oscura. El selector de la cabecera tiene
-tres estados —automático, claro, oscuro— y el automático sigue al sistema
-operativo. La elección se recuerda y se aplica antes de pintar, con un script en
-línea en el `<head>`, para que no aparezca un destello del tema equivocado.
+- `#80ED99` vs `#57CC99` miden **ΔE 10,3 en visión normal**, bajo el piso de 15.
+  Dos verdes que un lector *sin* daltonismo apenas distingue.
+- `#C7F9CC` da **1,18:1** contra blanco: sobre una superficie clara no es una
+  marca, es un fondo.
+- Tres de los cinco tonos quedan fuera de la banda de luminosidad.
 
-### Reglas de color en gráficos
+La causa es estructural, no de afinado: los cinco colores viven en la franja
+cian-verde, que es justo donde la deuteranopía y la protanopía colapsan
+diferencias. Ninguna paleta de datos honesta sale de ahí.
+
+**Lo que hay en su lugar** es una paleta categórica de seis ranuras que *abre*
+con el azul-teal de la referencia y luego se separa de verdad:
+
+| # | Claro | Oscuro | Tono |
+|---|---|---|---|
+| 1 | `#0e7ea6` | `#2b9ec7` | azul-teal, hereda `#22577A` |
+| 2 | `#e0662a` | `#d16a30` | naranja |
+| 3 | `#7b52c9` | `#9078dd` | violeta |
+| 4 | `#2fa36b` | `#2aa26a` | verde, hereda `#57CC99` |
+| 5 | `#d4a017` | `#b58612` | ámbar |
+| 6 | `#cc3f5c` | `#dc5c75` | carmín |
+
+Pasa las cinco comprobaciones en ambos modos: peor par adyacente CVD ΔE 8,7
+(claro) y 8,0 (oscuro); visión normal 19,3 y 16,2. **El orden de las ranuras es
+el mecanismo de seguridad, no una decisión estética**: violeta se sitúa entre
+naranja y verde precisamente porque naranja junto a verde caía en la banda de
+aviso. Reordenar es lo único que lo arregla sin cambiar ningún color.
+
+Sólo son **seis**. Una séptima obligaría a meter un tono en la franja que ya
+ocupan otros; más allá de seis entidades lo correcto es agrupar en «Otras» o
+separar en varios gráficos.
+
+`#d4a017` queda en 2,38:1 contra blanco. Eso obliga a **relieve**: por eso todo
+gráfico lleva etiqueta de valor visible junto a la marca y tabla equivalente
+desplegable. El color nunca es el único canal de identidad.
+
+### 12.2 Tipografía
+
+**Pila del sistema, no fuente web.** El proyecto prohíbe cargar nada desde un
+CDN, y autoalojar una familia añadiría binarios al repositorio y peso al bundle
+por una mejora que no cambia ninguna lectura analítica. La jerarquía se
+construye con peso, tamaño, interletrado y cifras tabulares.
+
+| Rol | Token | Tratamiento |
+|---|---|---|
+| Interfaz y prosa | `--f-ui` | `system-ui` con respaldos. Interletrado negativo creciente con el tamaño |
+| Cifras | `--f-cifra` | Misma pila. `tabular-nums` **sólo** donde deben alinearse en columna |
+| Identificadores | `--f-mono` | `ui-monospace`. Códigos de indicador, ORCID, DOI |
+
+Escala: `--t-xs` 11 px (códigos) · `--t-s` 12,5 px (notas) · `--t-m` 14 px
+(tablas y controles) · `--t-base` 16 px (prosa) · `--t-xl` 19 px (h2) ·
+`--t-2xl` y `--t-cifra` fluidos con `clamp()`.
+
+Un detalle deliberado: las cifras tabulares se reservan a tablas, ejes y
+tooltips. En un KPI suelto las proporcionales se leen mejor, y forzar la
+tabulación ahí sólo separa los dígitos sin ganar nada.
+
+### 12.3 Espacio y trazo
+
+Escala de espacio de 4 px, de `--e1` (4 px) a `--e7` (48 px). Sin valores
+sueltos fuera de la escala.
+
+Radios contenidos (6 px) y **sombra mínima**: la separación entre superficies la
+hace el filete, no la elevación. Una interfaz analítica no flota. Por la misma
+razón la cabecera es color plano de marca con un descenso sutil, sin degradados
+de color ni resplandores.
+
+### 12.4 Reglas de color en gráficos
 
 El color codifica **una** de tres cosas, y cuál se declara en la llamada:
 
@@ -250,21 +309,51 @@ Tres reglas que no se negocian:
    disponible para codificar.** Por eso `A-01` (Gold, Green, Bronze) se dibuja
    en una sola serie: la paleta categórica dejaría «Green» de color naranja.
 
-### Validación de daltonismo
+### 12.5 Interacción
 
-La paleta categórica se validó con la herramienta de la habilidad `dataviz`
-contra las superficies reales del sitio:
+**Gráficos.** Señalar una marca **atenúa las demás** al 34 % y contornea la
+activa. Resaltar sin apagar el resto no dirige la mirada: sólo añade un borde
+que hay que buscar. La atenuación se aplica al SVG que contiene la marca, así
+que dos gráficos en la misma pantalla no se interfieren.
 
-- **Claro** (`#ffffff`): banda de luminosidad, piso de croma, separación CVD
-  (peor par adyacente ΔE 9,1) y piso de visión normal (ΔE 19,6) pasan. Tres
-  series quedan bajo 3:1 de contraste.
-- **Oscuro** (`#12151c`): las cinco comprobaciones pasan, contraste incluido.
+Cada marca es **enfocable por teclado** y muestra el mismo tooltip que con el
+puntero. `Escape` lo cierra. El tooltip salta abajo o a la izquierda cuando no
+cabe: uno recortado por el borde no informa de nada.
 
-El contraste bajo en modo claro obliga a **relieve**: por eso todo gráfico lleva
-etiqueta de valor visible junto a la marca y una tabla equivalente desplegable.
-El color nunca es el único canal de identidad.
+El tooltip añade la **cuota sobre el total mostrado**, pero sólo donde las
+barras son realmente partes de un total. En umbrales encajados (`I-05`),
+multivaluados (`A-01`, `C-03`, `C-04`, `T-01`, `T-04`, `T-05`) y rankings
+recortados (`P-05`) se omite: ahí un porcentaje afirmaría algo falso.
 
-### Advertencias de lectura
+**Tablas.** La fila activa lleva fondo teñido **y** un filete de acción a la
+izquierda; el fondo solo es demasiado tenue en pantallas de bajo contraste. La
+regla responde a `:hover` y a `:focus-within`, de modo que existe navegando con
+teclado. Las cabeceras ordenables muestran su afordancia (`↕`) **antes** de
+pasar el puntero, y la columna por la que se ordena se marca **en todo su alto**:
+con 51 filas en pantalla, una flecha arriba del todo se pierde.
+
+### 12.6 Modo claro y oscuro
+
+El modo oscuro es una paleta **elegida y revalidada contra su propia
+superficie** (`#12222a`, un teal-pizarra, no un gris neutro), no una inversión.
+Un detalle que lo justifica: `#57CC99` rinde 2,00:1 sobre blanco y 8,15:1 sobre
+la superficie oscura. En modo oscuro **sí** puede ser color de acción; en claro
+sería ilegible. Invertir una paleta validada no produce una paleta validada.
+
+El selector de la cabecera tiene tres estados —automático, claro, oscuro—; el
+automático sigue al sistema operativo. La elección se recuerda y se aplica antes
+de pintar, con un script en línea en el `<head>`, para que no aparezca un
+destello del tema equivocado.
+
+### 12.7 Responsive
+
+Tres cortes. Bajo 900 px la navegación pasa a desplazamiento horizontal en una
+línea en vez de romper en varias filas. Bajo 640 px baja el tamaño base, se
+compacta el espaciado de tarjetas y tablas, y el subtítulo de marca pierde su
+filete separador. Hay además una hoja de impresión que oculta cabecera, filtros
+y paginación, y evita que los módulos se partan entre páginas.
+
+### 12.8 Advertencias de lectura
 
 Además de la nota metodológica de cada indicador —que describe cómo se
 *calcula*—, hay advertencias que describen cómo se *lee el gráfico*, y que sólo

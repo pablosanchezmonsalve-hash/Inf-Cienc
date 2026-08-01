@@ -204,8 +204,13 @@ const SIN_DATO = /^(sin dato|no determinad|sin declarar|desconocid)/i;
 export const esSinDato = v => SIN_DATO.test(String(v).trim());
 
 /* Orden fijo de series. Nunca se cicla ni se reasigna según el ranking: el
-   color sigue a la entidad, no a su posición. Más allá de ocho, se agrupa. */
-export const SERIES = Array.from({ length: 8 }, (_, i) => `var(--serie-${i + 1})`);
+   color sigue a la entidad, no a su posición.
+
+   Son SEIS, no ocho: la paleta se validó a seis ranuras y añadir una séptima
+   obligaría a meter un tono en la franja que ya ocupan otros. Más allá de seis
+   entidades, lo correcto es agrupar en «Otras» o separar en varios gráficos,
+   no generar un color nuevo. */
+export const SERIES = Array.from({ length: 6 }, (_, i) => `var(--serie-${i + 1})`);
 
 /* Rampa ordinal: un solo tono en cuatro pasos. Para escalas ORDENADAS
    (cuartiles, tramos). Cuatro tonos distintos afirmarían que Q1 y Q4 son
@@ -244,7 +249,9 @@ function recortar(txt, maxPx, px = 11) {
 let idGrafico = 0;
 
 /** Barras horizontales. Elegidas cuando las etiquetas son largas o muchas. */
-export function barrasH(datos, { alto = 26, escala = null, sufijo = '', ancho = 680 } = {}) {
+export function barrasH(datos, {
+  alto = 26, escala = null, sufijo = '', ancho = 680, cuotaValida = false,
+} = {}) {
   if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
   const max = Math.max(...datos.map(d => d.n), 1);
 
@@ -266,15 +273,23 @@ export function barrasH(datos, { alto = 26, escala = null, sufijo = '', ancho = 
   const total = datos.length * alto + 10;
   const id = `g${++idGrafico}`;
 
+  /* Cuota sobre el total mostrado. Se omite cuando las barras no son partes de
+     un total —multivaluados, umbrales encajados, rankings recortados—: ahí un
+     porcentaje sería una afirmación falsa, no una ayuda. */
+  const sumaBarras = datos.reduce((s, d) => s + d.n, 0);
+  const cuota = d => (cuotaValida && sumaBarras
+    ? `${(100 * d.n / sumaBarras).toFixed(1).replace('.', ',')} % de lo mostrado` : '');
+
   const filas = datos.map((d, i) => {
     const y = i * alto;
     const w = Math.max(2, anchoPista * (d.n / max));
     const etq = recortar(d.valor, anchoEtiqueta - 14);
     const cy = y + alto / 2;
+    const nota = d.nota || cuota(d);
     return `<g class="marca" tabindex="0" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
-        ${d.nota ? `data-tip-n="${escapar(d.nota)}"` : ''}>
+        ${nota ? `data-tip-n="${escapar(nota)}"` : ''}>
       <text x="${anchoEtiqueta - 10}" y="${cy + 3.5}" text-anchor="end">${escapar(etq)}</text>
       <rect class="barra" fill="${colorDe(d, i, escala)}" x="${anchoEtiqueta}" y="${y + 6}"
         width="${w}" height="${alto - 12}" rx="4"/>
@@ -400,16 +415,41 @@ export function montarTooltip() {
   tip.setAttribute('role', 'tooltip');
   document.body.appendChild(tip);
 
+  let activa = null;
+
+  /* Resaltar es atenuar el resto. Señalar una barra sin apagar las demás no
+     dirige la mirada: sólo añade un borde que hay que buscar. La atenuación se
+     aplica en el SVG que contiene la marca, no en la página, para que dos
+     gráficos de la misma pantalla no se interfieran. */
+  const resaltar = (m) => {
+    if (activa === m) return;
+    apagar();
+    activa = m;
+    m.classList.add('activa');
+    m.ownerSVGElement?.classList.add('hay-foco');
+  };
+  const apagar = () => {
+    if (!activa) return;
+    activa.classList.remove('activa');
+    activa.ownerSVGElement?.classList.remove('hay-foco');
+    activa = null;
+  };
+
   const mostrar = (el, x, y) => {
+    resaltar(el);
     tip.innerHTML = `<span class="tip-t">${el.dataset.tip}</span>
       <span class="tip-v">${el.dataset.tipV}</span>
-      ${el.dataset.tipN ? `<br><span class="tip-n">${el.dataset.tipN}</span>` : ''}`;
+      ${el.dataset.tipN ? `<span class="tip-n">${el.dataset.tipN}</span>` : ''}`;
     tip.hidden = false;
     const r = tip.getBoundingClientRect();
-    tip.style.left = `${Math.min(Math.max(8, x + 14), window.innerWidth - r.width - 10)}px`;
-    tip.style.top = `${Math.max(8, y - r.height - 12)}px`;
+    // Se coloca arriba a la derecha del puntero, y salta abajo o a la izquierda
+    // cuando no cabe: un tooltip recortado por el borde no informa de nada.
+    const izq = Math.min(Math.max(8, x + 14), window.innerWidth - r.width - 10);
+    const arr = y - r.height - 12 < 8 ? y + 20 : y - r.height - 12;
+    tip.style.left = `${izq}px`;
+    tip.style.top = `${arr}px`;
   };
-  const ocultar = () => { tip.hidden = true; };
+  const ocultar = () => { tip.hidden = true; apagar(); };
 
   document.addEventListener('pointermove', e => {
     const m = e.target.closest?.('[data-tip]');
@@ -419,6 +459,7 @@ export function montarTooltip() {
   document.addEventListener('focusin', e => {
     const m = e.target.closest?.('[data-tip]');
     if (m) { const r = m.getBoundingClientRect(); mostrar(m, r.right, r.bottom); }
+    else ocultar();
   });
   document.addEventListener('focusout', ocultar);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') ocultar(); });
