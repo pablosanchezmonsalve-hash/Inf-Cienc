@@ -80,7 +80,7 @@ def main() -> None:
            f"{scival['Scopus Source title'].nunique()} títulos", "alta", "V1",
            "Volumen, no calidad. No ordenar por métrica de revista por defecto.")
 
-    record("P-06", "Autores UFT distintos", "descriptivo", "parcial",
+    record("P-06", "Autores afiliados distintos", "descriptivo", "parcial",
            f"{len(master)} formas de firma", "media", "V1",
            "589 formas de firma, no 589 personas: 123 variantes de nombre y 20 "
            "perfiles Scopus fragmentados sin resolver (ver LIMITATIONS §2).")
@@ -239,7 +239,7 @@ def main() -> None:
     prom = numeric(scival, "Topic Prominence Percentile")
     record("T-03", "Prominencia temática", "tematico", "sí",
            f"{int(prom.notna().sum())}/{n_met}", "baja", "V2",
-           "Mide la atención del campo, NO el desempeño de la UFT en él. "
+           "Mide la atención del campo, NO el desempeño de la institución en él. "
            "Alto riesgo de malinterpretación; requiere glosario si se publica.")
 
     cov, cats, asg = multivalued("Sustainable Development Goals (2025)")
@@ -283,7 +283,7 @@ def main() -> None:
     record("AU-02", "Citas por autor", "impacto", "sí",
            f"{int(por_autor['citas'].sum())} citas atribuidas (conteo completo)",
            "media", "V1",
-           "Atribución completa: una publicación con 3 autores UFT aporta sus "
+           "Atribución completa: una publicación con 3 autores afiliados aporta sus "
            "citas 3 veces. No sumable a nivel institucional.")
 
     record("AU-03", "h-index en ventana 2023-2025", "impacto", "parcial",

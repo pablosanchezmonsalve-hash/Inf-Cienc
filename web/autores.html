@@ -7,6 +7,9 @@
 <meta name="description" content="Ranking de autores afiliados con publicaciones, citas y presencia en el top de citación.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/app.css">
+<script>/* Aplica el tema guardado antes de pintar: si se hiciera desde el módulo
+   diferido, la página aparecería un instante con el tema equivocado. */
+(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-tema',t)}catch(e){}})();</script>
 </head>
 <body data-pagina="autores">
 <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
@@ -22,12 +25,12 @@
       <input type="search" id="buscar-autor" placeholder="Escriba un apellido…">
     </div>
     <label class="opcion"><input type="checkbox" id="solo-interpretables" checked>
-      Mostrar sólo firmas con 5 o más publicaciones</label>
+      <span id="etiqueta-umbral">Mostrar sólo firmas interpretables</span></label>
   </section>
   <p class="resumen-resultados" id="resumen"></p>
   <div class="tabla-envoltura"><table>
     <thead><tr>
-      <th>Autor</th><th>Unidad académica</th>
+      <th>Autor</th><th>ORCID</th><th>Unidad académica</th>
       <th class="num" data-orden="n_publicaciones" aria-sort="descending">Publicaciones</th>
       <th class="num" data-orden="citas" aria-sort="none">Citas</th>
       <th class="num" data-orden="citas_por_publicacion" aria-sort="none">Citas/pub.</th>

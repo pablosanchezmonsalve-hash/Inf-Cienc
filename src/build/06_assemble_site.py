@@ -51,8 +51,8 @@ def main() -> None:
     print(f"  páginas          : {len(paginas)} · {', '.join(paginas)}")
     print(f"  fichas de autor  : {fichas}")
     print(f"  peso total       : {peso:.0f} KB")
-    print(f"  capa interna     : no incluida (verificado)")
-    print(f"\n  Servir con:  python3 -m http.server -d dist 8000")
+    print("  capa interna     : no incluida (verificado)")
+    print("\n  Servir con:  python3 -m http.server -d dist 8000")
 
 
 if __name__ == "__main__":

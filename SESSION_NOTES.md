@@ -277,3 +277,288 @@ La aprobación de licencias fija la intención del proyecto. **No sustituye** la
 verificación con la unidad que administra la suscripción a Elsevier sobre qué
 métricas derivadas pueden publicarse abiertamente: eso es un hecho externo, no
 una decisión del proyecto, y sigue abierto.
+
+---
+
+## Sesión 2026-08-01 — Post-V1: ORCID, despliegue y estado
+
+**Estado inicial:** V1 completa y las tres fases cerradas. El sitio existía sólo
+en `dist/` local. `T-01` (enriquecimiento de ORCID) seguía abierto y bloqueaba
+la consolidación de identidad de autor.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-41 | El resultado del enriquecimiento vive en `data/enriched/`, versionado | `data/interim/` está en `.gitignore` por ser regenerable; esto no lo es: consultar 804 DOI a un servicio externo no es reproducible a voluntad |
+| D-42 | `rdata` pasa a dependencia opcional con degradación declarada | No hay ruedas para Python 3.14 y los `.RData` son fuentes de referencia (D-05). Una dependencia dura habría bloqueado la instalación por un archivo que no alimenta ningún indicador |
+| D-43 | El respaldo por apellido sólo se aplica si Crossref no declara nombre de pila | Sin esa condición el respaldo asigna el ORCID de una persona a la firma de otra (ver supuestos descartados) |
+| D-44 | Compartir ORCID **no** fusiona firmas: se encola en `internal/identity_candidates.csv` | La asignación firma→ORCID es a su vez una hipótesis. Encadenar dos hipótesis no produce un hecho (extiende D-08) |
+| D-45 | La jerarquía escuela→facultad se declara con estado `confirmada` o `inferida` | Permite publicar la agregación por facultad sin afirmar como oficial lo que se dedujo de las afiliaciones |
+| D-46 | `STATE.md` es una vista derivada generada, fuera del orden de precedencia | Un resumen mantenido a mano envejece y no se puede auditar. Si contradice a `config/` o `PLAN.md`, manda la fuente |
+| D-47 | La activación de GitHub Pages queda como paso manual documentado | El `GITHUB_TOKEN` del workflow puede publicar pero no crear el sitio. Se documenta en vez de dejar un `enablement: true` que falla |
+
+### Archivos creados o modificados
+
+```
+src/enrich/orcid_crossref.py                enriquecimiento desde Crossref (nuevo)
+src/state/snapshot.py                       generador de STATE.md y DECISIONS.md (nuevo)
+STATE.md, docs/DECISIONS.md                 generados
+data/enriched/authors_orcid.csv             174 firmas con ORCID
+internal/identity_candidates.csv            17 grupos que comparten ORCID
+internal/orcid_conflicts.csv                1 conflicto
+.github/workflows/deploy.yml                build y publicación en Pages (nuevo)
+docs/{ORCID_GUIDE,DEPLOYMENT}.md            guía de ejecución y paso manual de Pages
+config/matching_rules.yml                   jerarquía escuela→facultad; patrón con guion
+src/build/03_authors.py                     lee ORCID de data/enriched/
+src/build/02_indicators.py                  P-07 agrega por facultad, con detalle_escuelas
+src/build/common_build.py                   unique_slugs()
+requirements.txt, CLAUDE.md, README.md,
+Makefile (objetivo `estado`)                actualizados
+```
+
+### Hallazgos
+
+- **Enriquecimiento ejecutado por el usuario** sobre 804 DOI (97,7 % del
+  universo), **0 errores de red**: **174 de 589 firmas (29,5 %)** reciben ORCID,
+  54 con confianza alta y 120 con confianza media, sobre **153 ORCID distintos**.
+- **17 grupos de firmas comparten ORCID** (21 firmas colapsables). **11 de ellos
+  son invisibles para la heurística de apellido** que alimenta la cola `P-03`:
+  el caso claro es `Gubbins V.` / `Foxley V.G.`, que no comparten apellido. El
+  identificador persistente aporta evidencia que la comparación de cadenas no
+  puede producir.
+- **Cota superior de 568 personas distintas** para 589 firmas, si se confirmaran
+  las 21 colapsables. Es una cota, no un recuento.
+- **El patrón blando de detección institucional no cubría el guion**:
+  `Universidad Finis-Terrae` quedaba fuera. Corregido a `\bfinis[\s\-]+terrae\b`.
+- **Sitio publicado**: `.github/workflows/deploy.yml`, ejecución #11 en verde
+  sobre `8f05a51`, en
+  https://pablosanchezmonsalve-hash.github.io/Inf-Cienc/
+- **El costo de retomar el proyecto se midió**: leer `PLAN.md`,
+  `SESSION_NOTES.md` y `docs/` por adelantado son ~3.700 líneas / 155 KB, de las
+  que la mayoría es referencia puntual. `STATE.md` lo reduce a ~110 líneas con un
+  mapa de qué abrir para cada pregunta.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «`authors_orcid.csv` es una salida intermedia» | **Falso.** `.gitignore` impedía versionarlo y el resultado de 804 consultas externas se habría perdido al limpiar. Movido a `data/enriched/` |
+| «El respaldo por apellido es seguro cuando no hay coincidencia exacta» | **Falso.** Asignaba el ORCID de `Diaz, Marcela` a la firma `Diaz F.`. Restringido a los casos en que Crossref no declara nombre de pila |
+| «`enablement: true` crea el sitio de Pages desde el workflow» | **Falso.** `Resource not accessible by integration`: el token publica, no crea. Documentado como paso manual |
+| «`rdata` se instala en cualquier Python 3.11+» | **Falso.** No hay ruedas para 3.14. Dependencia marcada como opcional |
+| «La proporción alta/media se invertiría en la corrida completa» | **Falso.** La muestra de 20 DOI ya anticipaba el resultado: 54 alta / 120 media |
+| «Claude-Mem está disponible en esta sesión» | **Falso.** No hay binario, plugin ni servidor MCP. La memoria del proyecto es `SESSION_NOTES.md` + `STATE.md`, versionada y legible por cualquiera |
+
+### Ambigüedades abiertas
+
+Las heredadas siguen abiertas. Se suman o se precisan:
+
+- **415 firmas (70,5 %) sin ORCID.** El techo real es la cobertura de ORCID en
+  los registros de Crossref, no el método.
+- **`Castro-Sepúlveda M.` aparece con dos ORCID** (`0000-0001-7673-7269` y
+  `0000-0002-2270-299X`). Encolado, no resuelto.
+- **17 grupos de firmas con ORCID compartido** esperando confirmación humana.
+- **Los 13 nombres de unidad académica siguen sin catálogo oficial**, y tres de
+  las cuatro jerarquías escuela→facultad son `inferida`. Sólo Kinesiología →
+  Facultad de Medicina está confirmada por el usuario. El sitio de la
+  universidad no es alcanzable desde este entorno: la validación requiere una
+  fuente institucional.
+
+### Próximo paso recomendado
+
+Revisión humana de las colas de identidad, que es lo único que puede convertir
+174 asignaciones y 17 grupos en una tabla maestra de autores consolidada
+(`T-03`, `T-04`, `T-14`). Nada de eso es automatizable sin violar `D-08`.
+
+---
+
+## Sesión 2026-08-01 — Auditoría general y rediseño de la interfaz
+
+**Estado inicial:** V1 desplegada. Encargo: auditar todo el trabajo hecho,
+aplicar las correcciones que no requirieran decisión del usuario, y rediseñar la
+interfaz buscando una experiencia moderna con una paleta atractiva.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-48 | La compuerta de capas recorre los artefactos completos, sin muestrear | Revisaba los primeros 200 elementos de cada lista y la más larga tiene 823: el 76 % no se miraba. Una compuerta que muestrea no es una compuerta |
+| D-49 | Toda serie se calcula sobre el denominador que declara | `A-01` y `R-01` se calculaban sobre 823 y declaraban 816: el gráfico contradecía su propia nota en pantalla |
+| D-50 | La multivaluación se declara en config y el front la rotula junto al gráfico | Un gráfico cuyas barras no suman el total tiene que decirlo donde se lee, no sólo en la nota metodológica |
+| D-51 | Las advertencias de LECTURA viven en el front, separadas de las de cálculo | Describen un sesgo que induce el gráfico concreto; dejan de aplicar si cambia la forma. `config/indicators.yml` describe el cálculo, que no cambia con el dibujo |
+| D-52 | El color codifica una de tres cosas y se declara cuál: serie, ordinal o serie única | Cuatro tonos para Q1–Q4 afirmaban que son categorías sin relación, cuando son posiciones de una escala |
+| D-53 | Si el nombre de la categoría ya es un color, el color no codifica | `A-01` dibujaba «Green» de naranja. Se mantiene en una sola serie |
+| D-54 | Las dependencias se acotan por rango mayor | El workflow reconstruye y publica solo: con `>=` a secas, un cambio en pandas republica cifras distintas sin aviso |
+| D-55 | Modo oscuro con paleta re-escalonada y revalidada, no invertida | Invertir una paleta validada no produce una paleta validada |
+
+### Archivos creados o modificados
+
+```
+web/assets/css/app.css                    sistema de diseño completo (reescrito)
+web/assets/js/core.js                     motor de gráficos, tooltip, tema
+web/assets/js/paginas.js                  escalas, advertencias, ORCID, panorama
+web/*.html (9)                            arranque de tema sin destello
+web/index.html                            sección «Panorama»
+web/autores.html                          columna ORCID, umbral parametrizado
+src/build/02_indicators.py                denominadores y multivaluación
+src/build/03_authors.py                   ORCID en el listado; umbral en la ficha
+src/build/05_verify_public_layer.py       fin del muestreo
+src/audit/run_all.py                      código de salida distinto de cero
+src/audit/common.py                       hojas por clave lógica, no por nombre
+src/audit/04_author_population.py         ventana de validación desde config
+config/{indicators,sources}.yml           multivaluado A-01; hojas y ventana
+requirements.txt, .github/workflows/      rangos acotados; denylist completa
+docs/{LAYERS,UX_UI}.md, internal/README   excepciones y alcance declarados
+```
+
+### Hallazgos de la auditoría
+
+- **La capa interna está publicada.** `internal/README.md` dice «NO PUBLICAR» y
+  el directorio está versionado en un repositorio público, junto a 33 MB de
+  exportaciones brutas de Elsevier. Las tres compuertas cubren `dist/`; ninguna
+  cubre el repositorio. **Declarado, no resuelto**: es una decisión del usuario.
+- **`A-01` se contradecía en pantalla**: el gráfico mostraba 233 sin dato y su
+  propia nota destacada decía 226. Dos denominadores distintos, 823 y 816.
+- **`R-01` arrastraba el mismo descuadre**: 61 frente a los 54 de su nota.
+- **Etiquetas cortadas por el lado equivocado**: la columna de etiquetas era fija
+  en 210 px y los nombres largos se salían del lienzo por la izquierda.
+- **`No determinada` se pintaba como un dato medido.** 437 pares, la segunda
+  barra más larga de `P-07`, con el mismo azul que las facultades reales.
+- **Los años se imprimían «2.025»**: `Intl.NumberFormat('es-CL')` aplicado a algo
+  que es una etiqueta, no una cantidad.
+- **Un ternario muerto** (`a.meta.denominadores ? 5 : 5`) y el umbral escrito a
+  mano en `autores.html`, pese a estar parametrizado en config.
+- **Los nombres de hoja del Excel institucional vivían en `common.py`**, no en
+  config: la corrección de la sesión anterior parametrizó la columna y dejó el
+  nombre de la hoja. La afirmación del README se había validado contra la cadena
+  «finis», que nunca aparece en un nombre de hoja.
+- **El ORCID no aparecía en el listado de autores**, sólo dentro de cada ficha.
+- **`run_all.py` nunca salía con código distinto de cero**: el paso de CI llamado
+  «Auditoría y validación» quedaba verde con reglas bloqueantes rotas.
+
+### Verificación
+
+- Reconstrucción limpia desde `data/raw/`: artefactos **byte a byte idénticos**.
+- Recorrido exhaustivo de los 596 artefactos, sin el muestreo: **0 fugas**.
+- `unique_slugs`: 589 firmas → 589 identificadores, 0 colisiones residuales.
+- Paleta validada con la herramienta de `dataviz` contra las superficies reales:
+  claro (`#ffffff`) pasa las cinco comprobaciones con aviso de contraste; oscuro
+  (`#12151c`) las pasa todas.
+- **32 combinaciones** (8 páginas × 2 temas × 2 anchos) en Chromium: sin errores
+  de consola y sin desborde horizontal.
+- Tooltip verificado con puntero y con foco de teclado.
+- Escapado HTML confirmado sobre un título real con `c.2302A>G`.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Emitir el color como atributo `fill` basta» | **Falso.** Una regla CSS gana al atributo de presentación: `.barra { fill }` pintaba «Sin dato declarado» del color de una serie medida. Detectado en captura, no en revisión de código |
+| «Un lienzo SVG único sirve para cualquier contenedor» | **Falso.** Un lienzo de 680 dentro de una columna de 330 reduce el texto a la mitad. El ancho se declara según el contexto |
+| «Colorear cada barra distingue mejor» | **Falso** en dos casos: en una escala ordenada afirma que no hay orden, y en categorías que se llaman como colores produce «Green» en naranja |
+| «`grep -ri finis src/ web/` = 0 prueba que no hay literales institucionales» | **Insuficiente.** Quedaban `Publicaciones_UFT_detalle`, `Investigadores` y un `>= 2024` |
+| «Las compuertas del build protegen la capa interna» | **Parcial.** Protegen `dist/`. El repositorio público no lo cubre ninguna |
+
+### Ambigüedades abiertas
+
+Las heredadas siguen abiertas. Se suman:
+
+- **`internal/` y `data/raw/` publicados**: pendiente de decisión del usuario.
+  Borrarlos ahora no los saca del historial de git.
+- **`P-07` expone defectos de extracción** que hoy son visibles en el sitio:
+  `Facultad de MedicinaEscuela de Medicina` y `Faculty of MedicineUniver-sidad`
+  son cadenas concatenadas sin separador, y `Facultad de Ingeniería` aparece dos
+  veces. Es dato, no presentación: no se corrige en silencio. Alimenta `T-02`.
+- La estimación del ancho de texto en SVG es aproximada: no hay forma de medir
+  una cadena que aún no está en el documento.
+
+### Próximo paso recomendado
+
+Decidir sobre `internal/` y `data/raw/` en el repositorio público, que es lo
+único de la auditoría que quedó sin aplicar. Después, `T-02`: las cadenas
+concatenadas de unidad académica ya son visibles para cualquier visitante.
+
+---
+
+## Sesión 2026-08-01 — Sistema visual sobre la paleta institucional
+
+**Estado inicial:** interfaz auditada y corregida en la sesión anterior, con
+identidad azul marino y cian. Encargo: reanclar el sistema visual en la paleta
+`#22577A · #38A3A5 · #57CC99 · #80ED99 · #C7F9CC`, refinar tipografía y
+jerarquía, y profundizar la interacción de gráficos y tablas.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-56 | La paleta entregada se usa para identidad, superficies y rampa ordinal, **no para series de datos** | Medida como categórica falla tres de cinco comprobaciones. `#80ED99` vs `#57CC99` dan ΔE 10,3 en visión **normal**, bajo el piso de 15 |
+| D-57 | Paleta categórica de seis ranuras que abre con el azul-teal de la referencia | Conserva el espíritu y separa de verdad: peor par CVD ΔE 8,7 claro / 8,0 oscuro |
+| D-58 | El **orden** de las ranuras es mecanismo de seguridad, no estética | Violeta va entre naranja y verde porque ese par caía en la banda de aviso. Reordenar lo arregla sin cambiar un solo color |
+| D-59 | Seis series, no ocho | Una séptima obligaría a meter un tono en la franja que ya ocupan otros. Más allá, se agrupa en «Otras» |
+| D-60 | Tipografía: pila del sistema con jerarquía por peso, tamaño e interletrado | El proyecto prohíbe CDN y autoalojar añadiría binarios y peso por una mejora que no cambia ninguna lectura analítica |
+| D-61 | Cifras tabulares sólo donde se alinean en columna | En un KPI suelto las proporcionales se leen mejor; forzar la tabulación sólo separa dígitos |
+| D-62 | La separación entre superficies la hace el filete, no la elevación | Radios de 6 px y sombra mínima. Una interfaz analítica no flota |
+| D-63 | Resaltar es atenuar el resto | Señalar sin apagar las demás no dirige la mirada: sólo añade un borde que hay que buscar |
+| D-64 | La cuota sobre el total sólo aparece donde las barras son partes de un total | En umbrales encajados, multivaluados y rankings recortados, un porcentaje afirmaría algo falso |
+
+### Archivos creados o modificados
+
+```
+web/assets/css/app.css        sistema completo reescrito sobre la paleta nueva
+web/assets/js/core.js         SERIES a seis; resaltado por atenuación; cuota en
+                              el tooltip; reposicionamiento cuando no cabe
+web/assets/js/paginas.js      cuotaValida por indicador; columna ordenada
+docs/UX_UI.md                 §12 reescrito: paleta medida, tipografía,
+                              espacio, interacción, responsive
+```
+
+### Hallazgos
+
+- **La paleta pedida es excelente como identidad y pésima como paleta de
+  datos**, y la causa es estructural: sus cinco tonos viven en la franja
+  cian-verde, que es donde la deuteranopía y la protanopía colapsan diferencias.
+  No es cuestión de afinar, ninguna paleta de datos honesta sale de ahí.
+- **Es, en cambio, una rampa ordinal natural.** Los cuartiles `R-01` usan ahora
+  una rampa de un tono anclada en `#38A3A5`: el orden se ve en el color mismo.
+- **`#38A3A5` da 3,02:1 sobre blanco**: vale para rellenos y bordes, no para
+  texto de enlace. Los enlaces usan `#1a6d78` (6,0:1).
+- **`#57CC99` rinde 2,00:1 sobre blanco y 8,15:1 sobre la superficie oscura.**
+  El mismo color es inservible en un modo y el color de acción natural en el
+  otro: la prueba más clara de que el modo oscuro no puede ser una inversión.
+- **La afordancia de ordenamiento sólo aparecía al pasar el puntero**, y la
+  columna ordenada no se distinguía en las 51 filas visibles.
+
+### Verificación
+
+- Paleta categórica revalidada contra las superficies reales: **cinco
+  comprobaciones en verde** en claro (`#ffffff`) y oscuro (`#12222a`).
+- Rampa ordinal: cuatro comprobaciones en verde en ambos modos.
+- Contrastes de texto calculados uno a uno antes de fijar los tokens.
+- **32 combinaciones** (8 páginas × 2 temas × 2 anchos): sin errores de consola
+  ni desborde horizontal.
+- Interacción comprobada en Chromium: atenuación al 34 %, una sola marca activa,
+  aislamiento entre gráficos de la misma página, foco por teclado con tooltip,
+  cierre con `Escape`, y 51 celdas marcadas al reordenar por otra columna.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Una paleta bonita de cinco tonos sirve para series» | **Falso, y medible.** Dos de sus verdes son indistinguibles incluso con visión normal |
+| «Basta oscurecer los tonos claros de la paleta para usarla en datos» | **Insuficiente.** El problema es el rango de tono, no la luminosidad: al separarlos deja de ser esa paleta |
+| «El modo oscuro se obtiene invirtiendo el claro» | **Falso.** `#57CC99` pasa de 2,00:1 a 8,15:1 según la superficie |
+| «El resalte por contorno basta para explorar» | **Insuficiente.** Sin atenuar el resto, el contorno hay que buscarlo |
+
+### Ambigüedades abiertas
+
+Las heredadas siguen abiertas, incluida `T-16`. Se suma:
+
+- El aviso de contraste de `#d4a017` (2,38:1 sobre blanco) se resuelve con
+  relieve —etiqueta de valor y tabla equivalente, que el sitio ya tiene—, pero
+  es un piso, no un margen: si en el futuro un gráfico prescinde de la etiqueta
+  de valor, ese color deja de ser legal.
+
+### Próximo paso recomendado
+
+Sin cambios: `T-16` sigue siendo lo único que requiere decisión del usuario.

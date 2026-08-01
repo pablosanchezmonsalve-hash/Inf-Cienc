@@ -54,7 +54,7 @@ jobs:
       - name: Comprobar que la capa interna no viaja
         run: |
           set -e
-          for prohibido in matching_log ambiguities_ orcid_conflicts; do
+          for prohibido in matching_log ambiguities_ orcid_conflicts identity_candidates; do
             if grep -rl "$prohibido" dist/ >/dev/null 2>&1; then
               echo "FALLA: '$prohibido' aparece en dist/"
               exit 1

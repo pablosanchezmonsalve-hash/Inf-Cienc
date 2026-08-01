@@ -117,11 +117,16 @@ def read_rdata(key: str) -> pd.DataFrame | None:
 def read_report_sheet(sheet: str) -> pd.DataFrame:
     """Hoja del reporte manual previo. Set de validación (decisión D-15)."""
     hojas = SOURCES["reporte_excel_2026"]["hojas_utiles"]
-    key = {
-        "Investigadores": "investigadores",
-        "Publicaciones_UFT_detalle": "publicaciones_uft_detalle",
-        "Publicaciones unificadas": "publicaciones_unificadas",
-    }[sheet]
+    # `sheet` es la clave lógica declarada en config, no el nombre literal de la
+    # hoja: ese nombre es propio del libro Excel de esta institución y no puede
+    # estar escrito aquí (requisito de replicabilidad, docs/REPLICATION.md §2).
+    if sheet not in hojas:
+        raise KeyError(
+            f"La hoja lógica '{sheet}' no está declarada en config/sources.yml "
+            f"bajo reporte_excel_2026.hojas_utiles. Declaradas: {sorted(hojas)}"
+        )
+    key = sheet
+    sheet = hojas[key]["nombre_hoja"]
     return pd.read_excel(
         source_path("reporte_excel_2026"),
         sheet_name=sheet,
