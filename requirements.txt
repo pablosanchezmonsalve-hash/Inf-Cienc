@@ -2,4 +2,9 @@
 pandas>=2.0
 openpyxl>=3.1
 PyYAML>=6.0
-rdata>=0.11        # lectura de los objetos bibliometrixDB (.RData) de referencia
+
+# OPCIONAL. Sólo para leer los .RData, que son fuentes de REFERENCIA y no
+# alimentan ningún indicador publicable (decisión D-05). Si no se instala, la
+# auditoría los omite y lo declara en su salida. Útil porque el paquete no
+# tiene ruedas precompiladas para todas las versiones de Python.
+rdata>=0.11 ; python_version < "3.14"
