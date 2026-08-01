@@ -285,7 +285,18 @@ def main() -> int:
         sys.exit("Falta un correo de contacto. Use --mailto o declare "
                  "enriquecimiento_externo.orcid.mailto en config/matching_rules.yml")
 
-    uni = pd.read_csv(c.INTERIM / "publications_universe.csv", dtype=str)
+    # data/interim/ no se versiona: se regenera con la auditoría. Sin ese paso
+    # previo este script no tiene sobre qué trabajar, y conviene decirlo con
+    # claridad en vez de dejar escapar un FileNotFoundError.
+    universo = c.INTERIM / "publications_universe.csv"
+    if not universo.exists():
+        sys.exit(
+            "Falta data/interim/publications_universe.csv.\n"
+            "Ese archivo se genera con la auditoría y no se versiona.\n"
+            "Ejecute primero:  python3 src/audit/run_all.py"
+        )
+
+    uni = pd.read_csv(universo, dtype=str)
     log = pd.read_csv(c.INTERNAL / "matching_log.csv", dtype=str)
     firmas_por_eid = log.groupby("eid")["nombre_en_fuente"].apply(lambda s: sorted(set(s))).to_dict()
 

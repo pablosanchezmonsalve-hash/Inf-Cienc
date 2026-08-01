@@ -95,9 +95,19 @@ def read_scival_export_metadata() -> dict:
     return meta
 
 
-def read_rdata(key: str) -> pd.DataFrame:
-    """Objeto bibliometrixDB. Sólo referencia comparativa (decisión D-05)."""
-    import rdata as _rdata
+def read_rdata(key: str) -> pd.DataFrame | None:
+    """Objeto bibliometrixDB. Sólo referencia comparativa (decisión D-05).
+
+    Devuelve None si el paquete `rdata` no está disponible. Estos archivos son
+    fuentes de REFERENCIA, no de indicadores publicables: hacer que toda la
+    auditoría dependa de poder leerlos convertiría una comparación opcional en
+    un requisito de instalación. El paquete no tiene ruedas precompiladas para
+    todas las versiones de Python, y la plataforma debe poder construirse sin él.
+    """
+    try:
+        import rdata as _rdata
+    except ImportError:
+        return None
 
     obj = SOURCES[key]["objeto"]
     parsed = _rdata.read_rda(str(source_path(key)))

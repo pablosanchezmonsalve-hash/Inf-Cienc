@@ -9,6 +9,11 @@ registros.
 **Requisitos:** una máquina con Python 3.11+ y salida a internet. Nada más: sin
 API key, sin cuenta, sin costo.
 
+> **En Windows** el comando es **`py`**, no `python3`. Sustitúyelo en todos los
+> ejemplos. Y los comandos van en PowerShell o en el Símbolo del sistema,
+> **no dentro del intérprete de Python** (si ves el prompt `>>>`, escribe
+> `exit()` para salir).
+
 ---
 
 ## Paso 1 — Traer el repositorio
@@ -36,7 +41,23 @@ pip install -r requirements.txt
 
 Si `pip` no existe, prueba `pip3`. En Windows, `py -m pip install -r requirements.txt`.
 
-## Paso 3 — Comprobar que todo está bien antes de salir a la red
+## Paso 3 — Generar los datos intermedios
+
+**Este paso es obligatorio y va antes que todo lo demás.** El script de ORCID
+trabaja sobre `data/interim/publications_universe.csv`, que **no está en el
+repositorio**: es un archivo derivado que se regenera desde los datos de origen.
+
+```bash
+python3 src/audit/run_all.py
+```
+
+Tarda un par de minutos. Debe terminar con `bloqueantes_fallando=0`.
+
+Si ves un aviso de que se omitieron las fuentes `rdata_*`, **no es un problema**:
+son archivos de referencia que no alimentan ningún indicador. La auditoría lo
+declara y sigue.
+
+## Paso 4 — Comprobar que todo está bien antes de salir a la red
 
 ```bash
 python3 src/enrich/orcid_crossref.py --test
@@ -51,7 +72,7 @@ TODOS LOS CASOS OK
 
 Si esto falla, no sigas: hay algo roto en la instalación.
 
-## Paso 4 — Prueba corta con 20 publicaciones
+## Paso 5 — Prueba corta con 20 publicaciones
 
 Antes de lanzar las 799, comprueba que hay conexión con Crossref:
 
@@ -62,7 +83,7 @@ python3 src/enrich/orcid_crossref.py --limit 20
 Si ves avisos del tipo `URLError` o `timeout`, no hay salida a
 `api.crossref.org` desde esa máquina. Prueba desde otra red.
 
-## Paso 5 — La corrida completa
+## Paso 6 — La corrida completa
 
 ```bash
 python3 src/enrich/orcid_crossref.py
@@ -89,7 +110,7 @@ Al terminar verás algo así:
 > Los números concretos son ilustrativos. **No sabemos aún cuántos ORCID
 > aparecerán**: depende de cuántos autores lo hayan declarado al publicar.
 
-## Paso 6 — Reconstruir el sitio
+## Paso 7 — Reconstruir el sitio
 
 ```bash
 make sitio
@@ -113,7 +134,7 @@ python3 -m http.server -d dist 8000
 y abrir `http://localhost:8000/autores.html`. Entra a una ficha y comprueba que
 el ORCID aparece enlazado donde antes decía «No disponible».
 
-## Paso 7 — Publicar
+## Paso 8 — Publicar
 
 ```bash
 git add data/interim/authors_orcid.csv internal/orcid_conflicts.csv .gitignore
@@ -169,7 +190,10 @@ siempre con su nivel de confianza.
 |---|---|---|
 | `URLError` o `timeout` en todos los DOI | Sin salida a `api.crossref.org` | Probar desde otra red |
 | `ABORTADO: demasiados errores de red` | Más de 25 fallos seguidos | Revisar la conexión y reejecutar; el caché conserva lo hecho |
-| `Sin hallazgos. No se escribe ningún archivo` | No se emparejó ningún ORCID | Revisar que `internal/matching_log.csv` exista; correr antes `python3 src/audit/run_all.py` |
+| `Falta data/interim/publications_universe.csv` | No se corrió la auditoría | Ejecutar `python3 src/audit/run_all.py` (paso 3) |
+| `Sin hallazgos. No se escribe ningún archivo` | No se emparejó ningún ORCID | Revisar que la auditoría haya terminado sin fallas bloqueantes |
+| `ERROR: Failed building wheel for rdata` | El paquete no tiene ruedas para esa versión de Python | **Ignorarlo.** Es opcional; la auditoría funciona sin él |
+| `NameError: name 'python3' is not defined` | Se escribió en el intérprete de Python, no en la terminal | `exit()` y usar PowerShell |
 | HTTP 429 de Crossref | Límite de tasa | Esperar unos minutos y reejecutar |
 | Las fichas siguen sin ORCID | No se reconstruyó el sitio | Ejecutar `make sitio` |
 
