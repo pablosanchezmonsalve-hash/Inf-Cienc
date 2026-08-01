@@ -103,7 +103,9 @@ def main() -> None:
     for _, r in vacias.iterrows():
         print(f"    {r['fuente']} :: {r['campo']}")
 
-    residuo = cols_df[cols_df["campo"].str.contains(r"\.(x|y)(\.(x|y))*$", regex=True)]
+    # Grupos no capturantes: con grupos normales pandas avisa que el patrón
+    # tiene captura y sugiere str.extract, aunque aquí sólo interesa el booleano.
+    residuo = cols_df[cols_df["campo"].str.contains(r"\.(?:x|y)(?:\.(?:x|y))*$", regex=True)]
     print(f"\nE-07 · columnas residuales de join: {len(residuo)}")
     for _, r in residuo.iterrows():
         print(f"    {r['fuente']} :: {r['campo']}")
