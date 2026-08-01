@@ -17,7 +17,11 @@ colaboración y estructura temática de la actividad científica institucional.
 | 2 | Indicadores, arquitectura y UX/UI | ✅ Completada |
 | 3 | Implementación, despliegue, documentación y replicabilidad | ✅ Completada |
 
-Ver `PLAN.md` para el detalle y `docs/V2_BACKLOG.md` para lo que sigue.
+**Para retomar el trabajo, leer `STATE.md`**: punto de entrada generado, con las
+cifras vigentes, los pendientes abiertos y un mapa de qué documento abrir para
+cada pregunta. Se regenera con `make estado`.
+
+Ver `PLAN.md` para el detalle por fase y `docs/V2_BACKLOG.md` para lo que sigue.
 
 ---
 
@@ -109,6 +113,8 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 
 | Documento | Contenido |
 |---|---|
+| **`STATE.md`** | **Punto de entrada: estado, cifras y mapa de lectura** |
+| `docs/DECISIONS.md` | Índice de las 40 decisiones, una línea cada una |
 | `docs/AUDIT_REPORT.md` | Auditoría completa con cifras verificadas |
 | `docs/DATA_MODEL.md` | Modelo lógico, entidades y claves de enlace |
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
