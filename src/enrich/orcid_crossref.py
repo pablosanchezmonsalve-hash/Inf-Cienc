@@ -24,6 +24,7 @@ USO
 Salidas:
     data/enriched/authors_orcid.csv    asignaciones publicables (SE VERSIONA)
     internal/orcid_conflicts.csv       conflictos y ambigüedades (capa interna)
+    internal/identity_candidates.csv   firmas que comparten ORCID (capa interna)
     data/cache/crossref/*.json         respuestas cacheadas (no versionadas)
 
 El resultado NO va a data/interim/: ese directorio contiene derivados que se
@@ -172,6 +173,42 @@ def emparejar(firmas_uft: list[str], autores_crossref: list[dict]) -> list[dict]
             resultados.append({"firma": firma, "orcid": None,
                                "match": "multiple", "ambiguo": True})
     return resultados
+
+
+def candidatos_de_identidad(asignaciones: pd.DataFrame) -> pd.DataFrame:
+    """Firmas distintas que comparten ORCID: candidatas a ser la misma persona.
+
+    NO se fusionan (decisión D-08). Compartir ORCID es evidencia fuerte, pero la
+    asignación firma->ORCID es a su vez una hipótesis basada en apellido e
+    inicial: encadenar dos hipótesis no produce un hecho. Se emite como cola de
+    revisión para que una persona confirme.
+
+    El valor está en lo que la agrupación por apellido NO encuentra: 'Gubbins V.'
+    y 'Foxley V.G.' no comparten apellido, pero sí ORCID.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "audit"))
+
+    filas = []
+    for orcid, grp in asignaciones.groupby("orcid"):
+        firmas = sorted(grp["nombre_en_fuente"])
+        if len(firmas) < 2:
+            continue
+        claves = {c.surname_key(f) for f in firmas}
+        filas.append({
+            "tipo": "V2-01_firmas_con_orcid_compartido",
+            "severidad": "alta",
+            "orcid": orcid,
+            "firmas": " | ".join(firmas),
+            "n_firmas": len(firmas),
+            # Si las claves de apellido difieren, la cola P-03 nunca las habría
+            # agrupado: es un hallazgo que sólo aporta el identificador.
+            "hallazgo_nuevo": len(claves) > 1,
+            "confianza_minima": grp["confianza"].min(),
+            "consecuencia": "firmas distintas comparten identificador persistente",
+            "resolucion": "PENDIENTE_CONFIRMACION_HUMANA",
+        })
+    return pd.DataFrame(filas)
 
 
 def consolidar(hallazgos: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -344,6 +381,10 @@ def main() -> int:
     if len(conflictos):
         c.write_internal(conflictos, "orcid_conflicts.csv")
 
+    candidatos = candidatos_de_identidad(asignaciones)
+    if len(candidatos):
+        c.write_internal(candidatos, "identity_candidates.csv")
+
     total_firmas = log["nombre_en_fuente"].nunique()
     print(f"\n  DOI sin registro en Crossref : {sin_registro}")
     print(f"  errores de red               : {errores}")
@@ -353,6 +394,12 @@ def main() -> int:
         print(f"    confianza alta : {int((asignaciones['confianza'] == 'alta').sum())}")
         print(f"    confianza media: {int((asignaciones['confianza'] == 'media').sum())}")
     print(f"  conflictos encolados         : {len(conflictos)}")
+    if len(candidatos):
+        nuevos = int(candidatos["hallazgo_nuevo"].sum())
+        colapsables = int((candidatos["n_firmas"] - 1).sum())
+        print(f"  firmas que comparten ORCID   : {len(candidatos)} grupos "
+              f"({colapsables} firmas colapsables)")
+        print(f"    de ellos, hallazgos que el apellido no detectaba: {nuevos}")
     print("\n  OK · data/enriched/authors_orcid.csv  (recuerde versionarlo)")
     return 0
 
