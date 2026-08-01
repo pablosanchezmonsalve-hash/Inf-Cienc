@@ -97,11 +97,32 @@ unidad_academica:
   # El ~30 % restante NO se imputa (decisión D-09).
   etiqueta_sin_dato: "No determinada"
 
+  # Jerarquía escuela -> facultad.
+  # Permite agregar la producción a nivel de facultad sin perder el detalle de
+  # escuela. Una escuela sin entrada aquí se reporta por sí misma.
+  #
+  # ESTATUS DE CADA RELACIÓN:
+  #   confirmada  -> validada por el responsable del proyecto
+  #   inferida    -> deducida de los datos, PENDIENTE de validación
+  jerarquia:
+    "Escuela de Kinesiología":
+      facultad: "Facultad de Medicina"
+      estado: confirmada        # usuario, sesión 2026-07-31
+    "Escuela de Nutrición y Dietética":
+      facultad: "Facultad de Medicina"
+      estado: inferida          # aparece bajo Facultad de Medicina en las afiliaciones
+    "Escuela de Enfermería":
+      facultad: "Facultad de Medicina"
+      estado: inferida
+    "Escuela de Ciencias de la Familia":
+      facultad: "Facultad de Educación, Psicología y Familia"
+      estado: inferida
+
   # Vocabulario controlado (regla I-07).
   # ESTATUS: INFERIDO DE LOS DATOS, NO OFICIAL.
-  # El usuario confirmó (sesión 2026-07-31) que no existe catálogo oficial UFT
-  # disponible. Este vocabulario requiere validación institucional antes de
-  # cualquier publicación de comparaciones entre unidades.
+  # No existe catálogo oficial UFT disponible para este proyecto. Los nombres se
+  # dedujeron de cómo aparecen escritos en las afiliaciones y requieren
+  # validación institucional antes de publicar comparaciones entre unidades.
   vocabulario_validado_por_institucion: false
   vocabulario:
     "Facultad de Medicina":

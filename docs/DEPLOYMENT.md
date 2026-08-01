@@ -99,7 +99,17 @@ Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'se
 en GitHub Pages con cada push a `main`.
 
 **Activación (una vez):** Settings → Pages → Source: **GitHub Actions**.
-Sin ese paso el workflow construye pero no publica.
+
+El workflow intenta activarlo por API (`enablement: true`), pero eso no siempre
+basta. Dos condiciones deben cumplirse:
+
+1. **Pages habilitado** en el repositorio.
+2. **El repositorio es público, o la cuenta tiene un plan de pago.** GitHub
+   Pages en repositorios privados requiere Pro, Team o Enterprise. En un
+   repositorio privado con plan gratuito **el despliegue por Pages no es
+   posible**, y hay que usar otra de las opciones de §4.
+
+Si el job falla con `Get Pages site failed`, es una de estas dos.
 
 El workflow reproduce las mismas compuertas y añade una verificación extra en
 CI: falla si `internal/`, `data/raw/` o cualquier rastro de las colas de
