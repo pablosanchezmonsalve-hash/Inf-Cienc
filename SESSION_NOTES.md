@@ -963,3 +963,66 @@ por 10 peticiones antes de ofrecer las 174.
 Comprobado: llaves y paréntesis equilibrados, sin comillas impares, todo el
 no-ASCII confinado a comentarios, BOM presente, y el directorio `scripts/` fuera
 de `dist/`.
+
+---
+
+## Sesión 2026-08-03 (cont. 4) — Ejecución sin instalar nada
+
+**Estado inicial:** el usuario intentó ejecutar el conector de ORCID. Dos
+obstáculos, ninguno suyo.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-88 | Detectar un intérprete es ejecutarlo, no comprobar que el comando exista | Windows instala alias de `python` y `python3` que apuntan a la Microsoft Store y no son Python. `Get-Command` los da por buenos |
+| D-89 | La verificación de ORCID puede correr en GitHub Actions, no sólo en local | El proyecto ya ejecuta Python allí. Un equipo administrado por la institución puede tener bloqueada la instalación, y eso no debería impedir el trabajo |
+| D-90 | En esa vía las credenciales van a los secretos del repositorio | Cifradas y no legibles ni desde la propia interfaz. Mejor que una consola o un archivo local, no sólo más cómodo |
+
+### Archivos creados o modificados
+
+```
+.github/workflows/verificar-orcid.yml   ejecución manual en GitHub (nuevo)
+scripts/verificar-orcid.ps1             detección real del intérprete
+docs/ORCID_API_GUIDE.md                 §3 con las tres vías
+```
+
+### Hallazgos
+
+- **`Get-Command python` da un falso positivo en Windows.** Existe un alias de
+  ejecución que responde con un mensaje de error en vez de ser Python. El fallo
+  aparecía tres líneas más abajo, dentro de un `Write-Host`, donde ya no se
+  entendía de qué venía.
+- **Python puede estar instalado fuera del `PATH`.** El script busca ahora las
+  rutas donde el instalador oficial lo deja por defecto antes de rendirse.
+- **La instalación puede estar bloqueada por la administración del equipo**, y
+  ese caso no se resuelve mejorando el mensaje de error. La vía por GitHub
+  Actions lo elimina: el trabajo corre donde el usuario sí tiene control.
+
+### Verificación
+
+- YAML válido; 10 pasos en el orden correcto.
+- La autoprueba sin red va **antes** de comprobar credenciales y de gastar
+  peticiones: si la lógica está rota, el problema no son las credenciales.
+- El artefacto se sube con `if: always()`, así que un fallo al guardar en el
+  repositorio no pierde el resultado de las consultas.
+- El `.ps1`: llaves y paréntesis equilibrados, sin comillas impares, no-ASCII
+  sólo en comentarios, BOM UTF-8 presente.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Si `Get-Command python` responde, hay Python» | **Falso.** Es un atajo a la Store que no ejecuta nada |
+| «Una guía con los comandos correctos basta» | **Insuficiente.** Se copiaron tres veces con las comillas de Markdown incluidas. Una instrucción que se puede copiar mal se copiará mal |
+| «Ejecutar en local es el único camino» | **Falso.** El pipeline ya corre en GitHub; la verificación también puede |
+
+### Ambigüedades abiertas
+
+El contrato de la API de ORCID sigue sin verificarse en vivo. La vía por GitHub
+Actions es ahora la más probable para comprobarlo, porque no depende de que el
+equipo del usuario permita instalar nada.
+
+### Próximo paso recomendado
+
+Guardar los dos secretos en el repositorio y lanzar el workflow con límite 10.

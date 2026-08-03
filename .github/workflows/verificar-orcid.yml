@@ -1,0 +1,133 @@
+name: Verificar ORCID contra su registro
+
+# Ejecuta la verificación de ORCID en GitHub, sin instalar nada en local.
+#
+# POR QUÉ EXISTE
+#   El conector necesita Python, y no todos los equipos permiten instalarlo:
+#   en un portátil administrado por la institución la instalación puede estar
+#   bloqueada. El proyecto ya corre Python aquí para construir el sitio, así que
+#   este paso puede correr en el mismo sitio.
+#
+#   Hay además una ventaja que no es sólo comodidad: las credenciales viven en
+#   los secretos del repositorio, cifradas, en vez de pasar por una consola o
+#   por un archivo local.
+#
+# ANTES DE LA PRIMERA EJECUCIÓN
+#   Settings → Secrets and variables → Actions → New repository secret
+#     ORCID_CLIENT_ID      APP-XXXXXXXXXXXX
+#     ORCID_CLIENT_SECRET  el secret que entrega ORCID
+#
+# CÓMO SE LANZA
+#   Pestaña Actions → «Verificar ORCID contra su registro» → Run workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limite:
+        description: 'Cuántas firmas verificar (vacío = todas las que haya)'
+        required: false
+        default: '10'
+      commitear:
+        description: '¿Guardar el resultado en el repositorio?'
+        type: boolean
+        required: false
+        default: true
+
+# Escritura, porque el resultado se versiona: es un dato costoso de reproducir
+# —depende de consultar un servicio externo— y perderlo obligaría a repetirlo.
+permissions:
+  contents: write
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      # Antes de gastar una sola petición: si la lógica está rota, el problema
+      # no son las credenciales y no tiene sentido consultarlas.
+      - name: Probar la lógica sin red
+        run: python3 src/enrich/orcid_api.py --test
+
+      - name: Comprobar que hay credenciales
+        env:
+          ID: ${{ secrets.ORCID_CLIENT_ID }}
+          SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
+        run: |
+          if [ -z "$ID" ] || [ -z "$SECRET" ]; then
+            echo "::error::Faltan los secretos ORCID_CLIENT_ID y ORCID_CLIENT_SECRET."
+            echo "Añádalos en Settings -> Secrets and variables -> Actions."
+            echo "Se obtienen gratis en https://orcid.org -> Developer tools."
+            exit 1
+          fi
+          echo "Credenciales presentes (Client ID: ${ID:0:8}...)"
+
+      - name: Auditoría
+        run: python3 src/audit/run_all.py
+
+      - name: Verificar contra el registro de ORCID
+        env:
+          ORCID_CLIENT_ID: ${{ secrets.ORCID_CLIENT_ID }}
+          ORCID_CLIENT_SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
+          LIMITE: ${{ inputs.limite }}
+        run: |
+          if [ -n "$LIMITE" ]; then
+            python3 src/enrich/orcid_api.py --limit "$LIMITE"
+          else
+            python3 src/enrich/orcid_api.py
+          fi
+
+      # Siempre descargable, se comitee o no: si algo sale mal con el commit,
+      # el resultado de las consultas no se pierde.
+      - name: Publicar el resultado como artefacto descargable
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verificacion-orcid
+          path: |
+            data/enriched/orcid_verificacion.csv
+            internal/orcid_hallazgos.csv
+          if-no-files-found: ignore
+
+      - name: Guardar el resultado en el repositorio
+        if: ${{ inputs.commitear }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/enriched/orcid_verificacion.csv internal/orcid_hallazgos.csv 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Sin cambios que guardar."
+          else
+            git commit -m "Verificación de ORCID contra el registro público
+
+          Ejecutado por el workflow «Verificar ORCID contra su registro».
+          Límite: ${{ inputs.limite || 'sin límite' }}."
+            git push
+          fi
+
+      - name: Resumen
+        if: always()
+        run: |
+          {
+            echo "## Verificación de ORCID"
+            echo ""
+            if [ -f data/enriched/orcid_verificacion.csv ]; then
+              echo "| Veredicto | Firmas |"
+              echo "|---|---:|"
+              tail -n +2 data/enriched/orcid_verificacion.csv \
+                | cut -d, -f3 | sort | uniq -c \
+                | awk '{printf "| %s | %s |\n", $2, $1}'
+              echo ""
+              echo "Descargable en **Artifacts**, al final de esta página."
+            else
+              echo "No se generó ningún resultado. Revise el registro de los pasos."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -48,29 +48,65 @@ suscripción institucional.
 
 ## 3. Ejecutar
 
-### Windows — la forma recomendada
+Tres vías. La primera **no requiere instalar nada** y es la indicada si el
+equipo está administrado por la institución y no permite instalar programas.
 
-En el Explorador de archivos, entre en la carpeta del proyecto, luego en
-`scripts`, y haga **clic derecho sobre `verificar-orcid.ps1` → «Ejecutar con
-PowerShell»**.
+---
 
-Eso es todo. El asistente se encarga del resto: comprueba que Python esté
-instalado, instala lo que falte, prueba la lógica sin tocar la red, corre la
-auditoría si hace falta, **pide las credenciales de forma oculta** y empieza por
-una prueba de 10 antes de ofrecerle las 174.
+### Vía A · En GitHub, sin instalar nada  ← recomendada
 
-No hay que copiar comandos ni definir variables a mano. El Client Secret se
-teclea una vez, no se guarda en ningún archivo y no queda en el historial de la
-consola.
+El proyecto ya ejecuta Python en GitHub para construir el sitio. Esta
+verificación puede correr en el mismo sitio.
 
-> Si Windows responde *«la ejecución de scripts está deshabilitada»*, abra
-> PowerShell y ejecute una sola vez:
+Tiene una ventaja que no es sólo comodidad: **las credenciales viven cifradas
+en los secretos del repositorio**, en vez de pasar por una consola o quedar en
+un archivo local.
+
+**Una sola vez —** guardar las credenciales:
+
+1. En el repositorio, **Settings → Secrets and variables → Actions**.
+2. **New repository secret**, dos veces:
+
+   | Name | Secret |
+   |---|---|
+   | `ORCID_CLIENT_ID` | `APP-XXXXXXXXXXXX` |
+   | `ORCID_CLIENT_SECRET` | el que entrega ORCID |
+
+   Una vez guardados no se pueden volver a leer, ni siquiera desde la propia
+   interfaz: es lo que se espera de un secreto.
+
+**Cada vez que quiera ejecutarlo:**
+
+1. Pestaña **Actions** → **«Verificar ORCID contra su registro»**.
+2. **Run workflow**. Deje el límite en `10` la primera vez.
+3. Al terminar, la propia página muestra una tabla con el recuento por
+   veredicto, y el resultado queda:
+   - guardado en el repositorio, si dejó marcada esa opción;
+   - descargable en **Artifacts**, al final de la página, siempre.
+
+Si algo falla, el registro de cada paso dice dónde.
+
+---
+
+### Vía B · Windows, con el asistente
+
+Requiere Python instalado. Clic derecho sobre
+`scripts\verificar-orcid.ps1` → **«Ejecutar con PowerShell»**. El asistente
+comprueba Python, instala dependencias, prueba la lógica sin red, pide las
+credenciales de forma oculta y empieza por 10 peticiones.
+
+> **Si Python no está instalado y no tiene permisos de administrador**, pruebe
+> el instalador oficial de python.org de todos modos: la opción por defecto
+> instala en su carpeta de usuario y **normalmente no pide administrador**. Si
+> aun así lo bloquea, use la **Vía A**, que no necesita nada instalado.
+
+> Si Windows responde *«la ejecución de scripts está deshabilitada»*:
 >
 >     Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
->
-> Es el ajuste que Microsoft recomienda para scripts propios.
 
-### macOS, Linux, o si prefiere hacerlo a mano
+---
+
+### Vía C · A mano
 
 Una línea cada vez, desde la carpeta del proyecto:
 
@@ -81,8 +117,12 @@ Una línea cada vez, desde la carpeta del proyecto:
     python3 src/enrich/orcid_api.py --limit 10
     python3 src/enrich/orcid_api.py
 
-**Empiece siempre por `--limit 10`.** Si el token o el contrato de la API no son
-los esperados, se ve en diez peticiones y no en trescientas.
+En PowerShell, `$env:ORCID_CLIENT_ID = '...'` en lugar de `export`.
+
+---
+
+**Sea cual sea la vía, empiece por 10.** Si el token o el contrato de la API no
+son los esperados, se ve en diez peticiones y no en trescientas.
 
 Las respuestas se cachean en `data/cache/orcid/`, que no se versiona:
 reejecutar no vuelve a golpear la API.
