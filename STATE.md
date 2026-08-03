@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ab78c9e` · Permite verificar ORCID sin instalar nada en local (#15)
+Último commit: `78cc009` · El ORCID publicado dice qué evidencia lo respalda, y las cifras se ven
 Snapshot: 2026-08-03
 
 ---
@@ -69,7 +69,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 92
+## Decisiones tomadas: 98
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
