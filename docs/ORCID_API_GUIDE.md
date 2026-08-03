@@ -167,13 +167,11 @@ resolver `T-14` y `T-15`, porque ya no depende de parecidos de apellido.
 
 ## 6. Límites honestos
 
-- **No se ha ejercido contra la API real desde este repositorio.** El entorno
-  donde se escribió bloquea `pub.orcid.org`. La lógica está cubierta por una
-  autoprueba de 9 casos con registros de mentira (`--test`), que corre en cada
-  build de CI, pero el contrato de la API —nombres de campo, formato de
-  respuesta— está tomado de la documentación y **no verificado en vivo**. Si la
-  primera ejecución con `--limit 10` falla al leer la respuesta, es ahí donde
-  hay que mirar.
+- **El contrato de la API está verificado en vivo** desde el 2026-08-03: una
+  ejecución de 10 firmas devolvió **10 confirmadas**, lo que prueba que el
+  conector lee correctamente la respuesta de ORCID. Antes de esa ejecución los
+  nombres de campo venían sólo de la documentación. La lógica sigue además
+  cubierta por una autoprueba de 9 casos (`--test`) que corre en cada build.
 - **Verificar una publicación no verifica una identidad.** Que el titular
   declare un artículo confirma que *ese artículo* es suyo. Que dos firmas
   correspondan a la misma persona sigue siendo una conclusión humana.

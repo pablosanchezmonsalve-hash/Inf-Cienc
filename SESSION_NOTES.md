@@ -1026,3 +1026,28 @@ equipo del usuario permita instalar nada.
 ### Próximo paso recomendado
 
 Guardar los dos secretos en el repositorio y lanzar el workflow con límite 10.
+
+### Resultado de esa ejecución · el contrato queda verificado
+
+El usuario guardó los secretos y lanzó el workflow con límite 10. Resultado:
+**10 de 10 confirmadas**.
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-91 | El contrato de la API de ORCID pasa de supuesto a verificado | 10 de 10 confirmadas prueba que el conector lee bien la respuesta. Era la única incógnita real que quedaba |
+| D-92 | Las acciones de los workflows se suben a las que usan Node 24 | GitHub avisa de que `checkout@v4`, `setup-python@v5` y `upload-artifact@v4` corren forzadas sobre Node 24. Un aviso que se repite en cada ejecución acaba tapando uno que sí importa |
+
+Dos lecturas del resultado, y conviene no confundirlas:
+
+- **Se confirma el conector.** Sabe encontrar la lista de obras dentro de la
+  respuesta de ORCID. Eso era lo que no se había podido probar desde aquí.
+- **Se confirman 10 asignaciones.** Para esas firmas, al menos un DOI atribuido
+  aparece en las obras que el propio titular declara. Deja de ser una deducción
+  por apellido e inicial.
+
+Lo que **no** se puede concluir: que las 174 vayan a confirmarse. Las 10
+primeras son las de mayor respaldo del archivo, así que el sesgo juega a favor.
+La cifra real sale de la ejecución completa.
+
+`docs/ORCID_API_GUIDE.md` §6 pasa de declarar el contrato como no verificado a
+declararlo verificado, con la fecha y la evidencia.
