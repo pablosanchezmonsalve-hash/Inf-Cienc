@@ -645,3 +645,88 @@ requiera decisión.
 ### Próximo paso recomendado
 
 `T-16` sigue siendo lo único que depende del usuario.
+
+---
+
+## Sesión 2026-08-03 — Pendientes: cierre de T-17 y T-18, herramienta de revisión
+
+**Estado inicial:** V1 desplegada, doce pendientes abiertos. Encargo: abarcarlos.
+El usuario confirmó tres cosas: quiere explicación comprensible antes de decidir
+`T-16`, revisará él mismo el duplicado de `T-05`, y sí a la herramienta de
+revisión de identidad.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-70 | Los artefactos de codificación de la fuente se reparan; las concatenaciones se corrigen con una tabla declarada en config | Reponer la letra base de `ı`+acento es canonicalizar, no inventar. Deducir una regla general de tres concatenaciones rompería nombres legítimos: son hechos sobre este conjunto, no una regla |
+| D-71 | `T-18` se cierra sin cambios, con la medición | 699 KB comprimen a 146 KB; la página entera transfiere 181 KB. La cifra que motivó el pendiente era sin comprimir |
+| D-72 | La revisión humana se desbloquea con herramienta, no resolviéndola | `D-08` prohíbe resolver; no prohíbe reunir la evidencia. La herramienta no decide ni propone respuesta por defecto |
+| D-73 | La coautoría directa es el descarte de identidad más limpio | Nadie firma dos veces el mismo artículo: si dos firmas comparten publicación, son personas distintas |
+
+### Archivos creados o modificados
+
+```
+src/review/build_review.py         herramienta de revisión (nuevo)
+internal/revision_identidad.html   generada, 89 casos
+src/audit/common.py                reparar_texto_fuente() + correcciones
+config/matching_rules.yml          correcciones_declaradas, 3 entradas justificadas
+Makefile                           objetivo `revision`
+internal/README.md                 la herramienta y cómo usarla
+README.md                          peso por página, ahora comprimido y sin comprimir
+PLAN.md                            T-17 y T-18 cerrados; T-03/04/14/15 desbloqueados
+```
+
+### Hallazgos
+
+- **`Facultad de Ingenierı́a` no era un duplicado de datos sino de codificación**:
+  usa `ı` (U+0131, i sin punto) más acento combinante en vez de `í`. Comprobado
+  que **NFC no lo arregla**: ese par no tiene composición canónica. Separaba 1
+  par de los otros 49.
+- **Las tres cadenas concatenadas están así en el origen**, no las produce el
+  extractor: la afiliación de Scopus dice literalmente
+  `Facultad de MedicinaEscuela de Medicina`.
+- Tras la reparación, **26 → 22 unidades distintas**. Verificado que el cambio
+  toca exactamente los 4 pares rotos y ninguno más; la cobertura de unidad
+  académica queda igual (63,8 %, 437 `No determinada`), porque esos 4 pares ya
+  tenían unidad, sólo que rota.
+- **`T-18` no era un problema.** Medido: `publications.json` comprime al 20 % y
+  `authors.json` al 8 %. Restructurar habría sido trabajo contra una cifra mal
+  leída.
+- **Ninguno de los 127 pares de firmas candidatas comparte publicación.** El
+  descarte más limpio no aplica en ningún caso. Verificado con control positivo
+  —un par que sí co-firma da 1— para descartar que el cálculo estuviera roto.
+- Los dos registros de `T-05` tienen **DOI distintos** (`…07451-7` y `…07630-6`),
+  misma revista y mismos 7 autores: compatible con carta al editor sobre el
+  propio artículo. Entregado al usuario para que lo verifique en Scopus.
+
+### Verificación
+
+- Herramienta probada en navegador: 89 casos, veredicto, nota, filtro,
+  persistencia tras recarga y exportación a CSV de 93 líneas. Sin errores.
+- Comprobado que no entra en `dist/` ni queda referenciada.
+- 32 combinaciones de página × tema × ancho sin errores ni desborde.
+- Las tres compuertas en verde; 29 reglas, 0 bloqueantes fallando.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «`Facultad de Ingenierı́a` es un problema de datos» | **Falso.** Es de codificación, y la normalización Unicode estándar no lo resuelve |
+| «Las concatenaciones son un fallo del extractor» | **Falso.** Están así en la afiliación de origen |
+| «699 KB en una petición es un problema de rendimiento» | **Falso.** Son 146 KB comprimidos. Medir antes de restructurar |
+| «0 pares que comparten publicación sugiere que el cálculo falla» | **Falso.** El control positivo da 1: el cálculo funciona y el 0 es real |
+
+### Ambigüedades abiertas
+
+- **`T-16`**: pendiente de decisión, con explicación entregada al usuario.
+- **`T-05`**: el usuario lo verifica en Scopus.
+- **`T-02`, `T-06`, `T-13`**: dependen de fuentes externas (catálogo oficial de
+  la universidad, reexportación de Scopus, documentación de SciVal).
+- **`T-03`, `T-04`, `T-14`, `T-15`**: desbloqueados, esperando la revisión.
+- **`T-10`** sigue dependiendo de `T-03`.
+
+### Próximo paso recomendado
+
+Que el usuario ejecute `make revision` y trabaje los 89 casos. Los 18 con
+evidencia de ORCID son los más rápidos y los de mayor rendimiento.

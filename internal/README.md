@@ -23,6 +23,30 @@ workflow de despliegue lo comprueba otra vez antes de publicar.
 | `ambiguities_publications.csv` | Cola de revisión de publicaciones (reglas X-01, X-02, X-03, P-01) |
 | `orcid_conflicts.csv` | Firmas a las que Crossref atribuye más de un ORCID (V2-01) |
 | `identity_candidates.csv` | Firmas distintas que comparten ORCID: candidatas a ser la misma persona, sin confirmar (D-44) |
+| `revision_identidad.html` | **Herramienta de revisión.** Generada, no editable a mano. Cruza las cuatro colas anteriores y presenta cada caso con su evidencia junta |
+| `identity_decisions.csv` | Decisiones que una persona ha tomado en esa herramienta. No existe hasta que se exporta |
+
+## Cómo revisar la identidad de autor
+
+```bash
+make revision                       # regenera internal/revision_identidad.html
+```
+
+Ábralo en el navegador. Reúne los 89 casos —variantes de nombre, nombres con
+varios Scopus ID, firmas que comparten ORCID y el conflicto de ORCID— y para
+cada uno muestra publicaciones, años, unidades, identificadores y tres señales
+cruzadas que ningún archivo tenía por separado:
+
+- **si dos firmas aparecen en la misma publicación**, son personas distintas:
+  nadie firma dos veces el mismo artículo. Es el descarte más limpio que existe,
+  y hoy **no aplica a ninguno de los 127 pares** —dato que por sí solo no prueba
+  identidad, pero elimina la vía rápida de descarte;
+- coautores en común;
+- solapamiento de años y de unidad académica.
+
+Las decisiones se guardan en el navegador mientras trabaja y se exportan a
+`identity_decisions.csv`. **La herramienta no decide nada ni propone respuesta
+por defecto**: sólo reúne la evidencia.
 
 ## Regla de uso
 

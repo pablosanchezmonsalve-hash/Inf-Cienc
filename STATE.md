@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `6147515` · Evita el aviso de multivaluación duplicado
-Snapshot: 2026-08-01
+Último commit: `c0ff4de` · Corrige los fallos de accesibilidad que encontró la segunda auditoría
+Snapshot: 2026-08-03
 
 ---
 
@@ -46,19 +46,19 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 416 |
+| `internal/ambiguities_authors.csv` | 413 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/orcid_conflicts.csv` | 1 |
 | `internal/identity_candidates.csv` | 17 |
 
 ---
 
-## Pendientes abiertos (12)
+## Pendientes abiertos (10)
 
 | # | Pendiente |
 |---|---|
 | `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
-| `T-03` | Revisión humana de las 123 variantes de nombre encoladas |
+| `T-03` | Revisión humana de las variantes de nombre encoladas (51 grupos) |
 | `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID |
 | `T-05` | Decidir tratamiento del duplicado probable Article/Letter |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
@@ -67,12 +67,10 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 | `T-14` | Revisión humana de los 17 grupos de firmas que comparten ORCID |
 | `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
 | `T-16` | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público |
-| `T-17` | Corregir las cadenas de unidad académica concatenadas sin separador |
-| `T-18` | Trocear o paginar `publications.json` (699 KB en una sola petición) |
 
 ---
 
-## Decisiones tomadas: 69
+## Decisiones tomadas: 73
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

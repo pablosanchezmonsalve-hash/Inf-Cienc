@@ -1,0 +1,1356 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revisión de identidad de autor — capa interna</title>
+<style>
+:root{--plano:#f1f5f6;--sup:#fff;--sup2:#eaf1f2;--tinta:#10222b;--tinta2:#4a5f68;
+--tinta3:#5a6b71;--linea:#dbe6e8;--marca:#22577A;--accion:#1a6d78;--viva:#38A3A5;
+--si:#2fa36b;--no:#cc3f5c;--duda:#d4a017;--radio:6px}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+background:var(--plano);color:var(--tinta)}
+header{background:var(--marca);color:#fff;padding:1.1rem 0;border-bottom:2px solid var(--viva)}
+.c{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+h1{margin:0;font-size:1.15rem;font-weight:650}
+header p{margin:.3rem 0 0;font-size:.82rem;color:#c7f9cc}
+.barra{position:sticky;top:0;z-index:10;background:var(--sup);border-bottom:1px solid var(--linea);
+padding:.7rem 0;font-size:.85rem}
+.barra .c{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.avance{font-variant-numeric:tabular-nums}
+.avance b{color:var(--marca)}
+select,button{font:inherit;font-size:.85rem;border-radius:4px;border:1px solid #bccdd2;
+background:var(--sup);color:var(--tinta);padding:.35rem .6rem;cursor:pointer}
+button.pri{background:var(--marca);color:#fff;border-color:var(--marca);font-weight:600}
+main{padding:1.5rem 0 4rem}
+.caso{background:var(--sup);border:1px solid var(--linea);border-radius:var(--radio);
+padding:1.1rem 1.25rem;margin-bottom:1rem}
+.caso[data-decidido="1"]{opacity:.5}
+.caso h2{margin:0 0 .2rem;font-size:1.02rem}
+.cola{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;
+color:var(--tinta3);background:var(--sup2);border:1px solid var(--linea);
+border-radius:999px;padding:.1rem .5rem;display:inline-block;margin-bottom:.4rem}
+.ctx{font-size:.84rem;color:var(--tinta2);margin:.3rem 0 .9rem}
+table{border-collapse:collapse;width:100%;font-size:.84rem;margin-bottom:.8rem}
+th,td{text-align:left;padding:.4rem .55rem;border-bottom:1px solid var(--linea);vertical-align:top}
+th{background:var(--sup2);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;
+color:var(--tinta2);font-weight:650}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+.senales{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.9rem}
+.s{font-size:.78rem;border-radius:999px;padding:.15rem .6rem;border:1px solid}
+.s.fuerte-no{background:#fdeaed;border-color:var(--no);color:#8a1f33}
+.s.fuerte-si{background:#e8f6ef;border-color:var(--si);color:#155e3c}
+.s.neutra{background:var(--sup2);border-color:var(--linea);color:var(--tinta2)}
+.dec{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;
+border-top:1px solid var(--linea);padding-top:.8rem}
+.dec button{border-width:1.5px}
+.dec button[aria-pressed="true"][data-v="misma"]{background:var(--si);color:#fff;border-color:var(--si)}
+.dec button[aria-pressed="true"][data-v="distintas"]{background:var(--no);color:#fff;border-color:var(--no)}
+.dec button[aria-pressed="true"][data-v="pendiente"]{background:var(--duda);color:#fff;border-color:var(--duda)}
+.dec input{flex:1;min-width:180px;font:inherit;font-size:.84rem;padding:.35rem .55rem;
+border:1px solid #bccdd2;border-radius:4px;background:var(--sup);color:var(--tinta)}
+.aviso{background:#fdf6e7;border:1px solid #c8901a55;border-left:3px solid #c8901a;
+border-radius:4px;padding:.7rem .9rem;font-size:.85rem;color:#6a4a05;margin-bottom:1.2rem}
+.oculto{display:none!important}
+footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:var(--tinta2)}
+</style>
+</head>
+<body>
+<header><div class="c">
+  <h1>Revisión de identidad de autor</h1>
+  <p>Capa interna · 89 casos · generado el 2026-08-03
+     desde 589 formas de firma</p>
+</div></header>
+
+<div class="barra"><div class="c">
+  <span class="avance" id="avance"></span>
+  <select id="filtro" aria-label="Filtrar casos">
+    <option value="todos">Todos los casos</option>
+    <option value="pendientes">Sólo pendientes</option>
+    <option value="resueltos">Sólo resueltos</option>
+  </select>
+  <button type="button" class="pri" id="exportar">Exportar decisiones (CSV)</button>
+  <button type="button" id="limpiar">Borrar todo</button>
+</div></div>
+
+<main class="c">
+  <div class="aviso">
+    <strong>Esta página no decide nada por usted.</strong>
+    Reúne la evidencia dispersa en cuatro archivos y la presenta junta; el
+    veredicto lo pone usted. Las decisiones se guardan en este navegador
+    mientras trabaja: <strong>expórtelas a CSV antes de cerrar</strong>, y
+    guarde el archivo como <span class="mono">internal/identity_decisions.csv</span>.
+    Nada de lo que marque aquí modifica el sitio público por sí solo.
+  </div>
+  <div class="aviso">
+    <strong>Cómo leer las señales.</strong>
+    «Firman juntas N publicaciones» es el descarte más limpio: nadie firma dos
+    veces el mismo artículo, así que si dos formas de firma aparecen en el mismo
+    trabajo son personas distintas. «Mismo ORCID» y «Mismo Scopus Author ID»
+    apuntan en sentido contrario, pero recuerde que la asignación de ORCID es a
+    su vez una hipótesis por apellido e inicial. El resto son indicios, no
+    pruebas.
+  </div>
+  
+    <article class="caso" data-id="orcid-0000-0001-6065-5218" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0001-6065-5218</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Galleguillos R.</strong></td><td class="n">3</td><td class="n">2024–2025</td><td>Facultad de Ingeniería</td><td class="mono">36025215000</td><td class="mono">0000-0001-6065-5218 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Galleguillos R.B.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Ingeniería</td><td class="mono">36025215000</td><td class="mono">0000-0001-6065-5218 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-1781-062X" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0002-1781-062X</h2>
+      <p class="ctx">El apellido también las agrupa.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Orellana Donoso M.</strong></td><td class="n">4</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">57219486372</td><td class="mono">0000-0002-1781-062X <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Orellana-Donoso M.</strong></td><td class="n">34</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">57219486372</td><td class="mono">0000-0002-1781-062X <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-2270-299X" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0002-2270-299X</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Castro M.</strong></td><td class="n">5</td><td class="n">2023–2024</td><td>Facultad de Medicina</td><td class="mono">22233746200 56076763200 7402292686</td><td class="mono">0000-0002-2270-299X <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Castro-Sepulveda M.</strong></td><td class="n">8</td><td class="n">2023–2025</td><td>Escuela de Kinesiología · Facultad de Medicina</td><td class="mono">56076763200</td><td class="mono">0000-0002-2270-299X <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-4312-1318" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0002-4312-1318</h2>
+      <p class="ctx">El apellido también las agrupa.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Lopez-Arana S.</strong></td><td class="n">2</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">23089038400</td><td class="mono">0000-0002-4312-1318 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>López-Arana S.</strong></td><td class="n">10</td><td class="n">2024–2025</td><td>Escuela de Nutrición y Dietética · Facultad de Medicina</td><td class="mono">23089038400</td><td class="mono">0000-0002-4312-1318 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-4411-8655" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0002-4411-8655</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">2 coautor(es) en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Castillo O.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">60129542700 7007101727</td><td class="mono">0000-0002-4411-8655 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Castillo-Valenzuela O.</strong></td><td class="n">4</td><td class="n">2023–2025</td><td>Escuela de Nutrición y Dietética · Facultad de Medicina</td><td class="mono">7007101727</td><td class="mono">0000-0002-4411-8655 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-5832-7327" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0002-5832-7327</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Strauss F.-J.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>Facultad de Odontología</td><td class="mono">—</td><td class="mono">0000-0002-5832-7327 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Strauss F.J.</strong></td><td class="n">14</td><td class="n">2024–2025</td><td>Facultad de Odontología</td><td class="mono">57130416100</td><td class="mono">0000-0002-5832-7327 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-7140-4294" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0002-7140-4294</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Hartmann D.</strong></td><td class="n">8</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">58612624500</td><td class="mono">0000-0002-7140-4294 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Hartmann Schatloff D.</strong></td><td class="n">5</td><td class="n">2023–2024</td><td>Facultad de Medicina</td><td class="mono">58612624500 59093175300</td><td class="mono">0000-0002-7140-4294 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0003-0051-9833" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0003-0051-9833</h2>
+      <p class="ctx">El apellido también las agrupa.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Núnez-Lisboa M.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">57317659600</td><td class="mono">0000-0003-0051-9833 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Núñez-Lisboa M.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">57317659600</td><td class="mono">0000-0003-0051-9833 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0003-0402-5072" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0003-0402-5072</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Álvarez C.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">55676817500 57226107208</td><td class="mono">0000-0003-0402-5072 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Álvarez-Valdés C.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">57226107208</td><td class="mono">0000-0003-0402-5072 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0003-3454-4252" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0003-3454-4252</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Pizarro S.</strong></td><td class="n">2</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">59137082400</td><td class="mono">0000-0003-3454-4252 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Pizarro S.I.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">59137082400</td><td class="mono">0000-0003-3454-4252 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0003-3620-9861" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0003-3620-9861</h2>
+      <p class="ctx">El apellido también las agrupa.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">2 coautor(es) en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Cancino-Lopez J.</strong></td><td class="n">4</td><td class="n">2023–2025</td><td>Escuela de Kinesiología · Facultad de Medicina</td><td class="mono">36996964200</td><td class="mono">0000-0003-3620-9861 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Cancino-López J.</strong></td><td class="n">8</td><td class="n">2024–2025</td><td>Escuela de Kinesiología · Facultad de Medicina</td><td class="mono">36996964200</td><td class="mono">0000-0003-3620-9861 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0003-4763-074X" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0000-0003-4763-074X</h2>
+      <p class="ctx">El apellido también las agrupa.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Diaz F.</strong></td><td class="n">7</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">35195498000</td><td class="mono">0000-0003-4763-074X <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Díaz F.</strong></td><td class="n">14</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">35195498000 57202322088 57220839793</td><td class="mono">0000-0003-4763-074X <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0009-0008-1613-0156" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>2 firmas comparten 0009-0008-1613-0156</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Lomboy Finsterbusch M.I.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Educación, Psicología y Familia</td><td class="mono">60090327500</td><td class="mono">0009-0008-1613-0156 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Lomboy M.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">59366525500</td><td class="mono">0009-0008-1613-0156 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-0533-4531" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>3 firmas comparten 0000-0002-0533-4531</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Giglio A.</strong></td><td class="n">21</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">58509256700</td><td class="mono">0000-0002-0533-4531 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Giglio Jimenez A.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>No determinada</td><td class="mono">58509256700</td><td class="mono">0000-0002-0533-4531 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Giglio Jiménez A.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">58509256700</td><td class="mono">0000-0002-0533-4531 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-6357-3469" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>3 firmas comparten 0000-0002-6357-3469</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Moyano C.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">60078986100</td><td class="mono">0000-0002-6357-3469 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Moyano Davila C.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">57201182805</td><td class="mono">0000-0002-6357-3469 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Moyano Dávila C.</strong></td><td class="n">3</td><td class="n">2023–2025</td><td>Escuela de Ciencias de la Familia</td><td class="mono">57201182805</td><td class="mono">0000-0002-6357-3469 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0002-9315-9365" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>3 firmas comparten 0000-0002-9315-9365</h2>
+      <p class="ctx">El apellido también las agrupa.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Henriquez-Olguin C.</strong></td><td class="n">6</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">35102305800</td><td class="mono">0000-0002-9315-9365 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Henriquez-Olguín C.</strong></td><td class="n">4</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">35102305800</td><td class="mono">0000-0002-9315-9365 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Henríquez-Olguín C.</strong></td><td class="n">5</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">35102305800</td><td class="mono">0000-0002-9315-9365 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="orcid-0000-0003-2175-2941" data-decidido="0">
+      <span class="cola">ORCID compartido</span>
+      <h2>3 firmas comparten 0000-0003-2175-2941</h2>
+      <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Foxley V.G.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">57188672913</td><td class="mono">0000-0003-2175-2941 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Gubbins V.</strong></td><td class="n">4</td><td class="n">2023–2025</td><td>Facultad de Educación, Psicología y Familia</td><td class="mono">57188672913</td><td class="mono">0000-0003-2175-2941 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Gubbins-Foxley V.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">57188672913</td><td class="mono">0000-0003-2175-2941 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="conf-Castro-Sepúlveda M." data-decidido="0">
+      <span class="cola">ORCID en conflicto</span>
+      <h2>Castro-Sepúlveda M. aparece con 2 ORCID</h2>
+      <p class="ctx">Una misma forma de firma recibe identificadores distintos según la publicación: o son dos personas que firman igual, o una de las asignaciones es incorrecta. ORCID: 0000-0001-7673-7269 · 0000-0002-2270-299X</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Castro-Sepúlveda M.</strong></td><td class="n">7</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">56076763200</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-arenasmassa" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Arenas-Massa A. · Arenas-Massa Á.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Arenas-Massa A.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Derecho</td><td class="mono">56404649500</td><td class="mono">—</td></tr><tr><td><strong>Arenas-Massa Á.</strong></td><td class="n">2</td><td class="n">2023–2023</td><td>Facultad de Derecho</td><td class="mono">56404649500</td><td class="mono">0000-0003-3188-0189 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-avilesdorlhiac" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Avilès Dorlhiac R. · Avilés-Dorlhiac R.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Avilès Dorlhiac R.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">57212759402</td><td class="mono">—</td></tr><tr><td><strong>Avilés-Dorlhiac R.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">57212759402</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-ballesteros" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Ballesteros P. · Ballesteros P. P.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Ballesteros P.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">58751671800</td><td class="mono">—</td></tr><tr><td><strong>Ballesteros P. P.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">58242709100</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-caffarenabarcenilla" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Caffarena Barcenilla P. · Caffarena-Barcenilla C.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Caffarena Barcenilla P.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Comunicaciones y Humanidades</td><td class="mono">57549937000</td><td class="mono">—</td></tr><tr><td><strong>Caffarena-Barcenilla C.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>Facultad de Educación, Psicología y Familia</td><td class="mono">57211584427</td><td class="mono">0000-0001-9550-3695 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-cancinolopez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Cancino-Lopez J. · Cancino-López J.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">2 coautor(es) en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Cancino-Lopez J.</strong></td><td class="n">4</td><td class="n">2023–2025</td><td>Escuela de Kinesiología · Facultad de Medicina</td><td class="mono">36996964200</td><td class="mono">0000-0003-3620-9861 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Cancino-López J.</strong></td><td class="n">8</td><td class="n">2024–2025</td><td>Escuela de Kinesiología · Facultad de Medicina</td><td class="mono">36996964200</td><td class="mono">0000-0003-3620-9861 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-carvajal" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Carvajal C. · Carvajal G.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Carvajal C.</strong></td><td class="n">5</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">53163308500</td><td class="mono">—</td></tr><tr><td><strong>Carvajal G.</strong></td><td class="n">4</td><td class="n">2023–2024</td><td>No determinada</td><td class="mono">57219929230</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-castillo" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Castillo N. · Castillo O.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Castillo N.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">58752377300</td><td class="mono">—</td></tr><tr><td><strong>Castillo O.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">60129542700 7007101727</td><td class="mono">0000-0002-4411-8655 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-castillovalenzuela" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Castillo Valenzuela O. · Castillo-Valenzuela O.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Castillo Valenzuela O.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">7007101727</td><td class="mono">—</td></tr><tr><td><strong>Castillo-Valenzuela O.</strong></td><td class="n">4</td><td class="n">2023–2025</td><td>Escuela de Nutrición y Dietética · Facultad de Medicina</td><td class="mono">7007101727</td><td class="mono">0000-0002-4411-8655 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-castrosepulveda" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Castro-Sepulveda M. · Castro-Sepúlveda M.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">4 coautor(es) en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Castro-Sepulveda M.</strong></td><td class="n">8</td><td class="n">2023–2025</td><td>Escuela de Kinesiología · Facultad de Medicina</td><td class="mono">56076763200</td><td class="mono">0000-0002-2270-299X <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Castro-Sepúlveda M.</strong></td><td class="n">7</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">56076763200</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-ceronml" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Ceron M.L. · Cerón M.L.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Ceron M.L.</strong></td><td class="n">2</td><td class="n">2023–2024</td><td>Facultad de Ingeniería</td><td class="mono">57416791800</td><td class="mono">—</td></tr><tr><td><strong>Cerón M.L.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Ingeniería</td><td class="mono">57416791800</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-crisostomoflores" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Crisóstomo Flores P. · Crisóstomo-Flores P.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Crisóstomo Flores P.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">57713608100</td><td class="mono">—</td></tr><tr><td><strong>Crisóstomo-Flores P.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">57713608100</td><td class="mono">0000-0002-9761-2112 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-dela" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>De la Fuente López M. · De la Fuente M. · De la fuente López M. · de la Cruz P.S. · de la Fuente M.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>De la Fuente López M.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>School of Medicine UFT-CLC</td><td class="mono">23090504600 60150573200</td><td class="mono">—</td></tr><tr><td><strong>De la Fuente M.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">23090504600</td><td class="mono">0000-0003-0577-7604 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>De la fuente López M.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">23090504600</td><td class="mono">—</td></tr><tr><td><strong>de la Cruz P.S.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">57218895503</td><td class="mono">—</td></tr><tr><td><strong>de la Fuente M.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">23090504600</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-diaz" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Diaz F. · Díaz F.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Diaz F.</strong></td><td class="n">7</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">35195498000</td><td class="mono">0000-0003-4763-074X <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Díaz F.</strong></td><td class="n">14</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">35195498000 57202322088 57220839793</td><td class="mono">0000-0003-4763-074X <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-dominguez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Dominguez A. · Domínguez A.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">1 coautor(es) en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Dominguez A.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">59180378700</td><td class="mono">—</td></tr><tr><td><strong>Domínguez A.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">59180378700</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-garcia" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Garcia J. · Garcia K. · García F. · García J.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Garcia J.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">59256319400</td><td class="mono">—</td></tr><tr><td><strong>Garcia K.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">59753589000</td><td class="mono">—</td></tr><tr><td><strong>García F.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">58857164000 59465758900</td><td class="mono">—</td></tr><tr><td><strong>García J.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">59256319400</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-gigliojimenez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Giglio Jimenez A. · Giglio Jiménez A.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">1 coautor(es) en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Giglio Jimenez A.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>No determinada</td><td class="mono">58509256700</td><td class="mono">0000-0002-0533-4531 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Giglio Jiménez A.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">58509256700</td><td class="mono">0000-0002-0533-4531 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-gomezbarbieri" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Gomez Barbieri G. · Gómez Barbieri G.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Gomez Barbieri G.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">57223157908</td><td class="mono">—</td></tr><tr><td><strong>Gómez Barbieri G.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">57223157908</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-gonzalezvalderrama" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Gonzalez- Valderrama A. · Gonzalez-Valderrama A. · González-Valderrama A.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Gonzalez- Valderrama A.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">56586062200</td><td class="mono">—</td></tr><tr><td><strong>Gonzalez-Valderrama A.</strong></td><td class="n">6</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">56586062200</td><td class="mono">—</td></tr><tr><td><strong>González-Valderrama A.</strong></td><td class="n">2</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">56586062200</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-gonzalez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>González A. · González I.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>González A.</strong></td><td class="n">4</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">56586062200 59249254000</td><td class="mono">—</td></tr><tr><td><strong>González I.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">59590859900</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-gutierrez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Gutierrez M. · Gutiérrez J. · Gutiérrez S.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Gutierrez M.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">60023564200</td><td class="mono">—</td></tr><tr><td><strong>Gutiérrez J.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">57192703299 59221961900</td><td class="mono">—</td></tr><tr><td><strong>Gutiérrez S.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Odontología</td><td class="mono">57206252422</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-hasbun" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Hasbun P. · Hasbún P.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">3 coautor(es) en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Hasbun P.</strong></td><td class="n">3</td><td class="n">2024–2025</td><td>No determinada</td><td class="mono">22955162900</td><td class="mono">—</td></tr><tr><td><strong>Hasbún P.</strong></td><td class="n">2</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">22955162900</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-henriquezolguin" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Henriquez-Olguin C. · Henriquez-Olguín C. · Henríquez-Olguin C. · Henríquez-Olguín C.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Henriquez-Olguin C.</strong></td><td class="n">6</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">35102305800</td><td class="mono">0000-0002-9315-9365 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Henriquez-Olguín C.</strong></td><td class="n">4</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">35102305800</td><td class="mono">0000-0002-9315-9365 <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Henríquez-Olguin C.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">35102305800</td><td class="mono">—</td></tr><tr><td><strong>Henríquez-Olguín C.</strong></td><td class="n">5</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">35102305800</td><td class="mono">0000-0002-9315-9365 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-ibanez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Ibañez H. · Ibañez V.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Ibañez H.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">57221208301</td><td class="mono">—</td></tr><tr><td><strong>Ibañez V.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">59502611000</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-jimenezag" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Jimenez A.G. · Jiménez A.G.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Jimenez A.G.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">59753605100</td><td class="mono">—</td></tr><tr><td><strong>Jiménez A.G.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">59753605100</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-lopezarana" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Lopez-Arana S. · López Arana S. · López-Arana S.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Lopez-Arana S.</strong></td><td class="n">2</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">23089038400</td><td class="mono">0000-0002-4312-1318 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>López Arana S.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">23089038400</td><td class="mono">—</td></tr><tr><td><strong>López-Arana S.</strong></td><td class="n">10</td><td class="n">2024–2025</td><td>Escuela de Nutrición y Dietética · Facultad de Medicina</td><td class="mono">23089038400</td><td class="mono">0000-0002-4312-1318 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-martinez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Martinez M. · Martínez M.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Martinez M.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">56499734000</td><td class="mono">0000-0002-8127-7620 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Martínez M.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">58088132900</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-martinezmardones" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Martinez-Mardones M. · Martinez-Mardones M.B. · Martínez-Mardones M.B.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Martinez-Mardones M.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">57225050522</td><td class="mono">—</td></tr><tr><td><strong>Martinez-Mardones M.B.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">57225050522</td><td class="mono">—</td></tr><tr><td><strong>Martínez-Mardones M.B.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">57225050522</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-massaaa" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Massa A.A. · Massa Á.A.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Massa A.A.</strong></td><td class="n">2</td><td class="n">2023–2024</td><td>No determinada</td><td class="mono">56087752400</td><td class="mono">—</td></tr><tr><td><strong>Massa Á.A.</strong></td><td class="n">2</td><td class="n">2023–2024</td><td>Facultad de Derecho</td><td class="mono">56087752400</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-molina" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Molina C. · Molina M.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Molina C.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">55130350300 58941265400</td><td class="mono">—</td></tr><tr><td><strong>Molina M.</strong></td><td class="n">4</td><td class="n">2023–2024</td><td>No determinada</td><td class="mono">55764694200</td><td class="mono">0000-0002-7091-2633 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-moralessepulveda" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Morales Sepúlveda J.P. · Morales-Sepulveda J.P.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Morales Sepúlveda J.P.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Educación, Psicología y Familia</td><td class="mono">57194732185</td><td class="mono">—</td></tr><tr><td><strong>Morales-Sepulveda J.P.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Educación, Psicología y Familia</td><td class="mono">57194732185</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-moyanodavila" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Moyano Davila C. · Moyano Dávila C.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo ORCID</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Moyano Davila C.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">57201182805</td><td class="mono">0000-0002-6357-3469 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Moyano Dávila C.</strong></td><td class="n">3</td><td class="n">2023–2025</td><td>Escuela de Ciencias de la Familia</td><td class="mono">57201182805</td><td class="mono">0000-0002-6357-3469 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-nunezlisboa" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Nuñez-Lisboa M. · Nùñez-Lisboa M. · Núnez-Lisboa M. · Núñez-Lisboa M. · Núñez-Lisboa M.N.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Nuñez-Lisboa M.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">57317659600</td><td class="mono">—</td></tr><tr><td><strong>Nùñez-Lisboa M.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">57317659600</td><td class="mono">—</td></tr><tr><td><strong>Núnez-Lisboa M.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">57317659600</td><td class="mono">0000-0003-0051-9833 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Núñez-Lisboa M.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">57317659600</td><td class="mono">0000-0003-0051-9833 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Núñez-Lisboa M.N.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">—</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-orellanadonoso" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Orellana Donoso M. · Orellana-Donoso M. · Orellana-Donoso M.I.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Orellana Donoso M.</strong></td><td class="n">4</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">57219486372</td><td class="mono">0000-0002-1781-062X <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Orellana-Donoso M.</strong></td><td class="n">34</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">57219486372</td><td class="mono">0000-0002-1781-062X <span style="color:#5a6b71">(alta)</span></td></tr><tr><td><strong>Orellana-Donoso M.I.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">57219486372</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-pinozuniga" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Pino-Zuñiga J. · Pino-Zúñiga J.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">1 coautor(es) en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Pino-Zuñiga J.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">57209908331</td><td class="mono">—</td></tr><tr><td><strong>Pino-Zúñiga J.</strong></td><td class="n">3</td><td class="n">2024–2025</td><td>Escuela de Kinesiología · Facultad de Medicina</td><td class="mono">57209908331</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-ponce" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Ponce D. · Ponce N. · Ponce P.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Ponce D.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">58189290000</td><td class="mono">—</td></tr><tr><td><strong>Ponce N.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Odontología</td><td class="mono">60235144400</td><td class="mono">0000-0002-4360-8249 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Ponce P.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Ingeniería</td><td class="mono">60619681700</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-ramos" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Ramos A. · Ramos T.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Ramos A.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">58861387700</td><td class="mono">—</td></tr><tr><td><strong>Ramos T.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">57682886400</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-reyes" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Reyes J. · Reyes M.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Reyes J.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">57669095300</td><td class="mono">—</td></tr><tr><td><strong>Reyes M.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">55819047100 59926881700</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-rodriguez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Rodríguez C. · Rodríguez I.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Rodríguez C.</strong></td><td class="n">2</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">57199444228</td><td class="mono">—</td></tr><tr><td><strong>Rodríguez I.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">58063024000</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-ruizriquelme" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Ruiz Riquelme P. · Ruiz-Riquelme P.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Ruiz Riquelme P.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">58070104900</td><td class="mono">—</td></tr><tr><td><strong>Ruiz-Riquelme P.</strong></td><td class="n">5</td><td class="n">2023–2025</td><td>Facultad de Medicina</td><td class="mono">58070104900</td><td class="mono">0000-0002-3293-8189 <span style="color:#5a6b71">(alta)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-salas" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Salas C. · Salas N.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Salas C.</strong></td><td class="n">3</td><td class="n">2023–2024</td><td>Facultad de Medicina</td><td class="mono">57202021763</td><td class="mono">—</td></tr><tr><td><strong>Salas N.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Educación, Psicología y Familia</td><td class="mono">53064631900</td><td class="mono">0000-0001-8815-5979 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-sanchezduque" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Sanchez-Duque C.G. · Sánchez-Duque C.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Sanchez-Duque C.G.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Educación, Psicología y Familia</td><td class="mono">60042606100</td><td class="mono">0009-0000-9651-2841 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Sánchez-Duque C.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>No determinada</td><td class="mono">60042606100</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-sepulveda" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Sepulveda I. · Sepúlveda A I. · Sepúlveda P. P.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Sepulveda I.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Odontología</td><td class="mono">55884627800</td><td class="mono">—</td></tr><tr><td><strong>Sepúlveda A I.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">55884627800</td><td class="mono">—</td></tr><tr><td><strong>Sepúlveda P. P.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">57105513600</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-soto" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Soto L. · Soto M.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Soto L.</strong></td><td class="n">2</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">57194392189</td><td class="mono">—</td></tr><tr><td><strong>Soto M.</strong></td><td class="n">2</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">57613682900</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-tabiloprieto" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Tabilo Prieto I. · Tabilo-Prieto I.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s fuerte-si">Mismo Scopus Author ID</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Tabilo Prieto I.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>No determinada</td><td class="mono">57832434200</td><td class="mono">—</td></tr><tr><td><strong>Tabilo-Prieto I.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">57832434200</td><td class="mono">0000-0002-7501-5085 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-tapia" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Tapia I. · Tapia V.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años sin solapar</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Tapia I.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Economía y Negocios</td><td class="mono">58640189700</td><td class="mono">—</td></tr><tr><td><strong>Tapia V.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Escuela de Nutrición y Dietética</td><td class="mono">59712949900</td><td class="mono">0009-0008-8319-3683 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-valderrama" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Valderrama E P. · Valderrama P. · Valderrama Y.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Valderrama E P.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">36603582700</td><td class="mono">—</td></tr><tr><td><strong>Valderrama P.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">57062781400</td><td class="mono">—</td></tr><tr><td><strong>Valderrama Y.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>Facultad de Medicina</td><td class="mono">59220077600</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-valenzuela" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Valenzuela C. · Valenzuela L. G. · Valenzuela R. · Valenzuela T.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Valenzuela C.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">59246912900</td><td class="mono">—</td></tr><tr><td><strong>Valenzuela L. G.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">58242928700</td><td class="mono">—</td></tr><tr><td><strong>Valenzuela R.</strong></td><td class="n">3</td><td class="n">2024–2025</td><td>Facultad de Medicina</td><td class="mono">16318014100 58862136700 59595360800</td><td class="mono">—</td></tr><tr><td><strong>Valenzuela T.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">55235294700</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-vallejos" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Vallejos G. · Vallejos P. G.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span><span class="s neutra">Misma unidad académica</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Vallejos G.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">57210135895</td><td class="mono">—</td></tr><tr><td><strong>Vallejos P. G.</strong></td><td class="n">1</td><td class="n">2023–2023</td><td>Facultad de Medicina</td><td class="mono">58242038500</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-vansint" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Van Sint Jan N. · van Sint Jan D N.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">1 coautor(es) en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Van Sint Jan N.</strong></td><td class="n">2</td><td class="n">2024–2025</td><td>No determinada</td><td class="mono">57196004058</td><td class="mono">0009-0009-2540-9228 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>van Sint Jan D N.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">58875319100</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-vasquez" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Vasquez F. · Vásquez F. · Vásquez G.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Vasquez F.</strong></td><td class="n">4</td><td class="n">2024–2025</td><td>Escuela de Nutrición y Dietética · School of Nutrition and Dietetic</td><td class="mono">24400395100</td><td class="mono">0000-0003-1769-3969 <span style="color:#5a6b71">(media)</span></td></tr><tr><td><strong>Vásquez F.</strong></td><td class="n">3</td><td class="n">2025–2025</td><td>Escuela de Nutrición y Dietética · Facultad de Medicina</td><td class="mono">24400395100</td><td class="mono">—</td></tr><tr><td><strong>Vásquez G.</strong></td><td class="n">1</td><td class="n">2024–2024</td><td>No determinada</td><td class="mono">59180378800</td><td class="mono">—</td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p03-zamorano" data-decidido="0">
+      <span class="cola">Variantes de nombre</span>
+      <h2>Zamorano A. · Zamorano S.</h2>
+      <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
+      <div class="senales"><span class="s neutra">Nunca firman la misma publicación</span><span class="s neutra">Sin coautores en común</span><span class="s neutra">Años solapados</span></div>
+      <table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th><th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead><tbody><tr><td><strong>Zamorano A.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Medicina</td><td class="mono">57543331300</td><td class="mono">—</td></tr><tr><td><strong>Zamorano S.</strong></td><td class="n">1</td><td class="n">2025–2025</td><td>Facultad de Odontología</td><td class="mono">60235455900</td><td class="mono">0009-0004-3725-4204 <span style="color:#5a6b71">(media)</span></td></tr></tbody></table>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Bressan, Rodrigo" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Bressan, Rodrigo</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57217026032 · 7005575041</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Castillo, Oscar" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Castillo, Oscar</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 60129542700 · 7007101727</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-De la Fuente López, Marjorie" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>De la Fuente López, Marjorie</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 23090504600 · 60150573200</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Franco, Pamela" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Franco, Pamela</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57204045244 · 59390952700</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Gutiérrez, Juan" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Gutiérrez, Juan</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57192703299 · 59221961900</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Hartmann Schatloff, Dan" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Hartmann Schatloff, Dan</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 58612624500 · 59093175300</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Ibáñez, Agustín" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Ibáñez, Agustín</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 55172691400 · 59795107500</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Lin, John C." data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Lin, John C.</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56009348900 · 59503986900</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Marques, Tiago Reis" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Marques, Tiago Reis</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 54785084900 · 59663513800</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Miyata, Jun" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Miyata, Jun</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 35570650200 · 57226205586</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Moreno, Sergio" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Moreno, Sergio</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56229831900 · 59919704200</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Moya, Patricia" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Moya, Patricia</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57767862900 · 60235456000</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Qian, Hongwei" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Qian, Hongwei</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 60077451400 · 7201520523</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Quezada, Mauricio" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Quezada, Mauricio</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56013972600 · 60138063800</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Richter, Erik A." data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Richter, Erik A.</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 35475650900 · 57218256582</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Rojas, Dario" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Rojas, Dario</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57196001996 · 60585234300</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Rojas-Costa, Gonzalo M." data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Rojas-Costa, Gonzalo M.</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 58805405100 · 7004503519</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Schumann, Gunter" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Schumann, Gunter</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57204862136 · 7103329271</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Torres, Keila" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Torres, Keila</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57224867683 · 60596438800</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+    <article class="caso" data-id="p04-Wolvius, Eppo" data-decidido="0">
+      <span class="cola">Varios Scopus ID</span>
+      <h2>Wolvius, Eppo</h2>
+      <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57201454707 · 6602721170</p>
+      
+      <p class="ctx">Sin perfil disponible para esta firma.</p>
+      <div class="dec">
+        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
+        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
+        <input type="text" placeholder="Nota (opcional): en qué te basaste">
+      </div>
+    </article>
+</main>
+
+<footer class="c">
+  Generado por <span class="mono">src/review/build_review.py</span>.
+  Regenerable. No se despliega: el ensamblado del sitio sólo copia
+  <span class="mono">web/</span> y <span class="mono">data/processed/</span>.
+</footer>
+
+<script>
+const CASOS = [{"id": "orcid-0000-0001-6065-5218", "cola": "ORCID compartido", "firmas": [{"nombre": "Galleguillos R."}, {"nombre": "Galleguillos R.B."}]}, {"id": "orcid-0000-0002-1781-062X", "cola": "ORCID compartido", "firmas": [{"nombre": "Orellana Donoso M."}, {"nombre": "Orellana-Donoso M."}]}, {"id": "orcid-0000-0002-2270-299X", "cola": "ORCID compartido", "firmas": [{"nombre": "Castro M."}, {"nombre": "Castro-Sepulveda M."}]}, {"id": "orcid-0000-0002-4312-1318", "cola": "ORCID compartido", "firmas": [{"nombre": "Lopez-Arana S."}, {"nombre": "López-Arana S."}]}, {"id": "orcid-0000-0002-4411-8655", "cola": "ORCID compartido", "firmas": [{"nombre": "Castillo O."}, {"nombre": "Castillo-Valenzuela O."}]}, {"id": "orcid-0000-0002-5832-7327", "cola": "ORCID compartido", "firmas": [{"nombre": "Strauss F.-J."}, {"nombre": "Strauss F.J."}]}, {"id": "orcid-0000-0002-7140-4294", "cola": "ORCID compartido", "firmas": [{"nombre": "Hartmann D."}, {"nombre": "Hartmann Schatloff D."}]}, {"id": "orcid-0000-0003-0051-9833", "cola": "ORCID compartido", "firmas": [{"nombre": "Núnez-Lisboa M."}, {"nombre": "Núñez-Lisboa M."}]}, {"id": "orcid-0000-0003-0402-5072", "cola": "ORCID compartido", "firmas": [{"nombre": "Álvarez C."}, {"nombre": "Álvarez-Valdés C."}]}, {"id": "orcid-0000-0003-3454-4252", "cola": "ORCID compartido", "firmas": [{"nombre": "Pizarro S."}, {"nombre": "Pizarro S.I."}]}, {"id": "orcid-0000-0003-3620-9861", "cola": "ORCID compartido", "firmas": [{"nombre": "Cancino-Lopez J."}, {"nombre": "Cancino-López J."}]}, {"id": "orcid-0000-0003-4763-074X", "cola": "ORCID compartido", "firmas": [{"nombre": "Diaz F."}, {"nombre": "Díaz F."}]}, {"id": "orcid-0009-0008-1613-0156", "cola": "ORCID compartido", "firmas": [{"nombre": "Lomboy Finsterbusch M.I."}, {"nombre": "Lomboy M."}]}, {"id": "orcid-0000-0002-0533-4531", "cola": "ORCID compartido", "firmas": [{"nombre": "Giglio A."}, {"nombre": "Giglio Jimenez A."}, {"nombre": "Giglio Jiménez A."}]}, {"id": "orcid-0000-0002-6357-3469", "cola": "ORCID compartido", "firmas": [{"nombre": "Moyano C."}, {"nombre": "Moyano Davila C."}, {"nombre": "Moyano Dávila C."}]}, {"id": "orcid-0000-0002-9315-9365", "cola": "ORCID compartido", "firmas": [{"nombre": "Henriquez-Olguin C."}, {"nombre": "Henriquez-Olguín C."}, {"nombre": "Henríquez-Olguín C."}]}, {"id": "orcid-0000-0003-2175-2941", "cola": "ORCID compartido", "firmas": [{"nombre": "Foxley V.G."}, {"nombre": "Gubbins V."}, {"nombre": "Gubbins-Foxley V."}]}, {"id": "conf-Castro-Sepúlveda M.", "cola": "ORCID en conflicto", "firmas": [{"nombre": "Castro-Sepúlveda M."}]}, {"id": "p03-arenasmassa", "cola": "Variantes de nombre", "firmas": [{"nombre": "Arenas-Massa A."}, {"nombre": "Arenas-Massa Á."}]}, {"id": "p03-avilesdorlhiac", "cola": "Variantes de nombre", "firmas": [{"nombre": "Avilès Dorlhiac R."}, {"nombre": "Avilés-Dorlhiac R."}]}, {"id": "p03-ballesteros", "cola": "Variantes de nombre", "firmas": [{"nombre": "Ballesteros P."}, {"nombre": "Ballesteros P. P."}]}, {"id": "p03-caffarenabarcenilla", "cola": "Variantes de nombre", "firmas": [{"nombre": "Caffarena Barcenilla P."}, {"nombre": "Caffarena-Barcenilla C."}]}, {"id": "p03-cancinolopez", "cola": "Variantes de nombre", "firmas": [{"nombre": "Cancino-Lopez J."}, {"nombre": "Cancino-López J."}]}, {"id": "p03-carvajal", "cola": "Variantes de nombre", "firmas": [{"nombre": "Carvajal C."}, {"nombre": "Carvajal G."}]}, {"id": "p03-castillo", "cola": "Variantes de nombre", "firmas": [{"nombre": "Castillo N."}, {"nombre": "Castillo O."}]}, {"id": "p03-castillovalenzuela", "cola": "Variantes de nombre", "firmas": [{"nombre": "Castillo Valenzuela O."}, {"nombre": "Castillo-Valenzuela O."}]}, {"id": "p03-castrosepulveda", "cola": "Variantes de nombre", "firmas": [{"nombre": "Castro-Sepulveda M."}, {"nombre": "Castro-Sepúlveda M."}]}, {"id": "p03-ceronml", "cola": "Variantes de nombre", "firmas": [{"nombre": "Ceron M.L."}, {"nombre": "Cerón M.L."}]}, {"id": "p03-crisostomoflores", "cola": "Variantes de nombre", "firmas": [{"nombre": "Crisóstomo Flores P."}, {"nombre": "Crisóstomo-Flores P."}]}, {"id": "p03-dela", "cola": "Variantes de nombre", "firmas": [{"nombre": "De la Fuente López M."}, {"nombre": "De la Fuente M."}, {"nombre": "De la fuente López M."}, {"nombre": "de la Cruz P.S."}, {"nombre": "de la Fuente M."}]}, {"id": "p03-diaz", "cola": "Variantes de nombre", "firmas": [{"nombre": "Diaz F."}, {"nombre": "Díaz F."}]}, {"id": "p03-dominguez", "cola": "Variantes de nombre", "firmas": [{"nombre": "Dominguez A."}, {"nombre": "Domínguez A."}]}, {"id": "p03-garcia", "cola": "Variantes de nombre", "firmas": [{"nombre": "Garcia J."}, {"nombre": "Garcia K."}, {"nombre": "García F."}, {"nombre": "García J."}]}, {"id": "p03-gigliojimenez", "cola": "Variantes de nombre", "firmas": [{"nombre": "Giglio Jimenez A."}, {"nombre": "Giglio Jiménez A."}]}, {"id": "p03-gomezbarbieri", "cola": "Variantes de nombre", "firmas": [{"nombre": "Gomez Barbieri G."}, {"nombre": "Gómez Barbieri G."}]}, {"id": "p03-gonzalezvalderrama", "cola": "Variantes de nombre", "firmas": [{"nombre": "Gonzalez- Valderrama A."}, {"nombre": "Gonzalez-Valderrama A."}, {"nombre": "González-Valderrama A."}]}, {"id": "p03-gonzalez", "cola": "Variantes de nombre", "firmas": [{"nombre": "González A."}, {"nombre": "González I."}]}, {"id": "p03-gutierrez", "cola": "Variantes de nombre", "firmas": [{"nombre": "Gutierrez M."}, {"nombre": "Gutiérrez J."}, {"nombre": "Gutiérrez S."}]}, {"id": "p03-hasbun", "cola": "Variantes de nombre", "firmas": [{"nombre": "Hasbun P."}, {"nombre": "Hasbún P."}]}, {"id": "p03-henriquezolguin", "cola": "Variantes de nombre", "firmas": [{"nombre": "Henriquez-Olguin C."}, {"nombre": "Henriquez-Olguín C."}, {"nombre": "Henríquez-Olguin C."}, {"nombre": "Henríquez-Olguín C."}]}, {"id": "p03-ibanez", "cola": "Variantes de nombre", "firmas": [{"nombre": "Ibañez H."}, {"nombre": "Ibañez V."}]}, {"id": "p03-jimenezag", "cola": "Variantes de nombre", "firmas": [{"nombre": "Jimenez A.G."}, {"nombre": "Jiménez A.G."}]}, {"id": "p03-lopezarana", "cola": "Variantes de nombre", "firmas": [{"nombre": "Lopez-Arana S."}, {"nombre": "López Arana S."}, {"nombre": "López-Arana S."}]}, {"id": "p03-martinez", "cola": "Variantes de nombre", "firmas": [{"nombre": "Martinez M."}, {"nombre": "Martínez M."}]}, {"id": "p03-martinezmardones", "cola": "Variantes de nombre", "firmas": [{"nombre": "Martinez-Mardones M."}, {"nombre": "Martinez-Mardones M.B."}, {"nombre": "Martínez-Mardones M.B."}]}, {"id": "p03-massaaa", "cola": "Variantes de nombre", "firmas": [{"nombre": "Massa A.A."}, {"nombre": "Massa Á.A."}]}, {"id": "p03-molina", "cola": "Variantes de nombre", "firmas": [{"nombre": "Molina C."}, {"nombre": "Molina M."}]}, {"id": "p03-moralessepulveda", "cola": "Variantes de nombre", "firmas": [{"nombre": "Morales Sepúlveda J.P."}, {"nombre": "Morales-Sepulveda J.P."}]}, {"id": "p03-moyanodavila", "cola": "Variantes de nombre", "firmas": [{"nombre": "Moyano Davila C."}, {"nombre": "Moyano Dávila C."}]}, {"id": "p03-nunezlisboa", "cola": "Variantes de nombre", "firmas": [{"nombre": "Nuñez-Lisboa M."}, {"nombre": "Nùñez-Lisboa M."}, {"nombre": "Núnez-Lisboa M."}, {"nombre": "Núñez-Lisboa M."}, {"nombre": "Núñez-Lisboa M.N."}]}, {"id": "p03-orellanadonoso", "cola": "Variantes de nombre", "firmas": [{"nombre": "Orellana Donoso M."}, {"nombre": "Orellana-Donoso M."}, {"nombre": "Orellana-Donoso M.I."}]}, {"id": "p03-pinozuniga", "cola": "Variantes de nombre", "firmas": [{"nombre": "Pino-Zuñiga J."}, {"nombre": "Pino-Zúñiga J."}]}, {"id": "p03-ponce", "cola": "Variantes de nombre", "firmas": [{"nombre": "Ponce D."}, {"nombre": "Ponce N."}, {"nombre": "Ponce P."}]}, {"id": "p03-ramos", "cola": "Variantes de nombre", "firmas": [{"nombre": "Ramos A."}, {"nombre": "Ramos T."}]}, {"id": "p03-reyes", "cola": "Variantes de nombre", "firmas": [{"nombre": "Reyes J."}, {"nombre": "Reyes M."}]}, {"id": "p03-rodriguez", "cola": "Variantes de nombre", "firmas": [{"nombre": "Rodríguez C."}, {"nombre": "Rodríguez I."}]}, {"id": "p03-ruizriquelme", "cola": "Variantes de nombre", "firmas": [{"nombre": "Ruiz Riquelme P."}, {"nombre": "Ruiz-Riquelme P."}]}, {"id": "p03-salas", "cola": "Variantes de nombre", "firmas": [{"nombre": "Salas C."}, {"nombre": "Salas N."}]}, {"id": "p03-sanchezduque", "cola": "Variantes de nombre", "firmas": [{"nombre": "Sanchez-Duque C.G."}, {"nombre": "Sánchez-Duque C."}]}, {"id": "p03-sepulveda", "cola": "Variantes de nombre", "firmas": [{"nombre": "Sepulveda I."}, {"nombre": "Sepúlveda A I."}, {"nombre": "Sepúlveda P. P."}]}, {"id": "p03-soto", "cola": "Variantes de nombre", "firmas": [{"nombre": "Soto L."}, {"nombre": "Soto M."}]}, {"id": "p03-tabiloprieto", "cola": "Variantes de nombre", "firmas": [{"nombre": "Tabilo Prieto I."}, {"nombre": "Tabilo-Prieto I."}]}, {"id": "p03-tapia", "cola": "Variantes de nombre", "firmas": [{"nombre": "Tapia I."}, {"nombre": "Tapia V."}]}, {"id": "p03-valderrama", "cola": "Variantes de nombre", "firmas": [{"nombre": "Valderrama E P."}, {"nombre": "Valderrama P."}, {"nombre": "Valderrama Y."}]}, {"id": "p03-valenzuela", "cola": "Variantes de nombre", "firmas": [{"nombre": "Valenzuela C."}, {"nombre": "Valenzuela L. G."}, {"nombre": "Valenzuela R."}, {"nombre": "Valenzuela T."}]}, {"id": "p03-vallejos", "cola": "Variantes de nombre", "firmas": [{"nombre": "Vallejos G."}, {"nombre": "Vallejos P. G."}]}, {"id": "p03-vansint", "cola": "Variantes de nombre", "firmas": [{"nombre": "Van Sint Jan N."}, {"nombre": "van Sint Jan D N."}]}, {"id": "p03-vasquez", "cola": "Variantes de nombre", "firmas": [{"nombre": "Vasquez F."}, {"nombre": "Vásquez F."}, {"nombre": "Vásquez G."}]}, {"id": "p03-zamorano", "cola": "Variantes de nombre", "firmas": [{"nombre": "Zamorano A."}, {"nombre": "Zamorano S."}]}, {"id": "p04-Bressan, Rodrigo", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Castillo, Oscar", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-De la Fuente López, Marjorie", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Franco, Pamela", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Gutiérrez, Juan", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Hartmann Schatloff, Dan", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Ibáñez, Agustín", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Lin, John C.", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Marques, Tiago Reis", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Miyata, Jun", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Moreno, Sergio", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Moya, Patricia", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Qian, Hongwei", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Quezada, Mauricio", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Richter, Erik A.", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Rojas, Dario", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Rojas-Costa, Gonzalo M.", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Schumann, Gunter", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Torres, Keila", "cola": "Varios Scopus ID", "firmas": []}, {"id": "p04-Wolvius, Eppo", "cola": "Varios Scopus ID", "firmas": []}];
+const CLAVE = 'revision_identidad_v1';
+let dec = {};
+try { dec = JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch (e) { dec = {}; }
+
+function guardar() {
+  try { localStorage.setItem(CLAVE, JSON.stringify(dec)); } catch (e) {}
+  pintarAvance();
+}
+
+function pintarAvance() {
+  const n = Object.values(dec).filter(d => d && d.veredicto && d.veredicto !== 'pendiente').length;
+  document.getElementById('avance').innerHTML =
+    `<b>${n}</b> de ${CASOS.length} resueltos`;
+  document.querySelectorAll('.caso').forEach(el => {
+    const d = dec[el.dataset.id];
+    el.dataset.decidido = (d && d.veredicto && d.veredicto !== 'pendiente') ? '1' : '0';
+  });
+  filtrar();
+}
+
+function filtrar() {
+  const f = document.getElementById('filtro').value;
+  document.querySelectorAll('.caso').forEach(el => {
+    const d = dec[el.dataset.id];
+    const resuelto = !!(d && d.veredicto && d.veredicto !== 'pendiente');
+    el.classList.toggle('oculto',
+      (f === 'pendientes' && resuelto) || (f === 'resueltos' && !resuelto));
+  });
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('.dec button[data-v]');
+  if (!b) return;
+  const id = b.closest('.caso').dataset.id;
+  const v = b.dataset.v;
+  const actual = dec[id] || {};
+  dec[id] = { ...actual, veredicto: actual.veredicto === v ? null : v,
+              fecha: new Date().toISOString().slice(0, 10) };
+  b.closest('.dec').querySelectorAll('button[data-v]').forEach(o =>
+    o.setAttribute('aria-pressed', String(dec[id].veredicto === o.dataset.v)));
+  guardar();
+});
+
+document.addEventListener('input', e => {
+  if (!e.target.matches('.dec input')) return;
+  const id = e.target.closest('.caso').dataset.id;
+  dec[id] = { ...(dec[id] || {}), nota: e.target.value };
+  try { localStorage.setItem(CLAVE, JSON.stringify(dec)); } catch (err) {}
+});
+
+document.getElementById('filtro').addEventListener('change', filtrar);
+
+document.getElementById('exportar').addEventListener('click', () => {
+  const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const cab = [
+    '# Decisiones de identidad de autor — revisión humana',
+    '# Generado por internal/revision_identidad.html',
+    `# Exportado: ${new Date().toISOString().slice(0, 10)}`,
+    '# veredicto: misma = misma persona · distintas = personas distintas · pendiente = sin resolver',
+  ].join('\n');
+  const cols = ['caso_id', 'cola', 'firmas', 'veredicto', 'nota', 'fecha'];
+  const filas = CASOS.map(c => {
+    const d = dec[c.id] || {};
+    return [c.id, c.cola, c.firmas.map(f => f.nombre).join(' | '),
+            d.veredicto || 'pendiente', d.nota || '', d.fecha || ''].map(esc).join(',');
+  });
+  const csv = [cab, cols.join(','), ...filas].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'identity_decisions.csv';
+  a.click();
+});
+
+document.getElementById('limpiar').addEventListener('click', () => {
+  if (!confirm('Se borran todas las decisiones guardadas en este navegador. ¿Continuar?')) return;
+  dec = {}; guardar();
+  document.querySelectorAll('.dec button[data-v]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  document.querySelectorAll('.dec input').forEach(i => { i.value = ''; });
+});
+
+// Restaurar lo guardado
+CASOS.forEach(c => {
+  const d = dec[c.id]; if (!d) return;
+  const el = document.querySelector(`.caso[data-id="${CSS.escape(c.id)}"]`);
+  if (!el) return;
+  el.querySelectorAll('.dec button[data-v]').forEach(b =>
+    b.setAttribute('aria-pressed', String(d.veredicto === b.dataset.v)));
+  const i = el.querySelector('.dec input'); if (i && d.nota) i.value = d.nota;
+});
+pintarAvance();
+</script>
+</body>
+</html>
