@@ -70,6 +70,9 @@ def cargar() -> dict:
         "master": leer(INTERIM / "authors_master_draft.csv", "borrador de tabla maestra"),
         "log": leer(INTERNAL / "matching_log.csv", "log de emparejamiento"),
         "orcid": leer(ENRICHED / "authors_orcid.csv", "ORCID enriquecido"),
+        # Opcional: sólo existe si se ha corrido `src/enrich/orcid_api.py`.
+        # Sin él la herramienta funciona igual, con una señal menos.
+        "verif": leer(ENRICHED / "orcid_verificacion.csv", "verificación contra ORCID"),
     }
     if d["master"] is None or d["log"] is None:
         sys.exit(
@@ -78,8 +81,15 @@ def cargar() -> dict:
     return d
 
 
-def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None) -> dict:
+def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None,
+             verif: pd.DataFrame | None = None) -> dict:
     """Ficha de evidencia por forma de firma."""
+    # Veredicto de la verificación contra el registro público, si se ejecutó.
+    ver = {}
+    if verif is not None:
+        ver = {r["nombre_en_fuente"]: (r["veredicto"], r.get("dois_coincidentes"),
+                                      r.get("afiliacion_institucional_declarada"))
+               for _, r in verif.iterrows()}
     orc = {}
     if orcid is not None:
         orc = {r["nombre_en_fuente"]: (r["orcid"], r.get("confianza"))
@@ -98,6 +108,7 @@ def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None
             coaut |= firmas_por_eid.get(e, set())
         coaut.discard(n)
         o = orc.get(n, (None, None))
+        v = ver.get(n)
         out[n] = {
             "nombre": n,
             "n_pub": int(r["n_publicaciones"]),
@@ -106,6 +117,9 @@ def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None
             "unidades": [u for u in str(r["unidades_academicas"]).split("|") if u],
             "scopus": [s for s in str(r["scopus_author_ids"] or "").split("|") if s and s != "nan"],
             "orcid": o[0], "orcid_confianza": o[1],
+            "orcid_veredicto": v[0] if v else None,
+            "orcid_dois_coincidentes": v[1] if v else None,
+            "orcid_afiliacion_ok": (str(v[2]).lower() == "true") if v else None,
             "eids": sorted(eids), "coautores": sorted(coaut),
         }
     return out
@@ -125,6 +139,10 @@ def cruces(a: dict, b: dict) -> dict:
         "misma_unidad": bool(set(a["unidades"]) & set(b["unidades"])
                              - {"No determinada"}),
         "mismo_orcid": bool(a["orcid"] and a["orcid"] == b["orcid"]),
+        # Que ambas firmas tengan el ORCID confirmado contra el registro es la
+        # evidencia más fuerte disponible: ya no es una inferencia por apellido.
+        "orcid_verificado": (a.get("orcid_veredicto") == "confirmada"
+                             and b.get("orcid_veredicto") == "confirmada"),
         "mismo_scopus": bool(set(a["scopus"]) & set(b["scopus"])),
     }
 
@@ -363,6 +381,9 @@ def señales_html(cr: dict | None) -> str:
         s.append(("neutra", "Nunca firman la misma publicación"))
     if cr["mismo_orcid"]:
         s.append(("fuerte-si", "Mismo ORCID"))
+    if cr.get("orcid_verificado"):
+        s.append(("fuerte-si", "ORCID verificado contra el registro: el titular "
+                               "declara estas publicaciones como suyas"))
     if cr["mismo_scopus"]:
         s.append(("fuerte-si", "Mismo Scopus Author ID"))
     if cr["coautores_comunes"]:
@@ -375,6 +396,26 @@ def señales_html(cr: dict | None) -> str:
     return ('<div class="senales">'
             + "".join(f'<span class="s {k}">{html.escape(t)}</span>' for k, t in s)
             + "</div>")
+
+
+def _verif(f: dict) -> str:
+    """Celda de verificación contra el registro público de ORCID.
+
+    Vacía si la verificación no se ha ejecutado: ausencia de dato y resultado
+    negativo no pueden verse igual (decisión D-09).
+    """
+    v = f.get("orcid_veredicto")
+    if not v:
+        return '<span style="color:#5a6b71">—</span>'
+    etiquetas = {
+        "confirmada": ("fuerte-si", f"sí · {f.get('orcid_dois_coincidentes') or 0} DOI"),
+        "sin_coincidencia": ("fuerte-no", "ningún DOI coincide"),
+        "no_verificable": ("neutra", "el titular no declara obras"),
+        "sin_registro": ("fuerte-no", "ORCID inexistente"),
+    }
+    clase, txt = etiquetas.get(v, ("neutra", v))
+    afil = ' · afiliación institucional declarada' if f.get("orcid_afiliacion_ok") else ""
+    return f'<span class="s {clase}">{html.escape(txt + afil)}</span>'
 
 
 def tabla_firmas(fs: list[dict]) -> str:
@@ -390,9 +431,10 @@ def tabla_firmas(fs: list[dict]) -> str:
             f'<td class="mono">{html.escape(f["orcid"] or "—")}'
             + (f' <span style="color:#5a6b71">({html.escape(f["orcid_confianza"])})</span>'
                if f["orcid"] and f["orcid_confianza"] else "")
-            + "</td></tr>")
+            + f"</td><td>{_verif(f)}</td></tr>")
     return ('<table><thead><tr><th>Forma de firma</th><th>Pub.</th><th>Años</th>'
-            '<th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th></tr></thead>'
+            '<th>Unidad académica</th><th>Scopus ID</th><th>ORCID</th>'
+            '<th>Verificado</th></tr></thead>'
             f"<tbody>{filas}</tbody></table>")
 
 
@@ -483,7 +525,7 @@ def main() -> int:
     print("=" * 78)
 
     d = cargar()
-    perf = perfiles(d["master"], d["log"], d["orcid"])
+    perf = perfiles(d["master"], d["log"], d["orcid"], d["verif"])
     cs = casos(d, perf)
     if not cs:
         print("  No hay casos que revisar. No se escribe nada.")

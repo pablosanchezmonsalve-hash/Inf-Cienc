@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision verificar-orcid limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -29,8 +29,16 @@ estado:
 
 # Herramienta de revisión humana de identidad de autor. Capa interna:
 # la salida vive en internal/ y nunca entra en dist/.
+# Verificación de ORCID contra el registro público. Requiere credenciales
+# gratuitas en el entorno; ver docs/ORCID_API_GUIDE.md.
+# En Windows es más simple: scripts/verificar-orcid.ps1 (clic derecho ->
+# «Ejecutar con PowerShell») hace la secuencia entera y pide el secret oculto.
+verificar-orcid:
+	python3 src/enrich/orcid_api.py
+
 revision: auditoria
 	python3 src/review/build_review.py
+	python3 src/review/build_unit_validation.py
 
 limpiar:
 	rm -rf dist data/processed

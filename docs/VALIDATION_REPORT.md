@@ -15,7 +15,7 @@ Generado por `src/audit/05_validation_rules.py`. Reejecutable.
 | `D-01` | bloqueante | Sin EID repetido | **PASA** | 0 |
 | `D-02` | alta | Sin DOI repetido entre los no nulos | **PASA** | 0 |
 | `D-03` | alta | Sin filas íntegramente duplicadas | **PASA** | 0 |
-| `P-01` | alta | Duplicados probables por título marcados, no resueltos | **PASA** | 1 grupo(s) encolado(s) en internal/ |
+| `P-01` | alta | Duplicados probables por título marcados, no resueltos | **PASA** | 1 grupo(s) · 1 revisado(s) por una persona · 0 pendiente(s) |
 | `P-03` | alta | Variantes de nombre encoladas sin colapso automático | **PASA** | 123 entradas |
 | `P-04` | alta | Nombres con múltiples Scopus ID encolados | **PASA** | 20 entradas |
 | `I-01` | bloqueante | Toda publicación tiene al menos una detección institucional | **PASA** | sin detección=0 |

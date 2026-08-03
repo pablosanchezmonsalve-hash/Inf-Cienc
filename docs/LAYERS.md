@@ -96,11 +96,17 @@ plataforma publica **indicadores derivados y metadatos bibliográficos**
 bundle desplegado**. La licencia del software es MIT (`D-39`) y la de los datos
 derivados, CC BY 4.0.
 
-> **Limitación abierta.** «No forma parte del bundle» no equivale a «no es
-> público»: mientras `data/raw/` e `internal/` estén versionados en un
-> repositorio público, están publicados. Las compuertas del build protegen el
-> sitio, no el repositorio, y ninguna decisión de este documento cambia eso.
-> Ver `docs/LIMITATIONS.md`.
+> **Alcance declarado, no limitación abierta.** «No forma parte del bundle» no
+> equivale a «no es público»: `data/raw/` e `internal/` están versionados en un
+> repositorio público y por tanto son accesibles. Las compuertas del build
+> protegen el sitio, no el repositorio.
+>
+> Se decidió mantenerlo así (`T-16`, cerrado el 2026-08-03): los nombres de
+> autor ya son públicos en Scopus, y documentar la incertidumbre es lo que hace
+> auditable al proyecto. Lo que queda abierto es la **redistribución de las
+> exportaciones de Elsevier**, que depende de la licencia institucional y no de
+> una decisión de este proyecto. Ver `internal/README.md` para el razonamiento
+> completo y las condiciones que obligarían a revisarlo.
 
 ---
 

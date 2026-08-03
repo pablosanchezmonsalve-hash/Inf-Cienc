@@ -95,9 +95,16 @@ def main() -> None:
           int(scopus.duplicated().sum()) == 0, str(int(scopus.duplicated().sum())))
 
     tnorm = scopus["Title"].map(c.normalize_title)
-    grupos = int(tnorm[tnorm.duplicated(keep=False)].nunique())
+    dups = tnorm[tnorm.duplicated(keep=False)]
+    grupos = int(dups.nunique())
+    # Lo revisado y lo pendiente se cuentan por separado: una afirmación
+    # verificada y una no verificada no pueden aparecer en la misma cifra.
+    revisados = sum(
+        1 for _, g in scopus.assign(_t=tnorm)[tnorm.isin(dups)].groupby("_t")
+        if c.resolucion_duplicado(g["EID"].iloc[0]))
     check("P-01", "alta", "Duplicados probables por título marcados, no resueltos",
-          True, f"{grupos} grupo(s) encolado(s) en internal/")
+          True, f"{grupos} grupo(s) · {revisados} revisado(s) por una persona · "
+                f"{grupos - revisados} pendiente(s)")
 
     amb_a = pd.read_csv(c.INTERNAL / "ambiguities_authors.csv")
     check("P-03", "alta", "Variantes de nombre encoladas sin colapso automático",

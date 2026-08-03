@@ -730,3 +730,236 @@ PLAN.md                            T-17 y T-18 cerrados; T-03/04/14/15 desbloque
 
 Que el usuario ejecute `make revision` y trabaje los 89 casos. Los 18 con
 evidencia de ORCID son los más rápidos y los de mayor rendimiento.
+
+---
+
+## Sesión 2026-08-03 (cont.) — T-05 cerrado, T-02/T-06/T-13 desbloqueados
+
+**Estado inicial:** el usuario verificó el duplicado de `T-05` contra ambos DOI
+y pidió seguir con lo pendiente.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-74 | Las resoluciones humanas viven en `config/resoluciones_humanas.yml` | Una resolución es un hecho verificado, no una regla. En el código sería invisible; aquí es dato versionado, con su evidencia al lado |
+| D-75 | Resolver una ambigüedad no la borra: baja de severidad y queda como revisada | Una afirmación verificada y una no verificada no pueden verse igual ni contarse en la misma cifra |
+| D-76 | `T-05` se cierra como **no es duplicado**: ambos siguen en el universo | Verificado por el usuario contra los dos DOI. El de 2025 es una carta al editor sobre el artículo de 2024: mismo título, documentos distintos |
+| D-77 | Lo que depende de una fuente externa se deja *pedido*, no sólo anotado | `T-02` y `T-06` no son trabajo de código, pero dejar la pregunta hecha con la evidencia delante sí lo es |
+
+### Archivos creados o modificados
+
+```
+config/resoluciones_humanas.yml       nuevo · resoluciones verificadas
+src/audit/common.py                   resolucion_duplicado()
+src/audit/02_reconcile_sources.py     lee la resolución; baja severidad
+src/audit/05_validation_rules.py      P-01 cuenta revisados y pendientes aparte
+src/review/build_unit_validation.py   nuevo · hoja de validación para T-02
+internal/validacion_unidades.md       generada
+docs/METHODOLOGY.md                   §7 bis · evidencia del percentil (T-13)
+docs/UPDATING_REQUEST.md              nuevo · qué pedir en la próxima carga (T-06)
+Makefile, PLAN.md                     objetivo `revision` amplía; estados
+```
+
+### Hallazgos
+
+- **`T-05` no era un duplicado.** DOI `…07451-7` (Article, 2024) es la
+  investigación; DOI `…07630-6` (Letter, 2025) es una carta al editor sobre sus
+  aspectos metodológicos. Mismo título, dos documentos. El universo sigue en
+  823 y ningún denominador cambia.
+- **La evidencia de `T-13` es concluyente.** Las 5 publicaciones más citadas
+  (115, 77, 52, 46, 45 citas) están en percentil 1, 2, 3, 4 y 2; **todas** las
+  no citadas están en 78, el máximo del rango. Correlación −0,66 con citas y
+  −0,58 con FWCI. Menor percentil = mejor posición, sin ambigüedad razonable.
+  Falta sólo el respaldo documental de Elsevier.
+- **`T-06` importa menos de lo que su enunciado sugiere.** Lo que no declara
+  fecha de corte es la exportación de Scopus, que aporta cobertura; las citas
+  —lo que más se mueve— vienen de SciVal, que sí la declara. Queda registrado
+  con esa proporción, no como un agujero de trazabilidad general.
+- **La hoja de `T-02` deja el pendiente a una lectura de distancia**: 21
+  unidades con sus recuentos, sus variantes reconocidas, las 4 jerarquías
+  separadas entre confirmada e inferidas, y una afiliación real por unidad.
+
+### Verificación
+
+- `P-01` reporta ahora «1 grupo · 1 revisado · 0 pendientes» y las dos filas
+  bajan a severidad informativa, conservando la traza.
+- Universo intacto en 823; las tres compuertas en verde.
+- Comprobado que `resoluciones_humanas.yml`, `validacion_unidades.md` y
+  `revision_identidad.html` no aparecen ni se referencian en `dist/`.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Resolver una ambigüedad es quitarla de la cola» | **Falso como diseño.** La coincidencia de título es real y se sigue declarando; lo que cambia es que consta como revisada |
+| «`T-06` es un agujero de trazabilidad general» | **Impreciso.** Afecta la cobertura, no las citas: SciVal sí declara su corte |
+| «Lo bloqueado por terceros no admite trabajo» | **Falso.** No se puede responder por ellos, pero sí dejar la pregunta hecha con la evidencia delante |
+
+### Ambigüedades abiertas
+
+- **`T-16`**: única decisión que sigue dependiendo del usuario.
+- `T-02`, `T-06`, `T-13`: esperando respuesta externa, ya pedida.
+- `T-03`, `T-04`, `T-14`, `T-15`: esperando la revisión con `make revision`.
+- `T-10`: depende de `T-03`.
+
+### Próximo paso recomendado
+
+Enviar `internal/validacion_unidades.md` a quien administre el catálogo de
+unidades, y `docs/UPDATING_REQUEST.md` a quien haga la exportación de Scopus.
+Ambas cosas pueden salir hoy y desbloquean dos pendientes.
+
+---
+
+## Sesión 2026-08-03 (cont. 2) — T-16 cerrado
+
+**Estado inicial:** `T-16` era el único pendiente que dependía de una decisión
+del usuario. Preguntó qué problema le generaría a él en particular, y observó
+que difícilmente alguien tendría el enlace.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-78 | `internal/` y `data/raw/` **se mantienen** en el repositorio público | El riesgo es bajo y documentar la incertidumbre es lo que hace auditable al proyecto. Purgar el historial es desproporcionado para esta exposición |
+| D-79 | La documentación pasa a declarar la exposición, no a negarla | El defecto real no era de seguridad sino de coherencia: `internal/README.md` decía «NO PUBLICAR» y estaba publicado |
+| D-80 | Se declaran las tres condiciones que obligarían a revisar D-78 | Una decisión sin criterio de revisión se convierte en inercia |
+
+### Archivos modificados
+
+```
+internal/README.md    reescrito: qué significa «interna» aquí, con el
+                      razonamiento y las condiciones de revisión
+docs/LAYERS.md        §5 pasa de «limitación abierta» a alcance declarado
+README.md             «interna» = fuera del sitio, no secreta
+PLAN.md               T-16 cerrado
+```
+
+### Hallazgos
+
+- **La premisa «nadie tiene el enlace» no se sostiene** para un repositorio
+  público: el buscador de GitHub indexa su contenido, Google indexa las páginas
+  de GitHub, y el sitio publicado sale del mismo repositorio. Lo que sí es
+  cierto es que hoy la probabilidad de que alguien lo busque es baja: la
+  exposición no depende de guardar un secreto, sino de que a nadie se le ocurra
+  mirar.
+- **El riesgo personal está mal ordenado si se pone la privacidad primero.** El
+  único con consecuencia práctica es Elsevier, y sería un aviso de retirada
+  dirigido a la cuenta del propietario, no a la universidad. Las colas de
+  identidad, en cambio, hacen que el proyecto se vea más riguroso, no menos.
+- **Lo único que sí era un defecto era la contradicción**: un archivo que
+  declara «NO PUBLICAR» dentro de un repositorio público rompe la premisa sobre
+  la que se construyó todo lo demás, que es decir exactamente lo que se hace.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «La opción correcta es purgar el historial» | **Desproporcionado.** Revisado el riesgo real, la opción correcta es declarar la exposición y fijar cuándo revisarla |
+| «Publicar las colas de identidad daña la credibilidad del proyecto» | **Al revés.** Documentar dudas en vez de esconderlas es lo que lo hace auditable |
+
+### Ambigüedades abiertas
+
+Ninguna que dependa del usuario. Queda abierta con Elsevier la redistribución de
+`data/raw/`, que no es una decisión de este proyecto.
+
+### Próximo paso recomendado
+
+Sin cambios: enviar las dos hojas de validación y trabajar `make revision`.
+
+---
+
+## Sesión 2026-08-03 (cont. 3) — API de ORCID
+
+**Estado inicial:** el usuario pidió implementar la API de ORCID. Antes de
+escribir nada se comprobó qué permite y qué es alcanzable.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-81 | El conector **verifica** asignaciones existentes; no las crea ni las reescribe | `authors_orcid.csv` guarda de dónde vino cada dato. Machacarlo borraría la procedencia; la verificación va en un archivo aparte |
+| D-82 | Las credenciales se leen del entorno y de ningún otro sitio | El repositorio es público: una credencial en un archivo versionado queda expuesta en el mismo commit |
+| D-83 | `no_verificable` y `sin_coincidencia` son categorías distintas | La primera es ausencia de evidencia; la segunda, evidencia en contra. Fundirlas convertiría un registro vacío en una acusación |
+| D-84 | La autoprueba sin red es obligatoria y corre en CI | El entorno de integración no alcanza la API: sin autoprueba, la lógica se rompería en silencio |
+
+### Archivos creados o modificados
+
+```
+src/enrich/orcid_api.py          conector de verificación (nuevo)
+docs/ORCID_API_GUIDE.md          guía de ejecución (nuevo)
+src/review/build_review.py       columna «Verificado» y señal nueva
+.github/workflows/deploy.yml     autoprueba en CI
+Makefile                         objetivo `verificar-orcid`
+.gitignore, README.md, PLAN.md   caché, índice, T-19
+```
+
+### Hallazgos
+
+- **El entorno bloquea `pub.orcid.org` y también `api.crossref.org`.** Sólo pasa
+  una lista corta (`api.github.com`, registros de paquetes). Eso confirma que el
+  enriquecimiento original nunca pudo correr aquí: lo ejecutó el usuario en su
+  máquina, como registra la sesión del 2026-08-01.
+- **La API pública de ORCID exige token desde hace años**, pero es gratuito y no
+  depende de suscripción institucional: se obtiene registrando un cliente en
+  Developer Tools.
+- **La verificación no sube la cobertura.** Comprueba las 174 asignaciones
+  existentes; no busca ORCID nuevos. Ampliar por búsqueda de afiliación es un
+  paso distinto, anotado como `T-19`.
+- Muchos ORCID existen **sin obras declaradas**, así que `no_verificable` será
+  un resultado frecuente y esperable, no un error.
+
+### Verificación
+
+- Autoprueba de **9 casos** con registros de mentira: todos pasan. Cubre
+  extracción de DOI, normalización a minúsculas, registro vacío, obras sin DOI,
+  los cuatro veredictos, y que una afiliación de otra institución no se cuente
+  como propia.
+- Sin credenciales, el script se detiene con instrucciones y no falla a medias.
+- La herramienta de revisión se probó con un fixture de verificación construido
+  sobre firmas reales de los 89 casos: los seis estados renderizan, y sin el
+  archivo la columna muestra «—» en vez de un falso negativo.
+- Las tres compuertas en verde; el fixture se retiró antes de commitear.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «La API pública de ORCID se consulta sin credenciales» | **Falso.** Exige token, aunque sea gratuito |
+| «Un fixture con las primeras firmas del CSV sirve para probar la herramienta» | **Falso.** Esas firmas no están entre los 89 casos; hubo que construirlo con firmas que sí aparecen |
+| «Verificar una publicación verifica una identidad» | **Falso.** Confirma que ese artículo es del titular; que dos firmas sean la misma persona sigue siendo conclusión humana |
+
+### Ambigüedades abiertas
+
+- **El contrato de la API no está verificado en vivo** desde este repositorio.
+  Los nombres de campo vienen de la documentación. Declarado en la guía §6: si
+  la primera ejecución con `--limit 10` falla al leer la respuesta, es ahí donde
+  hay que mirar.
+
+### Próximo paso recomendado
+
+Obtener las credenciales gratuitas y ejecutar `--limit 10`. Con eso se confirma
+el contrato de la API antes de gastar 174 peticiones.
+
+### Corrección posterior · la guía era el problema
+
+Al intentar ejecutarlo, el usuario copió tres veces el bloque de código de la
+guía **incluidas las comillas de cierre de Markdown**, y PowerShell lo trató
+como texto literal sin ejecutar nada. No fue un error suyo: la guía entregaba
+seis comandos encadenados dentro de un bloque cercado, y en el archivo `.md`
+esas comillas se ven como parte del contenido.
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-85 | La ejecución en Windows se hace con un asistente, no copiando comandos | Una instrucción que se puede copiar mal se copiará mal. El script comprueba cada paso y dice qué falló |
+| D-86 | El Client Secret se pide oculto y en el momento, nunca por variable de entorno pegada | Pegarlo en una consola lo deja en el historial; en un archivo, en el repositorio. `Read-Host -AsSecureString` no deja rastro |
+| D-87 | El `.ps1` se guarda con BOM UTF-8 | PowerShell 5.1 lee un script sin BOM como ANSI y corrompe los acentos |
+
+`scripts/verificar-orcid.ps1` verifica Python, instala dependencias si faltan,
+corre la autoprueba **antes** de pedir credenciales —si la lógica está rota, el
+problema no son las credenciales—, ejecuta la auditoría si hace falta, y empieza
+por 10 peticiones antes de ofrecer las 174.
+
+Comprobado: llaves y paréntesis equilibrados, sin comillas impares, todo el
+no-ASCII confinado a comentarios, BOM presente, y el directorio `scripts/` fuera
+de `dist/`.

@@ -175,12 +175,22 @@ def main() -> None:
     for _, grp in dup_titles.groupby("_tnorm"):
         eids = list(grp["EID"])
         for _, r in grp.iterrows():
+            # Un grupo revisado por una persona se sigue declarando —la
+            # coincidencia de título es real— pero como caso resuelto, no como
+            # duplicado pendiente. La resolución vive en config, con su
+            # evidencia; aquí sólo se lee.
+            res = c.resolucion_duplicado(r["EID"])
             amb.append({
-                "tipo": "P-01_duplicado_probable_por_titulo", "severidad": "alta",
+                "tipo": "P-01_duplicado_probable_por_titulo",
+                "severidad": "informativa" if res else "alta",
                 "eid": r["EID"], "anio": r["Year"],
                 "detalle": f"{str(r['Title'])[:100]} | tipo={r['Document Type']} | doi={r['DOI']}",
-                "consecuencia": f"agrupado con {[e for e in eids if e != r['EID']]}",
-                "resolucion": "NO_RESOLVER_AUTOMATICAMENTE",
+                "consecuencia": (f"revisado: {res['veredicto']} — {res['evidencia'][:120]}"
+                                 if res else
+                                 f"agrupado con {[e for e in eids if e != r['EID']]}"),
+                "resolucion": (f"RESUELTO_{res['veredicto'].upper()} "
+                               f"({res['revisado_por']}, {res['fecha']})"
+                               if res else "NO_RESOLVER_AUTOMATICAMENTE"),
             })
     for eid in year_mismatch:
         amb.append({"tipo": "X-02_year_mismatch", "severidad": "alta", "eid": eid,
