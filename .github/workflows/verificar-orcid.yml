@@ -42,9 +42,15 @@ jobs:
   verificar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          # Sin esto, checkout deja el repositorio en HEAD desacoplado —apuntando
+          # a un commit, no a una rama— y el `git push` del paso final no sabe a
+          # dónde empujar. La primera ejecución generó el resultado y lo subió
+          # como artefacto, pero no lo guardó en el repositorio.
+          ref: ${{ github.ref_name }}
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -89,7 +95,7 @@ jobs:
       # el resultado de las consultas no se pierde.
       - name: Publicar el resultado como artefacto descargable
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: verificacion-orcid
           path: |
@@ -110,7 +116,9 @@ jobs:
 
           Ejecutado por el workflow «Verificar ORCID contra su registro».
           Límite: ${{ inputs.limite || 'sin límite' }}."
-            git push
+            # Destino explícito: si el checkout dejara HEAD desacoplado, un
+            # `git push` a secas fallaría sin decir a dónde intentaba ir.
+            git push origin "HEAD:${{ github.ref_name }}"
           fi
 
       - name: Resumen
