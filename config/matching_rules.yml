@@ -97,6 +97,36 @@ unidad_academica:
   # El ~30 % restante NO se imputa (decisión D-09).
   etiqueta_sin_dato: "No determinada"
 
+  # Correcciones declaradas de artefactos del ORIGEN.
+  #
+  # No son reglas: son hechos sobre ESTE conjunto de datos. Scopus entregó estas
+  # cadenas con dos nombres pegados sin separador, y el extractor las toma tal
+  # cual porque son lo que dice la afiliación. Cada entrada corrige un caso
+  # observado y se justifica; deducir una regla general de tres casos —por
+  # ejemplo «cortar donde una minúscula precede a una mayúscula»— rompería
+  # nombres legítimos.
+  #
+  # La clave se compara normalizada (sin acentos, sin distinguir mayúsculas).
+  # Si la afiliación se reexporta corregida, estas entradas dejan de aplicarse
+  # solas y pueden retirarse.
+  #
+  # Aparte de esto, `reparar_texto_fuente()` arregla un problema distinto y
+  # genérico: 'Ingenierı́a' escrito con i sin punto más acento combinante, que
+  # es la misma palabra pero otra cadena. Eso sí es una regla, no una tabla.
+  correcciones_declaradas:
+    # 1 par. Afiliación: "Facultad de MedicinaEscuela de Medicina, Universidad
+    # Finis Terrae". Dos niveles pegados; se conserva la facultad, que es el
+    # nivel que el indicador P-07 agrega.
+    "Facultad de MedicinaEscuela de Medicina": "Facultad de Medicina"
+    # 1 par. Afiliación: "Facultad de EducaciónPsicología y Familia". El nombre
+    # completo de la unidad es "Facultad de Educación, Psicología y Familia":
+    # falta la coma, no sobra texto.
+    "Facultad de EducaciónPsicología y Familia": "Facultad de Educación, Psicología y Familia"
+    # 1 par. Afiliación: "Department of Cardiovascular DiseasesFaculty of
+    # MedicineUniver-sidad Finis Terrae-Clínica Las Condes". Tres fragmentos
+    # pegados y un guion de corte de línea dentro de "Universidad".
+    "Faculty of MedicineUniver-sidad": "Facultad de Medicina"
+
   # Jerarquía escuela -> facultad.
   # Permite agregar la producción a nivel de facultad sin perder el detalle de
   # escuela. Una escuela sin entrada aquí se reporta por sí misma.

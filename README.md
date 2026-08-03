@@ -107,20 +107,23 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Peso total de `dist/` | ~2,0 MB |
 | Dependencias externas en el navegador | **0** |
 
-Peso transferido por página, medido en navegador (sin comprimir; el servidor
-aplica gzip y reduce el texto a menos de un tercio):
+Peso por página, medido en navegador. La segunda columna es lo que realmente
+viaja: GitHub Pages sirve con gzip, y estos artefactos son JSON muy repetitivo.
 
-| Página | KB | Qué domina |
-|---|---|---|
-| Portada | 107 | CSS 33 · `paginas.js` 30 · `core.js` 22 · `series.json` 11 |
-| Impacto y demás módulos | 105 | lo mismo, sin `kpis.json` |
-| Autores | 267 | `authors.json` 172 — las 589 firmas |
-| Publicaciones | 808 | `publications.json` 699 — las 823 publicaciones |
+| Página | Sin comprimir | **Transferido** | Qué domina |
+|---|---|---|---|
+| Portada | 107 KB | **~29 KB** | CSS 33 · `paginas.js` 30 · `core.js` 22 · `series.json` 11 |
+| Impacto y demás módulos | 105 KB | **~28 KB** | lo mismo, sin `kpis.json` |
+| Autores | 267 KB | **~44 KB** | `authors.json` 171 → 14 KB |
+| Publicaciones | 808 KB | **~181 KB** | `publications.json` 699 → 146 KB |
 
-Los 105 KB comunes son el armazón: hoja de estilo, motor de gráficos y glosario,
-que el navegador cachea entre páginas. Las dos tablas grandes cargan su conjunto
-completo porque el filtrado ocurre en el cliente, sin servidor que consultar.
-Trocear `publications.json` está anotado para V2.
+`publications.json` comprime al **20 %** de su tamaño y `authors.json` al **8 %**.
+Las dos tablas grandes cargan su conjunto completo porque el filtrado ocurre en
+el cliente, sin servidor que consultar; a 146 KB comprimidos eso es un precio
+razonable por filtrar 823 publicaciones sin una sola petición más.
+
+El armazón común —hoja de estilo, motor de gráficos y glosario, unos 26 KB
+comprimidos— lo cachea el navegador entre páginas.
 
 ---
 
@@ -129,7 +132,7 @@ Trocear `publications.json` está anotado para V2.
 | Documento | Contenido |
 |---|---|
 | **`STATE.md`** | **Punto de entrada: estado, cifras y mapa de lectura** |
-| `docs/DECISIONS.md` | Índice de las 69 decisiones, una línea cada una |
+| `docs/DECISIONS.md` | Índice de las 73 decisiones, una línea cada una |
 | `docs/AUDIT_REPORT.md` | Auditoría completa con cifras verificadas |
 | `docs/DATA_MODEL.md` | Modelo lógico, entidades y claves de enlace |
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
