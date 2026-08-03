@@ -1051,3 +1051,68 @@ La cifra real sale de la ejecución completa.
 
 `docs/ORCID_API_GUIDE.md` §6 pasa de declarar el contrato como no verificado a
 declararlo verificado, con la fecha y la evidencia.
+
+---
+
+## Cierre · la verificación de ORCID, de extremo a extremo
+
+La ejecución completa corrió sobre las 174 asignaciones. Antes hubo que
+arreglar dos fallos del workflow que la ejecución #4 dejó a la vista: terminó
+en «success» a los 6 segundos, que para 174 firmas es imposible.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-93 | «Todas» necesita un valor explícito (`0`), no el campo vacío | Un campo vacío hace que GitHub sustituya el `default`. Pedir «sin límite» dejando el hueco en blanco devolvía 10 sin avisar |
+| D-94 | Los archivos se añaden al índice uno por uno, comprobando que existan | `git add A B` falla entero si `B` no existe. `orcid_hallazgos.csv` sólo se genera si hay dudosas; sin él, tampoco se guardaba `A` |
+| D-95 | El veredicto de ORCID se publica en la ficha de autor | Un ORCID de Crossref es una hipótesis por apellido e inicial. Publicarlo sin su evidencia lo convierte en un hecho sobre una persona con nombre y apellido, contra `<non_negotiable_rules>` |
+| D-96 | En el listado se marca sólo la excepción, no la norma | 153 de 174 están confirmadas. Etiquetarlas todas es ruido; la información es la minoría que se sale |
+| D-97 | `sin_coincidencia` se publica como «sin confirmar», nunca como «incorrecta» | La evidencia dice que no respalda la asignación, no que la desmienta. La segunda frase es una acusación que los datos no sostienen |
+| D-98 | `--cifra` se separa de `--marca` | `--marca` cambia de oficio entre temas: tinta en claro, superficie en oscuro. Un token no puede hacer las dos cosas |
+
+### Resultado
+
+| Veredicto | Firmas | |
+|---|---:|---|
+| confirmada | 153 | 87,9 % |
+| no_verificable | 17 | 9,8 % |
+| sin_coincidencia | 4 | 2,3 % |
+| sin_registro | 0 | — |
+
+La confianza declarada por el emparejador resulta ser un predictor real:
+94,4 % de confirmación cuando decía «alta», 85,0 % cuando decía «media».
+
+Las cuatro sin confirmar: tres son apellidos frecuentes con inicial única que
+no declaran afiliación UFT. `Díaz F.` arrastra además tres Scopus Author ID y
+la marca de identidad no consolidada — dos señales independientes coincidiendo.
+Quedan en `internal/orcid_hallazgos.csv`, sin resolver.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Las 10 primeras eran las de mayor respaldo, el sesgo juega a favor» (escrito en el cierre anterior) | **Falso, y al revés.** `head(10)` toma el orden alfabético del archivo, no un ranking: 9 de esas 10 eran de confianza «media», frente a 69 % en el total. La muestra era algo más débil que la media, y aun así dio 10/10 |
+| «El workflow terminó en success, luego hizo su trabajo» | **Falso.** Terminó en success habiendo verificado 10 y sin guardar nada. Un `success` sólo dice que ningún paso devolvió error |
+| «La paleta está revalidada, luego los colores del sitio están bien» | **Insuficiente.** El fallo de las cifras en modo oscuro no está en la paleta: los dos valores son correctos por separado y sólo el uso los enfrenta |
+| «Mi medición de contraste es de fiar» | **No lo era.** El primer barrido dio 64 fallos y 62 eran del instrumento: no componía fondos translúcidos, leía `color(srgb 0.21 …)` como enteros y daba por transparente la cabecera en degradado |
+
+### Archivos modificados
+
+`.github/workflows/verificar-orcid.yml`, `src/build/03_authors.py`,
+`web/assets/js/paginas.js`, `web/assets/css/app.css`,
+`docs/AUTHOR_PROFILE.md`, `docs/UX_UI.md`.
+Generados por la ejecución: `data/enriched/orcid_verificacion.csv`,
+`internal/orcid_hallazgos.csv`.
+
+### Ambigüedades abiertas
+
+Las cuatro asignaciones sin confirmar. La evidencia disponible no distingue
+entre «es otra persona con la misma firma abreviada» y «es la misma persona con
+el registro de ORCID incompleto». `De la Fuente M.` es el caso más favorable a
+la segunda lectura: declara afiliación UFT y sólo tres obras con DOI.
+
+### Próximo paso recomendado
+
+Resolver esas cuatro en `make revision`, junto con los 89 casos de identidad
+que ya esperaban. Es la misma clase de decisión y la misma herramienta.
