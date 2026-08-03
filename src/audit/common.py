@@ -232,12 +232,48 @@ def author_name_from_block(block: str) -> str:
     return block.split(",")[0].strip()
 
 
+def reparar_texto_fuente(s: str) -> str:
+    """Repara artefactos de codificación de la cadena original.
+
+    NO cambia el contenido: repone los caracteres que el origen escribió mal.
+    'Facultad de Ingenierı́a' usa U+0131 (i sin punto) seguida de U+0301 (acento
+    combinante) en lugar de 'í'. Es la misma palabra, pero como cadena es
+    distinta, así que producía dos unidades académicas donde hay una: 49 pares
+    en 'Facultad de Ingeniería' y 1 en la variante rota.
+
+    La normalización Unicode estándar no lo resuelve: U+0131 + U+0301 no tiene
+    composición canónica, de modo que NFC los deja tal cual. Hay que reponer la
+    letra base antes de componer.
+    """
+    if not isinstance(s, str):
+        return s
+    # i/j sin punto seguidas de un diacrítico combinante: se repone la letra con
+    # punto, que es lo que el diacrítico esperaba encima.
+    s = re.sub(r"[ı](?=[̀-ͯ])", "i", s)
+    s = re.sub(r"[ȷ](?=[̀-ͯ])", "j", s)
+    return unicodedata.normalize("NFC", s)
+
+
+_CORRECCIONES_UNIDAD = {
+    normalize_text(k): v
+    for k, v in (MATCHING["unidad_academica"].get("correcciones_declaradas") or {}).items()
+}
+
+
 def _clean_unit(unit: str) -> str:
-    """Quita restos de la cadena institucional pegados a la unidad."""
-    out = unit.strip()
+    """Quita restos de la cadena institucional pegados a la unidad.
+
+    Aplica además, en este orden: reparación de codificación y correcciones
+    declaradas. Las correcciones son una tabla en config, no lógica en el
+    código: son hechos sobre ESTE conjunto de datos —cadenas que el origen
+    entregó concatenadas sin separador— y una regla general deducida de tres
+    casos rompería nombres legítimos.
+    """
+    out = reparar_texto_fuente(unit).strip()
     for suffix in MATCHING["unidad_academica"].get("sufijos_a_limpiar", []):
         out = re.sub(rf"\s*{re.escape(suffix)}\s*$", "", out, flags=re.IGNORECASE)
-    return re.sub(r"[\s.,;-]+$", "", out).strip()
+    out = re.sub(r"[\s.,;-]+$", "", out).strip()
+    return _CORRECCIONES_UNIDAD.get(normalize_text(out), out)
 
 
 def extract_academic_unit(affiliation_chunk: str) -> str | None:

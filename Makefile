@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -26,6 +26,11 @@ servir: sitio
 
 estado:
 	python3 src/state/snapshot.py
+
+# Herramienta de revisión humana de identidad de autor. Capa interna:
+# la salida vive en internal/ y nunca entra en dist/.
+revision: auditoria
+	python3 src/review/build_review.py
 
 limpiar:
 	rm -rf dist data/processed
