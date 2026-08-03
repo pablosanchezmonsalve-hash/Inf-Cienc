@@ -98,23 +98,25 @@ para los datos derivados.
 | # | Pendiente | Fase objetivo | Origen |
 |---|---|---|---|
 | ~~T-01~~ | ~~Enriquecer ORCID desde Crossref por DOI (cobertura 97,7 %)~~ | — | **Cerrado (2026-08-01)**: 174 de 589 firmas, 0 errores de red |
-| T-02 | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad | 2 | Sin catálogo oficial |
+| T-02 | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad | 2 | **Desbloqueado**: hoja lista en `internal/validacion_unidades.md` (`make revision`). Falta enviarla |
 | T-03 | Revisión humana de las variantes de nombre encoladas (51 grupos) | 2 | **Desbloqueado**: `internal/revision_identidad.html` (`make revision`) |
 | T-04 | Revisión humana de los 20 nombres con múltiples Scopus ID | 2 | **Desbloqueado**: `internal/revision_identidad.html` (`make revision`) |
-| T-05 | Decidir tratamiento del duplicado probable Article/Letter | 2 | Regla P-01 |
-| T-06 | Reexportar Scopus con fecha de corte declarada | 2 | Ambigüedad de trazabilidad |
+| ~~T-05~~ | ~~Decidir tratamiento del duplicado probable Article/Letter~~ | — | **Cerrado (2026-08-03)**: verificado por el usuario contra ambos DOI. Son dos documentos distintos con el mismo título; universo intacto en 823 |
+| T-06 | Reexportar Scopus con fecha de corte declarada | 2 | **Petición redactada**: `docs/UPDATING_REQUEST.md`. Depende de quien exporte |
 | ~~T-07~~ | ~~Excluir `Molecular Sequence Numbers` del dataset procesado~~ | — | **Cerrado en Fase 3**: no se materializa en `publications_universe.csv` |
 | ~~T-08~~ | ~~Elegir stack de despliegue estático~~ | — | **Cerrado**: HTML/CSS/JS sin dependencias + build en Python |
 | ~~T-09~~ | ~~Excluir `internal/` del bundle público~~ | — | **Cerrado**: `06_assemble_site.py` lo excluye y lo verifica |
 | T-10 | Red de coautoría autor–autor derivada de `Autoria` | V2 | Diferido: depende de T-03 |
 | ~~T-11~~ | ~~Confirmar alcance de publicación de fichas de autor~~ | — | **Cerrado**: confirmado por el usuario (589 firmas, ranking n>=5) |
 | ~~T-12~~ | ~~Verificación automática de barrera pública/interna~~ | — | **Cerrado**: `05_verify_public_layer.py`, compuerta con código de salida |
-| T-13 | Confirmar semántica del percentil de citación con documentación SciVal | V2 | Determinada empíricamente, no documentalmente |
-| T-14 | Revisión humana de los 17 grupos de firmas que comparten ORCID | V2 | **Desbloqueado**: `internal/revision_identidad.html` (`make revision`) |
-| T-15 | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID | V2 | **Desbloqueado**: `internal/revision_identidad.html` (`make revision`) |
-| T-16 | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público | V2 | Auditoría 2026-08-01: contradice `internal/README.md` |
+| T-13 | Confirmar semántica del percentil de citación con documentación SciVal | V2 | **Evidencia consolidada** en `docs/METHODOLOGY.md` §7 bis: las 5 más citadas en percentil 1–4, todas las no citadas en 78. Falta el respaldo documental |
+| T-14 | Revisión humana de los 17 grupos de firmas que comparten ORCID | V2 | **Desbloqueado**: `make revision`; evidencia reforzable con `make verificar-orcid` |
+| T-15 | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID | V2 | **Desbloqueado**: `make revision`; `make verificar-orcid` dice cuál de los dos ORCID declara las publicaciones |
+| ~~T-16~~ | ~~Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público~~ | — | **Cerrado (2026-08-03)**: se mantienen, y `internal/README.md` pasa a declararlo con su razonamiento y las condiciones que obligarían a revisarlo |
 | ~~T-17~~ | ~~Corregir las cadenas de unidad académica concatenadas sin separador~~ | — | **Cerrado (2026-08-03)**: reparación de codificación + 3 correcciones declaradas en config. 26 → 22 unidades distintas |
 | ~~T-18~~ | ~~Trocear o paginar `publications.json`~~ | — | **Cerrado sin cambios (2026-08-03)**: 699 KB comprimen a 146 KB. La página entera transfiere 181 KB. La cifra que lo motivó era sin comprimir |
+
+| T-19 | Ampliar cobertura de ORCID buscando por afiliación en el registro | V2 | La verificación no busca ORCID nuevos; hoy el techo es 29,5 % |
 
 ---
 

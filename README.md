@@ -54,6 +54,7 @@ dist/            Sitio ensamblado. Lo único que se despliega.
 docs/            Documentación pública.
 internal/        Capa interna: matching, ambigüedades. No se despliega.
 prompts/         Especificaciones de cada fase.
+scripts/         Asistentes de ejecución para Windows.
 ```
 
 ---
@@ -132,7 +133,7 @@ comprimidos— lo cachea el navegador entre páginas.
 | Documento | Contenido |
 |---|---|
 | **`STATE.md`** | **Punto de entrada: estado, cifras y mapa de lectura** |
-| `docs/DECISIONS.md` | Índice de las 73 decisiones, una línea cada una |
+| `docs/DECISIONS.md` | Índice de las 87 decisiones, una línea cada una |
 | `docs/AUDIT_REPORT.md` | Auditoría completa con cifras verificadas |
 | `docs/DATA_MODEL.md` | Modelo lógico, entidades y claves de enlace |
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
@@ -145,7 +146,9 @@ comprimidos— lo cachea el navegador entre páginas.
 | `docs/GLOSSARY.md` | Glosario y ayuda contextual |
 | `docs/DEPLOYMENT.md` | Cómo construir y publicar |
 | `docs/UPDATING.md` | Cómo incorporar una carga de datos nueva |
+| `docs/UPDATING_REQUEST.md` | Qué pedir en la próxima exportación de datos |
 | `docs/ORCID_GUIDE.md` | Cómo ejecutar el enriquecimiento de ORCID desde Crossref |
+| `docs/ORCID_API_GUIDE.md` | Cómo verificar los ORCID contra el registro público |
 | `docs/REPLICATION.md` | Cómo adaptar el sistema a otra institución |
 | `docs/DATA_LICENSE.md` | Uso de datos institucionales |
 | `docs/V2_BACKLOG.md` | Pendientes de la siguiente versión |
@@ -160,7 +163,13 @@ El proyecto separa estrictamente dos capas (`CLAUDE.md`, `<data_governance>`):
 
 - **Pública** — `docs/`, `data/processed/`, el sitio.
 - **Interna** — `internal/`: reglas de matching, trazabilidad, colas de revisión
-  humana. Nunca se despliega, y la exclusión se verifica automáticamente.
+  humana. **Nunca llega al sitio**, y la exclusión se verifica en cada build y
+  otra vez en el despliegue.
+
+«Interna» significa *fuera del sitio*, no *secreta*: este repositorio es público
+y esos archivos también lo son. Es una decisión declarada, no un descuido — el
+razonamiento y las condiciones que obligarían a revisarla están en
+`internal/README.md`.
 
 El criterio: **público lo que describe un resultado, interno lo que describe
 cómo se llegó a él.** Los nombres de autor son públicos —están en Scopus—, pero

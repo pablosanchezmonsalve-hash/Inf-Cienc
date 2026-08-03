@@ -92,6 +92,33 @@ confundan con el desempeño del trabajo individual. El percentil de
 SJR/CiteScore es la vía defendible para hablar de «cuartil»; nunca como
 indicador de calidad del artículo.
 
+## 7 bis. Semántica del percentil de citación, determinada empíricamente
+
+El campo `percentil_citacion` **no venía con su dirección declarada** en el
+export: no había forma documental de saber si 1 es la mejor posición o la peor.
+Todo el indicador `I-05` («publicaciones en el top 10 %») depende de acertar,
+y equivocarse lo invierte por completo.
+
+Se determinó midiendo sobre los propios datos (n = 816). La evidencia es
+monótona en los dos extremos:
+
+| Publicaciones | Citas | Percentil observado |
+|---|---|---|
+| Las 5 más citadas | 115 · 77 · 52 · 46 · 45 | **1 · 2 · 3 · 4 · 2** |
+| Todas las no citadas | 0 | **78** (el máximo del rango) |
+
+Correlaciones: **−0,66** con el recuento de citas y **−0,58** con el FWCI. El
+rango observado es 1–78.
+
+**Conclusión: el valor menor es la mejor posición.** El campo expresa «top X %»,
+y por eso `I-05` cuenta las publicaciones con percentil ≤ 10.
+
+Queda una salvedad honesta: esto es evidencia empírica, no documentación de
+Elsevier. La ordenación es tan limpia que la conclusión no admite mucha duda,
+pero mientras no se confirme contra la documentación oficial de SciVal se
+declara como determinada por medición (pendiente `T-13`). La medición es
+reproducible: la ejecuta `src/analysis/indicator_feasibility.py`.
+
 ## 8. Visibilidad no es impacto
 
 `Views` y `Field-Weighted View Impact` miden visualizaciones en Scopus.

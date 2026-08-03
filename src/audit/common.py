@@ -38,6 +38,29 @@ INSTITUTION = load_config("institution.yml")
 SOURCES = load_config("sources.yml")["fuentes"]
 MATCHING = load_config("matching_rules.yml")
 
+# Decisiones que una persona tomó sobre ambigüedades encoladas. Opcional: sin el
+# archivo, todo sigue pendiente, que es el estado por defecto correcto.
+try:
+    RESOLUCIONES = load_config("resoluciones_humanas.yml") or {}
+except FileNotFoundError:
+    RESOLUCIONES = {}
+
+
+def resolucion_duplicado(eid: str) -> dict | None:
+    """Resolución humana del grupo de duplicado probable que contiene `eid`.
+
+    Devuelve None si nadie lo ha revisado todavía. Resolver no borra la
+    ambigüedad: la cola sigue registrando que existió, y el reporte distingue lo
+    revisado de lo pendiente. Una afirmación verificada y una no verificada
+    nunca deben verse igual.
+    """
+    grupos = ((RESOLUCIONES.get("publicaciones") or {})
+              .get("duplicados_por_titulo") or [])
+    for g in grupos:
+        if eid in (g.get("grupo") or []):
+            return g
+    return None
+
 
 def source_path(key: str) -> Path:
     return ROOT / SOURCES[key]["archivo"]

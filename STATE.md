@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `c0ff4de` · Corrige los fallos de accesibilidad que encontró la segunda auditoría
+Último commit: `1d1eb60` · Quita una f-string sin placeholders
 Snapshot: 2026-08-03
 
 ---
@@ -53,24 +53,23 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Pendientes abiertos (10)
+## Pendientes abiertos (9)
 
 | # | Pendiente |
 |---|---|
 | `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
 | `T-03` | Revisión humana de las variantes de nombre encoladas (51 grupos) |
 | `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID |
-| `T-05` | Decidir tratamiento del duplicado probable Article/Letter |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
 | `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
 | `T-13` | Confirmar semántica del percentil de citación con documentación SciVal |
 | `T-14` | Revisión humana de los 17 grupos de firmas que comparten ORCID |
 | `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
-| `T-16` | Decidir si `internal/` y `data/raw/` siguen versionados en el repositorio público |
+| `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 73
+## Decisiones tomadas: 87
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
