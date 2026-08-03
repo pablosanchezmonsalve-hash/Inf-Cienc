@@ -1,0 +1,60 @@
+# Resoluciones humanas de ambigüedades declaradas.
+#
+# QUÉ ES ESTE ARCHIVO
+#   El pipeline detecta ambigüedades y las encola, pero nunca las resuelve
+#   (decisión D-08). Cuando una persona las revisa y decide, la decisión tiene
+#   que vivir en algún sitio: aquí.
+#
+# POR QUÉ AQUÍ Y NO EN EL CÓDIGO
+#   Una resolución es un HECHO VERIFICADO, no una regla. Escribirla en el código
+#   la volvería invisible y la mezclaría con la lógica de detección. Aquí es
+#   dato: versionada, auditable, y con la evidencia que la sostiene al lado.
+#
+# QUÉ NO HACE
+#   Resolver una ambigüedad NO la borra: la cola sigue registrando que existió y
+#   el reporte de validación distingue lo revisado de lo pendiente. Una
+#   afirmación verificada y una no verificada nunca se ven igual.
+#
+# CADA ENTRADA DECLARA
+#   veredicto  · qué se concluyó
+#   evidencia  · en qué se basó, comprobable por un tercero
+#   revisado_por / fecha · quién y cuándo
+
+# ─────────────────────────────────────────────── duplicados de publicación
+publicaciones:
+
+  # Regla P-01: dos registros con el mismo título normalizado.
+  duplicados_por_titulo:
+
+    - grupo: ["2-s2.0-85203352103", "2-s2.0-85211925904"]
+      veredicto: no_es_duplicado
+      titulo: >-
+        Creatine Supplementation Prior to Strength Exercise Training Is Not
+        Superior in Preventing Muscle Mass Loss Compared with Standard
+        Nutritional Recommendations in Females After Bariatric Surgery
+      evidencia: >-
+        Son dos documentos distintos con el mismo título. El DOI
+        10.1007/s11695-024-07451-7 (Article, 2024) es la investigación original.
+        El DOI 10.1007/s11695-024-07630-6 (Letter, 2025) es una carta al editor
+        que comenta aspectos metodológicos de esa investigación. Ambos DOI
+        resuelven a textos diferentes en Obesity Surgery. Comprobado abriendo
+        las dos páginas del editor.
+      consecuencia: >-
+        Ambos permanecen en el universo canónico. El universo sigue siendo 823 y
+        ningún denominador cambia. La coincidencia de título es real y por eso
+        el par se sigue declarando, pero como caso revisado y descartado, no
+        como duplicado pendiente.
+      revisado_por: "Propietario del proyecto"
+      fecha: "2026-08-03"
+
+# ─────────────────────────────────────────────────── identidad de autor
+#
+# Se llenará desde `internal/identity_decisions.csv`, que exporta la herramienta
+# `make revision`. Vacío mientras la revisión no se haya hecho: no hay ninguna
+# resolución que declarar, y un archivo con entradas inventadas sería peor que
+# uno vacío.
+autores:
+  variantes_de_nombre: []
+  scopus_id_multiples: []
+  orcid_compartido: []
+  orcid_en_conflicto: []

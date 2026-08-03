@@ -1,18 +1,47 @@
-# Capa interna — NO PUBLICAR
+# Capa interna — fuera del sitio, dentro del repositorio
 
-Este directorio contiene material de conciliación y depuración. Conforme a
-`CLAUDE.md`, `<data_governance>`:
+Este directorio contiene material de conciliación y depuración: cómo se llegó a
+los resultados, no los resultados. Conforme a `CLAUDE.md`, `<data_governance>`:
 
 > Nunca publiques por defecto información que haya sido usada solo para
 > depuración o conciliación interna.
 
-**Excluido del bundle público** desde la Fase 3 (T-09 cerrado):
-`src/build/06_assemble_site.py` no lo copia a `dist/` y lo verifica, y el
-workflow de despliegue lo comprueba otra vez antes de publicar.
+## Qué significa «interna» aquí, exactamente
 
-> **Alcance de esa exclusión.** Las compuertas cubren `dist/`, es decir el sitio.
-> **No cubren el repositorio.** Mientras este directorio esté versionado en un
-> repositorio público, su contenido es público, con compuertas o sin ellas.
+**Excluido del sitio.** Desde la Fase 3 (T-09 cerrado),
+`src/build/06_assemble_site.py` no copia este directorio a `dist/` y lo
+verifica; el workflow de despliegue lo comprueba otra vez antes de publicar.
+Nada de lo que hay aquí ha llegado nunca a
+https://pablosanchezmonsalve-hash.github.io/Inf-Cienc/
+
+**No excluido del repositorio, y eso es deliberado.** Este repositorio es
+público, de modo que **estos archivos también lo son**. Las compuertas protegen
+el sitio; ninguna protege el repositorio, porque no se construyó para eso.
+
+Se decidió mantenerlo así (`T-16`, cerrado el 2026-08-03) tras sopesarlo:
+
+- Los **nombres de los autores ya son públicos**: están en Scopus. El
+  repositorio no los revela.
+- Lo que sí es propio de aquí son las **dudas**: qué formas de firma podrían
+  ser la misma persona sin haberlo comprobado. Se mantienen visibles porque
+  documentar la incertidumbre es lo que hace auditable al proyecto, y
+  esconderla lo haría parecer más seguro de lo que es.
+- Las **exportaciones originales de Elsevier** (`data/raw/`) están igualmente
+  versionadas. Su redistribución puede exceder lo que permite la licencia
+  institucional: es una cuestión abierta con quien administra la suscripción,
+  no una decisión que este proyecto pueda cerrar por su cuenta.
+
+**Cuándo habría que revisar esta decisión:** si la plataforma pasa a ser un
+servicio institucional formal, si Elsevier plantea la redistribución, o si
+alguna de las personas listadas en las colas objeta aparecer en ellas.
+Cualquiera de las tres cambia el cálculo.
+
+## Regla que sigue vigente
+
+Que estos archivos sean accesibles **no los convierte en publicables**. No se
+citan, no se enlazan desde el sitio, no se presentan como resultado y no
+sustituyen a nada de `docs/`. Lo que puede difundirse es el **recuento agregado**
+de ambigüedades y su explicación metodológica, nunca el detalle nominal.
 
 ## Contenido
 

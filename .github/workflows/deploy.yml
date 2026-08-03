@@ -45,6 +45,12 @@ jobs:
       - name: Verificar la lógica de emparejamiento de ORCID
         run: python3 src/enrich/orcid_crossref.py --test
 
+      # Autoprueba sin red del verificador contra el registro de ORCID. No pide
+      # credenciales: si las pidiera, CI no podría ejercer esta lógica y se
+      # rompería en silencio.
+      - name: Verificar la lógica de verificación contra ORCID
+        run: python3 src/enrich/orcid_api.py --test
+
       - name: Construir artefactos publicables
         run: python3 src/build/build_all.py
 

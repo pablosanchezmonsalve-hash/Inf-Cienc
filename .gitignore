@@ -11,6 +11,7 @@ dist/
 # Se conservan en disco para poder reejecutar el enriquecimiento sin volver a
 # golpear la API, pero no se versionan.
 data/cache/
+# Ídem para las respuestas del registro de ORCID.
 
 # Nunca desplegar la capa interna en la web pública (CLAUDE.md, <data_governance>).
 # Se versiona en el repositorio de trabajo, pero queda fuera del bundle: la
