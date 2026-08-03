@@ -421,10 +421,15 @@ async function autores() {
     const ord = k => (k === orden ? ' ordenada' : '');
 
     const conOrcid = f.filter(a => a.orcid).length;
+    const verificados = f.filter(a => a.orcid_veredicto === 'confirmada').length;
     document.getElementById('resumen').innerHTML =
       `<strong>${c.nf.format(f.length)}</strong> de ${c.nf.format(parametros.total_firmas)} formas de firma` +
       (soloInterpretables ? ` · mostrando sólo n ≥ ${parametros.n_minimo_interpretable}` : '') +
-      ` · <strong>${c.nf.format(conOrcid)}</strong> con ORCID recuperado`;
+      ` · <strong>${c.nf.format(conOrcid)}</strong> con ORCID recuperado` +
+      // Sólo si la verificación se ha ejecutado: sin ella el recuento sería 0
+      // y un 0 aquí se leería como «ninguno se verificó», que es falso.
+      (verificados ? ` · <strong>${c.nf.format(verificados)}</strong> verificado${
+        verificados === 1 ? '' : 's'} contra el registro de ORCID` : '');
 
     document.getElementById('tabla-cuerpo').innerHTML = f.length ? f.map(a => `<tr>
       <td><a href="autor.html?id=${encodeURIComponent(a.id)}">${c.escapar(a.nombre)}</a>
@@ -435,6 +440,13 @@ async function autores() {
              target="_blank" rel="noopener"
              title="ORCID recuperado desde Crossref · confianza ${c.escapar(a.orcid_confianza || '')}"
              >${c.escapar(a.orcid)}</a>`
+          // Se marca la excepción, no la norma: 153 de 174 asignaciones están
+          // verificadas contra el registro del titular, así que etiquetarlas
+          // todas sería ruido y etiquetar sólo las que no lo están es la
+          // información. En texto, no en color: el color solo no comunica.
+          + (a.orcid_veredicto && a.orcid_veredicto !== 'confirmada'
+            ? ` <span class="nota nota-orcid-${c.escapar(a.orcid_veredicto)}"
+                 >${c.escapar(a.orcid_veredicto_etiqueta)}</span>` : '')
         : '<span class="sin-dato-txt">No disponible</span>'}</td>
       <td>${c.escapar(a.unidades.join(' · '))}</td>
       <td class="num${ord('n_publicaciones')}">${c.celda(a.n_publicaciones)}</td>
@@ -489,10 +501,16 @@ async function fichaAutor() {
       : '<span class="sin-dato-txt">No resuelto</span>'}</div>
     <div><span>ORCID</span>${a.orcid
       ? `<a href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`
-        // La confianza viaja visible: un ORCID emparejado por apellido e
-        // inicial es una hipótesis verificable, no un dato de la fuente.
-        + (a.orcid_confianza === 'media'
-          ? ` <span class="nota">correspondencia probable</span>` : '')
+        // Qué evidencia respalda este ORCID, en orden de fuerza. El veredicto
+        // sale de contrastar la asignación contra el registro del propio
+        // titular, así que cuando existe desplaza a la confianza, que sólo
+        // dice lo que opina nuestra heurística de emparejamiento.
+        + (a.orcid_veredicto_etiqueta
+          ? ` <span class="nota nota-orcid-${c.escapar(a.orcid_veredicto)}"
+                 title="${c.escapar(a.orcid_veredicto_detalle || '')}"
+               >${c.escapar(a.orcid_veredicto_etiqueta)}</span>`
+          : a.orcid_confianza === 'media'
+            ? ` <span class="nota">correspondencia probable</span>` : '')
       : `<span class="sin-dato-txt">${c.escapar(a.orcid_estado)}</span>`}</div>`;
 
   const kpi = (v, etq, dec = 0, ayuda = null) => `<article class="kpi">

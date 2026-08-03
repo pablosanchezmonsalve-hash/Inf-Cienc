@@ -78,6 +78,13 @@
   --marca-alta: #2c6d97;
   --marca-tinta: #c7f9cc;  /* texto secundario sobre la marca · 6,58:1 */
 
+  /* Tinta de las cifras grandes. Existe aparte de --marca porque --marca
+     cambia de OFICIO entre temas: en claro es tinta, en oscuro es la
+     superficie de la cabecera. Usarla para el texto de un KPI funcionaba en
+     claro y en oscuro pintaba #0d1e26 sobre #12222a — 1,05:1, o sea la cifra
+     invisible. Este token es tinta en los dos temas y sólo eso. */
+  --cifra: #22577A;        /* 7,74:1 sobre la tarjeta */
+
   /* ---- Acción. Estado interactivo. Tampoco codifica un dato.
           El #38A3A5 de la paleta da 3,02:1 sobre blanco: vale para superficies
           y bordes, no para texto de enlace. Para eso hay una versión honda. ---- */
@@ -167,6 +174,9 @@
     --marca-honda: #081419;
     --marca-alta: #38A3A5;
     --marca-tinta: #9fd6cd;
+    /* El azul de marca aclarado: mismo tono, 7,32:1 sobre la
+       tarjeta, casi el mismo peso que los 7,74:1 del tema claro. */
+    --cifra: #7fb4d8;
 
     /* En superficie oscura el verde de la paleta rinde 8,15:1: aquí sí puede
        ser el color de acción, cosa que en modo claro sería ilegible. */
@@ -219,6 +229,9 @@
   --marca-honda: #081419;
   --marca-alta: #38A3A5;
   --marca-tinta: #9fd6cd;
+  /* El azul de marca aclarado: mismo tono, 7,32:1 sobre la tarjeta, casi el
+     mismo peso que los 7,74:1 del tema claro. */
+  --cifra: #7fb4d8;
   --accion: #5fc9cf;
   --accion-viva: #38A3A5;
   --accion-suave: #12333a;
@@ -420,7 +433,7 @@ main { padding: var(--e5) 0 var(--e7); }
 .kpi:hover { box-shadow: var(--sombra-2); border-color: var(--linea-fuerte); border-top-color: var(--accion-viva); }
 .kpi .valor {
   font: 700 var(--t-cifra)/1.04 var(--f-cifra);
-  color: var(--marca); letter-spacing: -.028em;
+  color: var(--cifra); letter-spacing: -.028em;
 }
 .kpi .valor small { font-size: .48em; font-weight: 650; color: var(--tinta-2); margin-left: .12em; letter-spacing: -.01em; }
 .kpi .etiqueta {
@@ -465,6 +478,37 @@ main { padding: var(--e5) 0 var(--e7); }
    Marcar todo igual equivale a no marcar nada. */
 .nota { font-size: var(--t-s); color: var(--tinta-2); margin-top: var(--e3); line-height: 1.5; }
 .nota strong { color: var(--tinta); }
+
+/* Estado de verificación de un ORCID contra el registro de su titular.
+   El significado va en la palabra, no en el color: quitarle el color a estas
+   etiquetas no les quita la información (WCAG 1.4.1). El color sólo separa
+   «respaldado por evidencia» de «pendiente de mirar».
+   Los guiones bajos vienen del veredicto que emite src/enrich/orcid_api.py;
+   se conservan tal cual para que la clase y el dato sean rastreables. */
+.nota-orcid-confirmada,
+.nota-orcid-no_verificable,
+.nota-orcid-sin_coincidencia,
+.nota-orcid-sin_registro {
+  display: inline-block; margin-top: 0; white-space: nowrap;
+  font-size: var(--t-xs); font-weight: 650; letter-spacing: .02em;
+  padding: .1rem .38rem; border-radius: var(--radio-s); border: 1px solid;
+}
+.nota-orcid-confirmada {
+  color: var(--accion); background: var(--accion-suave);
+  border-color: color-mix(in srgb, var(--accion-viva) 40%, transparent);
+}
+/* Ámbar, el mismo de las advertencias metodológicas: esto es una salvedad
+   sobre el dato, no un error del dato. */
+.nota-orcid-sin_coincidencia {
+  color: var(--aviso-tinta); background: var(--aviso-fondo);
+  border-color: color-mix(in srgb, var(--aviso-borde) 45%, transparent);
+}
+/* Ausencia de evidencia, no evidencia en contra: gris, como todo lo que en
+   este proyecto significa «no hay dato» (decisión D-09). */
+.nota-orcid-no_verificable,
+.nota-orcid-sin_registro {
+  color: var(--tinta-3); background: var(--superficie-2); border-color: var(--linea);
+}
 .nota-destacada {
   background: var(--aviso-fondo);
   border: 1px solid color-mix(in srgb, var(--aviso-borde) 30%, transparent);
@@ -734,7 +778,14 @@ svg.chart text.ref-etq { fill: var(--aviso-tinta-grafico); font-weight: 650; fon
   font-size: var(--t-m); margin-top: var(--e3); padding-top: var(--e3);
   border-top: 1px solid var(--linea);
 }
-.identificadores div span {
+/* Sólo el PRIMER span es la etiqueta del campo. Sin `:first-child` esto
+   alcanzaba a cualquier span hermano, y había dos: el marcador de ausencia
+   («No disponible en las fuentes actuales») salía en versalitas, en gris y
+   en 11 px, o sea con el mismo aspecto que la etiqueta que tenía encima —
+   la ficha mostraba dos etiquetas y ningún valor. El atajo `font:` además
+   reponía font-style a normal, de modo que la cursiva de .sin-dato-txt
+   tampoco llegaba a verse. */
+.identificadores div > span:first-child {
   display: block; color: var(--tinta-3); font: 650 var(--t-xs)/1.4 var(--f-ui);
   text-transform: uppercase; letter-spacing: .07em; margin-bottom: .1rem;
 }
