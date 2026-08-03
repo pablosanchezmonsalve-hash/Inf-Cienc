@@ -19,7 +19,7 @@ supuesta.
 | Afiliación UFT | ✅ 589/589 | matching | — |
 | Unidad académica | ⚠️ 353/589 (60 %) | inferida | «No determinada» |
 | Scopus Author ID | ✅ 575/589 (97,6 %) | Scopus | «No resuelto» + explicación |
-| **ORCID** | ❌ **0/589** | — | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
+| **ORCID** | ⚠️ **174/589 (29,5 %)** | Crossref, verificado contra ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
 | Otros identificadores | ❌ 0/589 | — | Sección oculta si no hay ninguno |
 
 ### Indicadores
@@ -99,6 +99,32 @@ Cuando un autor está en la cola de ambigüedad (P-03 o P-04), la ficha muestra:
 
 **No se enlazan** las fichas sospechosas entre sí ni se sugiere cuáles serían:
 eso publicaría la cola interna de revisión (`LAYERS.md` §3).
+
+### El ORCID que se muestra viene con su evidencia
+
+Un ORCID de esta plataforma **no procede de Scopus**: lo propone Crossref
+emparejando apellido e inicial, que es una heurística y puede confundir a dos
+personas con la misma firma abreviada. Publicarlo sin más lo convertiría en un
+hecho, y no lo es.
+
+Por eso cada asignación se contrasta contra el registro público del propio
+titular (`src/enrich/orcid_api.py`) y la ficha muestra el resultado:
+
+| Etiqueta en la ficha | Qué significa | Firmas |
+|---|---|---:|
+| `verificado` | El titular declara en su registro al menos una de las publicaciones que aquí se le atribuyen | 153 |
+| `no verificable` | El titular no declara ninguna obra con DOI: no hay contra qué contrastar | 17 |
+| `sin confirmar` | El titular declara obras, pero ninguna coincide con las de esta firma | 4 |
+| `registro no accesible` | El ORCID no existe o su registro no es público | 0 |
+
+`sin confirmar` **no afirma que la asignación sea falsa**. Afirma que la
+evidencia disponible no la respalda, que es una frase distinta y la única que
+los datos sostienen. Esas cuatro entran en la cola de revisión humana
+(`internal/orcid_hallazgos.csv`); resolverlas automáticamente está prohibido.
+
+Lo que se publica de esa cola es el **recuento**, arriba. El detalle nominal de
+por qué cada una no se confirma —qué DOI, qué afiliaciones declara— se queda en
+la capa interna.
 
 ---
 

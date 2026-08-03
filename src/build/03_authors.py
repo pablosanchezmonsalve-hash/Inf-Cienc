@@ -28,18 +28,63 @@ def cargar_orcid() -> dict[str, dict]:
 
     El archivo es opcional: sin él las fichas muestran el placeholder declarado.
     Nunca se inventa un ORCID ni se deja el campo en blanco silencioso.
+
+    Cuando además existe la verificación contra el registro público de ORCID,
+    cada asignación viaja con su veredicto. La distinción importa: `confianza`
+    es lo que opina nuestra heurística de emparejamiento —apellido e inicial
+    coincidentes en Crossref—, mientras que el veredicto es lo que dice el
+    titular en su propio registro. Cuando ambos están, manda el segundo.
     """
     path = b.ROOT / "data" / "enriched" / "authors_orcid.csv"
     if not path.exists():
         return {}
     import pandas as pd
     df = pd.read_csv(path, dtype=str)
-    return {r["nombre_en_fuente"]: {
-        "orcid": r["orcid"],
-        "confianza": r["confianza"],
-        "publicaciones_de_respaldo": b.to_num(r["publicaciones_de_respaldo"]),
-        "fuente": r["fuente"],
-    } for _, r in df.iterrows()}
+
+    verif: dict[str, dict] = {}
+    vpath = b.ROOT / "data" / "enriched" / "orcid_verificacion.csv"
+    if vpath.exists():
+        vdf = pd.read_csv(vpath, dtype=str)
+        verif = {r["nombre_en_fuente"]: r for _, r in vdf.iterrows()}
+
+    salida = {}
+    for _, r in df.iterrows():
+        nombre = r["nombre_en_fuente"]
+        v = verif.get(nombre)
+        salida[nombre] = {
+            "orcid": r["orcid"],
+            "confianza": r["confianza"],
+            "publicaciones_de_respaldo": b.to_num(r["publicaciones_de_respaldo"]),
+            "fuente": r["fuente"],
+            # None cuando la verificación no se ha ejecutado. No es lo mismo
+            # que «no verificada»: es que nadie ha mirado todavía, y la ficha
+            # debe poder decir esa diferencia.
+            "veredicto": v["veredicto"] if v is not None else None,
+            "dois_coincidentes": b.to_num(v["dois_coincidentes"]) if v is not None else None,
+        }
+    return salida
+
+
+# Qué se le enseña al lector para cada veredicto. `sin_coincidencia` NO dice
+# que la asignación sea falsa —eso exige una revisión humana que aún no se ha
+# hecho—, dice que la evidencia disponible no la respalda. La diferencia entre
+# «es incorrecta» y «no está confirmada» es la que separa un dato de una
+# acusación sobre una persona con nombre y apellido.
+VEREDICTO_PUBLICO = {
+    "confirmada": ("verificado",
+                   "El titular declara en su propio registro de ORCID al menos "
+                   "una de las publicaciones que aquí se le atribuyen."),
+    "no_verificable": ("no verificable",
+                       "El titular no declara ninguna obra con DOI en su "
+                       "registro de ORCID, de modo que no hay nada contra qué "
+                       "contrastar la asignación."),
+    "sin_coincidencia": ("sin confirmar",
+                         "El titular declara obras en su registro de ORCID, "
+                         "pero ninguna coincide con las atribuidas a esta "
+                         "firma. Pendiente de revisión humana."),
+    "sin_registro": ("registro no accesible",
+                     "El ORCID no existe o su registro no es público."),
+}
 
 
 def h_index(citas: list[int]) -> int:
@@ -106,6 +151,19 @@ def main() -> None:
         n_ids = b.to_num(m["n_scopus_author_ids"]) if m is not None else None
         identidad_ambigua = bool(n_ids and n_ids > 1)
 
+        veredicto = (orcid_map.get(nombre) or {}).get("veredicto")
+        coincidentes = (orcid_map.get(nombre) or {}).get("dois_coincidentes")
+        etiqueta, detalle = VEREDICTO_PUBLICO.get(veredicto, (None, None))
+        # La confirmación se cuantifica: «verificado» respaldado por diez
+        # publicaciones y por una no son la misma afirmación, y el lector no
+        # tiene por qué suponer cuál de las dos está leyendo.
+        if veredicto == "confirmada" and coincidentes:
+            detalle = (f"El titular declara en su propio registro de ORCID "
+                       f"{coincidentes} de las publicaciones que aquí se le "
+                       f"atribuyen." if coincidentes > 1 else
+                       "El titular declara en su propio registro de ORCID una "
+                       "de las publicaciones que aquí se le atribuyen.")
+
         ficha = {
             "meta": b.build_meta(),
             "id": slug,
@@ -115,10 +173,16 @@ def main() -> None:
             # Placeholder declarado, nunca omitido (decisión D-07). Cuando el
             # enriquecimiento desde Crossref se ha ejecutado, el ORCID viaja con
             # su confianza: una asignación por apellido e inicial es una
-            # hipótesis verificable, no un hecho.
+            # hipótesis verificable, no un hecho. Y cuando se ha contrastado
+            # contra el registro del titular, viaja además el veredicto, que es
+            # evidencia de la fuente y no opinión de nuestra heurística.
             "orcid": (orcid_map.get(nombre) or {}).get("orcid"),
             "orcid_confianza": (orcid_map.get(nombre) or {}).get("confianza"),
             "orcid_respaldo": (orcid_map.get(nombre) or {}).get("publicaciones_de_respaldo"),
+            "orcid_veredicto": veredicto,
+            "orcid_veredicto_etiqueta": etiqueta,
+            "orcid_veredicto_detalle": detalle,
+            "orcid_dois_coincidentes": (orcid_map.get(nombre) or {}).get("dois_coincidentes"),
             "orcid_estado": ("Recuperado desde Crossref"
                              if nombre in orcid_map
                              else "No disponible en las fuentes actuales"),
@@ -160,6 +224,8 @@ def main() -> None:
             # y esconderlo en el detalle obliga a abrir 589 fichas para usarlo.
             "orcid": (orcid_map.get(nombre) or {}).get("orcid"),
             "orcid_confianza": (orcid_map.get(nombre) or {}).get("confianza"),
+            "orcid_veredicto": veredicto,
+            "orcid_veredicto_etiqueta": etiqueta,
         })
 
     resumen.sort(key=lambda a: (-a["n_publicaciones"], a["nombre"]))
@@ -173,6 +239,13 @@ def main() -> None:
             "total_firmas": len(resumen),
             "firmas_interpretables": sum(1 for a in resumen if a["interpretable"]),
             "firmas_con_orcid": sum(1 for a in resumen if a["orcid"]),
+            # Recuento agregado, que es lo publicable: el detalle nominal de
+            # qué firma no se confirma vive en la capa interna (CLAUDE.md,
+            # <data_governance>).
+            "firmas_con_orcid_verificado": sum(
+                1 for a in resumen if a["orcid_veredicto"] == "confirmada"),
+            "firmas_con_orcid_sin_confirmar": sum(
+                1 for a in resumen if a["orcid_veredicto"] == "sin_coincidencia"),
         },
         "nota": b.nota("P-06"),
         "advertencia_identidad": (
@@ -192,6 +265,16 @@ def main() -> None:
     print(f"  identidad no consolidada: {sum(1 for a in resumen if a['identidad_no_consolidada'])}")
     print(f"  con ORCID               : {len(orcid_map)}"
           f"{'  (enriquecimiento no ejecutado)' if not orcid_map else ''}")
+    ver = [a["orcid_veredicto"] for a in resumen if a["orcid_veredicto"]]
+    if ver:
+        for k, etq in (("confirmada", "verificado contra el registro"),
+                       ("no_verificable", "sin obras con DOI que contrastar"),
+                       ("sin_coincidencia", "SIN CONFIRMAR — revisión humana"),
+                       ("sin_registro", "registro no accesible")):
+            if ver.count(k):
+                print(f"    {etq:38s}: {ver.count(k)}")
+    else:
+        print("    (verificación contra ORCID no ejecutada)")
     print(f"  mediana de publicaciones: {statistics.median(n_pubs)}")
 
 
