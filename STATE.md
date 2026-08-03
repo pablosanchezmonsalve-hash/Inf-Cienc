@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `1d1eb60` · Quita una f-string sin placeholders
+Último commit: `d71022a` · Detecta que Python existe pero no funciona
 Snapshot: 2026-08-03
 
 ---
@@ -69,7 +69,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 87
+## Decisiones tomadas: 90
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
