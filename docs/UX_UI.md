@@ -354,6 +354,18 @@ automático sigue al sistema operativo. La elección se recuerda y se aplica ant
 de pintar, con un script en línea en el `<head>`, para que no aparezca un
 destello del tema equivocado.
 
+**Un token no puede cambiar de oficio entre temas.** `--marca` es tinta en el
+tema claro (`#22577A`) y superficie de cabecera en el oscuro (`#0d1e26`). Las
+cifras grandes de los KPI lo usaban como color de texto: en claro daban 7,74:1
+y en oscuro `#0d1e26` sobre `#12222a`, **1,05:1** — los seis números más
+grandes de cada página, invisibles. Por eso existe `--cifra`, que es tinta en
+los dos temas y sólo eso (`#22577A` / `#7fb4d8`, 7,74:1 y 7,32:1).
+
+El fallo sobrevivió a una revisión de la paleta porque no está en la paleta:
+los dos valores son correctos por separado y sólo el uso los enfrenta. Se
+detecta midiendo el color computado contra el fondo compuesto, página por
+página y tema por tema, no leyendo la hoja de estilos.
+
 ### 12.7 Responsive
 
 Tres cortes. Bajo 900 px la navegación pasa a desplazamiento horizontal en una
