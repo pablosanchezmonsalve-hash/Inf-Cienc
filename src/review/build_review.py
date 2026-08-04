@@ -73,6 +73,12 @@ def cargar() -> dict:
         # Opcional: sólo existe si se ha corrido `src/enrich/orcid_api.py`.
         # Sin él la herramienta funciona igual, con una señal menos.
         "verif": leer(ENRICHED / "orcid_verificacion.csv", "verificación contra ORCID"),
+        # Opcionales también: los generan los conectores de ampliación. Sin
+        # ellos la herramienta funciona igual, con dos colas menos.
+        "afil": leer(INTERNAL / "orcid_candidatos_afiliacion.csv",
+                     "candidatos de ORCID por afiliación"),
+        "desac": leer(INTERNAL / "orcid_desacuerdos.csv",
+                      "desacuerdos entre Crossref y el registro de ORCID"),
     }
     if d["master"] is None or d["log"] is None:
         sys.exit(
@@ -185,6 +191,76 @@ def casos(d: dict, perf: dict) -> list[dict]:
                              "según la publicación: o son dos personas que firman igual, "
                              "o una de las asignaciones es incorrecta. ORCID: "
                              + r["detalle"].replace("|", " · ")),
+                "firmas": [f], "cruces": None,
+            })
+
+    # ── Crossref y el registro de ORCID no coinciden (V2-03). Uno de los dos
+    #    está equivocado, y cuál no se decide mirando los nombres.
+    if d["desac"] is not None:
+        for _, r in d["desac"].iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            out.append({
+                "id": f"desac-{r['nombre_en_fuente']}", "cola": "Fuentes en desacuerdo",
+                "prioridad": 1,
+                "titulo": f"{r['nombre_en_fuente']}: dos fuentes, dos ORCID",
+                "contexto": f"{r['detalle']}. Identificadores: "
+                            + str(r["orcid"]).replace("|", " · ")
+                            + ". La asignación vigente NO se ha modificado.",
+                "firmas": [f], "cruces": None,
+            })
+
+    # ── Candidatos por afiliación (V2-04). Van DESPUÉS de todo lo anclado en
+    #    una publicación compartida, porque su evidencia es más débil: coincide
+    #    el nombre y la institución, y nada más.
+    if d["afil"] is not None:
+        af = d["afil"].copy()
+        af["tf"] = af["titulares_que_coinciden_con_la_firma"].astype(int)
+        af["ft"] = af["firmas_que_coinciden_con_el_titular"].astype(int)
+
+        # Varias firmas apuntando al mismo titular: eso SÍ es una pista fuerte
+        # de identidad, y por eso sube de prioridad respecto del resto.
+        for orcid, g in af[af.ft > 1].groupby("orcid"):
+            fs = firmas_de(sorted(set(g["nombre_en_fuente"])))
+            if len(fs) < 2:
+                continue
+            out.append({
+                "id": f"afil-multi-{orcid}", "cola": "Mismo ORCID por afiliación",
+                "prioridad": 1,
+                "titulo": f"{len(fs)} firmas apuntan a {orcid}",
+                "contexto": "Varias formas de firma coinciden en nombre con el mismo "
+                            f"titular, que declara la institución: «{g['nombre_declarado_en_orcid'].iloc[0]}». "
+                            "Sugiere que son la misma persona. NO se ha fusionado nada.",
+                "firmas": fs, "cruces": cruces(fs[0], fs[1]) if len(fs) == 2 else None,
+            })
+
+        for _, r in af[(af.tf == 1) & (af.ft == 1)].iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            out.append({
+                "id": f"afil-{r['nombre_en_fuente']}", "cola": "Candidato por afiliación",
+                "prioridad": 4,
+                "titulo": f"{r['nombre_en_fuente']} → {r['orcid']}?",
+                "contexto": "Este titular declara la institución en su registro de ORCID y "
+                            f"se llama «{r['nombre_declarado_en_orcid']}». Coincidencia única "
+                            "en ambos sentidos. No hay ninguna publicación compartida que "
+                            "lo respalde: por eso es un candidato y no una asignación.",
+                "firmas": [f], "cruces": None,
+            })
+
+        for _, r in af[af.tf > 1].iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            out.append({
+                "id": f"afil-amb-{r['nombre_en_fuente']}-{r['orcid']}",
+                "cola": "Candidato por afiliación (ambiguo)", "prioridad": 4,
+                "titulo": f"{r['nombre_en_fuente']}: {r['tf']} titulares posibles",
+                "contexto": f"«{r['nombre_declarado_en_orcid']}» es uno de {r['tf']} titulares "
+                            "que declaran la institución y coinciden en apellido e inicial "
+                            "con esta firma. El nombre no basta para elegir.",
                 "firmas": [f], "cruces": None,
             })
 
