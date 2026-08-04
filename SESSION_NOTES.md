@@ -1116,3 +1116,64 @@ la segunda lectura: declara afiliación UFT y sólo tres obras con DOI.
 
 Resolver esas cuatro en `make revision`, junto con los 89 casos de identidad
 que ya esperaban. Es la misma clase de decisión y la misma herramienta.
+
+---
+
+## Cierre · ampliación de cobertura de ORCID y auditoría
+
+Se pidió llevar la cobertura de ORCID al 100 % de los autores. Se llegó al
+37,7 %, se agotaron las vías legítimas y se documentó por qué el 100 % no es
+alcanzable sin inventar datos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-99 | `orcid_api.py` fusiona en vez de sobrescribir | Escribir sin mirar convertía cualquier ejecución parcial en pérdida de datos, y era el camino por defecto del workflow |
+| D-100 | Tres vías de cobertura, una sola regla de emparejamiento, importada | Dos copias de una regla que la documentación presenta como una sola divergen en cuanto alguien corrige una |
+| D-101 | La búsqueda por afiliación NO publica | Ancla la asignación sólo en el nombre. Sin publicación compartida, dos homónimos de la misma universidad son indistinguibles |
+| D-102 | Un desacuerdo entre Crossref y el registro se encola, no se resuelve | Uno de los dos está equivocado y cuál no se decide mirando nombres |
+| D-103 | Las asignaciones halladas por `doi-self` dicen «declarado por el titular», no «verificado» | Su veredicto `confirmada` es circular: se las encontró justamente por declarar el DOI |
+| D-104 | Los recuentos agregados se cuentan por etiqueta, no por veredicto | Contar por veredicto inflaría las verificaciones independientes con comprobaciones circulares |
+| D-105 | La clase visual viaja aparte del veredicto | Un mismo veredicto merece dos tratamientos según de dónde venga la asignación |
+
+### Resultado
+
+Cobertura **174 → 222 de 589** (29,5 % → 37,7 %). Por etiqueta: 153 verificado,
+48 declarado por el titular, 17 no verificable, 4 sin confirmar.
+
+Entre las firmas con diez o más publicaciones la cobertura llega al **93,3 %**.
+419 de 589 firmas tienen una sola publicación, y ahí la cobertura es del 26,3 %.
+
+La herramienta de revisión pasa de 89 a **110 casos**.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Un `--limit` pequeño es una prueba inofensiva» | **Falso.** Sobrescribía el archivo completo. El default del workflow era 10, así que el camino por defecto destruía 164 filas |
+| «Si el veredicto dice `confirmada`, está verificado» | **Falso para las 48 nuevas.** Se las encontró por declarar el DOI, así que el veredicto repetía la primera comprobación en vez de añadir una segunda |
+| «Ampliar cobertura es acercarse al objetivo» | **Sólo si la evidencia acompaña.** Un ORCID equivocado en la ficha de una persona real es peor que un hueco declarado: el hueco se ve, el error no |
+| «Generar la cola es entregar el trabajo» | **No.** 20 candidatos y 2 desacuerdos quedaban en CSV que nadie abre hasta que entraron en `make revision` |
+
+### Archivos creados
+
+`src/enrich/orcid_expand.py`, `src/enrich/orcid_afiliacion.py`,
+`docs/ORCID_COVERAGE.md`, `.github/workflows/ampliar-orcid.yml`.
+
+### Ambigüedades abiertas
+
+- Las 4 asignaciones sin confirmar. `De la Fuente M.` gana evidencia a favor: el
+  titular declara la universidad y una segunda variante de firma apunta al mismo
+  ORCID. Sigue sin resolverse porque los DOI no coinciden.
+- Los 2 desacuerdos entre fuentes (`Castro M.`, `Elorrieta V.`).
+- Los 20 candidatos por afiliación, de los que 18 son coincidencia 1-a-1.
+- `Giordanino E.` y `Giordanino E.F.`: mismo ORCID por afiliación y mismo Scopus
+  Author ID. Es la fusión de variantes mejor respaldada del proyecto, y aun así
+  la decide una persona.
+
+### Próximo paso recomendado
+
+Abrir `make revision` y resolver los 110 casos. Cada decisión que confirme un
+candidato por afiliación sube la cobertura publicable sin relajar el criterio,
+que es la única vía que queda para acercarse más al 100 %.
