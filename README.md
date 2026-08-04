@@ -88,6 +88,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Formas de firma de autor | **589** |
 | Pares autor × publicación | **1.207** |
 | Firmas con ORCID recuperado desde Crossref | **174** (29,5 %) |
+| Firmas con ORCID sumando el registro de ORCID | **222** (37,7 %) |
 | Reglas de validación | **29** · 28 pasan · 0 fallas bloqueantes |
 
 ### Indicadores (Fase 2)

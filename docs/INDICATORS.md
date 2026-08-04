@@ -72,7 +72,7 @@ detallada · 589 formas de firma · 1.207 pares autor × publicación.
 | `AU-02` | Citas por autor | Citas atribuidas | `sum(citas) by autor` | `Autoria` + `Citations` | **sí** | media | ✅ | Atribución completa: una publicación aporta sus citas a cada autor UFT |
 | `AU-06` | Evolución temporal del autor | Publicaciones por año | `group by autor, anio` | `Autoria` | **sí** | media | ✅ | 3 puntos: **barras, no línea de tendencia** |
 | `AU-03` | h-index en ventana | h sobre 2023–2025 | h clásico sobre el subconjunto | `Autoria` + `Citations` | **parcial** | **baja** | ⚠️ | **497 de 589 autores tienen h ≤ 1: no discrimina.** Sólo en ficha, siempre etiquetado |
-| `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 174/589 | media | ⚠️ | No está en Scopus ni en SciVal. Cada asignación viaja con su veredicto de verificación; sin ORCID se muestra «no disponible», no se oculta |
+| `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 222/589 | media | ⚠️ | No está en Scopus ni en SciVal. Cada asignación viaja con su veredicto de verificación; sin ORCID se muestra «no disponible», no se oculta |
 | `AU-04` | FWCI por autor | Impacto normalizado del autor | — | — | **no** | no aplicable | ❌ | **Descartado.** El FWCI de un autor no es el promedio de sus publicaciones y SciVal no lo entrega a nivel autor. Calcularlo sería inventar la métrica |
 
 ### 1.6 No calculables — placeholders metodológicos declarados
