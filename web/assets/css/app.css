@@ -485,28 +485,35 @@ main { padding: var(--e5) 0 var(--e7); }
    «respaldado por evidencia» de «pendiente de mirar».
    Los guiones bajos vienen del veredicto que emite src/enrich/orcid_api.py;
    se conservan tal cual para que la clase y el dato sean rastreables. */
-.nota-orcid-confirmada,
-.nota-orcid-no_verificable,
-.nota-orcid-sin_coincidencia,
-.nota-orcid-sin_registro {
+.nota-orcid-verificado,
+.nota-orcid-declarado,
+.nota-orcid-neutro,
+.nota-orcid-sin-confirmar {
   display: inline-block; margin-top: 0; white-space: nowrap;
   font-size: var(--t-xs); font-weight: 650; letter-spacing: .02em;
   padding: .1rem .38rem; border-radius: var(--radio-s); border: 1px solid;
 }
-.nota-orcid-confirmada {
+.nota-orcid-verificado {
   color: var(--accion); background: var(--accion-suave);
   border-color: color-mix(in srgb, var(--accion-viva) 40%, transparent);
 }
+/* «Declarado por el titular» es un estado bueno, pero no es lo mismo que una
+   verificación independiente: comparte familia con la verificada y se separa
+   de ella con el borde y el fondo, no sólo con la palabra. */
+.nota-orcid-declarado {
+  color: var(--accion); background: transparent;
+  border-color: color-mix(in srgb, var(--accion-viva) 55%, transparent);
+  border-style: dashed;
+}
 /* Ámbar, el mismo de las advertencias metodológicas: esto es una salvedad
    sobre el dato, no un error del dato. */
-.nota-orcid-sin_coincidencia {
+.nota-orcid-sin-confirmar {
   color: var(--aviso-tinta); background: var(--aviso-fondo);
   border-color: color-mix(in srgb, var(--aviso-borde) 45%, transparent);
 }
 /* Ausencia de evidencia, no evidencia en contra: gris, como todo lo que en
    este proyecto significa «no hay dato» (decisión D-09). */
-.nota-orcid-no_verificable,
-.nota-orcid-sin_registro {
+.nota-orcid-neutro {
   color: var(--tinta-3); background: var(--superficie-2); border-color: var(--linea);
 }
 .nota-destacada {

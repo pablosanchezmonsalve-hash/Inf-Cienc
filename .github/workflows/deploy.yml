@@ -51,6 +51,15 @@ jobs:
       - name: Verificar la lógica de verificación contra ORCID
         run: python3 src/enrich/orcid_api.py --test
 
+      # Los dos conectores de ampliación, por lo mismo: su lógica decide qué
+      # ORCID se atribuye a qué persona, y ninguna de esas decisiones debe
+      # quedar sin una prueba que se ejecute en cada despliegue.
+      - name: Verificar la lógica de ampliación desde el registro
+        run: python3 src/enrich/orcid_expand.py --test
+
+      - name: Verificar la lógica de candidatos por afiliación
+        run: python3 src/enrich/orcid_afiliacion.py --test
+
       - name: Construir artefactos publicables
         run: python3 src/build/build_all.py
 

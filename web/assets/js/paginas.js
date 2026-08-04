@@ -421,7 +421,10 @@ async function autores() {
     const ord = k => (k === orden ? ' ordenada' : '');
 
     const conOrcid = f.filter(a => a.orcid).length;
-    const verificados = f.filter(a => a.orcid_veredicto === 'confirmada').length;
+    // Por etiqueta, no por veredicto: las asignaciones que salieron del propio
+    // registro también vienen «confirmada», pero por construcción, y sumarlas
+    // aquí presentaría como verificación independiente lo que no lo es.
+    const verificados = f.filter(a => a.orcid_veredicto_etiqueta === 'verificado').length;
     document.getElementById('resumen').innerHTML =
       `<strong>${c.nf.format(f.length)}</strong> de ${c.nf.format(parametros.total_firmas)} formas de firma` +
       (soloInterpretables ? ` · mostrando sólo n ≥ ${parametros.n_minimo_interpretable}` : '') +
@@ -440,12 +443,12 @@ async function autores() {
              target="_blank" rel="noopener"
              title="ORCID recuperado desde Crossref · confianza ${c.escapar(a.orcid_confianza || '')}"
              >${c.escapar(a.orcid)}</a>`
-          // Se marca la excepción, no la norma: 153 de 174 asignaciones están
-          // verificadas contra el registro del titular, así que etiquetarlas
-          // todas sería ruido y etiquetar sólo las que no lo están es la
-          // información. En texto, no en color: el color solo no comunica.
-          + (a.orcid_veredicto && a.orcid_veredicto !== 'confirmada'
-            ? ` <span class="nota nota-orcid-${c.escapar(a.orcid_veredicto)}"
+          // Se marca todo lo que NO sea una verificación independiente. Las
+          // verificadas son la norma y etiquetarlas sería ruido; el resto dice
+          // qué evidencia tiene, incluidas las que sólo declara el titular.
+          // En texto, no en color: el color solo no comunica.
+          + (a.orcid_veredicto_clase && a.orcid_veredicto_clase !== 'verificado'
+            ? ` <span class="nota nota-orcid-${c.escapar(a.orcid_veredicto_clase)}"
                  >${c.escapar(a.orcid_veredicto_etiqueta)}</span>` : '')
         : '<span class="sin-dato-txt">No disponible</span>'}</td>
       <td>${c.escapar(a.unidades.join(' · '))}</td>
@@ -506,7 +509,7 @@ async function fichaAutor() {
         // titular, así que cuando existe desplaza a la confianza, que sólo
         // dice lo que opina nuestra heurística de emparejamiento.
         + (a.orcid_veredicto_etiqueta
-          ? ` <span class="nota nota-orcid-${c.escapar(a.orcid_veredicto)}"
+          ? ` <span class="nota nota-orcid-${c.escapar(a.orcid_veredicto_clase)}"
                  title="${c.escapar(a.orcid_veredicto_detalle || '')}"
                >${c.escapar(a.orcid_veredicto_etiqueta)}</span>`
           : a.orcid_confianza === 'media'

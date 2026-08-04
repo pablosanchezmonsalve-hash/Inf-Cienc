@@ -70,21 +70,39 @@ def cargar_orcid() -> dict[str, dict]:
 # hecho—, dice que la evidencia disponible no la respalda. La diferencia entre
 # «es incorrecta» y «no está confirmada» es la que separa un dato de una
 # acusación sobre una persona con nombre y apellido.
+# La CLASE viaja aparte del veredicto: dos veredictos distintos pueden merecer
+# el mismo tratamiento visual, y un mismo veredicto puede merecer dos según de
+# dónde venga la asignación. Derivarla del veredicto ataba las dos cosas.
 VEREDICTO_PUBLICO = {
-    "confirmada": ("verificado",
+    "confirmada": ("verificado", "verificado",
                    "El titular declara en su propio registro de ORCID al menos "
                    "una de las publicaciones que aquí se le atribuyen."),
-    "no_verificable": ("no verificable",
+    "no_verificable": ("neutro", "no verificable",
                        "El titular no declara ninguna obra con DOI en su "
                        "registro de ORCID, de modo que no hay nada contra qué "
                        "contrastar la asignación."),
-    "sin_coincidencia": ("sin confirmar",
+    "sin_coincidencia": ("sin-confirmar", "sin confirmar",
                          "El titular declara obras en su registro de ORCID, "
                          "pero ninguna coincide con las atribuidas a esta "
                          "firma. Pendiente de revisión humana."),
-    "sin_registro": ("registro no accesible",
+    "sin_registro": ("neutro", "registro no accesible",
                      "El ORCID no existe o su registro no es público."),
 }
+
+# Una asignación encontrada preguntando al registro «¿quién declara este DOI?»
+# sale SIEMPRE confirmada, porque se la encontró justamente por declararlo.
+# El veredicto no aporta ahí una segunda comprobación: repite la primera.
+#
+# Llamarlo «verificado» sugeriría al lector que dos fuentes independientes
+# coinciden, y no es el caso: la fuente es una sola, el propio titular. Se
+# etiqueta por lo que realmente es, que además dice más y no menos.
+FUENTE_REGISTRO = "ORCID (declarado por el titular)"
+VEREDICTO_DEL_REGISTRO = (
+    "declarado",
+    "declarado por el titular",
+    "Esta asignación se encontró preguntando al registro de ORCID quién "
+    "declara esta publicación entre sus obras: la afirma el propio titular. "
+    "No hay aquí una segunda comprobación independiente.")
 
 
 def h_index(citas: list[int]) -> int:
@@ -153,11 +171,16 @@ def main() -> None:
 
         veredicto = (orcid_map.get(nombre) or {}).get("veredicto")
         coincidentes = (orcid_map.get(nombre) or {}).get("dois_coincidentes")
-        etiqueta, detalle = VEREDICTO_PUBLICO.get(veredicto, (None, None))
-        # La confirmación se cuantifica: «verificado» respaldado por diez
-        # publicaciones y por una no son la misma afirmación, y el lector no
-        # tiene por qué suponer cuál de las dos está leyendo.
-        if veredicto == "confirmada" and coincidentes:
+        fuente_orcid = (orcid_map.get(nombre) or {}).get("fuente")
+        clase, etiqueta, detalle = VEREDICTO_PUBLICO.get(veredicto, (None, None, None))
+
+        if veredicto == "confirmada" and fuente_orcid == FUENTE_REGISTRO:
+            # Circular por construcción: se la encontró por declarar el DOI.
+            clase, etiqueta, detalle = VEREDICTO_DEL_REGISTRO
+        elif veredicto == "confirmada" and coincidentes:
+            # La confirmación se cuantifica: «verificado» respaldado por diez
+            # publicaciones y por una no son la misma afirmación, y el lector
+            # no tiene por qué suponer cuál de las dos está leyendo.
             detalle = (f"El titular declara en su propio registro de ORCID "
                        f"{coincidentes} de las publicaciones que aquí se le "
                        f"atribuyen." if coincidentes > 1 else
@@ -181,6 +204,7 @@ def main() -> None:
             "orcid_respaldo": (orcid_map.get(nombre) or {}).get("publicaciones_de_respaldo"),
             "orcid_veredicto": veredicto,
             "orcid_veredicto_etiqueta": etiqueta,
+            "orcid_veredicto_clase": clase,
             "orcid_veredicto_detalle": detalle,
             "orcid_dois_coincidentes": (orcid_map.get(nombre) or {}).get("dois_coincidentes"),
             "orcid_estado": ("Recuperado desde Crossref"
@@ -226,6 +250,7 @@ def main() -> None:
             "orcid_confianza": (orcid_map.get(nombre) or {}).get("confianza"),
             "orcid_veredicto": veredicto,
             "orcid_veredicto_etiqueta": etiqueta,
+            "orcid_veredicto_clase": clase,
         })
 
     resumen.sort(key=lambda a: (-a["n_publicaciones"], a["nombre"]))
@@ -242,8 +267,17 @@ def main() -> None:
             # Recuento agregado, que es lo publicable: el detalle nominal de
             # qué firma no se confirma vive en la capa interna (CLAUDE.md,
             # <data_governance>).
+            #
+            # Se cuenta por ETIQUETA, no por veredicto. Las asignaciones que
+            # salieron del propio registro también traen veredicto
+            # «confirmada», pero por construcción: sumarlas aquí inflaría el
+            # recuento de verificaciones independientes con comprobaciones
+            # circulares.
             "firmas_con_orcid_verificado": sum(
-                1 for a in resumen if a["orcid_veredicto"] == "confirmada"),
+                1 for a in resumen if a["orcid_veredicto_etiqueta"] == "verificado"),
+            "firmas_con_orcid_declarado_por_titular": sum(
+                1 for a in resumen
+                if a["orcid_veredicto_etiqueta"] == "declarado por el titular"),
             "firmas_con_orcid_sin_confirmar": sum(
                 1 for a in resumen if a["orcid_veredicto"] == "sin_coincidencia"),
         },
@@ -265,14 +299,16 @@ def main() -> None:
     print(f"  identidad no consolidada: {sum(1 for a in resumen if a['identidad_no_consolidada'])}")
     print(f"  con ORCID               : {len(orcid_map)}"
           f"{'  (enriquecimiento no ejecutado)' if not orcid_map else ''}")
-    ver = [a["orcid_veredicto"] for a in resumen if a["orcid_veredicto"]]
-    if ver:
-        for k, etq in (("confirmada", "verificado contra el registro"),
-                       ("no_verificable", "sin obras con DOI que contrastar"),
-                       ("sin_coincidencia", "SIN CONFIRMAR — revisión humana"),
-                       ("sin_registro", "registro no accesible")):
-            if ver.count(k):
-                print(f"    {etq:38s}: {ver.count(k)}")
+    etq_vistas = [a["orcid_veredicto_etiqueta"] for a in resumen
+                  if a["orcid_veredicto_etiqueta"]]
+    if etq_vistas:
+        for k, texto in (("verificado", "verificado contra el registro"),
+                         ("declarado por el titular", "declarado por el titular (sin 2.ª fuente)"),
+                         ("no verificable", "sin obras con DOI que contrastar"),
+                         ("sin confirmar", "SIN CONFIRMAR — revisión humana"),
+                         ("registro no accesible", "registro no accesible")):
+            if etq_vistas.count(k):
+                print(f"    {texto:42s}: {etq_vistas.count(k)}")
     else:
         print("    (verificación contra ORCID no ejecutada)")
     print(f"  mediana de publicaciones: {statistics.median(n_pubs)}")

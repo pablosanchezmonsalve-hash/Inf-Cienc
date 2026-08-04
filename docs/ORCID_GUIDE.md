@@ -235,7 +235,8 @@ Los casos que ORCID no cubra seguirán necesitando revisión humana.
 |---|---|
 | Publicaciones consultadas | 804 de 823 (97,7 %) |
 | Errores de red | 0 |
-| Firmas con ORCID | **174 de 589 (29,5 %)** |
+| Firmas con ORCID **por esta vía** | **174 de 589 (29,5 %)** |
+| Cobertura total sumando el registro de ORCID | **222 de 589 (37,7 %)** · ver `ORCID_COVERAGE.md` |
 | Confianza alta / media | 54 / 120 |
 | Grupos de firmas que comparten ORCID | **17** (21 firmas colapsables) |
 | De ellos, invisibles para la agrupación por apellido | **11** |

@@ -19,7 +19,7 @@ supuesta.
 | Afiliación UFT | ✅ 589/589 | matching | — |
 | Unidad académica | ⚠️ 353/589 (60 %) | inferida | «No determinada» |
 | Scopus Author ID | ✅ 575/589 (97,6 %) | Scopus | «No resuelto» + explicación |
-| **ORCID** | ⚠️ **174/589 (29,5 %)** | Crossref, verificado contra ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
+| **ORCID** | ⚠️ **222/589 (37,7 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
 | Otros identificadores | ❌ 0/589 | — | Sección oculta si no hay ninguno |
 
 ### Indicadores
@@ -112,10 +112,13 @@ titular (`src/enrich/orcid_api.py`) y la ficha muestra el resultado:
 
 | Etiqueta en la ficha | Qué significa | Firmas |
 |---|---|---:|
-| `verificado` | El titular declara en su registro al menos una de las publicaciones que aquí se le atribuyen | 153 |
+| `verificado` | Lo transmitió el editor a Crossref **y** el titular lo declara en su registro: dos fuentes independientes | 153 |
+| `declarado por el titular` | Se encontró preguntando al registro quién declara esta publicación. Una sola fuente, sin segunda comprobación | 48 |
 | `no verificable` | El titular no declara ninguna obra con DOI: no hay contra qué contrastar | 17 |
 | `sin confirmar` | El titular declara obras, pero ninguna coincide con las de esta firma | 4 |
 | `registro no accesible` | El ORCID no existe o su registro no es público | 0 |
+
+Ver `ORCID_COVERAGE.md` §2 bis para por qué las 48 no dicen «verificado».
 
 `sin confirmar` **no afirma que la asignación sea falsa**. Afirma que la
 evidencia disponible no la respalda, que es una frase distinta y la única que
