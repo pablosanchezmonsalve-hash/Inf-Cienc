@@ -7,10 +7,14 @@
 
 ## 1. Qué hace y por qué importa
 
-Hoy los 174 ORCID del sitio son **hipótesis**. `orcid_crossref.py` los dedujo
-cruzando apellido e inicial contra los autores que Crossref declara en cada DOI.
-Que `Díaz F.` y `Díaz Fernández, Francisca` se parezcan no prueba que sean la
-misma persona.
+`orcid_crossref.py` deduce cada ORCID cruzando apellido e inicial contra los
+autores que Crossref declara en cada DOI. Que `Díaz F.` y `Díaz Fernández,
+Francisca` se parezcan no prueba que sean la misma persona: la asignación nace
+como **hipótesis**.
+
+Tras la ejecución completa del 2026-08-03, de las 174 vigentes **153 están
+confirmadas** contra el registro de su titular, 17 no son verificables y 4 no
+se confirman. Lo que sigue describe cómo se llega a esos veredictos.
 
 Este paso le pregunta al registro de ORCID, donde cada titular declara sus
 propias obras y afiliaciones:
