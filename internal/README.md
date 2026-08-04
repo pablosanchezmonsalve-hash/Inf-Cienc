@@ -54,6 +54,10 @@ de ambigüedades y su explicación metodológica, nunca el detalle nominal.
 | `identity_candidates.csv` | Firmas distintas que comparten ORCID: candidatas a ser la misma persona, sin confirmar (D-44) |
 | `revision_identidad.html` | **Herramienta de revisión.** Generada, no editable a mano. Cruza las cuatro colas anteriores y presenta cada caso con su evidencia junta |
 | `identity_decisions.csv` | Decisiones que una persona ha tomado en esa herramienta. No existe hasta que se exporta |
+| `orcid_hallazgos.csv` | Asignaciones que el registro de ORCID no confirma (V2-01) |
+| `orcid_ampliacion_log.csv` | Traza de cada hallazgo de `orcid_expand.py`: firma, ORCID, publicación y tipo de coincidencia |
+| `orcid_desacuerdos.csv` | Crossref y el registro atribuyen ORCID distintos a la misma firma (V2-03) |
+| `orcid_candidatos_afiliacion.csv` | Titulares que declaran la universidad y coinciden en nombre con una firma sin ORCID (V2-04). **Candidatos, no asignaciones** |
 
 ## Cómo revisar la identidad de autor
 
@@ -61,10 +65,11 @@ de ambigüedades y su explicación metodológica, nunca el detalle nominal.
 make revision                       # regenera internal/revision_identidad.html
 ```
 
-Ábralo en el navegador. Reúne los 89 casos —variantes de nombre, nombres con
-varios Scopus ID, firmas que comparten ORCID y el conflicto de ORCID— y para
-cada uno muestra publicaciones, años, unidades, identificadores y tres señales
-cruzadas que ningún archivo tenía por separado:
+Ábralo en el navegador. Reúne los 110 casos —variantes de nombre, nombres con
+varios Scopus ID, firmas que comparten ORCID, el conflicto de ORCID, los
+desacuerdos entre fuentes y los candidatos por afiliación— y para cada uno
+muestra publicaciones, años, unidades, identificadores y tres señales cruzadas
+que ningún archivo tenía por separado:
 
 - **si dos firmas aparecen en la misma publicación**, son personas distintas:
   nadie firma dos veces el mismo artículo. Es el descarte más limpio que existe,
@@ -87,6 +92,20 @@ Ninguna entrada de estas colas se resuelve automáticamente. El campo
   heurística.
 - `DECLARAR_NO_RESOLVER` — se publica como ambigüedad declarada.
 - `REVISAR_NORMALIZACION_DE_NOMBRE` — revisar la regla, no el dato.
+
+## Los candidatos por afiliación no son asignaciones
+
+`orcid_candidatos_afiliacion.csv` sale de preguntarle a ORCID quién declara la
+universidad, y cruzar esos nombres con las firmas que aún no tienen ORCID. A
+diferencia de las otras dos vías, **no hay ninguna publicación compartida que
+ancle la coincidencia**: sólo el nombre y la institución. Dos personas
+apellidadas Díaz con inicial F. en la misma universidad son indistinguibles por
+este método.
+
+Por eso `src/enrich/orcid_afiliacion.py` no escribe nunca en
+`data/enriched/authors_orcid.csv` y nada de esto llega al sitio. Cada fila trae
+`titulares_que_coinciden_con_la_firma` y `firmas_que_coinciden_con_el_titular`
+para que quien revise vea de un vistazo si el caso es un 1-a-1 o un 1-a-3.
 
 Lo que puede publicarse es el **recuento agregado** de ambigüedades y su
 explicación metodológica, no el detalle nominal de la cola.
