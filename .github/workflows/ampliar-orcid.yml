@@ -1,0 +1,191 @@
+name: Ampliar la cobertura de ORCID
+
+# Pregunta al registro de ORCID quién declara cada DOI del corpus, y verifica
+# después las asignaciones que salgan de ahí.
+#
+# POR QUÉ LAS DOS COSAS EN UN SOLO WORKFLOW
+#   Una asignación nueva sin verificar es una hipótesis recién creada. Dejar
+#   los dos pasos sueltos permite que alguien ejecute el primero, se publique
+#   la cobertura ampliada y la verificación quede para otro día.
+#
+# ANTES DE LA PRIMERA EJECUCIÓN
+#   Los mismos secretos que usa «Verificar ORCID contra su registro»:
+#     ORCID_CLIENT_ID      APP-XXXXXXXXXXXX
+#     ORCID_CLIENT_SECRET  el secret que entrega ORCID
+#
+# CÓMO SE LANZA
+#   Pestaña Actions → «Ampliar la cobertura de ORCID» → Run workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limite:
+        # Igual que en el otro workflow: un campo vacío NO significa «todos»,
+        # GitHub sustituye el valor por defecto. Hace falta un 0 explícito.
+        description: 'Cuántos DOI consultar. Escriba 0 para consultarlos todos'
+        required: false
+        default: '0'
+      verificar:
+        description: '¿Verificar después las asignaciones nuevas?'
+        type: boolean
+        required: false
+        default: true
+      commitear:
+        description: '¿Guardar el resultado en el repositorio?'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  ampliar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}   # sin esto, HEAD desacoplado y el push falla
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      # Antes de gastar una sola petición: si la lógica está rota, el problema
+      # no son las credenciales.
+      - name: Probar la lógica sin red
+        run: |
+          python3 src/enrich/orcid_expand.py --test
+          python3 src/enrich/orcid_api.py --test
+
+      - name: Comprobar que hay credenciales
+        env:
+          ID: ${{ secrets.ORCID_CLIENT_ID }}
+          SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
+        run: |
+          if [ -z "$ID" ] || [ -z "$SECRET" ]; then
+            echo "::error::Faltan los secretos ORCID_CLIENT_ID y ORCID_CLIENT_SECRET."
+            echo "Añádalos en Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "Credenciales presentes (Client ID: ${ID:0:8}...)"
+
+      - name: Auditoría
+        run: python3 src/audit/run_all.py
+
+      - name: Cobertura antes de ampliar
+        run: |
+          python3 - <<'PY'
+          import pandas as pd, pathlib
+          p = pathlib.Path("data/enriched/authors_orcid.csv")
+          n = len(pd.read_csv(p)) if p.exists() else 0
+          t = pd.read_csv("internal/matching_log.csv")["nombre_en_fuente"].nunique()
+          print(f"ANTES: {n} de {t} formas de firma ({100*n/t:.1f} %)")
+          PY
+
+      - name: Preguntar al registro de ORCID quién declara cada DOI
+        env:
+          ORCID_CLIENT_ID: ${{ secrets.ORCID_CLIENT_ID }}
+          ORCID_CLIENT_SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
+          LIMITE: ${{ inputs.limite }}
+        run: |
+          if [ -z "$LIMITE" ] || [ "$LIMITE" = "0" ]; then
+            echo "Consultando TODOS los DOI."
+            python3 src/enrich/orcid_expand.py
+          else
+            echo "Consultando los primeros $LIMITE DOI."
+            python3 src/enrich/orcid_expand.py --limit "$LIMITE"
+          fi
+
+      # Las asignaciones nuevas nacen sin verificar. Este paso las contrasta
+      # contra el registro igual que a las de Crossref, y como orcid_api.py
+      # fusiona en vez de sobrescribir, no pierde lo ya verificado.
+      - name: Verificar las asignaciones, incluidas las nuevas
+        if: ${{ inputs.verificar }}
+        env:
+          ORCID_CLIENT_ID: ${{ secrets.ORCID_CLIENT_ID }}
+          ORCID_CLIENT_SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
+        run: python3 src/enrich/orcid_api.py
+
+      # Reconstruir aquí no publica nada —de eso se encarga el workflow de
+      # despliegue— pero hace que la compuerta público/interno se pronuncie
+      # sobre los datos nuevos antes de que se guarden en el repositorio.
+      - name: Reconstruir y pasar la compuerta público/interno
+        run: |
+          python3 src/build/build_all.py
+          python3 src/build/06_assemble_site.py
+
+      - name: Publicar los resultados como artefacto descargable
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: ampliacion-orcid
+          path: |
+            data/enriched/authors_orcid.csv
+            data/enriched/orcid_verificacion.csv
+            internal/orcid_ampliacion_log.csv
+            internal/orcid_desacuerdos.csv
+            internal/orcid_hallazgos.csv
+          if-no-files-found: ignore
+
+      - name: Guardar el resultado en el repositorio
+        if: ${{ inputs.commitear }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Uno por uno: `git add A B` falla entero si B no existe, y entonces
+          # tampoco añade A. Varios de estos sólo se generan si hubo hallazgos.
+          for f in data/enriched/authors_orcid.csv \
+                   data/enriched/orcid_verificacion.csv \
+                   internal/orcid_ampliacion_log.csv \
+                   internal/orcid_desacuerdos.csv \
+                   internal/orcid_hallazgos.csv \
+                   docs/AUTHOR_PROFILE.md docs/BUILD_VERIFICATION.md; do
+            [ -f "$f" ] && git add "$f"
+          done
+          if git diff --cached --quiet; then
+            echo "Sin cambios que guardar."
+          else
+            git commit -m "Cobertura de ORCID ampliada desde el registro
+
+          Ejecutado por el workflow «Ampliar la cobertura de ORCID»."
+            git push origin "HEAD:${{ github.ref_name }}"
+          fi
+
+      - name: Resumen
+        if: always()
+        run: |
+          {
+            echo "## Ampliación de cobertura de ORCID"
+            echo ""
+            if [ -f data/enriched/authors_orcid.csv ]; then
+              python3 - <<'PY'
+          import pandas as pd, pathlib
+          a = pd.read_csv("data/enriched/authors_orcid.csv")
+          t = pd.read_csv("internal/matching_log.csv")["nombre_en_fuente"].nunique()
+          print(f"**Cobertura: {len(a)} de {t} formas de firma ({100*len(a)/t:.1f} %)**\n")
+          print("| Fuente de la asignación | Firmas |")
+          print("|---|---:|")
+          for k, v in a["fuente"].value_counts().items():
+              print(f"| {k} | {v} |")
+          p = pathlib.Path("data/enriched/orcid_verificacion.csv")
+          if p.exists():
+              v = pd.read_csv(p)
+              print("\n| Veredicto | Firmas |")
+              print("|---|---:|")
+              for k, n in v["veredicto"].value_counts().items():
+                  print(f"| {k} | {n} |")
+          for nombre, ruta in [("Desacuerdos entre fuentes", "internal/orcid_desacuerdos.csv"),
+                               ("Asignaciones sin confirmar", "internal/orcid_hallazgos.csv")]:
+              q = pathlib.Path(ruta)
+              if q.exists():
+                  print(f"\n{nombre}: **{len(pd.read_csv(q))}** (capa interna, revisión humana)")
+          PY
+            else
+              echo "No se generó ningún resultado. Revise el registro de los pasos."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

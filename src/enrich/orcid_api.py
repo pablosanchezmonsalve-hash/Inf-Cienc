@@ -52,6 +52,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -379,12 +380,36 @@ def main() -> int:
         print("\n  Sin resultados. No se escribe ningún archivo.")
         return 1
 
-    df = pd.DataFrame(resultados)
+    nuevos = pd.DataFrame(resultados)
+    nuevos["fecha_consulta"] = date.today().isoformat()
+
+    # Se FUSIONA con lo que ya había, no se sobrescribe. Escribir sin más
+    # convertía cualquier ejecución parcial en una pérdida de datos: verificar
+    # con --limit 10 sobre un archivo de 174 dejaba 10 filas y borraba 164
+    # consultas ya hechas. Y era el camino por defecto del workflow, cuyo
+    # campo venía relleno con 10.
+    salida = ENRICHED / "orcid_verificacion.csv"
+    if salida.exists():
+        previo = pd.read_csv(salida, dtype=str)
+        if "fecha_consulta" not in previo.columns:
+            previo["fecha_consulta"] = "desconocida"   # archivos anteriores al campo
+        recien = set(zip(nuevos.nombre_en_fuente, nuevos.orcid))
+        conservadas = previo[~previo.apply(
+            lambda r: (r["nombre_en_fuente"], r["orcid"]) in recien, axis=1)]
+        df = pd.concat([nuevos, conservadas], ignore_index=True)
+        print(f"\n  filas conservadas de la ejecución anterior: {len(conservadas)}")
+    else:
+        df = nuevos
+
+    df = df.sort_values("nombre_en_fuente", kind="stable")
     ENRICHED.mkdir(parents=True, exist_ok=True)
-    df.to_csv(ENRICHED / "orcid_verificacion.csv", index=False, encoding="utf-8")
+    df.to_csv(salida, index=False, encoding="utf-8")
 
     # Lo que exige mirada humana va a la capa interna, no al artefacto público:
-    # una asignación sospechosa es una duda sobre una persona real.
+    # una asignación sospechosa es una duda sobre una persona real. Se
+    # reconstruye desde el archivo COMPLETO: si sólo mirara lo recién
+    # consultado, una ejecución parcial dejaría en la cola dudas ya resueltas
+    # y se llevaría por delante las que no se volvieron a mirar.
     dudosas = df[df.veredicto.isin(["sin_coincidencia", "sin_registro"])]
     if len(dudosas):
         cola = dudosas.assign(
