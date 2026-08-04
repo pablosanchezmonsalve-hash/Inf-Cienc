@@ -30,6 +30,11 @@ on:
         type: boolean
         required: false
         default: true
+      afiliacion:
+        description: '¿Buscar además candidatos por afiliación? (no se publican)'
+        type: boolean
+        required: false
+        default: true
       commitear:
         description: '¿Guardar el resultado en el repositorio?'
         type: boolean
@@ -61,6 +66,7 @@ jobs:
         run: |
           python3 src/enrich/orcid_expand.py --test
           python3 src/enrich/orcid_api.py --test
+          python3 src/enrich/orcid_afiliacion.py --test
 
       - name: Comprobar que hay credenciales
         env:
@@ -111,6 +117,17 @@ jobs:
           ORCID_CLIENT_SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
         run: python3 src/enrich/orcid_api.py
 
+      # Alcanza a quien no puede alcanzarse por DOI. NO produce asignaciones
+      # publicables: sólo una cola de candidatos, porque un nombre que coincide
+      # sin publicación compartida no basta para atribuir un identificador a
+      # una persona concreta.
+      - name: Buscar candidatos por afiliación declarada
+        if: ${{ inputs.afiliacion }}
+        env:
+          ORCID_CLIENT_ID: ${{ secrets.ORCID_CLIENT_ID }}
+          ORCID_CLIENT_SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
+        run: python3 src/enrich/orcid_afiliacion.py
+
       # Reconstruir aquí no publica nada —de eso se encarga el workflow de
       # despliegue— pero hace que la compuerta público/interno se pronuncie
       # sobre los datos nuevos antes de que se guarden en el repositorio.
@@ -130,6 +147,7 @@ jobs:
             internal/orcid_ampliacion_log.csv
             internal/orcid_desacuerdos.csv
             internal/orcid_hallazgos.csv
+            internal/orcid_candidatos_afiliacion.csv
           if-no-files-found: ignore
 
       - name: Guardar el resultado en el repositorio
@@ -144,6 +162,7 @@ jobs:
                    internal/orcid_ampliacion_log.csv \
                    internal/orcid_desacuerdos.csv \
                    internal/orcid_hallazgos.csv \
+                   internal/orcid_candidatos_afiliacion.csv \
                    docs/AUTHOR_PROFILE.md docs/BUILD_VERIFICATION.md; do
             [ -f "$f" ] && git add "$f"
           done
@@ -180,7 +199,8 @@ jobs:
               for k, n in v["veredicto"].value_counts().items():
                   print(f"| {k} | {n} |")
           for nombre, ruta in [("Desacuerdos entre fuentes", "internal/orcid_desacuerdos.csv"),
-                               ("Asignaciones sin confirmar", "internal/orcid_hallazgos.csv")]:
+                               ("Asignaciones sin confirmar", "internal/orcid_hallazgos.csv"),
+                               ("Candidatos por afiliacion (NO publicados)", "internal/orcid_candidatos_afiliacion.csv")]:
               q = pathlib.Path(ruta)
               if q.exists():
                   print(f"\n{nombre}: **{len(pd.read_csv(q))}** (capa interna, revisión humana)")
