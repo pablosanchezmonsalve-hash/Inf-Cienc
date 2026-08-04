@@ -29,7 +29,10 @@ on:
         # falta un valor que signifique «todas» de forma explícita.
         description: 'Cuántas firmas verificar. Escriba 0 para verificarlas todas'
         required: false
-        default: '10'
+        # Por defecto, todas. Mientras el contrato de la API estaba sin probar
+        # tenía sentido arrancar con 10; ahora está probado, y un 10 por
+        # defecto sólo produce ejecuciones que parecen completas y no lo son.
+        default: '0'
       commitear:
         description: '¿Guardar el resultado en el repositorio?'
         type: boolean
