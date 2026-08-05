@@ -410,8 +410,13 @@ async function autores() {
   function pintar() {
     let f = lista.filter(a => (!soloInterpretables || a.interpretable));
     if (q) {
-      const n = q.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      f = f.filter(a => a.nombre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(n));
+      const sinTildes = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const n = sinTildes(q);
+      // Se busca también entre las variantes fusionadas: quien llega con
+      // «Giglio A.» desde Scopus no encontraría nada si sólo se mirara el
+      // nombre canónico, y la ficha que busca existe con otro título.
+      f = f.filter(a => [a.nombre, ...(a.variantes_consolidadas || [])]
+        .some(x => sinTildes(x).includes(n)));
     }
     f.sort((x, y) => (asc ? 1 : -1) * ((x[orden] ?? 0) - (y[orden] ?? 0)) ||
       x.nombre.localeCompare(y.nombre));
@@ -514,7 +519,14 @@ async function fichaAutor() {
                >${c.escapar(a.orcid_veredicto_etiqueta)}</span>`
           : a.orcid_confianza === 'media'
             ? ` <span class="nota">correspondencia probable</span>` : '')
-      : `<span class="sin-dato-txt">${c.escapar(a.orcid_estado)}</span>`}</div>`;
+      : `<span class="sin-dato-txt">${c.escapar(a.orcid_estado)}</span>`}</div>`
+    // Sin esto, una ficha con 24 publicaciones repartidas entre tres formas de
+    // firma no se puede rastrear hasta Scopus: quien busque «Giglio A.» no
+    // sabría que sus publicaciones están aquí.
+    + (a.variantes_consolidadas && a.variantes_consolidadas.length > 1
+      ? `<div><span>Formas de firma fusionadas</span>${
+          a.variantes_consolidadas.map(v => c.escapar(v)).join(' · ')}</div>`
+      : '');
 
   const kpi = (v, etq, dec = 0, ayuda = null) => `<article class="kpi">
     <div class="valor">${v === null ? '<span class="sin-dato-txt" style="font-size:1rem">No disponible</span>' : c.num(v, dec)}</div>

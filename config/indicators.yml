@@ -52,7 +52,7 @@ indicadores:
          advertencia: "Ordena por volumen, no por calidad."}
   P-06: {nombre: "Autores UFT distintos", categoria: descriptivo, publicar: true,
          denominador: con_autoria_detallada, confiabilidad: media,
-         advertencia: "589 formas de firma, no 589 personas: hay variantes de nombre sin consolidar."}
+         advertencia: "Formas de firma, no personas. Las que una revisión humana declaró la misma persona ya están fusionadas; el resto sigue sin consolidar."}
   P-07: {nombre: "Producción por unidad académica", categoria: descriptivo,
          publicar: true, denominador: con_autoria_detallada, confiabilidad: baja,
          advertencia_destacada: true,
