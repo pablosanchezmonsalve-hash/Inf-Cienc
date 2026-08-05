@@ -132,8 +132,89 @@ def load_universe() -> pd.DataFrame:
     return pd.read_csv(INTERIM / "publications_universe.csv", dtype=str)
 
 
+# ─────────────────────────────────────────── consolidación de identidades
+#
+# El pipeline NUNCA fusiona variantes de nombre por heurística (decisión D-08).
+# La única vía es este archivo, que genera src/review/apply_decisions.py a
+# partir de lo que una persona decidió en `make revision`. Si no existe, no hay
+# consolidación y todo funciona como antes: 589 formas de firma.
+def _mapa_consolidacion() -> dict[str, str]:
+    # Ausente mientras nadie haya revisado. No es un error: es el estado
+    # inicial del proyecto, y `load_config` reventaría en vez de decirlo.
+    if not (CONFIG / "identidades_consolidadas.yml").exists():
+        return {}
+    cfg = load_config("identidades_consolidadas.yml") or {}
+    mapa = {}
+    for g in cfg.get("grupos") or []:
+        for v in g["variantes"]:
+            mapa[v] = g["canonica"]
+    return mapa
+
+
+CONSOLIDACION = _mapa_consolidacion()
+
+
+def canonizar(nombre: str) -> str:
+    """Forma canónica de una firma, o la misma firma si no se consolidó."""
+    return CONSOLIDACION.get(nombre, nombre)
+
+
 def load_authors() -> pd.DataFrame:
-    return pd.read_csv(INTERIM / "authors_master_draft.csv", dtype=str)
+    """Tabla maestra, con las variantes ya fusionadas donde una persona lo decidió.
+
+    Fusionar filas no es concatenar: cada campo tiene su regla. Los Scopus
+    Author ID se UNEN sin repetir —una persona con tres variantes suele tener
+    tres identificadores, y perder dos rompería el enlace a la fuente—; los
+    años se toman por extremos; y `n_publicaciones` se recuenta desde el log en
+    vez de sumarse, porque sumar contaría dos veces una publicación en la que
+    dos variantes de la misma persona aparecen por separado.
+    """
+    df = pd.read_csv(INTERIM / "authors_master_draft.csv", dtype=str)
+    if not CONSOLIDACION:
+        return df
+
+    df["nombre_en_fuente"] = df["nombre_en_fuente"].map(canonizar)
+    log = pd.read_csv(INTERNAL / "matching_log.csv", dtype=str)
+    log["nombre_en_fuente"] = log["nombre_en_fuente"].map(canonizar)
+    npub = log.groupby("nombre_en_fuente")["eid"].nunique().to_dict()
+
+    def union(serie) -> str:
+        vistos = {x for v in serie.dropna()
+                  for x in str(v).split("|") if x and x != "nan"}
+        return "|".join(sorted(vistos))
+
+    def primero(serie):
+        v = serie.dropna()
+        return v.iloc[0] if len(v) else None
+
+    filas = []
+    for nombre, g in df.groupby("nombre_en_fuente", sort=False):
+        if len(g) == 1:
+            fila = g.iloc[0].to_dict()
+        else:
+            ids = union(g["scopus_author_ids"])
+            unidades = union(g["unidades_academicas"])
+            anios = pd.to_numeric(pd.concat([g["anio_min"], g["anio_max"]]),
+                                  errors="coerce").dropna()
+            fila = {
+                "nombre_en_fuente": nombre,
+                "clave_normalizada": primero(g["clave_normalizada"]),
+                "clave_apellido": primero(g["clave_apellido"]),
+                "scopus_author_ids": ids,
+                "n_scopus_author_ids": str(len([x for x in ids.split("|") if x])),
+                "orcid": primero(g["orcid"]),
+                "anio_min": str(int(anios.min())) if len(anios) else None,
+                "anio_max": str(int(anios.max())) if len(anios) else None,
+                "unidades_academicas": unidades,
+                "n_unidades_distintas": str(len([x for x in unidades.split("|") if x])),
+                "confianza_maxima": ("alta" if (g["confianza_maxima"] == "alta").any()
+                                     else primero(g["confianza_maxima"])),
+                "en_ranking_manual": str((g["en_ranking_manual"] == "True").any()),
+                "en_detalle_manual": str((g["en_detalle_manual"] == "True").any()),
+            }
+        fila["n_publicaciones"] = str(npub.get(nombre, 0))
+        filas.append(fila)
+    return pd.DataFrame(filas, columns=df.columns)
 
 
 _JERARQUIA = load_config("matching_rules.yml")["unidad_academica"].get("jerarquia", {})
@@ -157,8 +238,13 @@ def load_authorship() -> pd.DataFrame:
     lectura, no más adelante: así no pueden filtrarse por descuido.
     """
     df = pd.read_csv(INTERNAL / "matching_log.csv", dtype=str)
-    return df[["eid", "anio", "nombre_en_fuente", "unidad_academica",
-               "posicion_autor", "n_autores_total"]].copy()
+    df = df[["eid", "anio", "nombre_en_fuente", "unidad_academica",
+             "posicion_autor", "n_autores_total"]].copy()
+    # Único punto por el que pasan TODOS los consumidores de autoría: aplicar
+    # aquí la consolidación la propaga a los indicadores, a las fichas y al
+    # recuento de autores sin que ninguno tenga que acordarse de hacerlo.
+    df["nombre_en_fuente"] = df["nombre_en_fuente"].map(canonizar)
+    return df
 
 
 def denominadores() -> dict:

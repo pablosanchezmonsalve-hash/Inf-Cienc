@@ -19,7 +19,7 @@ supuesta.
 | Afiliación UFT | ✅ 589/589 | matching | — |
 | Unidad académica | ⚠️ 353/589 (60 %) | inferida | «No determinada» |
 | Scopus Author ID | ✅ 575/589 (97,6 %) | Scopus | «No resuelto» + explicación |
-| **ORCID** | ⚠️ **222/589 (37,7 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
+| **ORCID** | ⚠️ **216/556 (38,8 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
 | Otros identificadores | ❌ 0/589 | — | Sección oculta si no hay ninguno |
 
 ### Indicadores
@@ -91,6 +91,33 @@ es normalizado por campo y **sí está disponible por publicación** (`I-05`).
 
 La ficha corresponde a **una forma de firma**, no necesariamente a una persona.
 
+### 589 en la auditoría, 556 en el sitio: no es una incoherencia
+
+Las dos cifras son correctas y miden cosas distintas.
+
+- **589** son las formas de firma que la auditoría detecta en Scopus. Describe
+  la fuente, y no cambia porque nosotros revisemos nada.
+- **556** son las entidades que el sitio publica: 526 formas de firma sin
+  revisar más 30 personas en las que una revisión humana fusionó 63 variantes,
+  caso por caso.
+
+La consolidación no la hace ninguna heurística (decisión `D-08`). La única vía
+es `config/identidades_consolidadas.yml`, que genera `apply_decisions.py` a
+partir de lo que una persona decidió en `make revision`. Sin ese archivo el
+sitio publica las 589 y todo funciona igual.
+
+Cada ficha fusionada declara **qué formas de firma la componen**, y el buscador
+encuentra por cualquiera de ellas: quien llegue desde Scopus con «Giglio A.»
+tiene que dar con la ficha aunque hoy se titule «Giglio Jiménez A.».
+
+La forma canónica no se inventa. Es la que la fuente usa más, con una salvedad:
+si una variante conserva la tilde del apellido y otra no, gana la acentuada
+aunque sea menos frecuente. Perder una tilde es un artefacto conocido de estas
+exportaciones —en este corpus apareció `Ingenierı́a` con una i sin punto—, y
+publicar «Núnez-Lisboa» teniendo «Núñez-Lisboa» sería publicar un apellido
+corrupto. Con las **iniciales** no se aplica ese criterio: que el nombre de pila
+lleve tilde no se deduce de aquí, y ahí decide la frecuencia.
+
 Cuando un autor está en la cola de ambigüedad (P-03 o P-04), la ficha muestra:
 
 > **Identidad no consolidada.** Esta firma podría corresponder a la misma
@@ -112,13 +139,17 @@ titular (`src/enrich/orcid_api.py`) y la ficha muestra el resultado:
 
 | Etiqueta en la ficha | Qué significa | Firmas |
 |---|---|---:|
-| `verificado` | Lo transmitió el editor a Crossref **y** el titular lo declara en su registro: dos fuentes independientes | 153 |
-| `declarado por el titular` | Se encontró preguntando al registro quién declara esta publicación. Una sola fuente, sin segunda comprobación | 48 |
-| `no verificable` | El titular no declara ninguna obra con DOI: no hay contra qué contrastar | 17 |
-| `sin confirmar` | El titular declara obras, pero ninguna coincide con las de esta firma | 4 |
+| `verificado` | Lo transmitió el editor a Crossref **y** el titular lo declara en su registro: dos fuentes independientes | 139 |
+| `declarado por el titular` | Se encontró preguntando al registro quién declara esta publicación. Una sola fuente, sin segunda comprobación | 43 |
+| `confirmado por revisión` | Una persona confirmó, caso por caso, que el titular que declara la institución corresponde a esta firma | 15 |
+| `no verificable` | El titular no declara ninguna obra con DOI: no hay contra qué contrastar | 16 |
+| `sin confirmar` | El titular declara obras, pero ninguna coincide con las de esta firma | 3 |
 | `registro no accesible` | El ORCID no existe o su registro no es público | 0 |
 
-Ver `ORCID_COVERAGE.md` §2 bis para por qué las 48 no dicen «verificado».
+Ver `ORCID_COVERAGE.md` §2 bis para por qué las 43 no dicen «verificado».
+
+Los recuentos son **posteriores a la consolidación**: varias variantes de una
+misma persona que traían el mismo ORCID cuentan ahora una vez.
 
 `sin confirmar` **no afirma que la asignación sea falsa**. Afirma que la
 evidencia disponible no la respalda, que es una frase distinta y la única que

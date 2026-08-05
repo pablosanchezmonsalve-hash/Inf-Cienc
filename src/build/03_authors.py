@@ -22,6 +22,23 @@ import common_build as b
 
 PUBLICATION = b.load_config("publication.yml")["fichas_autor"]
 
+FUENTE_REGISTRO = "ORCID (declarado por el titular)"
+
+# Las asignaciones que salieron de la revisión humana no tienen veredicto y no
+# lo tendrán: `orcid_api.py` contrasta DOI atribuidos contra DOI declarados, y
+# estas nacieron SIN publicación compartida —por eso hacía falta que alguien
+# las mirara—. Dejarlas sin etiqueta las presentaba como si nadie las hubiera
+# comprobado, que es lo contrario de lo que ocurrió.
+FUENTE_REVISION = "Revisión humana (candidato por afiliación confirmado)"
+
+
+# canónica -> las formas de firma que se fusionaron en ella.
+CONSOLIDADAS: dict[str, list[str]] = {}
+for _v, _c in b.CONSOLIDACION.items():
+    CONSOLIDADAS.setdefault(_c, []).append(_v)
+for _c in CONSOLIDADAS:
+    CONSOLIDADAS[_c].sort()
+
 
 def cargar_orcid() -> dict[str, dict]:
     """Asignaciones de ORCID, si el enriquecimiento ya se ejecutó (V2-01).
@@ -47,11 +64,16 @@ def cargar_orcid() -> dict[str, dict]:
         vdf = pd.read_csv(vpath, dtype=str)
         verif = {r["nombre_en_fuente"]: r for _, r in vdf.iterrows()}
 
-    salida = {}
+    salida: dict[str, dict] = {}
+    conflictos: list[str] = []
     for _, r in df.iterrows():
-        nombre = r["nombre_en_fuente"]
-        v = verif.get(nombre)
-        salida[nombre] = {
+        # Las asignaciones están indexadas por la firma tal cual aparece en la
+        # fuente; las fichas, por su forma canónica. Sin canonizar aquí, una
+        # persona consolidada perdería el ORCID de todas sus variantes salvo
+        # el de la que da nombre al grupo.
+        nombre = b.canonizar(r["nombre_en_fuente"])
+        v = verif.get(r["nombre_en_fuente"])
+        cand = {
             "orcid": r["orcid"],
             "confianza": r["confianza"],
             "publicaciones_de_respaldo": b.to_num(r["publicaciones_de_respaldo"]),
@@ -62,7 +84,43 @@ def cargar_orcid() -> dict[str, dict]:
             "veredicto": v["veredicto"] if v is not None else None,
             "dois_coincidentes": b.to_num(v["dois_coincidentes"]) if v is not None else None,
         }
+        previo = salida.get(nombre)
+        if previo is None:
+            salida[nombre] = cand
+            continue
+        # Una persona consolidada suele traer ORCID desde varias de sus
+        # variantes. Antes ganaba la última fila del CSV, o sea el orden de
+        # ordenación del archivo: la evidencia que se enseñaba dependía de un
+        # detalle sin significado. Ahora gana la más fuerte, siempre la misma.
+        if previo["orcid"] != cand["orcid"]:
+            conflictos.append(f"{nombre}: {previo['orcid']} vs {cand['orcid']}")
+            continue          # no se elige: se declara y se deja el primero
+        if _fuerza(cand) > _fuerza(previo):
+            salida[nombre] = cand
+
+    if conflictos:
+        # No se resuelve por su cuenta: dos identificadores distintos para una
+        # persona que alguien declaró única es un hallazgo, no un desempate.
+        print("  AVISO · variantes consolidadas con ORCID distintos:")
+        for c in conflictos:
+            print(f"    {c}")
     return salida
+
+
+def _fuerza(a: dict) -> int:
+    """Cuánto respalda una asignación, para quedarse con la mejor.
+
+    El orden no es caprichoso: arriba está lo que apoyan dos fuentes
+    independientes; después, el juicio de una persona; después, lo que sólo
+    afirma el titular; y al final lo que nadie ha podido contrastar.
+    """
+    if a["veredicto"] == "confirmada" and a["fuente"] != FUENTE_REGISTRO:
+        return 4
+    if a["fuente"] == FUENTE_REVISION:
+        return 3
+    if a["veredicto"] == "confirmada":
+        return 2
+    return 1
 
 
 # Qué se le enseña al lector para cada veredicto. `sin_coincidencia` NO dice
@@ -96,7 +154,12 @@ VEREDICTO_PUBLICO = {
 # Llamarlo «verificado» sugeriría al lector que dos fuentes independientes
 # coinciden, y no es el caso: la fuente es una sola, el propio titular. Se
 # etiqueta por lo que realmente es, que además dice más y no menos.
-FUENTE_REGISTRO = "ORCID (declarado por el titular)"
+VEREDICTO_DE_REVISION = (
+    "revisado",
+    "confirmado por revisión",
+    "El titular declara esta institución en su registro de ORCID y una persona "
+    "confirmó, caso por caso, que corresponde a esta firma. No hay publicación "
+    "compartida que lo respalde: el respaldo es el juicio de quien revisó.")
 VEREDICTO_DEL_REGISTRO = (
     "declarado",
     "declarado por el titular",
@@ -127,6 +190,19 @@ def main() -> None:
     colisiones = sum(1 for n, s in slugs.items() if s != b.slugify(n))
 
     orcid_map = cargar_orcid()
+
+    # Las fichas de la corrida anterior se BORRAN antes de escribir las nuevas.
+    # Sin esto quedaban huérfanas: al consolidar identidades desaparecen firmas
+    # y cambian slugs —una variante que dejó de colisionar pierde su sufijo—, y
+    # los archivos viejos seguían en disco y viajaban al sitio. Se servían 610
+    # fichas para 556 firmas, y las 54 sobrantes mostraban datos de antes de la
+    # revisión sin decirlo en ninguna parte.
+    dir_fichas = b.PROCESSED / "author"
+    borradas = 0
+    if dir_fichas.exists():
+        for viejo_json in dir_fichas.glob("*.json"):
+            viejo_json.unlink()
+            borradas += 1
 
     resumen, fichas = [], 0
     for nombre, grp in authorship.groupby("nombre_en_fuente"):
@@ -167,14 +243,23 @@ def main() -> None:
         # Identidad no consolidada: se declara, no se enlaza con otras firmas
         # (docs/AUTHOR_PROFILE.md §4).
         n_ids = b.to_num(m["n_scopus_author_ids"]) if m is not None else None
-        identidad_ambigua = bool(n_ids and n_ids > 1)
+        # Varios Scopus Author ID sobre una firma SIN consolidar es una duda:
+        # puede haber dos personas detrás. Sobre una firma consolidada por
+        # revisión humana ya no lo es: es la consecuencia esperada de haber
+        # unido varias variantes, cada una con su identificador. Marcarla
+        # igual presentaría como incertidumbre justo lo que se acaba de
+        # resolver.
+        variantes = CONSOLIDADAS.get(nombre, [])
+        identidad_ambigua = bool(n_ids and n_ids > 1) and not variantes
 
         veredicto = (orcid_map.get(nombre) or {}).get("veredicto")
         coincidentes = (orcid_map.get(nombre) or {}).get("dois_coincidentes")
         fuente_orcid = (orcid_map.get(nombre) or {}).get("fuente")
         clase, etiqueta, detalle = VEREDICTO_PUBLICO.get(veredicto, (None, None, None))
 
-        if veredicto == "confirmada" and fuente_orcid == FUENTE_REGISTRO:
+        if fuente_orcid == FUENTE_REVISION:
+            clase, etiqueta, detalle = VEREDICTO_DE_REVISION
+        elif veredicto == "confirmada" and fuente_orcid == FUENTE_REGISTRO:
             # Circular por construcción: se la encontró por declarar el DOI.
             clase, etiqueta, detalle = VEREDICTO_DEL_REGISTRO
         elif veredicto == "confirmada" and coincidentes:
@@ -211,6 +296,10 @@ def main() -> None:
                              if nombre in orcid_map
                              else "No disponible en las fuentes actuales"),
             "identidad_no_consolidada": identidad_ambigua,
+            # Qué formas de firma se fusionaron aquí y por decisión de quién.
+            # Sin esto, una ficha con 34 publicaciones repartidas entre tres
+            # variantes no se podría rastrear hasta la fuente.
+            "variantes_consolidadas": variantes,
             "indicadores": {
                 "n_publicaciones": n_pub,
                 "citas_totales": total_citas,
@@ -243,6 +332,7 @@ def main() -> None:
             "anio_max": max(por_anio) if por_anio else None,
             "interpretable": n_pub >= umbral_interpretable,
             "identidad_no_consolidada": identidad_ambigua,
+            "variantes_consolidadas": variantes,
             # El ORCID viaja también en el listado, no sólo en la ficha: es el
             # único identificador persistente que distingue dos firmas parecidas,
             # y esconderlo en el detalle obliga a abrir 589 fichas para usarlo.
@@ -254,6 +344,10 @@ def main() -> None:
         })
 
     resumen.sort(key=lambda a: (-a["n_publicaciones"], a["nombre"]))
+
+    n_fusionadas = sum(len(v) for v in CONSOLIDADAS.values())
+    n_firmas_origen = len(resumen) - len(CONSOLIDADAS) + n_fusionadas
+    n_sin_revisar = len(resumen) - len(CONSOLIDADAS)
 
     payload = {
         "meta": b.build_meta(),
@@ -278,21 +372,35 @@ def main() -> None:
             "firmas_con_orcid_declarado_por_titular": sum(
                 1 for a in resumen
                 if a["orcid_veredicto_etiqueta"] == "declarado por el titular"),
+            "firmas_con_orcid_confirmado_por_revision": sum(
+                1 for a in resumen
+                if a["orcid_veredicto_etiqueta"] == "confirmado por revisión"),
             "firmas_con_orcid_sin_confirmar": sum(
                 1 for a in resumen if a["orcid_veredicto"] == "sin_coincidencia"),
         },
         "nota": b.nota("P-06"),
+        # El texto se construye con las cifras del momento en vez de fijarlo:
+        # decía «sin un identificador persistente no es posible consolidar»
+        # justo cuando una persona acababa de consolidar 30 grupos, y decía
+        # 589 junto a un recuento de 556.
         "advertencia_identidad": (
+            f"Cada ficha corresponde a una forma de firma, no necesariamente a una "
+            f"persona distinta. De las {n_firmas_origen} detectadas en la fuente, "
+            f"{n_fusionadas} se fusionaron en {len(CONSOLIDADAS)} personas tras una "
+            f"revisión humana caso por caso. Las {n_sin_revisar} restantes siguen "
+            f"sin consolidar: pueden incluir variantes de una misma persona."
+            if CONSOLIDADAS else
             "Cada ficha corresponde a una forma de firma, no necesariamente a una "
-            "persona distinta. Sin un identificador persistente como ORCID no es "
-            "posible consolidar variantes de nombre."
+            "persona distinta. Las variantes de nombre no se consolidan por "
+            "heurística: requieren revisión humana, aún pendiente."
         ),
     }
     b.write_json(payload, "authors.json")
 
     n_pubs = [a["n_publicaciones"] for a in resumen]
     print(f"  firmas               : {len(resumen)}")
-    print(f"  fichas generadas     : {fichas}")
+    print(f"  fichas generadas     : {fichas}"
+          + (f"  (se borraron {borradas} de la corrida anterior)" if borradas else ""))
     print(f"  slugs desambiguados  : {colisiones} (variantes que colapsaban)")
     print(f"  con n >= {umbral_interpretable} (interpretables): "
           f"{sum(1 for a in resumen if a['interpretable'])}")
@@ -304,6 +412,7 @@ def main() -> None:
     if etq_vistas:
         for k, texto in (("verificado", "verificado contra el registro"),
                          ("declarado por el titular", "declarado por el titular (sin 2.ª fuente)"),
+                         ("confirmado por revisión", "confirmado por revisión humana"),
                          ("no verificable", "sin obras con DOI que contrastar"),
                          ("sin confirmar", "SIN CONFIRMAR — revisión humana"),
                          ("registro no accesible", "registro no accesible")):
