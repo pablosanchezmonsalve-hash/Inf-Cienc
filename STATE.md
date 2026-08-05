@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `fbdd3a0` · Cierre: cobertura de ORCID al 37,7 % y por qué el 100 % no es alcanzab
+Último commit: `5392983` · Aplica la revisión humana: 589 formas de firma pasan a 556 entidades
 Snapshot: 2026-08-05
 
 ---
