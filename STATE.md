@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4ec0710` · La herramienta de revisión recoge lo que produjeron los conectores nue
-Snapshot: 2026-08-04
+Último commit: `fbdd3a0` · Cierre: cobertura de ORCID al 37,7 % y por qué el 100 % no es alcanzab
+Snapshot: 2026-08-05
 
 ---
 
@@ -31,7 +31,7 @@ Las que gobiernan todo lo publicado. Si alguna cambia, se regenera este archivo.
 | Con autoría detallada | **818** |
 | Formas de firma de autor | **589** |
 | Pares autor × publicación | **1207** |
-| Firmas con ORCID | **222** |
+| Firmas con ORCID | **240** |
 | Indicadores evaluados | **40** |
 | Indicadores publicados | **27** |
 | Reglas de validación | **29** |
@@ -69,7 +69,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 105
+## Decisiones tomadas: 113
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -487,6 +487,7 @@ main { padding: var(--e5) 0 var(--e7); }
    se conservan tal cual para que la clase y el dato sean rastreables. */
 .nota-orcid-verificado,
 .nota-orcid-declarado,
+.nota-orcid-revisado,
 .nota-orcid-neutro,
 .nota-orcid-sin-confirmar {
   display: inline-block; margin-top: 0; white-space: nowrap;
@@ -511,6 +512,14 @@ main { padding: var(--e5) 0 var(--e7); }
   color: var(--aviso-tinta); background: var(--aviso-fondo);
   border-color: color-mix(in srgb, var(--aviso-borde) 45%, transparent);
 }
+/* Confirmado por una persona. Se separa de «verificado» porque el respaldo es
+   de otra naturaleza —un juicio humano, no el cruce de dos fuentes— y de
+   «declarado» porque aquí sí hubo alguien comprobando. */
+.nota-orcid-revisado {
+  color: var(--marca-alta); background: transparent;
+  border-color: color-mix(in srgb, var(--marca-alta) 55%, transparent);
+}
+
 /* Ausencia de evidencia, no evidencia en contra: gris, como todo lo que en
    este proyecto significa «no hay dato» (decisión D-09). */
 .nota-orcid-neutro {

@@ -1177,3 +1177,63 @@ La herramienta de revisión pasa de 89 a **110 casos**.
 Abrir `make revision` y resolver los 110 casos. Cada decisión que confirme un
 candidato por afiliación sube la cobertura publicable sin relajar el criterio,
 que es la única vía que queda para acercarse más al 100 %.
+
+---
+
+## Cierre · aplicación de la revisión humana de identidad
+
+El propietario revisó los 110 casos y exportó `internal/identity_decisions.csv`:
+52 resueltos, 58 pendientes. Se aplicaron.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-106 | Las decisiones se aplican por un script con autoprueba, no a mano | Una fusión mal transcrita no se distingue de una decidida |
+| D-107 | Un conjunto de decisiones contradictorio detiene la aplicación | Aplicar una contradicción deja el resultado sin significado y sin aviso |
+| D-108 | La forma canónica se elige por frecuencia, con la tilde del apellido por delante | Ordenar por longitud desempataba alfabéticamente, y en español eso publica la variante sin tilde |
+| D-109 | La tilde de la INICIAL no decide | Que el nombre de pila lleve tilde no se deduce de la fuente |
+| D-110 | Las fichas de la corrida anterior se borran antes de escribir | Al consolidar cambian los slugs y quedaban huérfanas con datos viejos |
+| D-111 | Cada ficha fusionada declara qué firmas la componen, y el buscador las encuentra por cualquiera | Sin eso, quien llegue desde Scopus con «Giglio A.» no encuentra sus publicaciones |
+| D-112 | Entre varias variantes con ORCID gana la evidencia más fuerte, no la última fila | La etiqueta dependía del orden de ordenación del archivo |
+| D-113 | Los candidatos por afiliación confirmados se publican con `fuente = revisión humana` | Lo que les faltaba era el juicio de una persona, y es lo que aporta el archivo |
+
+### Resultado
+
+**589 → 556 entidades publicadas**: 526 formas de firma sin revisar más 30
+personas en las que se fusionaron 63 variantes.
+
+**Cobertura de ORCID 216 de 556 (38,8 %)**: 139 verificado, 43 declarado por el
+titular, 15 confirmado por revisión, 16 no verificable, 3 sin confirmar.
+
+### Hallazgos
+
+- **Las 22 personas consolidadas que traían ORCID desde más de una variante
+  coinciden todas en el mismo identificador.** Dos vías independientes llegando
+  al mismo sitio: es corroboración de que las fusiones son correctas.
+- **La consolidación resolvió una de las 4 asignaciones sin confirmar.**
+  `Diaz F.` declaraba 3 DOI coincidentes y `Díaz F.` ninguno: la marca era un
+  artefacto de tener una persona partida en dos firmas. Quedan 3.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Ordenar por longitud elige la mejor forma canónica» | **Falso.** A igualdad de longitud el desempate alfabético publicaba `Núnez-Lisboa M.` teniendo `Núñez-Lisboa M.` |
+| «`make sitio` deja el sitio consistente» | **Falso.** No borraba las fichas previas: 610 archivos para 556 firmas, 54 con datos de antes de la revisión |
+| «Las cifras del sitio se actualizan solas» | **Falso.** La nota del KPI decía 589 junto a un 556, y la advertencia afirmaba que sin ORCID no es posible consolidar justo después de consolidar 30 grupos |
+| «Indexar por nombre canónico basta» | **Insuficiente.** Ganaba la última fila del CSV: qué evidencia se enseñaba dependía del orden del archivo |
+
+### Ambigüedades abiertas
+
+58 casos pendientes, entre ellos los 20 de «Varios Scopus ID», el grupo
+`De la Fuente` —que mezcla `de la Cruz P.S.`, claramente otra persona— y los
+2 desacuerdos entre fuentes. Sobre `Elorrieta V.`: la decisión «personas
+distintas» dice que los dos identificadores no son la misma persona, pero no
+cuál corresponde a la firma UFT. La pregunta estaba mal planteada por la
+herramienta y hay que rehacerla.
+
+### Próximo paso recomendado
+
+Rehacer en la herramienta la pregunta de los desacuerdos: no «misma o distinta
+persona» sino «cuál de los dos identificadores es el correcto».

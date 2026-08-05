@@ -1,0 +1,143 @@
+# Identidades consolidadas por revisión humana.
+#
+# GENERADO por src/review/apply_decisions.py desde
+# internal/identity_decisions.csv. No editar a mano: se regenera.
+#
+# QUÉ AUTORIZA
+#   Que las formas de firma de cada grupo se traten como UNA persona en
+#   los indicadores y en las fichas. Es la única vía por la que dos
+#   variantes se fusionan: el pipeline nunca lo hace por heurística
+#   (decisión D-08).
+#
+# LA FORMA CANÓNICA no es un nombre nuevo: es la que la fuente usa más,
+# medida en publicaciones distintas. Entre paréntesis, ese recuento.
+# Se elige así y no por longitud porque el desempate alfabético
+# publicaba la variante sin tilde teniendo la variante con tilde.
+#
+# Decisiones leídas: 110 · grupos consolidados: 30
+# Fecha de la revisión: 2026-08-05
+
+grupos:
+  - canonica: 'Arenas-Massa Á.'
+    variantes:
+      - 'Arenas-Massa A.'   # 1 publicaciones
+      - 'Arenas-Massa Á.'   # 2 publicaciones
+  - canonica: 'Avilès Dorlhiac R.'
+    variantes:
+      - 'Avilès Dorlhiac R.'   # 1 publicaciones
+      - 'Avilés-Dorlhiac R.'   # 1 publicaciones
+  - canonica: 'Cancino-López J.'
+    variantes:
+      - 'Cancino-Lopez J.'   # 4 publicaciones
+      - 'Cancino-López J.'   # 8 publicaciones
+  - canonica: 'Castillo-Valenzuela O.'
+    variantes:
+      - 'Castillo O.'   # 2 publicaciones
+      - 'Castillo Valenzuela O.'   # 1 publicaciones
+      - 'Castillo-Valenzuela O.'   # 4 publicaciones
+  - canonica: 'Castro-Sepúlveda M.'
+    variantes:
+      - 'Castro M.'   # 5 publicaciones
+      - 'Castro-Sepulveda M.'   # 8 publicaciones
+      - 'Castro-Sepúlveda M.'   # 7 publicaciones
+  - canonica: 'Cerón M.L.'
+    variantes:
+      - 'Ceron M.L.'   # 2 publicaciones
+      - 'Cerón M.L.'   # 1 publicaciones
+  - canonica: 'Crisóstomo Flores P.'
+    variantes:
+      - 'Crisóstomo Flores P.'   # 1 publicaciones
+      - 'Crisóstomo-Flores P.'   # 1 publicaciones
+  - canonica: 'Domínguez A.'
+    variantes:
+      - 'Dominguez A.'   # 1 publicaciones
+      - 'Domínguez A.'   # 1 publicaciones
+  - canonica: 'Díaz F.'
+    variantes:
+      - 'Diaz F.'   # 7 publicaciones
+      - 'Díaz F.'   # 14 publicaciones
+  - canonica: 'Galleguillos R.'
+    variantes:
+      - 'Galleguillos R.'   # 3 publicaciones
+      - 'Galleguillos R.B.'   # 1 publicaciones
+  - canonica: 'Giglio Jiménez A.'
+    variantes:
+      - 'Giglio A.'   # 21 publicaciones
+      - 'Giglio Jimenez A.'   # 2 publicaciones
+      - 'Giglio Jiménez A.'   # 1 publicaciones
+  - canonica: 'Giordanino E.'
+    variantes:
+      - 'Giordanino E.'   # 2 publicaciones
+      - 'Giordanino E.F.'   # 1 publicaciones
+  - canonica: 'Gómez Barbieri G.'
+    variantes:
+      - 'Gomez Barbieri G.'   # 1 publicaciones
+      - 'Gómez Barbieri G.'   # 1 publicaciones
+  - canonica: 'Hartmann D.'
+    variantes:
+      - 'Hartmann D.'   # 8 publicaciones
+      - 'Hartmann Schatloff D.'   # 5 publicaciones
+  - canonica: 'Hasbún P.'
+    variantes:
+      - 'Hasbun P.'   # 3 publicaciones
+      - 'Hasbún P.'   # 2 publicaciones
+  - canonica: 'Jiménez A.G.'
+    variantes:
+      - 'Jimenez A.G.'   # 1 publicaciones
+      - 'Jiménez A.G.'   # 1 publicaciones
+  - canonica: 'Lomboy Finsterbusch M.I.'
+    variantes:
+      - 'Lomboy Finsterbusch M.I.'   # 1 publicaciones
+      - 'Lomboy M.'   # 1 publicaciones
+  - canonica: 'López-Arana S.'
+    variantes:
+      - 'Lopez-Arana S.'   # 2 publicaciones
+      - 'López-Arana S.'   # 10 publicaciones
+  - canonica: 'Massa A.A.'
+    variantes:
+      - 'Massa A.A.'   # 2 publicaciones
+      - 'Massa Á.A.'   # 2 publicaciones
+  - canonica: 'Morales Sepúlveda J.P.'
+    variantes:
+      - 'Morales Sepúlveda J.P.'   # 1 publicaciones
+      - 'Morales-Sepulveda J.P.'   # 1 publicaciones
+  - canonica: 'Moyano Dávila C.'
+    variantes:
+      - 'Moyano Davila C.'   # 1 publicaciones
+      - 'Moyano Dávila C.'   # 3 publicaciones
+  - canonica: 'Núñez-Lisboa M.'
+    variantes:
+      - 'Núnez-Lisboa M.'   # 1 publicaciones
+      - 'Núñez-Lisboa M.'   # 1 publicaciones
+  - canonica: 'Orellana-Donoso M.'
+    variantes:
+      - 'Orellana Donoso M.'   # 4 publicaciones
+      - 'Orellana-Donoso M.'   # 34 publicaciones
+  - canonica: 'Pino-Zúñiga J.'
+    variantes:
+      - 'Pino-Zuñiga J.'   # 1 publicaciones
+      - 'Pino-Zúñiga J.'   # 3 publicaciones
+  - canonica: 'Pizarro S.'
+    variantes:
+      - 'Pizarro S.'   # 2 publicaciones
+      - 'Pizarro S.I.'   # 1 publicaciones
+  - canonica: 'Ruiz-Riquelme P.'
+    variantes:
+      - 'Ruiz Riquelme P.'   # 1 publicaciones
+      - 'Ruiz-Riquelme P.'   # 5 publicaciones
+  - canonica: 'Strauss F.J.'
+    variantes:
+      - 'Strauss F.-J.'   # 2 publicaciones
+      - 'Strauss F.J.'   # 14 publicaciones
+  - canonica: 'Sánchez-Duque C.'
+    variantes:
+      - 'Sanchez-Duque C.G.'   # 1 publicaciones
+      - 'Sánchez-Duque C.'   # 1 publicaciones
+  - canonica: 'Tabilo Prieto I.'
+    variantes:
+      - 'Tabilo Prieto I.'   # 1 publicaciones
+      - 'Tabilo-Prieto I.'   # 1 publicaciones
+  - canonica: 'Álvarez-Valdés C.'
+    variantes:
+      - 'Álvarez C.'   # 1 publicaciones
+      - 'Álvarez-Valdés C.'   # 1 publicaciones
