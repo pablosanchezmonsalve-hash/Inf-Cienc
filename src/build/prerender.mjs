@@ -1,0 +1,122 @@
+/* prerender.mjs — escribe el HTML del sitio en el build, no en el navegador.
+
+   PROBLEMA QUE RESUELVE
+   Hasta ahora `impacto.html` pesaba 1,3 KB y su cuerpo era `<div id="modulos">`
+   vacío. Todo —cabecera, KPI, gráficos, tablas, sellos— aparecía después de que
+   el navegador descargara dos módulos de JavaScript, resolviera un `fetch` y
+   dibujara veinte SVG. Consecuencias medibles:
+
+     · sin JavaScript el sitio no mostraba NADA. Ni el titular. Para un informe
+       institucional que aspira a ser citable y archivable, eso es un defecto,
+       no una limitación aceptable;
+     · el LCP dependía de la cadena crítica más larga posible: HTML → módulo →
+       fetch → parseo → dibujo;
+     · un archivador web (o un buscador que no ejecute el módulo) guardaba una
+       página en blanco.
+
+   CÓMO
+   Los constructores de marcado viven en web/assets/js/vista.js y no tocan el
+   DOM. Este script los importa BAJO NODE, les pasa los mismos artefactos JSON
+   que consumiría el navegador, y sustituye el contenido de los contenedores
+   vacíos en dist/*.html.
+
+   No hay una segunda implementación del marcado. Es el mismo código: por eso el
+   HTML pre-renderizado no puede divergir del que produce el navegador.
+
+   HIDRATACIÓN
+   Cada contenedor rellenado se marca con `data-prerender="1"`. paginas.js lo
+   consulta y, si está, se salta el repintado y sólo engancha los
+   comportamientos. Repintar destruiría un LCP que ya ocurrió.
+
+   Uso:  node src/build/prerender.mjs <dist>
+*/
+
+import { readFile, writeFile, readdir } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+const dist = resolve(process.argv[2] || 'dist');
+
+const leerJSON = async (n) => JSON.parse(await readFile(join(dist, 'data', n), 'utf8'));
+const mod = (n) => import(pathToFileURL(join(dist, 'assets', 'js', n)).href);
+
+/** Rellena `<tag id="…" …></tag>` conservando los atributos que ya tenía.
+
+   Se sustituye por posición del contenedor, no por un parser de HTML completo:
+   los contenedores son elementos vacíos con id conocido, y meter una
+   dependencia de parseo para eso sería pagar un árbol entero por un hueco.
+   Si el contenedor no existe o no está vacío, se deja como está y se avisa: un
+   pre-renderizado silencioso que no hizo nada es peor que uno que falla. */
+function rellenar(html, id, contenido, aviso) {
+  const re = new RegExp(`(<([a-z]+)([^>]*\\bid="${id}"[^>]*)>)\\s*(</\\2>)`, 'i');
+  const m = html.match(re);
+  if (!m) { aviso.push(id); return html; }
+  return html.replace(re, `${m[1].replace('>', ' data-prerender="1">')}\n${contenido}\n${m[4]}`);
+}
+
+async function main() {
+  const c = await mod('core.js');
+  const v = await mod('vista.js');
+
+  const meta = await leerJSON('meta.json');
+  const series = await leerJSON('series.json');
+  const { kpis } = await leerJSON('kpis.json');
+
+  const archivos = (await readdir(dist)).filter(f => f.endsWith('.html'));
+  const faltantes = [];
+  let total = 0;
+
+  for (const archivo of archivos) {
+    const ruta = join(dist, archivo);
+    let html = await readFile(ruta, 'utf8');
+    const antes = html.length;
+
+    // El cromo va en todas las páginas. `tema` se emite como 'auto' porque en
+    // el build no hay preferencia guardada; el navegador corrige el botón
+    // activo en cuanto arranca, sin repintar nada.
+    const cromo = c.cromo(meta, archivo, 'auto');
+    const av = [];
+    html = rellenar(html, 'cabecera', cromo.cabecera, av);
+    html = rellenar(html, 'vigencia', cromo.vigencia, av);
+    html = rellenar(html, 'pie', cromo.pie, av);
+    if (av.length) faltantes.push(`${archivo}: ${av.join(', ')}`);
+
+    // Contenido específico de cada tipo de página. Las páginas cuyo contenido
+    // depende del estado del usuario —filtros de publicaciones, ficha de autor
+    // elegida por parámetro— NO se pre-renderizan: no hay un estado inicial
+    // único que sirva, y emitir uno arbitrario sería inventar una vista.
+    const tipo = (html.match(/<body[^>]*data-pagina="([^"]+)"/) || [])[1];
+
+    if (tipo === 'portada') {
+      const a = [];
+      html = rellenar(html, 'titular', v.hero(meta, kpis), a);
+      const resto = v.kpisRestantes(kpis);
+      html = rellenar(html, 'kpis', v.kpis(resto), a);
+      html = html.replace('<div class="kpis" id="kpis" data-prerender="1">',
+        `<div class="kpis" id="kpis" data-prerender="1" data-n="${resto.length}">`);
+      html = rellenar(html, 'panorama', v.panorama(series), a);
+      html = rellenar(html, 'lectura', v.lectura(kpis), a);
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    } else if (tipo === 'modulos') {
+      const codigos = (html.match(/id="modulos"[^>]*data-indicadores="([^"]+)"/) || [])[1]
+        ?.split(',').map(s => s.trim()) || [];
+      const a = [];
+      html = rellenar(html, 'modulos', v.paginaModulos(codigos, series), a);
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    }
+
+    if (html.length !== antes) { await writeFile(ruta, html, 'utf8'); total++; }
+    const kb = (Buffer.byteLength(html, 'utf8') / 1024).toFixed(1);
+    console.log(`  ${archivo.padEnd(22)} ${String(kb).padStart(7)} KB`
+      + (html.length === antes ? '   (sin cambios)' : ''));
+  }
+
+  if (faltantes.length) {
+    console.error('\nCONTENEDORES NO ENCONTRADOS O NO VACÍOS:');
+    faltantes.forEach(f => console.error(`  · ${f}`));
+    process.exit(1);
+  }
+  console.log(`\n  ${total} páginas pre-renderizadas`);
+}
+
+main().catch(e => { console.error(e); process.exit(1); });

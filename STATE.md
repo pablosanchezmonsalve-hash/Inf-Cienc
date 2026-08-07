@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `5392983` · Aplica la revisión humana: 589 formas de firma pasan a 556 entidades
-Snapshot: 2026-08-05
+Último commit: `b2abe64` · Tres advertencias metodológicas dejan de ser prosa y pasan a tener for
+Snapshot: 2026-08-07
 
 ---
 
@@ -69,7 +69,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 113
+## Decisiones tomadas: 129
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

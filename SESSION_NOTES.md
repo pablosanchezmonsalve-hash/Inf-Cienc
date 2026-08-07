@@ -1237,3 +1237,93 @@ herramienta y hay que rehacerla.
 
 Rehacer en la herramienta la pregunta de los desacuerdos: no «misma o distinta
 persona» sino «cuál de los dos identificadores es el correcto».
+
+---
+
+## Cierre · rediseño de interfaz, identidad roja y pre-renderizado
+
+Tres encargos en una sesión: cambiar la identidad cromática a rojo, rehacer la
+interfaz tomando como referencia portales bibliométricos reales de educación
+superior, y pre-renderizar el sitio.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-114 | La identidad pasa a roja, diseñada por medición, y NO se declara oficial de la UFT | `finis.cl` y los directorios de marca responden 403. Un hex inventado presentado como institucional es exactamente lo que `<non_negotiable_rules>` prohíbe |
+| D-115 | Cambiar el color del dato es seguro porque el sitio usa un solo color de dato | Medido antes de tocar nada. Si hubiera una paleta categórica en uso, el cambio habría obligado a revalidar el conjunto entero |
+| D-116 | La superficie oscura pasa de pizarra fría a pizarra cálida | Un rojo sobre fondo azulado se lee sucio: el fondo tira del tono al magenta |
+| D-117 | Cada token se declara UNA vez con `light-dark()` | La paleta oscura estaba escrita tres veces y las tres copias podían separarse sin que nada avisara |
+| D-118 | `--boton-tinta` se separa del blanco literal | El botón primario llevaba `#fff` fijo: 7,67:1 en claro y 2,84:1 en oscuro. Es el mismo fallo que obligó a crear `--cifra`, con otra cara |
+| D-119 | La segunda ranura categórica SÍ está en uso y ahora está validada como par | La documentación afirmaba que ningún módulo pedía `escala: 'serie'`. Era falso: `anillo()` la pide siempre |
+| D-120 | La tabla equivalente deja de estar detrás de un desplegable y pasa a ser la segunda vista | La figura resume; la tabla es la que se cita. Es el patrón del Leiden Ranking: misma serie, varias representaciones, elige el lector |
+| D-121 | Sin JavaScript se muestran LAS DOS vistas, no ninguna | La tabla es la vía equivalente al gráfico, no un extra. El conmutador sólo existe bajo la clase `js`: un control que no conmuta nada es una promesa falsa |
+| D-122 | Índice lateral fijo con scroll-spy en las páginas de sección | Patrón del panel de entidades de SciVal. En una página de cinco indicadores largos, poder ver qué hay y saltar es la diferencia entre consultar y leer en orden |
+| D-123 | El titular de portada lleva TRES indicadores y esos tres BAJAN de la rejilla | Un indicador repetido a cuatro centímetros de sí mismo no gana énfasis, lo pierde |
+| D-124 | El titular arrastra el denominador y la referencia de cada cifra | Un 0,87 de FWCI sin el «1 = promedio mundial» al lado no es un titular, es un número suelto |
+| D-125 | La cabecera es fija sólo a partir de 900 px | En un teléfono ocupa tres filas: fijarla se comía un tercio de la pantalla en cada desplazamiento |
+| D-126 | El marcado se construye en `vista.js`, sin tocar el DOM | Es la condición para que el navegador y el build produzcan lo mismo. Sin eso, pre-renderizar significa mantener dos versiones del marcado |
+| D-127 | El pre-renderizado NO alcanza a `publicaciones.html` ni `autor.html` | Dependen del estado del usuario. No hay estado inicial único que sirva, y emitir uno arbitrario sería inventar una vista |
+| D-128 | Node es requisito blando del build, con aviso en voz alta | Sin Node el sitio se ensambla y funciona igual mientras haya JavaScript. Abortar sería desproporcionado; callarlo dejaría un sitio peor sin que nadie lo notara |
+| D-129 | El lienzo de un gráfico de barras verticales se ajusta al número de categorías | Tres años estirados a lo ancho de una tarjeta se leen como «poco dato», que es una impresión y no una medición |
+
+### Referencias consultadas
+
+Portales de análisis bibliométrico de instituciones de educación superior, para
+tomar patrones con razón detrás y no apariencias. Detalle y qué se descartó, en
+`docs/UX_UI.md` §13.
+
+- CWTS Leiden Ranking (ediciones Tradicional y Abierta): vistas lista / gráfico
+  / mapa sobre la misma serie; intervalos de estabilidad al 95 % por
+  bootstrapping; sección «Responsible use» de primer nivel.
+- SciVal, módulo *Overview*: panel de entidades fijo a la izquierda; el resumen
+  agrupado en *Overall Research Performance*, *Research Topics* y *Performance
+  Indicators*.
+- Perfiles institucionales tipo Pure: resumen, línea de tiempo de producción,
+  conceptos frecuentes y mapa de colaboración.
+- Convenciones de tablero analítico: cifras tabulares alineadas a la derecha,
+  rejilla recesiva, divulgación progresiva, «la figura resume, la tabla es la
+  verdad».
+
+### Resultado
+
+| Medida | Antes | Después |
+|---|---|---|
+| LCP `index` (Slow 4G) | 1.916 ms | **776 ms** |
+| LCP `impacto` | 1.752 ms | **776 ms** |
+| LCP `tematica` | 1.296 ms | **740 ms** |
+| `impacto.html` sin JavaScript | 0 módulos, 99 caracteres | 5 módulos, 5 gráficos, 5 tablas, 2.847 caracteres |
+| Contraste WCAG, 9 páginas × 2 temas | 0 fallos | **0 fallos** |
+| Desborde horizontal en 430 px | — | **0 px** |
+| CSS | 41,9 KB | 51,3 KB (15,2 KB gzip) |
+| JavaScript | 61,0 KB | 72,1 KB (23,7 KB gzip) |
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Ningún módulo pide escala de serie» | **Falso.** `anillo()` la pide siempre. La segunda ranura llevaba dibujándose desde el principio, sin validar |
+| «El pre-renderizado no mejoró el LCP» | **Falso, y el error era mío.** El primer `PerformanceObserver` resolvía en la primera entrada en vez de esperar a la última: medía un candidato temprano, no el LCP. Corregido, la mejora es de 43–59 % |
+| «El rojo institucional se puede averiguar» | **No en esta sesión.** 403 en `finis.cl` y en los directorios de marca. Queda como token pendiente de sustituir |
+
+### Ambigüedades abiertas
+
+El hex oficial de la Universidad Finis Terrae sigue sin verificar. Todo el
+sistema cromático cuelga de `--marca` y sus derivados, así que sustituirlo es
+cambiar cuatro tokens y volver a correr el barrido de contraste; pero mientras
+no se verifique, el rojo publicado es **un rojo diseñado**, no *el* rojo de la
+institución, y así está declarado en la hoja de estilo y en `docs/UX_UI.md`.
+
+El presupuesto de JavaScript (60 KB en bruto) queda **excedido en 12,1 KB**. No
+se resolvió: se declara. El 28 % del archivo es comentario en prosa, que este
+proyecto trata como parte del entregable, y con el sitio pre-renderizado el
+JavaScript ya no está en la ruta crítica de pintado. Si se quiere respetar el
+techo literal, la decisión a tomar es si se minifica en el build —lo que separa
+lo que se lee en el repositorio de lo que se sirve— o si se sube el techo.
+
+### Próximo paso recomendado
+
+Pedir a la institución el valor oficial de su rojo y sustituir los cuatro tokens
+de marca. Después, seguir con lo que quedó del encargo original de interfaz y no
+se abordó: panel conceptual por sección, caja de exportación, estado en la URL y
+catálogo de indicadores.
