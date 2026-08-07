@@ -663,6 +663,11 @@ completa habría sido afirmar algo falso sobre el indicador.
 
 ### 16.4 Sincronización
 
+**Procedimiento completo en [`DESIGN_SYNC_GUIDE.md`](DESIGN_SYNC_GUIDE.md)** —
+requisitos, las dos vías de autorización, el protocolo `list → finalize_plan →
+write`, la comprobación de capas antes de publicar, y qué hacer cuando un cambio
+viene de Claude Design hacia el repositorio, que es el caso delicado.
+
 El paquete requiere autorización de sistema de diseño, que **no se puede
 conceder desde una sesión remota sin terminal interactiva**. Dos vías:
 
