@@ -85,7 +85,6 @@
   --plano:        light-dark(#faf7f8, #100b0d);
   --superficie:   light-dark(#ffffff, #171214);
   --superficie-2: light-dark(#f5eef0, #211a1d);
-  --superficie-3: light-dark(#ebdde1, #2e2428);
 
   /* ---- Tinta. Tres niveles, todos derivados del rojo de la marca. ---- */
   --tinta:   light-dark(#1c1013, #f2e9ec);
@@ -205,6 +204,10 @@
      del sitio en oscuro. Medido: 7,67:1 y 7,88:1. */
   --boton-tinta: light-dark(#ffffff, #171214);
 
+  /* Icono de la advertencia metodológica, como máscara: hereda el color del
+     token de aviso en vez de traerlo pintado, así que sigue al tema. */
+  --icono-aviso: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm0 6v7m0 3v.5" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+
   --max: 1240px;
   --rail: 224px;
 }
@@ -266,7 +269,6 @@ p:last-child { margin-bottom: 0; }
    un KPI suelto, las proporcionales se leen mejor. */
 .num, td.num, th.num, .tick, .tip-v { font-variant-numeric: tabular-nums; }
 
-.mono { font-family: var(--f-mono); font-size: .94em; }
 
 /* ═══════════════════════════════════════════════════════ 3. ESTRUCTURA */
 
@@ -702,9 +704,6 @@ main { padding: var(--e5) 0 var(--e8); }
   background: var(--aviso-borde);
   -webkit-mask: var(--icono-aviso) center/contain no-repeat;
   mask: var(--icono-aviso) center/contain no-repeat;
-}
-:root {
-  --icono-aviso: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm0 6v7m0 3v.5" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
 }
 
 /* ---------------------------------------------------------------- ayuda */

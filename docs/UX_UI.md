@@ -549,13 +549,16 @@ ocurrió.
 
 ### 14.1 Qué se ganó, medido
 
-Perfil *Slow 4G* (1,6 Mbps · 150 ms de latencia), Chromium:
+Perfil *Slow 4G* (1,6 Mbps · 150 ms de latencia), Chromium. **Mediana de cinco
+corridas por celda, con el rango observado**: una sola muestra en un contenedor
+compartido es ruido —la primera medición publicada dio 776 ms y la siguiente
+916 ms para la misma página—, así que la cifra suelta no era defendible.
 
-| Página | LCP antes | LCP después | |
+| Página | LCP sin pre-render | LCP pre-renderizado | Mejora |
 |---|---|---|---|
-| `index` | 1.916 ms | **776 ms** | −59 % |
-| `impacto` | 1.752 ms | **776 ms** | −56 % |
-| `tematica` | 1.296 ms | **740 ms** | −43 % |
+| `index` | 1.940 ms [1.904–1.956] | **780 ms** [772–796] | −60 % |
+| `impacto` | 1.764 ms [1.748–1.808] | **784 ms** [780–812] | −56 % |
+| `tematica` | 1.300 ms [1.296–1.320] | **756 ms** [752–764] | −42 % |
 
 Con JavaScript **desactivado**, lo que queda en la página:
 
@@ -590,11 +593,11 @@ estilos:
 | Contraste WCAG 2.1 (1.4.3 y 1.4.11) | 9 páginas × 2 temas, con composición alfa, paradas de degradado y exclusión de decoración | **0 fallos** |
 | Desborde horizontal | 430 px y 860 px | **0 px** |
 | Sitio sin JavaScript | `index`, `impacto`, `tematica` | módulos, gráficos, tablas y sellos presentes |
-| LCP | *Slow 4G*, 4 páginas | 740–788 ms (presupuesto: < 2.000 ms) |
+| LCP | *Slow 4G*, mediana de 5 corridas | 756–784 ms (presupuesto: < 2.000 ms) |
 | Auditoría de datos | 29 reglas | 28 pasan, 0 bloqueantes fallando |
 | Barrera pública/interna | artefactos de `dist/` | 0 fallas |
 
-**Presupuestos.** CSS **51,3 KB** en bruto (15,2 KB con gzip), dentro del techo
+**Presupuestos.** CSS **51,4 KB** en bruto (15,2 KB con gzip), dentro del techo
 de 55 KB. JavaScript **72,1 KB** en bruto, **por encima** del techo de 60 KB
 declarado; con gzip son **23,7 KB**. Dos cosas relevantes para juzgarlo: el
 28 % del JavaScript es comentario en prosa, que este proyecto trata como parte
