@@ -7,9 +7,14 @@
 <meta name="description" content="Ficha pública de autor con indicadores, evolución temporal y listado de publicaciones.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/app.css">
-<script>/* Aplica el tema guardado antes de pintar: si se hiciera desde el módulo
-   diferido, la página aparecería un instante con el tema equivocado. */
-(function(){try{var t=localStorage.getItem('tema');if(t)document.documentElement.setAttribute('data-tema',t)}catch(e){}})();</script>
+<script>/* Corre antes de pintar, y las dos cosas que hace tienen que ocurrir antes.
+   1. El tema guardado: desde el módulo diferido, la página aparecería un
+      instante con el tema equivocado.
+   2. La clase `js`: marca que hay JavaScript. Las vistas conmutables se
+      contraen a una sola sólo bajo esa clase; sin JS se muestran las dos, que
+      es lo correcto —la tabla es la vía equivalente al gráfico, no un extra—. */
+(function(){var e=document.documentElement;e.className+=' js';
+try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(x){}})();</script>
 </head>
 <body data-pagina="fichaAutor">
 <a class="salto-contenido" href="#contenido">Saltar al contenido</a>

@@ -80,56 +80,64 @@ export function temaInicial() {
 }
 
 /* ------------------------------------------------------------ cabecera */
-export async function montarCabecera(paginaActual) {
-  const meta = await cargar('meta.json');
-  const paginas = [
-    ['index.html', 'Portada'],
-    ['produccion.html', 'Producción'],
-    ['impacto.html', 'Impacto'],
-    ['colaboracion.html', 'Colaboración'],
-    ['tematica.html', 'Áreas temáticas'],
-    ['autores.html', 'Autores'],
-    ['publicaciones.html', 'Publicaciones'],
-    ['metodologia.html', 'Metodología'],
-  ];
-  const nav = paginas.map(([href, txt]) =>
+
+export const PAGINAS = [
+  ['index.html', 'Portada'],
+  ['produccion.html', 'Producción'],
+  ['impacto.html', 'Impacto'],
+  ['colaboracion.html', 'Colaboración'],
+  ['tematica.html', 'Áreas temáticas'],
+  ['autores.html', 'Autores'],
+  ['publicaciones.html', 'Publicaciones'],
+  ['metodologia.html', 'Metodología'],
+];
+
+/** Cromo de la página —cabecera, barra de vigencia y pie— como HTML puro.
+
+    Es una FUNCIÓN SIN DOM a propósito: el pre-renderizador la ejecuta en Node
+    durante el build y el navegador la ejecuta al hidratar. Un solo cuerpo de
+    código produce las dos versiones, así que no pueden divergir.
+
+    `tema` se pasa explícito en vez de leerse de localStorage porque en el build
+    no hay localStorage. El pre-render emite 'auto' y el navegador corrige el
+    botón activo en cuanto arranca. */
+export function cromo(meta, paginaActual, tema = 'auto') {
+  const nav = PAGINAS.map(([href, txt]) =>
     `<a href="${href}"${href === paginaActual ? ' aria-current="page"' : ''}>${txt}</a>`).join('');
 
-  const actual = temaInicial();
   const selectorTema = `<div class="tema" role="group" aria-label="Tema de color">${
     TEMAS.map(([id, txt, d]) => `<button type="button" data-tema="${id}"
-      aria-pressed="${String(id === actual)}" title="Tema ${txt.toLowerCase()}">
+      aria-pressed="${String(id === tema)}" title="Tema ${txt.toLowerCase()}">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      ${txt}</button>`).join('')}</div>`;
+      <span>${txt}</span></button>`).join('')}</div>`;
 
-  document.getElementById('cabecera').innerHTML = `
+  return {
+    cabecera: `
     <div class="contenedor">
       <div class="marca-fila">
-        <div class="marca">
-          <strong>${escapar(meta.institucion)}</strong>
-          <span>${escapar(meta.titulo_plataforma)}</span>
-        </div>
+        <a class="marca" href="index.html">
+          <span class="marca-sigla" aria-hidden="true">UFT</span>
+          <span class="marca-txt">
+            <strong>${escapar(meta.institucion)}</strong>
+            <span>${escapar(meta.titulo_plataforma)}</span>
+          </span>
+        </a>
         ${selectorTema}
       </div>
       <nav class="nav" aria-label="Secciones">${nav}</nav>
-    </div>`;
+    </div>`,
 
-  document.querySelectorAll('.tema button').forEach(b =>
-    b.addEventListener('click', () => aplicarTema(b.dataset.tema)));
-
-  document.getElementById('vigencia').innerHTML = `
+    vigencia: `
     <div class="contenedor">
-      <span>Datos: <strong>${meta.fuentes.join(' · ')}</strong></span>
-      <span class="sep" aria-hidden="true">|</span>
-      <span>Ventana <strong>${meta.ventana.inicio}–${meta.ventana.fin}</strong></span>
-      <span class="sep" aria-hidden="true">|</span>
-      <span>Citas al <strong>${meta.fecha_corte_citas}</strong></span>
-      <span class="sep" aria-hidden="true">|</span>
-      <a href="metodologia.html">Cómo leer estos indicadores</a>
-    </div>`;
+      <span><b>Fuente</b> ${escapar(meta.fuentes.join(' · '))}</span>
+      <span class="sep" aria-hidden="true"></span>
+      <span><b>Ventana</b> ${meta.ventana.inicio}–${meta.ventana.fin}</span>
+      <span class="sep" aria-hidden="true"></span>
+      <span><b>Citas al</b> ${escapar(meta.fecha_corte_citas)}</span>
+      <a class="vigencia-guia" href="metodologia.html">Cómo leer estos indicadores →</a>
+    </div>`,
 
-  const pie = document.getElementById('pie');
-  if (pie) pie.innerHTML = `
+    pie: `
     <div class="contenedor">
       <p>${escapar(meta.advertencia_global)}
       Ver <a href="metodologia.html">metodología y limitaciones</a>.</p>
@@ -137,7 +145,34 @@ export async function montarCabecera(paginaActual) {
       ${nf.format(meta.denominadores.con_metricas)} con métricas ·
       ${nf.format(meta.denominadores.con_autoria_detallada)} con autoría detallada.
       Build ${meta.fecha_build}.</p>
-    </div>`;
+    </div>`,
+  };
+}
+
+/** Escribe el cromo en la página y engancha el conmutador de tema.
+
+    Si el pre-renderizador ya dejó el HTML puesto, no se vuelve a pintar: sólo
+    se corrige el botón de tema y se enganchan los eventos. Repintar borraría
+    un LCP que ya ocurrió. */
+export async function montarCabecera(paginaActual) {
+  const meta = await cargar('meta.json');
+  const cab = document.getElementById('cabecera');
+
+  if (!cab.dataset.prerender) {
+    const html = cromo(meta, paginaActual, temaInicial());
+    cab.innerHTML = html.cabecera;
+    document.getElementById('vigencia').innerHTML = html.vigencia;
+    const pie = document.getElementById('pie');
+    if (pie) pie.innerHTML = html.pie;
+  } else {
+    const t = temaInicial();
+    document.querySelectorAll('.tema button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.tema === t)));
+  }
+
+  document.querySelectorAll('.tema button').forEach(b =>
+    b.addEventListener('click', () => aplicarTema(b.dataset.tema)));
+
   return meta;
 }
 
@@ -379,6 +414,15 @@ export function barrasV(datos, {
 } = {}) {
   if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
   const mIzq = 52, mDer = 16, mAb = 38, mArr = 26;
+
+  /* Tres años estirados a lo ancho de una tarjeta de 900 px son tres barras
+     finas perdidas en un descampado: el ojo lee «poco dato», que es una
+     impresión y no una medición. El lienzo se ajusta al número de categorías y
+     el contenedor se acota al mismo valor, de modo que el SVG se dibuja a
+     escala 1:1 y el texto sale al tamaño que se declaró. Estirar el viewBox sin
+     acotar el contenedor —o al revés— deforma la tipografía del gráfico. */
+  ancho = Math.min(ancho, mIzq + mDer + datos.length * 150);
+
   const vals = datos.map(d => d[etiquetaY]).filter(v => v !== null && v !== undefined);
   const max = Math.max(...vals, referencia || 0) * 1.18 || 1;
   const bw = (ancho - mIzq - mDer) / datos.length;
@@ -426,7 +470,7 @@ export function barrasV(datos, {
 
   const etq = titulo ? `${titulo} — gráfico de barras por año, ${datos.length} años`
                      : `Gráfico de barras verticales, ${datos.length} valores`;
-  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
+  return `<div class="grafico" style="max-width:${ancho}px"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
     role="list" aria-label="${escapar(etq)}">
     ${red}${ref}${barras}
     <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
@@ -530,13 +574,36 @@ export function montarTooltip() {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') ocultar(); });
 }
 
-/** Tabla de datos equivalente: los gráficos no pueden ser la única vía. */
+/** Tabla de datos equivalente: los gráficos no pueden ser la única vía.
+
+    Los portales de análisis bibliométrico serios ofrecen la misma serie en más
+    de una representación y dejan elegir —el Leiden Ranking alterna lista,
+    dispersión y mapa— porque la figura resume y la tabla es la que se cita.
+    Aquí la tabla no está escondida detrás de un desplegable: es la segunda
+    vista del módulo, al mismo nivel que el gráfico.
+
+    La columna `esperado` sólo aparece cuando el indicador la trae. Es la que
+    convierte un recuento en un juicio: 75 publicaciones en el top 10 % no dice
+    nada hasta que al lado está lo que cabría esperar. */
 export function tablaEquivalente(datos, col = 'valor') {
-  const filas = datos.map(d =>
-    `<tr><td>${escapar(String(d[col] ?? d.anio))}</td><td class="num">${nf.format(d.n ?? d.valor)}</td></tr>`).join('');
-  return `<details class="tabla-datos"><summary>Ver datos en tabla</summary>
-    <table><thead><tr><th>Categoría</th><th class="num">n</th></tr></thead>
-    <tbody>${filas}</tbody></table></details>`;
+  const hayEsperado = datos.some(d => d.esperado != null);
+  const filas = datos.map(d => {
+    const etiqueta = String(d[col] ?? d.anio);
+    const v = d.n ?? d.valor;
+    const esp = d.esperado == null ? ''
+      : `<td class="num">${nf.format(d.esperado)}</td>
+         <td class="num ${d.n >= d.esperado ? 'sobre' : 'bajo'}">${
+           d.n >= d.esperado ? '+' : '−'}${nf.format(Math.abs(d.n - d.esperado))}</td>`;
+    return `<tr><td${esSinDato(etiqueta) ? ' class="sin-dato-txt"' : ''}>${escapar(etiqueta)}</td>
+      <td class="num">${typeof v === 'number' ? nf.format(v) : escapar(String(v))}</td>
+      ${hayEsperado && !esp ? '<td class="num">—</td><td class="num">—</td>' : esp}</tr>`;
+  }).join('');
+  const cab = hayEsperado
+    ? '<th scope="col">Categoría</th><th scope="col" class="num">Observado</th>'
+      + '<th scope="col" class="num">Esperado</th><th scope="col" class="num">Diferencia</th>'
+    : '<th scope="col">Categoría</th><th scope="col" class="num">n</th>';
+  return `<div class="tabla-envoltura tabla-datos"><table>
+    <thead><tr>${cab}</tr></thead><tbody>${filas}</tbody></table></div>`;
 }
 
 export function mostrarError(contenedor, err) {
