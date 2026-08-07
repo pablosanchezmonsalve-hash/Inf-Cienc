@@ -7,6 +7,11 @@ data/processed/
 # Sitio ensamblado y desplegable: se reconstruye con `make sitio`
 dist/
 
+# Paquete de sistema de diseño para Claude Design: se reconstruye con `make kit`.
+# No se versiona por la misma razón que dist/ — es una salida derivada, y cada
+# regeneración produciría un diff de un megabyte de HTML generado.
+design-system/
+
 # Respuestas cacheadas de Crossref: ~800 archivos, se regeneran solos.
 # Se conservan en disco para poder reejecutar el enriquecimiento sin volver a
 # golpear la API, pero no se versionan.

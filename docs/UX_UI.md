@@ -604,3 +604,75 @@ declarado; con gzip son **23,7 KB**. Dos cosas relevantes para juzgarlo: el
 del entregable, y con el sitio pre-renderizado el JavaScript ya **no está en la
 ruta crítica de pintado** —es `type="module"`, o sea diferido, y el contenido ya
 está en el HTML—. Queda declarado como excedido, no como resuelto.
+
+---
+
+## 16. Sistema de diseño para Claude Design
+
+`make kit` genera en `design-system/` un paquete de 16 fichas listo para
+sincronizar con un proyecto de sistema de diseño en `claude.ai/design`.
+
+### 16.1 Por qué se genera y no se escribe
+
+Un sistema de diseño documentado a mano empieza siendo verdad y deja de serlo en
+la primera corrección que alguien hace en `app.css` sin acordarse de la ficha.
+Aquí cada ficha se construye desde las fuentes reales:
+
+- **la hoja de estilo desplegable**, incrustada entera en cada ficha, de modo que
+  la previsualización usa exactamente los estilos que se sirven;
+- **los constructores de `core.js` y `vista.js`**, ejecutados bajo Node — los
+  mismos que usa el pre-renderizador del sitio;
+- **los artefactos de `data/processed/`**. Los componentes se enseñan con datos
+  reales: un componente de bibliometría ilustrado con cifras inventadas
+  contradice `<non_negotiable_rules>` incluso en una ficha de diseño;
+- **las razones de contraste, calculadas al generar** a partir de los tokens
+  leídos de la hoja. No se copian de ninguna tabla: una tabla copiada se
+  desactualiza en silencio, un cálculo no.
+
+El sistema de diseño no puede desactualizarse respecto del producto. Si
+divergen, es que no se ha vuelto a generar.
+
+### 16.2 Las fichas
+
+| Grupo | Fichas |
+|---|---|
+| Fundamentos | Color · Tipografía · Espacio y trazo |
+| Componentes | KPI · Titular de portada · Módulo · Conmutador Gráfico ⇄ Tabla · Sello de procedencia · Notas y advertencias · Índice lateral · Controles · Estados |
+| Gráficos | Barras horizontales · Barras verticales · Anillo · Codificación por naturaleza del dato |
+
+Cada ficha muestra **los dos temas uno al lado del otro**. El mecanismo: la
+paleta usa `light-dark()`, que resuelve según el `color-scheme` del elemento
+donde se sustituye la variable —no según el de la raíz—, así que basta declarar
+`color-scheme: light` y `color-scheme: dark` en dos contenedores hermanos.
+Comprobado en las 16 fichas: los fondos de los dos paneles difieren siempre.
+
+### 16.3 Dos defectos que la verificación encontró
+
+**Identificadores duplicados.** El generador construía el cuerpo una vez y lo
+inyectaba en los dos paneles. Los patrones de trama se referencian por `id`, así
+que el panel oscuro terminaba apuntando al patrón del claro. Se corrigió
+evaluando el cuerpo **una vez por panel**.
+
+**Una ficha que ilustraba una regla con un ejemplo que no la cumple.** La ficha
+de codificación prometía trama, valor esperado y gris de ausencia, y usaba
+`P-07` para las tres. Pero `P-07` **no es multivaluado** —comprobado en
+`series.json`— y por tanto no lleva trama. Ahora cada afirmación trae el
+indicador que de verdad la demuestra: `T-05` para la trama, `I-05` para el valor
+esperado, `P-07` para el gris. Ponerle trama a `P-07` para que la ficha quedara
+completa habría sido afirmar algo falso sobre el indicador.
+
+### 16.4 Sincronización
+
+El paquete requiere autorización de sistema de diseño, que **no se puede
+conceder desde una sesión remota sin terminal interactiva**. Dos vías:
+
+1. desde Claude Design, «Send to Claude Code Web», que siembra el proyecto en el
+   espacio de trabajo;
+2. Claude Code en una máquina local, donde `/design-login` sí abre.
+
+Hecho eso, la sincronización es **incremental, componente a componente**, nunca
+un reemplazo completo.
+
+`design-system/` no se versiona, por la misma razón que `dist/`: es una salida
+derivada, y cada regeneración produciría un diff de un megabyte de HTML
+generado. Se reconstruye con `make kit`.

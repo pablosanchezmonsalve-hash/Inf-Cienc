@@ -1341,3 +1341,44 @@ pregunta responde cada eje antes de los indicadores— y **catálogo de
 indicadores** —una vista que liste los 20 indicadores con su definición, fuente,
 denominador y estado de factibilidad, hoy repartidos entre `metodologia.html` y
 los sellos—.
+
+---
+
+## Cierre · sistema de diseño generado para Claude Design
+
+Se abrió el PR #26 con el rediseño y se construyó el paquete de sistema de
+diseño para sincronizar con `claude.ai/design`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-130 | El sistema de diseño se GENERA desde la hoja, los constructores y los datos reales | Documentado a mano, empieza siendo verdad y deja de serlo en la primera corrección que nadie replica en la ficha |
+| D-131 | Las razones de contraste de las fichas se calculan al generar, no se copian | Una tabla copiada se desactualiza en silencio; un cálculo no |
+| D-132 | Los componentes se enseñan con datos reales del informe, no de relleno | Un componente de bibliometría ilustrado con cifras inventadas contradice las reglas del proyecto incluso en una ficha de diseño |
+| D-133 | Cada ficha muestra los dos temas mediante `color-scheme` en contenedores hermanos | `light-dark()` resuelve según el elemento donde se sustituye la variable, no según la raíz. Permite comparar sin duplicar la paleta |
+| D-134 | El cuerpo de una ficha se evalúa una vez POR PANEL | Inyectar la misma cadena en los dos duplicaba los `id` del SVG, y los patrones de trama se referencian por id |
+| D-135 | Cada regla se ilustra con el indicador que de verdad la cumple | La ficha de codificación usaba P-07 para enseñar la trama, y P-07 no es multivaluado. Ponérsela habría sido afirmar algo falso sobre el indicador |
+| D-136 | `design-system/` no se versiona | Salida derivada, igual que `dist/`. Cada regeneración sería un diff de un megabyte de HTML generado |
+
+### Resultado
+
+16 fichas —3 de fundamentos, 9 de componentes, 4 de gráficos—, verificadas en
+navegador: 0 excepciones, 0 fichas con problema, los dos paneles de tema
+resuelven a fondos distintos en las 16, y 0 identificadores duplicados tras la
+corrección.
+
+### Ambigüedad abierta
+
+La sincronización **no se pudo ejecutar desde esta sesión**: `DesignSync` exige
+autorización de sistema de diseño y `/design-login` necesita una terminal
+interactiva, que un contenedor remoto no tiene. El paquete queda listo; falta
+conectarlo desde Claude Design («Send to Claude Code Web») o desde Claude Code
+en una máquina local. El skill `/design-sync` tampoco está habilitado en la
+cuenta.
+
+### Próximo paso recomendado
+
+Fusionar el PR #26 para que el rediseño se publique —hoy el sitio en línea sigue
+sirviendo la versión anterior— y conectar Claude Design por cualquiera de las
+dos vías para empujar el paquete.

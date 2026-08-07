@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `380ba34` · El despliegue fija Node y comprueba que el sitio tenga contenido sin J
+Último commit: `d3aa19a` · Auditoría de la plataforma completa: dos correcciones de hecho y limpi
 Snapshot: 2026-08-07
 
 ---
@@ -69,7 +69,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 129
+## Decisiones tomadas: 136
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
