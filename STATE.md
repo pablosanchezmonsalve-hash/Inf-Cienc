@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `d3aa19a` · Auditoría de la plataforma completa: dos correcciones de hecho y limpi
+Último commit: `4e17943` · Sistema de diseño generado, no escrito: 16 fichas para Claude Design
 Snapshot: 2026-08-07
 
 ---
