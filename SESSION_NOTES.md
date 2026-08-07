@@ -1289,13 +1289,13 @@ tomar patrones con razón detrás y no apariencias. Detalle y qué se descartó,
 
 | Medida | Antes | Después |
 |---|---|---|
-| LCP `index` (Slow 4G) | 1.916 ms | **776 ms** |
-| LCP `impacto` | 1.752 ms | **776 ms** |
-| LCP `tematica` | 1.296 ms | **740 ms** |
+| LCP `index` (Slow 4G, mediana de 5) | 1.940 ms | **780 ms** |
+| LCP `impacto` | 1.764 ms | **784 ms** |
+| LCP `tematica` | 1.300 ms | **756 ms** |
 | `impacto.html` sin JavaScript | 0 módulos, 99 caracteres | 5 módulos, 5 gráficos, 5 tablas, 2.847 caracteres |
 | Contraste WCAG, 9 páginas × 2 temas | 0 fallos | **0 fallos** |
 | Desborde horizontal en 430 px | — | **0 px** |
-| CSS | 41,9 KB | 51,3 KB (15,2 KB gzip) |
+| CSS | 41,9 KB | 51,4 KB (15,2 KB gzip) |
 | JavaScript | 61,0 KB | 72,1 KB (23,7 KB gzip) |
 
 ### Supuestos descartados
@@ -1324,6 +1324,20 @@ lo que se lee en el repositorio de lo que se sirve— o si se sube el techo.
 ### Próximo paso recomendado
 
 Pedir a la institución el valor oficial de su rojo y sustituir los cuatro tokens
-de marca. Después, seguir con lo que quedó del encargo original de interfaz y no
-se abordó: panel conceptual por sección, caja de exportación, estado en la URL y
-catálogo de indicadores.
+de marca.
+
+Del encargo original de interfaz queda pendiente **menos de lo que se anotó en
+una primera versión de esta nota**. La auditoría posterior comprobó, ejerciendo
+la interfaz en un navegador, que dos de los cuatro «pendientes» ya estaban
+implementados y funcionando:
+
+- **Estado en la URL**: sí existe. `leerURL()` y `history.replaceState` en
+  `paginas.js`; el filtro sobrevive a la recarga y la URL es compartible.
+- **Exportación**: sí existe. Botón «Exportar CSV» que exporta *lo filtrado*, no
+  el universo, con BOM UTF-8 y la fecha de build en el nombre del archivo.
+
+Queda de verdad: **panel conceptual por sección** —un texto que explique qué
+pregunta responde cada eje antes de los indicadores— y **catálogo de
+indicadores** —una vista que liste los 20 indicadores con su definición, fuente,
+denominador y estado de factibilidad, hoy repartidos entre `metodologia.html` y
+los sellos—.

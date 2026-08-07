@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `b2abe64` · Tres advertencias metodológicas dejan de ser prosa y pasan a tener for
+Último commit: `380ba34` · El despliegue fija Node y comprueba que el sitio tenga contenido sin J
 Snapshot: 2026-08-07
 
 ---
