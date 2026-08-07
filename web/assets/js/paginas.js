@@ -27,13 +27,21 @@ async function portada() {
     const dec = Number.isInteger(k.valor) ? 0 : (k.sufijo === '%' ? 1 : 2);
     // La unidad del valor ('formas de firma') va bajo la etiqueta, no dentro
     // del número: intercalada rompe la línea y estorba la lectura.
+    // Sólo la unidad del valor. El «no personas distintas» lo decía aquí y lo
+    // repite la advertencia del indicador justo debajo: dicho dos veces en la
+    // misma tarjeta se lee como un descuido.
     const unidad = k.etiqueta_valor
-      ? `<div class="secundario">${c.escapar(k.etiqueta_valor)}, no personas distintas</div>` : '';
+      ? `<div class="secundario">${c.escapar(k.etiqueta_valor)}</div>` : '';
+    // La advertencia del indicador se pinta en la tarjeta, no sólo en el
+    // artefacto: el puente entre las 589 formas de firma de la fuente y las 556
+    // que publica el sitio se calculaba y no llegaba a ninguna pantalla.
+    const aviso = k.nota && k.nota.texto
+      ? `<div class="kpi-nota">${c.escapar(k.nota.texto)}</div>` : '';
     return `<article class="kpi">
       <div class="valor">${c.num(k.valor, dec)}${k.sufijo ? ' ' + k.sufijo : ''}</div>
       <div class="etiqueta">${c.escapar(k.nombre)}${ayuda}</div>
       <div class="denominador">sobre ${c.nf.format(k.denominador)} publicaciones</div>
-      ${unidad}${sec}</article>`;
+      ${unidad}${sec}${aviso}</article>`;
   }).join('');
 
   // Panorama: la portada no puede ser sólo seis cifras. Tres cortes que
@@ -46,7 +54,7 @@ async function portada() {
       { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n', ancho: 330, alto: 210 })],
     ['C-01', 'colaboracion.html', s => c.anillo(s.datos, { titulo: s.nombre })],
     ['T-05', 'tematica.html', s => c.barrasH(s.datos.slice(0, 6),
-      { titulo: s.nombre, alto: 25, ancho: 330 })],
+      { titulo: s.nombre, alto: 25, ancho: 330, trama: s.multivaluado })],
   ].filter(([cod]) => series[cod]);
 
   document.getElementById('panorama').innerHTML = `
@@ -95,30 +103,34 @@ async function portada() {
    rankings recortados (P-05), donde un porcentaje afirmaría algo falso. */
 const RENDER = {
   'P-02': s => c.barrasV(s.datos, { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n' }),
-  'P-03': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true }),
-  'P-05': s => c.barrasH(s.datos, { titulo: s.nombre }),
-  'P-07': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true }),
+  'P-03': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
+  'P-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
+  'P-07': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
   'I-01': s => c.barrasV(s.datos, { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n' }),
   'I-04': s => c.barrasV(s.datos.map(d => ({ anio: d.anio, n: d.valor })), {
     titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n', decimales: 2,
     referencia: 1, refEtiqueta: '1,00 — promedio mundial',
   }),
-  'I-05': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'I-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado,
+    // El trazo dice qué cabría esperar bajo el promedio mundial. Sin él, «75
+    // en el top 10 %» es un número sin escala: nadie sabe si son muchos.
+    refEtiqueta: `Lo esperable bajo el promedio mundial: el top k % contiene el k % `
+      + `de las ${c.nf.format(s.base_percentil)} publicaciones con percentil.` }),
   // Q1–Q4 es una escala ORDENADA, no cuatro categorías sueltas: un solo tono en
   // cuatro pasos, del más oscuro (mejor posición) al más claro.
-  'R-01': s => c.barrasH(s.datos, { titulo: s.nombre, escala: 'ordinal', cuotaValida: true }),
+  'R-01': s => c.barrasH(s.datos, { titulo: s.nombre, escala: 'ordinal', cuotaValida: true, trama: s.multivaluado }),
   // Acceso abierto se queda en una sola serie a propósito: las categorías se
   // llaman Gold, Green y Bronze, y pintarlas con la paleta categórica dejaría
   // «Green» de color naranja. Cuando el nombre de la categoría ya es un color,
   // el color deja de estar disponible para codificar.
-  'A-01': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'A-01': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'C-01': s => c.anillo(s.datos, { titulo: s.nombre }),
-  'C-03': s => c.barrasH(s.datos, { titulo: s.nombre }),
-  'C-04': s => c.barrasH(s.datos, { titulo: s.nombre }),
-  'C-06': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true }),
-  'T-05': s => c.barrasH(s.datos, { titulo: s.nombre }),
-  'T-01': s => c.barrasH(s.datos, { titulo: s.nombre }),
-  'T-04': s => c.barrasH(s.datos, { titulo: s.nombre }),
+  'C-03': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
+  'C-04': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
+  'C-06': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
+  'T-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
+  'T-01': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
+  'T-04': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
 };
 
 /* Advertencias que nacen de CÓMO se dibuja el indicador, no de cómo se calcula.
@@ -165,13 +177,18 @@ const EXTRA = {
    config/indicators.yml. */
 function avisoMultivaluado(s) {
   if (!s.multivaluado) return '';
-  // Varios indicadores ya lo dicen en su propia advertencia de config. Repetirlo
-  // debajo no refuerza nada: dos avisos idénticos se leen como un descuido y
-  // restan credibilidad al resto de las advertencias.
-  if (/multivaluad|no sumable/i.test(s.nota?.texto || '')) return '';
-  return `<p class="nota"><strong>Multivaluado:</strong> una publicación puede
-    aparecer en varias barras, de modo que la suma de las barras supera el número
-    de publicaciones. Las barras no son partes de un total.</p>`;
+  // La LEYENDA va siempre: es la que enseña el código visual. Un lector la
+  // aprende una vez —«rayado = las barras no suman»— y la reconoce en los seis
+  // módulos multivaluados del sitio sin volver a leer nada.
+  const leyenda = `<p class="leyenda-trama">Barras rayadas: no son partes de un
+    total y no suman.</p>`;
+  // El texto largo, en cambio, se omite si la advertencia del indicador ya lo
+  // dice. Dos avisos idénticos se leen como un descuido y restan credibilidad
+  // al resto de las advertencias.
+  if (/multivaluad|no sumable/i.test(s.nota?.texto || '')) return leyenda;
+  return leyenda + `<p class="nota"><strong>Multivaluado:</strong> una publicación
+    puede aparecer en varias barras, de modo que la suma de las barras supera el
+    número de publicaciones. Las barras no son partes de un total.</p>`;
 }
 
 async function modulos() {
@@ -189,6 +206,7 @@ async function modulos() {
       ${s.nota && s.nota.destacada ? c.nota(s.nota) : ''}
       ${LECTURA[cod] || ''}
       ${grafico}
+      ${c.sello(s.procedencia)}
       ${avisoMultivaluado(s)}
       ${extra}
       ${s.nota && !s.nota.destacada ? c.nota(s.nota) : ''}

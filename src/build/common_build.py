@@ -264,6 +264,54 @@ def nota(code: str) -> dict | None:
     return {"texto": texto, "destacada": bool(spec.get("advertencia_destacada"))}
 
 
+# Qué fuente sostiene cada indicador. Se declara aquí y no se infiere: el sitio
+# venía atribuyendo todo a «Scopus» mientras la metodología decía «Scopus y
+# SciVal», y sin SciVal no existirían el FWCI ni los percentiles de citación.
+# Decirlo por indicador es más preciso que decirlo una vez en el pie.
+FUENTE_POR_INDICADOR = {
+    "P-01": "Scopus", "P-02": "Scopus", "P-03": "Scopus", "P-04": "Scopus",
+    "P-05": "Scopus", "P-06": "Scopus", "P-07": "Scopus",
+    "A-01": "Scopus",
+    "I-01": "SciVal", "I-02": "SciVal", "I-03": "SciVal",
+    "I-04": "SciVal", "I-05": "SciVal",
+    "R-01": "SciVal",
+    "C-01": "Scopus", "C-03": "Scopus", "C-04": "Scopus", "C-06": "Scopus",
+    "T-01": "Scopus", "T-04": "SciVal", "T-05": "SciVal",
+}
+
+
+def procedencia(code: str, cubiertas: int | None = None,
+                n: int | None = None, unidad: str = "publicaciones") -> dict:
+    """Sello de procedencia de un indicador: fuente, corte, N y cobertura.
+
+    El N NO es global: cambia según el indicador —823 en producción, 816 en
+    impacto, 818 en autoría— y publicarlo con un denominador genérico sería
+    exactamente el error que este proyecto persigue. `cubiertas` es cuántas
+    publicaciones tienen realmente el dato; si es None se asume el denominador
+    completo.
+    """
+    spec = INDICATORS["indicadores"].get(code, {})
+    # El denominador de config está en publicaciones. Un indicador que se
+    # calcula sobre otra unidad —P-07 cuenta pares autor x publicación— tiene
+    # que traer el suyo, o el sello publicaría una cobertura que no es la que
+    # mide la auditoría.
+    if n is None:
+        n = denominadores().get(spec.get("denominador"), 0)
+    cub = n if cubiertas is None else cubiertas
+    umbral = INDICATORS["reglas_transversales"]["cobertura_minima_sin_advertencia"]
+    return {
+        "fuente": FUENTE_POR_INDICADOR.get(code, "Scopus · SciVal"),
+        "corte": SOURCES["scival_export"]["fecha_corte"],
+        "n": n,
+        "cubiertas": cub,
+        "unidad": unidad,
+        "cobertura": round(100 * cub / n, 1) if n else None,
+        # Por debajo del umbral declarado, el sello deja de ser informativo y
+        # pasa a ser una advertencia. Lo decide el dato, no quien maqueta.
+        "insuficiente": bool(n and cub / n < umbral),
+    }
+
+
 def build_meta() -> dict:
     """Procedencia del build. Se incrusta en todos los artefactos."""
     scival = SOURCES["scival_export"]
@@ -281,8 +329,9 @@ def build_meta() -> dict:
         "fecha_build": date.today().isoformat(),
         "denominadores": denominadores(),
         "advertencia_global": (
-            "Los indicadores describen la producción indexada en Scopus. "
-            "La cobertura de la base no es uniforme entre disciplinas."
+            "Los indicadores describen la producción indexada en Scopus, con las "
+            "métricas normalizadas de SciVal. La cobertura de la base no es "
+            "uniforme entre disciplinas."
         ),
     }
 
