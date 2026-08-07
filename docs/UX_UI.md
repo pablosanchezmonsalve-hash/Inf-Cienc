@@ -206,57 +206,87 @@ contenedor; la página nunca scrollea en horizontal.
 Implementado en `web/assets/css/app.css`, hoja única. Sin dependencias externas:
 ninguna fuente, hoja ni script se carga desde un CDN.
 
-### 12.1 Paleta: qué se usó y qué no
+### 12.1 Paleta: de dónde sale cada color
 
-La paleta de referencia entregada es
-`#22577A` · `#38A3A5` · `#57CC99` · `#80ED99` · `#C7F9CC`. Se **midió antes de
-aplicarla**, y la medición decide dónde va cada cosa.
+**La identidad es roja.** El sistema anterior era teal-azul (`#22577A` ·
+`#38A3A5` · …); se sustituyó por decisión del proyecto. Lo que hizo el cambio
+viable sin reabrir todo el diseño es un hecho medido: **el sitio usa un solo
+color de dato**, así que cambiarlo no obliga a revalidar un conjunto categórico.
 
-| Uso | ¿Se aplica la paleta? | Por qué |
-|---|---|---|
-| Marca, cabecera, superficies | **Sí, literal** | `#22577A` da 7,74:1 sobre blanco; `#C7F9CC` da 6,58:1 sobre la marca |
-| Estado interactivo | **Sí, con matiz** | `#38A3A5` da 3,02:1 sobre blanco: sirve para rellenos y bordes, no para texto de enlace. Los enlaces usan `#1a6d78` (6,0:1) |
-| Escalas ordenadas | **Sí, es lo que mejor hace** | Rampa de un tono anclada en `#38A3A5`. Pasa las cuatro comprobaciones ordinales |
-| **Series de datos** | **No** | Ver abajo |
+**El rojo no es el rojo institucional oficial de la UFT.** No se pudo verificar
+su valor exacto —`finis.cl` y los directorios de marca respondieron 403— y ante
+la duda **no se inventó**. Los tonos están *diseñados por medición*. El día que
+exista el hex oficial se cambia `--marca` y sus derivados: son tokens, no
+literales repartidos por la hoja.
 
-**Por qué no sirve para series.** Medida como paleta categórica falla tres de
-cinco comprobaciones:
+Cada token despeja un umbral comprobable, medido en los **dos** temas:
 
-- `#80ED99` vs `#57CC99` miden **ΔE 10,3 en visión normal**, bajo el piso de 15.
-  Dos verdes que un lector *sin* daltonismo apenas distingue.
-- `#C7F9CC` da **1,18:1** contra blanco: sobre una superficie clara no es una
-  marca, es un fondo.
-- Tres de los cinco tonos quedan fuera de la banda de luminosidad.
+| Token | Fondo | Claro | Oscuro | Piso |
+|---|---|---|---|---|
+| `--tinta` | `--superficie` | 18,54 | 15,57 | 4,5 (WCAG 1.4.3) |
+| `--tinta-2` | `--superficie` | 8,28 | 8,47 | 4,5 |
+| `--tinta-3` | `--superficie-2` | 5,73 | 5,64 | 4,5 |
+| `--cifra` | `--superficie` | 9,10 | 8,16 | 3,0 (texto grande) |
+| `--accion` | `--superficie` | 7,67 | 7,88 | 4,5 |
+| `--accion` | `--superficie-2` | 6,71 | 7,26 | 4,5 |
+| `--serie-1` | `--superficie` | 7,67 | 5,48 | 3,0 (WCAG 1.4.11) |
+| `--sin-dato` | `--superficie` | 3,90 | 3,71 | 3,0 |
+| `--ord-1` … `--ord-4` | `--superficie` | 14,80 … 3,53 | 12,33 … 3,17 | 3,0 |
+| `--marca-tinta` | `--marca` | 8,26 | 10,29 | 4,5 |
+| blanco | `--marca` | 10,88 | 17,73 | 4,5 |
+| `--aviso-tinta` | `--aviso-fondo` | 8,74 | 11,75 | 4,5 |
 
-La causa es estructural, no de afinado: los cinco colores viven en la franja
-cian-verde, que es justo donde la deuteranopía y la protanopía colapsan
-diferencias. Ninguna paleta de datos honesta sale de ahí.
+Dos condiciones que el contraste solo no cubre:
 
-**Lo que hay en su lugar** es una paleta categórica de seis ranuras que *abre*
-con el azul-teal de la referencia y luego se separa de verdad:
+**Separación dato ↔ advertencia.** El dato es rojo y la advertencia metodológica
+es ámbar: dos familias cálidas contiguas podrían confundirse. Medido en OKLab,
+ΔE **28,6** en claro y **21,2** en oscuro, sobre un piso de 20. Es la razón por
+la que el ámbar de las advertencias no se movió al cambiar el rojo.
 
-| # | Claro | Oscuro | Tono |
+**Rampa ordinal (Q1–Q4).** Un solo tono en cuatro pasos con luminosidad
+monótona; paso mínimo ΔE **10,5** y **11,3**, sobre un piso de 8. Cuatro tonos
+distintos habrían afirmado que Q1 y Q4 no tienen relación entre sí, cuando son
+posiciones de una misma escala.
+
+**Superficie oscura cálida.** El tema oscuro pasó de pizarra fría (`#12222a`) a
+pizarra cálida (`#171214`). Un rojo sobre fondo azulado se lee sucio: el fondo
+tira del tono hacia el magenta.
+
+#### Series categóricas: qué se dibuja de verdad
+
+De las seis ranuras declaradas, **el sitio dibuja dos**: el anillo de `C-01`
+pide escala categórica y gasta `--serie-1` y `--serie-2`. Todo lo demás cae en
+`--serie-1` sola o en la rampa ordinal.
+
+> Corrección. Una versión anterior de esta documentación afirmaba que «ningún
+> módulo pide `escala: 'serie'`» y que el sitio usaba una sola ranura. Era
+> **falso**: `anillo()` pide siempre escala de serie, así que la segunda ranura
+> llevaba dibujándose desde el principio. Queda anotado porque una paleta
+> declarada sin usar y una paleta en uso sin validar son problemas distintos, y
+> sólo el segundo es urgente.
+
+El par en uso **sí** está validado, y como par, que es como se dibuja:
+
+| Medida | Claro | Oscuro | Piso |
 |---|---|---|---|
-| 1 | `#0e7ea6` | `#2b9ec7` | azul-teal, hereda `#22577A` |
-| 2 | `#e0662a` | `#d16a30` | naranja |
-| 3 | `#7b52c9` | `#9078dd` | violeta |
-| 4 | `#2fa36b` | `#2aa26a` | verde, hereda `#57CC99` |
-| 5 | `#d4a017` | `#b58612` | ámbar |
-| 6 | `#cc3f5c` | `#dc5c75` | carmín |
+| Contraste `--serie-1` / `--serie-2` | 7,67 y 5,77 | 5,48 y 7,50 | 3,0 |
+| ΔE visión normal | 25,9 | 26,6 | — |
+| ΔE protanopía | 17,5 | 17,9 | 8 |
+| **ΔE deuteranopía** | **12,2** | **12,1** | **8** ← peor caso |
+| ΔE tritanopía | 32,4 | 33,1 | 8 |
 
-Pasa las cinco comprobaciones en ambos modos: peor par adyacente CVD ΔE 8,7
-(claro) y 8,0 (oscuro); visión normal 19,3 y 16,2. **El orden de las ranuras es
-el mecanismo de seguridad, no una decisión estética**: violeta se sitúa entre
-naranja y verde precisamente porque naranja junto a verde caía en la banda de
-aviso. Reordenar es lo único que lo arregla sin cambiar ningún color.
+Las **cuatro restantes** siguen reservadas y **sin validar**: nunca se han
+dibujado juntas. Quien las estrene debe revalidarlas *para el número de ranuras
+que vaya a usar*, no para seis. La sexta era carmín y se cambió por azul: con la
+marca en rojo, un carmín a dos pasos de `--serie-1` es una trampa a la espera.
 
-Sólo son **seis**. Una séptima obligaría a meter un tono en la franja que ya
-ocupan otros; más allá de seis entidades lo correcto es agrupar en «Otras» o
-separar en varios gráficos.
+#### Una sola declaración por token
 
-`#d4a017` queda en 2,38:1 contra blanco. Eso obliga a **relieve**: por eso todo
-gráfico lleva etiqueta de valor visible junto a la marca y tabla equivalente
-desplegable. El color nunca es el único canal de identidad.
+La paleta oscura estaba escrita **tres veces** —en el `@media`, en el selector
+explícito y en los comentarios— y las tres copias podían separarse sin que nada
+avisara. Ahora cada token se declara una vez con `light-dark()` y el conmutador
+de tema sólo cambia `color-scheme`. Son unas 90 líneas menos y **un modo entero
+de error menos**.
 
 ### 12.2 Tipografía
 
@@ -284,7 +314,7 @@ tabulación ahí sólo separa los dígitos sin ganar nada.
 Escala de espacio de 4 px, de `--e1` (4 px) a `--e7` (48 px). Sin valores
 sueltos fuera de la escala.
 
-Radios contenidos (6 px) y **sombra mínima**: la separación entre superficies la
+Radios contenidos (8 px) y **sombra mínima**: la separación entre superficies la
 hace el filete, no la elevación. Una interfaz analítica no flota. Por la misma
 razón la cabecera es color plano de marca con un descenso sutil, sin degradados
 de color ni resplandores.
@@ -344,10 +374,8 @@ con 51 filas en pantalla, una flecha arriba del todo se pierde.
 ### 12.6 Modo claro y oscuro
 
 El modo oscuro es una paleta **elegida y revalidada contra su propia
-superficie** (`#12222a`, un teal-pizarra, no un gris neutro), no una inversión.
-Un detalle que lo justifica: `#57CC99` rinde 2,00:1 sobre blanco y 8,15:1 sobre
-la superficie oscura. En modo oscuro **sí** puede ser color de acción; en claro
-sería ilegible. Invertir una paleta validada no produce una paleta validada.
+superficie** (`#171214`, pizarra cálida, no un gris neutro), no una inversión.
+Invertir una paleta validada no produce una paleta validada.
 
 El selector de la cabecera tiene tres estados —automático, claro, oscuro—; el
 automático sigue al sistema operativo. La elección se recuerda y se aplica antes
@@ -355,16 +383,20 @@ de pintar, con un script en línea en el `<head>`, para que no aparezca un
 destello del tema equivocado.
 
 **Un token no puede cambiar de oficio entre temas.** `--marca` es tinta en el
-tema claro (`#22577A`) y superficie de cabecera en el oscuro (`#0d1e26`). Las
-cifras grandes de los KPI lo usaban como color de texto: en claro daban 7,74:1
-y en oscuro `#0d1e26` sobre `#12222a`, **1,05:1** — los seis números más
-grandes de cada página, invisibles. Por eso existe `--cifra`, que es tinta en
-los dos temas y sólo eso (`#22577A` / `#7fb4d8`, 7,74:1 y 7,32:1).
+tema claro y superficie de cabecera en el oscuro. Las cifras grandes de los KPI
+lo usaban como color de texto: en claro daban 7,74:1 y en oscuro **1,05:1** —los
+números más grandes de cada página, invisibles—. Por eso existe `--cifra`, que
+es tinta en los dos temas y sólo eso.
 
-El fallo sobrevivió a una revisión de la paleta porque no está en la paleta:
-los dos valores son correctos por separado y sólo el uso los enfrenta. Se
-detecta midiendo el color computado contra el fondo compuesto, página por
-página y tema por tema, no leyendo la hoja de estilos.
+El fallo sobrevivió a una revisión de la paleta porque no está en la paleta: los
+dos valores son correctos por separado y sólo el uso los enfrenta. Se detecta
+midiendo el color computado contra el fondo compuesto, página por página y tema
+por tema, no leyendo la hoja de estilos.
+
+El mismo fallo, con otra cara, obligó a crear `--boton-tinta`: el botón primario
+llevaba texto blanco fijo sobre `--accion`. En claro es un rojo hondo y el
+blanco da 7,67:1; en oscuro el mismo token se aclara a un rosa y el blanco
+caería a 2,84:1. La tinta del botón cambia con el tema, igual que su fondo.
 
 ### 12.6 bis Codificación por naturaleza del dato
 
@@ -412,11 +444,21 @@ daba 94,1 % donde la auditoría mide 63,8 %.
 
 ### 12.7 Responsive
 
-Tres cortes. Bajo 900 px la navegación pasa a desplazamiento horizontal en una
-línea en vez de romper en varias filas. Bajo 640 px baja el tamaño base, se
-compacta el espaciado de tarjetas y tablas, y el subtítulo de marca pierde su
-filete separador. Hay además una hoja de impresión que oculta cabecera, filtros
-y paginación, y evita que los módulos se partan entre páginas.
+Tres cortes. Bajo **1040 px** el índice lateral deja de ser una columna fija y
+pasa a una fila de pastillas desplazable sobre el contenido —no se oculta: es la
+única vista general de la página—. Bajo **900 px** la cabecera **deja de ser
+fija**: en un teléfono ocupa tres filas y fijarla se comía un tercio de la
+pantalla en cada desplazamiento, que es peor que perder la referencia. Bajo
+**640 px** baja el tamaño base, se compacta el espaciado, el conmutador de tema
+pierde sus rótulos y conserva los iconos, y el titular abandona la rejilla
+compartida de filas, que en una sola columna sólo abría un hueco.
+
+Comprobado: **0 px de desborde horizontal** en 430 px y 860 px de ancho.
+
+Hoja de impresión: oculta cabecera, filtros, paginación e índice lateral, evita
+que los módulos se partan entre páginas y **despliega las dos vistas de cada
+módulo** —la figura y la tabla—, porque en papel no hay conmutador. Los enlaces
+externos imprimen su URL.
 
 ### 12.8 Advertencias de lectura
 
@@ -431,3 +473,211 @@ existen mientras el gráfico sea ése. Viven en `paginas.js`, no en config:
   1 % también está contado en el 5 %, el 10 % y el 25 %.
 - Cualquier indicador con `multivaluado: true` en `config/indicators.yml`
   declara junto al gráfico que las barras no son partes de un total.
+
+---
+
+## 13. Modelo de interfaz: qué se tomó de los portales del oficio
+
+El rediseño no partió del gusto. Se revisaron plataformas que publican análisis
+bibliométrico de instituciones de educación superior y se tomaron **patrones con
+una razón detrás**, no apariencias.
+
+| Patrón observado | Dónde | Qué resuelve | Cómo se implementó aquí |
+|---|---|---|---|
+| **Una serie, varias representaciones, y el lector elige** | CWTS Leiden Ranking: lista, dispersión y mapa sobre los mismos datos | La figura resume; la tabla es la que se cita. Decidir por el lector cuál es «la buena» le quita una de las dos | Conmutador **Gráfico ⇄ Tabla** en la cabecera de cada módulo |
+| **La incertidumbre se muestra, no se esconde** | Leiden publica intervalos de estabilidad al 95 % junto a cada indicador | Un indicador puntual sugiere una precisión que el dato no tiene | Marca del **valor esperado** en `I-05`, línea de promedio mundial en `I-04`, y **sello de procedencia** con N y cobertura en todos |
+| **Uso responsable como sección de primer nivel** | Leiden dedica una sección entera a cómo *no* usar el ranking | Publicar el número sin las condiciones de lectura es publicar media cosa | `Metodología` en la navegación principal, advertencias dentro del componente y notas de lectura por gráfico |
+| **Panel de entidades fijo a la izquierda** | SciVal, módulo *Overview* | En una página de cinco indicadores largos hay que poder ver qué hay y saltar sin recorrerla entera | **Índice lateral fijo** con scroll-spy, colapsable a pastillas |
+| **Agrupar indicadores en bloques con nombre** | SciVal agrupa en *Overall Research Performance*, *Research Topics*, *Performance Indicators* | Una lista plana de indicadores no tiene jerarquía | Páginas por eje (Producción, Impacto, Colaboración, Temática) y, en portada, *Indicadores de cabecera* / *Panorama* |
+| **Abrir con la magnitud, no con el índice** | Perfil institucional de los portales de investigación | Hay que saber de qué tamaño es el objeto antes de que un desglose signifique algo | **Titular con tres cifras a tamaño display**: volumen, impacto normalizado y colaboración |
+| **Cifras tabulares, alineadas a la derecha, rejilla recesiva** | Convención de tableros analíticos | Las columnas se comparan de un vistazo | `tabular-nums` en tablas, ejes y titular; `--red` y `--eje` como cromo recesivo |
+
+Lo que **no** se copió, y por qué:
+
+- **Mapa geográfico.** Leiden lo usa para comparar 1.500 universidades. Aquí hay
+  una institución: un mapa de colaboración por país sería un adorno con dos
+  docenas de puntos.
+- **Dispersión de dos indicadores.** Tiene sentido para comparar entidades entre
+  sí. Con una sola institución no hay nube que dibujar.
+- **Nube de conceptos tipo *fingerprint*.** Requiere minería de texto sobre los
+  documentos completos, que este proyecto no tiene, y produce una figura que se
+  interpreta como si midiera algo. No se emula con datos que no la sostienen.
+
+### 13.1 Titular de portada
+
+Tres indicadores, no seis: un titular con seis cifras no tiene titular. Son
+`P-01` (cuánto se produce), `I-03` (con qué impacto normalizado) y `C-01` (con
+quién se colabora) — los tres ejes que el proyecto declara.
+
+Cada cifra arrastra **su** denominador y, si la tiene, su referencia: un 0,87 de
+FWCI sin el «1 = promedio mundial» al lado no es un titular, es un número
+suelto. Los tres suben al titular y **bajan de la rejilla de KPI**: un indicador
+repetido a cuatro centímetros de sí mismo no gana énfasis, lo pierde.
+
+### 13.2 Conmutador Gráfico ⇄ Tabla
+
+La tabla equivalente dejó de estar detrás de un `<details>` «Ver datos» y pasó a
+ser la segunda vista, al mismo nivel que la figura. Cuando el indicador trae
+valor esperado, la tabla gana columnas **Observado · Esperado · Diferencia**,
+que es lo que convierte un recuento en un juicio.
+
+**Sin JavaScript se muestran las dos vistas.** Es lo correcto: la tabla es la
+vía equivalente al gráfico, no un extra. Lo decide una clase `js` escrita en
+`<html>` antes de pintar; el conmutador sólo existe bajo esa clase, porque un
+control que no conmuta nada es una promesa falsa.
+
+---
+
+## 14. Pre-renderizado
+
+Hasta ahora `impacto.html` pesaba **1,3 KB** y su cuerpo era `<div id="modulos">`
+vacío. Todo —cabecera, KPI, gráficos, tablas, sellos— aparecía después de
+descargar dos módulos de JavaScript, resolver un `fetch` y dibujar veinte SVG.
+
+Ahora `src/build/prerender.mjs` ejecuta **los mismos constructores de marcado**
+bajo Node durante el build y deja el HTML escrito en `dist/*.html`.
+
+**No hay una segunda implementación del marcado.** Los constructores viven en
+`web/assets/js/vista.js` y no tocan el DOM: ni una lectura de `document`, ni un
+`addEventListener`, ni un `localStorage`. Esa disciplina es la condición para
+que el navegador y el build produzcan lo mismo. La interacción —conmutador,
+scroll-spy, tooltip, filtros— sigue en `paginas.js`.
+
+Cada contenedor rellenado se marca con `data-prerender="1"`; `paginas.js` lo
+consulta y se salta el repintado, porque repintar destruiría un LCP que ya
+ocurrió.
+
+### 14.1 Qué se ganó, medido
+
+Perfil *Slow 4G* (1,6 Mbps · 150 ms de latencia), Chromium. **Mediana de cinco
+corridas por celda, con el rango observado**: una sola muestra en un contenedor
+compartido es ruido —la primera medición publicada dio 776 ms y la siguiente
+916 ms para la misma página—, así que la cifra suelta no era defendible.
+
+| Página | LCP sin pre-render | LCP pre-renderizado | Mejora |
+|---|---|---|---|
+| `index` | 1.940 ms [1.904–1.956] | **780 ms** [772–796] | −60 % |
+| `impacto` | 1.764 ms [1.748–1.808] | **784 ms** [780–812] | −56 % |
+| `tematica` | 1.300 ms [1.296–1.320] | **756 ms** [752–764] | −42 % |
+
+Con JavaScript **desactivado**, lo que queda en la página:
+
+| Página | Antes | Después |
+|---|---|---|
+| `index` | 0 módulos · 0 gráficos · 23 caracteres | 3 módulos · 3 gráficos · 1.833 caracteres |
+| `impacto` | 0 · 0 · 99 caracteres | 5 módulos · 5 gráficos · 5 tablas · 2.847 caracteres |
+| `tematica` | 0 · 0 · 130 caracteres | 3 módulos · 3 gráficos · 3 tablas · 3.117 caracteres |
+
+El coste es HTML más pesado (de 1,3 KB a 25–37 KB por página de sección) y está
+pagado con creces: el sitio es citable, archivable e indexable sin ejecutar nada.
+
+### 14.2 Qué NO se pre-renderiza
+
+`publicaciones.html` y `autor.html` dependen del estado del usuario —filtros
+aplicados, autor elegido por parámetro—. No hay un estado inicial único que
+sirva, y emitir uno arbitrario sería inventar una vista.
+
+Node es un requisito **blando**: si no está, el sitio se ensambla igual y
+funciona igual mientras haya JavaScript en el cliente. Lo que se pierde se avisa
+en voz alta durante el build, en vez de degradarse en silencio.
+
+---
+
+## 15. Verificación
+
+Todo lo anterior está comprobado sobre el sitio construido, no sobre la hoja de
+estilos:
+
+| Comprobación | Alcance | Resultado |
+|---|---|---|
+| Contraste WCAG 2.1 (1.4.3 y 1.4.11) | 9 páginas × 2 temas, con composición alfa, paradas de degradado y exclusión de decoración | **0 fallos** |
+| Desborde horizontal | 430 px y 860 px | **0 px** |
+| Sitio sin JavaScript | `index`, `impacto`, `tematica` | módulos, gráficos, tablas y sellos presentes |
+| LCP | *Slow 4G*, mediana de 5 corridas | 756–784 ms (presupuesto: < 2.000 ms) |
+| Auditoría de datos | 29 reglas | 28 pasan, 0 bloqueantes fallando |
+| Barrera pública/interna | artefactos de `dist/` | 0 fallas |
+
+**Presupuestos.** CSS **51,4 KB** en bruto (15,2 KB con gzip), dentro del techo
+de 55 KB. JavaScript **72,1 KB** en bruto, **por encima** del techo de 60 KB
+declarado; con gzip son **23,7 KB**. Dos cosas relevantes para juzgarlo: el
+28 % del JavaScript es comentario en prosa, que este proyecto trata como parte
+del entregable, y con el sitio pre-renderizado el JavaScript ya **no está en la
+ruta crítica de pintado** —es `type="module"`, o sea diferido, y el contenido ya
+está en el HTML—. Queda declarado como excedido, no como resuelto.
+
+---
+
+## 16. Sistema de diseño para Claude Design
+
+`make kit` genera en `design-system/` un paquete de 16 fichas listo para
+sincronizar con un proyecto de sistema de diseño en `claude.ai/design`.
+
+### 16.1 Por qué se genera y no se escribe
+
+Un sistema de diseño documentado a mano empieza siendo verdad y deja de serlo en
+la primera corrección que alguien hace en `app.css` sin acordarse de la ficha.
+Aquí cada ficha se construye desde las fuentes reales:
+
+- **la hoja de estilo desplegable**, incrustada entera en cada ficha, de modo que
+  la previsualización usa exactamente los estilos que se sirven;
+- **los constructores de `core.js` y `vista.js`**, ejecutados bajo Node — los
+  mismos que usa el pre-renderizador del sitio;
+- **los artefactos de `data/processed/`**. Los componentes se enseñan con datos
+  reales: un componente de bibliometría ilustrado con cifras inventadas
+  contradice `<non_negotiable_rules>` incluso en una ficha de diseño;
+- **las razones de contraste, calculadas al generar** a partir de los tokens
+  leídos de la hoja. No se copian de ninguna tabla: una tabla copiada se
+  desactualiza en silencio, un cálculo no.
+
+El sistema de diseño no puede desactualizarse respecto del producto. Si
+divergen, es que no se ha vuelto a generar.
+
+### 16.2 Las fichas
+
+| Grupo | Fichas |
+|---|---|
+| Fundamentos | Color · Tipografía · Espacio y trazo |
+| Componentes | KPI · Titular de portada · Módulo · Conmutador Gráfico ⇄ Tabla · Sello de procedencia · Notas y advertencias · Índice lateral · Controles · Estados |
+| Gráficos | Barras horizontales · Barras verticales · Anillo · Codificación por naturaleza del dato |
+
+Cada ficha muestra **los dos temas uno al lado del otro**. El mecanismo: la
+paleta usa `light-dark()`, que resuelve según el `color-scheme` del elemento
+donde se sustituye la variable —no según el de la raíz—, así que basta declarar
+`color-scheme: light` y `color-scheme: dark` en dos contenedores hermanos.
+Comprobado en las 16 fichas: los fondos de los dos paneles difieren siempre.
+
+### 16.3 Dos defectos que la verificación encontró
+
+**Identificadores duplicados.** El generador construía el cuerpo una vez y lo
+inyectaba en los dos paneles. Los patrones de trama se referencian por `id`, así
+que el panel oscuro terminaba apuntando al patrón del claro. Se corrigió
+evaluando el cuerpo **una vez por panel**.
+
+**Una ficha que ilustraba una regla con un ejemplo que no la cumple.** La ficha
+de codificación prometía trama, valor esperado y gris de ausencia, y usaba
+`P-07` para las tres. Pero `P-07` **no es multivaluado** —comprobado en
+`series.json`— y por tanto no lleva trama. Ahora cada afirmación trae el
+indicador que de verdad la demuestra: `T-05` para la trama, `I-05` para el valor
+esperado, `P-07` para el gris. Ponerle trama a `P-07` para que la ficha quedara
+completa habría sido afirmar algo falso sobre el indicador.
+
+### 16.4 Sincronización
+
+**Procedimiento completo en [`DESIGN_SYNC_GUIDE.md`](DESIGN_SYNC_GUIDE.md)** —
+requisitos, las dos vías de autorización, el protocolo `list → finalize_plan →
+write`, la comprobación de capas antes de publicar, y qué hacer cuando un cambio
+viene de Claude Design hacia el repositorio, que es el caso delicado.
+
+El paquete requiere autorización de sistema de diseño, que **no se puede
+conceder desde una sesión remota sin terminal interactiva**. Dos vías:
+
+1. desde Claude Design, «Send to Claude Code Web», que siembra el proyecto en el
+   espacio de trabajo;
+2. Claude Code en una máquina local, donde `/design-login` sí abre.
+
+Hecho eso, la sincronización es **incremental, componente a componente**, nunca
+un reemplazo completo.
+
+`design-system/` no se versiona, por la misma razón que `dist/`: es una salida
+derivada, y cada regeneración produciría un diff de un megabyte de HTML
+generado. Se reconstruye con `make kit`.

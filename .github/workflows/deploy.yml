@@ -33,6 +33,14 @@ jobs:
           python-version: '3.11'
           cache: pip
 
+      # El pre-renderizado ejecuta los constructores de marcado bajo Node. El
+      # runner suele traerlo, pero «suele» no es una garantía: sin Node el build
+      # NO falla —se degrada a un sitio que exige JavaScript— y en CI nadie lee
+      # los avisos. Se fija la versión para que el despliegue sea determinista.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
@@ -65,6 +73,22 @@ jobs:
 
       - name: Ensamblar el sitio
         run: python3 src/build/06_assemble_site.py
+
+      # Un sitio que exige JavaScript para mostrar una cifra no es un informe
+      # citable. Esto lo comprueba sobre el HTML desplegable, no sobre la
+      # intención: si el pre-renderizado se saltó, el despliegue se detiene.
+      - name: Comprobar que el sitio tiene contenido sin JavaScript
+        run: |
+          set -e
+          for p in index impacto produccion colaboracion tematica; do
+            grep -q 'data-prerender="1"' "dist/$p.html" \
+              || { echo "FALLA: dist/$p.html no está pre-renderizado"; exit 1; }
+          done
+          grep -q '<svg class="chart"' dist/impacto.html \
+            || { echo "FALLA: dist/impacto.html no trae ningún gráfico"; exit 1; }
+          grep -q 'class="sello"' dist/impacto.html \
+            || { echo "FALLA: dist/impacto.html no trae los sellos de procedencia"; exit 1; }
+          echo "Contenido presente sin JavaScript — verificado"
 
       - name: Comprobar que la capa interna no viaja
         run: |
