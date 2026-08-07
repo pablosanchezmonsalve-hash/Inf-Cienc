@@ -366,6 +366,50 @@ los dos valores son correctos por separado y sólo el uso los enfrenta. Se
 detecta midiendo el color computado contra el fondo compuesto, página por
 página y tema por tema, no leyendo la hoja de estilos.
 
+### 12.6 bis Codificación por naturaleza del dato
+
+Tres cosas que antes sólo existían en prosa y ahora tienen forma.
+
+**Trama diagonal = las barras no suman.** Seis indicadores son multivaluados
+—`T-01`, `T-04`, `T-05`, `A-01`, `C-03`, `C-04`—: una publicación aparece en
+varias barras y la suma supera el total. Hasta ahora se advertía en una nota al
+pie y el gráfico se dibujaba igual que uno cuyas barras sí suman. Ahora van
+rayadas, con una leyenda que usa **el mismo patrón** que el gráfico (7 px de
+período, 2,4 px de trazo): si la muestra no coincidiera con lo dibujado dejaría
+de enseñar el código y sería un adorno parecido.
+
+Las líneas van en el color de la superficie y **cortan** el relleno en vez de
+teñirlo. Por eso el rayado se lee igual en los dos temas, con cualquier
+daltonismo y sobre papel en blanco y negro — comprobado con un filtro de escala
+de grises sobre el módulo entero.
+
+`T-04` no estaba marcado como multivaluado y lo es: 391 asignaciones sobre las
+310 publicaciones que tienen algún ODS.
+
+**Marca del valor esperado.** `I-05` mostraba cuatro recuentos —3, 34, 75, 210—
+sin nada contra qué compararlos. Ahora cada umbral lleva el trazo de lo que
+cabría esperar bajo el promedio mundial: por definición, el top *k* % de la
+distribución mundial contiene el *k* % de las publicaciones. Se lee de un
+vistazo que la institución queda **por debajo en el 1 %, el 5 % y el 10 %, y
+por encima en el 25 %**. Usa el mismo ámbar que la línea de `I-04`, porque
+ambas dicen lo mismo y aprenderlo una vez debe servir en todo el sitio.
+
+Cuando lo esperable cae a la derecha de la barra, la cifra se corre más allá de
+la marca: es el caso que más importa leer y taparlo lo volvería ilegible justo
+ahí.
+
+**Sello de procedencia.** Franja monoespaciada bajo cada gráfico con fuente,
+corte, N y cobertura. El N **no es global**: 823 en producción, 816 en impacto,
+1.207 pares autor × publicación en `P-07`. Publicar un denominador genérico
+sería el error que este proyecto persigue.
+
+Por debajo del umbral de cobertura declarado en `config/indicators.yml` el sello
+cambia de registro y advierte. Dispara solo en `A-01` (72,3 %) y `T-04` (38 %).
+
+`P-07` obligó a corregir su denominador: se calcula sobre pares autor ×
+publicación, no sobre publicaciones, y con el denominador de config el sello
+daba 94,1 % donde la auditoría mide 63,8 %.
+
 ### 12.7 Responsive
 
 Tres cortes. Bajo 900 px la navegación pasa a desplazamiento horizontal en una

@@ -133,6 +133,10 @@ indicadores:
   T-04: {nombre: "Objetivos de Desarrollo Sostenible", categoria: tematico,
          publicar: true, denominador: con_metricas, confiabilidad: baja,
          solo_recuento: true,
+         # Una publicación puede tener varios ODS: 391 asignaciones sobre las
+         # 310 publicaciones que tienen alguno. Faltaba la marca, y sin ella el
+         # gráfico se dibujaba igual que uno cuyas barras sí suman.
+         multivaluado: true,
          advertencia_destacada: true,
          advertencia: "Cobertura 38 %. Se reporta como recuento, nunca como distribución porcentual del total."}
 

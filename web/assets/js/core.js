@@ -203,6 +203,31 @@ export function botonAyuda(termino) {
 const SIN_DATO = /^(sin dato|no determinad|sin declarar|desconocid)/i;
 export const esSinDato = v => SIN_DATO.test(String(v).trim());
 
+/** Sello de procedencia de un indicador.
+
+    Responde, sin que haya que buscarlo, a las cuatro preguntas que decide si
+    una cifra puede citarse: de dónde sale, a qué fecha, sobre cuántos casos y
+    con qué cobertura. El N NO es global —823 en producción, 816 en impacto,
+    1.207 pares en unidad académica— y por eso viaja pegado al gráfico y no en
+    el pie de la página.
+
+    Por debajo del umbral de cobertura declarado en config, el sello cambia de
+    registro y pasa a ser una advertencia. Lo decide el dato. */
+export function sello(p) {
+  if (!p) return '';
+  const cob = p.cobertura === null ? '—' : `${num(p.cobertura, 1)} %`;
+  const clase = p.insuficiente ? 'sello sello-aviso' : 'sello';
+  const aviso = p.insuficiente
+    ? `<span class="sello-alerta">cobertura baja</span>` : '';
+  return `<p class="${clase}">
+    <span><b>Fuente</b> ${escapar(p.fuente)}</span>
+    <span><b>Corte</b> ${escapar(p.corte)}</span>
+    <span><b>N</b> ${nf.format(p.n)} ${escapar(p.unidad || 'publicaciones')}</span>
+    <span><b>Cobertura</b> ${cob} · ${nf.format(p.cubiertas)} con dato</span>
+    ${aviso}</p>`;
+}
+
+
 /* Orden fijo de series. Nunca se cicla ni se reasigna según el ranking: el
    color sigue a la entidad, no a su posición.
 
@@ -251,10 +276,14 @@ let idGrafico = 0;
 /** Barras horizontales. Elegidas cuando las etiquetas son largas o muchas. */
 export function barrasH(datos, {
   alto = 26, escala = null, sufijo = '', ancho = 680, cuotaValida = false,
-  titulo = '',
+  titulo = '', trama = false, refEtiqueta = '',
 } = {}) {
   if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
-  const max = Math.max(...datos.map(d => d.n), 1);
+  // El máximo tiene que contemplar el valor esperado: si el observado se queda
+  // corto, la marca de referencia caería fuera del lienzo justo en el caso que
+  // más importa enseñar.
+  const esperados = datos.map(d => d.esperado).filter(v => v != null);
+  const max = Math.max(...datos.map(d => d.n), ...esperados, 1);
 
   // El ancho del lienzo se declara según el contexto. El SVG se escala al
   // contenedor, así que un lienzo de 680 dentro de una columna de 330 reduce el
@@ -287,24 +316,60 @@ export function barrasH(datos, {
     const etq = recortar(d.valor, anchoEtiqueta - 14);
     const cy = y + alto / 2;
     const nota = d.nota || cuota(d);
+
+    // Marca del valor esperado. Una barra de recuento no dice si es mucho o
+    // poco; con la referencia al lado, la comparación es inmediata y no exige
+    // que el lector calcule un porcentaje de cabeza.
+    let ref = '', refAria = '', xValor = anchoEtiqueta + w + 7;
+    if (d.esperado != null) {
+      const xr = anchoEtiqueta + anchoPista * (d.esperado / max);
+      ref = `<line class="esperado" x1="${xr}" x2="${xr}" y1="${y + 2}" y2="${y + alto - 2}"/>`;
+      const dif = d.n >= d.esperado ? 'por encima de' : 'por debajo de';
+      refAria = `, ${dif} lo esperable (${nf.format(d.esperado)})`;
+      // Cuando lo esperable queda a la DERECHA de la barra —es decir, cuando el
+      // valor observado se queda corto— la marca cae justo donde iba la cifra y
+      // ambas se pisan. La cifra se corre más allá de la marca: es el caso que
+      // más importa leer, y taparlo lo volvería ilegible justo ahí.
+      if (xr > anchoEtiqueta + w) xValor = xr + 7;
+    }
+
+    // La trama va ENCIMA del relleno, no en lugar de él: así funciona con
+    // cualquier color de barra, incluido el gris de «sin dato», sin necesitar
+    // un patrón por color.
+    const rayado = trama
+      ? `<rect class="trama" x="${anchoEtiqueta}" y="${y + 6}" width="${w}"
+           height="${alto - 12}" rx="4" fill="url(#${id}-t)"/>` : '';
+
     return `<g class="marca" tabindex="0" role="listitem"
-        aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}"
+        aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}${refAria}"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
         ${nota ? `data-tip-n="${escapar(nota)}"` : ''}>
       <text x="${anchoEtiqueta - 10}" y="${cy + 3.5}" text-anchor="end">${escapar(etq)}</text>
       <rect class="barra" fill="${colorDe(d, i, escala)}" x="${anchoEtiqueta}" y="${y + 6}"
-        width="${w}" height="${alto - 12}" rx="4"/>
-      <text class="valor" x="${anchoEtiqueta + w + 7}" y="${cy + 3.5}">${nf.format(d.n)}${sufijo}</text>
+        width="${w}" height="${alto - 12}" rx="4"/>${rayado}${ref}
+      <text class="valor" x="${xValor}" y="${cy + 3.5}">${nf.format(d.n)}${sufijo}</text>
     </g>`;
   }).join('');
+
+  /* El patrón se declara una vez por gráfico. Las líneas van en el color de la
+     superficie, de modo que «cortan» la barra en lugar de teñirla: el rayado se
+     lee igual sobre cualquier relleno y sobrevive a la impresión en gris. */
+  const defs = trama ? `<defs>
+    <pattern id="${id}-t" width="7" height="7" patternUnits="userSpaceOnUse"
+             patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="none"/>
+      <line x1="0" y1="0" x2="0" y2="7" stroke="var(--superficie)" stroke-width="2.4"/>
+    </pattern></defs>` : '';
 
   // La etiqueta accesible nombra el INDICADOR, no la forma del gráfico: cinco
   // «gráfico de barras horizontales» seguidos no le dicen nada a quien navega
   // con lector de pantalla.
   const etq = titulo ? `${titulo} — gráfico de barras, ${datos.length} categorías`
                      : `Gráfico de barras horizontales, ${datos.length} categorías`;
+  const pie = refEtiqueta
+    ? `<p class="leyenda-ref">${escapar(refEtiqueta)}</p>` : '';
   return `<div class="grafico"><svg class="chart" id="${id}" viewBox="0 0 ${ancho} ${total}"
-    role="list" aria-label="${escapar(etq)}">${filas}</svg></div>`;
+    role="list" aria-label="${escapar(etq)}">${defs}${filas}</svg></div>${pie}`;
 }
 
 /** Barras verticales. Para series anuales cortas: 3 años no son una línea. */

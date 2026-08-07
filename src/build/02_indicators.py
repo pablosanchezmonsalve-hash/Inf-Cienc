@@ -32,6 +32,27 @@ def main() -> None:
     pct = [b.to_num(p) for p in uni["percentil_citacion"] if b.to_num(p) is not None]
     intl = sum(1 for x in uni["es_internacional"] if x == "True")
 
+    def nota_firmas():
+        """Puente entre las 589 de la fuente y las que publica el sitio.
+
+        La portada mostraba 556 con una nota cualitativa y la auditoría hablaba
+        de 589: dos cifras sin puente, que es justo lo que un lector no puede
+        reconciliar por su cuenta. Se construye con los números del momento en
+        vez de fijarla en config, para que no vuelva a divergir cuando alguien
+        resuelva más casos de identidad.
+        """
+        publicadas = authorship["nombre_en_fuente"].nunique()
+        grupos = len(set(b.CONSOLIDACION.values()))
+        fusionadas = len(b.CONSOLIDACION)
+        if not grupos:
+            return b.nota("P-06")
+        origen = publicadas - grupos + fusionadas
+        return {"texto": (
+            f"Formas de firma, no personas. De las {origen} detectadas en la "
+            f"fuente, {fusionadas} se fusionaron en {grupos} personas tras una "
+            f"revisión humana caso por caso; las {publicadas - grupos} restantes "
+            "siguen sin consolidar."), "destacada": False}
+
     def kpi(code, valor, sufijo=None, extra=None):
         spec = b.indicador(code)
         item = {
@@ -58,7 +79,7 @@ def main() -> None:
                    "referencia_etiqueta": "promedio mundial"}),
         kpi("C-01", round(100 * intl / den["con_metricas"], 1), sufijo="%"),
         kpi("P-06", authorship["nombre_en_fuente"].nunique(),
-            extra={"etiqueta_valor": "formas de firma"}),
+            extra={"etiqueta_valor": "formas de firma", "nota": nota_firmas()}),
     ]
 
     b.write_json({"meta": b.build_meta(), "kpis": kpis}, "kpis.json")
@@ -163,9 +184,16 @@ def main() -> None:
                  "nota": b.nota("I-01")},
         "I-04": {"nombre": b.indicador("I-04")["nombre"], "datos": fwci_por_anio,
                  "sin_citas_pct": sin_citas, "nota": b.nota("I-04")},
+        # Cada umbral viaja con lo que cabría ESPERAR bajo el promedio mundial:
+        # por definición, el top k % de la distribución mundial contiene el k %
+        # de las publicaciones. Sin esa referencia, «75 en el top 10 %» no dice
+        # si es mucho o poco, y el lector no tiene forma de saberlo.
         "I-05": {"nombre": b.indicador("I-05")["nombre"],
-                 "datos": [{"valor": f"Top {k} %", "n": sum(1 for p in pct if p <= k)}
+                 "datos": [{"valor": f"Top {k} %",
+                            "n": sum(1 for p in pct if p <= k),
+                            "esperado": round(len(pct) * k / 100, 1)}
                            for k in (1, 5, 10, 25)],
+                 "base_percentil": len(pct),
                  "nota": b.nota("I-05")},
         "R-01": {"nombre": b.indicador("R-01")["nombre"], "datos": cuartiles,
                  "nota": b.nota("R-01")},
@@ -193,6 +221,29 @@ def main() -> None:
     for code, blk in series.items():
         if code != "meta" and b.indicador(code).get("multivaluado"):
             blk["multivaluado"] = True
+
+    # Sello de procedencia por indicador. La cobertura REAL sólo se conoce aquí,
+    # donde están los datos: fuera de estos casos el indicador se calcula sobre
+    # su denominador completo. Publicar un N global para todos sería el error
+    # que este proyecto persigue —el denominador cambia según el indicador—.
+    cobertura_real = {
+        "T-04": series["T-04"]["con_ods"],
+        "A-01": len(con_metricas) - oa["Sin dato declarado"],
+        "R-01": sum(d["n"] for d in cuartiles if d["valor"] != "Sin dato declarado"),
+    }
+    for code, blk in series.items():
+        if code != "meta":
+            blk["procedencia"] = b.procedencia(code, cobertura_real.get(code))
+
+    # P-07 se calcula sobre pares autor x publicación, no sobre publicaciones:
+    # una publicación firmada por gente de dos unidades aparece en las dos. Con
+    # el denominador de publicaciones el sello daba 94,1 %, cuando la cobertura
+    # que mide la auditoría (regla I-06) es del 63,8 %.
+    series["P-07"]["procedencia"] = b.procedencia(
+        "P-07",
+        cubiertas=sum(v for k, v in unidad.items() if k != "No determinada"),
+        n=sum(unidad.values()),
+        unidad="pares autor × publicación")
 
     b.write_json(series, "series.json")
     b.write_json(b.build_meta(), "meta.json")

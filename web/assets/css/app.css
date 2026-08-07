@@ -35,10 +35,10 @@
      que es justo donde la deuteranopía y la protanopía colapsan diferencias.
      Ninguna paleta de datos honesta sale de ahí.
 
-     En su lugar hay una paleta categórica de seis ranuras que ABRE con el
-     azul-teal de la referencia y luego se separa de verdad. Pasa las cinco
-     comprobaciones en ambos modos (peor par adyacente CVD ΔE 8,7 claro / 8,0
-     oscuro; visión normal 19,3 / 16,2).
+     Hay declaradas seis ranuras categóricas, pero el sitio usa UNA: ningún
+     módulo pide escala de serie. Las otras cinco quedan reservadas y sin
+     validar, con la razón anotada junto a los tokens. Recalibrarlas habría
+     sido optimizar código que no se dibuja.
 
    COMO RAMPA ORDINAL — sí, y es lo que mejor hace. La paleta es un degradado
      natural, así que las escalas ordenadas (cuartiles) usan una rampa de un
@@ -93,14 +93,28 @@
   --accion-suave: #e4f4f2;
   --accion-anillo: rgba(56, 163, 165, .34);
 
-  /* ---- Series categóricas. Orden fijo, nunca cíclico.
-          Validada; ver la nota de implementación arriba. ---- */
-  --serie-1: #0e7ea6;   /* azul-teal, hereda el espíritu de #22577A */
-  --serie-2: #e0662a;   /* naranja */
-  --serie-3: #7b52c9;   /* violeta */
-  --serie-4: #2fa36b;   /* verde, hereda #57CC99 */
-  --serie-5: #d4a017;   /* ámbar */
-  --serie-6: #cc3f5c;   /* carmín */
+  /* ---- Series categóricas ----
+          MEDIDO 2026-08-07: de las seis ranuras, el sitio usa UNA. Ningún módulo
+          pide `escala: 'serie'`; todos caen en --serie-1 o en la rampa ordinal.
+          Las cinco restantes están RESERVADAS y NO VALIDADAS: nunca se han
+          dibujado juntas, así que su separación no se ha comprobado en uso.
+
+          Se conservan en vez de borrarse porque el motor las expone y un módulo
+          futuro podría pedirlas. Quien las estrene debe revalidarlas PARA EL
+          NÚMERO DE RANURAS QUE VAYA A USAR, no para seis: la separación de un
+          conjunto de tres es un problema tratable y la de seis no lo es.
+
+          Se midieron tres candidatas sobre los dos fondos reales del sitio y
+          ninguna despeja a la vez el contraste ≥3:1 y la separación bajo
+          daltonismo. La de Okabe–Ito, que es el estándar de la disciplina, se
+          diseñó sobre fondo CLARO y aquí falla dos colores contra el blanco.
+          Adoptarla por autoridad habría metido dos regresiones. ---- */
+  --serie-1: #0e7ea6;   /* azul-teal, hereda el espíritu de #22577A · EN USO */
+  --serie-2: #e0662a;   /* naranja   · RESERVADA, sin validar */
+  --serie-3: #7b52c9;   /* violeta   · RESERVADA, sin validar */
+  --serie-4: #2fa36b;   /* verde     · RESERVADA, sin validar */
+  --serie-5: #d4a017;   /* ámbar     · RESERVADA, sin validar */
+  --serie-6: #cc3f5c;   /* carmín    · RESERVADA, sin validar */
 
   /* ---- Rampa ordinal. Un solo tono, anclada en el teal de la paleta. ---- */
   --ord-1: #124b5e;
@@ -440,6 +454,14 @@ main { padding: var(--e5) 0 var(--e7); }
   font-size: var(--t-m); font-weight: 650; margin-top: var(--e2); color: var(--tinta);
   display: flex; align-items: center; gap: 0; flex-wrap: wrap; line-height: 1.35;
 }
+/* La advertencia del indicador, dentro de la tarjeta. Recesiva respecto de la
+   cifra pero legible: es la que impide leer «556 autores» como 556 personas. */
+.kpi-nota {
+  font-size: var(--t-xs); line-height: 1.45; color: var(--tinta-2);
+  margin-top: var(--e2); padding-top: var(--e2);
+  border-top: 1px solid var(--linea);
+}
+
 .kpi .denominador {
   font-size: var(--t-xs); color: var(--tinta-3); margin-top: var(--e1);
   font-variant-numeric: tabular-nums; letter-spacing: .005em;
@@ -753,6 +775,81 @@ svg.chart text.valor { fill: var(--tinta); font-weight: 650; font-variant-numeri
 svg.chart text.tick { fill: var(--tinta-3); font-size: 10px; font-variant-numeric: tabular-nums; }
 svg.chart .ref { stroke: var(--aviso-borde); stroke-dasharray: 5 4; stroke-width: 1.5; }
 svg.chart text.ref-etq { fill: var(--aviso-tinta-grafico); font-weight: 650; font-size: 10px; }
+
+/* ---- Marca del valor esperado, en barras horizontales ----
+   Un trazo vertical sobre la barra, en el ámbar de las referencias: el mismo
+   color que la línea del promedio mundial en I-04, porque dicen lo mismo —esto
+   es lo que cabría esperar— y aprenderlo una vez debe servir en todo el sitio. */
+svg.chart .esperado {
+  stroke: var(--aviso-borde); stroke-width: 2.2; stroke-linecap: round;
+}
+
+/* ---- Trama del multivaluado ----
+   Traduce a forma una advertencia que hasta ahora sólo existía en prosa: si la
+   barra está rayada, las barras NO suman el total. El rayado no depende del
+   color —las líneas van en el color de la superficie y cortan el relleno—, de
+   modo que se lee igual en ambos temas, con cualquier daltonismo y sobre papel
+   en blanco y negro. */
+svg.chart .trama { pointer-events: none; }
+
+/* ---- Sello de procedencia ----
+   Franja monoespaciada bajo el gráfico. Monoespaciada a propósito: son datos
+   de catálogo —fuente, fecha, N— y la cifra tabular permite compararlos de un
+   módulo a otro sin que bailen. Recesivo cuando la cobertura es completa;
+   advertencia cuando no lo es. */
+.sello {
+  display: flex; flex-wrap: wrap; gap: var(--e2) var(--e4);
+  align-items: baseline;
+  margin: var(--e3) 0 0; padding: var(--e2) var(--e3);
+  border: 1px solid var(--linea); border-radius: var(--radio-s);
+  background: var(--superficie-2);
+  font: 400 var(--t-xs)/1.5 var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta-2);
+}
+.sello b {
+  font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--tinta-3); margin-right: .35em; font-size: .95em;
+}
+/* Cobertura por debajo del umbral: el sello deja de informar y advierte. */
+.sello-aviso {
+  background: var(--aviso-fondo);
+  border-color: color-mix(in srgb, var(--aviso-borde) 45%, transparent);
+  color: var(--aviso-tinta);
+}
+.sello-aviso b { color: var(--aviso-tinta); opacity: .85; }
+.sello-alerta {
+  font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--aviso-tinta);
+}
+.sello-alerta::before { content: "⚠ "; }
+
+.leyenda-ref {
+  display: flex; align-items: center; gap: var(--e2);
+  font-size: var(--t-s); color: var(--tinta-2);
+  margin: var(--e2) 0 0; line-height: 1.5;
+}
+.leyenda-ref::before {
+  content: ""; flex: none; width: 2px; height: 13px;
+  background: var(--aviso-borde); border-radius: 1px;
+}
+
+/* La leyenda del rayado se construye con el MISMO patrón que usa el gráfico,
+   no con un icono aparte que pueda quedar desincronizado. */
+.leyenda-trama {
+  display: flex; align-items: center; gap: var(--e2);
+  font-size: var(--t-s); color: var(--tinta-2); margin: var(--e2) 0 0;
+}
+.leyenda-trama::before {
+  content: ""; flex: none; width: 26px; height: 13px; border-radius: 3px;
+  /* Mismo período y mismo grosor que el <pattern> del SVG (7 px / 2,4 px):
+     si la muestra no coincide con lo dibujado, la leyenda deja de enseñar el
+     código y pasa a ser un adorno parecido. */
+  background:
+    repeating-linear-gradient(45deg,
+      var(--superficie) 0 2.4px, transparent 2.4px 7px),
+    var(--serie-1);
+}
 
 /* Leyenda del anillo. En las barras la identidad no la lleva una leyenda sino
    la etiqueta de la propia barra y su valor visible al lado: es relieve
