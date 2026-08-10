@@ -239,9 +239,19 @@ Cada token despeja un umbral comprobable, medido en los **dos** temas:
 Dos condiciones que el contraste solo no cubre:
 
 **Separación dato ↔ advertencia.** El dato es rojo y la advertencia metodológica
-es ámbar: dos familias cálidas contiguas podrían confundirse. Medido en OKLab,
-ΔE **28,6** en claro y **21,2** en oscuro, sobre un piso de 20. Es la razón por
-la que el ámbar de las advertencias no se movió al cambiar el rojo.
+es ámbar: dos familias cálidas contiguas podrían confundirse. Medido en OKLab
+entre `--serie-1` y `--aviso-borde` —el par que de verdad se dibuja junto, barra
+de dato contra línea de referencia—: ΔE **25,1** en claro y **24,1** en oscuro,
+sobre un piso de 20.
+
+> **Corrección.** Una versión anterior publicaba 28,6 y 21,2. Estaban medidas
+> contra `#d9a520`, que era `--aviso-tinta-grafico` de la paleta teal anterior y
+> ya no existe en la hoja. Con el valor real, el tema oscuro daba **17,9 y no
+> cumplía**: `--aviso-borde` en oscuro era `#c8901a`, un resto de la paleta teal
+> que sobrevivió al cambio de identidad sin que nadie lo mirara. Contra un dato
+> teal la separación sobraba; contra un dato rojo, no. Lo encontró
+> [`src/design/validar_paleta.py`](../src/design/validar_paleta.py), que lee los
+> tokens de la hoja en vez de creerse una tabla. Corregido a `#f0b429`.
 
 **Rampa ordinal (Q1–Q4).** Un solo tono en cuatro pasos con luminosidad
 monótona; paso mínimo ΔE **10,5** y **11,3**, sobre un piso de 8. Cuatro tonos
