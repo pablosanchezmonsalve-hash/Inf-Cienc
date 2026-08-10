@@ -1382,3 +1382,52 @@ cuenta.
 Fusionar el PR #26 para que el rediseño se publique —hoy el sitio en línea sigue
 sirviendo la versión anterior— y conectar Claude Design por cualquiera de las
 dos vías para empujar el paquete.
+
+---
+
+## Cierre · la verificación deja de ser efímera, y encuentra un fallo real
+
+Las comprobaciones del rediseño vivían en el scratchpad de la sesión, que se
+borra al terminar. Se trasladaron a `src/verify/` y `src/design/`, con dos
+comandos nuevos: `make verificar` y `python3 src/design/validar_paleta.py`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-137 | La batería de verificación vive en el repositorio, no en un directorio temporal | Una verificación que hay que reescribir en cada sesión no se corre; y una reescrita de memoria no es la misma. La versión anterior del barrido medía la ficha de autor con el parámetro equivocado y llevaba semanas dando «0 fallos» sobre una página vacía |
+| D-138 | `run_all.mjs` levanta y baja su propio servidor | Una comprobación que exige recordar arrancar algo a mano acaba no corriéndose |
+| D-139 | La resolución de Playwright y de Chromium se centraliza en `navegador.mjs` | Seis guiones llevaban incrustada la ruta del navegador del contenedor: ciertas aquí, falsas en cualquier otra máquina. La verificación no era replicable, que es justo lo que el proyecto exige de todo lo demás |
+| D-140 | El validador de paleta LEE los tokens de `app.css`, no los repite | Una tabla copiada es una fotografía; el instrumento se puede volver a correr. El día que llegue el rojo institucional oficial es cambiar cuatro valores y un comando |
+| D-141 | `--aviso-borde` en oscuro sube de `#c8901a` a `#f0b429` | Ver abajo |
+| D-142 | `rendimiento.mjs` queda fuera de la batería | Cinco corridas por página contra dos servidores tarda minutos. Se corre a mano cuando se toca algo que pueda afectarlo |
+
+### El fallo que encontró en su primera ejecución
+
+`--aviso-borde` en tema oscuro era `#c8901a`, **un resto de la paleta teal que
+sobrevivió al cambio de identidad sin que nadie lo mirara**. Contra un dato teal
+la separación sobraba; contra un dato rojo caía a **ΔE 17,9**, bajo el piso de
+20 que este mismo proyecto declara.
+
+Peor: la cifra publicada en `docs/UX_UI.md` y en la hoja decía 21,2 y estaba
+medida contra `#d9a520` —que era `--aviso-tinta-grafico` de la paleta anterior y
+**ya no existe en la hoja**—. La documentación afirmaba que el sistema cumplía
+midiendo contra un color que no se dibuja.
+
+Corregido a `#f0b429`: ΔE 24,1, contraste 9,94:1 sobre la tarjeta y 8,53:1 sobre
+el fondo de aviso. Las cifras de la documentación se rehicieron contra el par
+que de verdad se dibuja junto —`--serie-1` contra `--aviso-borde`, barra de dato
+contra línea de referencia—: 25,1 en claro y 24,1 en oscuro.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El ámbar no hizo falta moverlo al cambiar el rojo» | **Falso.** Sí hacía falta, y no se movió. La medición que lo justificaba usaba un color de la paleta anterior |
+| «Las cifras de la documentación reflejan la hoja» | **No necesariamente.** Una tabla escrita a mano y una hoja de estilo se separan sin que nada avise. Por eso ahora hay un instrumento |
+
+### Próximo paso recomendado
+
+Fusionar el PR #26. Después, en una sesión nueva partiendo de `STATE.md`:
+conectar Claude Design, o abordar los dos pendientes reales de interfaz —panel
+conceptual por sección y catálogo de indicadores—.

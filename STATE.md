@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4e17943` · Sistema de diseño generado, no escrito: 16 fichas para Claude Design
-Snapshot: 2026-08-07
+Último commit: `703003e` · Guía de integración con Claude Design
+Snapshot: 2026-08-10
 
 ---
 
@@ -69,7 +69,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 136
+## Decisiones tomadas: 142
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

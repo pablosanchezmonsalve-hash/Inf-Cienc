@@ -46,8 +46,15 @@
 
    SEPARACIÓN DATO ↔ ADVERTENCIA. El dato es rojo y la advertencia metodológica
      es ámbar. Dos avisos contiguos en la misma familia cálida se confundirían.
-     Medido en OKLab: ΔE 28,6 en claro y 21,2 en oscuro, sobre un piso de 20.
-     Es la razón por la que el ámbar no se movió al cambiar el rojo.
+     Medido en OKLab entre --serie-1 y --aviso-borde, que es el par que de
+     verdad se dibuja junto —barra de dato contra línea de referencia—:
+     ΔE 25,1 en claro y 24,1 en oscuro, sobre un piso de 20.
+
+     Una versión anterior de esta nota decía 28,6 y 21,2. Estaban medidas contra
+     #d9a520, que era --aviso-tinta-grafico de la paleta TEAL anterior y ya no
+     está en la hoja. Con el valor real el oscuro daba 17,9 y NO cumplía. Lo
+     encontró src/design/validar_paleta.py, que lee los tokens de la hoja en vez
+     de creerse una tabla; se corrigió subiendo el ámbar oscuro.
 
    RAMPA ORDINAL (Q1–Q4). Escala ORDENADA, así que un solo tono en cuatro pasos
      con luminosidad monótona. Paso mínimo ΔE 10,5 en claro y 11,3 en oscuro,
@@ -162,7 +169,12 @@
 
   /* ---- Advertencia metodológica. Ámbar, fuera de la familia del dato. ---- */
   --aviso-fondo: light-dark(#fdf6e7, #2a2109);
-  --aviso-borde: light-dark(#b8830f, #c8901a);
+  /* El ámbar OSCURO se subió de #c8901a a #f0b429. El valor anterior venía de
+     la paleta teal y sobrevivió al cambio de identidad sin que nadie lo mirara:
+     contra un dato teal la separación sobraba, contra un dato ROJO caía a
+     ΔE 17,9, bajo el piso de 20 que este mismo proyecto declara. Lo encontró
+     `src/design/validar_paleta.py`, no una revisión visual. Ahora ΔE 24,1. */
+  --aviso-borde: light-dark(#b8830f, #f0b429);
   --aviso-tinta: light-dark(#5e4104, #f0dca8);
   /* El ámbar del trazo (--aviso-borde) no llega a 4,5:1 como texto. La línea de
      referencia puede tenerlo; su ETIQUETA, que dice el promedio mundial, no. */
