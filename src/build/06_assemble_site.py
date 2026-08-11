@@ -13,6 +13,7 @@ Salida:
 from __future__ import annotations
 
 import shutil
+import subprocess
 import sys
 
 import common_build as b
@@ -22,6 +23,33 @@ WEB = b.ROOT / "web"
 
 # Directorios que jamás se copian al bundle desplegable (docs/LAYERS.md §6).
 NUNCA_DESPLEGAR = ("data/raw", "internal")
+
+
+def prerenderizar() -> None:
+    """Escribe el HTML de las páginas en el build en vez de en el navegador.
+
+    Ejecuta los constructores de marcado de `web/assets/js/vista.js` bajo Node,
+    contra los mismos artefactos JSON que consumiría el navegador. No hay una
+    segunda implementación del marcado: es el mismo código.
+
+    Node es un requisito BLANDO. Si no está, el sitio se ensambla igual y
+    funciona igual mientras haya JavaScript en el cliente; lo que se pierde es
+    el contenido sin JS y el LCP corto. Abortar el build entero por eso sería
+    desproporcionado, pero callarlo dejaría un sitio peor sin que nadie lo
+    notara: por eso se avisa en voz alta.
+    """
+    guion = b.ROOT / "src" / "build" / "prerender.mjs"
+    try:
+        r = subprocess.run(["node", str(guion), str(DIST)],
+                           capture_output=True, text=True, check=False)
+    except FileNotFoundError:
+        print("  pre-renderizado  : OMITIDO — no hay Node en el entorno.")
+        print("                     El sitio requerirá JavaScript para mostrar contenido.")
+        return
+    print(r.stdout.rstrip())
+    if r.returncode != 0:
+        print(r.stderr.rstrip())
+        sys.exit("BUILD ABORTADO: el pre-renderizado falló.")
 
 
 def main() -> None:
@@ -43,6 +71,8 @@ def main() -> None:
         colados = [p for p in DIST.rglob("*") if p.is_dir() and p.name == nombre]
         if colados:
             sys.exit(f"BUILD ABORTADO: '{prohibido}' apareció en dist/: {colados}")
+
+    prerenderizar()
 
     paginas = sorted(p.name for p in DIST.glob("*.html"))
     fichas = len(list((DIST / "data" / "author").glob("*.json")))

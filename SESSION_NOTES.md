@@ -1237,3 +1237,197 @@ herramienta y hay que rehacerla.
 
 Rehacer en la herramienta la pregunta de los desacuerdos: no «misma o distinta
 persona» sino «cuál de los dos identificadores es el correcto».
+
+---
+
+## Cierre · rediseño de interfaz, identidad roja y pre-renderizado
+
+Tres encargos en una sesión: cambiar la identidad cromática a rojo, rehacer la
+interfaz tomando como referencia portales bibliométricos reales de educación
+superior, y pre-renderizar el sitio.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-114 | La identidad pasa a roja, diseñada por medición, y NO se declara oficial de la UFT | `finis.cl` y los directorios de marca responden 403. Un hex inventado presentado como institucional es exactamente lo que `<non_negotiable_rules>` prohíbe |
+| D-115 | Cambiar el color del dato es seguro porque el sitio usa un solo color de dato | Medido antes de tocar nada. Si hubiera una paleta categórica en uso, el cambio habría obligado a revalidar el conjunto entero |
+| D-116 | La superficie oscura pasa de pizarra fría a pizarra cálida | Un rojo sobre fondo azulado se lee sucio: el fondo tira del tono al magenta |
+| D-117 | Cada token se declara UNA vez con `light-dark()` | La paleta oscura estaba escrita tres veces y las tres copias podían separarse sin que nada avisara |
+| D-118 | `--boton-tinta` se separa del blanco literal | El botón primario llevaba `#fff` fijo: 7,67:1 en claro y 2,84:1 en oscuro. Es el mismo fallo que obligó a crear `--cifra`, con otra cara |
+| D-119 | La segunda ranura categórica SÍ está en uso y ahora está validada como par | La documentación afirmaba que ningún módulo pedía `escala: 'serie'`. Era falso: `anillo()` la pide siempre |
+| D-120 | La tabla equivalente deja de estar detrás de un desplegable y pasa a ser la segunda vista | La figura resume; la tabla es la que se cita. Es el patrón del Leiden Ranking: misma serie, varias representaciones, elige el lector |
+| D-121 | Sin JavaScript se muestran LAS DOS vistas, no ninguna | La tabla es la vía equivalente al gráfico, no un extra. El conmutador sólo existe bajo la clase `js`: un control que no conmuta nada es una promesa falsa |
+| D-122 | Índice lateral fijo con scroll-spy en las páginas de sección | Patrón del panel de entidades de SciVal. En una página de cinco indicadores largos, poder ver qué hay y saltar es la diferencia entre consultar y leer en orden |
+| D-123 | El titular de portada lleva TRES indicadores y esos tres BAJAN de la rejilla | Un indicador repetido a cuatro centímetros de sí mismo no gana énfasis, lo pierde |
+| D-124 | El titular arrastra el denominador y la referencia de cada cifra | Un 0,87 de FWCI sin el «1 = promedio mundial» al lado no es un titular, es un número suelto |
+| D-125 | La cabecera es fija sólo a partir de 900 px | En un teléfono ocupa tres filas: fijarla se comía un tercio de la pantalla en cada desplazamiento |
+| D-126 | El marcado se construye en `vista.js`, sin tocar el DOM | Es la condición para que el navegador y el build produzcan lo mismo. Sin eso, pre-renderizar significa mantener dos versiones del marcado |
+| D-127 | El pre-renderizado NO alcanza a `publicaciones.html` ni `autor.html` | Dependen del estado del usuario. No hay estado inicial único que sirva, y emitir uno arbitrario sería inventar una vista |
+| D-128 | Node es requisito blando del build, con aviso en voz alta | Sin Node el sitio se ensambla y funciona igual mientras haya JavaScript. Abortar sería desproporcionado; callarlo dejaría un sitio peor sin que nadie lo notara |
+| D-129 | El lienzo de un gráfico de barras verticales se ajusta al número de categorías | Tres años estirados a lo ancho de una tarjeta se leen como «poco dato», que es una impresión y no una medición |
+
+### Referencias consultadas
+
+Portales de análisis bibliométrico de instituciones de educación superior, para
+tomar patrones con razón detrás y no apariencias. Detalle y qué se descartó, en
+`docs/UX_UI.md` §13.
+
+- CWTS Leiden Ranking (ediciones Tradicional y Abierta): vistas lista / gráfico
+  / mapa sobre la misma serie; intervalos de estabilidad al 95 % por
+  bootstrapping; sección «Responsible use» de primer nivel.
+- SciVal, módulo *Overview*: panel de entidades fijo a la izquierda; el resumen
+  agrupado en *Overall Research Performance*, *Research Topics* y *Performance
+  Indicators*.
+- Perfiles institucionales tipo Pure: resumen, línea de tiempo de producción,
+  conceptos frecuentes y mapa de colaboración.
+- Convenciones de tablero analítico: cifras tabulares alineadas a la derecha,
+  rejilla recesiva, divulgación progresiva, «la figura resume, la tabla es la
+  verdad».
+
+### Resultado
+
+| Medida | Antes | Después |
+|---|---|---|
+| LCP `index` (Slow 4G, mediana de 5) | 1.940 ms | **780 ms** |
+| LCP `impacto` | 1.764 ms | **784 ms** |
+| LCP `tematica` | 1.300 ms | **756 ms** |
+| `impacto.html` sin JavaScript | 0 módulos, 99 caracteres | 5 módulos, 5 gráficos, 5 tablas, 2.847 caracteres |
+| Contraste WCAG, 9 páginas × 2 temas | 0 fallos | **0 fallos** |
+| Desborde horizontal en 430 px | — | **0 px** |
+| CSS | 41,9 KB | 51,4 KB (15,2 KB gzip) |
+| JavaScript | 61,0 KB | 72,1 KB (23,7 KB gzip) |
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Ningún módulo pide escala de serie» | **Falso.** `anillo()` la pide siempre. La segunda ranura llevaba dibujándose desde el principio, sin validar |
+| «El pre-renderizado no mejoró el LCP» | **Falso, y el error era mío.** El primer `PerformanceObserver` resolvía en la primera entrada en vez de esperar a la última: medía un candidato temprano, no el LCP. Corregido, la mejora es de 43–59 % |
+| «El rojo institucional se puede averiguar» | **No en esta sesión.** 403 en `finis.cl` y en los directorios de marca. Queda como token pendiente de sustituir |
+
+### Ambigüedades abiertas
+
+El hex oficial de la Universidad Finis Terrae sigue sin verificar. Todo el
+sistema cromático cuelga de `--marca` y sus derivados, así que sustituirlo es
+cambiar cuatro tokens y volver a correr el barrido de contraste; pero mientras
+no se verifique, el rojo publicado es **un rojo diseñado**, no *el* rojo de la
+institución, y así está declarado en la hoja de estilo y en `docs/UX_UI.md`.
+
+El presupuesto de JavaScript (60 KB en bruto) queda **excedido en 12,1 KB**. No
+se resolvió: se declara. El 28 % del archivo es comentario en prosa, que este
+proyecto trata como parte del entregable, y con el sitio pre-renderizado el
+JavaScript ya no está en la ruta crítica de pintado. Si se quiere respetar el
+techo literal, la decisión a tomar es si se minifica en el build —lo que separa
+lo que se lee en el repositorio de lo que se sirve— o si se sube el techo.
+
+### Próximo paso recomendado
+
+Pedir a la institución el valor oficial de su rojo y sustituir los cuatro tokens
+de marca.
+
+Del encargo original de interfaz queda pendiente **menos de lo que se anotó en
+una primera versión de esta nota**. La auditoría posterior comprobó, ejerciendo
+la interfaz en un navegador, que dos de los cuatro «pendientes» ya estaban
+implementados y funcionando:
+
+- **Estado en la URL**: sí existe. `leerURL()` y `history.replaceState` en
+  `paginas.js`; el filtro sobrevive a la recarga y la URL es compartible.
+- **Exportación**: sí existe. Botón «Exportar CSV» que exporta *lo filtrado*, no
+  el universo, con BOM UTF-8 y la fecha de build en el nombre del archivo.
+
+Queda de verdad: **panel conceptual por sección** —un texto que explique qué
+pregunta responde cada eje antes de los indicadores— y **catálogo de
+indicadores** —una vista que liste los 20 indicadores con su definición, fuente,
+denominador y estado de factibilidad, hoy repartidos entre `metodologia.html` y
+los sellos—.
+
+---
+
+## Cierre · sistema de diseño generado para Claude Design
+
+Se abrió el PR #26 con el rediseño y se construyó el paquete de sistema de
+diseño para sincronizar con `claude.ai/design`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-130 | El sistema de diseño se GENERA desde la hoja, los constructores y los datos reales | Documentado a mano, empieza siendo verdad y deja de serlo en la primera corrección que nadie replica en la ficha |
+| D-131 | Las razones de contraste de las fichas se calculan al generar, no se copian | Una tabla copiada se desactualiza en silencio; un cálculo no |
+| D-132 | Los componentes se enseñan con datos reales del informe, no de relleno | Un componente de bibliometría ilustrado con cifras inventadas contradice las reglas del proyecto incluso en una ficha de diseño |
+| D-133 | Cada ficha muestra los dos temas mediante `color-scheme` en contenedores hermanos | `light-dark()` resuelve según el elemento donde se sustituye la variable, no según la raíz. Permite comparar sin duplicar la paleta |
+| D-134 | El cuerpo de una ficha se evalúa una vez POR PANEL | Inyectar la misma cadena en los dos duplicaba los `id` del SVG, y los patrones de trama se referencian por id |
+| D-135 | Cada regla se ilustra con el indicador que de verdad la cumple | La ficha de codificación usaba P-07 para enseñar la trama, y P-07 no es multivaluado. Ponérsela habría sido afirmar algo falso sobre el indicador |
+| D-136 | `design-system/` no se versiona | Salida derivada, igual que `dist/`. Cada regeneración sería un diff de un megabyte de HTML generado |
+
+### Resultado
+
+16 fichas —3 de fundamentos, 9 de componentes, 4 de gráficos—, verificadas en
+navegador: 0 excepciones, 0 fichas con problema, los dos paneles de tema
+resuelven a fondos distintos en las 16, y 0 identificadores duplicados tras la
+corrección.
+
+### Ambigüedad abierta
+
+La sincronización **no se pudo ejecutar desde esta sesión**: `DesignSync` exige
+autorización de sistema de diseño y `/design-login` necesita una terminal
+interactiva, que un contenedor remoto no tiene. El paquete queda listo; falta
+conectarlo desde Claude Design («Send to Claude Code Web») o desde Claude Code
+en una máquina local. El skill `/design-sync` tampoco está habilitado en la
+cuenta.
+
+### Próximo paso recomendado
+
+Fusionar el PR #26 para que el rediseño se publique —hoy el sitio en línea sigue
+sirviendo la versión anterior— y conectar Claude Design por cualquiera de las
+dos vías para empujar el paquete.
+
+---
+
+## Cierre · la verificación deja de ser efímera, y encuentra un fallo real
+
+Las comprobaciones del rediseño vivían en el scratchpad de la sesión, que se
+borra al terminar. Se trasladaron a `src/verify/` y `src/design/`, con dos
+comandos nuevos: `make verificar` y `python3 src/design/validar_paleta.py`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-137 | La batería de verificación vive en el repositorio, no en un directorio temporal | Una verificación que hay que reescribir en cada sesión no se corre; y una reescrita de memoria no es la misma. La versión anterior del barrido medía la ficha de autor con el parámetro equivocado y llevaba semanas dando «0 fallos» sobre una página vacía |
+| D-138 | `run_all.mjs` levanta y baja su propio servidor | Una comprobación que exige recordar arrancar algo a mano acaba no corriéndose |
+| D-139 | La resolución de Playwright y de Chromium se centraliza en `navegador.mjs` | Seis guiones llevaban incrustada la ruta del navegador del contenedor: ciertas aquí, falsas en cualquier otra máquina. La verificación no era replicable, que es justo lo que el proyecto exige de todo lo demás |
+| D-140 | El validador de paleta LEE los tokens de `app.css`, no los repite | Una tabla copiada es una fotografía; el instrumento se puede volver a correr. El día que llegue el rojo institucional oficial es cambiar cuatro valores y un comando |
+| D-141 | `--aviso-borde` en oscuro sube de `#c8901a` a `#f0b429` | Ver abajo |
+| D-142 | `rendimiento.mjs` queda fuera de la batería | Cinco corridas por página contra dos servidores tarda minutos. Se corre a mano cuando se toca algo que pueda afectarlo |
+
+### El fallo que encontró en su primera ejecución
+
+`--aviso-borde` en tema oscuro era `#c8901a`, **un resto de la paleta teal que
+sobrevivió al cambio de identidad sin que nadie lo mirara**. Contra un dato teal
+la separación sobraba; contra un dato rojo caía a **ΔE 17,9**, bajo el piso de
+20 que este mismo proyecto declara.
+
+Peor: la cifra publicada en `docs/UX_UI.md` y en la hoja decía 21,2 y estaba
+medida contra `#d9a520` —que era `--aviso-tinta-grafico` de la paleta anterior y
+**ya no existe en la hoja**—. La documentación afirmaba que el sistema cumplía
+midiendo contra un color que no se dibuja.
+
+Corregido a `#f0b429`: ΔE 24,1, contraste 9,94:1 sobre la tarjeta y 8,53:1 sobre
+el fondo de aviso. Las cifras de la documentación se rehicieron contra el par
+que de verdad se dibuja junto —`--serie-1` contra `--aviso-borde`, barra de dato
+contra línea de referencia—: 25,1 en claro y 24,1 en oscuro.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El ámbar no hizo falta moverlo al cambiar el rojo» | **Falso.** Sí hacía falta, y no se movió. La medición que lo justificaba usaba un color de la paleta anterior |
+| «Las cifras de la documentación reflejan la hoja» | **No necesariamente.** Una tabla escrita a mano y una hoja de estilo se separan sin que nada avise. Por eso ahora hay un instrumento |
+
+### Próximo paso recomendado
+
+Fusionar el PR #26. Después, en una sesión nueva partiendo de `STATE.md`:
+conectar Claude Design, o abordar los dos pendientes reales de interfaz —panel
+conceptual por sección y catálogo de indicadores—.

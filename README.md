@@ -150,6 +150,9 @@ comprimidos— lo cachea el navegador entre páginas.
 | `docs/UPDATING_REQUEST.md` | Qué pedir en la próxima exportación de datos |
 | `docs/ORCID_GUIDE.md` | Cómo ejecutar el enriquecimiento de ORCID desde Crossref |
 | `docs/ORCID_API_GUIDE.md` | Cómo verificar los ORCID contra el registro público |
+| `docs/DESIGN_SYNC_GUIDE.md` | Cómo integrar un proyecto de Claude Design |
+| `src/verify/run_all.mjs` | Batería de verificación del sitio (`make verificar`) |
+| `src/design/validar_paleta.py` | Validador del sistema cromático |
 | `docs/REPLICATION.md` | Cómo adaptar el sistema a otra institución |
 | `docs/DATA_LICENSE.md` | Uso de datos institucionales |
 | `docs/V2_BACKLOG.md` | Pendientes de la siguiente versión |

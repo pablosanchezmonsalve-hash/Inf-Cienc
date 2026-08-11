@@ -6,271 +6,229 @@
    ORGANIZACIÓN
      1. Tokens: color, tipografía, espacio, trazo
      2. Base y utilidades
-     3. Estructura: cabecera, navegación, pie
+     3. Estructura: cabecera, navegación, rail, pie
      4. Componentes: KPI, módulo, nota, ayuda, tabla, filtros, estados
      5. Gráficos e interacción
      6. Ficha de autor
      7. Responsive
 
    ────────────────────────────────────────────────────────────────────────────
-   NOTA DE IMPLEMENTACIÓN · cómo se tradujo la paleta pedida
+   NOTA DE IMPLEMENTACIÓN · de dónde sale este sistema cromático
 
-   La paleta de referencia es #22577A · #38A3A5 · #57CC99 · #80ED99 · #C7F9CC.
-   Se midió con el validador del proyecto antes de aplicarla, y el resultado
-   condiciona dónde se usa y dónde no:
+   La identidad es ROJA por decisión del proyecto. NO es el rojo institucional
+   oficial de la Universidad Finis Terrae: no se pudo verificar su valor exacto
+   (finis.cl y los directorios de marca respondieron 403), y ANTE LA DUDA NO SE
+   INVENTÓ. Los tonos de aquí están DISEÑADOS POR MEDICIÓN, no copiados. El día
+   que exista el hex oficial, se cambia --marca y sus derivados: son tokens.
 
-   COMO IDENTIDAD Y SUPERFICIE — se usa entera y literal.
-     #22577A es la marca (7,74:1 sobre blanco), #38A3A5 el estado interactivo,
-     y #C7F9CC / #80ED99 el texto secundario sobre la marca (6,58:1 y 5,34:1).
-     Las superficies claras están teñidas hacia el extremo frío de la paleta en
-     lugar de ser grises neutros.
+   Ningún color se eligió por gusto. Cada uno despeja un umbral comprobable, y
+   la comprobación se corrió sobre los DOS temas antes de escribirla aquí:
 
-   COMO SERIES DE DATOS — NO se usa. Medida como paleta categórica falla:
-     · #80ED99 vs #57CC99 miden ΔE 10,3 en visión NORMAL, bajo el piso de 15.
-       Dos verdes que un lector sin daltonismo apenas distingue.
-     · #C7F9CC da 1,18:1 contra blanco: sobre una superficie clara no es una
-       marca, es un fondo.
-     · Tres de los cinco colores quedan fuera de la banda de luminosidad.
-     La causa es estructural: los cinco tonos viven en la franja cian-verde,
-     que es justo donde la deuteranopía y la protanopía colapsan diferencias.
-     Ninguna paleta de datos honesta sale de ahí.
+     token                fondo            claro    oscuro   piso
+     --tinta              --superficie     18,54    15,57    4,5   (WCAG 1.4.3)
+     --tinta-2            --superficie      8,28     8,47    4,5
+     --tinta-3            --superficie-2    5,73     5,64    4,5
+     --cifra              --superficie      9,10     8,16    3,0   (texto grande)
+     --accion             --superficie      7,67     7,88    4,5
+     --accion             --superficie-2    6,71     7,26    4,5
+     --serie-1            --superficie      7,67     5,48    3,0   (WCAG 1.4.11)
+     --sin-dato           --superficie      3,90     3,71    3,0
+     --ord-1              --superficie     14,80    12,33    3,0
+     --ord-2              --superficie      9,81     7,95    3,0
+     --ord-3              --superficie      6,38     5,06    3,0
+     --ord-4              --superficie      3,53     3,17    3,0
+     --marca-tinta        --marca           8,26    10,29    4,5
+     blanco               --marca          10,88    17,73    4,5
+     --aviso-tinta        --aviso-fondo     8,74    11,75    4,5
+     --aviso-tinta-graf.  --superficie      6,48     8,91    4,5
 
-     Hay declaradas seis ranuras categóricas, pero el sitio usa UNA: ningún
-     módulo pide escala de serie. Las otras cinco quedan reservadas y sin
-     validar, con la razón anotada junto a los tokens. Recalibrarlas habría
-     sido optimizar código que no se dibuja.
+   Y dos condiciones que el contraste solo no cubre:
 
-   COMO RAMPA ORDINAL — sí, y es lo que mejor hace. La paleta es un degradado
-     natural, así que las escalas ordenadas (cuartiles) usan una rampa de un
-     solo tono anclada en el teal #38A3A5, con el extremo claro oscurecido para
-     que despegue de la superficie (2,44:1). Pasa las cuatro comprobaciones.
+   SEPARACIÓN DATO ↔ ADVERTENCIA. El dato es rojo y la advertencia metodológica
+     es ámbar. Dos avisos contiguos en la misma familia cálida se confundirían.
+     Medido en OKLab entre --serie-1 y --aviso-borde, que es el par que de
+     verdad se dibuja junto —barra de dato contra línea de referencia—:
+     ΔE 25,1 en claro y 24,1 en oscuro, sobre un piso de 20.
+
+     Una versión anterior de esta nota decía 28,6 y 21,2. Estaban medidas contra
+     #d9a520, que era --aviso-tinta-grafico de la paleta TEAL anterior y ya no
+     está en la hoja. Con el valor real el oscuro daba 17,9 y NO cumplía. Lo
+     encontró src/design/validar_paleta.py, que lee los tokens de la hoja en vez
+     de creerse una tabla; se corrigió subiendo el ámbar oscuro.
+
+   RAMPA ORDINAL (Q1–Q4). Escala ORDENADA, así que un solo tono en cuatro pasos
+     con luminosidad monótona. Paso mínimo ΔE 10,5 en claro y 11,3 en oscuro,
+     sobre un piso de 8: cuatro escalones que se distinguen incluso impresos en
+     gris. Cuatro tonos distintos habrían afirmado que Q1 y Q4 no tienen
+     relación entre sí, cuando son posiciones de una misma escala.
+
+   SUPERFICIE OSCURA CÁLIDA. El tema oscuro pasó de pizarra fría (#12222a) a
+     pizarra cálida (#171214). Un rojo sobre un fondo azulado se lee sucio: el
+     fondo tira del tono al magenta. No es una preferencia, es el mismo motivo
+     por el que las superficies claras están teñidas hacia la familia de la
+     marca en lugar de ser grises neutros.
+
+   UNA SOLA DECLARACIÓN POR TOKEN. Antes la paleta oscura estaba escrita tres
+     veces —en el media query, en el selector explícito y en los comentarios— y
+     las tres copias podían separarse sin que nada avisara. Ahora cada token se
+     declara una vez con light-dark(); el conmutador de tema sólo cambia
+     `color-scheme`. Son 90 líneas menos y un modo entero de error menos.
 
    TIPOGRAFÍA — pila del sistema, no fuente web. El proyecto prohíbe cargar
      nada desde un CDN y autoalojar una familia añadiría binarios al repositorio
      y peso al bundle. La jerarquía se construye con peso, tamaño, interletrado
-     y cifras tabulares, no con familias distintas. Las tres pilas declaradas
-     (interfaz, cifras, monoespacio) resuelven los tres trabajos tipográficos
-     del sitio: leer prosa, comparar números en columna, y citar identificadores.
+     y cifras tabulares, no con familias distintas.
    ──────────────────────────────────────────────────────────────────────────── */
 
 /* ═══════════════════════════════════════════════════════════ 1. TOKENS */
 
 :root {
-  color-scheme: light;
+  /* Por defecto se sigue al sistema operativo. El conmutador escribe
+     data-tema y eso reduce `color-scheme` a un solo valor, que es lo único
+     que light-dark() consulta. */
+  color-scheme: light dark;
 
-  /* ---- Superficies. Teñidas hacia el extremo frío de la paleta. ---- */
-  --plano: #f1f5f6;
-  --superficie: #ffffff;
-  --superficie-2: #eaf1f2;
-  --superficie-3: #dde8ea;
+  /* ---- Superficies. Teñidas hacia la familia de la marca. ---- */
+  --plano:        light-dark(#faf7f8, #100b0d);
+  --superficie:   light-dark(#ffffff, #171214);
+  --superficie-2: light-dark(#f5eef0, #211a1d);
 
-  /* ---- Tinta. Tres niveles, todos derivados del azul de la marca. ---- */
-  --tinta: #10222b;        /* 16,3:1 */
-  --tinta-2: #4a5f68;      /*  6,7:1 · texto secundario */
-  --tinta-3: #5a6b71;      /*  4,9:1 contra el peor fondo · ejes y metadatos */
+  /* ---- Tinta. Tres niveles, todos derivados del rojo de la marca. ---- */
+  --tinta:   light-dark(#1c1013, #f2e9ec);
+  --tinta-2: light-dark(#5b4a4f, #bfaab0);
+  --tinta-3: light-dark(#6d585e, #a48f95);
 
-  --linea: #dbe6e8;
-  --linea-fuerte: #bccdd2;
+  --linea:        light-dark(#e8dade, #2e2327);
+  --linea-fuerte: light-dark(#d3bcc2, #453539);
 
   /* ---- Marca. Identidad institucional. Nunca codifica un dato. ---- */
-  --marca: #22577A;
-  --marca-honda: #163d57;
-  --marca-alta: #2c6d97;
-  --marca-tinta: #c7f9cc;  /* texto secundario sobre la marca · 6,58:1 */
+  --marca:       light-dark(#7a0f2b, #2a1016);
+  --marca-honda: light-dark(#5c0a20, #1a0a0e);
+  --marca-alta:  light-dark(#a4123f, #e2607e);
+  --marca-tinta: light-dark(#f7d9e0, #e8b9c6);
 
   /* Tinta de las cifras grandes. Existe aparte de --marca porque --marca
      cambia de OFICIO entre temas: en claro es tinta, en oscuro es la
      superficie de la cabecera. Usarla para el texto de un KPI funcionaba en
-     claro y en oscuro pintaba #0d1e26 sobre #12222a — 1,05:1, o sea la cifra
-     invisible. Este token es tinta en los dos temas y sólo eso. */
-  --cifra: #22577A;        /* 7,74:1 sobre la tarjeta */
+     claro y en oscuro pintaba la cifra a 1,05:1, o sea invisible. Este token
+     es tinta en los dos temas y sólo eso. */
+  --cifra: light-dark(#8f1236, #f090a6);
 
-  /* ---- Acción. Estado interactivo. Tampoco codifica un dato.
-          El #38A3A5 de la paleta da 3,02:1 sobre blanco: vale para superficies
-          y bordes, no para texto de enlace. Para eso hay una versión honda. ---- */
-  --accion: #1a6d78;       /* 6,0:1 · enlaces y texto interactivo */
-  --accion-viva: #38A3A5;  /* rellenos, bordes, subrayados */
-  --accion-suave: #e4f4f2;
-  --accion-anillo: rgba(56, 163, 165, .34);
+  /* ---- Acción. Estado interactivo. Tampoco codifica un dato. ---- */
+  --accion:        light-dark(#a4123f, #f08ba3);
+  --accion-viva:   light-dark(#c03457, #e2607e);
+  --accion-suave:  light-dark(#fdf0f3, #2c161c);
+  --accion-anillo: light-dark(rgba(164, 18, 63, .32), rgba(226, 96, 126, .38));
 
   /* ---- Series categóricas ----
-          MEDIDO 2026-08-07: de las seis ranuras, el sitio usa UNA. Ningún módulo
-          pide `escala: 'serie'`; todos caen en --serie-1 o en la rampa ordinal.
-          Las cinco restantes están RESERVADAS y NO VALIDADAS: nunca se han
-          dibujado juntas, así que su separación no se ha comprobado en uso.
+          MEDIDO: de las seis ranuras, el sitio dibuja DOS. El anillo de
+          colaboración internacional (C-01) pide escala categórica y gasta
+          --serie-1 y --serie-2; todo lo demás cae en --serie-1 solo o en la
+          rampa ordinal.
 
-          Se conservan en vez de borrarse porque el motor las expone y un módulo
+          (Una versión anterior de esta nota decía «el sitio usa UNA». Era
+          falso: `anillo()` pide siempre escala de serie, así que la segunda
+          ranura llevaba dibujándose desde el principio. Queda anotado porque
+          una paleta declarada sin usar y una paleta en uso sin validar son
+          problemas distintos y sólo el segundo es urgente.)
+
+          EL PAR EN USO SÍ ESTÁ VALIDADO, y como par, que es como se dibuja:
+            contraste  claro  7,67:1 y 5,77:1   ·  oscuro  5,48:1 y 7,50:1
+            ΔE OKLab   visión normal 25,9 / 26,6
+                       protanopía    17,5 / 17,9
+                       deuteranopía  12,2 / 12,1   ← el peor caso, sobre piso 8
+                       tritanopía    32,4 / 33,1
+
+          Las CUATRO restantes siguen RESERVADAS y NO VALIDADAS: nunca se han
+          dibujado juntas. Se conservan porque el motor las expone y un módulo
           futuro podría pedirlas. Quien las estrene debe revalidarlas PARA EL
           NÚMERO DE RANURAS QUE VAYA A USAR, no para seis: la separación de un
           conjunto de tres es un problema tratable y la de seis no lo es.
 
-          Se midieron tres candidatas sobre los dos fondos reales del sitio y
-          ninguna despeja a la vez el contraste ≥3:1 y la separación bajo
-          daltonismo. La de Okabe–Ito, que es el estándar de la disciplina, se
-          diseñó sobre fondo CLARO y aquí falla dos colores contra el blanco.
-          Adoptarla por autoridad habría metido dos regresiones. ---- */
-  --serie-1: #0e7ea6;   /* azul-teal, hereda el espíritu de #22577A · EN USO */
-  --serie-2: #e0662a;   /* naranja   · RESERVADA, sin validar */
-  --serie-3: #7b52c9;   /* violeta   · RESERVADA, sin validar */
-  --serie-4: #2fa36b;   /* verde     · RESERVADA, sin validar */
-  --serie-5: #d4a017;   /* ámbar     · RESERVADA, sin validar */
-  --serie-6: #cc3f5c;   /* carmín    · RESERVADA, sin validar */
+          La sexta ranura era carmín. Con la marca en rojo, un carmín a dos
+          pasos de --serie-1 es una trampa a la espera: se cambió por azul. ---- */
+  --serie-1: light-dark(#a4123f, #e2607e);   /* rojo de marca · EN USO */
+  --serie-2: light-dark(#0f6f86, #45b2cd);   /* azul-teal · EN USO (anillo C-01) */
+  --serie-3: light-dark(#6b4bbd, #a48ae8);   /* violeta   · RESERVADA, sin validar */
+  --serie-4: light-dark(#1f7d4f, #4fbb85);   /* verde     · RESERVADA, sin validar */
+  --serie-5: light-dark(#8a5a06, #d09a2a);   /* ámbar     · RESERVADA, sin validar */
+  --serie-6: light-dark(#1c5fa8, #6fa8e8);   /* azul      · RESERVADA, sin validar */
 
-  /* ---- Rampa ordinal. Un solo tono, anclada en el teal de la paleta. ---- */
-  --ord-1: #124b5e;
-  --ord-2: #1a6b80;
-  --ord-3: #2b8f9c;
-  --ord-4: #58b3bd;
+  /* ---- Rampa ordinal. Un solo tono, cuatro pasos, luminosidad monótona. ---- */
+  --ord-1: light-dark(#520a1c, #ffc3d0);
+  --ord-2: light-dark(#851334, #f28ba4);
+  --ord-3: light-dark(#af2c4d, #d95b7a);
+  --ord-4: light-dark(#c96c81, #b03a58);
 
   /* ---- Ausencia de dato: gris, siempre (decisión D-09). ---- */
-  --sin-dato: #9aa8ad;
+  --sin-dato: light-dark(#8d7d81, #7d6b70);
 
   /* ---- Cromo del gráfico: recesivo por definición. ---- */
-  --red: #e9f0f1;
-  --eje: #bccdd2;
+  --red: light-dark(#f0e7ea, #241c1f);
+  --eje: light-dark(#d3bcc2, #453539);
 
-  /* ---- Advertencia metodológica. Ámbar, fuera de la paleta de series. ---- */
-  --aviso-fondo: #fdf6e7;
-  --aviso-borde: #c8901a;
-  --aviso-tinta: #6a4a05;
-  /* El ámbar del trazo (--aviso-borde) da 2,81:1 como texto. La línea de
+  /* ---- Advertencia metodológica. Ámbar, fuera de la familia del dato. ---- */
+  --aviso-fondo: light-dark(#fdf6e7, #2a2109);
+  /* El ámbar OSCURO se subió de #c8901a a #f0b429. El valor anterior venía de
+     la paleta teal y sobrevivió al cambio de identidad sin que nadie lo mirara:
+     contra un dato teal la separación sobraba, contra un dato ROJO caía a
+     ΔE 17,9, bajo el piso de 20 que este mismo proyecto declara. Lo encontró
+     `src/design/validar_paleta.py`, no una revisión visual. Ahora ΔE 24,1. */
+  --aviso-borde: light-dark(#b8830f, #f0b429);
+  --aviso-tinta: light-dark(#5e4104, #f0dca8);
+  /* El ámbar del trazo (--aviso-borde) no llega a 4,5:1 como texto. La línea de
      referencia puede tenerlo; su ETIQUETA, que dice el promedio mundial, no. */
-  --aviso-tinta-grafico: #8a620b;   /* 5,5:1 sobre blanco */
+  --aviso-tinta-grafico: light-dark(#7d5709, #e0ac26);
 
   /* ---- Tipografía ---- */
   --f-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --f-cifra: var(--f-ui);
   --f-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
+  /* Escala tipográfica. Dos registros: el de LECTURA, que sube despacio, y el
+     de CIFRA, que salta. Una plataforma de indicadores tiene que dejar que el
+     número gane la página; con una sola escala continua, la cifra clave y el
+     título de sección pesaban lo mismo y no había nada que mirar primero. */
   --t-xs: .6875rem;   /* 11px · códigos, micro-etiquetas */
   --t-s: .78125rem;   /* 12,5px · notas, pie */
   --t-m: .875rem;     /* 14px · tablas, controles */
   --t-base: 1rem;     /* 16px · prosa */
   --t-l: 1.0625rem;
   --t-xl: 1.1875rem;  /* h2 de módulo */
-  --t-2xl: clamp(1.6rem, 1.25rem + 1.5vw, 2.15rem);   /* h1 */
-  --t-cifra: clamp(1.75rem, 1.35rem + 1.2vw, 2.2rem); /* valor de KPI */
+  --t-2xl: clamp(1.75rem, 1.3rem + 1.9vw, 2.5rem);    /* h1 */
+  --t-display: clamp(2.6rem, 1.6rem + 4.2vw, 4.25rem); /* cifra de titular */
+  --t-cifra: clamp(1.9rem, 1.4rem + 1.6vw, 2.6rem);   /* valor de KPI */
 
   /* ---- Espacio. Escala de 4 px, sin valores sueltos. ---- */
   --e1: .25rem; --e2: .5rem;  --e3: .75rem; --e4: 1rem;
-  --e5: 1.5rem; --e6: 2rem;   --e7: 3rem;
+  --e5: 1.5rem; --e6: 2rem;   --e7: 3rem;   --e8: 4.5rem;
 
   /* ---- Trazo. Radios contenidos y sombra mínima: la separación la hace el
           filete, no la elevación. Una interfaz analítica no flota. ---- */
-  --radio: 6px;
-  --radio-s: 4px;
+  --radio: 8px;
+  --radio-s: 5px;
   --radio-pastilla: 999px;
-  --sombra-1: 0 1px 2px rgba(16, 34, 43, .05);
-  --sombra-2: 0 2px 8px rgba(16, 34, 43, .07);
-  --sombra-3: 0 8px 28px rgba(16, 34, 43, .16);
+  --sombra-1: light-dark(0 1px 2px rgba(28, 16, 19, .05), 0 1px 2px rgba(0, 0, 0, .45));
+  --sombra-2: light-dark(0 2px 10px rgba(28, 16, 19, .07), 0 2px 10px rgba(0, 0, 0, .5));
+  --sombra-3: light-dark(0 10px 34px rgba(28, 16, 19, .16), 0 10px 34px rgba(0, 0, 0, .62));
 
-  --max: 1200px;
+  /* Tinta sobre el fondo del botón primario: blanco en claro, la tinta oscura
+     del sitio en oscuro. Medido: 7,67:1 y 7,88:1. */
+  --boton-tinta: light-dark(#ffffff, #171214);
+
+  /* Icono de la advertencia metodológica, como máscara: hereda el color del
+     token de aviso en vez de traerlo pintado, así que sigue al tema. */
+  --icono-aviso: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm0 6v7m0 3v.5" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+
+  --max: 1240px;
+  --rail: 224px;
 }
 
-/* El modo oscuro es una paleta ELEGIDA y revalidada contra su propia
-   superficie, no una inversión de la clara. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) {
-    color-scheme: dark;
-    --plano: #0a171d;
-    --superficie: #12222a;
-    --superficie-2: #1a2e37;
-    --superficie-3: #243c46;
-
-    --tinta: #e8eff1;
-    --tinta-2: #a4b6bd;
-    --tinta-3: #8a9ea6;
-
-    --linea: #223944;
-    --linea-fuerte: #365058;
-
-    --marca: #0d1e26;
-    --marca-honda: #081419;
-    --marca-alta: #38A3A5;
-    --marca-tinta: #9fd6cd;
-    /* El azul de marca aclarado: mismo tono, 7,32:1 sobre la
-       tarjeta, casi el mismo peso que los 7,74:1 del tema claro. */
-    --cifra: #7fb4d8;
-
-    /* En superficie oscura el verde de la paleta rinde 8,15:1: aquí sí puede
-       ser el color de acción, cosa que en modo claro sería ilegible. */
-    --accion: #5fc9cf;
-    --accion-viva: #38A3A5;
-    --accion-suave: #12333a;
-    --accion-anillo: rgba(95, 201, 207, .34);
-
-    --serie-1: #2b9ec7;
-    --serie-2: #d16a30;
-    --serie-3: #9078dd;
-    --serie-4: #2aa26a;
-    --serie-5: #b58612;
-    --serie-6: #dc5c75;
-
-    --ord-1: #8fd4dc;
-    --ord-2: #63bcc6;
-    --ord-3: #429aa8;
-    --ord-4: #2f8794;
-
-    --sin-dato: #6b7f88;
-
-    --red: #1b303a;
-    --eje: #365058;
-
-    --aviso-fondo: #241d09;
-    --aviso-borde: #c8901a;
-    --aviso-tinta: #eed9a4;
-    --aviso-tinta-grafico: #d9a520;
-
-    --sombra-1: 0 1px 2px rgba(0, 0, 0, .45);
-    --sombra-2: 0 2px 8px rgba(0, 0, 0, .5);
-    --sombra-3: 0 8px 28px rgba(0, 0, 0, .6);
-  }
-}
-
-/* El selector explícito gana sobre el ajuste del sistema, en ambos sentidos. */
-:root[data-tema="oscuro"] {
-  color-scheme: dark;
-  --plano: #0a171d;
-  --superficie: #12222a;
-  --superficie-2: #1a2e37;
-  --superficie-3: #243c46;
-  --tinta: #e8eff1;
-  --tinta-2: #a4b6bd;
-  --tinta-3: #8a9ea6;
-  --linea: #223944;
-  --linea-fuerte: #365058;
-  --marca: #0d1e26;
-  --marca-honda: #081419;
-  --marca-alta: #38A3A5;
-  --marca-tinta: #9fd6cd;
-  /* El azul de marca aclarado: mismo tono, 7,32:1 sobre la tarjeta, casi el
-     mismo peso que los 7,74:1 del tema claro. */
-  --cifra: #7fb4d8;
-  --accion: #5fc9cf;
-  --accion-viva: #38A3A5;
-  --accion-suave: #12333a;
-  --accion-anillo: rgba(95, 201, 207, .34);
-  --serie-1: #2b9ec7;
-  --serie-2: #d16a30;
-  --serie-3: #9078dd;
-  --serie-4: #2aa26a;
-  --serie-5: #b58612;
-  --serie-6: #dc5c75;
-  --ord-1: #8fd4dc;
-  --ord-2: #63bcc6;
-  --ord-3: #429aa8;
-  --ord-4: #2f8794;
-  --sin-dato: #6b7f88;
-  --red: #1b303a;
-  --eje: #365058;
-  --aviso-fondo: #241d09;
-  --aviso-borde: #c8901a;
-  --aviso-tinta: #eed9a4;
-  --aviso-tinta-grafico: #d9a520;
-  --sombra-1: 0 1px 2px rgba(0, 0, 0, .45);
-  --sombra-2: 0 2px 8px rgba(0, 0, 0, .5);
-  --sombra-3: 0 8px 28px rgba(0, 0, 0, .6);
-}
+/* El conmutador gana sobre el ajuste del sistema, en ambos sentidos. Reducir
+   `color-scheme` a un solo valor es todo lo que hace falta: light-dark()
+   resuelve el resto de la paleta sola. */
+:root[data-tema="claro"]  { color-scheme: light; }
+:root[data-tema="oscuro"] { color-scheme: dark; }
 
 /* ═════════════════════════════════════════════════════════════ 2. BASE */
 
@@ -323,38 +281,61 @@ p:last-child { margin-bottom: 0; }
    un KPI suelto, las proporcionales se leen mejor. */
 .num, td.num, th.num, .tick, .tip-v { font-variant-numeric: tabular-nums; }
 
-.mono { font-family: var(--f-mono); font-size: .94em; }
 
 /* ═══════════════════════════════════════════════════════ 3. ESTRUCTURA */
 
-/* Cabecera: color plano de marca con un descenso sutil hacia el fondo. Sin
-   degradados de color ni resplandores: el énfasis lo aporta el filete inferior. */
+/* Cabecera: rojo profundo de marca con un descenso sutil hacia el fondo. Sin
+   resplandores: el énfasis lo aporta el filete inferior.
+
+   Va FIJA. En una página de cinco indicadores largos, perder de vista a qué
+   institución y a qué sección pertenece lo que se está mirando es fácil, y una
+   captura de pantalla a media página deja de ser interpretable. Es la razón por
+   la que la fila de marca se comprimió: fija y alta estorbaría. */
 .cabecera {
-  background: linear-gradient(178deg, var(--marca) 0%, var(--marca-honda) 100%);
+  background: linear-gradient(176deg, var(--marca) 0%, var(--marca-honda) 100%);
   color: #fff;
-  padding: var(--e4) 0 0;
-  position: relative;
+  padding: var(--e3) 0 0;
   border-bottom: 2px solid var(--accion-viva);
 }
-.cabecera a { color: #fff; text-decoration-color: rgba(255, 255, 255, .45); }
+/* Fija SÓLO donde cabe en una banda. En un teléfono la marca, el conmutador de
+   tema y la navegación ocupan tres filas: fijarla se comía un tercio de la
+   pantalla en cada scroll, que es peor que perder la referencia. */
+@media (min-width: 900px) {
+  .cabecera { position: sticky; top: 0; z-index: 40; }
+}
+.cabecera a { color: #fff; text-decoration-color: color-mix(in srgb, #fff 45%, transparent); }
 .cabecera a:hover { color: #fff; text-decoration-color: #fff; }
 
 .marca-fila {
   display: flex; align-items: center; justify-content: space-between;
   gap: var(--e4); flex-wrap: wrap;
 }
-.marca { display: flex; align-items: baseline; gap: var(--e3); flex-wrap: wrap; min-width: 0; }
-.marca strong { font-size: 1.02rem; font-weight: 650; letter-spacing: -.006em; }
-.marca span {
-  color: var(--marca-tinta); font-size: var(--t-s); font-weight: 500;
-  padding-left: var(--e3); border-left: 1px solid rgba(199, 249, 204, .3);
+/* Escudo tipográfico: da un ancla visual fija a la izquierda y sostiene la
+   identidad cuando el nombre largo se envuelve. No sustituye al nombre. */
+.marca {
+  display: flex; align-items: center; gap: var(--e3);
+  min-width: 0; text-decoration: none;
+}
+.marca:hover { text-decoration: none; }
+.marca-sigla {
+  flex: none; display: grid; place-items: center;
+  width: 2.15rem; height: 2.15rem; border-radius: var(--radio-s);
+  background: color-mix(in srgb, #fff 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--marca-tinta) 32%, transparent);
+  font: 800 var(--t-xs)/1 var(--f-ui); letter-spacing: .04em;
+}
+.marca-txt { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
+.marca-txt strong { font-size: .95rem; font-weight: 650; letter-spacing: -.008em; }
+.marca-txt > span {
+  color: var(--marca-tinta); font-size: var(--t-xs); font-weight: 550;
+  letter-spacing: .03em; text-transform: uppercase;
 }
 
 /* Selector de tema: tres estados explícitos, el primero sigue al sistema. */
 .tema {
   display: inline-flex; gap: 2px; padding: 3px;
-  background: rgba(255, 255, 255, .08);
-  border: 1px solid rgba(199, 249, 204, .22);
+  background: color-mix(in srgb, #fff 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--marca-tinta) 22%, transparent);
   border-radius: var(--radio-pastilla);
 }
 .tema button {
@@ -364,37 +345,172 @@ p:last-child { margin-bottom: 0; }
   display: inline-flex; align-items: center; gap: .3rem;
   transition: background .14s, color .14s;
 }
-.tema button:hover { color: #fff; background: rgba(255, 255, 255, .12); }
+.tema button:hover { color: #fff; background: color-mix(in srgb, #fff 14%, transparent); }
 .tema button[aria-pressed="true"] { background: #fff; color: var(--marca); }
 .tema svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.9; }
 
-.nav { display: flex; gap: 1px; flex-wrap: wrap; margin-top: var(--e4); }
-.nav a {
-  padding: .5rem .8rem .55rem; text-decoration: none;
-  font-size: var(--t-m); font-weight: 550; letter-spacing: -.004em;
-  color: var(--marca-tinta); border-radius: var(--radio) var(--radio) 0 0;
-  position: relative; transition: background .14s, color .14s;
+/* Navegación: subrayado activo en vez de pestaña rellena. La pestaña rellena
+   dependía de que el fondo de la página fuera el mismo color; con la cabecera
+   fija ese truco deja de funcionar en cuanto la página se desplaza. */
+.nav {
+  display: flex; gap: var(--e1); margin-top: var(--e3);
+  overflow-x: auto; scrollbar-width: none;
 }
-.nav a:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a {
+  padding: .5rem .7rem .62rem; text-decoration: none; white-space: nowrap;
+  font-size: var(--t-m); font-weight: 550; letter-spacing: -.004em;
+  color: var(--marca-tinta); border-radius: var(--radio-s) var(--radio-s) 0 0;
+  border-bottom: 3px solid transparent;
+  transition: background .14s, color .14s, border-color .14s;
+}
+.nav a:hover {
+  background: color-mix(in srgb, #fff 12%, transparent);
+  color: #fff; text-decoration: none;
+}
 .nav a[aria-current="page"] {
-  background: var(--plano); color: var(--tinta); font-weight: 650;
+  color: #fff; font-weight: 700; border-bottom-color: #fff;
 }
 
 /* Barra de vigencia: persistente en todas las páginas, para que una captura de
    pantalla siga siendo interpretable fuera de contexto. */
 .vigencia {
-  background: var(--superficie); border-bottom: 1px solid var(--linea);
-  font-size: var(--t-s); color: var(--tinta-2); padding: .55rem 0;
+  background: var(--superficie-2); border-bottom: 1px solid var(--linea);
+  font-size: var(--t-s); color: var(--tinta-2); padding: .5rem 0;
 }
-.vigencia .contenedor { display: flex; flex-wrap: wrap; gap: var(--e1) var(--e3); align-items: center; }
-.vigencia strong { color: var(--tinta); font-weight: 650; }
-.vigencia .sep { color: var(--linea-fuerte); user-select: none; }
+.vigencia .contenedor {
+  display: flex; flex-wrap: wrap; gap: var(--e1) var(--e4); align-items: center;
+}
+.vigencia b {
+  color: var(--tinta-3); font-weight: 700; font-size: var(--t-xs);
+  text-transform: uppercase; letter-spacing: .07em; margin-right: .35em;
+}
+.vigencia .sep {
+  width: 1px; height: .95em; background: var(--linea-fuerte);
+  margin: 0 calc(var(--e2) * -1);
+}
+.vigencia-guia { margin-left: auto; font-weight: 600; }
 
-main { padding: var(--e5) 0 var(--e7); }
+main { padding: var(--e5) 0 var(--e8); }
 .intro { color: var(--tinta-2); max-width: 66ch; font-size: var(--t-l); margin-top: var(--e2); }
 
 .migas { font-size: var(--t-s); color: var(--tinta-3); margin-bottom: var(--e3); }
 .migas a { color: var(--tinta-2); }
+
+/* Encabezado de una página de sección. Filete de marca a la izquierda: separa
+   el título de la sección del título de un módulo sin usar otro tamaño más. */
+.encabezado-seccion {
+  border-left: 3px solid var(--accion-viva);
+  padding-left: var(--e4); margin: var(--e3) 0 var(--e6);
+}
+.encabezado-seccion h1 { margin: 0; }
+
+/* ------------------------------------------------------- titular de portada */
+
+/* Las plataformas del oficio abren con la MAGNITUD, no con el índice: hay que
+   saber de qué tamaño es el objeto antes de que un desglose signifique algo.
+   Tres cifras, no seis: un titular con seis cifras no tiene titular. */
+.hero { margin: var(--e3) 0 var(--e7); }
+.hero h1 { margin: var(--e1) 0 0; }
+.hero .intro { margin-top: 0; }
+/* Título e introducción en dos columnas a partir del ancho en que el título
+   deja de necesitar toda la línea. Apilados dejaban media pantalla vacía a la
+   derecha y empujaban las cifras por debajo del pliegue. */
+.hero-texto { display: grid; gap: var(--e4); align-items: start; }
+@media (min-width: 900px) {
+  .hero-texto { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--e7); }
+  .hero .intro { padding-top: .5rem; }
+}
+.hero-kicker {
+  font: 700 var(--t-xs)/1 var(--f-ui); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--accion); margin: 0;
+}
+/* Las tres cifras comparten rejilla de filas, no sólo de columnas: con filas
+   independientes, una etiqueta de dos líneas desalineaba las otras dos y el
+   trío dejaba de leerse como un trío. */
+.hero-cifras {
+  display: grid; gap: var(--e5) var(--e6); margin: var(--e6) 0 0;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-rows: auto auto;
+  border-top: 1px solid var(--linea-fuerte); padding-top: var(--e5);
+}
+.hero-cifras > div {
+  min-width: 0; display: grid; grid-row: span 2;
+  grid-template-rows: subgrid; align-content: start;
+}
+.cifra-display {
+  font: 700 var(--t-display)/.92 var(--f-cifra);
+  letter-spacing: -.042em; color: var(--cifra);
+  font-variant-numeric: tabular-nums lining-nums;
+  display: block; margin: 0; align-self: end;
+}
+.cifra-display .suf { font-size: .42em; letter-spacing: -.01em; margin-left: .08em; }
+.cifra-etq {
+  margin: var(--e3) 0 0; font-size: var(--t-m); font-weight: 650;
+  color: var(--tinta); line-height: 1.35;
+}
+.cifra-etq span {
+  display: block; font-size: var(--t-xs); font-weight: 500;
+  color: var(--tinta-3); margin-top: 3px; letter-spacing: .005em;
+}
+
+/* ------------------------------------------ disposición con índice lateral */
+
+/* El panel de entidades fijo a la izquierda es el patrón de SciVal, y resuelve
+   un problema real: en una página de cinco indicadores largos hay que poder ver
+   qué hay y saltar sin recorrerla entera.
+
+   Debajo de 1040 px no hay ancho para dos columnas y el índice se convierte en
+   una fila de pastillas desplazable sobre el contenido. No se oculta: es la
+   única vista general de la página. */
+.disposicion { display: block; }
+@media (min-width: 1040px) {
+  .disposicion {
+    display: grid; grid-template-columns: var(--rail) minmax(0, 1fr);
+    gap: var(--e6); align-items: start;
+  }
+}
+.rail { min-width: 0; }
+@media (min-width: 1040px) {
+  .rail { position: sticky; top: 7.4rem; }
+}
+.rail-titulo {
+  font: 700 var(--t-xs)/1 var(--f-ui); letter-spacing: .12em;
+  text-transform: uppercase; color: var(--tinta-3);
+  margin: 0 0 var(--e3);
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--e1); }
+.rail a {
+  display: block; text-decoration: none; border-radius: var(--radio-s);
+  padding: var(--e2) var(--e3); color: var(--tinta-2); font-size: var(--t-m);
+  line-height: 1.3; transition: background .14s, color .14s, border-color .14s;
+}
+.rail-cod {
+  display: block; font: 600 var(--t-xs)/1 var(--f-mono);
+  letter-spacing: .04em; color: var(--tinta-3); margin-bottom: 2px;
+}
+.rail a:hover { background: var(--superficie-2); color: var(--tinta); text-decoration: none; }
+.rail a.activo { background: var(--accion-suave); color: var(--tinta); font-weight: 650; }
+.rail a.activo .rail-cod { color: var(--accion); }
+
+/* Por debajo del punto de corte: fila de pastillas desplazable. */
+@media (max-width: 1039px) {
+  .rail { margin-bottom: var(--e5); }
+  .rail ol { overflow-x: auto; padding-bottom: var(--e2); scrollbar-width: thin; }
+  .rail li { flex: none; }
+  .rail a {
+    border: 1px solid var(--linea); border-radius: var(--radio-pastilla);
+    background: var(--superficie); white-space: nowrap;
+  }
+  .rail-txt { display: none; }
+  .rail-cod { margin: 0; font-size: var(--t-m); color: var(--tinta-2); }
+  .rail a.activo { border-color: var(--accion-viva); }
+}
+@media (min-width: 1040px) {
+  .rail ol { flex-direction: column; }
+  .rail a { border-left: 2px solid var(--linea); border-radius: 0 var(--radio-s) var(--radio-s) 0; }
+  .rail a.activo { border-left-color: var(--accion-viva); }
+}
 
 .pie {
   border-top: 1px solid var(--linea); background: var(--superficie);
@@ -475,13 +591,22 @@ main { padding: var(--e5) 0 var(--e7); }
 /* -------------------------------------------------------------- módulos */
 .modulo {
   border: 1px solid var(--linea); border-radius: var(--radio);
-  padding: var(--e4) var(--e4) var(--e5);
-  margin: var(--e4) 0; background: var(--superficie); box-shadow: var(--sombra-1);
+  padding: var(--e5); margin: 0 0 var(--e4);
+  background: var(--superficie); box-shadow: var(--sombra-1);
+  scroll-margin-top: var(--e4);
 }
+.modulo:focus-visible { outline: 2px solid var(--accion-viva); outline-offset: 3px; }
+/* El margen de anclaje sólo hace falta donde la cabecera es fija: si no, deja
+   un hueco vacío sobre el módulo al saltar desde el índice. */
+@media (min-width: 900px) { .modulo { scroll-margin-top: 7.5rem; } }
 .modulo > header {
-  display: flex; justify-content: space-between; align-items: baseline;
+  display: flex; justify-content: space-between; align-items: flex-start;
   gap: var(--e4); margin-bottom: var(--e4); padding-bottom: var(--e3);
-  border-bottom: 1px solid var(--linea);
+  border-bottom: 1px solid var(--linea); flex-wrap: wrap;
+}
+.modulo-id {
+  display: flex; align-items: baseline; gap: var(--e3);
+  flex-wrap: wrap; min-width: 0; flex: 1 1 16rem;
 }
 .modulo > header h2 { margin: 0; }
 .modulo .codigo {
@@ -490,11 +615,39 @@ main { padding: var(--e5) 0 var(--e7); }
   border: 1px solid var(--linea); border-radius: var(--radio-s);
   padding: .22rem .45rem; white-space: nowrap; flex: none;
 }
+.modulo-compacto { padding: var(--e4); }
+.modulo-lectura { margin-top: var(--e5); }
+
+/* Conmutador Gráfico ⇄ Tabla. Existe sólo si hay JavaScript: sin él las dos
+   vistas se muestran y un control que no conmuta nada sería una promesa falsa. */
+.vistas { display: none; }
+.js .vistas {
+  display: inline-flex; flex: none; gap: 2px; padding: 2px;
+  background: var(--superficie-2); border: 1px solid var(--linea);
+  border-radius: var(--radio-pastilla);
+}
+.vistas button {
+  border: 0; background: none; cursor: pointer; color: var(--tinta-2);
+  font: 600 var(--t-xs)/1 var(--f-ui); letter-spacing: .02em;
+  padding: .38rem .72rem; border-radius: var(--radio-pastilla);
+  transition: background .14s, color .14s;
+}
+.vistas button:hover { color: var(--tinta); }
+.vistas button[aria-pressed="true"] {
+  background: var(--superficie); color: var(--tinta);
+  box-shadow: var(--sombra-1); border: 1px solid var(--linea);
+  padding: calc(.38rem - 1px) calc(.72rem - 1px);
+}
+/* Contraer a una sola vista es una mejora, no el comportamiento base. */
+.js .vista[data-activa="false"] { display: none; }
+.vista + .vista { margin-top: var(--e4); }
+
 .rejilla {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: var(--e4); align-items: start;
 }
 .rejilla > .modulo { margin: 0; }
+.enlace-seguir { font-weight: 650; }
 
 /* Nota contextual vs. advertencia destacada: dos niveles distintos por diseño.
    Marcar todo igual equivale a no marcar nada. */
@@ -564,9 +717,6 @@ main { padding: var(--e5) 0 var(--e7); }
   -webkit-mask: var(--icono-aviso) center/contain no-repeat;
   mask: var(--icono-aviso) center/contain no-repeat;
 }
-:root {
-  --icono-aviso: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm0 6v7m0 3v.5" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-}
 
 /* ---------------------------------------------------------------- ayuda */
 .ayuda {
@@ -634,14 +784,16 @@ td.ordenada { background: color-mix(in srgb, var(--accion-viva) 5%, transparent)
 
 .sin-dato-txt { color: var(--tinta-3); font-style: italic; font-size: .95em; }
 
-.tabla-datos { font-size: var(--t-s); margin-top: var(--e3); }
-.tabla-datos summary {
-  cursor: pointer; color: var(--tinta-2); font-size: var(--t-s); font-weight: 550;
-  display: inline-flex; align-items: center; gap: var(--e1); padding: var(--e1) 0;
-}
-.tabla-datos summary:hover { color: var(--accion); }
-.tabla-datos[open] summary { margin-bottom: var(--e2); }
-.tabla-datos table { font-size: var(--t-s); }
+ /* Tabla equivalente de un módulo. Ya no vive detrás de un desplegable: es la
+    segunda vista, y la que se cita. Cifras tabulares y alineación a la derecha
+    para que las columnas se comparen de un vistazo. */
+.tabla-datos { font-size: var(--t-m); }
+.tabla-datos table { font-size: var(--t-m); }
+.tabla-datos td.num, .tabla-datos th.num { font-variant-numeric: tabular-nums lining-nums; }
+/* Diferencia contra lo esperado: signo Y color. El signo va primero porque es
+   el que sobrevive al daltonismo y a la impresión en gris. */
+.tabla-datos td.sobre { color: var(--accion); font-weight: 650; }
+.tabla-datos td.bajo  { color: var(--tinta-2); font-weight: 650; }
 
 /* Etiqueta en línea, para marcas cortas junto a un nombre. */
 .etiqueta-en-linea {
@@ -719,8 +871,12 @@ input[type="checkbox"] { accent-color: var(--accion-viva); }
   transition: background .14s, border-color .14s, color .14s;
 }
 .boton:hover { background: var(--accion-suave); border-color: var(--accion-viva); color: var(--accion); }
-.boton-primario { background: var(--marca); color: #fff; border-color: var(--marca); }
-.boton-primario:hover { background: var(--marca-alta); border-color: var(--marca-alta); color: #fff; }
+/* El botón primario NO puede llevar texto blanco fijo. En tema claro el fondo
+   es un rojo hondo y el blanco da 7,67:1; en oscuro el mismo token se aclara a
+   un rosa y el blanco caería a 2,84:1. La tinta del botón es un token que
+   cambia con el tema, igual que su fondo. */
+.boton-primario { background: var(--accion); color: var(--boton-tinta); border-color: var(--accion); }
+.boton-primario:hover { background: var(--accion-viva); border-color: var(--accion-viva); color: var(--boton-tinta); }
 .boton:disabled { opacity: .42; cursor: not-allowed; }
 .boton:disabled:hover { background: var(--superficie); border-color: var(--linea-fuerte); color: var(--tinta); }
 
@@ -912,19 +1068,36 @@ svg.chart .trama { pointer-events: none; }
 
 @media (max-width: 640px) {
   :root { --t-base: .9375rem; }
-  .modulo { padding: var(--e3); }
+  .modulo { padding: var(--e4) var(--e3) var(--e4); }
   .modulo > header { flex-wrap: wrap; gap: var(--e2); }
   .kpi { padding: var(--e3); }
   .kpis { gap: var(--e2); }
   th, td { padding: var(--e2); }
   .identificadores { gap: var(--e3); }
   .marca-fila { gap: var(--e2); }
-  .marca span { padding-left: 0; border-left: 0; }
+  .encabezado-seccion { padding-left: var(--e3); margin-bottom: var(--e5); }
+  /* El nombre del icono de tema se cae antes que el icono: tres pastillas con
+     texto ocupan la fila entera y empujan la navegación a una cuarta. */
+  .tema button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .tema button { padding: .42rem .5rem; }
+  /* En una sola columna no hay nada que alinear entre cifras, y la rejilla
+     compartida sólo abre un hueco entre el número y su etiqueta. */
+  .hero-cifras { gap: var(--e5); grid-template-rows: none; }
+  .hero-cifras > div { display: block; grid-row: auto; }
+  .cifra-etq { margin-top: var(--e2); }
 }
 
+/* Impresión: el informe se imprime y se archiva, así que el papel no puede
+   perder ni el dato ni su procedencia. Las dos vistas de cada módulo se
+   imprimen —la figura y la tabla—, porque en papel no hay conmutador. */
 @media print {
-  .cabecera, .nav, .tema, .filtros, .paginacion, .salto-contenido { display: none; }
+  .cabecera, .tema, .filtros, .paginacion, .salto-contenido,
+  .rail, .vigencia-guia { display: none; }
   body { background: #fff; }
+  .disposicion { display: block; }
   .modulo, .kpi, .tabla-envoltura { box-shadow: none; border-color: #999; break-inside: avoid; }
-  .tabla-datos[open] summary { display: none; }
+  .vistas { display: none; }
+  .js .vista[data-activa="false"] { display: block; }
+  .hero-texto { display: block; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; color: #555; }
 }
