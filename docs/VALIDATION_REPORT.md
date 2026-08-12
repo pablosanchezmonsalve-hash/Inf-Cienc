@@ -18,6 +18,7 @@ Generado por `src/audit/05_validation_rules.py`. Reejecutable.
 | `P-01` | alta | Duplicados probables por título marcados, no resueltos | **PASA** | 1 grupo(s) · 1 revisado(s) por una persona · 0 pendiente(s) |
 | `P-03` | alta | Variantes de nombre encoladas sin colapso automático | **PASA** | 123 entradas |
 | `P-04` | alta | Nombres con múltiples Scopus ID encolados | **PASA** | 20 entradas |
+| `E-09` | alta | Firmas sin forma de persona encoladas, no eliminadas | **PASA** | 4 firma(s) · 4 de ellas son la única detección UFT de su publicación |
 | `I-01` | bloqueante | Toda publicación tiene al menos una detección institucional | **PASA** | sin detección=0 |
 | `I-04` | alta | Métodos duro y blando reconciliados sin contradicción | **PASA** | solo_duro=0 solo_blando=7 |
 | `I-05` | bloqueante | Ningún patrón prohibido en uso | **PASA** | prohibidos declarados=['inis', 'finis'] |
@@ -34,4 +35,4 @@ Generado por `src/audit/05_validation_rules.py`. Reejecutable.
 | `V-07` | bloqueante | Fecha de corte declarada para la fuente de métricas | **PASA** | scival=2026-07-22 scopus=None |
 | `V-10` | alta | Campos bajo el umbral de cobertura (80 %) identificados | **PASA** | ODS 37,9 % · Open Access 72,2 % · unidad académica 63.8 % (pares autor x publicación) |
 
-**Reglas evaluadas:** 29 · **Pasan:** 28 · **Fallan:** 1 (bloqueantes: 0)
+**Reglas evaluadas:** 30 · **Pasan:** 29 · **Fallan:** 1 (bloqueantes: 0)

@@ -184,6 +184,58 @@ def frecuencias(path: Path) -> dict[str, int]:
     return log.groupby("nombre_en_fuente")["eid"].nunique().to_dict()
 
 
+def descartadas(d: pd.DataFrame) -> list[tuple[str, str]]:
+    """Firmas que la revisión declaró que no son personas, con su nota.
+
+    Devuelve la firma y lo que quien revisó escribió al decidirlo. La nota
+    importa: dentro de un año, «no es una persona» sin más no permite saber si
+    alguien lo comprobó contra la fuente o lo dio por evidente.
+    """
+    filas = []
+    for _, r in d[d.veredicto == "no_es_persona"].iterrows():
+        for f in firmas_de(r):
+            filas.append((f, str(r.get("nota") or "").strip()))
+    return sorted(set(filas))
+
+
+def yaml_descartadas(firmas: list[tuple[str, str]], fecha: str) -> str:
+    """Escrito a mano, por lo mismo que `yaml_consolidacion`: se lee tanto como
+    se ejecuta, y un volcado automático perdería el porqué."""
+    lineas = [
+        "# Firmas que la revisión humana declaró que NO son personas.",
+        "#",
+        "# GENERADO por src/review/apply_decisions.py desde",
+        "# internal/identity_decisions.csv. No editar a mano: se regenera.",
+        "#",
+        "# QUÉ AUTORIZA",
+        "#   Que estas formas de firma dejen de contarse como autores y dejen de",
+        "#   tener ficha. Son fragmentos de cadena de afiliación que entraron en",
+        "#   la lista de autores de la fuente («School of Psychology», «and",
+        "#   Senior Lecturer»), detectados por la regla E-09.",
+        "#",
+        "# QUÉ NO AUTORIZA",
+        "#   Tocar internal/matching_log.csv. La detección institucional que las",
+        "#   trajo es REAL: la publicación sí es de la UFT, lo que no es una",
+        "#   persona es el nombre. Borrarlas del log dejaría a esas publicaciones",
+        "#   sin ninguna detección y haría fallar la regla bloqueante I-01.",
+        "#   El descarte se aplica aguas abajo, en src/build/common_build.py.",
+        "#",
+        "# CONSECUENCIA DECLARADA",
+        "#   Las publicaciones donde eran la única detección UFT quedan sin",
+        "#   autoría UFT nombrada. Eso se declara; no se rellena con nada.",
+        "#",
+        f"# Firmas descartadas: {len(firmas)}",
+        f"# Fecha de la revisión: {fecha}",
+        "",
+        "firmas:",
+    ]
+    for f, nota in firmas:
+        lineas.append(f"  - firma: {f!r}")
+        if nota:
+            lineas.append(f"    nota: {nota!r}")
+    return "\n".join(lineas) + "\n"
+
+
 def yaml_consolidacion(grupos: list[list[str]], fecha: str, n_dec: int,
                        frec: dict[str, int]) -> str:
     """Escribe el mapa a mano en vez de volcarlo con yaml.dump.
@@ -293,6 +345,25 @@ def autotest() -> int:
         ("afil-Fantasma Z.", "Candidato por afiliación", "Fantasma Z.", "misma")]), cand)
     casos.append(("firma ausente de los candidatos no se asigna", len(a) == 0, None))
 
+    # 9. Sólo se descarta lo que una persona declaró que no es una persona.
+    d9 = df([("e09-School of Psychology", "Firma sin forma de persona",
+              "School of Psychology", "no_es_persona"),
+             ("e09-Metabolism", "Firma sin forma de persona", "Metabolism", "pendiente"),
+             ("e09-Gómez P.", "Firma sin forma de persona", "Gómez P.", "es_persona")])
+    casos.append(("sólo no_es_persona descarta",
+                  [f for f, _ in descartadas(d9)] == ["School of Psychology"],
+                  descartadas(d9)))
+
+    # 10. «es_persona» conserva la firma: decir que no es un fragmento no puede
+    #     tener el mismo efecto que decir que lo es.
+    casos.append(("es_persona no descarta",
+                  "Gómez P." not in {f for f, _ in descartadas(d9)}, None))
+
+    # 11. Descartar una firma NO la mete en ningún grupo de identidad: son dos
+    #     preguntas distintas y el veredicto de una no puede responder la otra.
+    g, c = grupos_de_identidad(d9)
+    casos.append(("descartar no consolida", g == [] and not c, (g, c)))
+
     ok = True
     for nombre, paso, obs in casos:
         print(f"  {'OK  ' if paso else 'FALLA'} {nombre}" + (f"   {obs}" if not paso else ""))
@@ -320,7 +391,7 @@ def main() -> int:
                  "(se genera con `make revision`).")
 
     d = leer_decisiones(path)
-    resueltas = d[d.veredicto.isin(["misma", "distintas"])]
+    resueltas = d[d.veredicto.isin(["misma", "distintas", "no_es_persona", "es_persona"])]
     print(f"  decisiones leídas   : {len(d)}")
     print(f"    resueltas         : {len(resueltas)}")
     print(f"    pendientes        : {int((d.veredicto == 'pendiente').sum())}")
@@ -337,6 +408,20 @@ def main() -> int:
     print(f"\n  grupos consolidados : {len(grupos)}  "
           f"({firmas_fusionadas} formas de firma)")
 
+    # Una firma no puede a la vez fusionarse con una persona y no ser una
+    # persona. Si ocurre, alguien decidió dos cosas incompatibles y aplicar
+    # cualquiera de las dos publicaría un resultado que nadie decidió.
+    desc = descartadas(d)
+    en_grupos = {f for g in grupos for f in g}
+    choque = sorted({f for f, _ in desc} & en_grupos)
+    if choque:
+        print("\n  CONTRADICCIONES:")
+        for f in choque:
+            print(f"    «{f}» se declara «no es una persona» y a la vez se fusiona "
+                  "con otra firma como la misma persona")
+        sys.exit("\nNo se aplica nada. Resuelva la contradicción y vuelva a exportar.")
+    print(f"  firmas descartadas  : {len(desc)} (no son personas)")
+
     cpath = INTERNAL / "orcid_candidatos_afiliacion.csv"
     cand = pd.read_csv(cpath, dtype=str) if cpath.exists() else None
     nuevas = asignaciones_confirmadas(d, cand)
@@ -352,9 +437,11 @@ def main() -> int:
         return 0
 
     frec = frecuencias(INTERNAL / "matching_log.csv")
+    hoy = date.today().isoformat()
     (CONFIG / "identidades_consolidadas.yml").write_text(
-        yaml_consolidacion(grupos, date.today().isoformat(), len(d), frec),
-        encoding="utf-8")
+        yaml_consolidacion(grupos, hoy, len(d), frec), encoding="utf-8")
+    (CONFIG / "firmas_descartadas.yml").write_text(
+        yaml_descartadas(desc, hoy), encoding="utf-8")
 
     if len(nuevas):
         salida = pd.concat([vig, nuevas], ignore_index=True)
@@ -362,6 +449,7 @@ def main() -> int:
         salida.to_csv(opath, index=False, encoding="utf-8")
 
     print(f"\n  OK · config/identidades_consolidadas.yml")
+    print(f"       config/firmas_descartadas.yml     ({len(desc)} firmas)")
     if len(nuevas):
         print(f"       data/enriched/authors_orcid.csv  (+{len(nuevas)})")
     print("\n  Reconstruya el sitio para que surta efecto:  make sitio")

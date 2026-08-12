@@ -280,6 +280,27 @@ def casos(d: dict, perf: dict) -> list[dict]:
             "firmas": fs, "cruces": cruces(fs[0], fs[1]) if len(fs) == 2 else None,
         })
 
+    # ── Firmas sin forma de persona (E-09): fragmentos de cadena de afiliación.
+    #
+    # Va primero de todo porque no pregunta lo mismo que las demás. El resto de
+    # colas pregunta «¿son la misma persona?»; ésta pregunta si hay alguna
+    # persona. Y mientras no se responda, cada una tiene ficha pública y deja a
+    # su publicación sin autoría UFT nombrada.
+    e09 = d["amb"][d["amb"].tipo.str.startswith("E-09")]
+    for _, r in e09.iterrows():
+        f = perf.get(r["nombre_en_fuente"])
+        out.append({
+            "id": f"e09-{r['clave']}", "cola": "Firma sin forma de persona",
+            "prioridad": 0, "titulo": r["clave"],
+            "contexto": (f"{r['consecuencia']}. Señales: "
+                         + r["detalle"].replace(" · ", "; ")),
+            "firmas": [f] if f else [], "cruces": None,
+            # Aquí «misma / distintas» no significa nada: el caso es una sola
+            # firma y la pregunta es otra.
+            "veredictos": [("no_es_persona", "No es una persona"),
+                           ("es_persona", "Sí es una persona")],
+        })
+
     # ── Un nombre con varios Scopus Author ID (P-04): perfil fragmentado u homonimia.
     p04 = d["amb"][d["amb"].tipo.str.startswith("P-04")]
     for _, r in p04.iterrows():
@@ -340,8 +361,10 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .dec{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;
 border-top:1px solid var(--linea);padding-top:.8rem}
 .dec button{border-width:1.5px}
-.dec button[aria-pressed="true"][data-v="misma"]{background:var(--si);color:#fff;border-color:var(--si)}
-.dec button[aria-pressed="true"][data-v="distintas"]{background:var(--no);color:#fff;border-color:var(--no)}
+.dec button[aria-pressed="true"][data-v="misma"],
+.dec button[aria-pressed="true"][data-v="es_persona"]{background:var(--si);color:#fff;border-color:var(--si)}
+.dec button[aria-pressed="true"][data-v="distintas"],
+.dec button[aria-pressed="true"][data-v="no_es_persona"]{background:var(--no);color:#fff;border-color:var(--no)}
 .dec button[aria-pressed="true"][data-v="pendiente"]{background:var(--duda);color:#fff;border-color:var(--duda)}
 .dec input{flex:1;min-width:180px;font:inherit;font-size:.84rem;padding:.35rem .55rem;
 border:1px solid #bccdd2;border-radius:4px;background:var(--sup);color:var(--tinta)}
@@ -412,6 +435,7 @@ document.getElementById('exportar').addEventListener('click', () => {
     '# Generado por internal/revision_identidad.html',
     `# Exportado: ${new Date().toISOString().slice(0, 10)}`,
     '# veredicto: misma = misma persona · distintas = personas distintas · pendiente = sin resolver',
+    '# cola «Firma sin forma de persona»: no_es_persona = fragmento de afiliación, se descarta · es_persona = firma legítima, se conserva',
   ].join('\\n');
   const cols = ['caso_id', 'cola', 'firmas', 'veredicto', 'nota', 'fecha'];
   const filas = CASOS.map(c => {
@@ -514,6 +538,19 @@ def tabla_firmas(fs: list[dict]) -> str:
             f"<tbody>{filas}</tbody></table>")
 
 
+# El vocabulario por defecto. Una cola puede traer el suyo cuando la pregunta
+# que hace no es «¿son la misma persona?»: preguntar eso sobre una firma sola
+# no significa nada, y un botón que no significa nada se pulsa igual.
+VEREDICTOS = [("misma", "Misma persona"), ("distintas", "Personas distintas")]
+
+
+def botones(caso: dict) -> str:
+    return "\n        ".join(
+        f'<button type="button" data-v="{v}" aria-pressed="false">'
+        f"{html.escape(etq)}</button>"
+        for v, etq in caso.get("veredictos") or VEREDICTOS)
+
+
 def render(cs: list[dict], meta: dict) -> str:
     cuerpo = ""
     for c in cs:
@@ -525,8 +562,7 @@ def render(cs: list[dict], meta: dict) -> str:
       {señales_html(c['cruces'])}
       {tabla_firmas(c['firmas'])}
       <div class="dec">
-        <button type="button" data-v="misma" aria-pressed="false">Misma persona</button>
-        <button type="button" data-v="distintas" aria-pressed="false">Personas distintas</button>
+        {botones(c)}
         <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>
         <input type="text" placeholder="Nota (opcional): en qué te basaste">
       </div>

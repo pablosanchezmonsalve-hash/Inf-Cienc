@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `6fbd1f6` · La interfaz se rehace sobre portales bibliométricos, y el sitio deja d
-Snapshot: 2026-08-11
+Último commit: `19de6f2` · Cada cifra de STATE.md declara su base, y las de autor van en las dos
+Snapshot: 2026-08-12
 
 ---
 
@@ -36,14 +36,17 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **240** | sin consolidar · `data/enriched/authors_orcid.csv` |
+| Entidades con forma de persona | **552** | descontando las marcadas por `E-09`, pendientes de revisión |
 | Entidades con ORCID | **216** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **27** | `config/indicators.yml`, `publicar: true` |
-| Reglas de validación | **29** | `data/interim/validation_report.csv` |
+| Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
 Las cifras de autor van en dos bases porque una revisión humana declaró que **63 formas de firma eran 30 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+
+Y **4 de las publicadas no son personas**: son fragmentos de cadena de afiliación que la fuente metió en la lista de autores (regla `E-09`). Siguen contando y con ficha, porque descartarlas también es una decisión de identidad; están encoladas en `internal/ambiguities_authors.csv` y en `make revision`.
 
 ---
 
@@ -53,7 +56,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 413 |
+| `internal/ambiguities_authors.csv` | 417 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/orcid_conflicts.csv` | 1 |
 | `internal/identity_candidates.csv` | 17 |
@@ -76,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 142
+## Decisiones tomadas: 150
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

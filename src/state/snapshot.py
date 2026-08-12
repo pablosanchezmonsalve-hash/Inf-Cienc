@@ -83,6 +83,8 @@ CIFRAS = [
      "sin repetir una firma dentro de la misma publicación"),
     ("firmas_con_orcid", "Firmas con ORCID",
      "sin consolidar · `data/enriched/authors_orcid.csv`"),
+    ("entidades_con_forma_de_persona", "Entidades con forma de persona",
+     "descontando las marcadas por `E-09`, pendientes de revisión"),
     ("entidades_con_orcid", "Entidades con ORCID",
      "tras consolidación humana · **la que sirve el sitio**"),
     ("indicadores_evaluados", "Indicadores evaluados",
@@ -104,6 +106,7 @@ PARES_DE_BASE = [
     ("formas_de_firma", "entidades_autor"),
     ("firmas_con_orcid", "entidades_con_orcid"),
     ("apariciones_firma_publicacion", "pares_autor_publicacion"),
+    ("entidades_autor", "entidades_con_forma_de_persona"),
 ]
 
 
@@ -207,6 +210,20 @@ def cifras() -> dict:
     if grupos:
         out["grupos_consolidados"] = len(grupos)
         out["variantes_fusionadas"] = sum(len(g["variantes"]) for g in grupos)
+
+    # Firmas publicadas que la regla E-09 marcó como probables fragmentos de
+    # cadena de afiliación. Cuentan como entidad mientras nadie las revise
+    # (`D-08`), así que el recuento de autores sobra en esa cantidad y eso se
+    # dice aquí en vez de dejar que el lector lo descubra en la ficha.
+    amb = ROOT / "internal/ambiguities_authors.csv"
+    if amb.exists() and "entidades_autor" in out:
+        a = pd.read_csv(amb, dtype=str)
+        marcadas = set(a[a["tipo"] == "E-09_firma_sin_forma_de_persona"]["nombre_en_fuente"])
+        # Una firma fusionada en un grupo ya no es entidad propia; restarla
+        # descontaría dos veces.
+        variantes = {v for g in grupos for v in g["variantes"]}
+        out["firmas_sin_forma_de_persona"] = len(marcadas)
+        out["entidades_con_forma_de_persona"] = out["entidades_autor"] - len(marcadas - variantes)
     return out
 
 
@@ -292,6 +309,13 @@ def main() -> None:
               f"(`config/identidades_consolidadas.yml`, decisión `D-08`: el "
               f"pipeline nunca fusiona por heurística). Las restantes siguen sin "
               f"consolidar y pueden incluir variantes de una misma persona."]
+        if c.get("firmas_sin_forma_de_persona"):
+            s += ["", f"Y **{c['firmas_sin_forma_de_persona']} de las publicadas no "
+                  "son personas**: son fragmentos de cadena de afiliación que la "
+                  "fuente metió en la lista de autores (regla `E-09`). Siguen "
+                  "contando y con ficha, porque descartarlas también es una "
+                  "decisión de identidad; están encoladas en "
+                  "`internal/ambiguities_authors.csv` y en `make revision`."]
 
     s += ["", "---", "", "## Colas de revisión humana", "",
           "Capa interna. Ninguna se resuelve automáticamente "

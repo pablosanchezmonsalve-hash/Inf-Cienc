@@ -1431,3 +1431,62 @@ contra línea de referencia—: 25,1 en claro y 24,1 en oscuro.
 Fusionar el PR #26. Después, en una sesión nueva partiendo de `STATE.md`:
 conectar Claude Design, o abordar los dos pendientes reales de interfaz —panel
 conceptual por sección y catálogo de indicadores—.
+
+---
+
+## Cierre · cuatro fichas publicadas que no son personas
+
+`STATE.md` publicaba las cifras de autor sobre la base anterior a la
+consolidación —589 formas de firma y 240 con ORCID— mientras el sitio servía 556
+entidades y 216. Se corrigió el generador para que cada cifra declare su base.
+Al declararlas apareció una tercera: «pares autor × publicación» eran filas del
+log, y tres de ellas eran la misma firma repetida en una publicación. Esa firma
+era `School of Psychology`, y tirando de ahí salieron otras tres.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-143 | Cada cifra de `STATE.md` declara su base, y las de autor publican las dos | Ninguna era falsa; lo falso era presentarlas sin decir cuál era cuál. La que llegaba al punto de entrada del proyecto era justo la que el sitio no usa |
+| D-144 | La base consolidada se LEE de `data/processed/authors.json`, no se recalcula | Recalcularla sería una segunda implementación de la consolidación, y dos implementaciones divergen sin avisar. Si no coinciden, es que el build no se ha corrido, y eso se ve en la fecha |
+| D-145 | Las firmas sin forma de persona se detectan con tres señales que NO pesan igual | Dos son invariantes de la fuente —posición fuera de rango, firma repetida en un trabajo— y no admiten lectura benévola. La tercera, no llevar inicial, es heurística de forma: aquí aísla los mismos cuatro casos, pero en otra institución marcaría a un autor mononímico, que es una persona real |
+| D-146 | La regla se numera `E-09`, no `P-06` | `P-06` ya es el indicador al que esta regla afecta. Dos cosas distintas con el mismo código se confunden justo donde más importa no confundirlas |
+| D-147 | El descarte se aplica en `src/build/`, nunca sobre `internal/matching_log.csv` | `I-01` es bloqueante y se calcula sobre el log. Las cuatro firmas son la ÚNICA detección de su publicación: quitarlas del log dejaría a esas publicaciones sin ninguna y abortaría la auditoría entera |
+| D-148 | `P-06` sigue publicando 556 y declara que 552 tienen forma de persona | Declarar que una firma no es una persona es una decisión de identidad, y `D-08` la reserva a la revisión humana. Publicar 552 por decisión del pipeline sería resolverla por él |
+| D-149 | La cola «Firma sin forma de persona» trae su propio vocabulario de veredicto | «Misma persona / personas distintas» no significa nada sobre una firma sola. Un botón que no significa nada se pulsa igual |
+| D-150 | La nota de `P-06` vive en `common_build.py`, no en cada consumidor | Ya había divergido: la portada servía el texto construido con las cifras del momento y la página de autores el estático de `config/indicators.yml`. Dos notas para un indicador es una de más |
+
+### Lo que apareció al declarar las bases
+
+`School of Psychology` ocupaba tres posiciones de la misma publicación. Buscando
+la clase entera aparecieron `and Senior Lecturer` —posición 9 de 7 autores—,
+`Metabolism` y `Movement Sciences (NUTRIM)`. Las cuatro tienen ficha pública y en
+las cuatro publicaciones donde aparecen **son la única detección UFT**: esas
+publicaciones se quedan sin autoría UFT nombrada.
+
+Los dos invariantes atrapan dos de las cuatro. La señal de forma —ninguna
+inicial con punto— aísla las cuatro y sólo esas cuatro sobre 589 firmas.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Los invariantes estructurales bastan para detectar la clase» | **Falso.** Atrapan 2 de 4. `Metabolism` está en la posición 3 de 6 y `Movement Sciences (NUTRIM)` en la 8 de 14: la fuente no se contradice, simplemente el nombre no es un nombre |
+| «Basta con encolarlas» | **No.** Sin veredicto propio ni camino de aplicación, la herramienta habría recogido un botón que `apply_decisions.py` ignoraba en silencio. Peor que no ofrecerlo |
+| «Excluirlas es quitarlas del log» | **Falso, y rompía el build.** `I-01` habría pasado de 0 a 4 fallos bloqueantes |
+
+### Ambigüedades abiertas
+
+- Las cuatro firmas siguen publicadas y con ficha. El descarte lo decide una
+  persona en `make revision`; el ensayo del bucle completo se hizo y se
+  revirtió.
+- Cinco publicaciones sólo-SciVal ya salen hoy con la celda de autoría en
+  blanco (discrepancia `X-01`, sin lista de autores en Scopus). Tras un descarte
+  se les sumarían estas cuatro. Un lector no distingue «sin autoría UFT
+  nombrada» de «no se muestra»: falta rotularlo, y es decisión de interfaz.
+- `docs/ORCID_COVERAGE.md` sigue en la base previa a la revisión (222/589).
+
+### Próximo paso recomendado
+
+Abrir `make revision` y resolver los cuatro casos de la cola nueva. Después, el
+catálogo de indicadores.
