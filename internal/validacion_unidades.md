@@ -18,7 +18,7 @@ No hace falta responder en ningún formato especial: basta con marcar sobre este
 
 ## 1. Unidades detectadas
 
-Sobre **1.207** pares autor × publicación de la ventana 2023–2025. **437** (36,2 %) no permiten deducir unidad y se declaran como «No determinada»: no se imputan.
+Sobre **1.207** apariciones firma × publicación de la ventana 2023–2025. **437** (36,2 %) no permiten deducir unidad y se declaran como «No determinada»: no se imputan.
 
 | Unidad como aparece en el informe | Pares | ¿Nombre oficial correcto? | Corrección |
 |---|---:|---|---|

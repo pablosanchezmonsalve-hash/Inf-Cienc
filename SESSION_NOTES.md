@@ -1490,3 +1490,49 @@ inicial con punto— aísla las cuatro y sólo esas cuatro sobre 589 firmas.
 
 Abrir `make revision` y resolver los cuatro casos de la cola nueva. Después, el
 catálogo de indicadores.
+
+---
+
+## Cierre · el review encontró que el arreglo anterior no cerraba
+
+Se pasó `/code-review` al PR #27 antes de fusionarlo. Salieron 15 hallazgos, y
+los graves no eran de estilo: tres publicaban cifras equivocadas y uno rompía
+una regla no negociable de `CLAUDE.md`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-151 | «Sí es una persona» se registra igual que «no es una persona» | La auditoría vuelve a marcar la firma en cada corrida —se calcula sobre el log, que no se toca—, así que sin registrar la confirmación el veredicto no tenía ningún efecto y la única salida que el sistema ofrecía era declarar inexistente a la firma |
+| D-152 | Lo publicado dice «probables», no «no son personas» | Dos de las cuatro sólo disparan la señal heurística, sobre la que el propio código escribe que sola no basta. Publicarlo como hecho es convertir hipótesis en hecho, que `<non_negotiable_rules>` prohíbe |
+| D-153 | La segunda lectura desde `internal/` se declara en el docstring y en `docs/LAYERS.md` | `05_verify_public_layer.py` comprueba nombres de campo en las salidas, no de dónde se leyó cada dato. Una lectura nueva no la detecta nada automático: o es una decisión escrita o es una fuga esperando |
+| D-154 | Las publicaciones afectadas se cuentan por columna estructurada, no buscando un literal en la prosa | La regla contaba con `str.contains("ÚNICA detección")` sobre una frase escrita para humanos. Reescribir la frase —que es justo lo que pedía `D-152`— habría puesto la cifra a cero y publicado un «0» tranquilizador sobre el hecho que la regla existe para sacar a la luz |
+| D-155 | El YAML generado se entrecomilla con `yaml.safe_dump`, no con `repr()` de Python | `repr()` acierta casi siempre y falla con una nota que lleve las dos comillas. `DESCARTADAS` se evalúa al importar `common_build`: un archivo mal escrito no da un error localizado, mata todos los objetivos del build a la vez |
+| D-156 | «Única detección UFT» se evalúa publicación a publicación | Sobre la unión, una firma que acompañara a alguien en cualquier trabajo silenciaba el aviso para todos los demás |
+
+### Los tres que publicaban cifras falsas
+
+| Dónde | Qué habría publicado |
+|---|---|
+| `snapshot.py` | Restaba las marcadas a un total que ya las excluía: **548 donde son 552** |
+| `03_authors.py` | La advertencia dejaba de cuadrar al descartar: decía «de las 589, 63 se fusionaron… las 522 restantes», y 589 − 63 = 526 |
+| `build_review.py` | El HTML comprometido traía la redacción anterior a la corrección de concordancia: la cola y la pantalla del revisor no decían lo mismo |
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El ensayo de punta a punta validó el bucle» | **No.** Comprobé `kpis.json` tras el descarte, pero no la advertencia de `authors.json`, y nunca corrí `make estado` con firmas descartadas. Los tres fallos vivían justo ahí |
+| «Añadir el botón basta para que el veredicto exista» | **Falso.** Sin camino de aplicación, «sí es una persona» era decorativo |
+
+### Ambigüedades abiertas
+
+Quedan sin arreglar, declarados y verificados, cuatro hallazgos latentes: el
+filtro de redundancia de bases sí se corrigió, pero siguen abiertos los casos
+`E-09` sin perfil asociado (se avisa, no se bloquea) y la ausencia de una
+comprobación automática de que ninguna lectura nueva desde `internal/` entre sin
+declararse.
+
+### Próximo paso recomendado
+
+Fusionar el PR #27. Después, validación de PR en CI.

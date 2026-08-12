@@ -253,19 +253,30 @@ def main() -> None:
     # confirmado en `make revision`.
     for nombre, sig in sorted(firmas_sin_forma_de_persona(log).items()):
         eids = sorted(set(log[log["nombre_en_fuente"] == nombre]["eid"]))
-        acompañada = set(log[log["eid"].isin(eids)
-                             & (log["nombre_en_fuente"] != nombre)]["nombre_en_fuente"])
+        # Publicación a publicación, no sobre la unión: una firma puede ser la
+        # única detección de un trabajo y compartir otro. Evaluarlo en bloque
+        # dejaba el aviso en silencio en cuanto acompañara a alguien en algún
+        # sitio, que es justo el caso en que hace falta.
+        solas = [e for e in eids
+                 if not set(log[(log["eid"] == e)
+                                & (log["nombre_en_fuente"] != nombre)]["nombre_en_fuente"])]
         amb.append({
             "tipo": "E-09_firma_sin_forma_de_persona", "severidad": "alta",
             "clave": nombre, "nombre_en_fuente": nombre,
             "detalle": " · ".join(f"{k} ({v})" for k, v in sorted(sig.items()))
                        + " · publicaciones: " + ", ".join(eids),
+            # Dato estructurado, no prosa. La regla E-09 contaba las
+            # publicaciones afectadas buscando un literal dentro de esta misma
+            # frase: reescribirla la habría puesto a cero y el reporte habría
+            # publicado un «0» tranquilizador sobre el hecho que la regla existe
+            # para sacar a la luz.
+            "n_publicaciones_sin_otra_deteccion": len(solas),
             "consecuencia": (
-                "fragmento de cadena de afiliación probable, no una persona"
-                + ("" if acompañada else
-                   "; es la ÚNICA detección UFT de "
-                   + (f"las {len(eids)} publicaciones en que aparece, que quedarían"
-                      if len(eids) > 1 else
+                "probable fragmento de cadena de afiliación, no una persona"
+                + ("" if not solas else
+                   "; es la única detección UFT de "
+                   + (f"{len(solas)} de sus publicaciones, que quedarían"
+                      if len(solas) > 1 else
                       "la publicación en que aparece, que quedaría")
                    + " sin autoría UFT nombrada")),
             "resolucion": "NO_RESOLVER_AUTOMATICAMENTE",

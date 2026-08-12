@@ -38,6 +38,7 @@ from datetime import date
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 INTERNAL = ROOT / "internal"
@@ -184,36 +185,79 @@ def frecuencias(path: Path) -> dict[str, int]:
     return log.groupby("nombre_en_fuente")["eid"].nunique().to_dict()
 
 
-def descartadas(d: pd.DataFrame) -> list[tuple[str, str]]:
-    """Firmas que la revisión declaró que no son personas, con su nota.
+def resueltas_e09(d: pd.DataFrame, veredicto: str) -> list[tuple[str, str]]:
+    """Firmas de la cola `E-09` resueltas con un veredicto, con su nota.
 
-    Devuelve la firma y lo que quien revisó escribió al decidirlo. La nota
-    importa: dentro de un año, «no es una persona» sin más no permite saber si
+    Los DOS veredictos tienen efecto, y por razones distintas. «No es una
+    persona» descarta la firma. «Sí es una persona» no descarta nada, pero
+    tiene que sacarla de la cola igual: la auditoría la vuelve a marcar en cada
+    corrida —se calcula sobre el log, que no se toca—, así que sin registrar la
+    confirmación el sitio seguiría publicando que esa firma probablemente no es
+    una persona para siempre, y la única salida que el sistema ofrecería sería
+    declararla inexistente.
+
+    La nota importa: dentro de un año, un veredicto sin más no permite saber si
     alguien lo comprobó contra la fuente o lo dio por evidente.
     """
-    filas = []
-    for _, r in d[d.veredicto == "no_es_persona"].iterrows():
+    vistas: dict[str, str] = {}
+    for _, r in d[d.veredicto == veredicto].iterrows():
         for f in firmas_de(r):
-            filas.append((f, str(r.get("nota") or "").strip()))
-    return sorted(set(filas))
+            # Por firma, no por (firma, nota): la misma firma decidida dos veces
+            # —dos exportaciones concatenadas, una nota ampliada— duplicaría la
+            # entrada e inflaría el recuento que se le imprime al operador.
+            nota = str(r.get("nota") or "").strip()
+            if f not in vistas or (not vistas[f] and nota):
+                vistas[f] = nota
+    return sorted(vistas.items())
 
 
-def yaml_descartadas(firmas: list[tuple[str, str]], fecha: str) -> str:
+def _escalar(v: str) -> str:
+    """Comillas de YAML de verdad, no `repr()` de Python.
+
+    `repr()` acierta casi siempre y falla justo donde duele: una nota con
+    comilla simple y doble a la vez produce un escalar entrecomillado con
+    barras invertidas que YAML 1.1 no desescapa. `DESCARTADAS` se evalúa al
+    importar `common_build`, así que un archivo mal escrito no da un error
+    localizado: mata todos los objetivos del build a la vez.
+    """
+    # Se vuelca como mapeo de una clave y se recorta la clave: un escalar suelto
+    # sale con el marcador `...` de fin de documento pegado detrás. `width`
+    # evita el plegado de líneas, que partiría una nota larga en dos y rompería
+    # el formato de una línea por entrada.
+    linea = yaml.safe_dump({"v": v}, allow_unicode=True, width=10**9,
+                           default_flow_style=False).strip()
+    return linea[len("v: "):]
+
+
+def yaml_e09(descartadas: list[tuple[str, str]], confirmadas: list[tuple[str, str]],
+             fecha: str) -> str:
     """Escrito a mano, por lo mismo que `yaml_consolidacion`: se lee tanto como
     se ejecuta, y un volcado automático perdería el porqué."""
     lineas = [
-        "# Firmas que la revisión humana declaró que NO son personas.",
+        "# Resolución humana de la cola E-09 — firmas sin forma de persona.",
         "#",
         "# GENERADO por src/review/apply_decisions.py desde",
         "# internal/identity_decisions.csv. No editar a mano: se regenera.",
         "#",
-        "# QUÉ AUTORIZA",
-        "#   Que estas formas de firma dejen de contarse como autores y dejen de",
+        "# POR QUÉ ESTÁN LAS DOS LISTAS",
+        "#   La auditoría vuelve a marcar estas firmas en CADA corrida: se",
+        "#   calcula sobre internal/matching_log.csv, que no se toca. Sin",
+        "#   registrar también las confirmadas, decir «sí es una persona» no",
+        "#   tendría ningún efecto y el sitio seguiría publicando que esa firma",
+        "#   probablemente no lo es. La única salida sería declararla inexistente.",
+        "#",
+        "# QUÉ AUTORIZA `descartadas`",
+        "#   Que esas formas de firma dejen de contarse como autores y dejen de",
         "#   tener ficha. Son fragmentos de cadena de afiliación que entraron en",
         "#   la lista de autores de la fuente («School of Psychology», «and",
         "#   Senior Lecturer»), detectados por la regla E-09.",
         "#",
-        "# QUÉ NO AUTORIZA",
+        "# QUÉ AUTORIZA `confirmadas`",
+        "#   Sólo cerrar el caso. La firma sigue contando y con ficha, igual que",
+        "#   antes de la revisión: lo único que cambia es que deja de declararse",
+        "#   como probable fragmento.",
+        "#",
+        "# QUÉ NO AUTORIZA NINGUNA DE LAS DOS",
         "#   Tocar internal/matching_log.csv. La detección institucional que las",
         "#   trajo es REAL: la publicación sí es de la UFT, lo que no es una",
         "#   persona es el nombre. Borrarlas del log dejaría a esas publicaciones",
@@ -221,18 +265,20 @@ def yaml_descartadas(firmas: list[tuple[str, str]], fecha: str) -> str:
         "#   El descarte se aplica aguas abajo, en src/build/common_build.py.",
         "#",
         "# CONSECUENCIA DECLARADA",
-        "#   Las publicaciones donde eran la única detección UFT quedan sin",
-        "#   autoría UFT nombrada. Eso se declara; no se rellena con nada.",
+        "#   Las publicaciones donde una firma descartada era la única detección",
+        "#   UFT quedan sin autoría UFT nombrada. Eso se declara; no se rellena",
+        "#   con nada.",
         "#",
-        f"# Firmas descartadas: {len(firmas)}",
+        f"# Descartadas: {len(descartadas)} · confirmadas como persona: {len(confirmadas)}",
         f"# Fecha de la revisión: {fecha}",
         "",
-        "firmas:",
     ]
-    for f, nota in firmas:
-        lineas.append(f"  - firma: {f!r}")
-        if nota:
-            lineas.append(f"    nota: {nota!r}")
+    for clave, firmas in (("descartadas", descartadas), ("confirmadas", confirmadas)):
+        lineas.append(f"{clave}:")
+        for f, nota in firmas:
+            lineas.append(f"  - firma: {_escalar(f)}")
+            if nota:
+                lineas.append(f"    nota: {_escalar(nota)}")
     return "\n".join(lineas) + "\n"
 
 
@@ -351,13 +397,39 @@ def autotest() -> int:
              ("e09-Metabolism", "Firma sin forma de persona", "Metabolism", "pendiente"),
              ("e09-Gómez P.", "Firma sin forma de persona", "Gómez P.", "es_persona")])
     casos.append(("sólo no_es_persona descarta",
-                  [f for f, _ in descartadas(d9)] == ["School of Psychology"],
-                  descartadas(d9)))
+                  [f for f, _ in resueltas_e09(d9, "no_es_persona")]
+                  == ["School of Psychology"], resueltas_e09(d9, "no_es_persona")))
 
     # 10. «es_persona» conserva la firma: decir que no es un fragmento no puede
     #     tener el mismo efecto que decir que lo es.
     casos.append(("es_persona no descarta",
-                  "Gómez P." not in {f for f, _ in descartadas(d9)}, None))
+                  "Gómez P." not in {f for f, _ in resueltas_e09(d9, "no_es_persona")},
+                  None))
+
+    # 10b. Pero SÍ se registra: sin eso, confirmar que una firma es una persona
+    #      no tendría ningún efecto y la auditoría la volvería a marcar siempre.
+    casos.append(("es_persona se registra igualmente",
+                  [f for f, _ in resueltas_e09(d9, "es_persona")] == ["Gómez P."],
+                  resueltas_e09(d9, "es_persona")))
+
+    # 10c. Una firma decidida dos veces no se duplica, y gana la nota que dice algo.
+    d10 = pd.DataFrame(
+        [("a", "Firma sin forma de persona", "X", "no_es_persona", ""),
+         ("b", "Firma sin forma de persona", "X", "no_es_persona", "comprobado en la fuente")],
+        columns=["caso_id", "cola", "firmas", "veredicto", "nota"])
+    casos.append(("una firma decidida dos veces no se duplica",
+                  resueltas_e09(d10, "no_es_persona")
+                  == [("X", "comprobado en la fuente")],
+                  resueltas_e09(d10, "no_es_persona")))
+
+    # 10d. El YAML se entrecomilla como YAML, no con repr() de Python: una nota
+    #      con las dos comillas rompía el archivo y, con él, todo el build.
+    dura = 'dice "School of X", no es persona'
+    vuelta = yaml.safe_load(yaml_e09([("O'Brien \"Bob\" A.", dura)], [], "2026-01-01"))
+    casos.append(("el YAML generado se relee intacto",
+                  vuelta["descartadas"] == [{"firma": "O'Brien \"Bob\" A.", "nota": dura}]
+                  and vuelta["confirmadas"] is None,
+                  vuelta))
 
     # 11. Descartar una firma NO la mete en ningún grupo de identidad: son dos
     #     preguntas distintas y el veredicto de una no puede responder la otra.
@@ -411,7 +483,8 @@ def main() -> int:
     # Una firma no puede a la vez fusionarse con una persona y no ser una
     # persona. Si ocurre, alguien decidió dos cosas incompatibles y aplicar
     # cualquiera de las dos publicaría un resultado que nadie decidió.
-    desc = descartadas(d)
+    desc = resueltas_e09(d, "no_es_persona")
+    conf = resueltas_e09(d, "es_persona")
     en_grupos = {f for g in grupos for f in g}
     choque = sorted({f for f, _ in desc} & en_grupos)
     if choque:
@@ -420,7 +493,19 @@ def main() -> int:
             print(f"    «{f}» se declara «no es una persona» y a la vez se fusiona "
                   "con otra firma como la misma persona")
         sys.exit("\nNo se aplica nada. Resuelva la contradicción y vuelva a exportar.")
-    print(f"  firmas descartadas  : {len(desc)} (no son personas)")
+
+    # Un veredicto sobre una fila sin firmas no descarta nada y no lo diría:
+    # el operador vería «firmas descartadas: 0» y un código de salida cero.
+    vacias = [r["caso_id"] for _, r in d[d.veredicto.isin(["no_es_persona", "es_persona"])].iterrows()
+              if not firmas_de(r)]
+    if vacias:
+        print(f"\n  AVISO · {len(vacias)} decisión(es) de la cola E-09 sin ninguna "
+              "firma asociada, que no se pueden aplicar:")
+        for cid in vacias:
+            print(f"    {cid}")
+
+    print(f"  firmas descartadas  : {len(desc)} (probables fragmentos)")
+    print(f"  confirmadas persona : {len(conf)} (se conservan, salen de la cola)")
 
     cpath = INTERNAL / "orcid_candidatos_afiliacion.csv"
     cand = pd.read_csv(cpath, dtype=str) if cpath.exists() else None
@@ -440,8 +525,8 @@ def main() -> int:
     hoy = date.today().isoformat()
     (CONFIG / "identidades_consolidadas.yml").write_text(
         yaml_consolidacion(grupos, hoy, len(d), frec), encoding="utf-8")
-    (CONFIG / "firmas_descartadas.yml").write_text(
-        yaml_descartadas(desc, hoy), encoding="utf-8")
+    (CONFIG / "firmas_e09_resueltas.yml").write_text(
+        yaml_e09(desc, conf, hoy), encoding="utf-8")
 
     if len(nuevas):
         salida = pd.concat([vig, nuevas], ignore_index=True)
@@ -449,7 +534,8 @@ def main() -> int:
         salida.to_csv(opath, index=False, encoding="utf-8")
 
     print(f"\n  OK · config/identidades_consolidadas.yml")
-    print(f"       config/firmas_descartadas.yml     ({len(desc)} firmas)")
+    print(f"       config/firmas_e09_resueltas.yml   "
+          f"({len(desc)} descartadas · {len(conf)} confirmadas)")
     if len(nuevas):
         print(f"       data/enriched/authors_orcid.csv  (+{len(nuevas)})")
     print("\n  Reconstruya el sitio para que surta efecto:  make sitio")

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `19de6f2` · Cada cifra de STATE.md declara su base, y las de autor van en las dos
+Último commit: `24708be` · Cuatro fichas publicadas no son personas: la regla E-09 las detecta y 
 Snapshot: 2026-08-12
 
 ---
@@ -46,7 +46,7 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 
 Las cifras de autor van en dos bases porque una revisión humana declaró que **63 formas de firma eran 30 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
-Y **4 de las publicadas no son personas**: son fragmentos de cadena de afiliación que la fuente metió en la lista de autores (regla `E-09`). Siguen contando y con ficha, porque descartarlas también es una decisión de identidad; están encoladas en `internal/ambiguities_authors.csv` y en `make revision`.
+Y **4 de las publicadas probablemente no correspondan a personas**: la auditoría las marcó como probables fragmentos de cadena de afiliación que la fuente metió en la lista de autores (regla `E-09`). Dos de las señales son invariantes de la fuente; la tercera es una heurística sobre la forma del nombre, y sola no basta. Siguen contando y con ficha: confirmarlo es una decisión de identidad, y por `D-08` la toma una persona en `make revision`.
 
 ---
 
@@ -79,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 150
+## Decisiones tomadas: 156
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

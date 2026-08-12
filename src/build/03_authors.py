@@ -392,20 +392,25 @@ def main() -> None:
             (f"Cada ficha corresponde a una forma de firma, no necesariamente a una "
              f"persona distinta. De las {n_firmas_origen} detectadas en la fuente, "
              f"{n_fusionadas} se fusionaron en {len(CONSOLIDADAS)} personas tras una "
-             f"revisión humana caso por caso. Las {n_sin_revisar} restantes siguen "
-             f"sin consolidar: pueden incluir variantes de una misma persona."
+             f"revisión humana caso por caso"
+             # Sin esta cláusula la frase deja de cuadrar en cuanto se descarta
+             # algo: el origen las suma y ninguna otra parte las resta.
+             + (f" y {len(b.DESCARTADAS)} se descartaron por no ser personas sino "
+                "fragmentos de cadena de afiliación" if b.DESCARTADAS else "")
+             + f". Las {n_sin_revisar} restantes siguen sin consolidar: pueden "
+             f"incluir variantes de una misma persona."
              if CONSOLIDADAS else
              "Cada ficha corresponde a una forma de firma, no necesariamente a una "
              "persona distinta. Las variantes de nombre no se consolidan por "
              "heurística: requieren revisión humana, aún pendiente.")
-            # Ni siquiera «una forma de firma»: hay fichas que no corresponden a
-            # ninguna persona. Decirlo aquí y no sólo en la nota del indicador,
-            # porque esta es la página donde esas fichas se ven.
-            + (f" Además, {n_encoladas} de estas fichas son fragmentos de cadena "
-               "de afiliación que la fuente metió en la lista de autores, "
-               "detectados por la auditoría y pendientes de revisión humana: no "
-               "son personas y su descarte lo decide una persona, no el pipeline."
-               if n_encoladas else "")
+            # Ni siquiera «una forma de firma»: hay fichas que probablemente no
+            # correspondan a ninguna persona. Decirlo aquí y no sólo en la nota
+            # del indicador, porque esta es la página donde esas fichas se ven.
+            + (f" Además, {n_encoladas} de estas fichas son PROBABLES fragmentos "
+               "de cadena de afiliación que la fuente metió en la lista de "
+               "autores. La auditoría las detectó y están pendientes de revisión "
+               "humana: confirmarlo o descartarlo lo decide una persona, no el "
+               "pipeline." if n_encoladas else "")
         ),
     }
     b.write_json(payload, "authors.json")

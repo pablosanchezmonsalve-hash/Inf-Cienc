@@ -1,10 +1,20 @@
 """Utilidades compartidas por el build de artefactos publicables.
 
 BARRERA DE CAPAS (decisión D-22): este módulo lee de `data/interim/` y
-`config/`. Nunca de `data/raw/` ni de `internal/`. La única excepción es
-`internal/matching_log.csv`, del que se extraen exclusivamente los campos
-publicables (autor, eid, año, unidad) — nunca la cadena de afiliación cruda ni
-el método de detección. Ver `docs/LAYERS.md`.
+`config/`. Nunca de `data/raw/`. De `internal/` lee DOS archivos, ambos
+declarados aquí y en `docs/LAYERS.md`, y de ambos se proyecta sólo lo
+publicable:
+
+  · `internal/matching_log.csv` — campos publicables (autor, eid, año, unidad).
+    Nunca la cadena de afiliación cruda ni el método de detección.
+
+  · `internal/ambiguities_authors.csv` — SÓLO los `nombre_en_fuente` de las
+    filas `E-09`, y sólo para contarlos. Nunca `detalle`, `consecuencia` ni
+    `resolucion`, que son material de conciliación interna. Lo que llega a un
+    artefacto público es un RECUENTO, no los nombres. Se lee porque que varias
+    de las fichas publicadas probablemente no correspondan a personas es una
+    limitación del dato, y publicar el recuento sin ella sería publicar una
+    cifra que ya sabemos que sobra.
 """
 
 from __future__ import annotations
@@ -163,14 +173,23 @@ CONSOLIDACION = _mapa_consolidacion()
 # UFT—, y la regla bloqueante `I-01` exige que toda publicación tenga al menos
 # una. Quitarlos del log dejaría a esas publicaciones sin ninguna y abortaría la
 # auditoría entera. Lo que no es una persona es el nombre, no la afiliación.
-def _firmas_descartadas() -> set[str]:
-    if not (CONFIG / "firmas_descartadas.yml").exists():
-        return set()
-    cfg = load_config("firmas_descartadas.yml") or {}
-    return {f["firma"] for f in (cfg.get("firmas") or [])}
+def _resueltas_e09() -> tuple[set[str], set[str]]:
+    """Descartadas y confirmadas como persona. Las dos importan.
+
+    La confirmación no cambia ningún dato, pero cierra el caso: la auditoría
+    vuelve a marcar la firma en cada corrida —se calcula sobre el log, que no
+    se toca—, así que sin esta lista decir «sí es una persona» no tendría
+    efecto alguno.
+    """
+    if not (CONFIG / "firmas_e09_resueltas.yml").exists():
+        return set(), set()
+    cfg = load_config("firmas_e09_resueltas.yml") or {}
+    def leer(clave: str) -> set[str]:
+        return {f["firma"] for f in (cfg.get(clave) or [])}
+    return leer("descartadas"), leer("confirmadas")
 
 
-DESCARTADAS = _firmas_descartadas()
+DESCARTADAS, CONFIRMADAS_E09 = _resueltas_e09()
 
 
 def canonizar(nombre: str) -> str:
@@ -269,20 +288,21 @@ def load_authorship() -> pd.DataFrame:
 
 
 def firmas_e09_encoladas() -> set[str]:
-    """Firmas que la auditoría marcó como probables fragmentos de afiliación
-    (regla `E-09`) y que todavía espera que una persona resuelva.
+    """Firmas marcadas por `E-09` que siguen esperando a que alguien decida.
 
-    Se publica el RECUENTO, no los nombres: la cola es capa interna, pero que
-    cuatro de las firmas publicadas probablemente no sean personas es una
-    limitación del dato, y ocultarla sería publicar un número que ya sabemos
-    que sobra.
+    Devuelve la forma CANÓNICA, no la de la fuente: si una firma marcada se
+    fusionó con otra por revisión humana, ya no tiene ficha propia, y contarla
+    aparte declararía una ficha que no existe.
+
+    Se publica el RECUENTO, no los nombres (ver la barrera de capas arriba).
     """
     p = INTERNAL / "ambiguities_authors.csv"
     if not p.exists():
         return set()
     amb = pd.read_csv(p, dtype=str)
-    marcadas = amb[amb["tipo"] == "E-09_firma_sin_forma_de_persona"]
-    return set(marcadas["nombre_en_fuente"]) - DESCARTADAS
+    marcadas = set(amb[amb["tipo"] == "E-09_firma_sin_forma_de_persona"]["nombre_en_fuente"])
+    pendientes = marcadas - DESCARTADAS - CONFIRMADAS_E09
+    return {canonizar(f) for f in pendientes}
 
 
 def nota_p06(publicadas: int) -> dict:
@@ -322,9 +342,10 @@ def nota_p06(publicadas: int) -> dict:
               "de cadena de afiliación; ")
     t += f"las {publicadas - grupos} restantes siguen sin consolidar."
     if encoladas:
-        t += (f" De las {publicadas} publicadas, {encoladas} son fragmentos de "
-              "cadena de afiliación encolados para revisión humana (regla E-09): "
-              f"las firmas con forma de persona son {publicadas - encoladas}.")
+        t += (f" De las {publicadas} publicadas, {encoladas} son PROBABLES "
+              "fragmentos de cadena de afiliación, detectados por la auditoría y "
+              "pendientes de revisión humana (regla E-09): si se confirman, las "
+              f"firmas que corresponden a personas serían {publicadas - encoladas}.")
     return {"texto": t, "destacada": bool(encoladas)}
 
 

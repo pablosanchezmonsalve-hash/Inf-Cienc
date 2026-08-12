@@ -219,11 +219,19 @@ def cifras() -> dict:
     if amb.exists() and "entidades_autor" in out:
         a = pd.read_csv(amb, dtype=str)
         marcadas = set(a[a["tipo"] == "E-09_firma_sin_forma_de_persona"]["nombre_en_fuente"])
-        # Una firma fusionada en un grupo ya no es entidad propia; restarla
-        # descontaría dos veces.
+        # Sólo las PENDIENTES. La auditoría vuelve a marcarlas en cada corrida
+        # —se calcula sobre el log, que no se toca—, así que las ya resueltas
+        # siguen apareciendo aquí. Restarlas sería descontarlas dos veces:
+        # `entidades_autor` viene de `authors.json`, que ya excluye las
+        # descartadas.
+        res = yaml.safe_load(leer("config/firmas_e09_resueltas.yml") or "{}") or {}
+        resueltas = {f["firma"] for k in ("descartadas", "confirmadas")
+                     for f in (res.get(k) or [])}
+        # Y una firma fusionada en un grupo ya no es entidad propia.
         variantes = {v for g in grupos for v in g["variantes"]}
-        out["firmas_sin_forma_de_persona"] = len(marcadas)
-        out["entidades_con_forma_de_persona"] = out["entidades_autor"] - len(marcadas - variantes)
+        pendientes = marcadas - resueltas - variantes
+        out["firmas_sin_forma_de_persona"] = len(pendientes)
+        out["entidades_con_forma_de_persona"] = out["entidades_autor"] - len(pendientes)
     return out
 
 
@@ -291,8 +299,14 @@ def main() -> None:
           "| Cifra | Valor | Base |", "|---|---|---|"]
 
     # Una base sin su par se omite: si coinciden, la distinción no existe.
+    #
+    # Salvo que esa misma cifra sea la base de otro par que SÍ difiere. Sin la
+    # excepción, `entidades_autor` desaparecía cuando coincidía con las formas
+    # de firma, y quedaba en la tabla una cifra derivada de ella sin la base
+    # contra la que compararse: exactamente lo que la columna existe para evitar.
+    bases = {a for a, b in PARES_DE_BASE if b in c and c.get(a) != c[b]}
     redundantes = {b for a, b in PARES_DE_BASE
-                   if a in c and b in c and c[a] == c[b]}
+                   if a in c and b in c and c[a] == c[b] and b not in bases}
     for k, etq, base in CIFRAS:
         if k in c and k not in redundantes:
             s.append(f"| {etq} | **{c[k]}** | {base} |")
@@ -309,13 +323,19 @@ def main() -> None:
               f"(`config/identidades_consolidadas.yml`, decisión `D-08`: el "
               f"pipeline nunca fusiona por heurística). Las restantes siguen sin "
               f"consolidar y pueden incluir variantes de una misma persona."]
-        if c.get("firmas_sin_forma_de_persona"):
-            s += ["", f"Y **{c['firmas_sin_forma_de_persona']} de las publicadas no "
-                  "son personas**: son fragmentos de cadena de afiliación que la "
-                  "fuente metió en la lista de autores (regla `E-09`). Siguen "
-                  "contando y con ficha, porque descartarlas también es una "
-                  "decisión de identidad; están encoladas en "
-                  "`internal/ambiguities_authors.csv` y en `make revision`."]
+
+    # Fuera del bloque anterior: que haya consolidación y que la auditoría haya
+    # marcado firmas son dos condiciones sin relación. Anidarlas dejaba la fila
+    # de `E-09` en la tabla sin ninguna explicación en un despliegue nuevo.
+    if c.get("firmas_sin_forma_de_persona"):
+        s += ["", f"Y **{c['firmas_sin_forma_de_persona']} de las publicadas "
+              "probablemente no correspondan a personas**: la auditoría las marcó "
+              "como probables fragmentos de cadena de afiliación que la fuente "
+              "metió en la lista de autores (regla `E-09`). Dos de las señales son "
+              "invariantes de la fuente; la tercera es una heurística sobre la "
+              "forma del nombre, y sola no basta. Siguen contando y con ficha: "
+              "confirmarlo es una decisión de identidad, y por `D-08` la toma una "
+              "persona en `make revision`."]
 
     s += ["", "---", "", "## Colas de revisión humana", "",
           "Capa interna. Ninguna se resuelve automáticamente "

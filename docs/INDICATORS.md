@@ -8,7 +8,9 @@ La columna «Disponible» y las coberturas son **medidas sobre los datos**, no
 estimadas. Ningún indicador entró al catálogo sin verificación.
 
 Base: 823 publicaciones (2023–2025) · 816 con métricas · 818 con autoría
-detallada · 589 formas de firma · 1.207 pares autor × publicación.
+detallada · 589 formas de firma · 1.207 apariciones firma × publicación
+(1.205 pares distintos: una firma se repite en tres posiciones de un mismo
+trabajo).
 
 ---
 
@@ -23,7 +25,7 @@ detallada · 589 formas de firma · 1.207 pares autor × publicación.
 | `P-03` | Tipo documental | Distribución por tipo | `group by tipo` | `tipo_documental` | **sí** 100 % | alta | ✅ | Permite excluir tipos no citables del impacto |
 | `P-04` | Fuentes distintas | Revistas y otras fuentes | `count(distinct Source ID)` | `Source ID` | **sí** 495 | alta | ✅ | `Source ID` mejor clave que ISSN |
 | `P-05` | Ranking de fuentes | Fuentes por volumen | `group by fuente, order desc` | `Scopus Source title` | **sí** | alta | ✅ | Volumen ≠ calidad. No ordenar por métrica de revista |
-| `P-06` | Autores UFT distintos | Formas de firma detectadas | `count(distinct autor)` | tabla maestra | **parcial** 556 publicadas de 589 en la fuente | media | ✅ | **No son personas.** 589 en la fuente → 556 publicadas tras fusionar 63 variantes en 30 personas por revisión humana. De esas 556, **4 no son personas sino fragmentos de afiliación** (regla `E-09`, encolados): con forma de persona hay **552**. Quedan 31 grupos de variantes y 20 perfiles fragmentados sin revisar |
+| `P-06` | Autores UFT distintos | Formas de firma detectadas | `count(distinct autor)` | tabla maestra | **parcial** 556 publicadas de 589 en la fuente | media | ✅ | **No son personas.** 589 en la fuente → 556 publicadas tras fusionar 63 variantes en 30 personas por revisión humana. De esas 556, **4 son probables fragmentos de afiliación** (regla `E-09`, encolados, pendientes de revisión): si se confirman, quedan **552**. Quedan 31 grupos de variantes y 20 perfiles fragmentados sin revisar |
 | `P-07` | Producción por unidad académica | Pares por unidad | `group by unidad` | `unidad_academica` | **parcial** 63,8 % | **baja** | ⚠️ | Cobertura parcial + sesgo de cobertura Scopus. Advertencia obligatoria |
 | `P-08` | Distribución por idioma | Idioma del documento | `group by idioma` | `Language` | **sí** 100 % | alta | V2 | Bajo valor analítico inmediato |
 | `A-01` | Acceso abierto | Publicaciones con estado OA | `count(OA not null)` | `Open Access` | **parcial** 72,3 % | media | ⚠️ | **Ausencia ≠ «no OA»**. Reportar como «n con estado declarado» |

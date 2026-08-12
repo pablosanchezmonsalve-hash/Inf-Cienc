@@ -124,10 +124,14 @@ def main() -> None:
     # Severidad alta, no bloqueante: los datos vienen así desde la primera carga
     # y detener el build no los arregla, sólo impide publicar la advertencia.
     e09 = amb_a[amb_a["tipo"] == "E-09_firma_sin_forma_de_persona"]
-    sin_autoria = int(e09["consecuencia"].str.contains("ÚNICA detección").sum())
+    # Del dato estructurado, no de la prosa: contarlo buscando un literal dentro
+    # de una frase escrita para humanos hacía que reescribir la frase pusiera la
+    # cifra a cero sin que nada avisara.
+    afectadas = int(pd.to_numeric(
+        e09.get("n_publicaciones_sin_otra_deteccion"), errors="coerce").fillna(0).sum())
     check("E-09", "alta", "Firmas sin forma de persona encoladas, no eliminadas",
-          True, f"{len(e09)} firma(s) · {sin_autoria} de ellas son la única "
-                f"detección UFT de su publicación")
+          True, f"{len(e09)} firma(s) · {afectadas} publicación(es) quedarían sin "
+                f"autoría UFT nombrada si se descartaran")
 
     # -------------------------------------------- coherencia institucional
     detectadas = set(log["eid"])

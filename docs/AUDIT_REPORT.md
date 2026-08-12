@@ -116,7 +116,8 @@ en los datos y se perdía con un patrón que exigiera espacio.
 Inferida por parsing, restringida a la ventana de texto que precede a la
 institución foco.
 
-- Cobertura: **63,8 %** de los 1.207 pares autor × publicación.
+- Cobertura: **63,8 %** de las 1.207 apariciones firma × publicación (filas
+  del log; los pares distintos son 1.205).
 - **437 pares** como `No determinada`, sin imputar.
 - 13 unidades canónicas; **11 variantes** fuera del vocabulario, conservadas.
 
