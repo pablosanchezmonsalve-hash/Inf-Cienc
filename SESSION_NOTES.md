@@ -1536,3 +1536,45 @@ declararse.
 ### Próximo paso recomendado
 
 Fusionar el PR #27. Después, validación de PR en CI.
+
+---
+
+## Cierre · la compuerta deja de correr sólo después de fusionar
+
+`deploy.yml` disparaba en `push` a `main` y en `workflow_dispatch`, y nada más.
+Ningún pull request se validaba antes de entrar: el primero que rompiera una
+regla bloqueante lo habría hecho sobre la rama publicada. El PR #27, sin ir más
+lejos, se fusionó con la única garantía de dos verificaciones a mano.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-157 | El job de construcción y verificación corre también en `pull_request`; sólo la publicación queda atada a `main` | Verificar después de fusionar es enterarse tarde. La compuerta es la misma; lo que cambia es cuándo actúa |
+| D-158 | Las corridas de pull request se cancelan entre sí por rama; los despliegues se serializan y nunca se cancelan | De tres empujones seguidos a una rama sólo interesa el veredicto del último. Interrumpir una publicación a medias, en cambio, deja el sitio en un estado que nadie eligió |
+| D-159 | Los permisos de escritura sobre Pages bajan de la cabecera a cada job | Estaban arriba, así que las corridas de validación —que no publican nada— cargaban con permiso para publicar |
+| D-160 | La versión de Playwright se fija en el workflow, no en un `package.json` | El sitio no tiene dependencias de JavaScript y no va a tenerlas por una herramienta de prueba. Se fija la misma que se usa en local: una batería que corre contra otro navegador no comprueba lo mismo |
+| D-161 | CI invoca `src/verify/run_all.mjs` directamente, no `make verificar` | El objetivo depende de `sitio` y reconstruiría todo desde la auditoría. En CI `dist/` ya está construido, y es ese `dist/` el que hay que verificar, no otro levantado a su lado |
+| D-162 | La autoprueba de `apply_decisions` entra en CI | Es la lógica que decide qué firmas se fusionan como una persona y cuáles dejan de contarse por no serlo. Tenía 20 casos y no la ejercía nada automático |
+
+### Lo que ahora corre en cada pull request
+
+Pipeline completo, las cinco autopruebas, la comprobación de contenido sin
+JavaScript, la barrera pública/interna y la batería de `src/verify/` —contraste
+WCAG, estructura, consola, flujos, responsive e higiene—. La secuencia entera se
+ensayó en local, en el mismo orden que el workflow, antes de escribirla.
+
+### Ambigüedades abiertas
+
+- `make rendimiento` sigue fuera de CI por `D-142`: cinco corridas por página
+  contra dos servidores tarda minutos. Queda declarado, no resuelto.
+- Nada comprueba que el workflow siga cubriendo lo que dice cubrir. Si mañana
+  alguien añade un guion a `src/verify/`, entra solo —`run_all.mjs` los
+  enumera—, pero una autoprueba nueva en otro módulo hay que acordarse de
+  añadirla aquí.
+
+### Próximo paso recomendado
+
+Abrir el PR y comprobar que el disparador nuevo se ejecuta sobre él: es la
+primera vez que este repositorio valida un pull request antes de fusionarlo, y
+esa corrida es la prueba de que el cambio funciona.

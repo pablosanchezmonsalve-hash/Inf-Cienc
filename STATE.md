@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `24708be` · Cuatro fichas publicadas no son personas: la regla E-09 las detecta y 
-Snapshot: 2026-08-12
+Último commit: `284a051` · Cada cifra declara su base, y cuatro fichas publicadas probablemente n
+Snapshot: 2026-08-14
 
 ---
 
@@ -79,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 156
+## Decisiones tomadas: 162
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
