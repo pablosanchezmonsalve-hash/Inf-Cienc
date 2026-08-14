@@ -71,6 +71,25 @@ Queda registrada aquí porque la verificación automática vigila el nombre exac
 ruido, y la excepción tiene que ser una decisión escrita, no un efecto del
 nombre que se le puso a la columna.
 
+### Excepción declarada: el recuento de la cola `E-09`
+
+`src/build/common_build.py` lee un **segundo** archivo de `internal/` además de
+`matching_log.csv`: `internal/ambiguities_authors.csv`, y de él **sólo** los
+`nombre_en_fuente` de las filas de tipo `E-09_firma_sin_forma_de_persona`, y
+sólo para contarlos. Nunca `detalle`, `consecuencia` ni `resolucion`, que son
+material de conciliación interna.
+
+Lo que llega a un artefacto público es un **recuento**, nunca la lista nominal:
+«4 de las 556 fichas son probables fragmentos de cadena de afiliación,
+pendientes de revisión». Se publica porque es una limitación del dato —parte de
+las fichas probablemente no correspondan a personas— y publicar el recuento de
+autores sin ella sería publicar una cifra que ya sabemos que sobra.
+
+Queda escrita aquí y en el docstring del módulo por la misma razón que la
+anterior: `src/build/05_verify_public_layer.py` comprueba nombres de campo en
+las salidas, no de dónde se leyó cada dato. Una lectura nueva desde `internal/`
+no la detecta nada automático, así que tiene que ser una decisión declarada.
+
 ## 4. Qué sí se publica sobre la capa interna
 
 El **recuento agregado** y su explicación metodológica. Es la forma de ser

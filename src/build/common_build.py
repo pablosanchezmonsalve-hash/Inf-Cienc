@@ -1,10 +1,20 @@
 """Utilidades compartidas por el build de artefactos publicables.
 
 BARRERA DE CAPAS (decisión D-22): este módulo lee de `data/interim/` y
-`config/`. Nunca de `data/raw/` ni de `internal/`. La única excepción es
-`internal/matching_log.csv`, del que se extraen exclusivamente los campos
-publicables (autor, eid, año, unidad) — nunca la cadena de afiliación cruda ni
-el método de detección. Ver `docs/LAYERS.md`.
+`config/`. Nunca de `data/raw/`. De `internal/` lee DOS archivos, ambos
+declarados aquí y en `docs/LAYERS.md`, y de ambos se proyecta sólo lo
+publicable:
+
+  · `internal/matching_log.csv` — campos publicables (autor, eid, año, unidad).
+    Nunca la cadena de afiliación cruda ni el método de detección.
+
+  · `internal/ambiguities_authors.csv` — SÓLO los `nombre_en_fuente` de las
+    filas `E-09`, y sólo para contarlos. Nunca `detalle`, `consecuencia` ni
+    `resolucion`, que son material de conciliación interna. Lo que llega a un
+    artefacto público es un RECUENTO, no los nombres. Se lee porque que varias
+    de las fichas publicadas probablemente no correspondan a personas es una
+    limitación del dato, y publicar el recuento sin ella sería publicar una
+    cifra que ya sabemos que sobra.
 """
 
 from __future__ import annotations
@@ -154,6 +164,34 @@ def _mapa_consolidacion() -> dict[str, str]:
 CONSOLIDACION = _mapa_consolidacion()
 
 
+# Firmas que una revisión humana declaró que no son personas: fragmentos de
+# cadena de afiliación que la fuente metió en la lista de autores. La auditoría
+# los detecta (regla `E-09`) y los encola; descartarlos lo decide una persona.
+#
+# El descarte se aplica AQUÍ y no en `internal/matching_log.csv` a propósito.
+# La detección institucional que los trajo es real —la publicación sí es de la
+# UFT—, y la regla bloqueante `I-01` exige que toda publicación tenga al menos
+# una. Quitarlos del log dejaría a esas publicaciones sin ninguna y abortaría la
+# auditoría entera. Lo que no es una persona es el nombre, no la afiliación.
+def _resueltas_e09() -> tuple[set[str], set[str]]:
+    """Descartadas y confirmadas como persona. Las dos importan.
+
+    La confirmación no cambia ningún dato, pero cierra el caso: la auditoría
+    vuelve a marcar la firma en cada corrida —se calcula sobre el log, que no
+    se toca—, así que sin esta lista decir «sí es una persona» no tendría
+    efecto alguno.
+    """
+    if not (CONFIG / "firmas_e09_resueltas.yml").exists():
+        return set(), set()
+    cfg = load_config("firmas_e09_resueltas.yml") or {}
+    def leer(clave: str) -> set[str]:
+        return {f["firma"] for f in (cfg.get(clave) or [])}
+    return leer("descartadas"), leer("confirmadas")
+
+
+DESCARTADAS, CONFIRMADAS_E09 = _resueltas_e09()
+
+
 def canonizar(nombre: str) -> str:
     """Forma canónica de una firma, o la misma firma si no se consolidó."""
     return CONSOLIDACION.get(nombre, nombre)
@@ -170,6 +208,7 @@ def load_authors() -> pd.DataFrame:
     dos variantes de la misma persona aparecen por separado.
     """
     df = pd.read_csv(INTERIM / "authors_master_draft.csv", dtype=str)
+    df = df[~df["nombre_en_fuente"].isin(DESCARTADAS)]
     if not CONSOLIDACION:
         return df
 
@@ -241,10 +280,73 @@ def load_authorship() -> pd.DataFrame:
     df = df[["eid", "anio", "nombre_en_fuente", "unidad_academica",
              "posicion_autor", "n_autores_total"]].copy()
     # Único punto por el que pasan TODOS los consumidores de autoría: aplicar
-    # aquí la consolidación la propaga a los indicadores, a las fichas y al
-    # recuento de autores sin que ninguno tenga que acordarse de hacerlo.
+    # aquí la consolidación y el descarte los propaga a los indicadores, a las
+    # fichas y al recuento de autores sin que ninguno tenga que acordarse.
+    df = df[~df["nombre_en_fuente"].isin(DESCARTADAS)]
     df["nombre_en_fuente"] = df["nombre_en_fuente"].map(canonizar)
     return df
+
+
+def firmas_e09_encoladas() -> set[str]:
+    """Firmas marcadas por `E-09` que siguen esperando a que alguien decida.
+
+    Devuelve la forma CANÓNICA, no la de la fuente: si una firma marcada se
+    fusionó con otra por revisión humana, ya no tiene ficha propia, y contarla
+    aparte declararía una ficha que no existe.
+
+    Se publica el RECUENTO, no los nombres (ver la barrera de capas arriba).
+    """
+    p = INTERNAL / "ambiguities_authors.csv"
+    if not p.exists():
+        return set()
+    amb = pd.read_csv(p, dtype=str)
+    marcadas = set(amb[amb["tipo"] == "E-09_firma_sin_forma_de_persona"]["nombre_en_fuente"])
+    pendientes = marcadas - DESCARTADAS - CONFIRMADAS_E09
+    return {canonizar(f) for f in pendientes}
+
+
+def nota_p06(publicadas: int) -> dict:
+    """Puente entre las 589 formas de firma de la fuente y las que publica el sitio.
+
+    La portada mostraba 556 con una nota cualitativa y la auditoría hablaba de
+    589: dos cifras sin puente, que es justo lo que un lector no puede
+    reconciliar por su cuenta. Se construye con los números del momento en vez
+    de fijarla en config, para que no vuelva a divergir cuando alguien resuelva
+    más casos de identidad.
+
+    Declara además las firmas que la regla `E-09` marcó como probables
+    fragmentos de cadena de afiliación. Siguen contándose —descartarlas es una
+    decisión de identidad y la toma una persona, `D-08`—, pero el valor
+    publicado sobra en esa cantidad, y eso se dice en vez de esperar a que
+    alguien lo note.
+
+    Vive aquí y no en cada consumidor porque ya divergió una vez: la portada
+    servía este texto construido con las cifras del momento mientras la página
+    de autores servía el estático de `config/indicators.yml`. Dos notas para un
+    mismo indicador es una de más.
+    """
+    grupos = len(set(CONSOLIDACION.values()))
+    fusionadas = len(CONSOLIDACION)
+    descartadas = len(DESCARTADAS)
+    encoladas = len(firmas_e09_encoladas())
+    if not (grupos or descartadas or encoladas):
+        return nota("P-06")
+
+    origen = publicadas - grupos + fusionadas + descartadas
+    t = f"Formas de firma, no personas. De las {origen} detectadas en la fuente, "
+    if grupos:
+        t += (f"{fusionadas} se fusionaron en {grupos} personas tras una revisión "
+              "humana caso por caso; ")
+    if descartadas:
+        t += (f"{descartadas} se descartaron por no ser personas sino fragmentos "
+              "de cadena de afiliación; ")
+    t += f"las {publicadas - grupos} restantes siguen sin consolidar."
+    if encoladas:
+        t += (f" De las {publicadas} publicadas, {encoladas} son PROBABLES "
+              "fragmentos de cadena de afiliación, detectados por la auditoría y "
+              "pendientes de revisión humana (regla E-09): si se confirman, las "
+              f"firmas que corresponden a personas serían {publicadas - encoladas}.")
+    return {"texto": t, "destacada": bool(encoladas)}
 
 
 def denominadores() -> dict:

@@ -346,8 +346,13 @@ def main() -> None:
     resumen.sort(key=lambda a: (-a["n_publicaciones"], a["nombre"]))
 
     n_fusionadas = sum(len(v) for v in CONSOLIDADAS.values())
-    n_firmas_origen = len(resumen) - len(CONSOLIDADAS) + n_fusionadas
+    # Las descartadas cuentan en el origen: la fuente sí las traía. Sin este
+    # término, descartar cuatro firmas haría que el texto dijera que la fuente
+    # detectó 585, y la fuente detectó 589.
+    n_firmas_origen = (len(resumen) - len(CONSOLIDADAS) + n_fusionadas
+                       + len(b.DESCARTADAS))
     n_sin_revisar = len(resumen) - len(CONSOLIDADAS)
+    n_encoladas = len(b.firmas_e09_encoladas())
 
     payload = {
         "meta": b.build_meta(),
@@ -378,21 +383,34 @@ def main() -> None:
             "firmas_con_orcid_sin_confirmar": sum(
                 1 for a in resumen if a["orcid_veredicto"] == "sin_coincidencia"),
         },
-        "nota": b.nota("P-06"),
+        "nota": b.nota_p06(len(resumen)),
         # El texto se construye con las cifras del momento en vez de fijarlo:
         # decía «sin un identificador persistente no es posible consolidar»
         # justo cuando una persona acababa de consolidar 30 grupos, y decía
         # 589 junto a un recuento de 556.
         "advertencia_identidad": (
-            f"Cada ficha corresponde a una forma de firma, no necesariamente a una "
-            f"persona distinta. De las {n_firmas_origen} detectadas en la fuente, "
-            f"{n_fusionadas} se fusionaron en {len(CONSOLIDADAS)} personas tras una "
-            f"revisión humana caso por caso. Las {n_sin_revisar} restantes siguen "
-            f"sin consolidar: pueden incluir variantes de una misma persona."
-            if CONSOLIDADAS else
-            "Cada ficha corresponde a una forma de firma, no necesariamente a una "
-            "persona distinta. Las variantes de nombre no se consolidan por "
-            "heurística: requieren revisión humana, aún pendiente."
+            (f"Cada ficha corresponde a una forma de firma, no necesariamente a una "
+             f"persona distinta. De las {n_firmas_origen} detectadas en la fuente, "
+             f"{n_fusionadas} se fusionaron en {len(CONSOLIDADAS)} personas tras una "
+             f"revisión humana caso por caso"
+             # Sin esta cláusula la frase deja de cuadrar en cuanto se descarta
+             # algo: el origen las suma y ninguna otra parte las resta.
+             + (f" y {len(b.DESCARTADAS)} se descartaron por no ser personas sino "
+                "fragmentos de cadena de afiliación" if b.DESCARTADAS else "")
+             + f". Las {n_sin_revisar} restantes siguen sin consolidar: pueden "
+             f"incluir variantes de una misma persona."
+             if CONSOLIDADAS else
+             "Cada ficha corresponde a una forma de firma, no necesariamente a una "
+             "persona distinta. Las variantes de nombre no se consolidan por "
+             "heurística: requieren revisión humana, aún pendiente.")
+            # Ni siquiera «una forma de firma»: hay fichas que probablemente no
+            # correspondan a ninguna persona. Decirlo aquí y no sólo en la nota
+            # del indicador, porque esta es la página donde esas fichas se ven.
+            + (f" Además, {n_encoladas} de estas fichas son PROBABLES fragmentos "
+               "de cadena de afiliación que la fuente metió en la lista de "
+               "autores. La auditoría las detectó y están pendientes de revisión "
+               "humana: confirmarlo o descartarlo lo decide una persona, no el "
+               "pipeline." if n_encoladas else "")
         ),
     }
     b.write_json(payload, "authors.json")

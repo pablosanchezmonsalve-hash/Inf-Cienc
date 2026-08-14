@@ -96,7 +96,11 @@ def main() -> int:
         "",
         "## 1. Unidades detectadas",
         "",
-        f"Sobre **{es(total)}** pares autor × publicación de la ventana "
+        # «Apariciones» y no «pares»: `total` son filas del log, y una firma
+        # puede ocupar varias posiciones de un mismo trabajo. Los pares
+        # distintos son menos, y llamar igual a las dos cifras es el error
+        # silencioso que este proyecto persigue.
+        f"Sobre **{es(total)}** apariciones firma × publicación de la ventana "
         f"{c.INSTITUTION['ventana_temporal']['anio_inicio']}–"
         f"{c.INSTITUTION['ventana_temporal']['anio_fin']}. "
         f"**{es(sin_dato)}** ({pct(100 * sin_dato / total)} %) no permiten deducir "

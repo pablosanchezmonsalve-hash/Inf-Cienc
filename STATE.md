@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `703003e` · Guía de integración con Claude Design
-Snapshot: 2026-08-10
+Último commit: `24708be` · Cuatro fichas publicadas no son personas: la regla E-09 las detecta y 
+Snapshot: 2026-08-12
 
 ---
 
@@ -23,20 +23,30 @@ Snapshot: 2026-08-10
 
 Las que gobiernan todo lo publicado. Si alguna cambia, se regenera este archivo.
 
-| | |
-|---|---|
-| Ventana temporal | **2023–2025** |
-| Publicaciones (universo) | **823** |
-| Con métricas | **816** |
-| Con autoría detallada | **818** |
-| Formas de firma de autor | **589** |
-| Pares autor × publicación | **1207** |
-| Firmas con ORCID | **240** |
-| Indicadores evaluados | **40** |
-| Indicadores publicados | **27** |
-| Reglas de validación | **29** |
-| Reglas bloqueantes fallando | **0** |
-| Scopus Affiliation ID | **60105368** |
+Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la consolidación de identidades cambia el resultado figuran las dos, porque citar una donde corresponde la otra es un error silencioso.
+
+| Cifra | Valor | Base |
+|---|---|---|
+| Ventana temporal | **2023–2025** | `config/institution.yml` |
+| Publicaciones (universo) | **823** | denominador `universo_total` · `D-16` |
+| Con métricas | **816** | denominador `con_metricas` · `D-16` |
+| Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
+| Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
+| Entidades de autor publicadas | **556** | tras consolidación humana · **la que sirve el sitio** |
+| Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
+| Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
+| Firmas con ORCID | **240** | sin consolidar · `data/enriched/authors_orcid.csv` |
+| Entidades con forma de persona | **552** | descontando las marcadas por `E-09`, pendientes de revisión |
+| Entidades con ORCID | **216** | tras consolidación humana · **la que sirve el sitio** |
+| Indicadores evaluados | **40** | `config/indicators.yml` |
+| Indicadores publicados | **27** | `config/indicators.yml`, `publicar: true` |
+| Reglas de validación | **30** | `data/interim/validation_report.csv` |
+| Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
+| Scopus Affiliation ID | **60105368** | `config/institution.yml` |
+
+Las cifras de autor van en dos bases porque una revisión humana declaró que **63 formas de firma eran 30 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+
+Y **4 de las publicadas probablemente no correspondan a personas**: la auditoría las marcó como probables fragmentos de cadena de afiliación que la fuente metió en la lista de autores (regla `E-09`). Dos de las señales son invariantes de la fuente; la tercera es una heurística sobre la forma del nombre, y sola no basta. Siguen contando y con ficha: confirmarlo es una decisión de identidad, y por `D-08` la toma una persona en `make revision`.
 
 ---
 
@@ -46,7 +56,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 413 |
+| `internal/ambiguities_authors.csv` | 417 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/orcid_conflicts.csv` | 1 |
 | `internal/identity_candidates.csv` | 17 |
@@ -69,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 142
+## Decisiones tomadas: 156
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

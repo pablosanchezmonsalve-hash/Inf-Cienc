@@ -113,6 +113,45 @@ cuando el autor tenía doble afiliación (30 pares se atribuían a
 corrección redujo la cobertura declarada de unidad de 70,1 % a los valores
 reales del punto 3.
 
+### Cuatro firmas publicadas que probablemente no son personas
+
+El mismo separador produce un segundo efecto, y este llega hasta lo publicado:
+**cuatro de las formas de firma son probables fragmentos de cadena de
+afiliación** que entraron en la lista de autores. Tienen ficha pública.
+
+| Firma | Publicación | Qué la delata |
+|---|---|---|
+| `and Senior Lecturer` | `2-s2.0-85190421197` | posición 9 de 7 autores declarados |
+| `School of Psychology` | `2-s2.0-85151493381` | la misma firma en las posiciones 2, 5 y 9 |
+| `Metabolism` | `2-s2.0-85199751688` | ninguna inicial con punto |
+| `Movement Sciences (NUTRIM)` | `2-s2.0-85207388806` | ninguna inicial con punto |
+
+En **las cuatro publicaciones son la única detección UFT**: si se descartaran,
+esas publicaciones quedarían sin autoría UFT nombrada. Siguen en el universo,
+porque la afiliación que las trajo es real; lo que se pone en duda es el nombre,
+no la afiliación.
+
+**Las tres señales no pesan igual, y eso decide cuánto puede afirmarse.** Las
+dos primeras de la tabla son invariantes: la fuente se contradice a sí misma. La
+tercera —no llevar ninguna inicial con punto— es una heurística sobre la forma
+del nombre. Aquí aísla exactamente estos cuatro casos entre 589 firmas, pero en
+otro corpus marcaría a un autor mononímico, que es una persona real. Por eso
+`Metabolism` y `Movement Sciences (NUTRIM)`, que sólo disparan esa tercera, son
+**probables** y no un hecho establecido.
+
+Las detecta la regla `E-09` de `src/audit/05_validation_rules.py`, y **no se
+eliminan**: declarar que una firma no es una persona es una decisión de
+identidad, y `D-08` la reserva a la revisión humana. Están encoladas en
+`internal/ambiguities_authors.csv` y en la cola «Firma sin forma de persona» de
+`make revision`.
+
+**Efecto en `P-06`:** publica **556**, y si las cuatro se confirmaran, las firmas
+que corresponden a personas serían **552**. La nota del indicador lo declara
+mientras la revisión siga pendiente. Al resolver,
+`config/firmas_e09_resueltas.yml` registra los dos veredictos: las descartadas
+dejan de contar, y las confirmadas como persona salen de la cola sin cambiar
+ninguna cifra.
+
 ## 8. Un duplicado probable sin resolver
 
 Dos registros comparten título normalizado con EID y DOI distintos:

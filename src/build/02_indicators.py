@@ -33,25 +33,7 @@ def main() -> None:
     intl = sum(1 for x in uni["es_internacional"] if x == "True")
 
     def nota_firmas():
-        """Puente entre las 589 de la fuente y las que publica el sitio.
-
-        La portada mostraba 556 con una nota cualitativa y la auditoría hablaba
-        de 589: dos cifras sin puente, que es justo lo que un lector no puede
-        reconciliar por su cuenta. Se construye con los números del momento en
-        vez de fijarla en config, para que no vuelva a divergir cuando alguien
-        resuelva más casos de identidad.
-        """
-        publicadas = authorship["nombre_en_fuente"].nunique()
-        grupos = len(set(b.CONSOLIDACION.values()))
-        fusionadas = len(b.CONSOLIDACION)
-        if not grupos:
-            return b.nota("P-06")
-        origen = publicadas - grupos + fusionadas
-        return {"texto": (
-            f"Formas de firma, no personas. De las {origen} detectadas en la "
-            f"fuente, {fusionadas} se fusionaron en {grupos} personas tras una "
-            f"revisión humana caso por caso; las {publicadas - grupos} restantes "
-            "siguen sin consolidar."), "destacada": False}
+        return b.nota_p06(authorship["nombre_en_fuente"].nunique())
 
     def kpi(code, valor, sufijo=None, extra=None):
         spec = b.indicador(code)

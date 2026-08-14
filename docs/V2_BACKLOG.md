@@ -1,9 +1,17 @@
 # Pendientes para V2
 
-**Fase:** 3 · Cerrada la V1
+**Fase:** 3 · Cerrada la V1 · **Reconciliado con el repositorio:** 2026-08-11
 
 Ordenados por lo que desbloquean. Los pendientes `T-xx` vienen de fases
-anteriores y siguen abiertos.
+anteriores; los que ya se cerraron lo declaran, con lo que quedó abierto en su
+lugar.
+
+> Este archivo se mantiene **a mano** y por eso envejece: entre el cierre de la
+> V1 y esta reconciliación, tres entradas describían un estado que el
+> repositorio ya había superado. Las cifras de autor que aparecen aquí van
+> siempre con su base —firmas sin consolidar o entidades publicadas—, por la
+> misma razón que en `STATE.md`: sin base declarada, dos cifras verdaderas
+> parecen contradecirse.
 
 ---
 
@@ -11,17 +19,38 @@ anteriores y siguen abiertos.
 
 | # | Pendiente | Desbloquea | Origen |
 |---|---|---|---|
-| **V2-01** | Enriquecer ORCID desde Crossref por DOI (cobertura 97,7 %) | Identidad persistente; consolidación de variantes; campo exigido por `PROJECT_SPEC` | T-01 |
-| **V2-02** | Revisión humana de las 123 variantes de nombre | `C-05` red de coautoría; recuento real de personas | T-03 |
+| **V2-01** | Subir la cobertura de ORCID desde el 38,8 % actual, confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
+| **V2-02** | Resolver los 31 grupos de variantes de nombre que siguen pendientes | `C-05` red de coautoría; recuento real de personas | T-03 |
 | **V2-03** | Revisión humana de los 20 identificadores fragmentados | `C-07` liderazgo autoral | T-04 |
 | **V2-04** | Validar institucionalmente el vocabulario de unidades | Retirar la advertencia destacada de `P-07` | T-02 |
 | **V2-05** | Reexportar Scopus con fecha de corte declarada | Cierra la única brecha de trazabilidad que queda | T-06 |
 | **V2-06** | Reexportar SciVal con autocitas | `X-01` tasa de autocitación | Fase 2 |
 | **V2-07** | Decidir el duplicado probable Article/Letter | Cierra la última ambigüedad de publicaciones | T-05 |
 
-**V2-01 es el de mayor rendimiento.** Sin ORCID, las 589 firmas no pueden
-consolidarse y tres indicadores quedan bloqueados. Es la única vía identificada
-que no depende de trabajo manual.
+**Lo que cambió desde que se escribió este bloque.** Decía que sin ORCID las 589
+firmas no podían consolidarse y que era la única vía sin trabajo manual. Las dos
+afirmaciones caducaron:
+
+- **La vía Crossref ya se recorrió.** `T-01` se cerró el 2026-08-01 con 174
+  firmas, y la ampliación desde el registro más las decisiones humanas la
+  dejaron en **240 asignaciones sobre 589 formas de firma sin consolidar**, que
+  son **216 de 556 entidades publicadas (38,8 %)**. El 100 % no es alcanzable
+  sin inventar datos: el argumento está en `docs/ORCID_COVERAGE.md` §5 —sus
+  cifras de portada son anteriores a la revisión humana, el razonamiento no—.
+- **La consolidación no esperó al ORCID.** De los 110 casos que `make revision`
+  puso delante de una persona —repartidos en cuatro colas—, 52 se resolvieron:
+  51 «misma persona» y 1 «personas distintas». Su cierre transitivo dejó **63
+  formas de firma convertidas en 30 personas**
+  (`config/identidades_consolidadas.yml`). El camino fue humano y caso por caso,
+  que es justo lo que `D-08` exige y lo que este párrafo daba por imposible.
+
+No confundir dos recuentos que coinciden en el número: la cola de variantes de
+nombre tiene **51 grupos** (`T-03`, 123 filas en `internal/ambiguities_authors.csv`),
+y **51** es también el total de veredictos «misma» sumando las cuatro colas. Son
+conjuntos distintos.
+
+Queda `T-19`: cada candidato por afiliación que una persona confirme sube la
+cobertura sin relajar el criterio de evidencia (`D-101`).
 
 ---
 
@@ -60,7 +89,7 @@ salvo el renderizador de la red.
 
 | # | Decisión | Estado |
 |---|---|---|
-| **T-11** | Alcance de publicación de fichas de autor | **Supuesto vigente:** se publican las 589, ranking por defecto n ≥ 5 (`config/publication.yml`). Sin confirmar |
+| **T-11** | Alcance de publicación de fichas de autor | **Supuesto vigente:** se publican las **556 entidades** —las 589 formas de firma de la fuente, con 63 ya fusionadas en 30 personas—, ranking por defecto n ≥ 5 (`config/publication.yml`). Sin confirmar |
 | **T-13** | Confirmar la semántica del percentil de citación con documentación de SciVal | Determinada empíricamente (correlación −0,66), no documentalmente |
 | — | Licencia de datos derivados (CC BY 4.0) | Propuesta en `DATA_LICENSE.md`, sin validar |
 | — | Alcance de publicación de métricas de Elsevier | Sin verificación jurídica |
@@ -75,7 +104,7 @@ salvo el renderizador de la red.
 | **V2-14** | Los textos de `docs/` citan cifras de esta institución | Un despliegue replicado debe revisarlos a mano (`REPLICATION.md` §4) |
 | **V2-15** | Los denominadores de `config/indicators.yml` se actualizan a mano | Deliberado: cambiarlos es una decisión. Podría automatizarse con confirmación explícita |
 | **V2-16** | Las páginas HTML repiten la estructura del `<head>` | Con 9 páginas es manejable; con más conviene una plantilla |
-| **V2-17** | Sin pruebas automatizadas del sitio | Existe una verificación manual con Playwright; no está en el repositorio |
+| **V2-17** | La batería de verificación del sitio no corre en CI | Ya **no** es cierto que no exista ni que esté fuera del repositorio: vive en `src/verify/` y se corre con `make verificar` —contraste WCAG, estructura, consola, flujos, responsive e higiene—, con servidor propio (`D-137`, `D-138`, `D-139`). Lo que falta es que `deploy.yml` la ejecute: hoy CI corre el pipeline, las pruebas `--test` de la lógica de ORCID, la comprobación de contenido sin JavaScript y la de barrera pública/interna, pero ninguna que abra un navegador |
 | **V2-18** | `Molecular Sequence Numbers` sigue apareciendo en la auditoría | Excluida del dataset procesado; la regla `E-06` la reporta como hallazgo (T-07 cerrado en el build, no en la auditoría) |
 
 ---
