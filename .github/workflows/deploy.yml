@@ -41,9 +41,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # Sólo los usa `configure-pages`, y sólo en las corridas que publican.
+      # Lo pide `configure-pages`, que llama a la API de Pages. El paso está
+      # guardado con un `if:` y no corre en pull request, pero los permisos de
+      # un job no admiten condición: en una corrida de validación el token
+      # lleva este permiso sin que nada lo use.
+      #
+      # Quitarlo exigiría mover `configure-pages` y `upload-pages-artifact` a
+      # `desplegar`, y no se puede: el segundo sube `dist/`, que sólo existe
+      # aquí. Habría que pasar el sitio entero entre jobs —subirlo y volver a
+      # bajarlo— para ahorrar un permiso que ninguna corrida de PR ejerce. No
+      # compensa; queda escrito para que sea una decisión y no un descuido.
       pages: write
-      id-token: write
     steps:
       - uses: actions/checkout@v5
 
@@ -56,7 +64,7 @@ jobs:
       # runner suele traerlo, pero «suele» no es una garantía: sin Node el build
       # NO falla —se degrada a un sitio que exige JavaScript— y en CI nadie lee
       # los avisos. Se fija la versión para que el despliegue sea determinista.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 
