@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `fa9414b` · El catálogo publica los 40 indicadores evaluados, no sólo los 27 que s
+Último commit: `744b672` · El catálogo publicaba un repr de Python, y la guarda que lo caza marca
 Snapshot: 2026-08-14
 
 ---
@@ -79,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 175
+## Decisiones tomadas: 176
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

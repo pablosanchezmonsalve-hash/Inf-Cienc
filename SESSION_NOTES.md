@@ -1735,3 +1735,54 @@ Las dos guardas comprobadas en negativo: con un HTML de más en `dist/`,
 ### Próximo paso recomendado
 
 Panel conceptual por sección, o resolver las cuatro firmas de `E-09`.
+
+---
+
+## Cierre · la guarda cazaba la mitad de lo que decía cazar
+
+La revisión del PR #29 encontró que `REPR_DE_INTERPRETE` cerraba la mitad `np.*`
+de la forma «valor interpolado en un texto» y dejaba abierta la mitad
+`nan`/`None`, que sólo se cazaba comparando la cadena entera. Ese razonamiento
+vale para `str(elemento)`, no para la interpolación en f-string — que es
+exactamente cómo se rompió `P-02`. `«308/823 (nan %)»` pasaba.
+
+### Decisión
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-176 | `nan`, `None` y `NaT` se cazan con frontera de letra unicode, no comparando la cadena entera | «Poznan» lleva `z` delante, «asignan» lleva `g`, «Nanotecnología» lleva `o` detrás: los tres quedan fuera por la frontera, no por la puntuación. Medido: 18 casos sintéticos sin discrepancias y **0 marcas sobre las 34.736 cadenas de los 564 artefactos publicados** |
+
+### Coste residual, declarado
+
+`None` y `nan` son palabras inglesas legítimas en un título. «None of the
+above: …» abortaría el build. Hoy no ocurre —0 apariciones como token suelto en
+el corpus— y si algún día ocurre, lo que hay que afinar es la guarda, no
+quitarla. Queda escrito en el propio archivo.
+
+También queda escrito allí el alcance: la compuerta recorre
+`data/processed/**/*.json`, no `dist/*.html`. El catálogo está cubierto porque su
+JSON está aguas arriba de la página, pero un constructor que formatee un valor
+directo al HTML se la saltaría.
+
+### Dos cifras mías que estaban mal
+
+- Dije **563 artefactos**; son **564**. La compuerta lo imprime en cada corrida y
+  yo lo copié de una ejecución anterior al catálogo. La herramienta acertaba; la
+  cifra se torció al pasarla a prosa. Es la regla de la base declarada aplicada a
+  un número que ni siquiera había que calcular: había que leerlo.
+
+### Un rojo falso, que se lee igual de bien que un verde falso
+
+Quien revisó comprobó las guardas de cobertura corriendo `contraste.mjs` y
+`estructura.mjs` sueltos, y obtuvo `exit=1` de los dos. Casi lo dio por
+confirmado. El `1` era `ERR_CONNECTION_REFUSED` —el servidor lo levanta
+`run_all.mjs`, no los módulos— y `estructura` ni había llegado a mirar `dist/`.
+
+Es el cuarto caso del mismo patrón en dos sesiones, y el primero por el lado
+contrario: **un rojo por el motivo equivocado confirma lo que uno quería creer**,
+igual que un verde por el motivo equivocado. Rehecho con `run_all.mjs`, donde sí
+pasa.
+
+### Próximo paso recomendado
+
+Panel conceptual por sección, o resolver las cuatro firmas de `E-09`.

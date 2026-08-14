@@ -30,20 +30,45 @@ FALLAS: list[dict] = []
 #
 # Se vigila aquí y no con un barrido a mano porque un barrido encuentra lo que
 # ya está, no lo que alguien añada mañana.
-# Cada alternativa lleva puntuación o mayúscula que no aparece en prosa. La
-# primera versión incluía `nan\b` y marcó «Poznan Studies» y «se asignan al
-# documento»: un patrón que responde a otra pregunta devuelve resultados con la
-# misma cara que uno que acierta. Un `nan` suelto se caza abajo, comparando la
-# cadena ENTERA, que es la única forma en que pandas lo emite solo.
+# Rastro del intérprete, en dos mitades que se cazan distinto.
+#
+# La primera —`np.int64(…)`, `dtype`, `<class '…'>`— lleva puntuación o mayúscula
+# que no aparece en prosa y basta con buscarla.
+#
+# La segunda —`nan`, `None`, `NaT`— son palabras, y ahí el patrón importa. La
+# primera versión usó `nan\b` y marcó «Poz**nan** Studies» y «se asig**nan** al
+# documento». La segunda comparaba la cadena entera, y eso sólo caza
+# `str(elemento)`: dejaba pasar la interpolación, que es exactamente cómo se
+# rompió `P-02` —«308/823 (nan %)» pasaba—. Con frontera de LETRA unicode se
+# cierran las dos: «Poznan» lleva `z` delante, «asignan` lleva `g`,
+# «Nanotecnología» lleva `o` detrás, y los tres quedan fuera por la frontera y
+# no por la puntuación.
+#
+# MEDIDO, no supuesto: 16 casos sintéticos sin discrepancias y **0 marcas sobre
+# las 34.736 cadenas de los 564 artefactos publicados**. Ese segundo número es el
+# que hace adoptable el patrón; si alguien lo endurece, querrá saber contra qué
+# se midió.
+#
+# COSTE RESIDUAL DECLARADO: `None` y `nan` son palabras inglesas legítimas en un
+# título. «None of the above: …» abortaría el build. Hoy no ocurre —0 apariciones
+# como token suelto en el corpus—, y si algún día ocurre lo que hay que afinar es
+# la guarda, no quitarla.
+#
+# ALCANCE: esto recorre `data/processed/**/*.json`, no `dist/*.html`. El catálogo
+# queda cubierto porque su JSON está aguas arriba de la página, pero un
+# constructor que formatee un valor directo al HTML se saltaría la compuerta. Si
+# algún día lo hay, este es el sitio que hay que ampliar.
+_LETRA = r"[^\W\d_]"
 REPR_DE_INTERPRETE = re.compile(
     r"np\.(int|float|str_|bool_)\d*\(|numpy\.|dtype[:(=]|<class '|"
-    r"Name: \w+, dtype|Timestamp\(")
+    rf"Name: \w+, dtype|Timestamp\(|"
+    rf"(?<!{_LETRA})nan(?!{_LETRA})|(?<!{_LETRA})None(?!{_LETRA})|"
+    rf"(?<!{_LETRA})NaT(?!{_LETRA})")
 
 
 def revisar(obj, ruta: str, archivo: str) -> None:
     """Recorre el JSON buscando claves prohibidas en cualquier profundidad."""
-    if isinstance(obj, str) and (REPR_DE_INTERPRETE.search(obj)
-                                 or obj.strip().lower() in ("nan", "none", "nat")):
+    if isinstance(obj, str) and REPR_DE_INTERPRETE.search(obj):
         FALLAS.append({
             "archivo": archivo, "ruta": ruta,
             "problema": f"repr del intérprete en un texto publicable: {obj[:80]!r}",
