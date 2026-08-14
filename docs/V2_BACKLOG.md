@@ -104,7 +104,7 @@ salvo el renderizador de la red.
 | **V2-14** | Los textos de `docs/` citan cifras de esta institución | Un despliegue replicado debe revisarlos a mano (`REPLICATION.md` §4) |
 | **V2-15** | Los denominadores de `config/indicators.yml` se actualizan a mano | Deliberado: cambiarlos es una decisión. Podría automatizarse con confirmación explícita |
 | **V2-16** | Las páginas HTML repiten la estructura del `<head>` | Con 9 páginas es manejable; con más conviene una plantilla |
-| **V2-17** | La batería de verificación del sitio no corre en CI | Ya **no** es cierto que no exista ni que esté fuera del repositorio: vive en `src/verify/` y se corre con `make verificar` —contraste WCAG, estructura, consola, flujos, responsive e higiene—, con servidor propio (`D-137`, `D-138`, `D-139`). Lo que falta es que `deploy.yml` la ejecute: hoy CI corre el pipeline, las pruebas `--test` de la lógica de ORCID, la comprobación de contenido sin JavaScript y la de barrera pública/interna, pero ninguna que abra un navegador |
+| ~~**V2-17**~~ | ~~La batería de verificación del sitio no corre en CI~~ | **Cerrado (2026-08-14).** `deploy.yml` ejecuta `src/verify/run_all.mjs` y la autoprueba de `apply_decisions`, y el job de verificación corre también en `pull_request`: antes la compuerta sólo actuaba al empujar a `main`, o sea después de fusionar. Queda una brecha declarada aparte: `make rendimiento` sigue fuera por tardar minutos (`D-142`) |
 | **V2-18** | `Molecular Sequence Numbers` sigue apareciendo en la auditoría | Excluida del dataset procesado; la regla `E-06` la reporta como hallazgo (T-07 cerrado en el build, no en la auditoría) |
 
 ---

@@ -1,30 +1,49 @@
-name: Construir y desplegar
+name: Construir, verificar y desplegar
 
-# Reconstruye el sitio desde los datos versionados y lo publica en GitHub Pages.
+# Reconstruye el sitio desde los datos versionados, lo verifica y lo publica en
+# GitHub Pages.
 #
 # El pipeline es el mismo que en local (`make sitio`): auditoría → validación →
 # artefactos → ensamblado. Si una regla bloqueante falla o si la verificación de
 # capas encuentra material interno en un artefacto público, el job falla y NO se
 # publica nada. Es la misma compuerta, ejecutada por CI.
+#
+# DOS DISPARADORES, UN SOLO JOB DE VERIFICACIÓN
+#   La compuerta corría sólo al empujar a `main`, es decir DESPUÉS de fusionar:
+#   ningún pull request se validaba antes de entrar, y el primero que rompiera
+#   una regla bloqueante lo haría sobre la rama publicada. Ahora `construir`
+#   corre también en `pull_request` y `desplegar` sigue atado a `main`, de modo
+#   que se verifica lo mismo antes y después, y sólo se publica después.
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
+# Cada job pide lo suyo. Antes esto vivía arriba y las dos mitades cargaban con
+# permiso de escritura en Pages, incluidas las corridas de pull request, que no
+# publican nada.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Un despliegue a la vez; no cancela el que esté en curso.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  # Los despliegues se serializan bajo un grupo único y no se cancelan entre sí:
+  # interrumpir una publicación a medias deja el sitio en un estado que nadie
+  # eligió. Las corridas de pull request van a un grupo por rama y ahí sí se
+  # cancela la anterior — de una rama que se empuja tres veces seguidas sólo
+  # interesa el veredicto del último empujón.
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   construir:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Sólo los usa `configure-pages`, y sólo en las corridas que publican.
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v5
 
@@ -68,6 +87,13 @@ jobs:
       - name: Verificar la lógica de candidatos por afiliación
         run: python3 src/enrich/orcid_afiliacion.py --test
 
+      # Lo que decide qué firmas se fusionan como una persona y cuáles dejan de
+      # contarse por no serlo. Es la lógica con más consecuencias sobre lo
+      # publicado que existe fuera del pipeline, y hasta ahora no la ejercía
+      # nada en CI.
+      - name: Verificar la lógica de aplicación de decisiones humanas
+        run: python3 src/review/apply_decisions.py --test
+
       - name: Construir artefactos publicables
         run: python3 src/build/build_all.py
 
@@ -103,6 +129,27 @@ jobs:
           test ! -d dist/data/raw
           echo "Capa interna ausente de dist/ — verificado"
 
+      # La batería de `src/verify/`: contraste WCAG, estructura y consola,
+      # flujos interactivos, responsive e higiene de CSS/JS. Existe en el
+      # repositorio desde `D-137` y hasta ahora había que acordarse de correrla
+      # a mano — que es la forma que tiene una verificación de no correrse.
+      #
+      # La versión se fija aquí y no en un package.json porque el sitio no tiene
+      # dependencias de JavaScript y no va a tenerlas por una herramienta de
+      # prueba. Es la misma con la que se verifica en local: una batería que
+      # corre contra otro navegador no comprueba lo mismo.
+      - name: Instalar Playwright y Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      # Se invoca el guion directamente y no `make verificar`, que depende de
+      # `sitio` y volvería a construirlo todo desde la auditoría. Aquí `dist/`
+      # ya está construido por los pasos de arriba, y es justo ese `dist/` el
+      # que hay que verificar, no otro reconstruido a su lado.
+      - name: Verificar el sitio construido
+        run: node src/verify/run_all.mjs dist
+
       - name: Publicar informes de verificación
         uses: actions/upload-artifact@v5
         with:
@@ -124,14 +171,27 @@ jobs:
       # Mientras Pages no esté activado, este paso falla con
       # "Get Pages site failed" y el resto del pipeline igual se ejecuta y
       # valida: lo único que no ocurre es la publicación.
+      #
+      # Los dos se saltan en pull request: `configure-pages` llama a la API de
+      # Pages, que en una corrida de validación no tiene nada que configurar, y
+      # subir el artefacto de un PR sólo serviría para que alguien lo confundiera
+      # con lo publicado.
       - uses: actions/configure-pages@v5
+        if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: dist
 
   desplegar:
+    # Un pull request se construye y se verifica, pero no se publica. Es toda la
+    # diferencia entre los dos disparadores.
+    if: github.event_name != 'pull_request'
     needs: construir
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
