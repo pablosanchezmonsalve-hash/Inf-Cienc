@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `c774c90` · La compuerta deja de correr sólo después de fusionar (#28)
+Último commit: `dd54958` · Registra las tres decisiones que salieron de revisar el PR de CI
 Snapshot: 2026-08-14
 
 ---
@@ -79,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 165
+## Decisiones tomadas: 171
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

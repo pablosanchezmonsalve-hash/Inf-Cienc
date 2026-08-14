@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo de indicadores — Informe Cienciométrico</title>
+<meta name="description" content="Los 40 indicadores evaluados: cuáles se publican, cuáles no y por qué.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/app.css">
+<script>/* Corre antes de pintar, y las dos cosas que hace tienen que ocurrir antes.
+   1. El tema guardado: desde el módulo diferido, la página aparecería un
+      instante con el tema equivocado.
+   2. La clase `js`: marca que hay JavaScript. Las vistas conmutables se
+      contraen a una sola sólo bajo esa clase; sin JS se muestran las dos, que
+      es lo correcto —la tabla es la vía equivalente al gráfico, no un extra—. */
+(function(){var e=document.documentElement;e.className+=' js';
+try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(x){}})();</script>
+</head>
+<body data-pagina="catalogo">
+<a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+<header class="cabecera" id="cabecera"></header>
+<div class="vigencia" id="vigencia"></div>
+<main id="contenido" class="contenedor">
+  <p class="migas"><a href="index.html">Portada</a> › Catálogo de indicadores</p>
+  <header class="encabezado-seccion">
+    <h1>Catálogo de indicadores</h1>
+    <p class="intro">Este sitio publica 27 indicadores. Se evaluaron 40. Aquí
+  están los cuarenta, con su definición, su fuente, su denominador, la cobertura
+  medida sobre los datos y el estado de cada uno — incluido el motivo de los que
+  no se publican.</p>
+  </header>
+  <div id="catalogo"></div>
+</main>
+<footer class="pie" id="pie"></footer>
+<script type="module" src="assets/js/paginas.js"></script>
+</body>
+</html>

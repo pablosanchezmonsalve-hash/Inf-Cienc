@@ -1613,3 +1613,73 @@ la batería de `src/verify/`— corre antes de fusionar y no sólo después.
 ### Próximo paso recomendado
 
 El catálogo de indicadores.
+
+---
+
+## Cierre · el catálogo de indicadores, y lo que despertó al publicarlo
+
+El sitio publicaba 27 indicadores y no decía nada de los otros 13. Para un
+lector, «no está» tiene tres lecturas incompatibles —no se midió, se midió y
+salió mal, no se puede medir sin inventar el dato— y el criterio vivía sólo en
+`docs/`, que no es el sitio.
+
+Ahora hay una página, `indicadores.html`, con los cuarenta: definición, fuente,
+denominador, cobertura medida y estado, y el motivo de cada uno de los trece que
+no se publican.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-166 | El catálogo se construye en `02_indicators.py`, desde `config/indicators.yml` | Es el mismo archivo del que salen los KPI y las series. Un catálogo mantenido aparte diría lo que alguien recordó, no lo que el sitio publica: la única garantía de que «publicado» signifique publicado es que las dos cosas se lean del mismo sitio |
+| D-167 | El estado tiene cuatro valores y no dos | «No publicado» tapa la diferencia entre diferido —calculable y verificado—, no calculable —la fuente no lo entrega— y fuera de alcance —decisión, no carencia—. Son tres cosas distintas y la tercera no se arregla con más datos |
+| D-168 | Los estados no introducen colores nuevos | Reutilizan el par `--aviso-tinta` sobre `--aviso-fondo`, que ya está medido. Un verde y un rojo nuevos habrían metido dos colores sin validar en un sistema que se valida entero |
+| D-169 | El catálogo se pre-renderiza | Es justo el contenido que alguien va a citar o archivar. Una página que exige JavaScript para decir qué se publica y qué no vale poco archivada |
+| D-170 | `estructura.mjs` falla si una página de `dist/` no está en su lista de rutas | La lista es a mano porque la ficha de autor no dice nada sin `?id=`. Pero una lista a mano deja de cubrirlo todo en cuanto alguien añade una página, y el barrido sigue diciendo «0 problemas» sobre lo que no miró |
+| D-171 | Las publicaciones sin autoría UFT nombrada se rotulan | Una celda en blanco no distingue «no hay» de «no se muestra». La publicación es institucional —la afiliación la trajo— pero ninguna firma con nombre la sostiene, y eso se dice |
+
+### Lo que despertó al publicarlo
+
+`config/indicators.yml` tenía cuatro campos —`estado`, `razon`, `que_falta`,
+`mostrar_como`— que **no leía nadie**: metadatos dormidos. El catálogo los
+publica, y tres estaban caducados. De inofensivos pasaban a falsedades
+publicadas:
+
+| Dónde | Decía | Dice |
+|---|---|---|
+| `AU-05` | ORCID «no existe en ninguna de las fuentes actuales», pendiente de `T-01` | `T-01` se cerró el 2026-08-01 y el sitio publica 216 de 556. Ya no es placeholder |
+| `AU-03` | «497 de 589 firmas tienen h ≤ 1» | Base previa a la consolidación. Medido de nuevo: **466 de las 556 entidades publicadas** |
+| `C-05` | «heredaría 123 variantes de nombre sin resolver» | 123 son filas de auditoría, y 20 de los 51 grupos ya se resolvieron. Quedan **31** |
+
+Y la fuente de `AU-05` caía en el genérico «Scopus · SciVal» del mapa de
+procedencia. ORCID no está en ninguna de las dos: se declara
+`Crossref · registro de ORCID`.
+
+### El verde que no miraba
+
+La batería dio «sin fallos» sobre una página que **nunca abrió**:
+`contraste.mjs` y `estructura.mjs` llevaban la lista de páginas escrita a mano y
+`indicadores.html` no estaba en ella. Es el mismo fallo del barrido que pedía la
+ficha de autor con `?firma=` cuando la página lee `?id=`.
+
+Se añadió la página a las dos listas y, sobre todo, la guarda de `D-170`.
+Comprobada en negativo: con un HTML de más en `dist/`, la estructura falla y dice
+cuál nadie comprueba.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Un campo de configuración que nadie lee es inofensivo» | **Hasta que alguien lo lee.** Tres de cuatro estaban caducados, y el error llevaba semanas siendo invisible porque nada lo mostraba |
+| «La batería cubre el sitio» | **Cubría la lista.** Que no es lo mismo, y la diferencia no se ve desde el verde |
+
+### Ambigüedades abiertas
+
+- La cabecera `<head>` de `indicadores.html` se creó copiando la de metodología:
+  `V2-16` pasa de manejable a incómodo con diez páginas.
+- `docs/ORCID_COVERAGE.md` sigue en la base previa a la revisión (222/589).
+
+### Próximo paso recomendado
+
+Panel conceptual por sección, o resolver las cuatro firmas de `E-09` en
+`make revision`.

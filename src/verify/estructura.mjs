@@ -10,7 +10,8 @@ const DIST = process.argv[2] || process.env.DIST || 'dist';
 const RUTAS = [
   ['index.html', ''], ['produccion.html', ''], ['impacto.html', ''],
   ['colaboracion.html', ''], ['tematica.html', ''], ['autores.html', ''],
-  ['publicaciones.html', ''], ['metodologia.html', ''],
+  ['publicaciones.html', ''], ['indicadores.html', ''],
+  ['metodologia.html', ''],
   ['autor.html', '?id=giglio-jimenez-a'],
 ];
 
@@ -87,6 +88,19 @@ for (const tema of ['light', 'dark']) {
 // ---- Enlaces internos entre páginas, leídos del HTML desplegable
 console.log('\n  Enlaces internos entre páginas');
 const htmls = (await readdir(DIST)).filter(f => f.endsWith('.html'));
+
+/* GUARDA DE COBERTURA. La lista RUTAS está escrita a mano porque algunas
+   páginas necesitan parámetros —la ficha de autor no dice nada sin `?id=`—,
+   pero una lista a mano deja de cubrirlo todo en cuanto alguien añade una
+   página, y el barrido sigue diciendo «0 problemas» sobre lo que no miró.
+   Este proyecto ya pagó eso dos veces. Si aparece una página que nadie
+   comprueba, esto falla y dice cuál. */
+const cubiertas = new Set(RUTAS.map(([f]) => f));
+for (const f of htmls) {
+  if (!cubiertas.has(f)) {
+    anotar(`${f} existe en dist/ y no está en RUTAS: nadie la comprueba`);
+  }
+}
 for (const f of htmls) {
   const s = await readFile(`${DIST}/${f}`, 'utf8');
   const destinos = [...s.matchAll(/href="([^"#?:]+\.html)/g)].map(m => m[1]);

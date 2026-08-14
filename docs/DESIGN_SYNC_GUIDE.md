@@ -288,7 +288,7 @@ copiando el archivo.** Tres razones:
    qué bytes cambiaron.
 2. **Traducirlo a tokens** de `web/assets/css/app.css`. Si es un color, a los
    valores de `light-dark()`.
-3. **Medirlo.** Correr el barrido de contraste sobre las 9 páginas × 2 temas.
+3. **Medirlo.** Correr el barrido de contraste sobre las 10 páginas × 2 temas.
    Si un umbral no se despeja, el cambio no entra: se propone una variante que sí.
 4. **Regenerar** con `make kit` y comprobar que la ficha refleja el cambio.
 5. **Volver a empujar** la ficha, para que el remoto y el código vuelvan a
