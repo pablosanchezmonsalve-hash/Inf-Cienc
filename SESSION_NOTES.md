@@ -1431,3 +1431,108 @@ contra línea de referencia—: 25,1 en claro y 24,1 en oscuro.
 Fusionar el PR #26. Después, en una sesión nueva partiendo de `STATE.md`:
 conectar Claude Design, o abordar los dos pendientes reales de interfaz —panel
 conceptual por sección y catálogo de indicadores—.
+
+---
+
+## Cierre · cuatro fichas publicadas que no son personas
+
+`STATE.md` publicaba las cifras de autor sobre la base anterior a la
+consolidación —589 formas de firma y 240 con ORCID— mientras el sitio servía 556
+entidades y 216. Se corrigió el generador para que cada cifra declare su base.
+Al declararlas apareció una tercera: «pares autor × publicación» eran filas del
+log, y tres de ellas eran la misma firma repetida en una publicación. Esa firma
+era `School of Psychology`, y tirando de ahí salieron otras tres.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-143 | Cada cifra de `STATE.md` declara su base, y las de autor publican las dos | Ninguna era falsa; lo falso era presentarlas sin decir cuál era cuál. La que llegaba al punto de entrada del proyecto era justo la que el sitio no usa |
+| D-144 | La base consolidada se LEE de `data/processed/authors.json`, no se recalcula | Recalcularla sería una segunda implementación de la consolidación, y dos implementaciones divergen sin avisar. Si no coinciden, es que el build no se ha corrido, y eso se ve en la fecha |
+| D-145 | Las firmas sin forma de persona se detectan con tres señales que NO pesan igual | Dos son invariantes de la fuente —posición fuera de rango, firma repetida en un trabajo— y no admiten lectura benévola. La tercera, no llevar inicial, es heurística de forma: aquí aísla los mismos cuatro casos, pero en otra institución marcaría a un autor mononímico, que es una persona real |
+| D-146 | La regla se numera `E-09`, no `P-06` | `P-06` ya es el indicador al que esta regla afecta. Dos cosas distintas con el mismo código se confunden justo donde más importa no confundirlas |
+| D-147 | El descarte se aplica en `src/build/`, nunca sobre `internal/matching_log.csv` | `I-01` es bloqueante y se calcula sobre el log. Las cuatro firmas son la ÚNICA detección de su publicación: quitarlas del log dejaría a esas publicaciones sin ninguna y abortaría la auditoría entera |
+| D-148 | `P-06` sigue publicando 556 y declara que 552 tienen forma de persona | Declarar que una firma no es una persona es una decisión de identidad, y `D-08` la reserva a la revisión humana. Publicar 552 por decisión del pipeline sería resolverla por él |
+| D-149 | La cola «Firma sin forma de persona» trae su propio vocabulario de veredicto | «Misma persona / personas distintas» no significa nada sobre una firma sola. Un botón que no significa nada se pulsa igual |
+| D-150 | La nota de `P-06` vive en `common_build.py`, no en cada consumidor | Ya había divergido: la portada servía el texto construido con las cifras del momento y la página de autores el estático de `config/indicators.yml`. Dos notas para un indicador es una de más |
+
+### Lo que apareció al declarar las bases
+
+`School of Psychology` ocupaba tres posiciones de la misma publicación. Buscando
+la clase entera aparecieron `and Senior Lecturer` —posición 9 de 7 autores—,
+`Metabolism` y `Movement Sciences (NUTRIM)`. Las cuatro tienen ficha pública y en
+las cuatro publicaciones donde aparecen **son la única detección UFT**: esas
+publicaciones se quedan sin autoría UFT nombrada.
+
+Los dos invariantes atrapan dos de las cuatro. La señal de forma —ninguna
+inicial con punto— aísla las cuatro y sólo esas cuatro sobre 589 firmas.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Los invariantes estructurales bastan para detectar la clase» | **Falso.** Atrapan 2 de 4. `Metabolism` está en la posición 3 de 6 y `Movement Sciences (NUTRIM)` en la 8 de 14: la fuente no se contradice, simplemente el nombre no es un nombre |
+| «Basta con encolarlas» | **No.** Sin veredicto propio ni camino de aplicación, la herramienta habría recogido un botón que `apply_decisions.py` ignoraba en silencio. Peor que no ofrecerlo |
+| «Excluirlas es quitarlas del log» | **Falso, y rompía el build.** `I-01` habría pasado de 0 a 4 fallos bloqueantes |
+
+### Ambigüedades abiertas
+
+- Las cuatro firmas siguen publicadas y con ficha. El descarte lo decide una
+  persona en `make revision`; el ensayo del bucle completo se hizo y se
+  revirtió.
+- Cinco publicaciones sólo-SciVal ya salen hoy con la celda de autoría en
+  blanco (discrepancia `X-01`, sin lista de autores en Scopus). Tras un descarte
+  se les sumarían estas cuatro. Un lector no distingue «sin autoría UFT
+  nombrada» de «no se muestra»: falta rotularlo, y es decisión de interfaz.
+- `docs/ORCID_COVERAGE.md` sigue en la base previa a la revisión (222/589).
+
+### Próximo paso recomendado
+
+Abrir `make revision` y resolver los cuatro casos de la cola nueva. Después, el
+catálogo de indicadores.
+
+---
+
+## Cierre · el review encontró que el arreglo anterior no cerraba
+
+Se pasó `/code-review` al PR #27 antes de fusionarlo. Salieron 15 hallazgos, y
+los graves no eran de estilo: tres publicaban cifras equivocadas y uno rompía
+una regla no negociable de `CLAUDE.md`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-151 | «Sí es una persona» se registra igual que «no es una persona» | La auditoría vuelve a marcar la firma en cada corrida —se calcula sobre el log, que no se toca—, así que sin registrar la confirmación el veredicto no tenía ningún efecto y la única salida que el sistema ofrecía era declarar inexistente a la firma |
+| D-152 | Lo publicado dice «probables», no «no son personas» | Dos de las cuatro sólo disparan la señal heurística, sobre la que el propio código escribe que sola no basta. Publicarlo como hecho es convertir hipótesis en hecho, que `<non_negotiable_rules>` prohíbe |
+| D-153 | La segunda lectura desde `internal/` se declara en el docstring y en `docs/LAYERS.md` | `05_verify_public_layer.py` comprueba nombres de campo en las salidas, no de dónde se leyó cada dato. Una lectura nueva no la detecta nada automático: o es una decisión escrita o es una fuga esperando |
+| D-154 | Las publicaciones afectadas se cuentan por columna estructurada, no buscando un literal en la prosa | La regla contaba con `str.contains("ÚNICA detección")` sobre una frase escrita para humanos. Reescribir la frase —que es justo lo que pedía `D-152`— habría puesto la cifra a cero y publicado un «0» tranquilizador sobre el hecho que la regla existe para sacar a la luz |
+| D-155 | El YAML generado se entrecomilla con `yaml.safe_dump`, no con `repr()` de Python | `repr()` acierta casi siempre y falla con una nota que lleve las dos comillas. `DESCARTADAS` se evalúa al importar `common_build`: un archivo mal escrito no da un error localizado, mata todos los objetivos del build a la vez |
+| D-156 | «Única detección UFT» se evalúa publicación a publicación | Sobre la unión, una firma que acompañara a alguien en cualquier trabajo silenciaba el aviso para todos los demás |
+
+### Los tres que publicaban cifras falsas
+
+| Dónde | Qué habría publicado |
+|---|---|
+| `snapshot.py` | Restaba las marcadas a un total que ya las excluía: **548 donde son 552** |
+| `03_authors.py` | La advertencia dejaba de cuadrar al descartar: decía «de las 589, 63 se fusionaron… las 522 restantes», y 589 − 63 = 526 |
+| `build_review.py` | El HTML comprometido traía la redacción anterior a la corrección de concordancia: la cola y la pantalla del revisor no decían lo mismo |
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El ensayo de punta a punta validó el bucle» | **No.** Comprobé `kpis.json` tras el descarte, pero no la advertencia de `authors.json`, y nunca corrí `make estado` con firmas descartadas. Los tres fallos vivían justo ahí |
+| «Añadir el botón basta para que el veredicto exista» | **Falso.** Sin camino de aplicación, «sí es una persona» era decorativo |
+
+### Ambigüedades abiertas
+
+Quedan sin arreglar, declarados y verificados, cuatro hallazgos latentes: el
+filtro de redundancia de bases sí se corrigió, pero siguen abiertos los casos
+`E-09` sin perfil asociado (se avisa, no se bloquea) y la ausencia de una
+comprobación automática de que ninguna lectura nueva desde `internal/` entre sin
+declararse.
+
+### Próximo paso recomendado
+
+Fusionar el PR #27. Después, validación de PR en CI.

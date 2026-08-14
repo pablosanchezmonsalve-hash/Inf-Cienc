@@ -114,6 +114,25 @@ def main() -> None:
     check("P-04", "alta", "Nombres con múltiples Scopus ID encolados", True,
           f"{int((amb_a['tipo'] == 'P-04_nombre_con_multiples_scopus_id').sum())} entradas")
 
+    # E-09 vive en la familia estructural y no en la de población porque lo que
+    # dispara la detección son invariantes de la propia fuente: una posición de
+    # autoría fuera del rango que ella declara, o una firma en tres posiciones
+    # del mismo trabajo. Se numera E-09 y no P-06 a propósito: `P-06` ya es el
+    # indicador al que esta regla afecta, y dos cosas distintas con el mismo
+    # código se confunden justo donde más importa no confundirlas.
+    #
+    # Severidad alta, no bloqueante: los datos vienen así desde la primera carga
+    # y detener el build no los arregla, sólo impide publicar la advertencia.
+    e09 = amb_a[amb_a["tipo"] == "E-09_firma_sin_forma_de_persona"]
+    # Del dato estructurado, no de la prosa: contarlo buscando un literal dentro
+    # de una frase escrita para humanos hacía que reescribir la frase pusiera la
+    # cifra a cero sin que nada avisara.
+    afectadas = int(pd.to_numeric(
+        e09.get("n_publicaciones_sin_otra_deteccion"), errors="coerce").fillna(0).sum())
+    check("E-09", "alta", "Firmas sin forma de persona encoladas, no eliminadas",
+          True, f"{len(e09)} firma(s) · {afectadas} publicación(es) quedarían sin "
+                f"autoría UFT nombrada si se descartaran")
+
     # -------------------------------------------- coherencia institucional
     detectadas = set(log["eid"])
     check("I-01", "bloqueante", "Toda publicación tiene al menos una detección institucional",

@@ -442,7 +442,7 @@ ahí.
 
 **Sello de procedencia.** Franja monoespaciada bajo cada gráfico con fuente,
 corte, N y cobertura. El N **no es global**: 823 en producción, 816 en impacto,
-1.207 pares autor × publicación en `P-07`. Publicar un denominador genérico
+1.207 apariciones firma × publicación en `P-07`. Publicar un denominador genérico
 sería el error que este proyecto persigue.
 
 Por debajo del umbral de cobertura declarado en `config/indicators.yml` el sello

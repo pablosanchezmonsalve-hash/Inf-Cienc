@@ -34,6 +34,58 @@ def scopus_id_map(scopus: pd.DataFrame) -> dict[str, set[str]]:
     return out
 
 
+# Una firma de persona en esta fuente lleva siempre inicial con punto:
+# «Apellido X.», «Apellido-Compuesto X.Y.». Un fragmento de cadena de afiliación
+# —«School of Psychology», «and Senior Lecturer»— no.
+INICIAL = re.compile(r"[A-ZÁÉÍÓÚÑÜ]\.")
+
+
+def firmas_sin_forma_de_persona(log: pd.DataFrame) -> dict[str, dict[str, str]]:
+    """Firmas que probablemente no son personas, con la señal que delata a cada una.
+
+    Tres señales que NO pesan igual, y por eso se devuelven por separado en vez
+    de como un veredicto:
+
+      1 y 2 son INVARIANTES. La fuente se contradice a sí misma —una posición de
+      autoría mayor que el total de autores que ella misma declara, o una firma
+      ocupando tres posiciones del mismo trabajo— y eso no admite lectura
+      benévola.
+
+      3 es una HEURÍSTICA sobre la forma del nombre. Aquí aísla exactamente los
+      mismos casos, pero en otra institución marcaría a un autor mononímico, que
+      es una persona real. Sola no basta para acusar a nadie de no existir.
+
+    Nada de esto resuelve: alimenta una cola de revisión humana, porque declarar
+    que una firma no es una persona es una decisión de identidad (`D-08`). Quien
+    revise necesita saber cuál de las tres disparó, y de ahí que se conserven.
+    """
+    pos = pd.to_numeric(log["posicion_autor"], errors="coerce")
+    tot = pd.to_numeric(log["n_autores_total"], errors="coerce")
+    señales: dict[str, dict[str, str]] = {}
+
+    def marca(nombre: str, señal: str, evidencia: str) -> None:
+        señales.setdefault(nombre, {})[señal] = evidencia
+
+    for _, r in log[pos > tot].iterrows():
+        marca(r["nombre_en_fuente"], "posicion_fuera_de_rango",
+              f"posición {r['posicion_autor']} de {r['n_autores_total']} autores "
+              f"en {r['eid']}")
+
+    # Nadie firma dos veces el mismo trabajo. Una cadena de afiliación repetida
+    # a lo largo de la lista de autores, sí.
+    for (eid, nombre), n in log.groupby(["eid", "nombre_en_fuente"]).size().items():
+        if n > 1:
+            marca(nombre, "firma_repetida_en_publicacion",
+                  f"{n} posiciones distintas en {eid}")
+
+    for nombre in log["nombre_en_fuente"].dropna().unique():
+        if not INICIAL.search(str(nombre)):
+            marca(nombre, "sin_inicial_de_nombre",
+                  "el nombre no contiene ninguna inicial con punto")
+
+    return señales
+
+
 def main() -> None:
     c.banner("04 — POBLACIÓN DE AUTORES AFILIADOS")
 
@@ -184,6 +236,50 @@ def main() -> None:
             "clave": name, "nombre_en_fuente": name, "detalle": "",
             "consecuencia": "presente en el Excel manual, no reproducido por la extracción",
             "resolucion": "PENDIENTE_REVISION_HUMANA",
+        })
+
+    # ── E-09: firmas que no tienen forma de persona.
+    #
+    # No se eliminan aquí, y no por timidez: el descarte NO PUEDE aplicarse
+    # sobre este log. `I-01` es bloqueante, exige que toda publicación tenga al
+    # menos una detección institucional y se calcula justo sobre estas filas.
+    # Las firmas marcadas suelen ser la única detección de su publicación, así
+    # que quitarlas dejaría a esas publicaciones sin ninguna y abortaría la
+    # auditoría entera. La afiliación UFT que las trajo es real; lo que no es
+    # una persona es el nombre.
+    #
+    # El filtro vive aguas abajo, en `load_authors()`/`load_authorship()` de
+    # `src/build/common_build.py`, y sólo se activa con lo que una persona haya
+    # confirmado en `make revision`.
+    for nombre, sig in sorted(firmas_sin_forma_de_persona(log).items()):
+        eids = sorted(set(log[log["nombre_en_fuente"] == nombre]["eid"]))
+        # Publicación a publicación, no sobre la unión: una firma puede ser la
+        # única detección de un trabajo y compartir otro. Evaluarlo en bloque
+        # dejaba el aviso en silencio en cuanto acompañara a alguien en algún
+        # sitio, que es justo el caso en que hace falta.
+        solas = [e for e in eids
+                 if not set(log[(log["eid"] == e)
+                                & (log["nombre_en_fuente"] != nombre)]["nombre_en_fuente"])]
+        amb.append({
+            "tipo": "E-09_firma_sin_forma_de_persona", "severidad": "alta",
+            "clave": nombre, "nombre_en_fuente": nombre,
+            "detalle": " · ".join(f"{k} ({v})" for k, v in sorted(sig.items()))
+                       + " · publicaciones: " + ", ".join(eids),
+            # Dato estructurado, no prosa. La regla E-09 contaba las
+            # publicaciones afectadas buscando un literal dentro de esta misma
+            # frase: reescribirla la habría puesto a cero y el reporte habría
+            # publicado un «0» tranquilizador sobre el hecho que la regla existe
+            # para sacar a la luz.
+            "n_publicaciones_sin_otra_deteccion": len(solas),
+            "consecuencia": (
+                "probable fragmento de cadena de afiliación, no una persona"
+                + ("" if not solas else
+                   "; es la única detección UFT de "
+                   + (f"{len(solas)} de sus publicaciones, que quedarían"
+                      if len(solas) > 1 else
+                      "la publicación en que aparece, que quedaría")
+                   + " sin autoría UFT nombrada")),
+            "resolucion": "NO_RESOLVER_AUTOMATICAMENTE",
         })
 
     amb_df = pd.DataFrame(amb)

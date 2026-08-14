@@ -1,6 +1,6 @@
 # Validación institucional de unidades académicas
 
-**Generado** el 2026-08-03 por `src/review/build_unit_validation.py`. Regenerable.
+**Generado** el 2026-08-12 por `src/review/build_unit_validation.py`. Regenerable.
 
 ## Qué se pide
 
@@ -18,7 +18,7 @@ No hace falta responder en ningún formato especial: basta con marcar sobre este
 
 ## 1. Unidades detectadas
 
-Sobre **1.207** pares autor × publicación de la ventana 2023–2025. **437** (36,2 %) no permiten deducir unidad y se declaran como «No determinada»: no se imputan.
+Sobre **1.207** apariciones firma × publicación de la ventana 2023–2025. **437** (36,2 %) no permiten deducir unidad y se declaran como «No determinada»: no se imputan.
 
 | Unidad como aparece en el informe | Pares | ¿Nombre oficial correcto? | Corrección |
 |---|---:|---|---|
@@ -35,9 +35,9 @@ Sobre **1.207** pares autor × publicación de la ventana 2023–2025. **437** (
 | Facultad de Arquitectura y Diseño | 3 | ☐ sí  ☐ no | |
 | Escuela de Enfermería | 3 | ☐ sí  ☐ no | |
 | Escuela de Ciencias de la Familia | 2 | ☐ sí  ☐ no | |
-| School of Medicine UFT-CLC | 1 | ☐ sí  ☐ no | |
-| Facultad de Odontología y Ciencias de la Rehabilitación | 1 | ☐ sí  ☐ no | |
 | School of Nutrition and Dietetic | 1 | ☐ sí  ☐ no | |
+| Facultad de Odontología y Ciencias de la Rehabilitación | 1 | ☐ sí  ☐ no | |
+| School of Medicine UFT-CLC | 1 | ☐ sí  ☐ no | |
 | Facultad de Educación y Ciencias Sociales | 1 | ☐ sí  ☐ no | |
 | School of Civil Engineering | 1 | ☐ sí  ☐ no | |
 | Facultad de Economía y Negocios en la Univ | 1 | ☐ sí  ☐ no | |
@@ -139,17 +139,17 @@ Una afiliación real por unidad, tal como la entrega Scopus. Sirve para juzgar s
 
 > School of Family Sciences, Universidad Finis Terrae, Santiago, Chile
 
-**School of Medicine UFT-CLC** (1 pares)
+**School of Nutrition and Dietetic** (1 pares)
 
-> Innate Immunity Laboratory, Immunology Program, Biomedical Sciences Institute, Faculty of Medicine, Universidad de Chile, Santiago, Chile, Center of Biomedical Research (CIBMED), School of Medicine UF
+> School of Nutrition and Dietetic, Finis Terrae University, Santiago, 7501014, Chile
 
 **Facultad de Odontología y Ciencias de la Rehabilitación** (1 pares)
 
 > Universidad San Sebastián, Facultad de Odontología y Ciencias de la Rehabilitación, Carrera de Fonoaudiología, Santiago, Chile, Universidad Finis Terrae, Facultad de Educación, Psicología y Familia, S
 
-**School of Nutrition and Dietetic** (1 pares)
+**School of Medicine UFT-CLC** (1 pares)
 
-> School of Nutrition and Dietetic, Finis Terrae University, Santiago, 7501014, Chile
+> Innate Immunity Laboratory, Immunology Program, Biomedical Sciences Institute, Faculty of Medicine, Universidad de Chile, Santiago, Chile, Center of Biomedical Research (CIBMED), School of Medicine UF
 
 **Facultad de Educación y Ciencias Sociales** (1 pares)
 
