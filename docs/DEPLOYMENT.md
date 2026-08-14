@@ -98,6 +98,49 @@ Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'se
 `.github/workflows/deploy.yml` ejecuta el mismo pipeline que en local y publica
 en GitHub Pages con cada push a `main`.
 
+### Dos disparadores: se verifica antes y después, se publica sólo después
+
+El workflow tiene dos jobs y no corren en los mismos casos:
+
+| Job | `pull_request` | `push` a `main` | `workflow_dispatch` |
+|---|---|---|---|
+| `construir` — pipeline, autopruebas y verificación | **sí** | sí | sí |
+| `desplegar` — publica en Pages | **no** | sí | sí |
+
+Antes la compuerta corría **sólo** al empujar a `main`, es decir después de
+fusionar: ningún pull request se validaba antes de entrar, y el primero que
+rompiera una regla bloqueante lo haría sobre la rama publicada. Ahora el mismo
+job de verificación corre en las dos situaciones y lo único reservado a `main`
+es la publicación.
+
+Las corridas de pull request además:
+
+- se **cancelan entre sí** por rama (de tres empujones seguidos sólo interesa el
+  veredicto del último), mientras que los despliegues se serializan y nunca se
+  cancelan: interrumpir una publicación a medias deja el sitio en un estado que
+  nadie eligió;
+- **no tocan Pages**. Los pasos `configure-pages` y `upload-pages-artifact` se
+  saltan, y los permisos de escritura sobre Pages viven en cada job en vez de en
+  la cabecera del workflow.
+
+### Qué comprueba
+
+Además del pipeline y de las compuertas de la sección siguiente:
+
+| Paso | Qué ejerce |
+|---|---|
+| Autopruebas de los cuatro módulos de ORCID | Qué identificador se atribuye a qué persona |
+| Autoprueba de `apply_decisions` (20 casos) | Qué firmas se fusionan como una persona y cuáles dejan de contarse |
+| Contenido sin JavaScript | Que el pre-renderizado ocurrió de verdad |
+| Barrera pública/interna | Que nada de `internal/` viaja en `dist/` |
+| `src/verify/run_all.mjs` | Contraste WCAG, estructura, consola, flujos, responsive e higiene |
+
+La batería de `src/verify/` existía desde `D-137` pero había que acordarse de
+correrla a mano, que es la forma que tiene una verificación de no correrse. La
+versión de Playwright se fija en el workflow —no en un `package.json`, porque el
+sitio no tiene dependencias de JavaScript— y es la misma con la que se verifica
+en local: una batería que corre contra otro navegador no comprueba lo mismo.
+
 ### Activación: un paso manual, una sola vez
 
 > **Settings → Pages → Build and deployment → Source: `GitHub Actions`**
@@ -119,9 +162,10 @@ repositorio sea público**, o una cuenta con plan de pago (Pro, Team o
 Enterprise).
 
 Mientras Pages no esté activado, el workflow **falla sólo en el último paso**.
-Todo lo anterior —auditoría, 29 reglas de validación, build y verificación de
-capas— se ejecuta igual, y los informes quedan disponibles como artefactos de
-la ejecución. Lo único que no ocurre es la publicación.
+Todo lo anterior —auditoría, 30 reglas de validación, autopruebas, build y
+verificación de capas y del sitio— se ejecuta igual, y los informes quedan
+disponibles como artefactos de la ejecución. Lo único que no ocurre es la
+publicación.
 
 El workflow reproduce las mismas compuertas y añade una verificación extra en
 CI: falla si `internal/`, `data/raw/` o cualquier rastro de las colas de
