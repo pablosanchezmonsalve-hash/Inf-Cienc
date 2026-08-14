@@ -380,7 +380,8 @@ export function catalogo(cat) {
           <strong>${c.escapar(r.nombre)}</strong>
           ${r.definicion ? `<br><span class="nota">${c.escapar(r.definicion)}</span>` : ''}
         </td>
-        <td>${c.escapar(r.fuente)}</td>
+        <td>${r.fuente ? c.escapar(r.fuente)
+          : '<span class="sin-dato-txt">No se calcula</span>'}</td>
         <td>${den}</td>
         <td>${r.cobertura ? c.escapar(r.cobertura) : '—'}</td>
         <td><span class="estado" data-e="${r.estado}">${c.escapar(r.estado_etiqueta)}</span>

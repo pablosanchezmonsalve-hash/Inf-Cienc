@@ -13,15 +13,41 @@ Salida:
 from __future__ import annotations
 
 import json
+import re
 import sys
 
 import common_build as b
 
 FALLAS: list[dict] = []
 
+# Rastro del intérprete en un texto destinado a leerse.
+#
+# Apareció publicado: la cobertura de `P-02` decía «{2023: np.int64(228)}»
+# porque `dict()` sobre una Series de pandas conserva los tipos de numpy y su
+# repr acaba impreso tal cual. Mientras esa cadena vivió en una nota interna fue
+# fea; el día que el catálogo la publicó, pasó a ser una página enseñando el
+# tipo de dato de su propio intérprete.
+#
+# Se vigila aquí y no con un barrido a mano porque un barrido encuentra lo que
+# ya está, no lo que alguien añada mañana.
+# Cada alternativa lleva puntuación o mayúscula que no aparece en prosa. La
+# primera versión incluía `nan\b` y marcó «Poznan Studies» y «se asignan al
+# documento»: un patrón que responde a otra pregunta devuelve resultados con la
+# misma cara que uno que acierta. Un `nan` suelto se caza abajo, comparando la
+# cadena ENTERA, que es la única forma en que pandas lo emite solo.
+REPR_DE_INTERPRETE = re.compile(
+    r"np\.(int|float|str_|bool_)\d*\(|numpy\.|dtype[:(=]|<class '|"
+    r"Name: \w+, dtype|Timestamp\(")
+
 
 def revisar(obj, ruta: str, archivo: str) -> None:
     """Recorre el JSON buscando claves prohibidas en cualquier profundidad."""
+    if isinstance(obj, str) and (REPR_DE_INTERPRETE.search(obj)
+                                 or obj.strip().lower() in ("nan", "none", "nat")):
+        FALLAS.append({
+            "archivo": archivo, "ruta": ruta,
+            "problema": f"repr del intérprete en un texto publicable: {obj[:80]!r}",
+        })
     if isinstance(obj, dict):
         for k, v in obj.items():
             if k in b.CAMPOS_PROHIBIDOS:

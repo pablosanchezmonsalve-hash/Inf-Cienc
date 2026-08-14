@@ -293,7 +293,15 @@ def catalogo() -> None:
             "nombre": spec["nombre"],
             "categoria": spec.get("categoria"),
             "categoria_etiqueta": CATEGORIAS.get(spec.get("categoria"), "Otros"),
-            "fuente": b.FUENTE_POR_INDICADOR.get(code, "Scopus · SciVal"),
+            # La procedencia se afirma sólo de lo que se calcula. Un indicador
+            # no calculable no tiene fuente: tiene un motivo, y ese motivo va en
+            # su propia fila. Poner «Scopus · SciVal» sugeriría que el dato
+            # vendría de ahí, y de los cuatro no calculables sólo es cierto para
+            # dos —a `X-03` le falla la cobertura y a `X-04` la ventana, no la
+            # fuente—. Una etiqueta única para los cuatro sería falsa en la
+            # mitad.
+            "fuente": (b.FUENTE_POR_INDICADOR.get(code, "Scopus · SciVal")
+                       if estado in ("publicado", "diferido") else None),
             "denominador": nombre_den,
             "denominador_valor": den.get(nombre_den),
             "confiabilidad": spec.get("confiabilidad"),

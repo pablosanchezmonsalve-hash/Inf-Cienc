@@ -16,6 +16,7 @@
    Umbrales: WCAG 2.1 · 4,5:1 texto normal · 3,0:1 texto grande (≥24px, o
    ≥18,66px en negrita) y objetos gráficos (1.4.11). */
 
+import { readdir } from 'node:fs/promises';
 import { abrir } from './navegador.mjs';
 
 const PORT = process.env.PUERTO || 8841;
@@ -109,6 +110,19 @@ const medir = () => {
   return { texto: fallos, graficos: graf };
 };
 
+/* GUARDA DE COBERTURA, igual que en estructura.mjs y por lo mismo: la lista de
+   arriba está escrita a mano porque la ficha de autor no dice nada sin `?id=`,
+   pero deja de cubrirlo todo en cuanto alguien añade una página, y este barrido
+   seguiría diciendo «0 fallos de contraste» sobre la que no miró. Ya pasó con
+   `indicadores.html`: la batería dio verde sobre una página que nunca abrió. */
+const DIST = process.argv[2] || process.env.DIST || 'dist';
+const enDisco = (await readdir(DIST)).filter(f => f.endsWith('.html'));
+const cubiertas = new Set(PAGINAS.map(p => `${p}.html`));
+const sinCubrir = enDisco.filter(f => !cubiertas.has(f));
+if (sinCubrir.length) {
+  console.log(`  ✗ páginas en ${DIST}/ que nadie comprueba: ${sinCubrir.join(', ')}`);
+}
+
 const b = await abrir();
 let total = 0;
 for (const tema of ['light', 'dark']) {
@@ -131,5 +145,5 @@ for (const tema of ['light', 'dark']) {
   await ctx.close();
 }
 await b.close();
-console.log(`\n  TOTAL: ${total} fallo(s) de contraste`);
-process.exit(total ? 1 : 0);
+console.log(`\n  TOTAL: ${total + sinCubrir.length} fallo(s) de contraste`);
+process.exit(total + sinCubrir.length ? 1 : 0);

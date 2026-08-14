@@ -1683,3 +1683,55 @@ cuál nadie comprueba.
 
 Panel conceptual por sección, o resolver las cuatro firmas de `E-09` en
 `make revision`.
+
+---
+
+## Cierre · el catálogo publicaba un repr de Python
+
+La revisión del PR #29 encontró que la cobertura de `P-02` salía en la página
+pública y en `catalogo.json` como
+`823/823 · {2023: np.int64(228), 2024: np.int64(276), 2025: np.int64(319)}`.
+
+`dict()` sobre una Series de pandas conserva los tipos de numpy, y su repr acaba
+impreso tal cual. El defecto era anterior a este trabajo, pero mientras esa
+cadena vivió en una nota interna de factibilidad fue fea; el catálogo es lo que
+la asciende a página pública. El commit que la publica es el que debe publicarla
+limpia.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-172 | La cobertura de `P-02` se formatea como texto, no se vuelca el diccionario | Esa columna la lee una persona, no un intérprete. Un volcado arrastra el tipo de dato de quien lo produjo |
+| D-173 | `05_verify_public_layer.py` falla si un texto publicable contiene repr del intérprete | Un barrido a mano encuentra lo que ya está, no lo que alguien añada mañana. La compuerta que ya recorre todos los artefactos es el sitio donde eso se vigila |
+| D-174 | `contraste.mjs` gana la misma guarda de cobertura que `estructura.mjs` | Una verificación que no mira todo dice «0 fallos» sobre lo que no miró. Aplicado al propio instrumento, no sólo al producto |
+| D-175 | La fuente se afirma sólo de los indicadores que se calculan | Los cuatro no calculables no lo son por lo mismo: a `X-01` y `AU-04` la fuente no les entrega el dato, pero a `X-03` le falla la cobertura y a `X-04` la ventana. Una etiqueta única para los cuatro sería falsa en la mitad |
+
+### El patrón, por tercera vez en dos sesiones
+
+La primera versión de la guarda de `D-173` incluía `nan\b` y marcó **«Poznan
+Studies in Contemporary Linguistics»** y **«se asignan al documento»**. Un patrón
+que responde a otra pregunta devuelve resultados con la misma cara que uno que
+acierta. Corregido: cada alternativa lleva puntuación o mayúscula que no aparece
+en prosa, y el `nan` suelto se caza comparando la cadena entera.
+
+Es el mismo tropiezo que el `grep` ampliado con «consecuencia|resolucion» sobre
+un título de pediatría, y que el `git branch -r` que respondía con exactitud a
+una pregunta distinta de la que se creía hacer. Aquí falló en voz alta —cuatro
+falsos positivos en la compuerta— en vez de en silencio, que es la diferencia
+entre una guarda y un adorno.
+
+Quien revisó llegó al catálogo buscando `data-codigo="…"`, que no existe: la
+página emite `data-e`. Estuvo a punto de reportar «la página no marca los
+indicadores». El mismo silencio, del otro lado.
+
+### Verificación
+
+Las dos guardas comprobadas en negativo: con un HTML de más en `dist/`,
+`contraste` y `estructura` fallan y dicen cuál nadie comprueba. Barrera de capas
+0 fallas, batería completa sin fallos, y `np.int64` ausente de `dist/` y de
+`data/processed/`.
+
+### Próximo paso recomendado
+
+Panel conceptual por sección, o resolver las cuatro firmas de `E-09`.
