@@ -1578,3 +1578,38 @@ ensayó en local, en el mismo orden que el workflow, antes de escribirla.
 Abrir el PR y comprobar que el disparador nuevo se ejecuta sobre él: es la
 primera vez que este repositorio valida un pull request antes de fusionarlo, y
 esa corrida es la prueba de que el cambio funciona.
+
+---
+
+## Cierre · lo que salió de revisar el PR de CI
+
+Tres cosas que se decidieron durante la revisión del PR #28, después de que el
+cierre anterior estuviera escrito. Se registran aparte porque `docs/DECISIONS.md`
+se genera desde estas tablas: lo que no está aquí no existe para ninguna sesión
+que arranque por `STATE.md`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-163 | `id-token: write` sale del job `construir`; `pages: write` se queda | El primero no lo usaba nadie ahí: lo pide `deploy-pages`, que vive en `desplegar` y ya lo tiene. El segundo lo pide `configure-pages`, que sí vive en `construir`, y mover ese paso era imposible: `upload-pages-artifact` sube `dist/`, que sólo existe en ese job. Habría que pasar el sitio entero entre jobs para ahorrar un permiso que ninguna corrida de PR ejerce |
+| D-164 | `setup-node` sube de `@v4` a `@v5` | Era la única de las siete acciones fuera de su major vigente, y la había fijado esta misma línea de trabajo al añadir Node para el pre-renderizado mientras el resto ya estaba al día por `D-92` |
+| D-165 | La mitad restante del aviso de deprecación de Node es deuda de GitHub, no del proyecto | Medido, no supuesto: tras subir `setup-node@v5`, la corrida del 2026-08-14 nombra sólo `actions/upload-artifact@v5`, y **ése es su major vigente — no hay a dónde subir**. Queda escrito con esa frase para que dentro de unos meses nadie lo trate como deuda propia y se ponga a buscar una versión que no existe |
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Mover `upload-pages-artifact` a `desplegar` cierra el permiso» | **Falso.** El diagnóstico valía; el remedio no era aplicable. Comprobar que un remedio se puede aplicar es parte de proponerlo, no un paso posterior |
+| «`upload-artifact@v5` no puede estar señalada, es el major vigente» | **Lo estaba.** El registro lo decía y bastaba con mirarlo. Un extrañamiento no es una comprobación |
+| «El registro puede ir montado en la siguiente funcionalidad» | **No.** `docs/DECISIONS.md` se deriva de estas tablas: mientras el párrafo espera, las decisiones no existen para el camino de entrada que el propio proyecto manda usar |
+
+### Estado que deja
+
+`V2-17` cerrado: el próximo pull request ya no se fusiona a ciegas. La compuerta
+—pipeline, cinco autopruebas, contenido sin JavaScript, barrera pública/interna y
+la batería de `src/verify/`— corre antes de fusionar y no sólo después.
+
+### Próximo paso recomendado
+
+El catálogo de indicadores.
