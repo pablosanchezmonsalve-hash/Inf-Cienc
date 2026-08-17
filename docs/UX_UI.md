@@ -600,7 +600,7 @@ estilos:
 
 | Comprobación | Alcance | Resultado |
 |---|---|---|
-| Contraste WCAG 2.1 (1.4.3 y 1.4.11) | 9 páginas × 2 temas, con composición alfa, paradas de degradado y exclusión de decoración | **0 fallos** |
+| Contraste WCAG 2.1 (1.4.3 y 1.4.11) | 10 páginas × 2 temas, con composición alfa, paradas de degradado y exclusión de decoración | **0 fallos** |
 | Desborde horizontal | 430 px y 860 px | **0 px** |
 | Sitio sin JavaScript | `index`, `impacto`, `tematica` | módulos, gráficos, tablas y sellos presentes |
 | LCP | *Slow 4G*, mediana de 5 corridas | 756–784 ms (presupuesto: < 2.000 ms) |

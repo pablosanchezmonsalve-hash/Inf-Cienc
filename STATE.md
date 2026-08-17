@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `284a051` · Cada cifra declara su base, y cuatro fichas publicadas probablemente n
-Snapshot: 2026-08-14
+Último commit: `550819d` · La guarda cazaba la mitad de lo que decía cazar
+Snapshot: 2026-08-17
 
 ---
 
@@ -79,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 162
+## Decisiones tomadas: 176
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -62,8 +62,16 @@ def main() -> None:
            "Conteo de publicaciones únicas. Denominador institucional base.")
 
     por_anio = universe["anio"].value_counts().sort_index()
+    # Se formatea como texto, no se vuelca el diccionario: `dict()` sobre una
+    # Series conserva los `np.int64` de pandas, y el repr de esos objetos
+    # —«{2023: np.int64(228)}»— acababa impreso tal cual. Mientras esta cadena
+    # vivía en una nota interna de factibilidad era feo; desde que el catálogo
+    # la publica, es una página pública enseñando el tipo de dato de su propio
+    # intérprete. Esta columna la lee una persona.
     record("P-02", "Producción anual", "descriptivo", "sí",
-           f"{int(por_anio.sum())}/{n_uni} · {dict(por_anio)}", "alta", "V1",
+           f"{int(por_anio.sum())}/{n_uni} · "
+           + " · ".join(f"{int(a)}: {int(n)}" for a, n in por_anio.items()),
+           "alta", "V1",
            "Serie de 3 puntos. Insuficiente para tendencia de largo plazo.")
 
     tipos = universe["tipo_documental"].value_counts()

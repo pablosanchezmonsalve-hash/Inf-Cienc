@@ -13,15 +13,75 @@ Salida:
 from __future__ import annotations
 
 import json
+import re
 import sys
 
 import common_build as b
 
 FALLAS: list[dict] = []
 
+# Rastro del intérprete en un texto destinado a leerse.
+#
+# Apareció publicado: la cobertura de `P-02` decía «{2023: np.int64(228)}»
+# porque `dict()` sobre una Series de pandas conserva los tipos de numpy y su
+# repr acaba impreso tal cual. Mientras esa cadena vivió en una nota interna fue
+# fea; el día que el catálogo la publicó, pasó a ser una página enseñando el
+# tipo de dato de su propio intérprete.
+#
+# Se vigila aquí y no con un barrido a mano porque un barrido encuentra lo que
+# ya está, no lo que alguien añada mañana.
+# Rastro del intérprete, en dos mitades que se cazan distinto.
+#
+# La primera —`np.int64(…)`, `dtype`, `<class '…'>`— lleva puntuación o mayúscula
+# que no aparece en prosa y basta con buscarla.
+#
+# La segunda —`nan`, `None`, `NaT`— son palabras, y ahí el patrón importa. La
+# primera versión usó `nan\b` y marcó «Poz**nan** Studies» y «se asig**nan** al
+# documento». La segunda comparaba la cadena entera, y eso sólo caza
+# `str(elemento)`: dejaba pasar la interpolación, que es exactamente cómo se
+# rompió `P-02` —«308/823 (nan %)» pasaba—. Con frontera de LETRA unicode se
+# cierran las dos: «Poznan» lleva `z` delante, «asignan` lleva `g`,
+# «Nanotecnología» lleva `o` detrás, y los tres quedan fuera por la frontera y
+# no por la puntuación.
+#
+# MEDIDO, no supuesto: 16 casos sintéticos sin discrepancias y **0 marcas sobre
+# las 34.736 cadenas de los 564 artefactos publicados**. Ese segundo número es el
+# que hace adoptable el patrón; si alguien lo endurece, querrá saber contra qué
+# se midió.
+#
+# COSTE RESIDUAL DECLARADO, y no está donde parecía. La frontera es de LETRA, así
+# que el guión no la cruza: cualquier cadena donde `nan` quede entre guiones pasa
+# por marcada. Eso apunta a los IDENTIFICADORES DE AUTOR antes que a los títulos.
+#
+#   · `id` de autor: son slugs con guión —`abara-j-f`—, y `Nan` es un nombre de
+#     pila corriente en la fuente china. Una firma «Nan Y.» daría el id `nan-y`,
+#     que esta guarda marcaría, y abortaría el build por una persona real.
+#   · Título en inglés: «None of the above: …» también, pero es el caso menos
+#     probable de los dos y no el que hay que tener presente.
+#
+# Hoy no ocurre ninguno: 0 apariciones de `nan`, `None` o `NaT` como token suelto
+# en los 556 id de autor y en las 34.736 cadenas publicadas. Cuando ocurra, lo
+# que hay que afinar es la frontera —incluir el guión— y no quitar la guarda.
+#
+# ALCANCE: esto recorre `data/processed/**/*.json`, no `dist/*.html`. El catálogo
+# queda cubierto porque su JSON está aguas arriba de la página, pero un
+# constructor que formatee un valor directo al HTML se saltaría la compuerta. Si
+# algún día lo hay, este es el sitio que hay que ampliar.
+_LETRA = r"[^\W\d_]"
+REPR_DE_INTERPRETE = re.compile(
+    r"np\.(int|float|str_|bool_)\d*\(|numpy\.|dtype[:(=]|<class '|"
+    rf"Name: \w+, dtype|Timestamp\(|"
+    rf"(?<!{_LETRA})nan(?!{_LETRA})|(?<!{_LETRA})None(?!{_LETRA})|"
+    rf"(?<!{_LETRA})NaT(?!{_LETRA})")
+
 
 def revisar(obj, ruta: str, archivo: str) -> None:
     """Recorre el JSON buscando claves prohibidas en cualquier profundidad."""
+    if isinstance(obj, str) and REPR_DE_INTERPRETE.search(obj):
+        FALLAS.append({
+            "archivo": archivo, "ruta": ruta,
+            "problema": f"repr del intérprete en un texto publicable: {obj[:80]!r}",
+        })
     if isinstance(obj, dict):
         for k, v in obj.items():
             if k in b.CAMPOS_PROHIBIDOS:

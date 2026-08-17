@@ -1101,3 +1101,30 @@ svg.chart .trama { pointer-events: none; }
   .hero-texto { display: block; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; color: #555; }
 }
+
+/* ------------------------------------------------------- catálogo de indicadores
+   Sin tokens nuevos: los estados reutilizan el par --aviso-tinta sobre
+   --aviso-fondo, que ya está medido (8,74 y 11,75 de contraste), y el neutro
+   sale de --superficie-2. Introducir un verde y un rojo aquí habría metido dos
+   colores sin validar en un sistema que se valida entero. */
+.estado {
+  display: inline-block; padding: .12em .5em; border-radius: var(--radio-s);
+  font-size: var(--t-s); font-weight: 650; white-space: nowrap;
+  background: var(--superficie-2); color: var(--tinta-2);
+  border: 1px solid var(--linea);
+}
+.estado[data-e="publicado"] { color: var(--tinta); border-color: var(--linea-fuerte); }
+.estado[data-e="diferido"],
+.estado[data-e="no_calculable"],
+.estado[data-e="fuera_de_alcance"] {
+  background: var(--aviso-fondo); color: var(--aviso-tinta); border-color: var(--aviso-borde);
+}
+.tabla-catalogo td { vertical-align: top; }
+.tabla-catalogo .nota { margin-top: 2px; display: block; }
+/* La fila del motivo pertenece a la de encima: sin línea que las separe se lee
+   como continuación y no como una entrada más de las cuarenta. */
+.tabla-catalogo tr.cat-motivo > td {
+  border-top: 0; padding-top: 0; padding-bottom: var(--e3);
+  font-size: var(--t-s); color: var(--tinta-2);
+}
+.tabla-catalogo tr.cat-motivo strong { color: var(--tinta); }

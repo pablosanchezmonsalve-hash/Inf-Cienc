@@ -89,6 +89,7 @@ export const PAGINAS = [
   ['tematica.html', 'Áreas temáticas'],
   ['autores.html', 'Autores'],
   ['publicaciones.html', 'Publicaciones'],
+  ['indicadores.html', 'Indicadores'],
   ['metodologia.html', 'Metodología'],
 ];
 
