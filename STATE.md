@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `550819d` · La guarda cazaba la mitad de lo que decía cazar
+Último commit: `bef3a7c` · El catálogo publica los 40 indicadores evaluados, no sólo los 27 que s
 Snapshot: 2026-08-17
 
 ---
@@ -79,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 176
+## Decisiones tomadas: 180
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
@@ -102,6 +102,7 @@ Abrir sólo lo que responde la pregunta que se tiene:
 | Qué decisión se tomó y por qué | `docs/DECISIONS.md` |
 | Qué límites tienen los datos | `docs/LIMITATIONS.md` |
 | Cómo se calcula un indicador | `docs/INDICATORS.md` |
+| Qué pregunta responde una sección | `docs/EJES.md` |
 | Por qué un cálculo es válido | `docs/METHODOLOGY.md` |
 | Qué entidades y claves hay | `docs/DATA_MODEL.md` |
 | Qué es público y qué interno | `docs/LAYERS.md` |

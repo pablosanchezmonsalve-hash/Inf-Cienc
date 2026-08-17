@@ -1128,3 +1128,31 @@ svg.chart .trama { pointer-events: none; }
   font-size: var(--t-s); color: var(--tinta-2);
 }
 .tabla-catalogo tr.cat-motivo strong { color: var(--tinta); }
+
+/* ------------------------------------------------------ panel conceptual de sección
+   Abre cada sección y ocupa el ancho completo: en la rejilla de dos columnas
+   iría a parar a la del índice, y el aviso de qué NO responde una sección no es
+   material de barra lateral.
+
+   Sin tokens nuevos. El término «No responde» se marca con el color de acción
+   porque es la parte que justifica el panel: si se lee una sola, que sea ésa. */
+.panel-eje {
+  grid-column: 1 / -1;
+  background: var(--superficie-2);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  padding: var(--e4) var(--e5);
+  margin-bottom: var(--e5);
+}
+.panel-eje h2 { margin: 0 0 var(--e3); font-size: var(--t-l); }
+.panel-eje dl { margin: 0; display: grid; gap: var(--e2) var(--e4); }
+@media (min-width: 720px) {
+  .panel-eje dl { grid-template-columns: max-content minmax(0, 1fr); }
+}
+.panel-eje dt {
+  font-size: var(--t-s); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--tinta-2); padding-top: .15em;
+}
+.panel-eje dt:nth-of-type(2) { color: var(--accion); }
+.panel-eje dd { margin: 0; color: var(--tinta); line-height: 1.55; }
+.panel-eje dd + dt { margin-top: var(--e2); }

@@ -61,6 +61,7 @@ async function main() {
   const meta = await leerJSON('meta.json');
   const series = await leerJSON('series.json');
   const { kpis } = await leerJSON('kpis.json');
+  const { ejes } = await leerJSON('ejes.json');
 
   const archivos = (await readdir(dist)).filter(f => f.endsWith('.html'));
   const faltantes = [];
@@ -107,8 +108,16 @@ async function main() {
     } else if (tipo === 'modulos') {
       const codigos = (html.match(/id="modulos"[^>]*data-indicadores="([^"]+)"/) || [])[1]
         ?.split(',').map(s => s.trim()) || [];
+      // El eje se identifica por el nombre del archivo, que ya es la clave de
+      // la sección. Si falta su panel en ejes.json, se aborta: una sección sin
+      // el aviso de qué NO responde es justo la que lo necesitaba.
+      const clave = archivo.replace(/\.html$/, '');
+      if (!ejes[clave]) {
+        console.error(`\nFALTA EL PANEL CONCEPTUAL de '${clave}' en ejes.json`);
+        process.exit(1);
+      }
       const a = [];
-      html = rellenar(html, 'modulos', v.paginaModulos(codigos, series), a);
+      html = rellenar(html, 'modulos', v.paginaModulos(codigos, series, ejes[clave]), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     }
 

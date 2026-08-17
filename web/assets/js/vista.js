@@ -191,10 +191,32 @@ export function rail(codigos, series) {
   </nav>`;
 }
 
-/** Los módulos de una página de sección, con su índice. */
-export function paginaModulos(codigos, series) {
+/** El panel conceptual que abre una sección.
+
+    Cada sección invita a una lectura equivocada concreta —producción se lee como
+    rendimiento, impacto como calidad, colaboración como influencia, la
+    clasificación temática como el tema real del artículo— y un lector que llega
+    sin saber qué pregunta responde la sección no tiene forma de saber cuál NO
+    responde. Decirlo después de los gráficos es decirlo tarde: va delante.
+
+    El texto viene de `docs/EJES.md` a través de `ejes.json`. No se escribe aquí:
+    es una afirmación metodológica y se revisa como documento. */
+export function panelEje(eje) {
+  if (!eje) return '';
+  return `<section class="panel-eje" aria-label="Qué responde esta sección">
+    <h2>${c.escapar(eje.titulo)}</h2>
+    <dl>
+      <dt>Responde</dt><dd>${c.escapar(eje.responde)}</dd>
+      <dt>No responde</dt><dd>${c.escapar(eje.no_responde)}</dd>
+      <dt>Sobre qué</dt><dd>${c.escapar(eje.sobre_que)}</dd>
+    </dl>
+  </section>`;
+}
+
+/** Los módulos de una página de sección, con su panel y su índice. */
+export function paginaModulos(codigos, series, eje) {
   const presentes = codigos.filter(cod => series[cod]);
-  return rail(presentes, series)
+  return panelEje(eje) + rail(presentes, series)
     + `<div class="modulos">${presentes.map(cod => modulo(cod, series[cod])).join('')}</div>`;
 }
 

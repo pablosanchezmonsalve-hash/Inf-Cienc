@@ -145,6 +145,7 @@ comprimidos— lo cachea el navegador entre páginas.
 | `docs/LAYERS.md` | Qué es público y qué es interno |
 | `docs/AUTHOR_PROFILE.md` | Estructura de la ficha pública de autor |
 | `docs/GLOSSARY.md` | Glosario y ayuda contextual |
+| `docs/EJES.md` | Qué pregunta responde cada sección, y cuál no |
 | `docs/DEPLOYMENT.md` | Cómo construir y publicar |
 | `docs/UPDATING.md` | Cómo incorporar una carga de datos nueva |
 | `docs/UPDATING_REQUEST.md` | Qué pedir en la próxima exportación de datos |

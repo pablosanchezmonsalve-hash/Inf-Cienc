@@ -1796,3 +1796,57 @@ pasa.
 ### Próximo paso recomendado
 
 Panel conceptual por sección, o resolver las cuatro firmas de `E-09`.
+
+---
+
+## Cierre · el panel conceptual por sección
+
+Cada sección presenta indicadores distintos y cada una invita a una lectura
+equivocada concreta: producción se lee como rendimiento, impacto como calidad,
+colaboración como influencia, y la clasificación temática como el tema real del
+artículo. Un lector que llega sin saber qué pregunta responde la sección no
+tiene forma de saber cuál **no** responde.
+
+Las cuatro secciones abren ahora con un panel que declara tres cosas antes de
+mostrar ningún gráfico: qué responde, qué no responde y sobre qué base.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-177 | El texto de los paneles vive en `docs/EJES.md`, no en `vista.js` | Son afirmaciones metodológicas y se revisan como documento. Es el mismo criterio del glosario: la fuente de verdad es el Markdown, para que lo que lee el usuario sea literalmente el documento revisado y no una copia divergente |
+| D-178 | Las tres partes son obligatorias y su ausencia **aborta el build** | Un panel sin el «no responde» es justo el que no hacía falta escribir: sin esa parte el resto es un subtítulo. Y una sección sin el aviso es la que más lo necesitaba |
+| D-179 | El panel ocupa el ancho completo y va delante del índice | En la rejilla de dos columnas caería en la del índice. El aviso de qué no responde una sección no es material de barra lateral, y decirlo después de los gráficos es decirlo tarde |
+| D-180 | El texto es institucionalmente neutro | Describe la metodología, no a esta universidad: otra institución lo reutiliza sin tocarlo. `V2-14` —los textos de `docs/` citan cifras de esta institución— no crece con esto |
+
+### Lo que dicen los cuatro
+
+Las cuatro confusiones que `CLAUDE.md` enumera en su marco metodológico, cada
+una en la sección donde de verdad se produce:
+
+| Eje | Lo que no responde |
+|---|---|
+| Producción | Qué tan bueno es lo publicado. Volumen es actividad indexada, y comparar unidades mide también la cobertura desigual de Scopus |
+| Impacto | Ni calidad ni mérito. Citar no es aprobar; tampoco es visibilidad; y el cuartil describe a la revista, no al artículo |
+| Colaboración | Ni la calidad de la colaboración ni quién la lideró. «Más países» no es «mejor» |
+| Temática | De qué trata cada artículo: la clasificación asigna la categoría de la revista. Y la prominencia describe al campo, no a quien publica en él |
+
+### Verificación
+
+Los cuatro paneles se pre-renderizan y salen delante del índice en las cuatro
+páginas. La guarda comprobada en negativo: quitando el «no responde» de
+colaboración, el build aborta nombrando el eje y la parte que falta. Batería
+completa sin fallos —contraste incluido, sobre el par `--accion` /
+`--superficie-2`, que ya estaba medido— y el validador de paleta sigue dando
+sistema cromático válido.
+
+### Ambigüedades abiertas
+
+- El panel usa `--accion` para destacar «No responde». Es un par ya validado,
+  pero si algún día llega el rojo institucional oficial hay que volver a medirlo
+  como todo lo demás.
+
+### Próximo paso recomendado
+
+Resolver las cuatro firmas de `E-09` en `make revision`, que sigue siendo lo
+único que bloquea que `P-06` baje a 552.
