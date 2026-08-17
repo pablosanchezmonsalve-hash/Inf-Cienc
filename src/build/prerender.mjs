@@ -97,6 +97,13 @@ async function main() {
       html = rellenar(html, 'panorama', v.panorama(series), a);
       html = rellenar(html, 'lectura', v.lectura(kpis), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    } else if (tipo === 'catalogo') {
+      // Se pre-renderiza porque es contenido de referencia: es justo la página
+      // que alguien va a citar o archivar, y una que exige JavaScript para
+      // decir qué se publica y qué no vale de poco archivada.
+      const a = [];
+      html = rellenar(html, 'catalogo', v.catalogo(await leerJSON('catalogo.json')), a);
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'modulos') {
       const codigos = (html.match(/id="modulos"[^>]*data-indicadores="([^"]+)"/) || [])[1]
         ?.split(',').map(s => s.trim()) || [];

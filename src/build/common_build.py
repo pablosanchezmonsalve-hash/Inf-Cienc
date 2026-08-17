@@ -379,6 +379,10 @@ FUENTE_POR_INDICADOR = {
     "R-01": "SciVal",
     "C-01": "Scopus", "C-03": "Scopus", "C-04": "Scopus", "C-06": "Scopus",
     "T-01": "Scopus", "T-04": "SciVal", "T-05": "SciVal",
+    # ORCID no está en ninguna de las dos fuentes: se recupera aparte. El
+    # catálogo publica esta columna, así que dejarlo caer en el genérico
+    # «Scopus · SciVal» sería publicar una procedencia falsa.
+    "AU-05": "Crossref · registro de ORCID",
 }
 
 

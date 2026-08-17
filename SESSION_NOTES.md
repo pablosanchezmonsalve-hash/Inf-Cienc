@@ -1578,3 +1578,221 @@ ensayó en local, en el mismo orden que el workflow, antes de escribirla.
 Abrir el PR y comprobar que el disparador nuevo se ejecuta sobre él: es la
 primera vez que este repositorio valida un pull request antes de fusionarlo, y
 esa corrida es la prueba de que el cambio funciona.
+
+---
+
+## Cierre · lo que salió de revisar el PR de CI
+
+Tres cosas que se decidieron durante la revisión del PR #28, después de que el
+cierre anterior estuviera escrito. Se registran aparte porque `docs/DECISIONS.md`
+se genera desde estas tablas: lo que no está aquí no existe para ninguna sesión
+que arranque por `STATE.md`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-163 | `id-token: write` sale del job `construir`; `pages: write` se queda | El primero no lo usaba nadie ahí: lo pide `deploy-pages`, que vive en `desplegar` y ya lo tiene. El segundo lo pide `configure-pages`, que sí vive en `construir`, y mover ese paso era imposible: `upload-pages-artifact` sube `dist/`, que sólo existe en ese job. Habría que pasar el sitio entero entre jobs para ahorrar un permiso que ninguna corrida de PR ejerce |
+| D-164 | `setup-node` sube de `@v4` a `@v5` | Era la única de las siete acciones fuera de su major vigente, y la había fijado esta misma línea de trabajo al añadir Node para el pre-renderizado mientras el resto ya estaba al día por `D-92` |
+| D-165 | La mitad restante del aviso de deprecación de Node es deuda de GitHub, no del proyecto | Medido, no supuesto: tras subir `setup-node@v5`, la corrida del 2026-08-14 nombra sólo `actions/upload-artifact@v5`, y **ése es su major vigente — no hay a dónde subir**. Queda escrito con esa frase para que dentro de unos meses nadie lo trate como deuda propia y se ponga a buscar una versión que no existe |
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Mover `upload-pages-artifact` a `desplegar` cierra el permiso» | **Falso.** El diagnóstico valía; el remedio no era aplicable. Comprobar que un remedio se puede aplicar es parte de proponerlo, no un paso posterior |
+| «`upload-artifact@v5` no puede estar señalada, es el major vigente» | **Lo estaba.** El registro lo decía y bastaba con mirarlo. Un extrañamiento no es una comprobación |
+| «El registro puede ir montado en la siguiente funcionalidad» | **No.** `docs/DECISIONS.md` se deriva de estas tablas: mientras el párrafo espera, las decisiones no existen para el camino de entrada que el propio proyecto manda usar |
+
+### Estado que deja
+
+`V2-17` cerrado: el próximo pull request ya no se fusiona a ciegas. La compuerta
+—pipeline, cinco autopruebas, contenido sin JavaScript, barrera pública/interna y
+la batería de `src/verify/`— corre antes de fusionar y no sólo después.
+
+### Próximo paso recomendado
+
+El catálogo de indicadores.
+
+---
+
+## Cierre · el catálogo de indicadores, y lo que despertó al publicarlo
+
+El sitio publicaba 27 indicadores y no decía nada de los otros 13. Para un
+lector, «no está» tiene tres lecturas incompatibles —no se midió, se midió y
+salió mal, no se puede medir sin inventar el dato— y el criterio vivía sólo en
+`docs/`, que no es el sitio.
+
+Ahora hay una página, `indicadores.html`, con los cuarenta: definición, fuente,
+denominador, cobertura medida y estado, y el motivo de cada uno de los trece que
+no se publican.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-166 | El catálogo se construye en `02_indicators.py`, desde `config/indicators.yml` | Es el mismo archivo del que salen los KPI y las series. Un catálogo mantenido aparte diría lo que alguien recordó, no lo que el sitio publica: la única garantía de que «publicado» signifique publicado es que las dos cosas se lean del mismo sitio |
+| D-167 | El estado tiene cuatro valores y no dos | «No publicado» tapa la diferencia entre diferido —calculable y verificado—, no calculable —la fuente no lo entrega— y fuera de alcance —decisión, no carencia—. Son tres cosas distintas y la tercera no se arregla con más datos |
+| D-168 | Los estados no introducen colores nuevos | Reutilizan el par `--aviso-tinta` sobre `--aviso-fondo`, que ya está medido. Un verde y un rojo nuevos habrían metido dos colores sin validar en un sistema que se valida entero |
+| D-169 | El catálogo se pre-renderiza | Es justo el contenido que alguien va a citar o archivar. Una página que exige JavaScript para decir qué se publica y qué no vale poco archivada |
+| D-170 | `estructura.mjs` falla si una página de `dist/` no está en su lista de rutas | La lista es a mano porque la ficha de autor no dice nada sin `?id=`. Pero una lista a mano deja de cubrirlo todo en cuanto alguien añade una página, y el barrido sigue diciendo «0 problemas» sobre lo que no miró |
+| D-171 | Las publicaciones sin autoría UFT nombrada se rotulan | Una celda en blanco no distingue «no hay» de «no se muestra». La publicación es institucional —la afiliación la trajo— pero ninguna firma con nombre la sostiene, y eso se dice |
+
+### Lo que despertó al publicarlo
+
+`config/indicators.yml` tenía cuatro campos —`estado`, `razon`, `que_falta`,
+`mostrar_como`— que **no leía nadie**: metadatos dormidos. El catálogo los
+publica, y tres estaban caducados. De inofensivos pasaban a falsedades
+publicadas:
+
+| Dónde | Decía | Dice |
+|---|---|---|
+| `AU-05` | ORCID «no existe en ninguna de las fuentes actuales», pendiente de `T-01` | `T-01` se cerró el 2026-08-01 y el sitio publica 216 de 556. Ya no es placeholder |
+| `AU-03` | «497 de 589 firmas tienen h ≤ 1» | Base previa a la consolidación. Medido de nuevo: **466 de las 556 entidades publicadas** |
+| `C-05` | «heredaría 123 variantes de nombre sin resolver» | 123 son filas de auditoría, y 20 de los 51 grupos ya se resolvieron. Quedan **31** |
+
+Y la fuente de `AU-05` caía en el genérico «Scopus · SciVal» del mapa de
+procedencia. ORCID no está en ninguna de las dos: se declara
+`Crossref · registro de ORCID`.
+
+### El verde que no miraba
+
+La batería dio «sin fallos» sobre una página que **nunca abrió**:
+`contraste.mjs` y `estructura.mjs` llevaban la lista de páginas escrita a mano y
+`indicadores.html` no estaba en ella. Es el mismo fallo del barrido que pedía la
+ficha de autor con `?firma=` cuando la página lee `?id=`.
+
+Se añadió la página a las dos listas y, sobre todo, la guarda de `D-170`.
+Comprobada en negativo: con un HTML de más en `dist/`, la estructura falla y dice
+cuál nadie comprueba.
+
+### Supuestos descartados
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Un campo de configuración que nadie lee es inofensivo» | **Hasta que alguien lo lee.** Tres de cuatro estaban caducados, y el error llevaba semanas siendo invisible porque nada lo mostraba |
+| «La batería cubre el sitio» | **Cubría la lista.** Que no es lo mismo, y la diferencia no se ve desde el verde |
+
+### Ambigüedades abiertas
+
+- La cabecera `<head>` de `indicadores.html` se creó copiando la de metodología:
+  `V2-16` pasa de manejable a incómodo con diez páginas.
+- `docs/ORCID_COVERAGE.md` sigue en la base previa a la revisión (222/589).
+
+### Próximo paso recomendado
+
+Panel conceptual por sección, o resolver las cuatro firmas de `E-09` en
+`make revision`.
+
+---
+
+## Cierre · el catálogo publicaba un repr de Python
+
+La revisión del PR #29 encontró que la cobertura de `P-02` salía en la página
+pública y en `catalogo.json` como
+`823/823 · {2023: np.int64(228), 2024: np.int64(276), 2025: np.int64(319)}`.
+
+`dict()` sobre una Series de pandas conserva los tipos de numpy, y su repr acaba
+impreso tal cual. El defecto era anterior a este trabajo, pero mientras esa
+cadena vivió en una nota interna de factibilidad fue fea; el catálogo es lo que
+la asciende a página pública. El commit que la publica es el que debe publicarla
+limpia.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-172 | La cobertura de `P-02` se formatea como texto, no se vuelca el diccionario | Esa columna la lee una persona, no un intérprete. Un volcado arrastra el tipo de dato de quien lo produjo |
+| D-173 | `05_verify_public_layer.py` falla si un texto publicable contiene repr del intérprete | Un barrido a mano encuentra lo que ya está, no lo que alguien añada mañana. La compuerta que ya recorre todos los artefactos es el sitio donde eso se vigila |
+| D-174 | `contraste.mjs` gana la misma guarda de cobertura que `estructura.mjs` | Una verificación que no mira todo dice «0 fallos» sobre lo que no miró. Aplicado al propio instrumento, no sólo al producto |
+| D-175 | La fuente se afirma sólo de los indicadores que se calculan | Los cuatro no calculables no lo son por lo mismo: a `X-01` y `AU-04` la fuente no les entrega el dato, pero a `X-03` le falla la cobertura y a `X-04` la ventana. Una etiqueta única para los cuatro sería falsa en la mitad |
+
+### El patrón, por tercera vez en dos sesiones
+
+La primera versión de la guarda de `D-173` incluía `nan\b` y marcó **«Poznan
+Studies in Contemporary Linguistics»** y **«se asignan al documento»**. Un patrón
+que responde a otra pregunta devuelve resultados con la misma cara que uno que
+acierta. Corregido: cada alternativa lleva puntuación o mayúscula que no aparece
+en prosa, y el `nan` suelto se caza comparando la cadena entera.
+
+Es el mismo tropiezo que el `grep` ampliado con «consecuencia|resolucion» sobre
+un título de pediatría, y que el `git branch -r` que respondía con exactitud a
+una pregunta distinta de la que se creía hacer. Aquí falló en voz alta —cuatro
+falsos positivos en la compuerta— en vez de en silencio, que es la diferencia
+entre una guarda y un adorno.
+
+Quien revisó llegó al catálogo buscando `data-codigo="…"`, que no existe: la
+página emite `data-e`. Estuvo a punto de reportar «la página no marca los
+indicadores». El mismo silencio, del otro lado.
+
+### Verificación
+
+Las dos guardas comprobadas en negativo: con un HTML de más en `dist/`,
+`contraste` y `estructura` fallan y dicen cuál nadie comprueba. Barrera de capas
+0 fallas, batería completa sin fallos, y `np.int64` ausente de `dist/` y de
+`data/processed/`.
+
+### Próximo paso recomendado
+
+Panel conceptual por sección, o resolver las cuatro firmas de `E-09`.
+
+---
+
+## Cierre · la guarda cazaba la mitad de lo que decía cazar
+
+La revisión del PR #29 encontró que `REPR_DE_INTERPRETE` cerraba la mitad `np.*`
+de la forma «valor interpolado en un texto» y dejaba abierta la mitad
+`nan`/`None`, que sólo se cazaba comparando la cadena entera. Ese razonamiento
+vale para `str(elemento)`, no para la interpolación en f-string — que es
+exactamente cómo se rompió `P-02`. `«308/823 (nan %)»` pasaba.
+
+### Decisión
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-176 | `nan`, `None` y `NaT` se cazan con frontera de letra unicode, no comparando la cadena entera | «Poznan» lleva `z` delante, «asignan» lleva `g`, «Nanotecnología» lleva `o` detrás: los tres quedan fuera por la frontera, no por la puntuación. Medido: 18 casos sintéticos sin discrepancias y **0 marcas sobre las 34.736 cadenas de los 564 artefactos publicados** |
+
+### Coste residual, declarado — y no estaba donde yo lo puse
+
+Lo escribí como un riesgo de títulos en inglés («None of the above: …»). La
+revisión lo movió al sitio correcto: la frontera es de LETRA, el guión no la
+cruza, y eso apunta a los **identificadores de autor** antes que a los títulos.
+Son slugs con guión —`abara-j-f`— y `Nan` es un nombre de pila corriente en la
+fuente china: una firma «Nan Y.» daría el id `nan-y`, que la guarda marcaría, y
+abortaría el build por una persona real.
+
+Comprobado sobre el patrón: `nan-y` marca, `abara-j-f` no. Hoy no ocurre —0
+apariciones como token suelto en los 556 id de autor y en las 34.736 cadenas
+publicadas—, y cuando ocurra lo que hay que afinar es la frontera, incluyendo el
+guión. Queda escrito así en el propio archivo.
+
+El arreglo del guión no entra aquí por decisión de quien revisó: va en el PR en
+que se vuelva a tocar la guarda.
+
+También queda escrito allí el alcance: la compuerta recorre
+`data/processed/**/*.json`, no `dist/*.html`. El catálogo está cubierto porque su
+JSON está aguas arriba de la página, pero un constructor que formatee un valor
+directo al HTML se la saltaría.
+
+### Dos cifras mías que estaban mal
+
+- Dije **563 artefactos**; son **564**. La compuerta lo imprime en cada corrida y
+  yo lo copié de una ejecución anterior al catálogo. La herramienta acertaba; la
+  cifra se torció al pasarla a prosa. Es la regla de la base declarada aplicada a
+  un número que ni siquiera había que calcular: había que leerlo.
+
+### Un rojo falso, que se lee igual de bien que un verde falso
+
+Quien revisó comprobó las guardas de cobertura corriendo `contraste.mjs` y
+`estructura.mjs` sueltos, y obtuvo `exit=1` de los dos. Casi lo dio por
+confirmado. El `1` era `ERR_CONNECTION_REFUSED` —el servidor lo levanta
+`run_all.mjs`, no los módulos— y `estructura` ni había llegado a mirar `dist/`.
+
+Es el cuarto caso del mismo patrón en dos sesiones, y el primero por el lado
+contrario: **un rojo por el motivo equivocado confirma lo que uno quería creer**,
+igual que un verde por el motivo equivocado. Rehecho con `run_all.mjs`, donde sí
+pasa.
+
+### Próximo paso recomendado
+
+Panel conceptual por sección, o resolver las cuatro firmas de `E-09`.

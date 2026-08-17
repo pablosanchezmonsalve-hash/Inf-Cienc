@@ -15,6 +15,8 @@ from __future__ import annotations
 import statistics
 from collections import Counter
 
+import pandas as pd
+
 import common_build as b
 
 
@@ -230,6 +232,98 @@ def main() -> None:
     b.write_json(series, "series.json")
     b.write_json(b.build_meta(), "meta.json")
     print(f"  series: {len([k for k in series if k != 'meta'])} indicadores")
+
+    catalogo()
+
+
+def catalogo() -> None:
+    """Los 40 indicadores evaluados, publicados o no, con por qué.
+
+    EL PROBLEMA QUE RESUELVE
+        El sitio publica 27 indicadores y no dice nada de los otros 13. El
+        criterio —qué se midió, qué se descartó y por qué— vivía sólo en
+        `docs/`, que no es el sitio. Un lector no puede distinguir «no se
+        calculó» de «se calculó y salió mal» de «no se puede calcular sin
+        inventar el dato», y las tres cosas significan lo contrario.
+
+    POR QUÉ VIVE AQUÍ
+        Se construye desde `config/indicators.yml`, el mismo archivo del que
+        salen los KPI y las series de arriba. Un catálogo mantenido aparte
+        diría lo que alguien recordó, no lo que el sitio publica: la única
+        garantía de que «publicado» signifique publicado es que las dos cosas
+        se lean del mismo sitio.
+
+        La cobertura medida viene de `data/interim/indicator_feasibility.csv`,
+        que la calcula sobre los datos. Ninguna cifra de esta vista está
+        escrita a mano.
+    """
+    # Estado: publicado, o la razón de no estarlo. El orden importa —un
+    # indicador no calculable que además fuera V2 es, ante todo, no calculable—.
+    ETIQUETAS = {
+        "publicado": ("Publicado", "Se calcula y se muestra en el sitio."),
+        "no_calculable": ("No calculable", "La fuente no entrega el dato. "
+                          "Aproximarlo sería inventar la métrica."),
+        "fuera_de_alcance": ("Fuera de alcance", "Excluido por decisión de "
+                             "alcance del proyecto, no por falta de datos."),
+        "diferido": ("Diferido a V2", "Calculable y verificado, pero no se "
+                     "publica en esta versión."),
+    }
+    CATEGORIAS = {"descriptivo": "Producción y descripción", "impacto": "Impacto",
+                  "colaboracion": "Colaboración", "tematico": "Áreas temáticas"}
+
+    fact = {}
+    p = b.ROOT / "data" / "interim" / "indicator_feasibility.csv"
+    if p.exists():
+        fact = {r["codigo"]: r for _, r in pd.read_csv(p).fillna("").iterrows()}
+
+    den = b.denominadores()
+    filas = []
+    for code, spec in b.INDICATORS["indicadores"].items():
+        if spec.get("publicar"):
+            estado = "publicado"
+        elif spec.get("estado") in ("no_calculable", "fuera_de_alcance"):
+            estado = spec["estado"]
+        else:
+            estado = "diferido"
+
+        nombre_den = spec.get("denominador")
+        f = fact.get(code, {})
+        filas.append({
+            "codigo": code,
+            "nombre": spec["nombre"],
+            "categoria": spec.get("categoria"),
+            "categoria_etiqueta": CATEGORIAS.get(spec.get("categoria"), "Otros"),
+            # La procedencia se afirma sólo de lo que se calcula. Un indicador
+            # no calculable no tiene fuente: tiene un motivo, y ese motivo va en
+            # su propia fila. Poner «Scopus · SciVal» sugeriría que el dato
+            # vendría de ahí, y de los cuatro no calculables sólo es cierto para
+            # dos —a `X-03` le falla la cobertura y a `X-04` la ventana, no la
+            # fuente—. Una etiqueta única para los cuatro sería falsa en la
+            # mitad.
+            "fuente": (b.FUENTE_POR_INDICADOR.get(code, "Scopus · SciVal")
+                       if estado in ("publicado", "diferido") else None),
+            "denominador": nombre_den,
+            "denominador_valor": den.get(nombre_den),
+            "confiabilidad": spec.get("confiabilidad"),
+            "estado": estado,
+            "estado_etiqueta": ETIQUETAS[estado][0],
+            "estado_detalle": ETIQUETAS[estado][1],
+            # `razon` explica por qué no se publica; `advertencia` cualifica lo
+            # que sí se publica. No son lo mismo y no se funden en un campo.
+            "razon": spec.get("razon"),
+            "que_falta": spec.get("que_falta"),
+            "advertencia": spec.get("advertencia"),
+            "advertencia_destacada": bool(spec.get("advertencia_destacada")),
+            "cobertura": f.get("cobertura_medida") or None,
+            "definicion": f.get("nota_metodologica") or None,
+        })
+
+    resumen = {e: sum(1 for r in filas if r["estado"] == e) for e in ETIQUETAS}
+    b.write_json({"meta": b.build_meta(), "resumen": resumen,
+                  "categorias": CATEGORIAS, "etiquetas_estado": ETIQUETAS,
+                  "indicadores": filas}, "catalogo.json")
+    print("  catálogo: " + " · ".join(
+        f"{n} {ETIQUETAS[e][0].lower()}" for e, n in resumen.items() if n))
 
 
 if __name__ == "__main__":

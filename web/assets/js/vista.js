@@ -331,3 +331,96 @@ export function lectura(kpisLista) {
     cambia según el indicador.</p>
   </div>`;
 }
+
+/* ------------------------------------------------------------ catálogo */
+
+/** El catálogo completo de indicadores: los 40 evaluados, no los 27 que se
+    publican.
+
+    POR QUÉ EXISTE
+    El sitio mostraba 27 indicadores y no decía nada de los otros 13. Para un
+    lector, «no está» tiene al menos tres lecturas incompatibles: no se midió,
+    se midió y salió mal, o no se puede medir sin inventar el dato. Publicar el
+    criterio es lo que separa un informe de una selección de cifras favorables.
+
+    Es una tabla y no tarjetas a propósito: cuarenta entradas que se comparan
+    entre sí se leen en columnas. Y va sin JavaScript —se pre-renderiza— porque
+    es justo el contenido que alguien va a querer citar o archivar. */
+export function catalogo(cat) {
+  const { indicadores, resumen, categorias, etiquetas_estado: est } = cat;
+
+  const resumenHTML = Object.entries(est)
+    .filter(([e]) => resumen[e])
+    .map(([e, [etq, detalle]]) => `
+      <div class="kpi">
+        <span class="valor">${resumen[e]}</span>
+        <span class="etiqueta">${c.escapar(etq)}</span>
+        <span class="secundario">${c.escapar(detalle)}</span>
+      </div>`).join('');
+
+  const fila = (r) => {
+    const den = r.denominador
+      ? `${c.escapar(r.denominador)}<br><span class="nota">${c.nf.format(r.denominador_valor)}</span>`
+      : '<span class="sin-dato-txt">No aplica</span>';
+    // El porqué de no publicarse va en su propia fila y no en una celda: es
+    // prosa, y meterla en una columna la haría ilegible en las cuarenta.
+    const motivo = [r.razon, r.estado !== 'publicado' ? r.advertencia : null]
+      .filter(Boolean).join(' ');
+    const extra = (motivo || r.que_falta) ? `
+      <tr class="cat-motivo">
+        <td colspan="6">
+          ${motivo ? `<strong>Por qué:</strong> ${c.escapar(motivo)}` : ''}
+          ${r.que_falta ? `<br><strong>Qué falta:</strong> ${c.escapar(r.que_falta)}` : ''}
+        </td>
+      </tr>` : '';
+    return `
+      <tr>
+        <td><span class="codigo">${r.codigo}</span></td>
+        <td>
+          <strong>${c.escapar(r.nombre)}</strong>
+          ${r.definicion ? `<br><span class="nota">${c.escapar(r.definicion)}</span>` : ''}
+        </td>
+        <td>${r.fuente ? c.escapar(r.fuente)
+          : '<span class="sin-dato-txt">No se calcula</span>'}</td>
+        <td>${den}</td>
+        <td>${r.cobertura ? c.escapar(r.cobertura) : '—'}</td>
+        <td><span class="estado" data-e="${r.estado}">${c.escapar(r.estado_etiqueta)}</span>
+          ${r.confiabilidad ? `<br><span class="nota">confiabilidad ${c.escapar(r.confiabilidad)}</span>` : ''}
+        </td>
+      </tr>${extra}`;
+  };
+
+  const secciones = Object.entries(categorias).map(([clave, etiqueta]) => {
+    const filas = indicadores.filter(r => r.categoria === clave);
+    if (!filas.length) return '';
+    return `
+    <section class="modulo" id="cat-${clave}" tabindex="-1">
+      <header><div class="modulo-id"><h2>${c.escapar(etiqueta)}</h2>
+        <span class="codigo">${filas.length}</span></div></header>
+      <div class="tabla-envoltura tabla-datos tabla-catalogo">
+        <table>
+          <thead><tr>
+            <th scope="col">Cód.</th><th scope="col">Indicador y definición</th>
+            <th scope="col">Fuente</th><th scope="col">Denominador</th>
+            <th scope="col">Cobertura medida</th><th scope="col">Estado</th>
+          </tr></thead>
+          <tbody>${filas.map(fila).join('')}</tbody>
+        </table>
+      </div>
+    </section>`;
+  }).join('');
+
+  const indice = Object.entries(categorias).map(([clave, etiqueta]) =>
+    `<li><a href="#cat-${clave}"><span class="rail-txt">${c.escapar(etiqueta)}</span></a></li>`).join('');
+
+  return `
+    <div class="kpis" data-n="${Object.values(resumen).filter(Boolean).length}">${resumenHTML}</div>
+    <p class="nota">Las coberturas están <strong>medidas sobre los datos</strong>,
+    no estimadas: salen de <code>indicator_feasibility.csv</code>, que se
+    regenera en cada build. Un indicador diferido está verificado como
+    calculable; uno no calculable no lo está, y aproximarlo sería inventar la
+    métrica.</p>
+    <nav class="rail" aria-label="Categorías del catálogo">
+      <p class="rail-titulo">En esta página</p><ol>${indice}</ol></nav>
+    ${secciones}`;
+}

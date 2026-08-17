@@ -203,7 +203,12 @@ async function publicaciones() {
       <td>${c.anio(p.anio)}</td>
       <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>`
         : c.escapar(p.titulo)}
-        ${p.autores_uft.length ? `<br><span class="nota">${c.escapar(p.autores_uft.join(' · '))}</span>` : ''}</td>
+        ${p.autores_uft.length
+          ? `<br><span class="nota">${c.escapar(p.autores_uft.join(' · '))}</span>`
+          // Una celda en blanco no distingue «no hay» de «no se muestra», y
+          // aquí sí hay algo que decir: la publicación es institucional —la
+          // afiliación la trajo— pero ninguna firma con nombre la sostiene.
+          : '<br><span class="sin-dato-txt">Sin autoría UFT nombrada</span>'}</td>
       <td>${c.celda(p.fuente)}</td>
       <td>${c.celda(p.tipo)}</td>
       <td class="num">${p.tiene_metricas ? c.celda(p.citas) : '<span class="sin-dato-txt">Sin métricas</span>'}</td>
@@ -510,8 +515,15 @@ async function metodologia() {
     </ul>`;
 }
 
+async function catalogo() {
+  const cont = document.getElementById('catalogo');
+  // Pre-renderizado: repintar destruiría un LCP que ya ocurrió, y el marcado
+  // sería idéntico porque lo produce esta misma función.
+  if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'));
+}
+
 /* ============================================================== arranque */
-const PAGINAS = { portada, modulos, publicaciones, autores, fichaAutor, metodologia };
+const PAGINAS = { portada, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
 
 document.addEventListener('DOMContentLoaded', async () => {
   const pagina = document.body.dataset.pagina;
