@@ -49,10 +49,19 @@ FALLAS: list[dict] = []
 # que hace adoptable el patrón; si alguien lo endurece, querrá saber contra qué
 # se midió.
 #
-# COSTE RESIDUAL DECLARADO: `None` y `nan` son palabras inglesas legítimas en un
-# título. «None of the above: …» abortaría el build. Hoy no ocurre —0 apariciones
-# como token suelto en el corpus—, y si algún día ocurre lo que hay que afinar es
-# la guarda, no quitarla.
+# COSTE RESIDUAL DECLARADO, y no está donde parecía. La frontera es de LETRA, así
+# que el guión no la cruza: cualquier cadena donde `nan` quede entre guiones pasa
+# por marcada. Eso apunta a los IDENTIFICADORES DE AUTOR antes que a los títulos.
+#
+#   · `id` de autor: son slugs con guión —`abara-j-f`—, y `Nan` es un nombre de
+#     pila corriente en la fuente china. Una firma «Nan Y.» daría el id `nan-y`,
+#     que esta guarda marcaría, y abortaría el build por una persona real.
+#   · Título en inglés: «None of the above: …» también, pero es el caso menos
+#     probable de los dos y no el que hay que tener presente.
+#
+# Hoy no ocurre ninguno: 0 apariciones de `nan`, `None` o `NaT` como token suelto
+# en los 556 id de autor y en las 34.736 cadenas publicadas. Cuando ocurra, lo
+# que hay que afinar es la frontera —incluir el guión— y no quitar la guarda.
 #
 # ALCANCE: esto recorre `data/processed/**/*.json`, no `dist/*.html`. El catálogo
 # queda cubierto porque su JSON está aguas arriba de la página, pero un

@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `744b672` · El catálogo publicaba un repr de Python, y la guarda que lo caza marca
-Snapshot: 2026-08-14
+Último commit: `550819d` · La guarda cazaba la mitad de lo que decía cazar
+Snapshot: 2026-08-17
 
 ---
 

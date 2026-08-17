@@ -1752,12 +1752,22 @@ exactamente cómo se rompió `P-02`. `«308/823 (nan %)»` pasaba.
 |---|---|---|
 | D-176 | `nan`, `None` y `NaT` se cazan con frontera de letra unicode, no comparando la cadena entera | «Poznan» lleva `z` delante, «asignan» lleva `g`, «Nanotecnología» lleva `o` detrás: los tres quedan fuera por la frontera, no por la puntuación. Medido: 18 casos sintéticos sin discrepancias y **0 marcas sobre las 34.736 cadenas de los 564 artefactos publicados** |
 
-### Coste residual, declarado
+### Coste residual, declarado — y no estaba donde yo lo puse
 
-`None` y `nan` son palabras inglesas legítimas en un título. «None of the
-above: …» abortaría el build. Hoy no ocurre —0 apariciones como token suelto en
-el corpus— y si algún día ocurre, lo que hay que afinar es la guarda, no
-quitarla. Queda escrito en el propio archivo.
+Lo escribí como un riesgo de títulos en inglés («None of the above: …»). La
+revisión lo movió al sitio correcto: la frontera es de LETRA, el guión no la
+cruza, y eso apunta a los **identificadores de autor** antes que a los títulos.
+Son slugs con guión —`abara-j-f`— y `Nan` es un nombre de pila corriente en la
+fuente china: una firma «Nan Y.» daría el id `nan-y`, que la guarda marcaría, y
+abortaría el build por una persona real.
+
+Comprobado sobre el patrón: `nan-y` marca, `abara-j-f` no. Hoy no ocurre —0
+apariciones como token suelto en los 556 id de autor y en las 34.736 cadenas
+publicadas—, y cuando ocurra lo que hay que afinar es la frontera, incluyendo el
+guión. Queda escrito así en el propio archivo.
+
+El arreglo del guión no entra aquí por decisión de quien revisó: va en el PR en
+que se vuelva a tocar la guarda.
 
 También queda escrito allí el alcance: la compuerta recorre
 `data/processed/**/*.json`, no `dist/*.html`. El catálogo está cubierto porque su
