@@ -1796,3 +1796,180 @@ pasa.
 ### Próximo paso recomendado
 
 Panel conceptual por sección, o resolver las cuatro firmas de `E-09`.
+
+---
+
+## Cierre · el panel conceptual por sección
+
+Cada sección presenta indicadores distintos y cada una invita a una lectura
+equivocada concreta: producción se lee como rendimiento, impacto como calidad,
+colaboración como influencia, y la clasificación temática como el tema real del
+artículo. Un lector que llega sin saber qué pregunta responde la sección no
+tiene forma de saber cuál **no** responde.
+
+Las cuatro secciones abren ahora con un panel que declara tres cosas antes de
+mostrar ningún gráfico: qué responde, qué no responde y sobre qué base.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-177 | El texto de los paneles vive en `docs/EJES.md`, no en `vista.js` | Son afirmaciones metodológicas y se revisan como documento. Es el mismo criterio del glosario: la fuente de verdad es el Markdown, para que lo que lee el usuario sea literalmente el documento revisado y no una copia divergente |
+| D-178 | Las tres partes son obligatorias y su ausencia **aborta el build** | Un panel sin el «no responde» es justo el que no hacía falta escribir: sin esa parte el resto es un subtítulo. Y una sección sin el aviso es la que más lo necesitaba |
+| D-179 | El panel ocupa el ancho completo y va delante del índice | En la rejilla de dos columnas caería en la del índice. El aviso de qué no responde una sección no es material de barra lateral, y decirlo después de los gráficos es decirlo tarde |
+| D-180 | El texto es institucionalmente neutro | Describe la metodología, no a esta universidad: otra institución lo reutiliza sin tocarlo. `V2-14` —los textos de `docs/` citan cifras de esta institución— no crece con esto |
+
+### Lo que dicen los cuatro
+
+Las cuatro confusiones que `CLAUDE.md` enumera en su marco metodológico, cada
+una en la sección donde de verdad se produce:
+
+| Eje | Lo que no responde |
+|---|---|
+| Producción | Qué tan bueno es lo publicado. Volumen es actividad indexada, y comparar unidades mide también la cobertura desigual de Scopus |
+| Impacto | Ni calidad ni mérito. Citar no es aprobar; tampoco es visibilidad; y el cuartil describe a la revista, no al artículo |
+| Colaboración | Ni la calidad de la colaboración ni quién la lideró. «Más países» no es «mejor» |
+| Temática | De qué trata cada artículo: la clasificación asigna la categoría de la revista. Y la prominencia describe al campo, no a quien publica en él |
+
+### Verificación
+
+Los cuatro paneles se pre-renderizan y salen delante del índice en las cuatro
+páginas. La guarda comprobada en negativo: quitando el «no responde» de
+colaboración, el build aborta nombrando el eje y la parte que falta. Batería
+completa sin fallos —contraste incluido, sobre el par `--accion` /
+`--superficie-2`, que ya estaba medido— y el validador de paleta sigue dando
+sistema cromático válido.
+
+### Ambigüedades abiertas
+
+- El panel usa `--accion` para destacar «No responde». Es un par ya validado,
+  pero si algún día llega el rojo institucional oficial hay que volver a medirlo
+  como todo lo demás.
+
+### Próximo paso recomendado
+
+Resolver las cuatro firmas de `E-09` en `make revision`, que sigue siendo lo
+único que bloquea que `P-06` baje a 552.
+
+---
+
+## Cierre · el panel se equivocó en lo que el panel promete
+
+La revisión del PR encontró que el panel de producción decía «Las publicaciones
+del universo» y explicaba sólo el caso de la unidad académica. Pero la sección
+trae cuatro indicadores sobre **tres** bases: `P-02` y `P-03` sobre las 823 del
+universo, `P-07` sobre los 818 con autoría detallada, y `P-05` —ranking de
+fuentes— sobre las **816 con métricas**, que el panel no nombraba.
+
+Un lector que mirara el ranking habría contado 823 donde son 816, en la frase
+que existe para impedirle contar mal. Es pequeño en magnitud y exacto en tipo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-181 | Cada eje declara en `EJES.md` los denominadores que su sección usa, y el build falla si no coinciden con los de `data-indicadores` | Los dos lados ya eran legibles por máquina: la página declara sus códigos y `config/indicators.yml` el denominador de cada uno. Sólo faltaba que el eje declarara los suyos. Sin esto, la lista escrita a mano deja de cubrirlo todo en cuanto alguien añade un indicador y el panel sigue diciendo su base vieja |
+| D-182 | La guarda exige **igualdad**, no inclusión | Un denominador declarado que ninguna página usa es una declaración que envejeció, y esa es la otra mitad del problema |
+| D-183 | `denominadores` no se publica en `ejes.json` | Es instrumental: sirve a la guarda, no al lector. Publicarlo metería en el artefacto un dato que la página no usa |
+
+### La segunda, que hoy no se ve
+
+Temática declaraba «con área temática asignada», pero `T-04` —Objetivos de
+Desarrollo Sostenible— corre sobre `con_metricas`. Las dos valen 816 hoy, así
+que ningún lector se confunde: **la igualdad es coincidencia, no definición**. El
+panel lo dice ahora, y si algún día divergen la guarda lo caza antes de que el
+texto envejezca en silencio.
+
+### Comprobado en negativo, dos veces
+
+| Escenario | Qué hace el build |
+|---|---|
+| Se quita `con_metricas` del panel de producción —el fallo original— | Aborta: «el eje 'produccion' declara […] y su página usa […] · faltan ['con_metricas']» |
+| Se añade `P-07` a colaboración sin tocar su panel | Aborta nombrando `con_autoria_detallada` como el que falta |
+
+El segundo es el que importa: es el caso futuro, no el pasado.
+
+### Nota de método, la cuarta de la ronda
+
+Quien revisó buscó `id="eje"` para localizar el panel y obtuvo «no» en las cuatro
+páginas —el marcado es `<section class="panel-eje">` dentro de `#modulos`—. Estuvo
+a punto de reportar que el panel no estaba. Lo cazó porque en el mismo barrido
+«No responde» aparecía una vez por página y **las dos cosas no podían ser verdad
+a la vez**.
+
+Es la contrapartida exacta del rojo falso de la ronda anterior: un falso negativo
+se lee igual de bien que un hallazgo. Lo que lo desmontó no fue mirar más, sino
+tener dos medidas que se contradecían.
+
+### Próximo paso recomendado
+
+Resolver las cuatro firmas de `E-09` en `make revision`.
+
+---
+
+## Cierre · una errata de un carácter borraba un gráfico sin dejar rastro
+
+La revisión encontró dos agujeros en la guarda de los paneles. El segundo no era
+de este trabajo, pero se ve desde aquí porque es el primer sitio donde
+`data-indicadores` se lee contra el catálogo.
+
+### Lo que se midió antes de arreglarlo
+
+Sustituyendo `A-01` por `Z-99` en el `data-indicadores` de impacto:
+
+```
+make sitio                        exit=0
+menciones de «Z-99» en la salida  0
+módulos en dist/impacto.html      5 → 4
+A-01 en dist/impacto.html         ausente
+```
+
+Auditoría, barrera de capas, guarda nueva y batería del navegador: todo verde. Un
+carácter mal escrito retira un indicador publicado del informe y **nada lo dice**.
+De todo lo hallado en esta revisión es lo único que degrada lo publicado sin
+dejar rastro; el resto eran cifras mal contadas o guardas que miraban de menos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-184 | Un código de `data-indicadores` que no esté en `config/indicators.yml` aborta el build | No hay nada que interpretar: un código desconocido no es una decisión de diseño, es un error de escritura. `paginaModulos` lo descarta en silencio y la página sale con un gráfico menos |
+| D-185 | Un eje declarado en `EJES.md` sin página que lo use aborta el build | El bucle recorría páginas, así que cazaba «página sin panel» y no su simétrico. Y el eje huérfano pesa más que el denominador huérfano: éste no llegaba al artefacto, aquél se serializa a `ejes.json` y se publica |
+| D-186 | El denominador se cuenta sólo de los indicadores publicados, y eso endurece la guarda | Al retirar uno con `publicar: false`, su base deja de usarse y el panel pasa a declarar una que ya nadie tiene: el build se detiene. Es deliberado — si el ranking de fuentes deja de mostrarse, la frase del panel que lo explica deja de ser verdad |
+
+### Un comentario mío que decía lo contrario de lo que hacía el código
+
+Escribí que filtrar por `publicar` evitaba que ejercer la vía de replicabilidad
+rompiera el build. **Es al revés**: el filtro hace que `publicar: false` detenga
+el build, porque el panel queda declarando una base sin uso. Lo descubrí
+probándolo, no releyéndolo.
+
+El comportamiento es el correcto y se conserva; lo que estaba mal era la
+explicación. La promesa de `config/indicators.yml` —desactivar un indicador «sin
+tocar el código del build»— sigue en pie: `EJES.md` no es código, es el documento
+que describe la sección, y si un gráfico desaparece su frase hay que reescribirla.
+
+### Cuatro escenarios, cuatro mensajes distintos
+
+| Escenario | Qué dice el build |
+|---|---|
+| `Z-99` por `A-01` en impacto | códigos que no existen en `config/indicators.yml`: `['Z-99']` |
+| Eje `financiamiento` sin página | ejes que ninguna página usa: `['financiamiento']` |
+| Quitar `con_metricas` del panel de producción | faltan `['con_metricas']` |
+| Añadir `P-07` a colaboración | faltan `['con_autoria_detallada']` |
+
+### La forma única, que merece nombre
+
+Cinco hallazgos de esta revisión son el mismo defecto: **una lista escrita a mano
+que deja de cubrir, y un verde que sigue diciendo «bien» sobre lo que no miró.**
+
+`RUTAS` en `estructura.mjs` · `PAGINAS` en `contraste.mjs` · el barrido de `np.`
+que sólo veía lo que ya estaba · el panel que declaraba dos bases de tres ·
+`data-indicadores` contra el catálogo.
+
+Cinco sitios, una sola forma. En los cinco el arreglo fue el mismo: que el
+instrumento compare su lista contra la realidad y falle nombrando la diferencia.
+
+### Próximo paso recomendado
+
+Resolver las cuatro firmas de `E-09` en `make revision`.

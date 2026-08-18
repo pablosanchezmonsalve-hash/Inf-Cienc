@@ -34,7 +34,11 @@ async function modulos() {
   if (!yaPintado(cont)) {
     const codigos = cont.dataset.indicadores.split(',').map(s => s.trim());
     const series = await c.cargar('series.json');
-    cont.innerHTML = v.paginaModulos(codigos, series);
+    // El eje se identifica por el archivo, igual que en el pre-renderizado, y
+    // por el mismo motivo: es la clave de la sección y ya está en la URL.
+    const clave = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
+    const { ejes } = await c.cargar('ejes.json');
+    cont.innerHTML = v.paginaModulos(codigos, series, ejes[clave]);
   }
   conmutadorVistas(cont);
   scrollSpy(cont);
