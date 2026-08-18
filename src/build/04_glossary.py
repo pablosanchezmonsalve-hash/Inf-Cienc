@@ -72,13 +72,65 @@ def parse_ejes(text: str) -> dict[str, dict]:
 
         partes = {k: campo(e) for k, e in
                   (("titulo", "Título"), ("responde", "Responde"),
-                   ("no_responde", "No responde"), ("sobre_que", "Sobre qué"))}
+                   ("no_responde", "No responde"), ("sobre_que", "Sobre qué"),
+                   ("denominadores", "Denominadores"))}
         faltan = [k for k, v in partes.items() if not v]
         if faltan:
             raise SystemExit(f"BUILD ABORTADO: al eje '{clave}' de EJES.md le "
                              f"faltan las partes {faltan}")
+        # `denominadores` no se publica: existe para que la guarda pueda
+        # contrastar lo que el panel dice con lo que la página usa.
+        partes["denominadores"] = sorted(
+            d.strip() for d in partes["denominadores"].split(",") if d.strip())
         ejes[clave] = partes
     return ejes
+
+
+def verificar_denominadores(ejes: dict[str, dict]) -> None:
+    """Que la base declarada por cada panel sea la que la sección usa de verdad.
+
+    EL FALLO QUE ESTO CAZA, y que ya ocurrió:
+        El panel de producción decía «las publicaciones del universo» y explicaba
+        el caso de la unidad académica. Pero la sección también trae el ranking
+        de fuentes, que corre sobre las publicaciones con métricas: 816 y no 823.
+        Un lector habría contado mal justo en la frase que promete impedírselo.
+
+    POR QUÉ SE INSTRUMENTA Y NO SE REVISA A MANO
+        Los dos lados ya eran legibles por máquina —la página declara sus códigos
+        en `data-indicadores` y `config/indicators.yml` declara el denominador de
+        cada código—; sólo faltaba que el eje declarara los suyos. Sin esto, la
+        lista escrita a mano deja de cubrirlo todo en cuanto alguien añade un
+        indicador a una sección, y el panel sigue diciendo su base vieja sin que
+        nada avise. Es la misma forma que las guardas de cobertura de
+        `contraste.mjs` y `estructura.mjs`.
+
+    Se exige igualdad y no inclusión: un denominador declarado que ninguna página
+    usa es una declaración que envejeció, y esa es la mitad del problema.
+    """
+    ind = b.INDICATORS["indicadores"]
+    problemas = []
+    for pagina in sorted((b.ROOT / "web").glob("*.html")):
+        m = re.search(r'id="modulos"[^>]*data-indicadores="([^"]+)"',
+                      pagina.read_text(encoding="utf-8"))
+        if not m:
+            continue
+        clave = pagina.stem
+        if clave not in ejes:
+            problemas.append(f"la página '{clave}' no tiene panel en EJES.md")
+            continue
+        usados = sorted({ind[c.strip()].get("denominador")
+                         for c in m.group(1).split(",")
+                         if ind.get(c.strip(), {}).get("denominador")})
+        declarados = ejes[clave]["denominadores"]
+        if usados != declarados:
+            problemas.append(
+                f"el eje '{clave}' declara {declarados} y su página usa {usados}"
+                f" · sobran {sorted(set(declarados) - set(usados))}"
+                f" · faltan {sorted(set(usados) - set(declarados))}")
+    if problemas:
+        raise SystemExit("BUILD ABORTADO: el panel de una sección declara una "
+                         "base que no es la que usa:\n  · "
+                         + "\n  · ".join(problemas))
 
 
 def main() -> None:
@@ -102,7 +154,13 @@ def main() -> None:
     ejes = parse_ejes((b.DOCS / "EJES.md").read_text(encoding="utf-8"))
     if not ejes:
         raise SystemExit("BUILD ABORTADO: no se extrajo ningún eje de EJES.md")
-    b.write_json({"meta": b.build_meta(), "ejes": ejes}, "ejes.json")
+    verificar_denominadores(ejes)
+
+    # La lista de denominadores es instrumental: sirve a la guarda de arriba, no
+    # al lector. Publicarla metería en el artefacto un dato que la página no usa.
+    publicables = {k: {c: v for c, v in e.items() if c != "denominadores"}
+                   for k, e in ejes.items()}
+    b.write_json({"meta": b.build_meta(), "ejes": publicables}, "ejes.json")
     print(f"\n  ejes: {len(ejes)}")
     for clave, e in ejes.items():
         print(f"    - {clave}: {e['titulo']}")

@@ -20,6 +20,15 @@ responde.
 3. **Sobre qué** — la base de cálculo, porque la misma sección puede mezclar
    denominadores (`D-16`).
 
+Y una cuarta parte, que no se publica: **Denominadores**, la lista de los que la
+sección usa de verdad. El build la contrasta contra los indicadores que la página
+declara en `data-indicadores` y **falla si no coinciden**. Está porque la primera
+versión de este documento se equivocó justo en eso: el panel de producción decía
+«las publicaciones del universo» y explicaba el caso de la unidad académica, pero
+el ranking de fuentes corre sobre las publicaciones con métricas, que son 816 y
+no 823. Un lector habría contado mal exactamente en la frase que promete impedir
+que cuente mal.
+
 El texto es **institucionalmente neutro**: describe la metodología, no a esta
 universidad. Otra institución lo reutiliza sin tocarlo.
 
@@ -38,10 +47,15 @@ cifra pueden estar en disciplinas que Scopus cubre de forma muy desigual, y la
 comparación entre ellas mide entonces la cobertura de la base tanto como la
 actividad de las personas.
 
-**Sobre qué:** Las publicaciones del universo. La producción por unidad
-académica se calcula sobre pares autor × publicación, no sobre publicaciones: un
-trabajo firmado desde dos unidades cuenta en las dos, y por eso esas barras no
-suman el total.
+**Sobre qué:** Tres bases distintas, y conviene no sumarlas de memoria. La
+producción anual y el tipo documental se calculan sobre **todo el universo**; el
+ranking de fuentes, sólo sobre las publicaciones **con métricas**, que son menos;
+y la producción por unidad académica, sobre **pares autor × publicación** y no
+sobre publicaciones —un trabajo firmado desde dos unidades cuenta en las dos, y
+por eso esas barras no suman el total—. Cada gráfico lleva su denominador en el
+sello.
+
+**Denominadores:** universo_total, con_metricas, con_autoria_detallada
 
 ---
 
@@ -62,6 +76,8 @@ no al artículo que se publicó en ella.
 **Sobre qué:** Las publicaciones con métricas normalizadas, que son menos que el
 universo. Las de los años más recientes han tenido menos tiempo para acumular
 citas: su impacto es provisional por construcción, no bajo.
+
+**Denominadores:** con_metricas
 
 ---
 
@@ -84,6 +100,8 @@ lee.
 campos multivaluados: una publicación aparece en todos los que la firman, así que
 esas barras no son partes de un total y no suman el 100 %.
 
+**Denominadores:** con_metricas
+
 ---
 
 ## tematica
@@ -100,5 +118,10 @@ categorías tampoco son excluyentes —una revista puede estar en varias— y po
 no reparten el total. Y la prominencia de un tema describe la atención que el
 campo recibe en el mundo, no el desempeño de quien publica en él.
 
-**Sobre qué:** Las publicaciones con área temática asignada. Al ser
+**Sobre qué:** Las áreas y categorías, sobre las publicaciones con área temática
+asignada; los Objetivos de Desarrollo Sostenible, sobre las que tienen métricas.
+Hoy las dos cifras coinciden, pero por coincidencia y no por definición: son
+coberturas distintas y pueden separarse en la próxima carga. Al ser
 multivaluadas, la suma de las categorías supera el número de publicaciones.
+
+**Denominadores:** con_area_tematica, con_metricas

@@ -1850,3 +1850,57 @@ sistema cromático válido.
 
 Resolver las cuatro firmas de `E-09` en `make revision`, que sigue siendo lo
 único que bloquea que `P-06` baje a 552.
+
+---
+
+## Cierre · el panel se equivocó en lo que el panel promete
+
+La revisión del PR encontró que el panel de producción decía «Las publicaciones
+del universo» y explicaba sólo el caso de la unidad académica. Pero la sección
+trae cuatro indicadores sobre **tres** bases: `P-02` y `P-03` sobre las 823 del
+universo, `P-07` sobre los 818 con autoría detallada, y `P-05` —ranking de
+fuentes— sobre las **816 con métricas**, que el panel no nombraba.
+
+Un lector que mirara el ranking habría contado 823 donde son 816, en la frase
+que existe para impedirle contar mal. Es pequeño en magnitud y exacto en tipo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-181 | Cada eje declara en `EJES.md` los denominadores que su sección usa, y el build falla si no coinciden con los de `data-indicadores` | Los dos lados ya eran legibles por máquina: la página declara sus códigos y `config/indicators.yml` el denominador de cada uno. Sólo faltaba que el eje declarara los suyos. Sin esto, la lista escrita a mano deja de cubrirlo todo en cuanto alguien añade un indicador y el panel sigue diciendo su base vieja |
+| D-182 | La guarda exige **igualdad**, no inclusión | Un denominador declarado que ninguna página usa es una declaración que envejeció, y esa es la otra mitad del problema |
+| D-183 | `denominadores` no se publica en `ejes.json` | Es instrumental: sirve a la guarda, no al lector. Publicarlo metería en el artefacto un dato que la página no usa |
+
+### La segunda, que hoy no se ve
+
+Temática declaraba «con área temática asignada», pero `T-04` —Objetivos de
+Desarrollo Sostenible— corre sobre `con_metricas`. Las dos valen 816 hoy, así
+que ningún lector se confunde: **la igualdad es coincidencia, no definición**. El
+panel lo dice ahora, y si algún día divergen la guarda lo caza antes de que el
+texto envejezca en silencio.
+
+### Comprobado en negativo, dos veces
+
+| Escenario | Qué hace el build |
+|---|---|
+| Se quita `con_metricas` del panel de producción —el fallo original— | Aborta: «el eje 'produccion' declara […] y su página usa […] · faltan ['con_metricas']» |
+| Se añade `P-07` a colaboración sin tocar su panel | Aborta nombrando `con_autoria_detallada` como el que falta |
+
+El segundo es el que importa: es el caso futuro, no el pasado.
+
+### Nota de método, la cuarta de la ronda
+
+Quien revisó buscó `id="eje"` para localizar el panel y obtuvo «no» en las cuatro
+páginas —el marcado es `<section class="panel-eje">` dentro de `#modulos`—. Estuvo
+a punto de reportar que el panel no estaba. Lo cazó porque en el mismo barrido
+«No responde» aparecía una vez por página y **las dos cosas no podían ser verdad
+a la vez**.
+
+Es la contrapartida exacta del rojo falso de la ronda anterior: un falso negativo
+se lee igual de bien que un hallazgo. Lo que lo desmontó no fue mirar más, sino
+tener dos medidas que se contradecían.
+
+### Próximo paso recomendado
+
+Resolver las cuatro firmas de `E-09` en `make revision`.

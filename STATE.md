@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `bef3a7c` · El catálogo publica los 40 indicadores evaluados, no sólo los 27 que s
-Snapshot: 2026-08-17
+Último commit: `d953a14` · Cada sección declara qué pregunta responde, y cuál no
+Snapshot: 2026-08-18
 
 ---
 
@@ -79,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 180
+## Decisiones tomadas: 183
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
