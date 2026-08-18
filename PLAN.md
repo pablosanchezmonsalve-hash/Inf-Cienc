@@ -116,7 +116,7 @@ para los datos derivados.
 | ~~T-17~~ | ~~Corregir las cadenas de unidad académica concatenadas sin separador~~ | — | **Cerrado (2026-08-03)**: reparación de codificación + 3 correcciones declaradas en config. 26 → 22 unidades distintas |
 | ~~T-18~~ | ~~Trocear o paginar `publications.json`~~ | — | **Cerrado sin cambios (2026-08-03)**: 699 KB comprimen a 146 KB. La página entera transfiere 181 KB. La cifra que lo motivó era sin comprimir |
 
-| T-19 | Ampliar cobertura de ORCID buscando por afiliación en el registro | V2 | La verificación no busca ORCID nuevos; hoy el techo es 29,5 % |
+| T-19 | Ampliar cobertura de ORCID buscando por afiliación en el registro | V2 | La verificación no busca ORCID nuevos. El techo citado aquí era 29,5 %, de antes de la ampliación desde el registro y de la revisión humana: hoy la cobertura es 216 de 556 entidades (38,8 %). Corregida la cifra el 2026-08-18; el pendiente sigue abierto |
 
 ---
 

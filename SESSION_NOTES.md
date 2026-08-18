@@ -1973,3 +1973,60 @@ instrumento compare su lista contra la realidad y falle nombrando la diferencia.
 ### Próximo paso recomendado
 
 Resolver las cuatro firmas de `E-09` en `make revision`.
+
+---
+
+## Cierre · la última base sin declarar
+
+`docs/ORCID_COVERAGE.md` seguía publicando **222 de 589 (37,7 %)**: la base
+previa a la consolidación, en un documento de capa pública cuyo tema es
+precisamente esa cifra. Era la última instancia viva del defecto que ocupó toda
+la ronda — se corrigieron `STATE.md`, `INDICATORS.md`, `LIMITATIONS.md`, el
+catálogo, los cuatro paneles y `V2_BACKLOG.md`, y quedó éste.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-187 | Las cifras del documento se rehacen sobre la base publicada, y la cabecera declara cuál es | Un documento sobre cobertura que publica una base que ya no existe no es sólo inexacto: enseña a leer mal la cifra que explica |
+| D-188 | La tabla de las tres vías conserva sus cifras de entonces, declaradas como históricas | Así se recorrió el camino y así queda. Reescribirla con cifras de hoy borraría el proceso; lo que hacía falta era decir sobre qué base estaba medida |
+| D-189 | La cifra de `T-19` en `PLAN.md` se corrige; el pendiente sigue abierto | Cerrar o reescribir un `T-xx` es decisión del propietario. Corregir una cifra caducada dentro de él no lo es: el techo citado, 29,5 %, era de antes de la ampliación y de la revisión |
+
+### Todo remedido, no arrastrado
+
+| Qué | Decía | Dice |
+|---|---|---|
+| Cobertura | 222 de 589 · 37,7 % | **216 de 556 · 38,8 %** (y 240 sobre firmas sin consolidar) |
+| Etiquetas | 153 / 48 / 17 / 4 | **139 / 43 / 16 / 15 / 3** — la de «confirmado por revisión» no existía |
+| Una sola publicación | 419 firmas · 71,1 % · 26,3 % de cobertura | **387 entidades · 69,6 % · 27,1 %** |
+| Diez o más | 15 firmas · 93,3 % | **18 entidades · 94,4 %** |
+| Sin ninguna publicación con DOI | 10 | **10** — no cambió |
+
+La forma de la distribución no cambió; las cifras sí. Fusionar variantes junta
+las publicaciones de una persona, así que hay menos entidades de una sola
+publicación y más de diez o más — y eso está dicho en el documento, porque la
+diferencia entre las dos tablas es un dato sobre la consolidación, no ruido.
+
+### Dos cosas que aparecieron al remedirlo
+
+- **§2 bis contaba cuatro etiquetas y hoy son cinco.** «Confirmado por revisión»
+  la trajo la revisión humana de identidad y es la única que no depende de una
+  fuente automática. La tabla vieja no cuadraba con las 216.
+- **§4 daba la consolidación por pendiente entera.** Ya no lo está: 63 formas son
+  30 personas, y quedan 31 grupos, 20 perfiles fragmentados y las 4 firmas de
+  `E-09`. El argumento —que «100 % de los autores» no está bien definido mientras
+  no se sepa cuántos hay— se sostiene igual, y ahora dice además que esa cifra
+  sólo baja según se resuelve la cola.
+
+### Lo que se comprobó y NO estaba mal
+
+§5 afirma que una ficha sin ORCID muestra «No disponible en las fuentes
+actuales». Se verificó contra una ficha real: el campo `orcid_estado` dice
+exactamente eso. Es la misma cadena que estaba caducada en `AU-05` de
+`config/indicators.yml`, y aquí sí es cierta — describe la ficha, no el
+indicador.
+
+### Próximo paso recomendado
+
+`V2-08`: procedimiento público de corrección de fichas de autor, requisito
+escrito de `DATA_LICENSE.md` §4.

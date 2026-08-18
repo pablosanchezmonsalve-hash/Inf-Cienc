@@ -3,6 +3,13 @@
 **Capa:** pública · **Pendientes que ataca:** `T-19` y la pregunta de cuánta
 cobertura es alcanzable
 
+> **Las cifras van sobre la base publicada: 556 entidades de autor**, que son las
+> 589 formas de firma de la fuente con 63 ya fusionadas en 30 personas por
+> revisión humana. Este documento se escribió antes de esa revisión y durante un
+> tiempo siguió publicando 222 de 589 —una base que ya no existía— mientras el
+> sitio servía otra. Corregido el 2026-08-18; si vuelve a divergir, manda
+> `STATE.md`, que se deriva del repositorio.
+
 ---
 
 ## 1. La pregunta
@@ -30,9 +37,17 @@ otras dos **importan** en vez de reimplementar.
 | `orcid_expand.py` | ¿Quién declara este DOI entre sus obras? | Publicación compartida | Sí | **+48** |
 | `orcid_afiliacion.py` | ¿Quién declara esta universidad en su registro? | **Sólo el nombre** | **No** | 0 |
 
-**Cobertura: 174 → 222 de 589 (29,5 % → 37,7 %)**, un 27,6 % más de firmas
-identificadas. La ejecución completa consultó los 804 DOI del corpus y encoló
-2 desacuerdos entre Crossref y el registro, sin resolverlos.
+Las cifras de la columna son **de aquella ejecución, sobre las 589 formas de
+firma sin consolidar**: así se recorrió el camino, y así queda. La ejecución
+completa consultó los 804 DOI del corpus y encoló 2 desacuerdos entre Crossref y
+el registro, sin resolverlos.
+
+Después vino la revisión humana, que consolidó variantes y confirmó candidatos
+por afiliación. **Sobre la base que hoy publica el sitio la cobertura es de 216
+de 556 entidades (38,8 %)**, y son 240 asignaciones si se cuentan sobre las
+formas de firma sin consolidar. Las dos cifras son ciertas y miden poblaciones
+distintas; citar una donde corresponde la otra es el error que este proyecto
+persigue.
 
 La tercera es distinta y por eso no publica. Las dos primeras exigen que la
 firma y el titular coincidan en nombre **y** aparezcan en el mismo artículo. La
@@ -66,12 +81,19 @@ Los recuentos agregados se cuentan por esa etiqueta y no por el veredicto, para
 que el número de verificaciones independientes no se infle con comprobaciones
 circulares:
 
-| Etiqueta en la ficha | Firmas |
+Sobre las **216 entidades con ORCID** de la base publicada:
+
+| Etiqueta en la ficha | Entidades |
 |---|---:|
-| `verificado` — dos fuentes independientes coinciden | 153 |
-| `declarado por el titular` — una sola fuente, el titular | 48 |
-| `no verificable` — sin obras con DOI que contrastar | 17 |
-| `sin confirmar` — pendiente de revisión humana | 4 |
+| `verificado` — dos fuentes independientes coinciden | 139 |
+| `declarado por el titular` — una sola fuente, el titular | 43 |
+| `no verificable` — sin obras con DOI que contrastar | 16 |
+| `confirmado por revisión` — una persona lo comprobó en `make revision` | 15 |
+| `sin confirmar` — pendiente de revisión humana | 3 |
+
+La cuarta etiqueta no existía cuando se escribió este documento: la trajo la
+revisión humana de identidad, y es la única que no depende de una fuente
+automática.
 
 ---
 
@@ -80,22 +102,27 @@ circulares:
 La cobertura sube con el número de publicaciones de la firma, y el corpus está
 dominado por firmas de una sola publicación:
 
-| Publicaciones de la firma | Firmas | Con ORCID | Cobertura |
+| Publicaciones de la entidad | Entidades | Con ORCID | Cobertura |
 |---|---:|---:|---:|
-| 1 | 419 | 110 | 26,3 % |
+| 1 | 387 | 105 | 27,1 % |
 | 2 | 74 | 38 | 51,4 % |
-| 3–4 | 45 | 30 | 66,7 % |
-| 5–9 | 36 | 30 | 83,3 % |
-| 10 o más | 15 | 14 | **93,3 %** |
+| 3–4 | 46 | 31 | 67,4 % |
+| 5–9 | 31 | 25 | 80,6 % |
+| 10 o más | 18 | 17 | **94,4 %** |
 
-**71,1 % de las formas de firma tienen una sola publicación.** Una firma con
-una publicación tiene exactamente una oportunidad de ser encontrada: si su ORCID
-no aparece en ese único DOI, no hay una segunda vía por la que pueda aparecer.
-Entre quienes tienen diez o más, la cobertura ya es del 93,3 %: **entre los
-autores con obra sostenida en la ventana, la cobertura casi está completa**, y
-lo que falta se concentra en la cola de firmas con una sola publicación.
+**69,6 % de las entidades tienen una sola publicación.** Una entidad con una
+publicación tiene exactamente una oportunidad de ser encontrada: si su ORCID no
+aparece en ese único DOI, no hay una segunda vía por la que pueda aparecer.
+Entre quienes tienen diez o más, la cobertura es del 94,4 %: **entre los autores
+con obra sostenida en la ventana, la cobertura casi está completa**, y lo que
+falta se concentra en la cola de entidades con una sola publicación.
 
-A esto se añade un límite estructural: **10 formas de firma no tienen ninguna
+La forma de la distribución no cambió con la consolidación —sigue dominada por
+la cola de una publicación— pero las cifras sí: fusionar variantes junta las
+publicaciones de una misma persona, y por eso hay menos entidades de una sola
+publicación y más de diez o más.
+
+A esto se añade un límite estructural: **10 entidades no tienen ninguna
 publicación con DOI**. Ninguna vía basada en DOI puede alcanzarlas, ni la de
 Crossref ni la del registro. Para ellas sólo queda la búsqueda por afiliación,
 que no publica.
@@ -104,23 +131,25 @@ que no publica.
 
 ## 4. Lo que el 100 % exigiría
 
-Para que las 589 tuvieran ORCID harían falta las cuatro cosas a la vez:
+Para que las 556 tuvieran ORCID harían falta las cuatro cosas a la vez:
 
-1. que las 589 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
+1. que las 556 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
 2. que su registro sea **público** —puede configurarse como privado—;
 3. que alguna fuente **conecte** ese ORCID con alguna de sus publicaciones de
    este corpus, o que la persona declare la universidad;
 4. que el nombre permita distinguirla de sus homónimos.
 
 Las cuatro se cumplen para una parte de los autores y no para el resto. Escribir
-589 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
+556 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
 las reglas del proyecto: *«No inventes datos, columnas, métricas, relaciones ni
 resultados»*.
 
-**589 formas de firma tampoco son 589 personas.** Son variantes de nombre, y
-consolidarlas es un pendiente abierto de revisión humana (`T-03`, `T-04`). Una
-cobertura del «100 % de los autores» ni siquiera está bien definida mientras no
-se sepa cuántos autores hay.
+**Y 556 entidades tampoco son 556 personas.** Una revisión humana ya fusionó 63
+formas de firma en 30 personas, pero quedan 31 grupos de variantes y 20 perfiles
+fragmentados sin resolver (`T-03`, `T-04`), y cuatro firmas que probablemente no
+sean personas sino fragmentos de cadena de afiliación (`E-09`). Una cobertura del
+«100 % de los autores» ni siquiera está bien definida mientras no se sepa cuántos
+autores hay — y esa cifra sólo baja según se resuelve la cola, nunca sube.
 
 ---
 
@@ -128,7 +157,8 @@ se sepa cuántos autores hay.
 
 El indicador `AU-05` se publica **con su denominador y su veredicto a la vista**,
 no como una cifra a maximizar. Cada ORCID del sitio dice qué evidencia lo
-respalda: `verificado`, `no verificable` o `sin confirmar`. Una firma sin ORCID
+respalda: `verificado`, `declarado por el titular`, `confirmado por revisión`,
+`no verificable` o `sin confirmar`. Una firma sin ORCID
 muestra «No disponible en las fuentes actuales», declarado y no escondido
 (decisión `D-07`).
 
