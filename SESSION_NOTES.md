@@ -2030,3 +2030,66 @@ indicador.
 
 `V2-08`: procedimiento público de corrección de fichas de autor, requisito
 escrito de `DATA_LICENSE.md` §4.
+
+---
+
+## Cierre · el procedimiento de corrección, y una comprobación que no comprobaba lo que creí
+
+`DATA_LICENSE.md` §4 dejaba escrito un pendiente: definir cómo una persona puede
+pedir la corrección de su ficha. Era `V2-08`, y llevaba abierto desde la Fase 3.
+
+Al leerlo resultó **menos bloqueado de lo que parecía**: el propio documento ya
+determinaba el camino principal —corregir el perfil en Scopus, y la plataforma
+lo refleja en la siguiente carga porque se reconstruye entera—. Lo que faltaba
+era declararlo donde el lector lo encuentra.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-190 | El procedimiento se publica en el sitio y `DATA_LICENSE.md` apunta a él en vez de repetirlo | Dos redacciones de un mismo compromiso divergen, y la que el público lee es la del sitio. Una sola, en un sitio |
+| D-191 | Distingue lo que se corrige en la fuente de lo que sólo se corrige aquí | No son el mismo trámite. Nombre, afiliación e identificador vienen de Scopus; aparecer dos veces, una ficha que no es persona, un ORCID mal atribuido o una unidad mal deducida los introduce esta plataforma al procesar, y no hay perfil de Scopus que los arregle |
+| D-192 | Declara además **qué no se cambia a petición** | Afirmar una identidad, enlazar firmas sin revisión, o alterar una posición en un listado. No por rigidez: cambiarlas publicaría afirmaciones que los datos no sostienen. Un procedimiento que no dice qué no concede promete de más |
+| D-193 | El canal de contacto queda como hueco declarado, no improvisado | Es decisión de la institución. Inventar un canal sería peor que no tenerlo: haría creer que hay alguien escuchando |
+| D-194 | El enlace va en la página de autores, no sólo en metodología | Es la página donde alguien se encuentra a sí mismo mal representado, y es el momento en que necesita saber qué puede hacer |
+
+La sección es **HTML estático**: un lector sin JavaScript ve el procedimiento
+entero. El glosario y la procedencia de esa misma página sí dependen de JS, pero
+eso es anterior y queda declarado, no tocado.
+
+### La sexta lista, y una prueba negativa que era falsa
+
+El enlace nuevo es de **página cruzada** —`metodologia.html#correcciones`— y la
+comprobación de enlaces internos corta el `href` en el `#`: daba por bueno el
+ancla con sólo existir el archivo. Un ancla rota no falla; deja al lector arriba
+de la página preguntándose dónde estaba lo prometido, que cuesta más detectar que
+un 404 precisamente porque no rompe nada.
+
+Se añadió la comprobación de anclas de página cruzada a `estructura.mjs`. **Pero
+la primera prueba negativa fue inválida**: rompí un ancla de la MISMA página, y
+la cazó una comprobación que ya existía —`a[href^="#"]`, en el barrido del
+navegador— cuyo mensaje ni siquiera era el mío. Di por confirmado el instrumento
+nuevo con el rojo del viejo.
+
+Rehecha sobre un ancla de página cruzada, sale el mensaje correcto. Y de paso
+quedó claro que el check nuevo no duplica al viejo: uno mira dentro de la página
+en el DOM renderizado, el otro entre páginas en el HTML estático.
+
+| Comprobación | Qué cubre | Qué no |
+|---|---|---|
+| `a[href^="#"]` en el navegador | Anclas de la misma página, incluidas las que pinta JS | Enlaces a otra página |
+| La nueva, sobre el HTML | Anclas de página cruzada en los 30 enlaces estáticos | Enlaces que pinta JS |
+
+**El enlace que añadí no lo cubre ninguna de las dos**, porque es de página
+cruzada Y lo pinta JavaScript. Se verificó a mano en el navegador: aparece,
+lleva a `metodologia.html#correcciones`, la sección existe y el título se ve.
+
+### Supuesto descartado
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Nadie comprobaba las anclas» | **Falso.** Había una comprobación desde antes; leí un bloque del archivo y no el archivo. Validé mi suposición contra un fragmento |
+
+### Próximo paso recomendado
+
+`V2-16`: la cabecera `<head>` repetida en diez páginas.
