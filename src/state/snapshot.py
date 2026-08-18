@@ -42,6 +42,7 @@ MAPA_LECTURA = [
     ("Qué decisión se tomó y por qué", "docs/DECISIONS.md"),
     ("Qué límites tienen los datos", "docs/LIMITATIONS.md"),
     ("Cómo se calcula un indicador", "docs/INDICATORS.md"),
+    ("Qué pregunta responde una sección", "docs/EJES.md"),
     ("Por qué un cálculo es válido", "docs/METHODOLOGY.md"),
     ("Qué entidades y claves hay", "docs/DATA_MODEL.md"),
     ("Qué es público y qué interno", "docs/LAYERS.md"),

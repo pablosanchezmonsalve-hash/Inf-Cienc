@@ -75,6 +75,29 @@ información con tooltip.
 
 ---
 
+## 4 bis. Panel conceptual de sección
+
+Cada sección de indicadores abre con un panel que declara tres cosas antes de
+mostrar ningún gráfico: **qué responde**, **qué no responde** y **sobre qué base**
+está calculada.
+
+La segunda es la que justifica el panel. Cada sección invita a una lectura
+equivocada concreta —producción se lee como rendimiento, impacto como calidad,
+colaboración como influencia, la clasificación temática como el tema real del
+artículo— y un lector que llega sin saber qué pregunta responde la sección no
+tiene forma de saber cuál **no** responde. Decirlo después de los gráficos es
+decirlo tarde, así que va delante y ocupa el ancho completo: en la rejilla de dos
+columnas caería en la del índice, y esto no es material de barra lateral.
+
+El texto vive en **`docs/EJES.md`** y se serializa a `ejes.json` en el build, por
+lo mismo que el glosario: son afirmaciones metodológicas y se revisan como
+documento, no como cadenas dentro de un archivo de JavaScript. Si a un eje le
+falta cualquiera de las tres partes, **el build aborta** — un panel sin el «no
+responde» es justo el que no hacía falta escribir.
+
+Es institucionalmente neutro: describe la metodología, no a esta universidad.
+Otra institución lo reutiliza sin tocarlo.
+
 ## 5. Módulos analíticos
 
 | Módulo | Visualización | Pregunta que responde | Por qué esa forma |
