@@ -76,7 +76,7 @@ salvo el renderizador de la red.
 
 | # | Pendiente | Nota |
 |---|---|---|
-| **V2-08** | Procedimiento público de corrección de fichas de autor | Requisito de `DATA_LICENSE.md` §4 |
+| **V2-08** | ~~Procedimiento público de corrección de fichas de autor~~ · **publicado (2026-08-18)** en `metodologia.html#correcciones`, enlazado desde la página de autores. Distingue lo que se corrige en Scopus de lo que sólo se corrige aquí, y declara qué no se cambia a petición. **Queda un hueco declarado:** la vía institucional de contacto, que es decisión de la institución | Requisito de `DATA_LICENSE.md` §4 |
 | **V2-09** | Comparación entre períodos | Necesita al menos dos cargas con corte distinto |
 | **V2-10** | Interfaz en inglés | Hoy sólo español |
 | **V2-11** | Exportación desde más vistas | Hoy sólo desde publicaciones |

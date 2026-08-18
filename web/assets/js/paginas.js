@@ -300,8 +300,12 @@ async function autores() {
   const { autores: lista, parametros } = data;
   let soloInterpretables = true, orden = 'n_publicaciones', asc = false, q = '';
 
+  // El enlace de corrección va AQUÍ y no sólo en metodología: ésta es la página
+  // donde alguien se encuentra a sí mismo mal representado, y es el momento en
+  // que necesita saber qué puede hacer. `DATA_LICENSE.md` §4 lo exige.
   document.getElementById('aviso-autores').innerHTML = `
-    <div class="nota-destacada"><b>Sobre estas cifras</b>${c.escapar(data.advertencia_identidad)}</div>`;
+    <div class="nota-destacada"><b>Sobre estas cifras</b>${c.escapar(data.advertencia_identidad)}
+      <br><a href="metodologia.html#correcciones">¿Su ficha tiene un error? Cómo se corrige →</a></div>`;
 
   // El umbral estaba escrito en el HTML. Viene de config/publication.yml.
   document.getElementById('etiqueta-umbral').textContent =
