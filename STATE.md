@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `d953a14` · Cada sección declara qué pregunta responde, y cuál no
+Último commit: `5658d7b` · El panel de producción declaraba dos bases y la sección usa tres
 Snapshot: 2026-08-18
 
 ---
@@ -79,7 +79,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 183
+## Decisiones tomadas: 186
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

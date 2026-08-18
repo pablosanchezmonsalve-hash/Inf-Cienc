@@ -106,30 +106,74 @@ def verificar_denominadores(ejes: dict[str, dict]) -> None:
 
     Se exige igualdad y no inclusión: un denominador declarado que ninguna página
     usa es una declaración que envejeció, y esa es la mitad del problema.
+
+    Y ya que aquí es donde `data-indicadores` se lee por primera vez contra el
+    catálogo, se comprueban dos cosas más que sólo se ven desde este sitio: que
+    ningún código sea desconocido, y que ningún eje se quede sin página.
     """
     ind = b.INDICATORS["indicadores"]
     problemas = []
+    con_pagina = set()
     for pagina in sorted((b.ROOT / "web").glob("*.html")):
         m = re.search(r'id="modulos"[^>]*data-indicadores="([^"]+)"',
                       pagina.read_text(encoding="utf-8"))
         if not m:
             continue
         clave = pagina.stem
+        con_pagina.add(clave)
         if clave not in ejes:
             problemas.append(f"la página '{clave}' no tiene panel en EJES.md")
             continue
-        usados = sorted({ind[c.strip()].get("denominador")
-                         for c in m.group(1).split(",")
-                         if ind.get(c.strip(), {}).get("denominador")})
+
+        codigos = [c.strip() for c in m.group(1).split(",") if c.strip()]
+
+        # UN CÓDIGO DESCONOCIDO ES UNA ERRATA, Y HOY BORRABA UN GRÁFICO EN
+        # SILENCIO. `paginaModulos` descarta los códigos que no están en las
+        # series, así que cambiar `A-01` por `Z-99` en un `data-indicadores`
+        # dejaba la página de impacto con cuatro módulos en vez de cinco, y el
+        # pipeline entero —auditoría, barrera de capas, batería del navegador—
+        # terminaba en verde sin nombrar el código ni una vez. Medido.
+        #
+        # Aquí no hay nada que interpretar: un código que no está en el catálogo
+        # no es una decisión, es un error de escritura.
+        desconocidos = [c for c in codigos if c not in ind]
+        if desconocidos:
+            problemas.append(
+                f"la página '{clave}' declara códigos que no existen en "
+                f"config/indicators.yml: {desconocidos}")
+            continue
+
+        # Sólo los publicados, y esto ENDURECE la guarda en vez de relajarla:
+        # al retirar un indicador con `publicar: false`, su denominador deja de
+        # estar en uso y el panel pasa a declarar una base que ya nadie tiene.
+        # El build se detiene y dice cuál sobra.
+        #
+        # Es deliberado. `config/indicators.yml` promete que se puede desactivar
+        # un indicador «sin tocar el código del build», y sigue siendo cierto:
+        # `EJES.md` no es código, es el documento que describe la sección. Si el
+        # ranking de fuentes deja de mostrarse, la frase del panel que lo explica
+        # deja de ser verdad, y esa frase hay que reescribirla. Dejarlo pasar en
+        # silencio sería publicar un panel que describe un gráfico ausente.
+        usados = sorted({ind[c].get("denominador") for c in codigos
+                         if ind[c].get("publicar") and ind[c].get("denominador")})
         declarados = ejes[clave]["denominadores"]
         if usados != declarados:
             problemas.append(
                 f"el eje '{clave}' declara {declarados} y su página usa {usados}"
                 f" · sobran {sorted(set(declarados) - set(usados))}"
                 f" · faltan {sorted(set(usados) - set(declarados))}")
+
+    # El bucle recorre páginas, así que caza «página sin panel» y no su simétrico.
+    # Un eje sin página se serializa a ejes.json igual: se PUBLICA un panel que
+    # ninguna sección muestra. Pesa más que el denominador huérfano, que al menos
+    # no llegaba al artefacto.
+    huerfanos = sorted(set(ejes) - con_pagina)
+    if huerfanos:
+        problemas.append(f"EJES.md declara ejes que ninguna página usa: {huerfanos}")
+
     if problemas:
-        raise SystemExit("BUILD ABORTADO: el panel de una sección declara una "
-                         "base que no es la que usa:\n  · "
+        raise SystemExit("BUILD ABORTADO: los paneles de sección y los "
+                         "indicadores de sus páginas no concuerdan:\n  · "
                          + "\n  · ".join(problemas))
 
 

@@ -1904,3 +1904,72 @@ tener dos medidas que se contradecían.
 ### Próximo paso recomendado
 
 Resolver las cuatro firmas de `E-09` en `make revision`.
+
+---
+
+## Cierre · una errata de un carácter borraba un gráfico sin dejar rastro
+
+La revisión encontró dos agujeros en la guarda de los paneles. El segundo no era
+de este trabajo, pero se ve desde aquí porque es el primer sitio donde
+`data-indicadores` se lee contra el catálogo.
+
+### Lo que se midió antes de arreglarlo
+
+Sustituyendo `A-01` por `Z-99` en el `data-indicadores` de impacto:
+
+```
+make sitio                        exit=0
+menciones de «Z-99» en la salida  0
+módulos en dist/impacto.html      5 → 4
+A-01 en dist/impacto.html         ausente
+```
+
+Auditoría, barrera de capas, guarda nueva y batería del navegador: todo verde. Un
+carácter mal escrito retira un indicador publicado del informe y **nada lo dice**.
+De todo lo hallado en esta revisión es lo único que degrada lo publicado sin
+dejar rastro; el resto eran cifras mal contadas o guardas que miraban de menos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-184 | Un código de `data-indicadores` que no esté en `config/indicators.yml` aborta el build | No hay nada que interpretar: un código desconocido no es una decisión de diseño, es un error de escritura. `paginaModulos` lo descarta en silencio y la página sale con un gráfico menos |
+| D-185 | Un eje declarado en `EJES.md` sin página que lo use aborta el build | El bucle recorría páginas, así que cazaba «página sin panel» y no su simétrico. Y el eje huérfano pesa más que el denominador huérfano: éste no llegaba al artefacto, aquél se serializa a `ejes.json` y se publica |
+| D-186 | El denominador se cuenta sólo de los indicadores publicados, y eso endurece la guarda | Al retirar uno con `publicar: false`, su base deja de usarse y el panel pasa a declarar una que ya nadie tiene: el build se detiene. Es deliberado — si el ranking de fuentes deja de mostrarse, la frase del panel que lo explica deja de ser verdad |
+
+### Un comentario mío que decía lo contrario de lo que hacía el código
+
+Escribí que filtrar por `publicar` evitaba que ejercer la vía de replicabilidad
+rompiera el build. **Es al revés**: el filtro hace que `publicar: false` detenga
+el build, porque el panel queda declarando una base sin uso. Lo descubrí
+probándolo, no releyéndolo.
+
+El comportamiento es el correcto y se conserva; lo que estaba mal era la
+explicación. La promesa de `config/indicators.yml` —desactivar un indicador «sin
+tocar el código del build»— sigue en pie: `EJES.md` no es código, es el documento
+que describe la sección, y si un gráfico desaparece su frase hay que reescribirla.
+
+### Cuatro escenarios, cuatro mensajes distintos
+
+| Escenario | Qué dice el build |
+|---|---|
+| `Z-99` por `A-01` en impacto | códigos que no existen en `config/indicators.yml`: `['Z-99']` |
+| Eje `financiamiento` sin página | ejes que ninguna página usa: `['financiamiento']` |
+| Quitar `con_metricas` del panel de producción | faltan `['con_metricas']` |
+| Añadir `P-07` a colaboración | faltan `['con_autoria_detallada']` |
+
+### La forma única, que merece nombre
+
+Cinco hallazgos de esta revisión son el mismo defecto: **una lista escrita a mano
+que deja de cubrir, y un verde que sigue diciendo «bien» sobre lo que no miró.**
+
+`RUTAS` en `estructura.mjs` · `PAGINAS` en `contraste.mjs` · el barrido de `np.`
+que sólo veía lo que ya estaba · el panel que declaraba dos bases de tres ·
+`data-indicadores` contra el catálogo.
+
+Cinco sitios, una sola forma. En los cinco el arreglo fue el mismo: que el
+instrumento compare su lista contra la realidad y falle nombrando la diferencia.
+
+### Próximo paso recomendado
+
+Resolver las cuatro firmas de `E-09` en `make revision`.
