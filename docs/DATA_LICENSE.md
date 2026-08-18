@@ -78,18 +78,30 @@ No se incorpora ningún dato personal que no esté en la fuente.
 Aun así hay tres decisiones deliberadas:
 
 1. **No se afirma identidad.** Cada ficha corresponde a una forma de firma, no
-   a una persona verificada. Las 123 variantes de nombre y los 20
-   identificadores fragmentados se declaran sin resolver.
+   a una persona verificada. Una revisión humana ya fusionó 63 formas en 30
+   personas; quedan **31 grupos de variantes** y **20 identificadores
+   fragmentados** declarados sin resolver, más **4 firmas que probablemente no
+   sean personas** sino fragmentos de cadena de afiliación (regla `E-09`).
 2. **No se enlazan firmas sospechosas entre sí.** Sugerir que dos firmas son la
    misma persona publicaría una afirmación no verificada. La cola de revisión
    permanece interna.
 3. **No se publican rankings de desempeño individual.** El orden por número de
    publicaciones es descriptivo y va acompañado de la advertencia DORA/Leiden.
 
-**Pendiente:** definir el procedimiento por el cual una persona puede solicitar
-corrección de su ficha. En Scopus, la vía es corregir el perfil de autor en la
-fuente; la plataforma lo reflejará en la siguiente carga. Conviene declararlo
-explícitamente en el sitio (pendiente V2-08).
+**Procedimiento de corrección: publicado** en el sitio, en
+`metodologia.html#correcciones` y enlazado desde la página de autores, que es
+donde alguien se encuentra a sí mismo mal representado (`V2-08`).
+
+El texto vive **sólo allí** y no se repite aquí a propósito: dos redacciones de
+un mismo compromiso divergen, y la que el público lee es la del sitio. Distingue
+lo que se corrige en la fuente —perfil de Scopus, y la plataforma lo refleja en
+la siguiente carga porque se reconstruye entera— de lo que sólo se corrige aquí:
+firmas duplicadas, fichas que no son personas, ORCID mal atribuidos y unidades
+académicas mal deducidas. Todos entran en la cola de revisión humana (`D-08`).
+
+**Queda declarado un hueco:** la vía institucional por la que enviar esas
+solicitudes no está definida. Es decisión de la institución y no de la
+plataforma, y el sitio lo dice en vez de improvisar un canal.
 
 ---
 

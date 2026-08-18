@@ -101,11 +101,30 @@ for (const f of htmls) {
     anotar(`${f} existe en dist/ y no está en RUTAS: nadie la comprueba`);
   }
 }
+const idsDe = new Map();
+for (const f of htmls) {
+  const s = await readFile(`${DIST}/${f}`, 'utf8');
+  idsDe.set(f, new Set([...s.matchAll(/\sid="([^"]+)"/g)].map(m => m[1])));
+}
+
 for (const f of htmls) {
   const s = await readFile(`${DIST}/${f}`, 'utf8');
   const destinos = [...s.matchAll(/href="([^"#?:]+\.html)/g)].map(m => m[1]);
   for (const d of new Set(destinos)) {
     if (!htmls.includes(d)) anotar(`${f} enlaza a ${d}, que no existe`);
+  }
+
+  /* Y el ANCLA, que hasta ahora nadie miraba: el patrón de arriba corta en `#`,
+     así que `metodologia.html#correcciones` se daba por bueno con sólo existir
+     el archivo. Un enlace que apunta a un ancla inexistente no falla — deja al
+     lector arriba de la página, preguntándose dónde estaba lo prometido. Cuesta
+     más detectarlo que un 404, precisamente porque no rompe nada. */
+  for (const [, destino, ancla] of s.matchAll(/href="([^"?:]*)#([^"]+)"/g)) {
+    const archivo = destino || f;
+    if (!htmls.includes(archivo)) continue;   // ya lo dice la comprobación de arriba
+    if (!idsDe.get(archivo).has(ancla)) {
+      anotar(`${f} enlaza a ${archivo}#${ancla}, y ese ancla no existe`);
+    }
   }
 }
 

@@ -54,6 +54,60 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
       sus indicadores de impacto son provisionales.</li>
     </ul>
   </section>
+  <section class="modulo" id="correcciones">
+    <h2>Si su ficha de autor tiene un error</h2>
+    <p>Esta plataforma no es la fuente de los datos: los toma de Scopus y SciVal
+    y los reconstruye en cada carga. De dónde venga el error decide por dónde se
+    corrige, y las dos vías son distintas.</p>
+
+    <h3>Lo que se corrige en la fuente</h3>
+    <p>El nombre con que firma, su afiliación declarada, el identificador de
+    autor y qué publicaciones le corresponden vienen de <strong>su perfil de
+    Scopus</strong>. Se corrigen allí, a través del procedimiento de Elsevier
+    para el perfil de autor. <strong>La plataforma lo reflejará en la siguiente
+    carga</strong>, sin que haya que pedir nada aquí: se reconstruye entera cada
+    vez, así que no conserva correcciones propias que la fuente contradiga.</p>
+
+    <h3>Lo que sólo se corrige aquí</h3>
+    <p>Hay errores que la fuente no tiene y esta plataforma sí, porque los
+    introduce al procesar:</p>
+    <ul>
+      <li><strong>Aparecer dos veces.</strong> Dos formas de firma de la misma
+      persona que aún no se han declarado equivalentes.</li>
+      <li><strong>Una ficha que no es una persona.</strong> Fragmentos de la
+      cadena de afiliación que la fuente coló en la lista de autores.</li>
+      <li><strong>Un ORCID mal atribuido</strong>, o atribuido con evidencia más
+      débil de la que la ficha declara.</li>
+      <li><strong>Una unidad académica equivocada</strong>, que se deduce de la
+      cadena de afiliación y no de un campo.</li>
+    </ul>
+    <p>Ninguno de estos se resuelve automáticamente. Todos entran en una
+    <strong>cola de revisión humana</strong>: una persona los examina caso por
+    caso y decide, porque afirmar que dos firmas son la misma persona —o que una
+    no lo es— es una afirmación sobre alguien real y no una operación de
+    software.</p>
+
+    <p class="nota-destacada"><b>Canal de contacto pendiente</b>La vía
+    institucional por la que enviar estas solicitudes no está definida todavía.
+    Es una decisión de la institución, no de la plataforma, y mientras no exista
+    se declara en vez de improvisarse. El procedimiento de arriba describe qué
+    ocurre con una solicitud, no cómo hacerla llegar.</p>
+
+    <h3>Lo que una solicitud no puede obtener</h3>
+    <p>Tres cosas no se cambian a petición, y no por rigidez: cambiarlas
+    publicaría afirmaciones que los datos no sostienen.</p>
+    <ul>
+      <li><strong>Que se afirme una identidad.</strong> Cada ficha corresponde a
+      una forma de firma, no a una persona verificada, y así se declara.</li>
+      <li><strong>Que se enlacen firmas entre sí sin revisión.</strong> Sugerir
+      que dos firmas son la misma persona sin comprobarlo publicaría una
+      afirmación no verificada.</li>
+      <li><strong>Que se altere una posición en un listado.</strong> El orden por
+      número de publicaciones es descriptivo y no mide desempeño: no hay una
+      posición que ganar ni que perder.</li>
+    </ul>
+  </section>
+
   <h2>Glosario</h2>
   <div id="glosario"></div>
 </main>
