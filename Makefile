@@ -59,6 +59,10 @@ rendimiento: sitio
 verificar-orcid:
 	python3 src/enrich/orcid_api.py
 
+# En Windows: scripts/revisar-identidad.ps1 (clic derecho -> «Ejecutar con
+# PowerShell»). Hace la secuencia entera —generar, abrir, recoger el CSV
+# exportado, aplicar y reconstruir— porque son siete pasos en el orden justo y
+# la decisión D-85 ya dice qué pasa con eso.
 revision: auditoria
 	python3 src/review/build_review.py
 	python3 src/review/build_unit_validation.py
