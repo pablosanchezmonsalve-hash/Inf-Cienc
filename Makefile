@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -58,6 +58,12 @@ rendimiento: sitio
 # «Ejecutar con PowerShell») hace la secuencia entera y pide el secret oculto.
 verificar-orcid:
 	python3 src/enrich/orcid_api.py
+
+# Ficha de la institución en ROR (V2-20): cierra ror_id e isni, y contrasta el
+# patrón de detección institucional contra los nombres que ROR registra.
+# En Windows:  py src\enrich\ror_institucion.py
+ror:
+	python3 src/enrich/ror_institucion.py
 
 # En Windows: scripts/revisar-identidad.ps1 (clic derecho -> «Ejecutar con
 # PowerShell»). Hace la secuencia entera —generar, abrir, recoger el CSV

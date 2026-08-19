@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `3c47439` · Los perfiles de ORCID pendientes: dónde se validan, y la cola que nunc
+Último commit: `c304223` · La revisión de identidad también tiene asistente en Windows
 Snapshot: 2026-08-19
 
 ---
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 211
+## Decisiones tomadas: 217
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

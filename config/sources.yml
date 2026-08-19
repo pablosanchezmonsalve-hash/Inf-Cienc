@@ -129,3 +129,68 @@ fuentes:
     nota: >-
       Fórmulas rotas: referencian el libro externo [1]!PublicacionesUnicas,
       ausente. Sin valores recuperables. Valor únicamente histórico.
+
+  # ── Fuentes consultadas por API ────────────────────────────────────────────
+  #
+  # Las de arriba son archivos: se exportan a mano y se versionan. Éstas se
+  # preguntan por red, y por eso llevan `endpoint` en vez de `archivo` y no
+  # tienen fecha de export: la fecha va en cada dato recuperado.
+  #
+  # Estaban implementadas y sin declarar aquí, que era una brecha de
+  # trazabilidad real: el ORCID se publica en las fichas de autor y hasta ahora
+  # no se podía rastrear hasta una entrada de este archivo, que es justo lo que
+  # la cabecera exige.
+
+  crossref_api:
+    nombre: "Crossref — REST API"
+    tipo: "api"
+    endpoint: "https://api.crossref.org/works/{doi}"
+    autenticacion: "ninguna (mailto para el polite pool)"
+    conector: "src/enrich/orcid_crossref.py"
+    rol: "enriquecimiento"
+    aporta:
+      - orcid_declarado_por_el_editor
+    salida: "data/enriched/authors_orcid.csv"
+    fecha_corte: null            # cada asignación lleva la suya
+    nota: >-
+      Sólo ve el ORCID que el editor transmitió al depositar. Emparejar por
+      apellido e inicial es una hipótesis: cada asignación viaja con su
+      confianza y los conflictos se encolan sin resolver (D-08).
+
+  orcid_api:
+    nombre: "ORCID — Public API v3.0"
+    tipo: "api"
+    endpoint: "https://pub.orcid.org/v3.0"
+    autenticacion: "token client_credentials, alcance /read-public (gratuito)"
+    conector: "src/enrich/orcid_api.py, orcid_expand.py, orcid_afiliacion.py"
+    rol: "enriquecimiento"
+    aporta:
+      - verificacion_de_orcid_contra_el_registro_del_titular
+      - orcid_declarado_por_el_titular
+      - candidatos_por_afiliacion_declarada
+    salida: "data/enriched/orcid_verificacion.csv, internal/orcid_*.csv"
+    fecha_corte: null
+    nota: >-
+      Tres preguntas distintas al mismo registro, con tres calidades de
+      evidencia distintas. Los candidatos por afiliación NO se publican: no hay
+      publicación compartida que los ancle y van a revisión humana.
+
+  ror_api:
+    nombre: "ROR — Research Organization Registry"
+    tipo: "api"
+    endpoint: "https://api.ror.org/v2/organizations"
+    autenticacion: "ninguna"
+    conector: "src/enrich/ror_institucion.py"
+    rol: "referencia"
+    aporta:
+      - identificador_ror_de_la_institucion
+      - isni_de_la_institucion
+      - nombres_registrados_para_contrastar_la_deteccion
+    salida: "data/enriched/ror_institucion.json"
+    fecha_corte: null
+    ejecutada: false             # V2-20: el conector existe, la consulta no se ha corrido
+    nota: >-
+      No aporta ningún dato del corpus ni ningún indicador: aporta identidad de
+      la institución y un vocabulario público contra el que contrastar el
+      patrón de detección institucional. El contrato de la API no está
+      verificado desde este repositorio.

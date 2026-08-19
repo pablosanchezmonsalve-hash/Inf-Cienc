@@ -2230,3 +2230,60 @@ PowerShell 5.1 que en 7.
 
 Ejecutar el asistente y resolver los 16 casos urgentes: 4 «ORCID sin
 confirmar», 4 de `E-09`, 1 conflicto, 1 desacuerdo y 6 «Firma sin ORCID».
+
+---
+
+## Cierre · V2-20, el conector de ROR, y una consulta que este entorno no puede hacer
+
+`config/institution.yml` lleva desde la Fase 1 con dos identificadores en
+`null` y el motivo escrito al lado: «placeholder: no verificado». ROR los tiene
+los dos —`ror_id` e `isni`— y trae además algo que vale más: **los nombres bajo
+los que la institución está registrada**.
+
+Eso es lo que convierte esto en algo más que rellenar dos campos. La detección
+institucional blanda es **un patrón escrito a mano**,
+`\bfinis[\s\-]+terrae\b`. Contrastarlo contra un vocabulario público dice si se
+deja fuera alguna forma con la que la institución se firma de verdad. En el
+ensayo con datos de prueba, el acrónimo es exactamente lo que el patrón no
+captura: una cadena de afiliación que llegara sólo como «UFT, Santiago, Chile»
+hoy no se detectaría.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-212 | El conector **no escribe `config/institution.yml`**: imprime la línea exacta y la pega una persona | Ese archivo es el contrato de replicabilidad —lo que otra institución edita para reutilizar la plataforma— y un identificador de organización es una afirmación sobre esa organización |
+| D-213 | Los candidatos se filtran con `matches_institution_soft`, la regla del propio proyecto, no con parecido de cadena | Si ROR y el corpus se filtraran con reglas distintas, el contraste posterior no compararía lo que dice comparar. Y la regla `I-05` prohíbe el matching por subcadena |
+| D-214 | Si más de una organización coincide, **se encola**; no se desempata | Elegir la primera es elegir por orden de respuesta de una API, que no significa nada |
+| D-215 | Se admiten las dos formas conocidas de respuesta y, ante una desconocida, **se guarda la cruda y se detiene** | `CLAUDE.md` prohíbe suponer endpoints no confirmados. Adivinar la forma produce un error tres capas más abajo, donde ya no se entiende de qué venía |
+| D-216 | El contraste **declara** las formas que el patrón no captura; no amplía el patrón | Cada patrón nuevo puede traer falsos positivos, y este proyecto ya tiene 16 verificados. Ampliarlo es una decisión |
+| D-217 | Crossref, ORCID y ROR se declaran en `config/sources.yml` | Estaban implementadas y sin declarar. La cabecera de ese archivo exige que todo indicador publicado se pueda rastrear hasta una entrada suya, y el ORCID **se publica en las fichas de autor**: era una brecha de trazabilidad real, no una formalidad |
+
+### Lo que este entorno no pudo hacer, y hay que decirlo
+
+**La consulta no se ha ejecutado.** El contenedor donde se escribió el conector
+no alcanza `api.ror.org`: la política de red lo deniega con un 403 en el CONNECT.
+Se comprobó contra el estado del proxy, no se supuso.
+
+Consecuencia práctica: **el contrato de la API no está verificado desde este
+repositorio**. Por eso el conector no da por hecha una forma de respuesta —admite
+la de `v2` y la de `v1`, y detecta cuál llegó— y ante una desconocida guarda la
+respuesta cruda y se detiene diciendo dónde está. Es el mismo camino que ya usa
+el asistente de ORCID: probar corto, y hacer que el fallo sea legible para que
+una sola corrida baste para corregir.
+
+### Lo que sí se verificó
+
+| Comprobación | Resultado |
+|---|---|
+| `--test`, 12 casos: extracción de las dos formas, forma desconocida, orden determinista, filtrado de candidatos, contraste | Todos OK. Corre también en CI, junto a las otras cuatro autopruebas de conector |
+| Ensayo de los cuatro caminos de `main()` con respuestas guardadas | Un candidato → propone y escribe; dos → encola y sale con 1; cero → declara y sale con 1; contrato raro → guarda la cruda y se detiene |
+| Que el ensayo no dejara nada inventado en disco | `data/enriched/ror_institucion.json`, `internal/ror_candidatos.csv` y la caché, borrados. Ningún identificador falso versionado |
+| `make auditoria` y `make sitio` tras tocar `config/sources.yml` | Sin cambios; nada enumera `fuentes` a ciegas |
+
+### Próximo paso recomendado
+
+Ejecutar la consulta desde la máquina del proyecto —`py src\enrich\ror_institucion.py`—
+y pegar en `config/institution.yml` las dos líneas que imprime. Si el contraste
+declara alguna forma no capturada, esa es una decisión aparte: ampliar el patrón
+de detección puede traer falsos positivos.
