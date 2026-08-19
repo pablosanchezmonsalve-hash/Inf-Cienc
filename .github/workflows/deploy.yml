@@ -95,6 +95,12 @@ jobs:
       - name: Verificar la lógica de candidatos por afiliación
         run: python3 src/enrich/orcid_afiliacion.py --test
 
+      # La consulta a ROR no corre en CI —sale a red— pero su extracción sí se
+      # comprueba: es la parte que puede romperse en silencio si la API cambia
+      # de forma, y la que decidiría mal qué organización es la institución.
+      - name: Verificar la lógica de la ficha en ROR
+        run: python3 src/enrich/ror_institucion.py --test
+
       # Lo que decide qué firmas se fusionan como una persona y cuáles dejan de
       # contarse por no serlo. Es la lógica con más consecuencias sobre lo
       # publicado que existe fuera del pipeline, y hasta ahora no la ejercía
