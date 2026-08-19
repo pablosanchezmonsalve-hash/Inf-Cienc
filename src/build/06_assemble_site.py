@@ -12,6 +12,7 @@ Salida:
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import sys
@@ -23,6 +24,63 @@ WEB = b.ROOT / "web"
 
 # Directorios que jamás se copian al bundle desplegable (docs/LAYERS.md §6).
 NUNCA_DESPLEGAR = ("data/raw", "internal")
+
+
+def expandir_cabeceras() -> None:
+    """Compone el `<head>` de cada página desde una sola plantilla (V2-16).
+
+    Las dieciséis líneas de cabecera estaban copiadas en las diez páginas, y la
+    del catálogo se creó copiando la de metodología: así es como diez copias se
+    vuelven once y una se queda atrás. Ahora cada página declara sólo lo suyo
+    —`data-titulo` y `data-descripcion`— y aquí se expande.
+
+    TRES COMPROBACIONES, Y NINGUNA ES DECORATIVA
+        1. Toda página tiene el marcador. Una que no lo tenga se quedaría sin
+           hoja de estilo y sin el guion de tema, y el build lo diría.
+        2. La expansión deja dentro la hoja de estilo. Si la plantilla se
+           rompiera, el sitio saldría sin CSS y pasaría todas las demás
+           comprobaciones: el HTML sería válido, sólo ilegible.
+        3. La plantilla no viaja a dist/. Si lo hiciera sería una página
+           huérfana, y la guarda de cobertura de `estructura.mjs` la
+           denunciaría —pero es mejor no crearla que confiar en que otro la
+           cace—.
+    """
+    plantilla = DIST / "_cabecera.html"
+    if not plantilla.exists():
+        sys.exit("BUILD ABORTADO: falta web/_cabecera.html")
+    # El comentario explicativo del archivo no viaja: es documentación para
+    # quien lo edite, no marcado para el navegador.
+    cuerpo = re.sub(r"^<!--.*?-->\n", "", plantilla.read_text(encoding="utf-8"), flags=re.S)
+    plantilla.unlink()
+
+    sin_marcador, sin_css = [], []
+    for pagina in sorted(DIST.glob("*.html")):
+        s = pagina.read_text(encoding="utf-8")
+        m = re.search(r'<head\s+data-titulo="([^"]*)"\s+data-descripcion="([^"]*)"\s*>\s*</head>',
+                      s, re.S)
+        if not m:
+            sin_marcador.append(pagina.name)
+            continue
+        head = (cuerpo.replace("{{titulo}}", m.group(1))
+                      .replace("{{descripcion}}", m.group(2)))
+        s = s[:m.start()] + "<head>\n" + head + "</head>" + s[m.end():]
+        if 'href="assets/css/app.css"' not in s:
+            sin_css.append(pagina.name)
+        pagina.write_text(s, encoding="utf-8")
+
+    if sin_marcador or sin_css:
+        if sin_marcador:
+            print("  PÁGINAS SIN MARCADOR DE CABECERA:")
+            for n in sin_marcador:
+                print(f"    · {n}")
+        if sin_css:
+            print("  PÁGINAS QUE QUEDARON SIN HOJA DE ESTILO:")
+            for n in sin_css:
+                print(f"    · {n}")
+        sys.exit("BUILD ABORTADO: la cabecera no se expandió en todas las páginas.")
+
+    print(f"  cabeceras        : {len(list(DIST.glob('*.html')))} expandidas "
+          "desde web/_cabecera.html")
 
 
 def prerenderizar() -> None:
@@ -72,6 +130,7 @@ def main() -> None:
         if colados:
             sys.exit(f"BUILD ABORTADO: '{prohibido}' apareció en dist/: {colados}")
 
+    expandir_cabeceras()
     prerenderizar()
 
     paginas = sorted(p.name for p in DIST.glob("*.html"))

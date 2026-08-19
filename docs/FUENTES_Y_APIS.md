@@ -126,11 +126,13 @@ formalidad: es lo que separa una propuesta de una promesa.
   2. **Contraste de la detección institucional por ROR.** Las publicaciones que
      este proyecto atribuye a la institución y OpenAlex no, son un hallazgo: o
      su desambiguación falló, o el patrón blando detectó de más.
-- **Lo que NO alcanza, y conviene no fingir que sí:** la producción que OpenAlex
-  atribuye a la institución y este proyecto no. Sólo se consultan los DOI del
-  universo, y el universo ya está filtrado por la institución. Encontrar lo que
-  falta exige preguntar **por institución** (`filter=institutions.ror:…`), que es
-  otra consulta: `V2-26`.
+- **Lo que este conector no alcanza** —la producción que OpenAlex atribuye a la
+  institución y este proyecto no— lo cubre `src/enrich/openalex_cobertura.py`
+  (`V2-26`), que pregunta **por institución** (`filter=institutions.ror:…`) y
+  compara contra el universo. Es la primera vez que la brecha de cobertura que
+  `LIMITATIONS.md` advierte en prosa se puede **medir**. Su resultado es una cola
+  de revisión en `internal/`, nunca un ajuste del corpus: Scopus y OpenAlex
+  indexan con criterios distintos y sumarlos no significa nada (`D-206`).
 - **Dependencia declarada:** el contraste necesita el ROR de la institución
   (`V2-20`). Sin él esa mitad no corre, y se dice; no se sustituye por una
   comparación de nombres, que la regla `I-05` prohíbe.
