@@ -2287,3 +2287,68 @@ Ejecutar la consulta desde la máquina del proyecto —`py src\enrich\ror_instit
 y pegar en `config/institution.yml` las dos líneas que imprime. Si el contraste
 declara alguna forma no capturada, esa es una decisión aparte: ampliar el patrón
 de detección puede traer falsos positivos.
+
+---
+
+## Cierre · V2-19 OpenAlex, y una afirmación mía que era falsa
+
+El encargo era el conector de OpenAlex, que el propio backlog presentaba como
+«una **segunda fuente independiente** de ORCID». Al escribirlo quedó claro que
+esa frase —que había escrito yo el día anterior— **es falsa**.
+
+**OpenAlex ingiere Crossref.** Un ORCID que devuelve puede ser literalmente el
+que Crossref depositó. Que las dos coincidan no confirma nada que no
+supiéramos: es la misma evidencia contada dos veces.
+
+Importa porque este proyecto **publica** esa distinción. Cada ficha de autor
+dice si su ORCID está «verificado» —dos fuentes independientes— o «declarado
+por el titular» —una sola—, y `03_authors.py` ya evita exactamente este error
+con las asignaciones que salen del propio registro de ORCID: llamarlas
+«verificado» sugeriría dos fuentes cuando la fuente es una. Contar una
+coincidencia con OpenAlex como verificación habría inflado el recuento de
+comprobaciones independientes con comprobaciones circulares.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-218 | OpenAlex **no cuenta como fuente independiente**. Sus concordancias se cuentan aparte y **nunca** suben una asignación a «verificado» | Ingiere Crossref. La independencia tiene que ser real, no aguas abajo de la misma fuente |
+| D-219 | Lo que sí aporta y por eso se implementa: **ORCID donde no había** y **contraste de la detección institucional por ROR** | Lo primero es cobertura nueva venga de donde venga; lo segundo compara un patrón escrito a mano contra una desambiguación externa |
+| D-220 | El emparejamiento **se importa** de `orcid_crossref.py`, no se reescribe | Dos reglas para «¿qué autor de esta publicación es esta firma?» bastaría con tocar una para que las asignaciones dejaran de ser comparables |
+| D-221 | El `author.id` de OpenAlex **no** se usa para fusionar firmas | Es una desambiguación por agrupamiento, y fusionar por ella es justo la «consolidación automática por similitud» que `V2_BACKLOG` §6 descarta |
+| D-222 | El contraste institucional corre **en una sola dirección**, y se declara por qué | La contraria —producción que OpenAlex atribuye y nosotros no— es inalcanzable: sólo se consultan los DOI del universo, y el universo ya está filtrado por la institución. Anotado como `V2-26` en vez de dejar código que no puede encontrarla |
+| D-223 | Las citas de OpenAlex **no** se contrastan aquí | Añadiría indicadores, y eso es una decisión con su propio denominador (`D-16`), no una consecuencia de tener el dato a mano |
+
+### Un hallazgo de paso: una bandera que los datos desmentían
+
+`config/matching_rules.yml` declaraba `ejecutado_contra_api: false` para el
+conector de Crossref, con un comentario explicando que la red del entorno lo
+impedía. Pero `data/enriched/authors_orcid.csv` tiene **174 asignaciones con
+fuente `Crossref`**, y `T-01` se cerró el 2026-08-01 con esa corrida. La bandera
+llevaba semanas afirmando lo contrario de lo que el archivo de datos probaba.
+
+Corregida, y separada de lo que sí sigue siendo cierto: **el entorno de
+desarrollo no tiene salida a `api.crossref.org`, `api.openalex.org` ni
+`pub.orcid.org`** —comprobado hoy contra los tres— y por eso todo conector se
+escribe con `--test` sin red y se ejecuta desde una máquina con salida.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `--test`, 11 casos | Partición del nombre, autor sin ORCID, recogida de ROR, contrato desconocido, que la forma extraída alimenta al `emparejar` importado, apellido compuesto que **falla** en vez de asignar de más, y las tres ramas del contraste. Corre en CI |
+| Ensayo completo de `main()`, **sin red**, sembrando la caché con respuestas de prueba sobre 400 DOI reales | 1 asignación nueva · 1 concordante, contada aparte y no como verificación · 1 desacuerdo encolado · 1 publicación en el contraste institucional |
+| Que el ensayo no dejara nada inventado | `authors_orcid.csv` restaurado y comparado byte a byte; caché, artefactos internos y la ficha ROR de prueba, borrados |
+| `make auditoria` tras tocar `config/` | Sin cambios |
+
+**El apellido compuesto merece una nota.** OpenAlex da el nombre entero en
+`display_name` y hay que partirlo; «Ana Arenas Massa» se parte como apellido
+«Massa» y entonces **no coincide** con la firma «Arenas-Massa A.». El caso está
+en la autoprueba y el resultado esperado es que **no se asigne nada**: perder
+una asignación es el fallo correcto, y atribuirle a alguien el ORCID de otro
+sería el incorrecto.
+
+### Próximo paso recomendado
+
+Ejecutar `make ror` primero —el contraste institucional lo necesita— y después
+`make openalex`. Los dos desde una máquina con salida a internet.
