@@ -122,17 +122,40 @@ formalidad: es lo que separa una propuesta de una promesa.
   integraría como **fuente de contraste**, con su propio denominador declarado
   (`D-16`), nunca fusionada con la principal.
 
-### 3.2 ROR — cerrar un placeholder concreto
+### 3.2 ROR — **implementado el 2026-08-19; falta ejecutar la consulta**
 
-- **Qué preguntaría:** el identificador ROR de la institución y sus variantes de
-  nombre registradas.
-- **Qué desbloquearía:** `config/institution.yml` declara `ror_id: null` como
-  placeholder no verificado. Un identificador de organización permitiría además
-  contrastar el vocabulario de variantes institucionales del proyecto contra uno
-  público, que es una de las reglas de `<author_master_rule>`.
-- **Coste:** el más bajo de la lista. Es una consulta, no un conector.
-- **Hay que confirmar:** que la ficha ROR de la institución existe y está
-  actualizada.
+`src/enrich/ror_institucion.py`. Es la única entrada de esta sección que ya
+tiene código, y por eso conviene leer bien qué significa «falta ejecutar».
+
+- **Qué pregunta:** el identificador ROR de la institución, su ISNI, y los
+  nombres bajo los que está registrada.
+- **Qué cierra:** los dos placeholders de `config/institution.yml` —`ror_id` e
+  `isni`, ambos `null` con el motivo escrito al lado— y, sobre todo, contrasta
+  el patrón de detección institucional de `config/matching_rules.yml` contra un
+  vocabulario público, que es una de las reglas de `<author_master_rule>`.
+- **Lo que el contraste puede encontrar:** una forma registrada que el patrón
+  `\bfinis[\s\-]+terrae\b` no reconoce —un acrónimo, por ejemplo— y que, si
+  llegara sola en una cadena de afiliación, no se detectaría. El conector lo
+  **declara**; ampliar el patrón es una decisión, porque la regla `I-05` prohíbe
+  el matching por subcadena y hay 16 falsos positivos verificados.
+- **Lo que NO hace:** no escribe `config/institution.yml` —es el contrato de
+  replicabilidad, y un identificador de organización es una afirmación sobre
+  ella—, no elige entre candidatos si más de una organización coincide, y no
+  toca el patrón de detección.
+
+**El contrato de la API no está verificado desde este repositorio.** El entorno
+donde se escribió el conector no alcanza `api.ror.org`: la política de red del
+contenedor deniega la conexión. En consecuencia el conector admite las dos
+formas de respuesta conocidas —`v2` con `names[]`, `v1` con `name`/`aliases`/
+`acronyms`— y, si no encaja ninguna, guarda la respuesta cruda y se detiene
+diciéndolo, en vez de adivinar. La lógica de extracción y de contraste sí está
+verificada: 12 casos en `--test`, que corre también en CI.
+
+```
+python3 src/enrich/ror_institucion.py --test     lógica, sin red
+python3 src/enrich/ror_institucion.py            la consulta
+py src\enrich\ror_institucion.py                lo mismo, en Windows
+```
 
 ### 3.3 ORCID — ampliar lo ya implementado
 
