@@ -200,11 +200,12 @@ fuentes:
     tipo: "api"
     endpoint: "https://api.openalex.org/works/{doi}"
     autenticacion: "ninguna (mailto para el polite pool)"
-    conector: "src/enrich/orcid_openalex.py"
+    conector: "src/enrich/orcid_openalex.py, openalex_cobertura.py"
     rol: "enriquecimiento y contraste"
     aporta:
       - orcid_donde_no_habia
       - contraste_de_la_deteccion_institucional_por_ror
+      - brecha_de_cobertura_frente_al_universo
     salida: "data/enriched/authors_orcid.csv, internal/openalex_*.csv"
     fecha_corte: null
     ejecutada: false             # V2-19: el conector existe, la consulta no se ha corrido

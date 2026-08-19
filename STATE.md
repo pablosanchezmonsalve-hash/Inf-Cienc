@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `2adb877` · V2-20: la ficha de la institución en ROR, y el patrón de detección con
+Último commit: `203eddf` · V2-19: OpenAlex, y la independencia que yo mismo había afirmado de más
 Snapshot: 2026-08-19
 
 ---
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 223
+## Decisiones tomadas: 229
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

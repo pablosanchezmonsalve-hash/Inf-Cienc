@@ -2352,3 +2352,71 @@ sería el incorrecto.
 
 Ejecutar `make ror` primero —el contraste institucional lo necesita— y después
 `make openalex`. Los dos desde una máquina con salida a internet.
+
+---
+
+## Cierre · V2-16 y V2-26: la cabecera repetida, y la brecha que por fin se puede medir
+
+Dos pendientes que no dependían de nadie más.
+
+### V2-16 · Diez copias de dieciséis líneas
+
+El `<head>` estaba copiado en las diez páginas: idéntico salvo el título y la
+descripción. Su propia entrada del backlog decía cuándo tocaba arreglarlo —«con
+una más, plantilla»— y la página del catálogo ya se había creado copiando la de
+metodología, que es exactamente cómo diez copias se vuelven once y una se queda
+atrás.
+
+Ahora cada página declara sólo lo suyo:
+
+```html
+<head data-titulo="Producción — Informe Cienciométrico"
+      data-descripcion="Volumen de publicaciones por año, tipo documental…"></head>
+```
+
+y `06_assemble_site.py` expande `web/_cabecera.html` al ensamblar. **140 líneas
+duplicadas pasaron a 20.**
+
+Con tres comprobaciones que abortan el build, y ninguna es decorativa: una
+página sin marcador se quedaría sin hoja de estilo y sin el guion de tema; una
+expansión rota produciría un sitio **sin CSS que pasaría todas las demás
+comprobaciones**, porque el HTML seguiría siendo válido, sólo ilegible; y la
+plantilla viajando a `dist/` sería una página huérfana. La primera se probó en
+negativo: quitando el marcador de `tematica.html`, el build aborta nombrándola.
+
+### V2-26 · La pregunta que el proyecto no podía responder
+
+`LIMITATIONS.md` declara que el corpus describe producción **indexada en
+Scopus** y que esa base castiga a humanidades, ciencias sociales y a la
+publicación en español. Es una advertencia honesta y era **sólo cualitativa**:
+nadie podía decir de qué tamaño es la brecha.
+
+No se podía porque todo lo que el pipeline mira sale del universo, y el universo
+ya está filtrado por la institución. `V2-19` tropezó con eso ayer: su contraste
+sólo corre en una dirección. Esta consulta va al revés —le pregunta a OpenAlex
+**quién publica desde esta institución**— y compara esa lista contra el universo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-224 | La cabecera común vive en `web/_cabecera.html` y se expande en el ensamblado, no en el navegador | Hacerlo en cliente costaría una petición y un repintado en la ruta crítica, justo lo que el pre-renderizado vino a evitar |
+| D-225 | Una expansión que deje la página sin hoja de estilo **aborta el build** | Es el único fallo de esta clase que pasaría inadvertido: el HTML seguiría siendo válido y todas las comprobaciones seguirían en verde |
+| D-226 | La brecha de cobertura es una **cola de revisión**, nunca un ajuste del corpus | `D-206`. Scopus y OpenAlex indexan con criterios distintos; sumarlos produce una cifra que nadie puede reconciliar |
+| D-227 | Una obra **sin DOI** no se afirma como faltante | Sin DOI no se puede saber si es la misma que el universo ya tiene por otro identificador. Contarla sería inventar brecha |
+| D-228 | La consulta exige el **ROR**, no el nombre | Buscar por nombre es matching por cadena suelta —regla `I-05`— y aquí traería la producción de cualquier homónimo |
+| D-229 | Los DOI se normalizan antes de comparar | Scopus exporta `10.x/y` y OpenAlex `https://doi.org/10.X/Y`. Comparar en crudo daría el 100 % de brecha: un resultado espectacular y falso. Está en la autoprueba |
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `--test` de `openalex_cobertura.py`, 9 casos | Normalización de DOI, cursor, contrato desconocido, las tres clases de hallazgo, y el caso de la brecha inflada. Corre en CI |
+| Ensayo con una respuesta guardada, contra el universo real | 6 obras: 3 ya dentro —con el DOI en MAYÚSCULAS a propósito, para probar la normalización—, 1 con DOI ausente, 1 sin DOI, 1 fuera de ventana. Cada una con su motivo |
+| Guarda del ROR ausente | Se detiene y explica por qué no busca por nombre |
+| `make sitio` + batería completa tras V2-16 | Sin fallos. `dist/produccion.html` reconstruido byte a byte con su cabecera |
+
+### Próximo paso recomendado
+
+Sigue siendo suyo: `make ror` desbloquea `make openalex` **y** `make cobertura`,
+que son las dos consultas que hoy no pueden correr.
