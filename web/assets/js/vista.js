@@ -181,10 +181,18 @@ export function modulo(cod, s) {
     saltar sin recorrer la página entera es la diferencia entre consultar y
     resignarse a leer en orden. El indicador activo se marca por scroll-spy
     desde paginas.js; sin JavaScript sigue siendo una lista de anclas útil. */
-export function rail(codigos, series) {
-  const items = codigos.filter(cod => series[cod]).map(cod =>
-    `<li><a href="#${cod}"><span class="rail-cod">${cod}</span>
-      <span class="rail-txt">${c.escapar(series[cod].nombre)}</span></a></li>`).join('');
+export function rail(codigos, series, porCodigo = {}) {
+  // Un indicador diferido sigue en el índice: si desapareciera de aquí, la
+  // página diría que no existe, que es justo lo que el módulo evita decir.
+  const items = codigos.map(cod => {
+    const s = series[cod] || porCodigo[cod];
+    if (!s) return '';
+    const dif = !series[cod];
+    return `<li><a href="#${cod}"${dif ? ' class="rail-diferido"' : ''}>
+      <span class="rail-cod">${cod}</span>
+      <span class="rail-txt">${c.escapar(s.nombre)}</span>
+      ${dif ? '<span class="rail-marca">diferido</span>' : ''}</a></li>`;
+  }).join('');
   return `<nav class="rail" aria-label="Indicadores de esta página">
     <p class="rail-titulo">En esta página</p>
     <ol>${items}</ol>
@@ -213,11 +221,57 @@ export function panelEje(eje) {
   </section>`;
 }
 
-/** Los módulos de una página de sección, con su panel y su índice. */
-export function paginaModulos(codigos, series, eje) {
-  const presentes = codigos.filter(cod => series[cod]);
-  return panelEje(eje) + rail(presentes, series)
-    + `<div class="modulos">${presentes.map(cod => modulo(cod, series[cod])).join('')}</div>`;
+/** Módulo de un indicador que NO se publica.
+
+    Un indicador diferido que simplemente no aparece se lee como que el
+    fenómeno no existe: en colaboración, un hueco donde iría la red de
+    coautoría dice «no hay coautoría interna», que es una afirmación distinta
+    y falsa. Es la misma regla que `D-09` aplica a la celda —ausencia de dato
+    y cero nunca se ven igual— llevada al módulo completo.
+
+    No inventa texto: el motivo sale de `catalogo.json`, que a su vez lo toma
+    de `config/indicators.yml`. Se combinan `razon` y `advertencia` con el
+    mismo criterio que la tabla del catálogo, para que las dos vistas del
+    mismo hecho no puedan divergir. */
+export function moduloDiferido(cod, r) {
+  const motivo = [r.razon, r.advertencia].filter(Boolean).join(' ');
+  return `<section class="modulo modulo-diferido" id="${cod}" tabindex="-1">
+    <header>
+      <div class="modulo-id">
+        <h2>${c.escapar(r.nombre)}</h2>
+        <span class="codigo">${cod}</span>
+      </div>
+      <span class="estado" data-e="${r.estado}">${c.escapar(r.estado_etiqueta)}</span>
+    </header>
+    <p class="diferido-detalle">${c.escapar(r.estado_detalle)}</p>
+    ${motivo ? `<p class="nota-destacada"><b>Por qué no se publica</b>${c.escapar(motivo)}</p>` : ''}
+    ${r.que_falta ? `<p class="nota"><strong>Qué falta:</strong> ${c.escapar(r.que_falta)}</p>` : ''}
+    <p class="nota">Este módulo no muestra un gráfico vacío ni un cero: el dato
+      todavía no se ha construido, que no es lo mismo que valer cero. Ver el
+      <a href="indicadores.html#${cod}">catálogo de indicadores</a>.</p>
+  </section>`;
+}
+
+/** Los módulos de una página de sección, con su panel y su índice.
+
+    `catalogo` es opcional: sin él la página se comporta como antes. Con él,
+    los códigos declarados en la página que no tienen serie porque no se
+    publican se dibujan como módulo diferido en lugar de desaparecer. */
+export function paginaModulos(codigos, series, eje, catalogo = null) {
+  const porCodigo = {};
+  if (catalogo) for (const r of catalogo.indicadores) porCodigo[r.codigo] = r;
+
+  // Se conserva el orden declarado en la página: el diferido ocupa el lugar
+  // que le corresponde en la secuencia, no se relega al final.
+  const presentes = codigos.filter(cod =>
+    series[cod] || (porCodigo[cod] && porCodigo[cod].estado !== 'publicado'));
+
+  const bloques = presentes.map(cod => series[cod]
+    ? modulo(cod, series[cod])
+    : moduloDiferido(cod, porCodigo[cod])).join('');
+
+  return panelEje(eje) + rail(presentes, series, porCodigo)
+    + `<div class="modulos">${bloques}</div>`;
 }
 
 /* ══════════════════════════════════════════════════════════════ portada */

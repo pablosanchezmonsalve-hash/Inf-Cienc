@@ -117,7 +117,8 @@ async function main() {
         process.exit(1);
       }
       const a = [];
-      html = rellenar(html, 'modulos', v.paginaModulos(codigos, series, ejes[clave]), a);
+      html = rellenar(html, 'modulos',
+        v.paginaModulos(codigos, series, ejes[clave], await leerJSON('catalogo.json')), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     }
 
