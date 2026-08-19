@@ -29,3 +29,7 @@ __pycache__/
 *.py[cod]
 .venv/
 .DS_Store
+
+# Respaldos del asistente de revisión antes de sustituir el CSV de decisiones.
+# El archivo bueno sí se versiona; sus copias de seguridad no.
+internal/.respaldos/

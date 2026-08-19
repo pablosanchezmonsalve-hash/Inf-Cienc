@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ea8a3ca` · La última base sin declarar: ORCID_COVERAGE.md publicaba 222 de 589 (#
-Snapshot: 2026-08-18
+Último commit: `3c47439` · Los perfiles de ORCID pendientes: dónde se validan, y la cola que nunc
+Snapshot: 2026-08-19
 
 ---
 
@@ -52,14 +52,19 @@ Y **4 de las publicadas probablemente no correspondan a personas**: la auditorí
 
 ## Colas de revisión humana
 
-Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
+Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumeran leyendo `internal/`: una cola es un archivo con columna `resolucion`.
 
 | Cola | Entradas |
 |---|---|
 | `internal/ambiguities_authors.csv` | 417 |
 | `internal/ambiguities_publications.csv` | 14 |
-| `internal/orcid_conflicts.csv` | 1 |
 | `internal/identity_candidates.csv` | 17 |
+| `internal/orcid_candidatos_afiliacion.csv` | 20 |
+| `internal/orcid_conflicts.csv` | 1 |
+| `internal/orcid_desacuerdos.csv` | 2 |
+| `internal/orcid_hallazgos.csv` | 4 |
+
+`make revision` reúne estas colas en 141 casos, de los que **89 siguen pendientes**: 52 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -79,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`).
 
 ---
 
-## Decisiones tomadas: 194
+## Decisiones tomadas: 211
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
