@@ -108,19 +108,29 @@ pendiente T-08. Los requisitos que debe cumplir, y que condicionan la elección:
 
 ---
 
-## 6. Preparación para integraciones futuras
+## 6. Integraciones externas
 
-No se implementan en V1, pero la arquitectura las admite sin reescritura:
+**Implementadas** (paso de enriquecimiento entre `interim` y `build`, por DOI):
 
-| Integración | Punto de entrada previsto | Pendiente |
+| Integración | Script | Qué aporta |
 |---|---|---|
-| ORCID vía Crossref | Enriquecimiento entre `interim` y `build`, por DOI | T-01 |
-| API de Scopus/SciVal | Reemplaza el depósito manual en `data/raw/` | — |
-| Repositorio institucional | Fuente adicional en `config/sources.yml` | T-01 |
+| Crossref | `src/enrich/orcid_crossref.py` | ORCID declarado por el editor |
+| ORCID Public API | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | Verificación, ampliación y candidatos |
+
+Scopus y SciVal **no se consultan por API**: se leen de exports manuales
+versionados en `data/raw/`. Confundir las dos cosas cambia lo que se puede
+prometer sobre actualización y fecha de corte.
+
+**Evaluadas y no implementadas:** OpenAlex, ROR, SciELO, las API de Elsevier,
+Unpaywall y Altmetric, entre otras. Qué preguntaría cada una, qué desbloquearía
+y qué falta confirmar está en `docs/FUENTES_Y_APIS.md`; el orden de prioridad,
+en `V2_BACKLOG.md` §7.
 
 El contrato es `config/sources.yml`: cualquier fuente nueva se declara ahí con
 su rol, fecha de corte y cobertura, y el pipeline la trata igual que a un
-export manual.
+export manual. Las ocho reglas que un conector nuevo tiene que cumplir —modo
+`--test` sin red, caché, fuente declarada por dato, ambigüedades encoladas y no
+resueltas— están en `docs/FUENTES_Y_APIS.md` §4.
 
 ---
 
@@ -151,6 +161,12 @@ Adaptar a otra institución no requiere tocar `src/`:
 | `config/matching_rules.yml` | Patrones de detección, vocabulario de unidades |
 | `config/sources.yml` | Rutas, fechas de corte, roles |
 | `config/indicators.yml` | Qué indicadores se publican y con qué advertencias |
+
+Tres archivos más de `config/` **no se editan**: los genera
+`src/review/apply_decisions.py` desde lo que una persona decidió en `make
+revision` —`identidades_consolidadas.yml`, `firmas_e09_resueltas.yml` y
+`orcid_revisado.yml`—. Un despliegue replicado empieza sin ellos, que es el
+estado correcto: son decisiones sobre personas concretas de esta institución.
 
 Separación software / datos institucionales: `src/`, `config/` y `web/` son
 reutilizables; `data/` e `internal/` son propios de cada institución.

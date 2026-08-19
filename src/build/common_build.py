@@ -192,6 +192,30 @@ def _resueltas_e09() -> tuple[set[str], set[str]]:
 DESCARTADAS, CONFIRMADAS_E09 = _resueltas_e09()
 
 
+# Veredictos humanos sobre asignaciones de ORCID (`config/orcid_revisado.yml`,
+# generado por `apply_decisions.py`). Tres cosas distintas:
+#
+#   confirmado   el ORCID vigente lo respalda una persona que lo comprobó.
+#   retirado     el ORCID vigente NO es de esa firma. El build deja de usarlo.
+#   sin_registro alguien buscó y no encontró. Es un dato: distingue «no tiene»
+#                de «nadie ha mirado», que es la distinción que D-09 exige.
+#
+# El retiro se aplica como FILTRO y no como borrado de
+# `data/enriched/authors_orcid.csv` porque ese archivo lo regeneran los
+# conectores de enriquecimiento: un borrado se deshace solo en la siguiente
+# corrida, y sin aviso.
+def _orcid_revisado() -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
+    if not (CONFIG / "orcid_revisado.yml").exists():
+        return {}, {}, {}
+    cfg = load_config("orcid_revisado.yml") or {}
+    def leer(clave: str) -> dict[str, str]:
+        return {f["firma"]: f.get("orcid") or "" for f in (cfg.get(clave) or [])}
+    return leer("confirmadas"), leer("retiradas"), leer("sin_registro")
+
+
+ORCID_CONFIRMADO, ORCID_RETIRADO, ORCID_SIN_REGISTRO = _orcid_revisado()
+
+
 def canonizar(nombre: str) -> str:
     """Forma canónica de una firma, o la misma firma si no se consolidó."""
     return CONSOLIDACION.get(nombre, nombre)

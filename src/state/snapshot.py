@@ -237,14 +237,53 @@ def cifras() -> dict:
 
 
 def colas_internas() -> list[tuple[str, int]]:
-    """Cuántas entradas espera cada cola de revisión humana."""
+    """Cuántas entradas espera cada cola de revisión humana.
+
+    Se enumeran leyendo `internal/`, no una lista escrita aquí. La lista
+    nombraba cuatro archivos y había siete: `orcid_candidatos_afiliacion`,
+    `orcid_desacuerdos` y `orcid_hallazgos` existían desde hacía semanas y
+    STATE.md no las mencionaba. Nadie se enteró porque un informe que omite algo
+    se lee igual de bien que uno completo.
+
+    El criterio para distinguir una cola de un log es intrínseco al archivo y no
+    una segunda lista: **una cola declara una columna `resolucion`**, porque su
+    razón de existir es que algo queda por resolver. `matching_log.csv` y
+    `orcid_ampliacion_log.csv` no la tienen, y no son colas.
+    """
     out = []
-    for nombre in ("ambiguities_authors", "ambiguities_publications",
-                   "orcid_conflicts", "identity_candidates"):
-        p = ROOT / "internal" / f"{nombre}.csv"
-        if p.exists():
-            out.append((nombre, len(pd.read_csv(p))))
+    for p in sorted((ROOT / "internal").glob("*.csv")):
+        try:
+            df = pd.read_csv(p, nrows=0)
+        except Exception:
+            continue
+        if "resolucion" in df.columns:
+            out.append((p.stem, len(pd.read_csv(p))))
     return out
+
+
+def avance_revision() -> tuple[int, int, int] | None:
+    """Casos, pendientes y decididos de `make revision`.
+
+    Es la cifra que una persona necesita —cuánto queda por mirar—, y las tablas
+    de arriba no la dan: suman entradas de archivo, y un caso agrupa varias.
+
+    Los casos NO se reconstruyen aquí: se leen de la lista que `build_review.py`
+    incrusta en su propia página. Volver a derivarla sería una segunda
+    implementación de la construcción de colas, y divergiría de la primera.
+
+    Se lee la LISTA y no el titular de la página: el titular es prosa y cambia
+    al reescribir una frase; la lista es el dato con el que la herramienta
+    trabaja.
+    """
+    html = ROOT / "internal" / "revision_identidad.html"
+    if not html.exists():
+        return None
+    m = re.search(r"const CASOS = (\[.*?\]);\n", html.read_text(encoding="utf-8"), re.S)
+    if not m:
+        return None          # no se inventa: si no está, no se publica la cifra
+    casos = json.loads(m.group(1))
+    decididos = sum(1 for c in casos if c.get("previa"))
+    return len(casos), len(casos) - decididos, decididos
 
 
 def main() -> None:
@@ -256,6 +295,7 @@ def main() -> None:
     pend = pendientes_abiertos()
     c = cifras()
     colas = colas_internas()
+    rev = avance_revision()
 
     # ------------------------------------------------------ DECISIONS.md
     lineas = [
@@ -340,8 +380,16 @@ def main() -> None:
 
     s += ["", "---", "", "## Colas de revisión humana", "",
           "Capa interna. Ninguna se resuelve automáticamente "
-          "(decisión `D-08`).", "", "| Cola | Entradas |", "|---|---|"]
+          "(decisión `D-08`). Se enumeran leyendo `internal/`: una cola es un "
+          "archivo con columna `resolucion`.", "",
+          "| Cola | Entradas |", "|---|---|"]
     s += [f"| `internal/{n}.csv` | {v} |" for n, v in colas]
+    if rev:
+        s += ["", f"`make revision` reúne estas colas en {rev[0]} casos, de los "
+                  f"que **{rev[1]} siguen pendientes**: {rev[2]} ya se "
+                  "decidieron y quedan registrados en "
+                  "`internal/identity_decisions.csv`. Cifras de la última "
+                  "corrida de `make revision`, no de ahora mismo."]
 
     s += ["", "---", "", f"## Pendientes abiertos ({len(pend)})", "",
           "| # | Pendiente |", "|---|---|"]
