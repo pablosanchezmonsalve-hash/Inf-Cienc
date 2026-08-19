@@ -116,12 +116,13 @@ pendiente T-08. Los requisitos que debe cumplir, y que condicionan la elección:
 |---|---|---|
 | Crossref | `src/enrich/orcid_crossref.py` | ORCID declarado por el editor |
 | ORCID Public API | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | Verificación, ampliación y candidatos |
+| ROR | `src/enrich/ror_institucion.py` | Identidad de la institución y sus nombres registrados. Escrito, **consulta sin ejecutar** |
 
 Scopus y SciVal **no se consultan por API**: se leen de exports manuales
 versionados en `data/raw/`. Confundir las dos cosas cambia lo que se puede
 prometer sobre actualización y fecha de corte.
 
-**Evaluadas y no implementadas:** OpenAlex, ROR, SciELO, las API de Elsevier,
+**Evaluadas y no implementadas:** OpenAlex, SciELO, las API de Elsevier,
 Unpaywall y Altmetric, entre otras. Qué preguntaría cada una, qué desbloquearía
 y qué falta confirmar está en `docs/FUENTES_Y_APIS.md`; el orden de prioridad,
 en `V2_BACKLOG.md` §7.
