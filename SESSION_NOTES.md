@@ -2184,3 +2184,49 @@ comparar; el veredicto no lo pone.
 Abrir `internal/revision_identidad.html`, filtrar por «Sólo ORCID» y resolver
 las 4 de «ORCID sin confirmar»: son las únicas que el sitio publica hoy con la
 marca de que nadie las ha respaldado.
+
+---
+
+## Cierre · el asistente que faltaba para la parte que sí requiere una persona
+
+Al recomendar «siéntese a revisar los 16 casos urgentes» salió a la luz que la
+vía para hacerlo era copiar cinco comandos a mano. La decisión `D-85` ya había
+descartado eso: *«una instrucción que se puede copiar mal se copiará mal»*.
+Había asistente para la verificación de ORCID y no para la revisión, que es
+justo donde una persona decide sobre personas reales.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-208 | `scripts/revisar-identidad.ps1`: la revisión de identidad tiene asistente en Windows, como ya lo tenía la verificación de ORCID | `D-85`. La secuencia son siete pasos en el orden justo —autoprueba, auditoría, generar, abrir, recoger el CSV descargado, aplicar, reconstruir— y el error no se ve donde ocurre sino tres pasos después |
+| D-209 | El asistente muestra `--dry-run` y **exige confirmación** antes de escribir | Aplicar sin ver antes qué se va a aplicar es lo que convierte una errata en un dato publicado sobre una persona |
+| D-210 | Respalda el CSV anterior en `internal/.respaldos/` antes de sustituirlo | La exportación reescribe el archivo entero. El respaldo no se versiona; el archivo bueno sí |
+| D-211 | El asistente **no decide nada**: abre, recoge y aplica | `D-08`. Un asistente que propusiera un veredicto por defecto lo convertiría en el veredicto |
+
+### Cómo se verificó, y qué no se pudo verificar
+
+No hay Windows en el contenedor. Lo que sí se comprobó, instalando PowerShell
+7.4.6 en Linux:
+
+| Comprobación | Resultado |
+|---|---|
+| Sintaxis, con el parser de PowerShell | 1.199 tokens, 0 errores. También se pasó el asistente existente, que sale limpio |
+| BOM UTF-8 (`D-87`) | Presente |
+| Cero acentos en las cadenas que se muestran (la consola de PS 5.1 los rompe) | 0, igual que el asistente existente |
+| `foreach` sobre un array de arrays no se aplana | 2 iteraciones, no 4 |
+| `$LASTEXITCODE` sobrevive a un `\| Select-Object` | 7, correcto |
+| `ErrorActionPreference = 'Stop'` no aborta con un comando nativo que falla | Sigue vivo; los `if ($LASTEXITCODE -ne 0)` son la guarda real |
+| Cada comando de Python que invoca | `--test`, `--dry-run`, `build_review`, `build_unit_validation` y la cadena de reconstrucción, todos corridos |
+
+**Lo que NO se verificó, y hay que decirlo:** el script no se ha ejecutado en
+Windows. La detección del intérprete, la ruta de Descargas y `Start-Process` se
+copiaron del asistente que sí funciona allí, pero copiar de algo que funciona no
+es haberlo probado. Se corrigió de paso un `@()` que faltaba: sin él, un único
+archivo encontrado llega como escalar y `.Count` no significa lo mismo en
+PowerShell 5.1 que en 7.
+
+### Próximo paso recomendado
+
+Ejecutar el asistente y resolver los 16 casos urgentes: 4 «ORCID sin
+confirmar», 4 de `E-09`, 1 conflicto, 1 desacuerdo y 6 «Firma sin ORCID».

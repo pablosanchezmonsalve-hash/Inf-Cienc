@@ -217,3 +217,16 @@ desharía solo en la siguiente corrida.
 Un identificador tecleado a mano se comprueba con su dígito de control antes de
 aplicarse: la errata de un carácter produce un ORCID que existe y es de otra
 persona.
+
+**Cómo se corre.** En Linux o macOS, `make revision`. En Windows —donde `make`
+no existe— hay asistente:
+
+```
+scripts\revisar-identidad.ps1     clic derecho -> «Ejecutar con PowerShell»
+```
+
+Genera la página, la abre, y cuando usted vuelve con el CSV exportado lo recoge
+de la carpeta de descargas, respalda el anterior, muestra en seco qué se
+aplicaría, y sólo después de su confirmación aplica y reconstruye el sitio y el
+estado. Volver a correrlo no pierde nada: las decisiones ya tomadas se siembran
+desde `internal/identity_decisions.csv`.
