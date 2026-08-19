@@ -6,6 +6,8 @@ QUÉ HACE
     consumir:
 
       config/identidades_consolidadas.yml   variantes declaradas la misma persona
+      config/firmas_e09_resueltas.yml       firmas que no son personas
+      config/orcid_revisado.yml             veredictos sobre asignaciones de ORCID
       data/enriched/authors_orcid.csv       asignaciones que la revisión confirma
 
 QUÉ NO HACE
@@ -40,24 +42,29 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+import decisiones as D
+
 ROOT = Path(__file__).resolve().parents[2]
 INTERNAL = ROOT / "internal"
 ENRICHED = ROOT / "data" / "enriched"
 CONFIG = ROOT / "config"
 
 FUENTE_REVISION = "Revisión humana (candidato por afiliación confirmado)"
+# Distinta de la anterior a propósito: aquella confirma un candidato que un
+# conector había propuesto; ésta nace de que una persona fue a buscar al
+# registro y encontró algo que ningún conector había visto. La evidencia no es
+# la misma y la ficha no debe decir que sí.
+FUENTE_BUSQUEDA = "Revisión humana (búsqueda manual en el registro)"
+
+firmas_de = D.firmas_de
 
 
 def leer_decisiones(path: Path) -> pd.DataFrame:
-    d = pd.read_csv(path, comment="#", dtype=str).fillna("")
+    d = D.leer(path)
     faltan = {"caso_id", "cola", "firmas", "veredicto"} - set(d.columns)
     if faltan:
         sys.exit(f"El CSV no tiene las columnas esperadas: faltan {sorted(faltan)}")
     return d
-
-
-def firmas_de(fila) -> list[str]:
-    return [x.strip() for x in str(fila["firmas"]).split("|") if x.strip()]
 
 
 def grupos_de_identidad(d: pd.DataFrame) -> tuple[list[list[str]], list[tuple]]:
@@ -209,6 +216,111 @@ def resueltas_e09(d: pd.DataFrame, veredicto: str) -> list[tuple[str, str]]:
             if f not in vistas or (not vistas[f] and nota):
                 vistas[f] = nota
     return sorted(vistas.items())
+
+
+def veredictos_orcid(d: pd.DataFrame, vigente: dict[str, str]) -> dict:
+    """Traduce los cuatro veredictos de ORCID a lo que hay que escribir.
+
+    LA ASIMETRÍA, QUE ES DELIBERADA
+        Lo que se AÑADE va a `data/enriched/authors_orcid.csv`, igual que hace
+        `asignaciones_confirmadas`: es dato nuevo, con su fuente declarada.
+
+        Lo que se RETIRA no se borra de ahí. Se anota en `config/` y el build lo
+        filtra, por la misma razón que las firmas de la cola E-09 no se borran
+        del log: borrar la fila destruiría de dónde vino el dato, y además los
+        conectores de enriquecimiento regeneran ese archivo —la próxima corrida
+        de `orcid_crossref.py` devolvería la asignación retirada y nadie se
+        enteraría—. Un filtro declarado sobrevive a la regeneración; un borrado,
+        no.
+
+    Devuelve las cuatro listas y los errores, sin decidir qué hacer con ellos.
+    """
+    conf: dict[str, tuple[str, str]] = {}
+    ret: dict[str, tuple[str, str]] = {}
+    sinreg: dict[str, str] = {}
+    nuevas: list[dict] = []
+    errores: list[str] = []
+    avisos: list[str] = []
+
+    for _, r in d.iterrows():
+        v = str(r.get("veredicto") or "")
+        if not v.startswith("orcid_"):
+            continue
+        nota = str(r.get("nota") or "").strip()
+        propuesto = str(r.get("orcid_propuesto") or "").strip().upper()
+        for f in firmas_de(r):
+            if v in ("orcid_correcto", "orcid_incorrecto"):
+                actual = vigente.get(f)
+                if not actual:
+                    avisos.append(f"«{f}»: veredicto «{v}» pero hoy no tiene "
+                                  "ninguna asignación vigente que confirmar o retirar")
+                    continue
+                (conf if v == "orcid_correcto" else ret)[f] = (actual, nota)
+            elif v == "orcid_encontrado":
+                if f in vigente:
+                    avisos.append(f"«{f}»: se declara un ORCID encontrado a mano, "
+                                  f"pero ya tiene asignado {vigente[f]}. No se toca.")
+                    continue
+                if not propuesto:
+                    errores.append(f"«{f}»: veredicto «orcid_encontrado» sin "
+                                   "identificador en la columna orcid_propuesto")
+                elif not D.orcid_valido(propuesto):
+                    errores.append(f"«{f}»: «{propuesto}» no es un ORCID válido "
+                                   "(forma o dígito de control)")
+                else:
+                    nuevas.append({"nombre_en_fuente": f, "orcid": propuesto,
+                                   "publicaciones_de_respaldo": 0,
+                                   "confianza": "alta", "fuente": FUENTE_BUSQUEDA,
+                                   "nota": nota})
+            elif v == "orcid_no_encontrado":
+                sinreg[f] = nota
+
+    # La misma firma confirmada y retirada son dos afirmaciones incompatibles
+    # sobre una persona con nombre y apellido. No se desempata: se detiene.
+    for f in sorted(set(conf) & set(ret)):
+        errores.append(f"«{f}» se declara a la vez con el ORCID correcto y con "
+                       "el ORCID equivocado")
+
+    return {"confirmadas": conf, "retiradas": ret, "sin_registro": sinreg,
+            "nuevas": nuevas, "errores": errores, "avisos": avisos}
+
+
+def yaml_orcid(v: dict, fecha: str) -> str:
+    """Escrito a mano, como los otros dos: se lee tanto como se ejecuta."""
+    lineas = [
+        "# Veredictos humanos sobre asignaciones de ORCID.",
+        "#",
+        "# GENERADO por src/review/apply_decisions.py desde",
+        "# internal/identity_decisions.csv. No editar a mano: se regenera.",
+        "#",
+        "# confirmadas   el ORCID vigente es de esta persona. No cambia el dato;",
+        "#               cambia lo que la ficha declara sobre su respaldo.",
+        "# retiradas     el ORCID vigente NO es de esta persona. El build deja de",
+        "#               usarlo. La fila sigue en data/enriched/authors_orcid.csv",
+        "#               a propósito: borrarla perdería de dónde vino, y el",
+        "#               conector la repondría en la siguiente corrida.",
+        "# sin_registro  alguien buscó en el registro y no encontró a esta",
+        "#               persona. No es lo mismo que «nadie ha mirado».",
+        "#",
+        f"# Aplicado: {fecha}",
+        "",
+        f"fecha_de_aplicacion: {fecha}",
+    ]
+    for clave, entradas in (("confirmadas", v["confirmadas"]),
+                            ("retiradas", v["retiradas"])):
+        lineas.append(f"\n{clave}:")
+        if not entradas:
+            lineas[-1] = f"\n{clave}: []"
+            continue
+        for f, (orcid, nota) in sorted(entradas.items()):
+            lineas.append(f"  - firma: {_escalar(f)}")
+            lineas.append(f"    orcid: {_escalar(orcid)}")
+            lineas.append(f"    nota: {_escalar(nota)}")
+    lineas.append("\nsin_registro:" if v["sin_registro"] else "\nsin_registro: []")
+    for f, nota in sorted(v["sin_registro"].items()):
+        lineas.append(f"  - firma: {_escalar(f)}")
+        lineas.append(f"    nota: {_escalar(nota)}")
+    return "\n".join(lineas) + "\n"
 
 
 def _escalar(v: str) -> str:
@@ -436,6 +548,94 @@ def autotest() -> int:
     g, c = grupos_de_identidad(d9)
     casos.append(("descartar no consolida", g == [] and not c, (g, c)))
 
+    # ── 12. Los cuatro veredictos de ORCID.
+    def dfo(filas):
+        return pd.DataFrame(filas, columns=["caso_id", "cola", "firmas", "veredicto",
+                                            "orcid_propuesto", "nota"])
+
+    VIG = {"Aedo S.": "0000-0001-5567-3374"}
+    # ORCID reales por su dígito de control; el inválido es el mismo con el
+    # último dígito cambiado, que es exactamente la errata que se comete.
+    BUENO, MALO = "0000-0002-1825-0097", "0000-0002-1825-0098"
+
+    v = veredictos_orcid(dfo([
+        ("ver-Aedo S.", "ORCID sin confirmar", "Aedo S.", "orcid_correcto", "", "cotejado")]), VIG)
+    casos.append(("orcid_correcto confirma la asignación vigente",
+                  v["confirmadas"] == {"Aedo S.": ("0000-0001-5567-3374", "cotejado")}
+                  and not v["errores"], v))
+
+    v = veredictos_orcid(dfo([
+        ("ver-Aedo S.", "ORCID sin confirmar", "Aedo S.", "orcid_incorrecto", "", "otra persona")]), VIG)
+    casos.append(("orcid_incorrecto retira, no borra",
+                  v["retiradas"] == {"Aedo S.": ("0000-0001-5567-3374", "otra persona")},
+                  v))
+
+    # Un veredicto sobre algo que ya no existe avisa y no aplica nada: es un CSV
+    # viejo, no un error del operador, y abortar por eso bloquearía el resto.
+    v = veredictos_orcid(dfo([
+        ("ver-Fantasma Z.", "ORCID sin confirmar", "Fantasma Z.", "orcid_correcto", "", "")]), VIG)
+    casos.append(("veredicto sobre firma sin asignación vigente avisa",
+                  not v["confirmadas"] and not v["errores"] and len(v["avisos"]) == 1, v))
+
+    v = veredictos_orcid(dfo([
+        ("sinorcid-Dreyse J.", "Firma sin ORCID", "Dreyse J.", "orcid_encontrado", BUENO, "buscado")]), VIG)
+    casos.append(("orcid_encontrado añade con su fuente propia",
+                  len(v["nuevas"]) == 1 and v["nuevas"][0]["orcid"] == BUENO
+                  and v["nuevas"][0]["fuente"] == FUENTE_BUSQUEDA and not v["errores"], v))
+
+    v = veredictos_orcid(dfo([
+        ("sinorcid-Dreyse J.", "Firma sin ORCID", "Dreyse J.", "orcid_encontrado", MALO, "")]), VIG)
+    casos.append(("un dígito de control malo no se aplica",
+                  not v["nuevas"] and len(v["errores"]) == 1, v))
+
+    v = veredictos_orcid(dfo([
+        ("sinorcid-Dreyse J.", "Firma sin ORCID", "Dreyse J.", "orcid_encontrado", "", "")]), VIG)
+    casos.append(("orcid_encontrado sin identificador es un error",
+                  not v["nuevas"] and len(v["errores"]) == 1, v))
+
+    v = veredictos_orcid(dfo([
+        ("a", "ORCID sin confirmar", "Aedo S.", "orcid_correcto", "", ""),
+        ("b", "ORCID no verificable", "Aedo S.", "orcid_incorrecto", "", "")]), VIG)
+    casos.append(("la misma firma correcta e incorrecta se detiene",
+                  len(v["errores"]) == 1, v))
+
+    v = veredictos_orcid(dfo([
+        ("sinorcid-X", "Firma sin ORCID", "X", "orcid_no_encontrado", "", "no está")]), VIG)
+    casos.append(("orcid_no_encontrado deja constancia de que se buscó",
+                  v["sin_registro"] == {"X": "no está"}, v))
+
+    # 13. El YAML de ORCID se relee intacto, con una nota hostil.
+    dura = 'dice \'no\' y "sí" a la vez: # 3'
+    v = veredictos_orcid(dfo([
+        ("a", "ORCID sin confirmar", "Aedo S.", "orcid_incorrecto", "", dura)]), VIG)
+    vuelta = yaml.safe_load(yaml_orcid(v, "2026-01-01"))
+    casos.append(("el YAML de ORCID se relee intacto",
+                  vuelta["retiradas"] == [{"firma": "Aedo S.",
+                                           "orcid": "0000-0001-5567-3374", "nota": dura}]
+                  and vuelta["confirmadas"] == [] and vuelta["sin_registro"] == [],
+                  vuelta))
+
+    # 14. Los guardianes del vocabulario.
+    casos.append(("un veredicto inventado se detecta",
+                  D.veredictos_desconocidos(df([("x", "V", "A", "quizas")])) == ["quizas"],
+                  None))
+    casos.append(("un veredicto en la cola equivocada se detecta",
+                  len(D.veredictos_fuera_de_cola(
+                      df([("x", "ORCID sin confirmar", "A", "misma")]))) == 1, None))
+    casos.append(("cada cola ofrece sólo veredictos que existen",
+                  all(v in D.VOCABULARIO
+                      for vs in list(D.COLAS.values()) + [D.POR_DEFECTO] for v in vs), None))
+
+    # 15. La almohadilla de una nota ya no se come media línea.
+    tmp = ROOT / "internal" / ".autotest_decisiones.csv"
+    tmp.write_text('# cabecera\n# otra\ncaso_id,cola,firmas,veredicto,nota\n'
+                   'x,V,A,misma,"cotejado con el registro #2, ok"\n', encoding="utf-8")
+    leido = D.leer(tmp)
+    tmp.unlink()
+    casos.append(("una nota con almohadilla se lee entera",
+                  leido.nota.iloc[0] == "cotejado con el registro #2, ok",
+                  leido.nota.iloc[0]))
+
     ok = True
     for nombre, paso, obs in casos:
         print(f"  {'OK  ' if paso else 'FALLA'} {nombre}" + (f"   {obs}" if not paso else ""))
@@ -463,7 +663,26 @@ def main() -> int:
                  "(se genera con `make revision`).")
 
     d = leer_decisiones(path)
-    resueltas = d[d.veredicto.isin(["misma", "distintas", "no_es_persona", "es_persona"])]
+
+    # GUARDA DE VOCABULARIO. Antes esta línea filtraba con una lista de
+    # veredictos escrita a mano: un veredicto que la página ofrecía y esta lista
+    # no conocía se leía, se contaba como leído y no hacía nada. Ahora la lista
+    # es el vocabulario compartido, y lo que no esté en él detiene la aplicación
+    # nombrándolo en vez de ignorarlo.
+    desconocidos = D.veredictos_desconocidos(d)
+    if desconocidos:
+        sys.exit(f"El CSV trae veredictos que este programa no sabe aplicar: "
+                 f"{desconocidos}\nVeredictos válidos: {sorted(D.VOCABULARIO)}\n"
+                 "No se aplica nada.")
+    fuera = D.veredictos_fuera_de_cola(d)
+    if fuera:
+        print("\n  VEREDICTOS QUE NO CORRESPONDEN A SU COLA:")
+        for cid, cola, v in fuera:
+            print(f"    {cid}: «{v}» en la cola «{cola}»")
+        sys.exit("\nSólo puede venir de un CSV editado a mano o de dos "
+                 "exportaciones de versiones distintas. No se aplica nada.")
+
+    resueltas = d[d.veredicto.isin(set(D.VOCABULARIO) - {"pendiente"})]
     print(f"  decisiones leídas   : {len(d)}")
     print(f"    resueltas         : {len(resueltas)}")
     print(f"    pendientes        : {int((d.veredicto == 'pendiente').sum())}")
@@ -513,9 +732,34 @@ def main() -> int:
 
     opath = ENRICHED / "authors_orcid.csv"
     vig = pd.read_csv(opath, dtype=str)
+    vigente = dict(zip(vig.nombre_en_fuente, vig.orcid))
+
+    orc = veredictos_orcid(d, vigente)
+    for a in orc["avisos"]:
+        print(f"\n  AVISO · {a}")
+    if orc["errores"]:
+        print("\n  NO SE PUEDE APLICAR:")
+        for e in orc["errores"]:
+            print(f"    {e}")
+        sys.exit("\nCorrija el CSV y vuelva a intentarlo. No se aplica nada.")
+
+    halladas = pd.DataFrame(
+        [{k: v for k, v in n.items() if k != "nota"} for n in orc["nuevas"]],
+        columns=list(nuevas.columns))
+    nuevas = pd.concat([nuevas, halladas], ignore_index=True)
     nuevas = nuevas[~nuevas.nombre_en_fuente.isin(set(vig.nombre_en_fuente))]
-    print(f"  ORCID confirmados   : {len(nuevas)} asignaciones nuevas")
-    print(f"  cobertura           : {len(vig)} → {len(vig) + len(nuevas)}")
+    nuevas = nuevas.drop_duplicates("nombre_en_fuente")
+
+    print(f"  ORCID confirmados   : {len(orc['confirmadas'])} asignaciones que "
+          "una persona respalda")
+    print(f"  ORCID retirados     : {len(orc['retiradas'])} que el build dejará "
+          "de usar")
+    print(f"  buscados sin éxito  : {len(orc['sin_registro'])} firmas sin registro")
+    print(f"  asignaciones nuevas : {len(nuevas)} "
+          f"({len(halladas)} de búsqueda manual)")
+    efectiva = len(vig) + len(nuevas) - len(orc["retiradas"])
+    print(f"  cobertura           : {len(vig)} → {efectiva} "
+          "(asignaciones que el build usará)")
 
     if args.dry_run:
         print("\n  --dry-run: no se ha escrito nada.")
@@ -527,6 +771,8 @@ def main() -> int:
         yaml_consolidacion(grupos, hoy, len(d), frec), encoding="utf-8")
     (CONFIG / "firmas_e09_resueltas.yml").write_text(
         yaml_e09(desc, conf, hoy), encoding="utf-8")
+    (CONFIG / "orcid_revisado.yml").write_text(
+        yaml_orcid(orc, hoy), encoding="utf-8")
 
     if len(nuevas):
         salida = pd.concat([vig, nuevas], ignore_index=True)
@@ -536,6 +782,9 @@ def main() -> int:
     print(f"\n  OK · config/identidades_consolidadas.yml")
     print(f"       config/firmas_e09_resueltas.yml   "
           f"({len(desc)} descartadas · {len(conf)} confirmadas)")
+    print(f"       config/orcid_revisado.yml        "
+          f"({len(orc['confirmadas'])} confirmadas · {len(orc['retiradas'])} "
+          f"retiradas · {len(orc['sin_registro'])} sin registro)")
     if len(nuevas):
         print(f"       data/enriched/authors_orcid.csv  (+{len(nuevas)})")
     print("\n  Reconstruya el sitio para que surta efecto:  make sitio")

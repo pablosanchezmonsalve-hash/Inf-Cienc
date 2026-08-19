@@ -2093,3 +2093,94 @@ lleva a `metodologia.html#correcciones`, la sección existe y el título se ve.
 ### Próximo paso recomendado
 
 `V2-16`: la cabecera `<head>` repetida en diez páginas.
+
+---
+
+## Cierre · los perfiles de ORCID pendientes, y la cola que nunca menguaba
+
+El encargo era una interfaz para identificar y validar los perfiles de ORCID
+pendientes, verificables a mano, más un apartado informativo de las plataformas
+ya integradas y una propuesta de nuevas.
+
+Antes de construir nada se midió qué superficie de validación **ya existía**,
+porque una segunda herramienta fragmentaría el registro de decisiones que `D-08`
+centraliza. La medición encontró dos cosas distintas:
+
+**Lo que sí estaba cubierto.** Cuatro colas de `make revision` ya preguntaban a
+quién asignar un ORCID: 17 grupos que comparten identificador, 1 conflicto, 2
+desacuerdos entre fuentes y 20 candidatos por afiliación.
+
+**Lo que no lo estaba, y es peor.** Las asignaciones **ya publicadas** cuya
+evidencia no las respalda no tenían cola ninguna: 17 formas de firma cuyo
+titular no declara ninguna obra con DOI contra la que contrastar, 4 cuyas obras
+declaradas no coinciden con ninguna de las atribuidas, y 6 firmas con cinco o
+más publicaciones y ningún identificador —una de ellas con 16—. Un ORCID mal
+atribuido publicado en una ficha con nombre y apellido le adjudica a alguien la
+obra de otro, y no había forma de resolverlo.
+
+**Y una tercera cosa, que no se buscaba.** La herramienta reconstruía la cola
+desde la auditoría en cada corrida y **no leía lo ya decidido**: de 114 casos,
+52 estaban resueltos desde el 5 de agosto y los volvía a preguntar como si nadie
+los hubiera mirado. Una cola de pendientes que incluye lo resuelto no es una
+cola de pendientes; es la misma clase de defecto que este repositorio lleva seis
+instrumentos corrigiendo, sólo que del revés: no una lista que deja de cubrir,
+sino una que nunca mengua.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-195 | La validación de ORCID **extiende `make revision`**; no se construye una segunda herramienta | `D-08` centraliza las decisiones de identidad en una cola y un archivo. Dos herramientas serían dos registros, dos exportaciones y dos caminos de aplicación que podrían contradecirse sin que nadie lo notara |
+| D-196 | `build_review.py` **lee `internal/identity_decisions.csv`** y siembra cada caso con lo que ya se decidió | El navegador guarda el avance, pero en una máquina y hasta que alguien limpie el navegador. El registro que perdura está en el repositorio, y era el único que la herramienta no consultaba |
+| D-197 | Lo decidido **no se borra de la página**: se marca y el filtro por defecto lo oculta | La exportación reescribe el archivo entero. Si los casos resueltos desaparecieran del HTML, exportar produciría un CSV sin ellos y la siguiente aplicación deshaaría 30 consolidaciones |
+| D-198 | Tres colas nuevas y no una sola de «ORCID pendiente» | «El titular no declara obras» y «declara obras y ninguna coincide» no son el mismo caso: el segundo es sospechoso y el primero sólo no contrastable. Mezclar 4 casos urgentes con 17 rutinarios entierra los urgentes |
+| D-199 | El umbral para «vale la pena buscarlo a mano» es `n_minimo_interpretable`, el que ya existe | Inventar un segundo umbral obligaría a justificar por qué difiere del primero. Con 5 publicaciones hay obra suficiente para reconocer a alguien; con una, la búsqueda devuelve homónimos indistinguibles |
+| D-200 | El vocabulario de veredictos vive en **un solo módulo** (`src/review/decisiones.py`) y quien aplica **falla ante un veredicto que no conoce** | Estaba en cuatro sitios: los botones, los veredictos por caso, el `isin([...])` del aplicador y la cabecera del CSV. Un veredicto que la página ofrecía y el aplicador no conocía se leía, se contaba como leído y no hacía nada |
+| D-201 | Un ORCID tecleado a mano se valida con su **dígito de control** (ISO 7064 MOD 11-2) y uno inválido **detiene** la aplicación | La errata de un carácter produce un identificador que existe y es de otra persona. Es justo el error que se comete al copiar, y el único que un dígito de control detecta con certeza |
+| D-202 | Una asignación retirada **no se borra** de `data/enriched/authors_orcid.csv`: se declara en `config/orcid_revisado.yml` y el build la filtra | Ese archivo lo regeneran los conectores. Un borrado se deshace solo en la siguiente corrida de `orcid_crossref.py`, sin aviso. Y borrar la fila perdería de dónde vino el dato |
+| D-203 | La comprobación humana **no pisa a «verificado»**: va al final de la cadena de etiquetas | «Verificado» significa que dos fuentes independientes coinciden. Sustituirlo por el juicio de una persona sería cambiar evidencia fuerte por débil y presentarlo como mejora |
+| D-204 | «Se buscó y no se encontró» se registra como dato propio | `D-09`: ausencia de dato y resultado negativo no pueden verse igual. Sin esto, una firma buscada sin éxito es indistinguible de una que nadie ha mirado, y se volvería a buscar |
+| D-205 | El apartado de plataformas se **publica en el sitio**; las propuestas de integración se quedan en `docs/` | Qué se consulta hoy es procedencia, y es publicable. Qué podría consultarse es un plan: publicarlo como sección del informe presentaría una intención como un hecho |
+| D-206 | Un corpus nuevo —SciELO, OpenAlex— entraría como **corpus paralelo declarado**, nunca sumado al universo | Indexan con criterios distintos. La suma produce una cifra que nadie puede reconciliar, y `D-16` exige que cada indicador declare su denominador |
+| D-207 | Google Académico se declara **no viable** y queda escrito en `V2_BACKLOG.md` §6 | No tiene API pública, sus condiciones prohíben la recuperación automatizada y sus datos no son reproducibles: sin fecha de corte, sin criterio de indexación declarado, sin identificador estable. Escribirlo evita que se reabra cada vez que alguien pregunte |
+
+### Un campo publicado que era falso
+
+`orcid_estado` decía «Recuperado desde Crossref» para **toda** asignación. De
+las 216 publicadas, 43 vinieron del registro de ORCID y 15 de una revisión
+humana: **58 fichas afirmaban una procedencia que no era la suya**. Ahora se
+deriva de la fuente, y distingue tres ausencias que no son la misma —nadie ha
+mirado, alguien miró y no encontró, no hay fuente que lo aporte—.
+
+No lo detectó ninguna comprobación. Salió de leer el campo mientras se añadía
+uno nuevo al lado.
+
+### Ensayo del bucle completo
+
+Con un CSV de prueba: confirmar dos asignaciones, retirar una, teclear un ORCID
+encontrado a mano y registrar una búsqueda sin resultado. `apply_decisions.py`
+generó `config/orcid_revisado.yml`, el build lo consumió y el desglose cerró:
+216 → 216 (−1 retirada, +1 encontrada), «sin confirmar» 3 → 2, «no verificable»
+16 → 15, y dos etiquetas nuevas con un caso cada una. La batería de verificación
+del sitio pasó sin fallos. Después se restauró el estado real: **ninguna de esas
+decisiones es real y ninguna quedó aplicada**.
+
+### Dos defectos menores que aparecieron de paso
+
+| Defecto | Efecto |
+|---|---|
+| `pd.read_csv(comment='#')` en el lector de decisiones | Truncaba la línea en la primera almohadilla **estuviera donde estuviera**: una nota como «cotejado con el registro #2» perdía la mitad, en silencio. Ahora los comentarios se recortan por posición, sólo al principio del archivo |
+| El desglose de etiquetas de ORCID se imprimía desde una lista escrita a mano | Una etiqueta nueva se habría omitido y el desglose habría dejado de sumar el total sin decir por qué. Ahora avisa de las que no tienen glosa |
+
+### Lo que sigue sin ser mío
+
+Las 89 decisiones pendientes de `make revision` —incluidas las 27 colas nuevas
+de ORCID y las 4 firmas de `E-09`— las toma una persona. La herramienta reúne la
+evidencia, enlaza al registro del titular y enseña las publicaciones que hay que
+comparar; el veredicto no lo pone.
+
+### Próximo paso recomendado
+
+Abrir `internal/revision_identidad.html`, filtrar por «Sólo ORCID» y resolver
+las 4 de «ORCID sin confirmar»: son las únicas que el sitio publica hoy con la
+marca de que nadie las ha respaldado.

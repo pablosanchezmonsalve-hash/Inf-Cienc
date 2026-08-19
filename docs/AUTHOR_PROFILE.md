@@ -145,16 +145,27 @@ titular (`src/enrich/orcid_api.py`) y la ficha muestra el resultado:
 | `no verificable` | El titular no declara ninguna obra con DOI: no hay contra qué contrastar | 16 |
 | `sin confirmar` | El titular declara obras, pero ninguna coincide con las de esta firma | 3 |
 | `registro no accesible` | El ORCID no existe o su registro no es público | 0 |
+| `comprobado por revisión` | La vía automática no pudo resolverla y una persona abrió el registro del titular y la respaldó | 0 |
+| `encontrado por revisión` | Ninguna vía automática dio con el identificador; una persona lo buscó en el registro y lo encontró | 0 |
 
 Ver `ORCID_COVERAGE.md` §2 bis para por qué las 43 no dicen «verificado».
 
 Los recuentos son **posteriores a la consolidación**: varias variantes de una
 misma persona que traían el mismo ORCID cuentan ahora una vez.
 
+Las dos últimas están en cero porque nadie ha revisado todavía; existen desde
+que `make revision` encola las asignaciones que la comprobación automática no
+puede resolver. No se omiten por valer cero: una etiqueta ausente y una en cero
+dicen cosas distintas.
+
 `sin confirmar` **no afirma que la asignación sea falsa**. Afirma que la
 evidencia disponible no la respalda, que es una frase distinta y la única que
-los datos sostienen. Esas cuatro entran en la cola de revisión humana
-(`internal/orcid_hallazgos.csv`); resolverlas automáticamente está prohibido.
+los datos sostienen. Esas tres —cuatro formas de firma antes de consolidar—
+entran en la cola «ORCID sin confirmar» de `make revision`, con enlace al
+registro del titular y la lista de publicaciones que hay que comparar;
+resolverlas automáticamente está prohibido. Las 16 `no verificable` tienen su
+propia cola, separada a propósito: que no haya nada contra qué contrastar no es
+lo mismo que contrastar y no encontrar coincidencia.
 
 Lo que se publica de esa cola es el **recuento**, arriba. El detalle nominal de
 por qué cada una no se confirma —qué DOI, qué afiliaciones declara— se queda en
@@ -164,8 +175,14 @@ la capa interna.
 
 ## 5. Alcance de publicación
 
+> **Nota de base (2026-08-19).** Las cifras de esta sección son de antes de la
+> consolidación humana: 589 es el número de **formas de firma** de la fuente,
+> de las que 63 se fusionaron en 30 personas. Las **entidades publicadas hoy son
+> 556**. El razonamiento no cambia; los números sí. El supuesto vigente está en
+> `V2_BACKLOG.md` §4 (`T-11`).
+
 Pregunta abierta para el responsable del proyecto: **¿se publican las 589
-fichas, o sólo un subconjunto validado?**
+formas de firma, o sólo un subconjunto validado?**
 
 Argumentos a considerar:
 
