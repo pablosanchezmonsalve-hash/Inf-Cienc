@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    a { color: #7a0f2b; } a:hover { color: #a4123f; }
+  </style>
+</helmet>
+<div style="width: 794px; height: 1123px; box-sizing: border-box; background: #ffffff; color: #1c1013; display: flex; flex-direction: column;">
+
+  <div style="padding: 34px 56px 0; display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; color: #6d585e;">
+    <span style="text-transform: uppercase; letter-spacing: .12em;">Informe Cienciométrico · Universidad Finis Terrae</span>
+    <span>2023–2025 · corte 2026-07-22</span>
+  </div>
+  <div style="margin: 12px 56px 0; height: 2px; background: {{marca}};"></div>
+
+  <div style="padding: 28px 56px 0; display: flex; flex-direction: column; gap: 22px; flex-grow: 1;">
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: {{marca}}; font-weight: 700;">Eje 1 · Producción</div>
+      <h2 style="margin: 0; font-size: 27px; line-height: 1.15; font-weight: 700; letter-spacing: -.01em;">Qué se publicó, y qué no dice el volumen</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid #e8dade; border-radius: 5px; overflow: hidden;">
+      <div style="padding: 14px 18px; display: flex; flex-direction: column; gap: 5px; background: #ffffff;">
+        <div style="font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #1f7d4f; font-weight: 700;">Responde</div>
+        <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #5b4a4f;">Cuánto se publicó, en qué años, de qué tipo documental, en qué fuentes y desde qué unidades académicas.</p>
+      </div>
+      <div style="padding: 14px 18px; display: flex; flex-direction: column; gap: 5px; background: #f5eef0; border-left: 1px solid #e8dade;">
+        <div style="font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #a4123f; font-weight: 700;">No responde</div>
+        <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #5b4a4f;">Qué tan bueno es lo publicado. El volumen mide actividad indexada, no rendimiento ni calidad: dos unidades con la misma cifra pueden estar en disciplinas que Scopus cubre de forma muy desigual.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 10px;">
+        <h3 style="margin: 0; font-size: 19px; font-weight: 650;">Producción anual</h3>
+        <span style="font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #6d585e; border: 1px solid #e8dade; border-radius: 999px; padding: 1px 8px;">P-02</span>
+      </div>
+
+      <svg viewBox="0 -10 682 220" width="682" height="220" role="img" aria-label="Producción anual: 228 en 2023, 276 en 2024, 319 en 2025">
+        <line x1="52" y1="170" x2="670" y2="170" stroke="#e8dade" stroke-width="1"></line>
+        <line x1="52" y1="94" x2="670" y2="94" stroke="#e8dade" stroke-width="1" stroke-dasharray="3 3"></line>
+        <line x1="52" y1="18" x2="670" y2="18" stroke="#e8dade" stroke-width="1" stroke-dasharray="3 3"></line>
+        <text x="44" y="174" text-anchor="end" font-size="11" fill="#6d585e">0</text>
+        <text x="44" y="98" text-anchor="end" font-size="11" fill="#6d585e">160</text>
+        <text x="44" y="22" text-anchor="end" font-size="11" fill="#6d585e">320</text>
+        <rect x="120" y="62" width="96" height="108" fill="{{serie}}"></rect>
+        <text x="168" y="54" text-anchor="middle" font-size="14" font-weight="700" fill="#1c1013">228</text>
+        <text x="168" y="190" text-anchor="middle" font-size="12" fill="#5b4a4f">2023</text>
+        <rect x="313" y="39" width="96" height="131" fill="{{serie}}"></rect>
+        <text x="361" y="31" text-anchor="middle" font-size="14" font-weight="700" fill="#1c1013">276</text>
+        <text x="361" y="190" text-anchor="middle" font-size="12" fill="#5b4a4f">2024</text>
+        <rect x="506" y="18" width="96" height="152" fill="{{serie}}"></rect>
+        <text x="554" y="12" text-anchor="middle" font-size="14" font-weight="700" fill="#1c1013">319</text>
+        <text x="554" y="190" text-anchor="middle" font-size="12" fill="#5b4a4f">2025</text>
+      </svg>
+
+      <div style="display: flex; gap: 18px; font-size: 11px; color: #6d585e; border-top: 1px solid #e8dade; padding-top: 7px;">
+        <span><strong style="color: #5b4a4f; font-weight: 600;">Fuente:</strong> Scopus</span>
+        <span><strong style="color: #5b4a4f; font-weight: 600;">Corte:</strong> 2026-07-22</span>
+        <span><strong style="color: #5b4a4f; font-weight: 600;">Denominador:</strong> 823 publicaciones (100 % de cobertura)</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 10px;">
+        <h3 style="margin: 0; font-size: 19px; font-weight: 650;">Grandes áreas temáticas</h3>
+        <span style="font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #6d585e; border: 1px solid #e8dade; border-radius: 999px; padding: 1px 8px;">T-05</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <sc-for list="{{areas}}" as="a" hint-placeholder-count="5">
+          <div style="display: grid; grid-template-columns: 218px minmax(0, 1fr) 46px; gap: 12px; align-items: center;">
+            <div style="font-size: 12.5px; color: #1c1013;">{{a.nombre}}</div>
+            <div style="height: 15px; background: #f5eef0; border-radius: 2px; overflow: hidden;">
+              <div style="height: 15px; width: {{a.ancho}}; background: {{serie2}}; border-radius: 2px;"></div>
+            </div>
+            <div style="font-size: 12.5px; font-weight: 650; text-align: right; font-variant-numeric: tabular-nums;">{{a.n}}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; gap: 18px; font-size: 11px; color: #6d585e; border-top: 1px solid #e8dade; padding-top: 7px;">
+        <span><strong style="color: #5b4a4f; font-weight: 600;">Fuente:</strong> SciVal</span>
+        <span><strong style="color: #5b4a4f; font-weight: 600;">Corte:</strong> 2026-07-22</span>
+        <span><strong style="color: #5b4a4f; font-weight: 600;">Denominador:</strong> 816 publicaciones con área temática</span>
+      </div>
+    </div>
+
+    <div style="background: #fdf6e7; border: 1px solid #b8830f; border-left-width: 3px; border-radius: 4px; padding: 13px 17px;">
+      <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #5e4104;"><strong>Una publicación puede contarse en más de un área.</strong> Las cinco cifras suman más que 816 porque la clasificación de SciVal no es excluyente. Leerlas como un reparto del total sería un error.</p>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 56px 30px; display: flex; justify-content: space-between; font-size: 11px; color: #6d585e; border-top: 1px solid #e8dade; margin-top: 10px; padding-top: 12px;">
+    <span>Cada indicador declara su fuente, su fecha de corte y su denominador.</span>
+    <span style="font-variant-numeric: tabular-nums;">2</span>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"marca":{"editor":"color","default":"#7a0f2b","options":["#7a0f2b","#a4123f","#5c0a20","#0f6f86"],"section":"Identidad"},"serie":{"editor":"color","default":"#a4123f","options":["#a4123f","#7a0f2b","#0f6f86","#1f7d4f"],"section":"Gráficos"},"serie2":{"editor":"color","default":"#0f6f86","options":["#0f6f86","#a4123f","#1f7d4f","#6b4bbd"],"section":"Gráficos"},"$preview":{"width":794,"height":1123}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const datos = [
+      { nombre: 'Life Sciences & Medicine', n: 537 },
+      { nombre: 'Social Sciences & Management', n: 192 },
+      { nombre: 'Engineering & Technology', n: 102 },
+      { nombre: 'Arts & Humanities', n: 94 },
+      { nombre: 'Natural Sciences', n: 71 },
+    ];
+    const max = 537;
+    return {
+      marca: this.props.marca ?? '#7a0f2b',
+      serie: this.props.serie ?? '#a4123f',
+      serie2: this.props.serie2 ?? '#0f6f86',
+      areas: datos.map((d) => ({ ...d, ancho: Math.round((d.n / max) * 100) + '%' })),
+    };
+  }
+}
+</script>
+</body>
+</html>

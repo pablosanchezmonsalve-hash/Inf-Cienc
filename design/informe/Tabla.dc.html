@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    a { color: #7a0f2b; } a:hover { color: #a4123f; }
+  </style>
+</helmet>
+<div style="width: 794px; height: 1123px; box-sizing: border-box; background: #ffffff; color: #1c1013; display: flex; flex-direction: column;">
+
+  <div style="padding: 34px 56px 0; display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; color: #6d585e;">
+    <span style="text-transform: uppercase; letter-spacing: .12em;">Informe Cienciométrico · Universidad Finis Terrae</span>
+    <span>2023–2025 · corte 2026-07-22</span>
+  </div>
+  <div style="margin: 12px 56px 0; height: 2px; background: {{marca}};"></div>
+
+  <div style="padding: 28px 56px 0; display: flex; flex-direction: column; gap: 22px; flex-grow: 1;">
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: {{marca}}; font-weight: 700;">Eje 1 · Producción · detalle</div>
+      <h2 style="margin: 0; font-size: 27px; line-height: 1.15; font-weight: 700; letter-spacing: -.01em;">Tipo documental</h2>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #5b4a4f; max-width: 62ch;">El reparto por tipo documental dice de qué está hecha la producción indexada. Un corpus con mucha <em>Review</em> y poco <em>Article</em> no describe la misma actividad que uno inverso, aunque el total coincida.</p>
+    </div>
+
+    <div style="border: 1px solid #e8dade; border-radius: 5px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 260px 88px 92px minmax(0, 1fr); gap: 0; background: #f5eef0; border-bottom: 1px solid #e8dade; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #5b4a4f; font-weight: 650;">
+        <div style="padding: 9px 16px;">Tipo documental</div>
+        <div style="padding: 9px 16px; text-align: right;">Publicaciones</div>
+        <div style="padding: 9px 16px; text-align: right;">% del total</div>
+        <div style="padding: 9px 16px;">Distribución</div>
+      </div>
+      <sc-for list="{{filas}}" as="f" hint-placeholder-count="8">
+        <div style="display: grid; grid-template-columns: 260px 88px 92px minmax(0, 1fr); gap: 0; border-bottom: 1px solid #e8dade; align-items: center; background: {{f.fondo}};">
+          <div style="padding: 8px 16px; font-size: 14px;">{{f.tipo}}</div>
+          <div style="padding: 8px 16px; font-size: 14px; text-align: right; font-weight: 650; font-variant-numeric: tabular-nums;">{{f.n}}</div>
+          <div style="padding: 8px 16px; font-size: 14px; text-align: right; color: #5b4a4f; font-variant-numeric: tabular-nums;">{{f.pct}}</div>
+          <div style="padding: 8px 16px;">
+            <div style="height: 11px; background: #f5eef0; border-radius: 2px; overflow: hidden;">
+              <div style="height: 11px; width: {{f.ancho}}; background: {{serie}}; border-radius: 2px;"></div>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+      <div style="display: grid; grid-template-columns: 260px 88px 92px minmax(0, 1fr); gap: 0; background: #ffffff; font-weight: 700;">
+        <div style="padding: 9px 16px; font-size: 14px;">Total</div>
+        <div style="padding: 9px 16px; font-size: 14px; text-align: right; font-variant-numeric: tabular-nums;">823</div>
+        <div style="padding: 9px 16px; font-size: 14px; text-align: right; font-variant-numeric: tabular-nums;">100 %</div>
+        <div style="padding: 9px 16px;"></div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 18px; font-size: 11px; color: #6d585e;">
+      <span><strong style="color: #5b4a4f; font-weight: 600;">Fuente:</strong> Scopus</span>
+      <span><strong style="color: #5b4a4f; font-weight: 600;">Corte:</strong> 2026-07-22</span>
+      <span><strong style="color: #5b4a4f; font-weight: 600;">Denominador:</strong> 823 publicaciones (100 % de cobertura)</span>
+      <span><strong style="color: #5b4a4f; font-weight: 600;">Indicador:</strong> P-03</span>
+    </div>
+
+    <div style="background: #fdf6e7; border: 1px solid #b8830f; border-left-width: 3px; border-radius: 4px; padding: 13px 17px;">
+      <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #5e4104;"><strong>El tipo documental lo asigna la fuente, no este proyecto.</strong> Un mismo trabajo puede estar tipificado de forma distinta en Scopus y en SciVal; aquí manda Scopus, que es la fuente del universo. Las categorías con menos de diez casos no admiten lectura de tendencia.</p>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 56px 30px; display: flex; justify-content: space-between; font-size: 11px; color: #6d585e; border-top: 1px solid #e8dade; margin-top: 10px; padding-top: 12px;">
+    <span>Los datos completos se exportan en CSV desde la vista de publicaciones.</span>
+    <span style="font-variant-numeric: tabular-nums;">3</span>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"marca":{"editor":"color","default":"#7a0f2b","options":["#7a0f2b","#a4123f","#5c0a20","#0f6f86"],"section":"Identidad"},"serie":{"editor":"color","default":"#a4123f","options":["#a4123f","#7a0f2b","#0f6f86","#1f7d4f"],"section":"Gráficos"},"$preview":{"width":794,"height":1123}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const datos = [
+      { tipo: 'Article', n: 595 },
+      { tipo: 'Review', n: 133 },
+      { tipo: 'Book chapter', n: 24 },
+      { tipo: 'Letter', n: 24 },
+      { tipo: 'Conference paper', n: 18 },
+      { tipo: 'Editorial', n: 8 },
+      { tipo: 'Note', n: 7 },
+      { tipo: 'Erratum', n: 7 },
+    ];
+    const total = 823;
+    return {
+      marca: this.props.marca ?? '#7a0f2b',
+      serie: this.props.serie ?? '#a4123f',
+      filas: datos.map((d, i) => ({
+        ...d,
+        pct: (d.n / total * 100).toFixed(1).replace('.', ',') + ' %',
+        ancho: Math.round(d.n / 595 * 100) + '%',
+        fondo: i % 2 ? '#fbf7f8' : '#ffffff',
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

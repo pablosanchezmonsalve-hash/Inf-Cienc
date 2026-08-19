@@ -33,3 +33,9 @@ __pycache__/
 # Respaldos del asistente de revisión antes de sustituir el CSV de decisiones.
 # El archivo bueno sí se versiona; sus copias de seguridad no.
 internal/.respaldos/
+
+# Lienzo de diseño ya ensamblado: ~2 MB de editor empaquetado que se regenera
+# desde los .dc.html con `node <skill>/seed-canvas.mjs`. Lo que se versiona es
+# la FUENTE del diseño, no el paquete.
+design/informe/*.html
+!design/informe/*.dc.html

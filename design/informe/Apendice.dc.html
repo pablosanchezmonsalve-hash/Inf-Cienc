@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    a { color: #7a0f2b; } a:hover { color: #a4123f; }
+  </style>
+</helmet>
+<div style="width: 794px; height: 1123px; box-sizing: border-box; background: #ffffff; color: #1c1013; display: flex; flex-direction: column;">
+
+  <div style="padding: 34px 56px 0; display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; color: #6d585e;">
+    <span style="text-transform: uppercase; letter-spacing: .12em;">Informe Cienciométrico · Universidad Finis Terrae</span>
+    <span>2023–2025 · corte 2026-07-22</span>
+  </div>
+  <div style="margin: 12px 56px 0; height: 2px; background: {{marca}};"></div>
+
+  <div style="padding: 28px 56px 0; display: flex; flex-direction: column; gap: 20px; flex-grow: 1;">
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: {{marca}}; font-weight: 700;">Apéndice</div>
+      <h2 style="margin: 0; font-size: 27px; line-height: 1.15; font-weight: 700; letter-spacing: -.01em;">Metodología y limitaciones</h2>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #5b4a4f; max-width: 62ch;">Publicar indicadores sin sus límites es un error metodológico. Este apéndice acompaña siempre al informe: sin él, las cifras de las páginas anteriores no son interpretables.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 9px;">
+      <h3 style="margin: 0; font-size: 17px; font-weight: 650;">Los tres denominadores</h3>
+      <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #5b4a4f;">No todas las publicaciones tienen la misma información, así que no todos los indicadores se calculan sobre el mismo total. Cada cifra del informe declara el suyo.</p>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+        <div style="border: 1px solid #e8dade; border-radius: 5px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-size: 24px; font-weight: 700; color: {{marca}}; font-variant-numeric: tabular-nums;">823</div>
+          <div style="font-size: 12.5px; font-weight: 600;">Universo total</div>
+          <div style="font-size: 11px; color: #6d585e; line-height: 1.45;">Unión de Scopus y SciVal. Base de producción y tipo documental.</div>
+        </div>
+        <div style="border: 1px solid #e8dade; border-radius: 5px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-size: 24px; font-weight: 700; color: {{marca}}; font-variant-numeric: tabular-nums;">816</div>
+          <div style="font-size: 12.5px; font-weight: 600;">Con métricas</div>
+          <div style="font-size: 11px; color: #6d585e; line-height: 1.45;">Base de citas, FWCI, cuartiles y colaboración. Sólo SciVal las entrega.</div>
+        </div>
+        <div style="border: 1px solid #e8dade; border-radius: 5px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-size: 24px; font-weight: 700; color: {{marca}}; font-variant-numeric: tabular-nums;">818</div>
+          <div style="font-size: 12.5px; font-weight: 600;">Con autoría detallada</div>
+          <div style="font-size: 11px; color: #6d585e; line-height: 1.45;">Base de todo lo que se calcula por autor o por unidad académica.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 9px;">
+      <h3 style="margin: 0; font-size: 17px; font-weight: 650;">Qué sostiene cada ORCID publicado</h3>
+      <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #5b4a4f;">Ni Scopus ni SciVal entregan ORCID: se recupera de Crossref y del registro público de ORCID. No todas las asignaciones cuentan con la misma evidencia, y cada ficha lo dice.</p>
+      <div style="border: 1px solid #e8dade; border-radius: 5px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 176px minmax(0, 1fr) 62px; background: #f5eef0; border-bottom: 1px solid #e8dade; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #5b4a4f; font-weight: 650;">
+          <div style="padding: 8px 14px;">Etiqueta</div>
+          <div style="padding: 8px 14px;">Qué significa</div>
+          <div style="padding: 8px 14px; text-align: right;">Firmas</div>
+        </div>
+        <sc-for list="{{evidencia}}" as="e" hint-placeholder-count="5">
+          <div style="display: grid; grid-template-columns: 176px minmax(0, 1fr) 62px; border-bottom: 1px solid #e8dade; align-items: center;">
+            <div style="padding: 7px 14px; font-size: 12.5px; font-weight: 600; color: {{e.color}};">{{e.etiqueta}}</div>
+            <div style="padding: 7px 14px; font-size: 12.5px; color: #5b4a4f; line-height: 1.45;">{{e.que}}</div>
+            <div style="padding: 7px 14px; font-size: 12.5px; text-align: right; font-weight: 650; font-variant-numeric: tabular-nums;">{{e.n}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="background: #fdf6e7; border: 1px solid #b8830f; border-left-width: 3px; border-radius: 4px; padding: 13px 17px; display: flex; flex-direction: column; gap: 7px;">
+      <div style="font-size: 12.5px; font-weight: 700; color: #5e4104;">Limitaciones declaradas</div>
+      <ul style="margin: 0; padding-left: 17px; font-size: 12.5px; line-height: 1.55; color: #5e4104; display: flex; flex-direction: column; gap: 4px;">
+        <li>Los indicadores describen producción <strong>indexada en Scopus</strong>, no productividad académica total. La cobertura de la base no es uniforme entre disciplinas: castiga a humanidades, ciencias sociales y a la publicación en español.</li>
+        <li>Cada ficha de autor corresponde a <strong>una forma de firma</strong>, no necesariamente a una persona distinta. De las 589 detectadas, 63 se fusionaron en 30 personas tras revisión humana; las 526 restantes siguen sin consolidar.</li>
+        <li>La unidad académica se <strong>infiere</strong> de la afiliación declarada y está disponible en el 63,8 % de los casos. El vocabulario no ha sido validado institucionalmente.</li>
+        <li>Las publicaciones más recientes tienen una ventana de citación corta: sus indicadores de impacto son <strong>provisionales</strong>.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 56px 30px; display: flex; justify-content: space-between; font-size: 11px; color: #6d585e; border-top: 1px solid #e8dade; margin-top: 10px; padding-top: 12px;">
+    <span>Metodología completa y catálogo de los 40 indicadores evaluados, en el sitio.</span>
+    <span style="font-variant-numeric: tabular-nums;">4</span>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"marca":{"editor":"color","default":"#7a0f2b","options":["#7a0f2b","#a4123f","#5c0a20","#0f6f86"],"section":"Identidad"},"$preview":{"width":794,"height":1123}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      marca: this.props.marca ?? '#7a0f2b',
+      evidencia: [
+        { etiqueta: 'verificado', color: '#1f7d4f', n: 139,
+          que: 'Lo transmitió el editor a Crossref y el titular lo declara en su registro: dos fuentes independientes.' },
+        { etiqueta: 'declarado por el titular', color: '#5b4a4f', n: 43,
+          que: 'Se encontró preguntando al registro quién declara esta publicación. Una sola fuente, sin segunda comprobación.' },
+        { etiqueta: 'confirmado por revisión', color: '#5b4a4f', n: 15,
+          que: 'Una persona confirmó, caso por caso, que el titular corresponde a esta firma.' },
+        { etiqueta: 'no verificable', color: '#6d585e', n: 16,
+          que: 'El titular no declara ninguna obra con DOI: no hay contra qué contrastar.' },
+        { etiqueta: 'sin confirmar', color: '#a4123f', n: 3,
+          que: 'El titular declara obras, pero ninguna coincide con las de esta firma. Pendiente de revisión humana.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
