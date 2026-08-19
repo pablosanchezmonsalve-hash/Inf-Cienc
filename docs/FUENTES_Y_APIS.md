@@ -102,25 +102,43 @@ Ordenadas por lo que desbloquean frente a lo que cuestan. **Ninguna está
 probada desde este repositorio.** La columna «Hay que confirmar» no es una
 formalidad: es lo que separa una propuesta de una promesa.
 
-### 3.1 OpenAlex — la de mayor relación entre lo que aporta y lo que cuesta
+### 3.1 OpenAlex — **implementado el 2026-08-19; falta ejecutar la consulta**
 
-- **Qué preguntaría:** por DOI, los autores con su ORCID, su institución
-  desambiguada (con identificador ROR), el estado de acceso abierto y las citas
-  contadas sobre un grafo abierto.
-- **Qué desbloquearía:**
-  - una **segunda fuente independiente de ORCID**, que es justo lo que hoy
-    falta: hoy 43 asignaciones descansan sólo en lo que declara el titular;
-  - un **contraste externo del recuento de citas**, que hoy sólo tiene a Scopus
-    y SciVal, que no son independientes entre sí;
-  - la desambiguación institucional por ROR, que permitiría cerrar el
-    `ror_id: null` declarado en `config/institution.yml`.
-- **Hay que confirmar:** política de uso del *polite pool*, límites de consulta,
-  y —lo importante— si su desambiguación de autor es lo bastante buena para el
-  tamaño de este corpus o si añadiría ruido que habría que encolar.
-- **Riesgo metodológico:** su cobertura NO es la de Scopus. Mezclar recuentos de
-  las dos sin declararlo produciría cifras que no se pueden reconciliar. Se
-  integraría como **fuente de contraste**, con su propio denominador declarado
-  (`D-16`), nunca fusionada con la principal.
+`src/enrich/orcid_openalex.py`.
+
+> **Corrección.** La versión anterior de esta sección presentaba a OpenAlex como
+> «una segunda fuente independiente de ORCID». **Era falso.** OpenAlex ingiere
+> Crossref entre sus fuentes: un ORCID que devuelve puede ser literalmente el
+> que Crossref depositó, y que las dos coincidan no confirma nada que no
+> supiéramos — es la misma evidencia contada dos veces.
+>
+> Importa porque este proyecto **publica** la diferencia entre «verificado» —dos
+> fuentes independientes— y «declarado por el titular» —una sola— en cada ficha
+> de autor. Contar una coincidencia con OpenAlex como verificación habría
+> inflado el recuento de comprobaciones independientes con comprobaciones
+> circulares. El conector las cuenta aparte y **nunca sube una asignación a
+> «verificado»**.
+
+- **Qué aporta, sin discusión:**
+  1. **ORCID donde no había ninguno.** 349 formas de firma no tienen
+     identificador por ninguna de las tres vías actuales; cualquiera que
+     OpenAlex traiga es cobertura nueva, venga de donde venga.
+  2. **Contraste de la detección institucional por ROR.** Las publicaciones que
+     este proyecto atribuye a la institución y OpenAlex no, son un hallazgo: o
+     su desambiguación falló, o el patrón blando detectó de más.
+- **Lo que NO alcanza, y conviene no fingir que sí:** la producción que OpenAlex
+  atribuye a la institución y este proyecto no. Sólo se consultan los DOI del
+  universo, y el universo ya está filtrado por la institución. Encontrar lo que
+  falta exige preguntar **por institución** (`filter=institutions.ror:…`), que es
+  otra consulta: `V2-26`.
+- **Dependencia declarada:** el contraste necesita el ROR de la institución
+  (`V2-20`). Sin él esa mitad no corre, y se dice; no se sustituye por una
+  comparación de nombres, que la regla `I-05` prohíbe.
+- **Contraste de citas:** no se implementa aquí. Añadiría indicadores, y eso es
+  una decisión con su propio denominador (`D-16`), no una consecuencia.
+- **Riesgo metodológico que sigue vigente:** su cobertura NO es la de Scopus.
+  Mezclar recuentos produciría cifras que nadie puede reconciliar. Entra como
+  fuente de contraste, nunca fusionada (`D-206`).
 
 ### 3.2 ROR — **implementado el 2026-08-19; falta ejecutar la consulta**
 
