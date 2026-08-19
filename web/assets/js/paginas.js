@@ -38,7 +38,10 @@ async function modulos() {
     // por el mismo motivo: es la clave de la sección y ya está en la URL.
     const clave = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
     const { ejes } = await c.cargar('ejes.json');
-    cont.innerHTML = v.paginaModulos(codigos, series, ejes[clave]);
+    // El catálogo se pide para que un indicador declarado en la página pero no
+    // publicado se dibuje como diferido en vez de desaparecer.
+    const catalogo = await c.cargar('catalogo.json');
+    cont.innerHTML = v.paginaModulos(codigos, series, ejes[clave], catalogo);
   }
   conmutadorVistas(cont);
   scrollSpy(cont);

@@ -489,6 +489,13 @@ main { padding: var(--e5) 0 var(--e8); }
   display: block; font: 600 var(--t-xs)/1 var(--f-mono);
   letter-spacing: .04em; color: var(--tinta-3); margin-bottom: 2px;
 }
+/* En el índice, el diferido se marca pero no se esconde. */
+.rail-marca {
+  font: 650 var(--t-xs)/1 var(--f-ui); letter-spacing: .04em;
+  color: var(--aviso-tinta); background: var(--aviso-fondo);
+  border: 1px solid var(--aviso-borde); border-radius: var(--radio-s);
+  padding: .1em .4em; white-space: nowrap;
+}
 .rail a:hover { background: var(--superficie-2); color: var(--tinta); text-decoration: none; }
 .rail a.activo { background: var(--accion-suave); color: var(--tinta); font-weight: 650; }
 .rail a.activo .rail-cod { color: var(--accion); }
@@ -596,6 +603,18 @@ main { padding: var(--e5) 0 var(--e8); }
   scroll-margin-top: var(--e4);
 }
 .modulo:focus-visible { outline: 2px solid var(--accion-viva); outline-offset: 3px; }
+
+/* Módulo de un indicador que no se publica. Se distingue del publicado sin
+   competir con él: borde punteado y superficie recesiva dicen «aquí no hay
+   figura» antes de leer una palabra. No se atenúa con opacidad porque el
+   texto que explica POR QUÉ no se publica es lo único que el módulo tiene,
+   y atenuarlo lo volvería letra pequeña. */
+.modulo-diferido {
+  border-style: dashed; border-color: var(--linea-fuerte);
+  background: var(--superficie-2); box-shadow: none;
+}
+.modulo-diferido > header { border-bottom-color: var(--linea-fuerte); }
+.diferido-detalle { color: var(--tinta-2); margin: 0 0 var(--e3); }
 /* El margen de anclaje sólo hace falta donde la cabecera es fija: si no, deja
    un hueco vacío sobre el módulo al saltar desde el índice. */
 @media (min-width: 900px) { .modulo { scroll-margin-top: 7.5rem; } }
@@ -931,6 +950,30 @@ svg.chart text.valor { fill: var(--tinta); font-weight: 650; font-variant-numeri
 svg.chart text.tick { fill: var(--tinta-3); font-size: 10px; font-variant-numeric: tabular-nums; }
 svg.chart .ref { stroke: var(--aviso-borde); stroke-dasharray: 5 4; stroke-width: 1.5; }
 svg.chart text.ref-etq { fill: var(--aviso-tinta-grafico); font-weight: 650; font-size: 10px; }
+
+/* ---- red() · C-05, red de coautoría ----
+   La primitiva no lleva color categórico: la pertenencia a un grupo la dice la
+   POSICIÓN, y el color queda para el eje de ausencia de unidad. Estas reglas
+   sólo fijan cromo recesivo y tipografía; el relleno de cada nodo lo emite el
+   JS como atributo `fill`, y aquí NO se declara `fill` para las marcas —una
+   regla CSS ganaría al atributo y pintaría la trama de ausencia como si fuera
+   una medición—. */
+svg.chart.red-svg { min-width: 680px; }
+svg.chart.red-svg .vinculo { transition: opacity .13s; }
+svg.chart.red-svg .nodo-red { cursor: pointer; }
+svg.chart.red-svg .nodo-red:focus { outline: none; }
+svg.chart.red-svg .nodo-red:focus-visible circle.marca-nodo {
+  stroke: var(--accion-viva); stroke-width: 2.6;
+}
+svg.chart.red-svg text.etiqueta-grupo {
+  fill: var(--tinta-2);
+  font: 650 10px var(--f-ui); letter-spacing: .06em; text-transform: uppercase;
+}
+svg.chart.red-svg text.etiqueta-firma { fill: var(--tinta-2); font: 400 9px var(--f-mono); }
+svg.chart.red-svg text.etiqueta-firma.sin-unidad { fill: var(--tinta-3); }
+svg.chart.red-svg text.aislados-titulo {
+  fill: var(--tinta-2); font: 650 10.5px var(--f-ui); letter-spacing: .05em;
+}
 
 /* ---- Marca del valor esperado, en barras horizontales ----
    Un trazo vertical sobre la barra, en el ámbar de las referencias: el mismo
