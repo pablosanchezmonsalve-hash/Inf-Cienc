@@ -450,7 +450,7 @@ export function catalogo(cat) {
         </td>
       </tr>` : '';
     return `
-      <tr>
+      <tr id="${r.codigo}">
         <td><span class="codigo">${r.codigo}</span></td>
         <td>
           <strong>${c.escapar(r.nombre)}</strong>
