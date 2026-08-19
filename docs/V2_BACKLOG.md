@@ -1,6 +1,6 @@
 # Pendientes para V2
 
-**Fase:** 3 · Cerrada la V1 · **Reconciliado con el repositorio:** 2026-08-11
+**Fase:** 3 · Cerrada la V1 · **Reconciliado con el repositorio:** 2026-08-19
 
 Ordenados por lo que desbloquean. Los pendientes `T-xx` vienen de fases
 anteriores; los que ya se cerraron lo declaran, con lo que quedó abierto en su
@@ -51,6 +51,15 @@ conjuntos distintos.
 
 Queda `T-19`: cada candidato por afiliación que una persona confirme sube la
 cobertura sin relajar el criterio de evidencia (`D-101`).
+
+**Lo que cambió el 2026-08-19.** `make revision` sólo encolaba asignaciones *por
+hacer*. Las **ya publicadas cuya evidencia no las respalda** no tenían cola: 21
+formas de firma con ORCID que el registro no puede contrastar —17 cuyo titular
+no declara obras con DOI, 4 cuyas obras declaradas no coinciden con ninguna
+atribuida—, más 6 firmas con cinco o más publicaciones y ningún identificador.
+Ahora tienen tres colas propias, con enlace al registro del titular y la lista
+de publicaciones que hay que comparar. Y la herramienta **lee lo ya decidido**:
+antes volvía a preguntar los 52 casos resueltos en cada corrida.
 
 ---
 
@@ -121,3 +130,36 @@ Registrado para evitar que se reabra sin motivo:
 - **Nube de palabras.** Sin lectura cuantitativa defendible.
 - **Consolidación automática de variantes de nombre por similitud.** Fusionaría
   homónimos. Requiere ORCID o validación humana.
+- **Google Académico.** No tiene API pública —no es que sea de pago: no
+  existe—, sus condiciones prohíben la recuperación automatizada, y sus datos no
+  son reproducibles ni auditables: sin fecha de corte, sin criterio de indexación
+  declarado y sin identificador estable de autor. Incompatible con las tres
+  primeras prioridades del proyecto. Queda escrito para que no se reabra.
+- **Fusionar corpus de fuentes distintas en un solo universo.** Scopus, OpenAlex
+  y SciELO indexan con criterios distintos; sumarlos produce una cifra que nadie
+  puede reconciliar.
+
+---
+
+## 7. Plataformas evaluadas para integración
+
+Evaluadas el 2026-08-19; el análisis completo —qué preguntaría cada una, qué
+riesgo metodológico trae y qué reglas tendría que cumplir el conector— está en
+`docs/FUENTES_Y_APIS.md`.
+
+**Ninguna se ha probado desde este repositorio.** La columna «qué falta
+confirmar» no es una formalidad: es lo que separa una propuesta de una promesa,
+y `CLAUDE.md` prohíbe suponer disponibilidad de APIs o credenciales.
+
+| # | Integración | Desbloquea | Qué falta confirmar |
+|---|---|---|---|
+| **V2-19** | OpenAlex | Segunda fuente independiente de ORCID —hoy 43 asignaciones descansan sólo en lo que declara el titular—; contraste externo del recuento de citas; identificador ROR | Límites de consulta y si su desambiguación de autor añade más señal que ruido a este tamaño de corpus |
+| **V2-20** | ROR | Cierra el `ror_id: null` de `config/institution.yml` y da un vocabulario público contra el que contrastar las variantes institucionales | Que la ficha de la institución exista y esté al día |
+| **V2-21** | SciELO | Mide la brecha de cobertura que hoy sólo se advierte en prosa: humanidades, ciencias sociales y publicación en español | Qué interfaz de consulta ofrece hoy y con qué estabilidad. Entraría como corpus paralelo declarado, nunca sumado al universo |
+| **V2-22** | API de Scopus | `V2-05` y la ambigüedad `A-05`: fecha de corte declarada por la propia consulta, y actualización como objetivo del `Makefile` | Clave institucional, si la suscripción la habilita, y si exige IP institucional. **Bloqueante** |
+| **V2-23** | API de SciVal | `X-01` autocitas (`V2-06`) y `T-13`, la semántica del percentil, hoy determinada empíricamente | Que la suscripción incluya acceso programático a SciVal, que suele ser producto aparte. **Bloqueante** |
+| **V2-24** | Unpaywall | Contraste de acceso abierto, que hoy se publica desde SciVal sin segunda fuente | Condiciones de uso |
+| **V2-25** | Altmetric | Un eje de atención que hoy no existe; la mención en política pública tiene valor real para un informe institucional | Condiciones de acceso para una web pública institucional. Riesgo alto de leerse como impacto: entraría con panel conceptual propio o no entraría |
+
+Más abajo, en una línea cada una: DataCite, OpenAIRE, Semantic Scholar,
+Europe PMC y Wikidata. Dimensions y Lens.org quedan fuera por requerir acuerdo.

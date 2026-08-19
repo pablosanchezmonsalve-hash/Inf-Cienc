@@ -190,3 +190,30 @@ comprueba la lógica sin red y sin credenciales.
 
 Las credenciales salen del entorno o de los secretos del repositorio, nunca de
 un archivo versionado.
+
+---
+
+## 7. Dónde se validan a mano los pendientes
+
+Las cuatro vías automáticas se detienen donde empieza el juicio. Lo que queda
+—asignaciones que el registro no puede contrastar, firmas sin identificador,
+candidatos sin publicación que los ancle— se revisa en **`make revision`**, que
+las presenta con la evidencia junta y con enlace al registro del titular:
+
+| Cola | Qué pregunta |
+|---|---|
+| ORCID sin confirmar | El titular declara obras y ninguna coincide con las atribuidas. La ficha lo publica hoy con esa marca |
+| ORCID no verificable | El titular no declara ninguna obra con DOI: no hay contra qué contrastar |
+| Firma sin ORCID | Ninguna vía lo encontró, y la firma tiene obra suficiente para buscarla a mano |
+| ORCID compartido · en conflicto · fuentes en desacuerdo | A quién corresponde un identificador que aparece más de una vez, o dos veces distinto |
+| Candidato por afiliación | El titular declara la institución y coincide el nombre, sin publicación compartida que lo respalde |
+
+Cada veredicto se exporta a `internal/identity_decisions.csv` y se aplica con
+`src/review/apply_decisions.py`. Retirar una asignación **no borra** su fila de
+`data/enriched/authors_orcid.csv`: se declara en `config/orcid_revisado.yml` y
+el build la filtra, porque los conectores regeneran ese archivo y un borrado se
+desharía solo en la siguiente corrida.
+
+Un identificador tecleado a mano se comprueba con su dígito de control antes de
+aplicarse: la errata de un carácter produce un ORCID que existe y es de otra
+persona.

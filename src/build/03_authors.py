@@ -30,6 +30,7 @@ FUENTE_REGISTRO = "ORCID (declarado por el titular)"
 # las mirara—. Dejarlas sin etiqueta las presentaba como si nadie las hubiera
 # comprobado, que es lo contrario de lo que ocurrió.
 FUENTE_REVISION = "Revisión humana (candidato por afiliación confirmado)"
+FUENTE_BUSQUEDA = "Revisión humana (búsqueda manual en el registro)"
 
 
 # canónica -> las formas de firma que se fusionaron en ella.
@@ -67,6 +68,11 @@ def cargar_orcid() -> dict[str, dict]:
     salida: dict[str, dict] = {}
     conflictos: list[str] = []
     for _, r in df.iterrows():
+        # Asignaciones que una revisión humana declaró que no son de esta
+        # firma. La fila se conserva en el CSV —de ahí viene el dato— y aquí
+        # simplemente no se usa.
+        if r["nombre_en_fuente"] in b.ORCID_RETIRADO:
+            continue
         # Las asignaciones están indexadas por la firma tal cual aparece en la
         # fuente; las fichas, por su forma canónica. Sin canonizar aquí, una
         # persona consolidada perdería el ORCID de todas sus variantes salvo
@@ -83,6 +89,10 @@ def cargar_orcid() -> dict[str, dict]:
             # debe poder decir esa diferencia.
             "veredicto": v["veredicto"] if v is not None else None,
             "dois_coincidentes": b.to_num(v["dois_coincidentes"]) if v is not None else None,
+            # Se resuelve con la firma SIN canonizar, que es la forma sobre la
+            # que se pronunció quien revisó; el mapa está indexado por la
+            # canónica y para entonces esa distinción ya se perdió.
+            "comprobado_a_mano": r["nombre_en_fuente"] in b.ORCID_CONFIRMADO,
         }
         previo = salida.get(nombre)
         if previo is None:
@@ -166,6 +176,53 @@ VEREDICTO_DEL_REGISTRO = (
     "Esta asignación se encontró preguntando al registro de ORCID quién "
     "declara esta publicación entre sus obras: la afirma el propio titular. "
     "No hay aquí una segunda comprobación independiente.")
+
+# Cuando una persona miró el registro del titular y respaldó una asignación que
+# la comprobación automática no podía resolver. Pisa al veredicto automático
+# porque responde la misma pregunta con más evidencia, no con otra distinta.
+VEREDICTO_COMPROBADO_A_MANO = (
+    "revisado",
+    "comprobado por revisión",
+    "La comprobación automática no pudo resolver esta asignación —el titular no "
+    "declara obras con DOI, o ninguna coincide—. Una persona abrió su registro "
+    "y la respaldó caso por caso.")
+VEREDICTO_DE_BUSQUEDA = (
+    "revisado",
+    "encontrado por revisión",
+    "Ninguna de las vías automáticas encontró identificador para esta firma. "
+    "Una persona lo buscó en el registro de ORCID y lo encontró. El respaldo es "
+    "su juicio, no una publicación compartida.")
+
+
+# Firmas que una persona buscó en el registro sin encontrarlas, en su forma
+# canónica: el veredicto se emite sobre la firma de la fuente y las fichas se
+# indexan por la canónica.
+SIN_REGISTRO = {b.canonizar(f) for f in b.ORCID_SIN_REGISTRO}
+
+ESTADO_POR_FUENTE = {
+    "Crossref": "Recuperado desde Crossref",
+    FUENTE_REGISTRO: "Recuperado del registro público de ORCID",
+    FUENTE_REVISION: "Confirmado en revisión humana",
+    FUENTE_BUSQUEDA: "Encontrado en el registro por búsqueda manual",
+}
+
+
+def estado_orcid(nombre: str, fuente: str | None) -> str:
+    """De dónde salió el identificador, o por qué no hay ninguno.
+
+    Decía «Recuperado desde Crossref» para TODA asignación, incluidas las 48
+    que vinieron del registro de ORCID y las 18 que salió a buscar una persona.
+    Era una afirmación sobre la procedencia del dato, y era falsa en 66 fichas.
+
+    Y distingue tres ausencias que no son la misma: nadie ha mirado, alguien
+    miró y no encontró, y no hay fuente que lo aporte.
+    """
+    if fuente:
+        return ESTADO_POR_FUENTE.get(fuente, f"Recuperado desde {fuente}")
+    if nombre in SIN_REGISTRO:
+        return ("Buscado en el registro de ORCID por una revisión humana, "
+                "sin encontrarlo")
+    return "No disponible en las fuentes actuales"
 
 
 def h_index(citas: list[int]) -> int:
@@ -257,7 +314,9 @@ def main() -> None:
         fuente_orcid = (orcid_map.get(nombre) or {}).get("fuente")
         clase, etiqueta, detalle = VEREDICTO_PUBLICO.get(veredicto, (None, None, None))
 
-        if fuente_orcid == FUENTE_REVISION:
+        if fuente_orcid == FUENTE_BUSQUEDA:
+            clase, etiqueta, detalle = VEREDICTO_DE_BUSQUEDA
+        elif fuente_orcid == FUENTE_REVISION:
             clase, etiqueta, detalle = VEREDICTO_DE_REVISION
         elif veredicto == "confirmada" and fuente_orcid == FUENTE_REGISTRO:
             # Circular por construcción: se la encontró por declarar el DOI.
@@ -271,6 +330,14 @@ def main() -> None:
                        f"atribuyen." if coincidentes > 1 else
                        "El titular declara en su propio registro de ORCID una "
                        "de las publicaciones que aquí se le atribuyen.")
+        elif (orcid_map.get(nombre) or {}).get("comprobado_a_mano"):
+            # VA AL FINAL de la cadena, y eso es la decisión, no el orden en que
+            # se escribió: la comprobación humana levanta una asignación que la
+            # vía automática no pudo resolver, pero NO pisa a una que sí resolvió.
+            # «Verificado» significa que dos fuentes independientes coinciden;
+            # sustituirlo por el juicio de una persona sería cambiar evidencia
+            # más fuerte por más débil y presentarlo como una mejora.
+            clase, etiqueta, detalle = VEREDICTO_COMPROBADO_A_MANO
 
         ficha = {
             "meta": b.build_meta(),
@@ -292,9 +359,7 @@ def main() -> None:
             "orcid_veredicto_clase": clase,
             "orcid_veredicto_detalle": detalle,
             "orcid_dois_coincidentes": (orcid_map.get(nombre) or {}).get("dois_coincidentes"),
-            "orcid_estado": ("Recuperado desde Crossref"
-                             if nombre in orcid_map
-                             else "No disponible en las fuentes actuales"),
+            "orcid_estado": estado_orcid(nombre, fuente_orcid),
             "identidad_no_consolidada": identidad_ambigua,
             # Qué formas de firma se fusionaron aquí y por decisión de quién.
             # Sin esto, una ficha con 34 publicaciones repartidas entre tres
@@ -380,8 +445,18 @@ def main() -> None:
             "firmas_con_orcid_confirmado_por_revision": sum(
                 1 for a in resumen
                 if a["orcid_veredicto_etiqueta"] == "confirmado por revisión"),
+            # Por etiqueta como los tres de arriba, y no por veredicto: cuando
+            # una persona comprueba a mano una asignación que la vía automática
+            # no pudo resolver, el veredicto de origen no cambia —nadie
+            # reescribe `orcid_verificacion.csv`— pero la ficha ya no dice «sin
+            # confirmar». Contando por veredicto, el recuento seguiría
+            # denunciando durante años algo que ya se resolvió.
             "firmas_con_orcid_sin_confirmar": sum(
-                1 for a in resumen if a["orcid_veredicto"] == "sin_coincidencia"),
+                1 for a in resumen if a["orcid_veredicto_etiqueta"] == "sin confirmar"),
+            "firmas_con_orcid_comprobado_a_mano": sum(
+                1 for a in resumen
+                if a["orcid_veredicto_etiqueta"] in ("comprobado por revisión",
+                                                     "encontrado por revisión")),
         },
         "nota": b.nota_p06(len(resumen)),
         # El texto se construye con las cifras del momento en vez de fijarlo:
@@ -428,14 +503,23 @@ def main() -> None:
     etq_vistas = [a["orcid_veredicto_etiqueta"] for a in resumen
                   if a["orcid_veredicto_etiqueta"]]
     if etq_vistas:
-        for k, texto in (("verificado", "verificado contra el registro"),
-                         ("declarado por el titular", "declarado por el titular (sin 2.ª fuente)"),
-                         ("confirmado por revisión", "confirmado por revisión humana"),
-                         ("no verificable", "sin obras con DOI que contrastar"),
-                         ("sin confirmar", "SIN CONFIRMAR — revisión humana"),
-                         ("registro no accesible", "registro no accesible")):
+        glosa = (("verificado", "verificado contra el registro"),
+                 ("declarado por el titular", "declarado por el titular (sin 2.ª fuente)"),
+                 ("confirmado por revisión", "confirmado por revisión humana"),
+                 ("comprobado por revisión", "comprobado a mano en el registro"),
+                 ("encontrado por revisión", "encontrado a mano en el registro"),
+                 ("no verificable", "sin obras con DOI que contrastar"),
+                 ("sin confirmar", "SIN CONFIRMAR — revisión humana"),
+                 ("registro no accesible", "registro no accesible"))
+        for k, texto in glosa:
             if etq_vistas.count(k):
                 print(f"    {texto:42s}: {etq_vistas.count(k)}")
+        # Otra lista escrita a mano junto a las etiquetas que enumera. Si
+        # aparece una etiqueta nueva, este bucle la omitiría en silencio y el
+        # desglose dejaría de sumar el total sin decir por qué.
+        huerfanas = sorted(set(etq_vistas) - {k for k, _ in glosa})
+        if huerfanas:
+            print(f"    AVISO · etiquetas sin glosa en este desglose: {huerfanas}")
     else:
         print("    (verificación contra ORCID no ejecutada)")
     print(f"  mediana de publicaciones: {statistics.median(n_pubs)}")

@@ -32,6 +32,56 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
     <h2>Procedencia de los datos</h2>
     <div id="procedencia"></div>
   </section>
+  <section class="modulo" id="fuentes">
+    <h2>De dónde se consulta cada dato</h2>
+    <p>No todas las fuentes entran igual. Dos se leen de archivos exportados a
+    mano y dos se consultan por interfaz de programación, y esa diferencia
+    decide qué se puede actualizar solo y qué no.</p>
+
+    <h3>Se leen de un export, no de una API</h3>
+    <ul>
+      <li><strong>Scopus.</strong> Export nativo en CSV. Aporta la autoría, la
+      afiliación por autor y el resumen. Es la fuente del universo de
+      publicaciones.</li>
+      <li><strong>SciVal.</strong> Export nativo en XLSX. Aporta las métricas
+      normalizadas —FWCI, percentiles, cuartiles—, la clasificación temática y
+      los indicadores de colaboración.</li>
+    </ul>
+    <p class="nota">Que sean exports y no consultas en vivo tiene una
+    consecuencia que conviene saber al leer cualquier cifra: <strong>los datos
+    son los del día en que se exportaron</strong>. No se actualizan solos. La
+    fecha de cada export está arriba, en la procedencia.</p>
+
+    <h3>Se consultan por API</h3>
+    <ul>
+      <li><strong>Crossref.</strong> Pública y gratuita. Se le pregunta, por
+      cada DOI, qué ORCID declaró el editor al depositar la publicación. Es de
+      donde salió la mayor parte de los identificadores que se publican.</li>
+      <li><strong>Registro público de ORCID.</strong> Se le hacen tres preguntas
+      distintas: si el titular de un identificador declara entre sus obras las
+      publicaciones que aquí se le atribuyen; quién declara un DOI concreto; y
+      quién declara esta institución en su registro. La primera <em>verifica</em>
+      una asignación, la segunda <em>encuentra</em> las que Crossref no vio, y
+      la tercera sólo produce <em>candidatos</em> para que una persona
+      decida.</li>
+    </ul>
+    <p class="nota"><strong>Ni Scopus ni SciVal entregan ORCID.</strong> Esa es
+    la razón de que estas dos consultas existan: sin identificador persistente
+    no hay forma de distinguir a dos personas que firman igual, ni de reunir a
+    una que firma de tres maneras.</p>
+
+    <h3>Qué sostiene cada identificador publicado</h3>
+    <p>Cada ficha de autor con ORCID declara con qué evidencia cuenta, y no
+    todas cuentan con la misma: que dos fuentes independientes coincidan, que lo
+    afirme el propio titular, o que una persona lo comprobara caso por caso son
+    tres cosas distintas y la ficha dice cuál es. Una asignación que nadie ha
+    podido contrastar se marca como tal en vez de presentarse como confirmada.</p>
+
+    <p class="nota">El detalle técnico de cada conector —qué consulta, con qué
+    límites y qué no resuelve— y las plataformas cuya integración se ha evaluado
+    están en <em>docs/FUENTES_Y_APIS.md</em>, en la
+    documentación del proyecto.</p>
+  </section>
   <section class="modulo">
     <h2>Advertencias principales</h2>
     <ul>
