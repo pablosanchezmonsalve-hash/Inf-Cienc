@@ -194,3 +194,23 @@ fuentes:
       la institución y un vocabulario público contra el que contrastar el
       patrón de detección institucional. El contrato de la API no está
       verificado desde este repositorio.
+
+  openalex_api:
+    nombre: "OpenAlex — Works API"
+    tipo: "api"
+    endpoint: "https://api.openalex.org/works/{doi}"
+    autenticacion: "ninguna (mailto para el polite pool)"
+    conector: "src/enrich/orcid_openalex.py"
+    rol: "enriquecimiento y contraste"
+    aporta:
+      - orcid_donde_no_habia
+      - contraste_de_la_deteccion_institucional_por_ror
+    salida: "data/enriched/authors_orcid.csv, internal/openalex_*.csv"
+    fecha_corte: null
+    ejecutada: false             # V2-19: el conector existe, la consulta no se ha corrido
+    nota: >-
+      NO es una segunda fuente independiente de ORCID: OpenAlex ingiere
+      Crossref, de modo que coincidir con él no confirma nada que no
+      supiéramos. Sus concordancias se cuentan aparte y NUNCA suben una
+      asignación a 'verificado'. El contrato de la API no está verificado desde
+      este repositorio.

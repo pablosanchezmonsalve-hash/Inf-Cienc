@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -64,6 +64,14 @@ verificar-orcid:
 # En Windows:  py src\enrich\ror_institucion.py
 ror:
 	python3 src/enrich/ror_institucion.py
+
+# Enriquecimiento y contraste desde OpenAlex (V2-19). Aporta ORCID donde no
+# había y compara la detección institucional contra la desambiguación de
+# OpenAlex. NO cuenta como segunda fuente independiente: OpenAlex ingiere
+# Crossref. La mitad del contraste exige haber corrido `make ror` antes.
+# En Windows:  py src\enrich\orcid_openalex.py
+openalex:
+	python3 src/enrich/orcid_openalex.py
 
 # En Windows: scripts/revisar-identidad.ps1 (clic derecho -> «Ejecutar con
 # PowerShell»). Hace la secuencia entera —generar, abrir, recoger el CSV
