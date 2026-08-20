@@ -1085,6 +1085,26 @@ input[type="checkbox"] { accent-color: var(--accion-viva); }
 /* ══════════════════════════════════════ 5. GRÁFICOS E INTERACCIÓN */
 
 .grafico { width: 100%; overflow-x: auto; position: relative; }
+
+/* El gráfico es UN punto de tabulación y por dentro se recorre con las
+   flechas. Eso sólo sirve si el lector lo sabe, así que la pista aparece
+   cuando el foco entra y se va cuando sale: quien usa el ratón no la ve nunca
+   y quien llega con el teclado la tiene justo cuando la necesita. La escribe
+   el CSS y no el marcado porque es una instrucción sobre CÓMO se usa este
+   medio, no contenido del informe.
+
+   Va DEBAJO del gráfico y en flujo, no superpuesta. Probada encima, tapaba la
+   primera barra y su valor: una ayuda que esconde el dato que vino a explicar
+   está peor que no estar. Ocupa cero alto hasta que el foco entra, así que el
+   desplazamiento sólo lo ve quien está usando el teclado. */
+.grafico::after {
+  content: "← → recorren las barras · Inicio y Fin van a los extremos";
+  display: block; overflow: hidden; height: 0;
+  font: 600 var(--t-xs)/1.6 var(--f-ui); color: var(--tinta-3);
+  transition: height .14s;
+}
+.grafico:focus-within::after { height: 1.6em; }
+@media (prefers-reduced-motion: reduce) { .grafico::after { transition: none; } }
 svg.chart { display: block; width: 100%; height: auto; }
 
 /* El color se emite como atributo `fill` desde el JS, y aquí NO se declara
