@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `b04387c` · Colas chicas y paso 6: la cobertura de C-05 se mide en vez de escribir
+Último commit: `b2748e7` · Vista de la red de coautoría con el grafo real (capa interna)
 Snapshot: 2026-08-20
 
 ---
@@ -74,11 +74,11 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 |---|---|
 | `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
 | `T-03` | Revisión humana de las variantes de nombre encoladas (28 grupos, 27 pendientes) |
-| `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID |
+| `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID, de los que **10 afectan al informe** |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
 | `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
 | `T-13` | Confirmar semántica del percentil de citación con documentación SciVal |
-| `T-14` | Revisión humana de los 17 grupos de firmas que comparten ORCID |
+| `T-14` | Revisión humana de los grupos de firmas que comparten ORCID (**10 casos, 2 pendientes**) |
 | `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
