@@ -20,7 +20,13 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
 <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
 <header class="cabecera" id="cabecera"></header>
 <div class="vigencia" id="vigencia"></div>
-<main id="contenido" class="contenedor">
+<main id="contenido">
+  <!-- Metodología es prosa, no superficie de consulta: se compone en bandas
+       como la portada y las secciones. Las ADVERTENCIAS van sobre el suelo de
+       contraste, que es el mismo gesto que la banda de ausencia de cada
+       sección: lo que el informe no puede afirmar no se lee como un apartado
+       más de la lista. -->
+  <section class="banda banda-papel"><div class="contenedor">
   <p class="migas"><a href="index.html">Portada</a> › Metodología</p>
   <header class="encabezado-seccion">
     <h1>Metodología y limitaciones</h1>
@@ -28,12 +34,16 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
   Esta página reúne las definiciones de las métricas no triviales y la
   procedencia exacta de los datos.</p>
   </header>
+  </div></section>
+
+  <section class="banda banda-papel-2"><div class="contenedor">
+  <h2 class="solo-lectores">De dónde vienen los datos</h2>
   <section class="modulo">
-    <h2>Procedencia de los datos</h2>
+    <h3>Procedencia de los datos</h3>
     <div id="procedencia"></div>
   </section>
   <section class="modulo" id="fuentes">
-    <h2>De dónde se consulta cada dato</h2>
+    <h3>De dónde se consulta cada dato</h3>
     <p>No todas las fuentes entran igual. Dos se leen de archivos exportados a
     mano y dos se consultan por interfaz de programación, y esa diferencia
     decide qué se puede actualizar solo y qué no.</p>
@@ -82,8 +92,16 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
     están en <em>docs/FUENTES_Y_APIS.md</em>, en la
     documentación del proyecto.</p>
   </section>
-  <section class="modulo">
+  </div></section>
+
+  <section class="banda banda-contraste"><div class="contenedor">
+  <div class="banda-titulo">
+    <p class="banda-gancho">Los límites de lo que aquí se publica</p>
     <h2>Advertencias principales</h2>
+    <p>Publicar una cifra sin su límite la convierte en otra cosa. Estas van
+    sobre su propio suelo para que no se lean como un apartado más.</p>
+  </div>
+  <section class="modulo">
     <ul>
       <li>Los indicadores describen <strong>producción indexada en Scopus</strong>,
       no productividad académica total. La cobertura de la base no es uniforme
@@ -104,6 +122,9 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
       sus indicadores de impacto son provisionales.</li>
     </ul>
   </section>
+  </div></section>
+
+  <section class="banda banda-papel"><div class="contenedor">
   <section class="modulo" id="correcciones">
     <h2>Si su ficha de autor tiene un error</h2>
     <p>Esta plataforma no es la fuente de los datos: los toma de Scopus y SciVal
@@ -158,8 +179,12 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
     </ul>
   </section>
 
-  <h2>Glosario</h2>
-  <div id="glosario"></div>
+  </div></section>
+
+  <section class="banda banda-papel-2"><div class="contenedor">
+    <h2>Glosario</h2>
+    <div id="glosario"></div>
+  </div></section>
 </main>
 <footer class="pie" id="pie"></footer>
 <script type="module" src="assets/js/paginas.js"></script>

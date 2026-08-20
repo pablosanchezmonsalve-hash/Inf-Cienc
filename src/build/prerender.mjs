@@ -97,6 +97,7 @@ async function main() {
         `<div class="kpis" id="kpis" data-prerender="1" data-n="${resto.length}">`);
       html = rellenar(html, 'panorama', v.panorama(series), a);
       html = rellenar(html, 'lectura', v.lectura(kpis), a);
+      html = rellenar(html, 'cierre', v.cierrePortada(), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'catalogo') {
       // Se pre-renderiza porque es contenido de referencia: es justo la página
@@ -117,7 +118,8 @@ async function main() {
         process.exit(1);
       }
       const a = [];
-      html = rellenar(html, 'modulos', v.paginaModulos(codigos, series, ejes[clave]), a);
+      html = rellenar(html, 'modulos',
+        v.paginaModulos(codigos, series, ejes[clave], await leerJSON('catalogo.json')), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     }
 

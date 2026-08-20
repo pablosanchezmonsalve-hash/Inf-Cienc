@@ -1,0 +1,23 @@
+# Veredictos humanos sobre asignaciones de ORCID.
+#
+# GENERADO por src/review/apply_decisions.py desde
+# internal/identity_decisions.csv. No editar a mano: se regenera.
+#
+# confirmadas   el ORCID vigente es de esta persona. No cambia el dato;
+#               cambia lo que la ficha declara sobre su respaldo.
+# retiradas     el ORCID vigente NO es de esta persona. El build deja de
+#               usarlo. La fila sigue en data/enriched/authors_orcid.csv
+#               a propósito: borrarla perdería de dónde vino, y el
+#               conector la repondría en la siguiente corrida.
+# sin_registro  alguien buscó en el registro y no encontró a esta
+#               persona. No es lo mismo que «nadie ha mirado».
+#
+# Aplicado: 2026-08-20
+
+fecha_de_aplicacion: 2026-08-20
+
+confirmadas: []
+
+retiradas: []
+
+sin_registro: []

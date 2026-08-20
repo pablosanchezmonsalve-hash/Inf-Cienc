@@ -88,37 +88,43 @@
      que light-dark() consulta. */
   color-scheme: light dark;
 
-  /* ---- Superficies. Teñidas hacia la familia de la marca. ---- */
-  --plano:        light-dark(#faf7f8, #100b0d);
-  --superficie:   light-dark(#ffffff, #171214);
-  --superficie-2: light-dark(#f5eef0, #211a1d);
+  /* ---- Superficies. Teñidas con Peach Glow al 6–10 %; en oscuro, Ink Black. ---- */
+  --plano:        light-dark(#f6efe6, #041417);
+  --superficie:   light-dark(#fffcf8, #0d2a2f);
+  --superficie-2: light-dark(#f7efe5, #113236);
+
+  /* Segundo suelo de banda. Es un TOKEN y no un valor suelto para que
+     validar_paleta.py lo mida: las cifras que lo justifican están en la regla
+     de .banda-papel-2, y una cifra que sólo vive en un comentario deja de ser
+     cierta en silencio. */
+  --banda-papel-2: light-dark(#e1e7e4, #113236);
 
   /* ---- Tinta. Tres niveles, todos derivados del rojo de la marca. ---- */
-  --tinta:   light-dark(#1c1013, #f2e9ec);
-  --tinta-2: light-dark(#5b4a4f, #bfaab0);
-  --tinta-3: light-dark(#6d585e, #a48f95);
+  --tinta:   light-dark(#071e22, #eef1ee);
+  --tinta-2: light-dark(#33484a, #b9c6c3);
+  --tinta-3: light-dark(#516365, #93a3a1);
 
-  --linea:        light-dark(#e8dade, #2e2327);
-  --linea-fuerte: light-dark(#d3bcc2, #453539);
+  --linea:        light-dark(#e8ddce, #1c4045);
+  --linea-fuerte: light-dark(#cbbca9, #2c5459);
 
   /* ---- Marca. Identidad institucional. Nunca codifica un dato. ---- */
-  --marca:       light-dark(#7a0f2b, #2a1016);
-  --marca-honda: light-dark(#5c0a20, #1a0a0e);
-  --marca-alta:  light-dark(#a4123f, #e2607e);
-  --marca-tinta: light-dark(#f7d9e0, #e8b9c6);
+  --marca:       light-dark(#071e22, #041417);
+  --marca-honda: light-dark(#041417, #020c0e);
+  --marca-alta:  light-dark(#1d7874, #45b0aa);
+  --marca-tinta: light-dark(#f4c095, #f4c095);
 
   /* Tinta de las cifras grandes. Existe aparte de --marca porque --marca
      cambia de OFICIO entre temas: en claro es tinta, en oscuro es la
      superficie de la cabecera. Usarla para el texto de un KPI funcionaba en
      claro y en oscuro pintaba la cifra a 1,05:1, o sea invisible. Este token
      es tinta en los dos temas y sólo eso. */
-  --cifra: light-dark(#8f1236, #f090a6);
+  --cifra: light-dark(#12514e, #f4c095);
 
   /* ---- Acción. Estado interactivo. Tampoco codifica un dato. ---- */
-  --accion:        light-dark(#a4123f, #f08ba3);
-  --accion-viva:   light-dark(#c03457, #e2607e);
-  --accion-suave:  light-dark(#fdf0f3, #2c161c);
-  --accion-anillo: light-dark(rgba(164, 18, 63, .32), rgba(226, 96, 126, .38));
+  --accion:        light-dark(#145956, #f4c095);
+  --accion-viva:   light-dark(#1d7874, #f4c095);
+  --accion-suave:  light-dark(#e4f0ee, #12333a);
+  --accion-anillo: light-dark(rgba(29, 120, 116, .34), rgba(244, 192, 149, .38));
 
   /* ---- Series categóricas ----
           MEDIDO: de las seis ranuras, el sitio dibuja DOS. El anillo de
@@ -147,38 +153,38 @@
 
           La sexta ranura era carmín. Con la marca en rojo, un carmín a dos
           pasos de --serie-1 es una trampa a la espera: se cambió por azul. ---- */
-  --serie-1: light-dark(#a4123f, #e2607e);   /* rojo de marca · EN USO */
-  --serie-2: light-dark(#0f6f86, #45b2cd);   /* azul-teal · EN USO (anillo C-01) */
+  --serie-1: light-dark(#1d7874, #45b0aa);   /* Deep Ocean · el dato, teal en ambos temas */
+  --serie-2: light-dark(#071e22, #f4c095);   /* Ink Black / Peach Glow · EN USO (anillo C-01) */
   --serie-3: light-dark(#6b4bbd, #a48ae8);   /* violeta   · RESERVADA, sin validar */
   --serie-4: light-dark(#1f7d4f, #4fbb85);   /* verde     · RESERVADA, sin validar */
   --serie-5: light-dark(#8a5a06, #d09a2a);   /* ámbar     · RESERVADA, sin validar */
   --serie-6: light-dark(#1c5fa8, #6fa8e8);   /* azul      · RESERVADA, sin validar */
 
   /* ---- Rampa ordinal. Un solo tono, cuatro pasos, luminosidad monótona. ---- */
-  --ord-1: light-dark(#520a1c, #ffc3d0);
-  --ord-2: light-dark(#851334, #f28ba4);
-  --ord-3: light-dark(#af2c4d, #d95b7a);
-  --ord-4: light-dark(#c96c81, #b03a58);
+  --ord-1: light-dark(#04262a, #cfeae5);
+  --ord-2: light-dark(#0f4e4b, #93cdc6);
+  --ord-3: light-dark(#1d7874, #6ab4ad);
+  --ord-4: light-dark(#469b93, #469690);
 
   /* ---- Ausencia de dato: gris, siempre (decisión D-09). ---- */
-  --sin-dato: light-dark(#8d7d81, #7d6b70);
+  --sin-dato: light-dark(#87807a, #7d8886);
 
   /* ---- Cromo del gráfico: recesivo por definición. ---- */
-  --red: light-dark(#f0e7ea, #241c1f);
-  --eje: light-dark(#d3bcc2, #453539);
+  --red: light-dark(#efe6d8, #123033);
+  --eje: light-dark(#cbbca9, #2c5459);
 
   /* ---- Advertencia metodológica. Ámbar, fuera de la familia del dato. ---- */
-  --aviso-fondo: light-dark(#fdf6e7, #2a2109);
+  --aviso-fondo: light-dark(#fdefdc, #2e2210);
   /* El ámbar OSCURO se subió de #c8901a a #f0b429. El valor anterior venía de
      la paleta teal y sobrevivió al cambio de identidad sin que nadie lo mirara:
      contra un dato teal la separación sobraba, contra un dato ROJO caía a
      ΔE 17,9, bajo el piso de 20 que este mismo proyecto declara. Lo encontró
      `src/design/validar_paleta.py`, no una revisión visual. Ahora ΔE 24,1. */
-  --aviso-borde: light-dark(#b8830f, #f0b429);
-  --aviso-tinta: light-dark(#5e4104, #f0dca8);
+  --aviso-borde: light-dark(#c07a2a, #e0a445);
+  --aviso-tinta: light-dark(#6b3d10, #f0cf9c);
   /* El ámbar del trazo (--aviso-borde) no llega a 4,5:1 como texto. La línea de
      referencia puede tenerlo; su ETIQUETA, que dice el promedio mundial, no. */
-  --aviso-tinta-grafico: light-dark(#7d5709, #e0ac26);
+  --aviso-tinta-grafico: light-dark(#8a5518, #e0a445);
 
   /* ---- Tipografía ---- */
   --f-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -463,6 +469,117 @@ main { padding: var(--e5) 0 var(--e8); }
    Debajo de 1040 px no hay ancho para dos columnas y el índice se convierte en
    una fila de pastillas desplazable sobre el contenido. No se oculta: es la
    única vista general de la página. */
+/* ═══════════════════════════════════ BANDAS · unidad de composición
+
+   Una banda es una franja a sangre con su propio suelo. El patrón viene del
+   informe narrativo: una banda sostiene UNA afirmación, y los suelos alternan
+   para que dos bandas seguidas no se lean como una sola.
+
+   Cinco variantes cerradas, no composiciones sueltas: si cada banda fuera
+   dibujada a mano, cada página nueva empezaría de cero.
+
+   QUÉ ADMITE CADA SUELO (medido; ver la lámina «Sistema de bandas»):
+     papel · papel-2 · contraste  admiten todo, incluidas figuras y ausencia.
+     énfasis (Peach)              SÓLO titular y prosa: sobre él el color del
+                                  dato cae a 3,21:1 y la marca de ausencia a
+                                  2,35:1. Por eso el cierre no lleva figuras.
+
+   La banda de contraste REDEFINE los tokens en su propio ámbito. Así los
+   módulos, gráficos y sellos que caen dentro se adaptan solos: no hay una
+   segunda hoja de estilo para «lo que va sobre fondo oscuro». */
+.banda { padding: var(--e7) 0; }
+.banda + .banda { padding-top: var(--e7); }
+.banda-papel    { background: var(--plano); }
+.banda-enfasis  { background: light-dark(#f4c095, #2e2210); }
+
+/* El segundo papel NO puede ser --superficie-2. Ese token es un tinte que se
+   aplica ENCIMA del blanco de tarjeta (chips, cabeceras de tabla, hover) y en
+   tema claro vale #f7efe5, que contra el papel #f6efe6 mide ΔE OKLab 0,18 y
+   1,00:1: el mismo color. La alternancia sólo funcionaba en oscuro, y en claro
+   dejaba 6rem de aire entre dos bandas sin nada que explicara el corte.
+
+   Este suelo tiene valor propio y es FRÍO, no un peach más oscuro. La razón es
+   medida: oscurecer el papel hacia el peach rompe la marca de ausencia
+   (--sin-dato cae bajo 3:1 pasado #dbe3df) y además lo acercaba al Peach del
+   cierre. Un papel frío se separa del papel cálido y del cierre a la vez.
+
+   #e1e7e4 es el límite útil: ΔE 3,63 contra el papel, y todos los pisos con
+   holgura —sin-dato 3,10:1, tinta-3 5,04:1, serie-1 4,20:1—. Un paso más
+   (#dbe3df) da ΔE 4,97 pero deja la ausencia en 2,98:1, o sea la rompe. */
+.banda-papel-2  { background: var(--banda-papel-2); }
+
+/* El borde de ese suelo mide 1,10:1 en claro: es real, pero no alcanza para
+   sostener solo un corte de sección. En oscuro no hace falta —#041417 contra
+   #113236 da ΔE 11,75—, así que la costura existe sólo donde el papel no
+   puede separarse más. */
+.banda-papel + .banda-papel-2,
+.banda-papel-2 + .banda-papel { border-top: 1px solid light-dark(#cbbca9, transparent); }
+
+/* Sobre Peach, --tinta-3 no llega a 4,5:1. Se sube al valor de --tinta-2 para
+   que un metadato que se cuele siga siendo legible en vez de fallar en
+   silencio. */
+.banda-enfasis { --tinta-3: light-dark(#33484a, #d9c39e); }
+
+.banda-contraste {
+  background: light-dark(#071e22, #113236);
+  --superficie:   light-dark(#0d2a2f, #17393d);
+  --superficie-2: light-dark(#113236, #1c4045);
+  --plano:        light-dark(#071e22, #113236);
+  --tinta:        #eef1ee;
+  --tinta-2:      #b9c6c3;
+  /* Más claro que el --tinta-3 global: dentro de la banda, --superficie-2 sube
+     en el tema oscuro y el chip de código caía a 4,28:1. Medido contra los
+     cuatro fondos que la banda puede presentar. */
+  --tinta-3:      #a1b0ae;
+  --linea:        light-dark(#1c4045, #2c5459);
+  --linea-fuerte: light-dark(#2c5459, #3a666b);
+  --serie-1:      #45b0aa;
+  --serie-2:      #f4c095;
+  --sin-dato:     #7d8886;
+  /* La rampa ordinal y la tinta del botón faltaban. Como la banda es oscura en
+     LOS DOS temas, en claro conservaban su valor claro y caían encima de un
+     suelo oscuro: --ord-1 medía 1,06:1, o sea invisible, y la tinta del botón
+     1,64:1 sobre el Peach. Toman el valor oscuro, que ya está validado.
+     Lo encontró validar_paleta.py al empezar a medir este ámbito. */
+  --ord-1:        #cfeae5;
+  --ord-2:        #93cdc6;
+  --ord-3:        #6ab4ad;
+  --ord-4:        #469690;
+  --boton-tinta:  #171214;
+  --accion:       #f4c095;
+  --accion-viva:  #f4c095;
+  --cifra:        #f4c095;
+  --red:          light-dark(#123033, #1a3d41);
+  --eje:          light-dark(#2c5459, #3a666b);
+  --aviso-fondo:  #2e2210;
+  --aviso-borde:  #e0a445;
+  --aviso-tinta:  #f0cf9c;
+  --aviso-tinta-grafico: #e0a445;
+  color: var(--tinta);
+}
+
+/* Encabezado de banda: el gancho y la afirmación que la banda sostiene. */
+.banda-titulo { max-width: 62ch; margin: 0 0 var(--e5); }
+.banda-gancho {
+  font: 650 var(--t-xs)/1 var(--f-ui); letter-spacing: .18em; text-transform: uppercase;
+  color: var(--accion); margin: 0 0 var(--e3);
+}
+.banda-titulo h2 { margin: 0 0 var(--e2); }
+.banda-titulo p { color: var(--tinta-2); margin: 0; }
+
+/* Cierre: enlaces a las demás secciones, sin figuras. */
+.banda-salidas {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--e5); margin-top: var(--e5);
+}
+.banda-salidas a {
+  border-top: 2px solid currentColor; padding-top: var(--e3);
+  text-decoration: none; color: var(--tinta); display: block;
+}
+.banda-salidas a strong { display: block; font-size: var(--t-l); margin-bottom: var(--e1); }
+.banda-salidas a span { font-size: var(--t-s); font-weight: 650; color: var(--accion); }
+.banda-salidas a:hover span { text-decoration: underline; }
+
 .disposicion { display: block; }
 @media (min-width: 1040px) {
   .disposicion {
@@ -488,6 +605,13 @@ main { padding: var(--e5) 0 var(--e8); }
 .rail-cod {
   display: block; font: 600 var(--t-xs)/1 var(--f-mono);
   letter-spacing: .04em; color: var(--tinta-3); margin-bottom: 2px;
+}
+/* En el índice, el diferido se marca pero no se esconde. */
+.rail-marca {
+  font: 650 var(--t-xs)/1 var(--f-ui); letter-spacing: .04em;
+  color: var(--aviso-tinta); background: var(--aviso-fondo);
+  border: 1px solid var(--aviso-borde); border-radius: var(--radio-s);
+  padding: .1em .4em; white-space: nowrap;
 }
 .rail a:hover { background: var(--superficie-2); color: var(--tinta); text-decoration: none; }
 .rail a.activo { background: var(--accion-suave); color: var(--tinta); font-weight: 650; }
@@ -596,6 +720,18 @@ main { padding: var(--e5) 0 var(--e8); }
   scroll-margin-top: var(--e4);
 }
 .modulo:focus-visible { outline: 2px solid var(--accion-viva); outline-offset: 3px; }
+
+/* Módulo de un indicador que no se publica. Se distingue del publicado sin
+   competir con él: borde punteado y superficie recesiva dicen «aquí no hay
+   figura» antes de leer una palabra. No se atenúa con opacidad porque el
+   texto que explica POR QUÉ no se publica es lo único que el módulo tiene,
+   y atenuarlo lo volvería letra pequeña. */
+.modulo-diferido {
+  border-style: dashed; border-color: var(--linea-fuerte);
+  background: var(--superficie-2); box-shadow: none;
+}
+.modulo-diferido > header { border-bottom-color: var(--linea-fuerte); }
+.diferido-detalle { color: var(--tinta-2); margin: 0 0 var(--e3); }
 /* El margen de anclaje sólo hace falta donde la cabecera es fija: si no, deja
    un hueco vacío sobre el módulo al saltar desde el índice. */
 @media (min-width: 900px) { .modulo { scroll-margin-top: 7.5rem; } }
@@ -719,15 +855,27 @@ main { padding: var(--e5) 0 var(--e8); }
 }
 
 /* ---------------------------------------------------------------- ayuda */
+/* El BOTÓN es el área táctil (24×24, WCAG 2.5.8) y el CÍRCULO lo dibuja
+   ::before a 1,05rem. Separarlos permite cumplir el mínimo de puntero sin
+   engordar una marca que va pegada a un título: si el círculo creciera a 24 px
+   competiría con el texto que anota. `isolation` deja el ::before sobre el
+   fondo del propio botón y bajo el signo de interrogación. */
 .ayuda {
   display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border: 0; background: none; padding: 0;
+  position: relative; isolation: isolate;
+  font: 700 var(--t-xs)/1 var(--f-ui); color: var(--tinta-3); cursor: help;
+  margin-left: var(--e1); flex: none;
+  transition: color .14s;
+}
+.ayuda::before {
+  content: ""; position: absolute; z-index: -1;
   width: 1.05rem; height: 1.05rem; border-radius: 50%;
   border: 1px solid var(--linea-fuerte); background: var(--superficie-2);
-  font: 700 var(--t-xs)/1 var(--f-ui); color: var(--tinta-3); cursor: help;
-  margin-left: var(--e1); padding: 0; flex: none;
-  transition: color .14s, border-color .14s, background .14s;
+  transition: border-color .14s, background .14s;
 }
-.ayuda:hover { color: var(--accion); border-color: var(--accion-viva); background: var(--accion-suave); }
+.ayuda:hover { color: var(--accion); }
+.ayuda:hover::before { border-color: var(--accion-viva); background: var(--accion-suave); }
 .ayuda-panel {
   position: absolute; z-index: 30; max-width: 320px;
   background: var(--superficie); border: 1px solid var(--linea-fuerte);
@@ -808,6 +956,41 @@ td.ordenada { background: color-mix(in srgb, var(--accion-viva) 5%, transparent)
   background: var(--accion-suave);
 }
 .etiqueta-orcid:hover { background: color-mix(in srgb, var(--accion-viva) 18%, transparent); color: var(--accion); }
+
+/* Título que existe para el esquema del documento, no para la vista. Se usa
+   donde una banda necesita encabezado para que los módulos cuelguen de algo,
+   pero escribirlo en pantalla sería ruido: el rail ya dice lo mismo. No usa
+   display:none ni visibility:hidden, que lo sacarían también del lector. */
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; margin: -1px; padding: 0; border: 0;
+}
+
+/* ------------------------------------------------- objetivos de puntero */
+/* WCAG 2.2 · SC 2.5.8 pide 24×24 px CSS por objetivo. Medido a 360 px, el
+   sitio tenía siete controles por debajo: el botón de ayuda a 17×17, las
+   etiquetas ORCID y el enlace de vigencia a 20 de alto, y el enlace de
+   seguimiento a 15.
+
+   Los enlaces que van DENTRO de un párrafo quedan como están: la propia norma
+   los exceptúa, y agrandarlos rompería el interlineado de la prosa sin que
+   nadie gane nada. Los que se arreglan son los que NO están en prosa.
+
+   Se amplía por PADDING, con un margen negativo que lo compensa: así crece la
+   caja real del control —que es lo que se puede medir y lo que recibe el
+   puntero— y la maquetación no se mueve ni un píxel. Un pseudo-elemento
+   superpuesto parecía más limpio, pero al probarlo por hit-test no recibía el
+   evento: el área existía en la hoja y no en la pantalla. */
+.vigencia-guia, .enlace-seguir, .etiqueta-orcid, .enlace-dato {
+  display: inline-block; padding-block: 4px; margin-block: -4px;
+}
+
+/* Los controles de verdad sí crecen: son cajas, no texto corrido. */
+button, .boton, [role="tab"] { min-height: 24px; }
+
+/* La casilla nativa medía 13×13. Es el único control del sitio que se toca
+   con el dedo sobre una lista larga. */
+input[type="checkbox"], input[type="radio"] { width: 1.5rem; height: 1.5rem; }
 
 /* -------------------------------------------------------------- filtros */
 .filtros {
@@ -902,6 +1085,26 @@ input[type="checkbox"] { accent-color: var(--accion-viva); }
 /* ══════════════════════════════════════ 5. GRÁFICOS E INTERACCIÓN */
 
 .grafico { width: 100%; overflow-x: auto; position: relative; }
+
+/* El gráfico es UN punto de tabulación y por dentro se recorre con las
+   flechas. Eso sólo sirve si el lector lo sabe, así que la pista aparece
+   cuando el foco entra y se va cuando sale: quien usa el ratón no la ve nunca
+   y quien llega con el teclado la tiene justo cuando la necesita. La escribe
+   el CSS y no el marcado porque es una instrucción sobre CÓMO se usa este
+   medio, no contenido del informe.
+
+   Va DEBAJO del gráfico y en flujo, no superpuesta. Probada encima, tapaba la
+   primera barra y su valor: una ayuda que esconde el dato que vino a explicar
+   está peor que no estar. Ocupa cero alto hasta que el foco entra, así que el
+   desplazamiento sólo lo ve quien está usando el teclado. */
+.grafico::after {
+  content: "← → recorren las barras · Inicio y Fin van a los extremos";
+  display: block; overflow: hidden; height: 0;
+  font: 600 var(--t-xs)/1.6 var(--f-ui); color: var(--tinta-3);
+  transition: height .14s;
+}
+.grafico:focus-within::after { height: 1.6em; }
+@media (prefers-reduced-motion: reduce) { .grafico::after { transition: none; } }
 svg.chart { display: block; width: 100%; height: auto; }
 
 /* El color se emite como atributo `fill` desde el JS, y aquí NO se declara
@@ -930,7 +1133,63 @@ svg.chart text { fill: var(--tinta-2); font: 400 11px/1 var(--f-ui); }
 svg.chart text.valor { fill: var(--tinta); font-weight: 650; font-variant-numeric: tabular-nums; }
 svg.chart text.tick { fill: var(--tinta-3); font-size: 10px; font-variant-numeric: tabular-nums; }
 svg.chart .ref { stroke: var(--aviso-borde); stroke-dasharray: 5 4; stroke-width: 1.5; }
+
+/* ---- Formas nuevas: desviación, acumulada, distribución, proporcional ----
+   No son adornos. Cada una existe porque la forma anterior afirmaba algo falso
+   sobre la estructura del dato; el criterio de elección es la RELACIÓN que
+   expresa el indicador, según el Visual Vocabulary del Financial Times. */
+
+/* Desviación: déficit y superávit se distinguen por posición respecto del eje
+   —arriba o abajo—, que es un canal que no depende del color. El tono sólo
+   refuerza. */
+/* Ambos van en el color del dato a propósito: una primera versión pintaba el
+   déficit con --sin-dato y eso decía otra cosa. Ese gris significa AUSENCIA de
+   dato (D-09), y un FWCI por debajo del promedio es un valor MEDIDO. Teñirlo
+   de gris confundía «no lo sabemos» con «lo sabemos y es bajo». */
+svg.chart .barra.deficit,
+svg.chart .barra.superavit { fill: var(--serie-1); }
+
+/* Acumulada: la pista muestra el total contra el que se lee cada tramo, y la
+   línea vertical dice que un tramo está CONTENIDO en el siguiente. */
+svg.chart .acum-pista { fill: var(--red); }
+svg.chart .acum-nido {
+  stroke: var(--linea-fuerte); stroke-width: 1.4; stroke-dasharray: 3 3; fill: none;
+}
+
+/* Proporcional: sin hueco entre segmentos —son partes de un mismo total— y con
+   el porcentaje dentro cuando cabe. */
+svg.chart .segmento { transition: opacity .13s; }
+svg.chart text.seg-pct {
+  fill: var(--superficie); font-weight: 650; font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.leyenda-seg { gap: var(--e1) var(--e4); }
+.seg-leyenda { white-space: nowrap; }
 svg.chart text.ref-etq { fill: var(--aviso-tinta-grafico); font-weight: 650; font-size: 10px; }
+
+/* ---- red() · C-05, red de coautoría ----
+   La primitiva no lleva color categórico: la pertenencia a un grupo la dice la
+   POSICIÓN, y el color queda para el eje de ausencia de unidad. Estas reglas
+   sólo fijan cromo recesivo y tipografía; el relleno de cada nodo lo emite el
+   JS como atributo `fill`, y aquí NO se declara `fill` para las marcas —una
+   regla CSS ganaría al atributo y pintaría la trama de ausencia como si fuera
+   una medición—. */
+svg.chart.red-svg { min-width: 680px; }
+svg.chart.red-svg .vinculo { transition: opacity .13s; }
+svg.chart.red-svg .nodo-red { cursor: pointer; }
+svg.chart.red-svg .nodo-red:focus { outline: none; }
+svg.chart.red-svg .nodo-red:focus-visible circle.marca-nodo {
+  stroke: var(--accion-viva); stroke-width: 2.6;
+}
+svg.chart.red-svg text.etiqueta-grupo {
+  fill: var(--tinta-2);
+  font: 650 10px var(--f-ui); letter-spacing: .06em; text-transform: uppercase;
+}
+svg.chart.red-svg text.etiqueta-firma { fill: var(--tinta-2); font: 400 9px var(--f-mono); }
+svg.chart.red-svg text.etiqueta-firma.sin-unidad { fill: var(--tinta-3); }
+svg.chart.red-svg text.aislados-titulo {
+  fill: var(--tinta-2); font: 650 10.5px var(--f-ui); letter-spacing: .05em;
+}
 
 /* ---- Marca del valor esperado, en barras horizontales ----
    Un trazo vertical sobre la barra, en el ámbar de las referencias: el mismo
