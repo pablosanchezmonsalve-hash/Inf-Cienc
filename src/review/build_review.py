@@ -409,12 +409,37 @@ def casos(d: dict, perf: dict) -> list[dict]:
     p04 = d["amb"][d["amb"].tipo.str.startswith("P-04")]
     for _, r in p04.iterrows():
         f = perf.get(r["nombre_en_fuente"])
+        # La auditoría ya midió dos cosas sobre este caso. Se usan para ordenar
+        # la cola y para decir qué lecturas siguen en pie, nunca para decidir.
+        uft = str(r.get("en_poblacion_uft", "True")) == "True"
+        coo = int(float(r.get("coocurren_en_publicaciones") or 0))
+
+        ctx = ("Un mismo nombre completo con varios identificadores de Scopus: "
+               "perfil fragmentado en la fuente, u homonimia. IDs: "
+               + r["detalle"].replace("|", " · "))
+        if coo:
+            ctx += (f". Los dos identificadores firman {coo} publicación(es) EN COMÚN, "
+                    "así que «perfil fragmentado» queda descartado: la fuente no puede "
+                    "haber repartido entre dos identificadores los trabajos de una "
+                    "persona dentro de un mismo trabajo. Queda decidir entre homonimia "
+                    "y error de la fuente")
+        if not uft:
+            ctx += (". FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de "
+                    "matching, así que no tiene ficha, no cuenta en «autores UFT "
+                    "distintos» y no entraría en la red de coautoría. La ambigüedad "
+                    "es real y por eso se declara, pero no afecta a ninguna cifra "
+                    "publicada")
+
         out.append({
-            "id": f"p04-{r['clave']}", "cola": "Varios Scopus ID", "prioridad": 3,
+            # Prioridad 3 mientras toca a la población que el informe describe;
+            # 5 cuando no. No se oculta ni se da por resuelto: se ordena. Diez de
+            # los veinte casos son coautores externos, y mezclarlos con los diez
+            # que sí son UFT hacía la cola el doble de larga sin ningún efecto
+            # sobre el informe.
+            "id": f"p04-{r['clave']}", "cola": "Varios Scopus ID",
+            "prioridad": 3 if uft else 5,
             "titulo": r["clave"],
-            "contexto": ("Un mismo nombre completo con varios identificadores de Scopus: "
-                         "perfil fragmentado en la fuente, u homonimia. IDs: "
-                         + r["detalle"].replace("|", " · ")),
+            "contexto": ctx,
             "firmas": [f] if f else [], "cruces": None,
         })
 
