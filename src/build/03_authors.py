@@ -41,6 +41,29 @@ for _c in CONSOLIDADAS:
     CONSOLIDADAS[_c].sort()
 
 
+def _frase_consolidacion(n_fusionadas: int) -> str:
+    """Cómo se fusionaron las firmas, separando los dos niveles de evidencia.
+
+    Decir «revisión humana caso por caso» de un grupo que unió una
+    normalización de cadena sería atribuir a una persona una decisión que nadie
+    tomó. Los grupos ortográficos no son un juicio sobre personas —son la misma
+    firma escrita con otros diacríticos o separadores—, y el lector tiene
+    derecho a saber cuáles son cuáles.
+    """
+    orig = b.ORIGEN_CONSOLIDACION
+    humanas = sum(1 for c in CONSOLIDADAS if orig.get(c, "humana") in ("humana", "mixta"))
+    ortog = sum(1 for c in CONSOLIDADAS if orig.get(c) == "ortografica")
+    t = f"{n_fusionadas} se fusionaron en {len(CONSOLIDADAS)} personas"
+    if ortog and humanas:
+        return (t + f": {humanas} tras una revisión humana caso por caso y {ortog} "
+                "por ser la misma firma escrita con distintos diacríticos o "
+                "separadores")
+    if ortog:
+        return (t + ", por ser la misma firma escrita con distintos diacríticos o "
+                "separadores")
+    return t + " tras una revisión humana caso por caso"
+
+
 def cargar_orcid() -> dict[str, dict]:
     """Asignaciones de ORCID, si el enriquecimiento ya se ejecutó (V2-01).
 
@@ -466,8 +489,7 @@ def main() -> None:
         "advertencia_identidad": (
             (f"Cada ficha corresponde a una forma de firma, no necesariamente a una "
              f"persona distinta. De las {n_firmas_origen} detectadas en la fuente, "
-             f"{n_fusionadas} se fusionaron en {len(CONSOLIDADAS)} personas tras una "
-             f"revisión humana caso por caso"
+             + _frase_consolidacion(n_fusionadas)
              # Sin esta cláusula la frase deja de cuadrar en cuanto se descarta
              # algo: el origen las suma y ninguna otra parte las resta.
              + (f" y {len(b.DESCARTADAS)} se descartaron por no ser personas sino "

@@ -51,6 +51,7 @@ import pandas as pd
 import yaml
 
 import decisiones as D
+import equivalencia_ortografica as EQ
 
 ROOT = Path(__file__).resolve().parents[2]
 INTERNAL = ROOT / "internal"
@@ -357,11 +358,31 @@ def casos(d: dict, perf: dict) -> list[dict]:
         fs = firmas_de(sorted(set(g["nombre_en_fuente"])))
         if len(fs) < 2:
             continue
+
+        # LO ORTOGRÁFICO NO SE PREGUNTA. Las formas que sólo se diferencian en
+        # diacríticos o separadores son la misma cadena, así que se colapsan
+        # antes de encolar: preguntarle a una persona si «Henriquez-Olguin C.»
+        # y «Henríquez-Olguín C.» son la misma gasta su atención en algo que no
+        # es un juicio, y la atención es justo el recurso escaso de esta cola.
+        clases = EQ.subgrupos([f["nombre"] for f in fs])
+        por_nombre = {f["nombre"]: f for f in fs}
+        rep = [por_nombre[c[0]] for c in clases]
+        agrupadas = {c[0]: c for c in clases if len(c) > 1}
+
+        # Si al colapsar queda una sola forma, no queda nada que decidir.
+        if len(rep) < 2:
+            continue
+
+        ctx = "Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad."
+        if agrupadas:
+            detalle = " · ".join(" = ".join(v) for v in agrupadas.values())
+            ctx += (f" Ya unidas por equivalencia ortográfica, no hace falta"
+                    f" decidirlas: {detalle}.")
         out.append({
             "id": f"p03-{clave}", "cola": "Variantes de nombre", "prioridad": 2,
-            "titulo": " · ".join(f["nombre"] for f in fs),
-            "contexto": "Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.",
-            "firmas": fs, "cruces": cruces(fs[0], fs[1]) if len(fs) == 2 else None,
+            "titulo": " · ".join(f["nombre"] for f in rep),
+            "contexto": ctx,
+            "firmas": rep, "cruces": cruces(rep[0], rep[1]) if len(rep) == 2 else None,
         })
 
     # ── Firmas sin forma de persona (E-09): fragmentos de cadena de afiliación.
