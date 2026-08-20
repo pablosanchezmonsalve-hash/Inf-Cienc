@@ -135,6 +135,12 @@ export function cromo(meta, paginaActual, tema = 'auto') {
       <span><b>Ventana</b> ${meta.ventana.inicio}–${meta.ventana.fin}</span>
       <span class="sep" aria-hidden="true"></span>
       <span><b>Citas al</b> ${escapar(meta.fecha_corte_citas)}</span>
+      <button type="button" class="descargar" id="descargar-informe"
+        title="Abre el diálogo de impresión del navegador; elija «Guardar como PDF»">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+          fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Descargar informe
+      </button>
       <a class="vigencia-guia" href="metodologia.html">Cómo leer estos indicadores →</a>
     </div>`,
 
@@ -173,6 +179,18 @@ export async function montarCabecera(paginaActual) {
 
   document.querySelectorAll('.tema button').forEach(b =>
     b.addEventListener('click', () => aplicarTema(b.dataset.tema)));
+
+  /* Descargar el informe. Es `print()` a propósito y no una librería de PDF:
+     el navegador ya sabe paginar, embeber tipografías y producir texto
+     seleccionable y buscable. Una librería costaría entre 300 KB y 1 MB y, o
+     bien rasteriza el texto —adiós accesibilidad y búsqueda—, o bien obliga a
+     reimplementar el informe en su propia API de maquetación, que sería una
+     segunda definición del marcado.
+
+     El botón no se esconde si falta `print`: no falta en ningún navegador de
+     escritorio, y en móvil el diálogo también existe. */
+  const btn = document.getElementById('descargar-informe');
+  if (btn) btn.addEventListener('click', () => window.print());
 
   return meta;
 }

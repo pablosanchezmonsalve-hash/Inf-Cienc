@@ -718,6 +718,37 @@ def apellido_de(firma: str) -> str:
     return " ".join(partes)
 
 
+def ancla(caso_id: str) -> str:
+    """Identificador de fragmento estable para un caso.
+
+    Los `caso_id` traen espacios y puntos —vienen de una forma de firma— y un
+    `href` con espacios no navega. Se transforman a una forma segura, y la
+    misma función la usan la página y la lista que se comparte: si divergieran,
+    la lista llevaría a anclas que no existen y nadie se enteraría hasta
+    pulsarlas.
+    """
+    return "caso-" + re.sub(r"[^a-zA-Z0-9]+", "-", caso_id).strip("-").lower()
+
+
+def enlaces_de(f: dict) -> list[tuple[str, str]]:
+    """Adónde hay que ir para comprobar esta firma con los ojos.
+
+    Sólo lo que existe: sin ORCID no hay registro que abrir, y sin Scopus
+    Author ID no hay perfil. Un enlace roto que promete evidencia es peor que
+    ningún enlace.
+    """
+    e = []
+    if f.get("orcid"):
+        e.append(("Registro del titular en ORCID", f"https://orcid.org/{f['orcid']}"))
+    busq = urllib.parse.quote(f["nombre"])
+    e.append((f"Buscar «{f['nombre']}» en ORCID",
+              f"https://orcid.org/orcid-search/search?searchQuery={busq}"))
+    for sid in f.get("scopus", []):
+        e.append((f"Perfil {sid} en Scopus (requiere suscripción)",
+                  f"https://www.scopus.com/authid/detail.uri?authorId={sid}"))
+    return e
+
+
 def enlaces_html(f: dict) -> str:
     """A dónde ir para comprobarlo con los ojos.
 
@@ -731,23 +762,13 @@ def enlaces_html(f: dict) -> str:
     Scopus Author ID no hay perfil de Scopus. Un enlace roto que promete
     evidencia es peor que ningún enlace.
     """
-    e = []
-    if f.get("orcid"):
-        e.append((f"https://orcid.org/{f['orcid']}",
-                  "Registro del titular en ORCID", ""))
-    # Búsqueda de texto libre con la firma tal como la imprime la fuente: es lo
-    # que una persona teclearía. No se le añade un filtro por institución porque
-    # la sintaxis avanzada del buscador web no está documentada como estable, y
+    # La búsqueda usa la firma tal como la imprime la fuente: es lo que una
+    # persona teclearía. No se le añade filtro por institución porque la
+    # sintaxis avanzada del buscador web no está documentada como estable, y
     # `CLAUDE.md` prohíbe suponer comportamiento de un endpoint no confirmado.
-    busq = urllib.parse.quote(f["nombre"])
-    e.append((f"https://orcid.org/orcid-search/search?searchQuery={busq}",
-              f"Buscar «{f['nombre']}» en ORCID", ""))
-    for sid in f.get("scopus", []):
-        e.append((f"https://www.scopus.com/authid/detail.uri?authorId={sid}",
-                  f"Perfil {sid} en Scopus", " (requiere suscripción)"))
     return ('<div class="enlaces">'
             + "".join(f'<a href="{html.escape(u)}" target="_blank" rel="noopener">'
-                      f"{html.escape(t)}</a>{html.escape(n)}" for u, t, n in e)
+                      f"{html.escape(t)}</a>" for t, u in enlaces_de(f))
             + "</div>")
 
 
@@ -838,7 +859,7 @@ def render(cs: list[dict], meta: dict) -> str:
                  'pattern="\\d{4}-\\d{4}-\\d{4}-\\d{3}[\\dXx]">'
                  if c["cola"] in D.PIDEN_ORCID else "")
         cuerpo += f"""
-    <article class="caso" data-id="{html.escape(c['id'])}" data-decidido="0"
+    <article class="caso" id="{html.escape(ancla(c['id']))}" data-id="{html.escape(c['id'])}" data-decidido="0"
              data-familia="{'orcid' if orc else 'identidad'}">
       <span class="cola">{html.escape(c['cola'])}</span>
       <h2>{html.escape(c['titulo'])}</h2>
@@ -937,6 +958,83 @@ def render(cs: list[dict], meta: dict) -> str:
 """
 
 
+def lista_pendientes(cs: list[dict], fecha: str) -> str:
+    """Los casos que faltan por consolidar, con adónde ir para comprobar cada uno.
+
+    POR QUÉ ADEMÁS DE LA PÁGINA
+        La página de revisión es una herramienta de trabajo: se abre, se decide
+        y se exporta. No sirve para lo otro que hace falta —repartir el trabajo,
+        pedir ayuda a un tercero, o mirar desde el teléfono qué queda—, porque
+        para eso hay que poder mandar una lista.
+
+        Esta lista es esa. Lleva, por caso, el enlace al caso concreto dentro de
+        la página y los enlaces externos que hay que abrir para verificarlo:
+        el registro del titular, la búsqueda por nombre y el perfil de Scopus.
+
+    CAPA
+        Interna. Nombra a personas concretas y dice de cuáles no se sabe algo,
+        que es exactamente el material que `CLAUDE.md` mantiene fuera de la capa
+        pública. Vive en `internal/` y no viaja a `dist/`.
+    """
+    pend = [c for c in cs if not c.get("previa")]
+    por_cola: dict[str, list[dict]] = defaultdict(list)
+    for c in pend:
+        por_cola[c["cola"]].append(c)
+
+    L = ["# Pendientes de consolidación",
+         "",
+         f"**Generado** el {fecha} por `src/review/build_review.py`. Regenerable.",
+         "",
+         f"Quedan **{len(pend)} casos** de {len(cs)}. Cada uno lleva el enlace al caso "
+         "dentro de la herramienta de revisión y los enlaces externos que hay que "
+         "abrir para comprobarlo.",
+         "",
+         "> **Capa interna.** Este documento nombra personas y dice de cuáles no se "
+         "sabe algo. No se publica.",
+         "",
+         "## Cómo se usa",
+         "",
+         "1. Genere la herramienta: `py src\\review\\build_review.py` "
+         "(o `scripts\\revisar-identidad.ps1`, que hace la secuencia entera).",
+         "2. Los enlaces `revision_identidad.html#caso-…` abren la página **en el "
+         "caso concreto**. Requieren tener el archivo al lado de este documento, "
+         "que es donde lo deja el generador.",
+         "3. Decida en la página, exporte el CSV y aplíquelo con "
+         "`apply_decisions.py`.",
+         "",
+         "---",
+         ""]
+
+    for cola in sorted(por_cola, key=lambda k: (por_cola[k][0]["prioridad"], k)):
+        casos = por_cola[cola]
+        L += [f"## {cola} — {len(casos)} pendiente(s)", ""]
+        for c in casos:
+            L += [f"### [{c['titulo']}](revision_identidad.html#{ancla(c['id'])})", "",
+                  c["contexto"], ""]
+            enlaces = [e for f in c["firmas"] for e in enlaces_de(f)]
+            if enlaces:
+                # Sin duplicar: dos firmas de un mismo grupo comparten búsqueda.
+                vistos, unicos = set(), []
+                for t, u in enlaces:
+                    if u not in vistos:
+                        vistos.add(u)
+                        unicos.append((t, u))
+                L += ["| Comprobar en | Enlace |", "|---|---|"]
+                L += [f"| {t} | <{u}> |" for t, u in unicos]
+                L += [""]
+            obras = [o for f in c["firmas"] for o in (f.get("obras") or []) if o[3]]
+            if obras and cola in D.FAMILIA_ORCID:
+                L += ["Publicaciones atribuidas, para comparar contra el registro:", ""]
+                L += [f"- {a or '—'} · {t or '(sin título)'} — "
+                      f"<https://doi.org/{d}>" for _e, a, t, d in obras[:MAX_OBRAS]]
+                if len(obras) > MAX_OBRAS:
+                    L += [f"- … y {len(obras) - MAX_OBRAS} más"]
+                L += [""]
+        L += ["---", ""]
+
+    return "\n".join(L)
+
+
 def main() -> int:
     print("=" * 78)
     print("HERRAMIENTA DE REVISIÓN DE IDENTIDAD DE AUTOR")
@@ -949,6 +1047,10 @@ def main() -> int:
         print("  No hay casos que revisar. No se escribe nada.")
         return 0
     decididos, huerfanos = sembrar(cs, d["dec"])
+
+    hoy = date.today().isoformat()
+    (INTERNAL / "pendientes_consolidacion.md").write_text(
+        lista_pendientes(cs, hoy), encoding="utf-8")
 
     salida = INTERNAL / "revision_identidad.html"
     salida.write_text(render(cs, {
@@ -983,6 +1085,8 @@ def main() -> int:
             print(f"    … y {len(huerfanos) - 10} más")
     print(f"\n  OK · {salida.relative_to(ROOT)}")
     print("       Ábralo en el navegador. Exporte a internal/identity_decisions.csv")
+    print("     · internal/pendientes_consolidacion.md")
+    print("       La misma cola en forma de lista, con un enlace por caso.")
     return 0
 
 
