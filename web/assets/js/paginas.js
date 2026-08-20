@@ -399,7 +399,15 @@ async function autores() {
 async function fichaAutor() {
   const id = new URLSearchParams(location.search).get('id');
   const cont = document.getElementById('ficha');
-  if (!id) { cont.innerHTML = '<div class="vacio">Falta el identificador de autor.</div>'; return; }
+  // Sin identificador la página quedaba en blanco: ni encabezado —la ficha es
+  // la única del sitio sin h1 propio en el archivo, porque lo pone el JS— ni
+  // salida hacia ningún lado. Un callejón sin salida se corrige con una puerta.
+  if (!id) {
+    cont.innerHTML = `<h1>Ficha de autor</h1>
+      <div class="vacio">La dirección no trae identificador de autor, así que no
+      hay ficha que mostrar.<br><a href="autores.html">Ir al directorio de autores →</a></div>`;
+    return;
+  }
 
   let a;
   try { a = await c.cargar(`author/${id}.json`); }
@@ -412,11 +420,11 @@ async function fichaAutor() {
     <div><span>Nombre en fuente</span>${c.escapar(a.nombre_en_fuente)}</div>
     <div><span>Unidad académica</span>${c.escapar(a.unidades_academicas.join(' · '))}</div>
     <div><span>Scopus Author ID</span>${a.scopus_author_ids.length
-      ? a.scopus_author_ids.map(s => `<a href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
+      ? a.scopus_author_ids.map(s => `<a class="enlace-dato" href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
           target="_blank" rel="noopener">${s}</a>`).join(' · ')
       : '<span class="sin-dato-txt">No resuelto</span>'}</div>
     <div><span>ORCID</span>${a.orcid
-      ? `<a href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`
+      ? `<a class="enlace-dato" href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`
         // Qué evidencia respalda este ORCID, en orden de fuerza. El veredicto
         // sale de contrastar la asignación contra el registro del propio
         // titular, así que cuando existe desplaza a la confianza, que sólo
@@ -486,7 +494,7 @@ async function fichaAutor() {
     <section class="modulo">
       <header><h2>Publicaciones (${a.publicaciones.length})</h2></header>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Año</th><th>Título</th><th>Fuente</th><th>Tipo</th><th class="num">Citas</th></tr></thead>
+        <thead><tr><th scope="col">Año</th><th scope="col">Título</th><th scope="col">Fuente</th><th scope="col">Tipo</th><th scope="col" class="num">Citas</th></tr></thead>
         <tbody>${a.publicaciones.map(p => `<tr>
           <td>${c.anio(p.anio)}</td>
           <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>` : c.escapar(p.titulo)}</td>
