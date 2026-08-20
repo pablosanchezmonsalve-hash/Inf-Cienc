@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `622c611` · Documentación de diseño: describir el sitio que existe
+Último commit: `b6ecf87` · Rediseño de la interfaz: paleta, bandas y formas por relación del dato
 Snapshot: 2026-08-20
 
 ---
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 223
+## Decisiones tomadas: 229
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
