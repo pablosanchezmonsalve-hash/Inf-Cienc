@@ -157,7 +157,7 @@ export function modulo(cod, s) {
   return `<section class="modulo" id="${cod}" tabindex="-1">
     <header>
       <div class="modulo-id">
-        <h2>${c.escapar(s.nombre)}</h2>
+        <h3>${c.escapar(s.nombre)}</h3>
         <span class="codigo">${cod}</span>
       </div>
       ${conmutador(cod)}
@@ -241,7 +241,7 @@ export function moduloDiferido(cod, r) {
   return `<section class="modulo modulo-diferido" id="${cod}" tabindex="-1">
     <header>
       <div class="modulo-id">
-        <h2>${c.escapar(r.nombre)}</h2>
+        <h3>${c.escapar(r.nombre)}</h3>
         <span class="codigo">${cod}</span>
       </div>
       <span class="estado" data-e="${r.estado}">${c.escapar(r.estado_etiqueta)}</span>
@@ -284,7 +284,8 @@ export function paginaModulos(codigos, series, eje, catalogo = null) {
   // 2 · TRABAJO — el índice y los módulos publicados. Es la banda de consulta:
   //     aquí la narrativa cede y manda la función de referencia.
   if (publicados.length) {
-    bandas.push(banda('papel-2', `<div class="disposicion">${
+    bandas.push(banda('papel-2', `<h2 class="solo-lectores">Indicadores publicados</h2>
+      <div class="disposicion">${
       rail(presentes, series, porCodigo)}<div class="modulos">${
       publicados.map(cod => modulo(cod, series[cod])).join('')}</div></div>`));
   }
@@ -442,12 +443,14 @@ export function panorama(series) {
       <section class="modulo modulo-compacto">
         <header>
           <div class="modulo-id">
-            <h2>${c.escapar(series[cod].nombre)}</h2>
+            <h3>${c.escapar(series[cod].nombre)}</h3>
             <span class="codigo">${cod}</span>
           </div>
         </header>
         ${dibujar(series[cod])}
-        <p class="nota"><a class="enlace-seguir" href="${destino}">Ver la sección completa →</a></p>
+        <p class="nota"><a class="enlace-seguir" href="${destino}"
+           aria-label="Ver la sección completa de ${c.escapar(series[cod].nombre)}"
+           >Ver la sección completa →</a></p>
       </section>`).join('')}</div>`;
 }
 

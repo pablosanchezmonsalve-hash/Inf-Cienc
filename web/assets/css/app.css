@@ -855,15 +855,27 @@ main { padding: var(--e5) 0 var(--e8); }
 }
 
 /* ---------------------------------------------------------------- ayuda */
+/* El BOTÓN es el área táctil (24×24, WCAG 2.5.8) y el CÍRCULO lo dibuja
+   ::before a 1,05rem. Separarlos permite cumplir el mínimo de puntero sin
+   engordar una marca que va pegada a un título: si el círculo creciera a 24 px
+   competiría con el texto que anota. `isolation` deja el ::before sobre el
+   fondo del propio botón y bajo el signo de interrogación. */
 .ayuda {
   display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border: 0; background: none; padding: 0;
+  position: relative; isolation: isolate;
+  font: 700 var(--t-xs)/1 var(--f-ui); color: var(--tinta-3); cursor: help;
+  margin-left: var(--e1); flex: none;
+  transition: color .14s;
+}
+.ayuda::before {
+  content: ""; position: absolute; z-index: -1;
   width: 1.05rem; height: 1.05rem; border-radius: 50%;
   border: 1px solid var(--linea-fuerte); background: var(--superficie-2);
-  font: 700 var(--t-xs)/1 var(--f-ui); color: var(--tinta-3); cursor: help;
-  margin-left: var(--e1); padding: 0; flex: none;
-  transition: color .14s, border-color .14s, background .14s;
+  transition: border-color .14s, background .14s;
 }
-.ayuda:hover { color: var(--accion); border-color: var(--accion-viva); background: var(--accion-suave); }
+.ayuda:hover { color: var(--accion); }
+.ayuda:hover::before { border-color: var(--accion-viva); background: var(--accion-suave); }
 .ayuda-panel {
   position: absolute; z-index: 30; max-width: 320px;
   background: var(--superficie); border: 1px solid var(--linea-fuerte);
@@ -944,6 +956,41 @@ td.ordenada { background: color-mix(in srgb, var(--accion-viva) 5%, transparent)
   background: var(--accion-suave);
 }
 .etiqueta-orcid:hover { background: color-mix(in srgb, var(--accion-viva) 18%, transparent); color: var(--accion); }
+
+/* Título que existe para el esquema del documento, no para la vista. Se usa
+   donde una banda necesita encabezado para que los módulos cuelguen de algo,
+   pero escribirlo en pantalla sería ruido: el rail ya dice lo mismo. No usa
+   display:none ni visibility:hidden, que lo sacarían también del lector. */
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; margin: -1px; padding: 0; border: 0;
+}
+
+/* ------------------------------------------------- objetivos de puntero */
+/* WCAG 2.2 · SC 2.5.8 pide 24×24 px CSS por objetivo. Medido a 360 px, el
+   sitio tenía siete controles por debajo: el botón de ayuda a 17×17, las
+   etiquetas ORCID y el enlace de vigencia a 20 de alto, y el enlace de
+   seguimiento a 15.
+
+   Los enlaces que van DENTRO de un párrafo quedan como están: la propia norma
+   los exceptúa, y agrandarlos rompería el interlineado de la prosa sin que
+   nadie gane nada. Los que se arreglan son los que NO están en prosa.
+
+   Se amplía por PADDING, con un margen negativo que lo compensa: así crece la
+   caja real del control —que es lo que se puede medir y lo que recibe el
+   puntero— y la maquetación no se mueve ni un píxel. Un pseudo-elemento
+   superpuesto parecía más limpio, pero al probarlo por hit-test no recibía el
+   evento: el área existía en la hoja y no en la pantalla. */
+.vigencia-guia, .enlace-seguir, .etiqueta-orcid, .enlace-dato {
+  display: inline-block; padding-block: 4px; margin-block: -4px;
+}
+
+/* Los controles de verdad sí crecen: son cajas, no texto corrido. */
+button, .boton, [role="tab"] { min-height: 24px; }
+
+/* La casilla nativa medía 13×13. Es el único control del sitio que se toca
+   con el dedo sobre una lista larga. */
+input[type="checkbox"], input[type="radio"] { width: 1.5rem; height: 1.5rem; }
 
 /* -------------------------------------------------------------- filtros */
 .filtros {
