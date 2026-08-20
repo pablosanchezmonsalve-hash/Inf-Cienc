@@ -99,7 +99,7 @@ para los datos derivados.
 |---|---|---|---|
 | ~~T-01~~ | ~~Enriquecer ORCID desde Crossref por DOI (cobertura 97,7 %)~~ | — | **Cerrado (2026-08-01)**: 174 de 589 firmas, 0 errores de red |
 | T-02 | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad | 2 | **Desbloqueado**: hoja lista en `internal/validacion_unidades.md` (`make revision`). Falta enviarla |
-| T-03 | Revisión humana de las variantes de nombre encoladas (51 grupos) | 2 | **Desbloqueado**: `internal/revision_identidad.html` (`make revision`) |
+| T-03 | Revisión humana de las variantes de nombre encoladas (28 grupos, 27 pendientes) | 2 | **Desbloqueado**: `internal/revision_identidad.html` (`make revision`). Las diferencias puramente ortográficas ya no se encolan: las resuelve `src/review/equivalencia_ortografica.py`, que es equivalencia de cadena y no un juicio de identidad (no toca D-08). Quedan sólo los juicios reales: iniciales distintas, inicial adicional, apellido materno |
 | T-04 | Revisión humana de los 20 nombres con múltiples Scopus ID | 2 | **Desbloqueado**: `internal/revision_identidad.html` (`make revision`) |
 | ~~T-05~~ | ~~Decidir tratamiento del duplicado probable Article/Letter~~ | — | **Cerrado (2026-08-03)**: verificado por el usuario contra ambos DOI. Son dos documentos distintos con el mismo título; universo intacto en 823 |
 | T-06 | Reexportar Scopus con fecha de corte declarada | 2 | **Petición redactada**: `docs/UPDATING_REQUEST.md`. Depende de quien exporte |

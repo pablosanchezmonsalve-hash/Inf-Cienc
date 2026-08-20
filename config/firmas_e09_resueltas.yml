@@ -1,0 +1,40 @@
+# Resolución humana de la cola E-09 — firmas sin forma de persona.
+#
+# GENERADO por src/review/apply_decisions.py desde
+# internal/identity_decisions.csv. No editar a mano: se regenera.
+#
+# POR QUÉ ESTÁN LAS DOS LISTAS
+#   La auditoría vuelve a marcar estas firmas en CADA corrida: se
+#   calcula sobre internal/matching_log.csv, que no se toca. Sin
+#   registrar también las confirmadas, decir «sí es una persona» no
+#   tendría ningún efecto y el sitio seguiría publicando que esa firma
+#   probablemente no lo es. La única salida sería declararla inexistente.
+#
+# QUÉ AUTORIZA `descartadas`
+#   Que esas formas de firma dejen de contarse como autores y dejen de
+#   tener ficha. Son fragmentos de cadena de afiliación que entraron en
+#   la lista de autores de la fuente («School of Psychology», «and
+#   Senior Lecturer»), detectados por la regla E-09.
+#
+# QUÉ AUTORIZA `confirmadas`
+#   Sólo cerrar el caso. La firma sigue contando y con ficha, igual que
+#   antes de la revisión: lo único que cambia es que deja de declararse
+#   como probable fragmento.
+#
+# QUÉ NO AUTORIZA NINGUNA DE LAS DOS
+#   Tocar internal/matching_log.csv. La detección institucional que las
+#   trajo es REAL: la publicación sí es de la UFT, lo que no es una
+#   persona es el nombre. Borrarlas del log dejaría a esas publicaciones
+#   sin ninguna detección y haría fallar la regla bloqueante I-01.
+#   El descarte se aplica aguas abajo, en src/build/common_build.py.
+#
+# CONSECUENCIA DECLARADA
+#   Las publicaciones donde una firma descartada era la única detección
+#   UFT quedan sin autoría UFT nombrada. Eso se declara; no se rellena
+#   con nada.
+#
+# Descartadas: 0 · confirmadas como persona: 0
+# Fecha de la revisión: 2026-08-20
+
+descartadas:
+confirmadas:

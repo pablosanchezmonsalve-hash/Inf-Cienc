@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ed0c75e` · Accesibilidad: esquema de encabezados, objetivos de puntero y bandas e
+Último commit: `59db972` · Teclado: el gráfico es un control con N posiciones, no N controles
 Snapshot: 2026-08-20
 
 ---
@@ -32,19 +32,19 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **556** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades de autor publicadas | **542** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **240** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con forma de persona | **552** | descontando las marcadas por `E-09`, pendientes de revisión |
-| Entidades con ORCID | **216** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades con forma de persona | **538** | descontando las marcadas por `E-09`, pendientes de revisión |
+| Entidades con ORCID | **209** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **27** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **63 formas de firma eran 30 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+Las cifras de autor van en dos bases porque una revisión humana declaró que **85 formas de firma eran 38 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
 Y **4 de las publicadas probablemente no correspondan a personas**: la auditoría las marcó como probables fragmentos de cadena de afiliación que la fuente metió en la lista de autores (regla `E-09`). Dos de las señales son invariantes de la fuente; la tercera es una heurística sobre la forma del nombre, y sola no basta. Siguen contando y con ficha: confirmarlo es una decisión de identidad, y por `D-08` la toma una persona en `make revision`.
 
@@ -64,7 +64,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 4 |
 
-`make revision` reúne estas colas en 141 casos, de los que **89 siguen pendientes**: 52 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 118 casos, de los que **85 siguen pendientes**: 33 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -73,7 +73,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | # | Pendiente |
 |---|---|
 | `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
-| `T-03` | Revisión humana de las variantes de nombre encoladas (51 grupos) |
+| `T-03` | Revisión humana de las variantes de nombre encoladas (28 grupos, 27 pendientes) |
 | `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
 | `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
