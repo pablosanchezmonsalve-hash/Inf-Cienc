@@ -29,32 +29,35 @@ RESULTS: list[dict] = []
 def _tamano_red(log: pd.DataFrame) -> dict[str, int]:
     """Qué tamaño tendría la red de coautoría con los datos de hoy.
 
-    Se cuenta sobre PERSONAS, aplicando la consolidación de identidades
-    vigente, y sobre pares DISTINTOS: una firma repetida dentro de una misma
-    publicación no es una coautoría consigo misma.
+    Delega en src/build/grafo_coautoria.py en vez de contar aquí. Tener dos
+    implementaciones ya produjo dos cifras: 818 publicaciones en un sitio y 814
+    en el otro, porque sólo una excluía las firmas E-09. Las funciones de ese
+    módulo son puras y no arrastran la capa de build.
     """
-    import itertools
     import yaml
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "build"))
+    import grafo_coautoria as G
 
-    # Se lee el YAML directamente en vez de importar el mapa del build: este
-    # módulo es de análisis y no depende de la capa de construcción.
-    ruta = c.ROOT / "config" / "identidades_consolidadas.yml" if hasattr(c, "ROOT") \
-        else Path(__file__).resolve().parents[2] / "config" / "identidades_consolidadas.yml"
-    mapa: dict[str, str] = {}
-    if ruta.exists():
-        cfg = yaml.safe_load(ruta.read_text(encoding="utf-8")) or {}
-        mapa = {v: g["canonica"] for g in (cfg.get("grupos") or [])
-                for v in g["variantes"]}
+    raiz = Path(__file__).resolve().parents[2]
+    cfg = yaml.safe_load((raiz / "config" / "identidades_consolidadas.yml")
+                         .read_text(encoding="utf-8")) or {}
+    mapa = {v: g["canonica"] for g in (cfg.get("grupos") or []) for v in g["variantes"]}
 
-    persona = log["nombre_en_fuente"].map(lambda n: mapa.get(n, n))
-    par = pd.DataFrame({"persona": persona, "eid": log["eid"]}).drop_duplicates()
-    por_pub = par.groupby("eid")["persona"].apply(list)
-    multi = [p for p in por_pub if len(p) > 1]
-    aristas = {tuple(sorted(x)) for ps in multi
-               for x in itertools.combinations(sorted(set(ps)), 2)}
-    nodos = {p for a in aristas for p in a}
-    return {"pares": len(par), "pubs": int(par["eid"].nunique()),
-            "pubs_multi": len(multi), "aristas": len(aristas), "nodos": len(nodos)}
+    # Las mismas exclusiones que el grafo: un fragmento de cadena de afiliación
+    # no es una persona y no puede coautorar con nadie.
+    amb = pd.read_csv(raiz / "internal" / "ambiguities_authors.csv", dtype=str)
+    e09 = set(amb[amb["tipo"] == "E-09_firma_sin_forma_de_persona"]["nombre_en_fuente"])
+
+    pares = ((mapa.get(n, n), e) for n, e in
+             zip(log["nombre_en_fuente"], log["eid"]))
+    g = G.construir(pares, excluir={mapa.get(f, f) for f in e09} | e09)
+    comp = G.componentes(g["nodos"], g["aristas"])
+    con_arista = {p for e in g["aristas"] for p in (e["a"], e["b"])}
+    return {"pares": sum(g["publicaciones_por_persona"].values()),
+            "pubs": g["publicaciones"],
+            "pubs_multi": g["publicaciones_con_dos_o_mas"],
+            "aristas": len(g["aristas"]), "nodos": len(con_arista),
+            "componentes": len(set(comp.values()))}
 
 
 def record(code: str, nombre: str, categoria: str, disponible: str,
