@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex cobertura limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex cobertura informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -79,6 +79,12 @@ openalex:
 # En Windows:  py src\enrich\openalex_cobertura.py
 cobertura:
 	python3 src/enrich/openalex_cobertura.py
+
+# El informe institucional en PDF, desde el sitio ya construido. Usa la MISMA
+# hoja de impresión que el botón «Descargar informe» de la interfaz: un origen,
+# dos consumidores. Exige Playwright y Chromium, como `make verificar`.
+informe: sitio
+	node src/build/informe_pdf.mjs dist dist/informe-cienciometrico.pdf
 
 # En Windows: scripts/revisar-identidad.ps1 (clic derecho -> «Ejecutar con
 # PowerShell»). Hace la secuencia entera —generar, abrir, recoger el CSV
