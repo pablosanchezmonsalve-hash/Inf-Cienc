@@ -20,10 +20,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 STEPS = ["01_publications", "02_indicators", "03_authors", "04_glossary"]
 
+# El grafo de coautoría (C-05) va DESPUÉS de 03_authors, que es quien deja la
+# consolidación de identidades aplicada, y ANTES de la compuerta 05. Escribe en
+# data/interim/, que no se copia a dist/: C-05 sigue diferido y el grafo lleva
+# nombres de personas y sus vínculos. Cuando T-03 se resuelva y el indicador
+# pase a publicarse, lo que cambia es el destino del artefacto, no el cálculo.
+DERIVADOS = ["grafo_coautoria"]
+
 
 def main() -> int:
     for step in STEPS:
         importlib.import_module(step).main()
+
+    for derivado in DERIVADOS:
+        importlib.import_module(derivado).main()
 
     codigo = importlib.import_module("05_verify_public_layer").main()
 

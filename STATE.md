@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `e4e4093` · P-04: medir qué está en juego en cada nombre con varios Scopus ID
+Último commit: `b04387c` · Colas chicas y paso 6: la cobertura de C-05 se mide en vez de escribir
 Snapshot: 2026-08-20
 
 ---
