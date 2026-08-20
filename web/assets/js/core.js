@@ -855,6 +855,219 @@ export function pasoTecladoRed(D, kIdx, focoActual, key) {
   return null;
 }
 
+/* ═══════════════════════ formas elegidas por la RELACIÓN del dato
+
+   Hasta esta revisión el sitio dibujaba 11 de sus 16 indicadores con
+   `barrasH`. No era una preferencia estética: era la forma por defecto
+   aplicándose a relaciones de datos distintas. El Visual Vocabulary del
+   Financial Times (Financial-Times/chart-doctor) clasifica los gráficos por
+   la RELACIÓN que expresan, y cuatro de los indicadores del sitio estaban en
+   la categoría equivocada:
+
+     I-04  FWCI contra el 1,00 mundial   -> Desviación, no magnitud
+     I-05  umbrales de percentil anidados -> Distribución acumulada, no ranking
+     C-06  autores por publicación        -> Distribución, no ranking
+     R-01  cuartiles Q1–Q4 del total      -> Parte-de-un-todo, no magnitud
+
+   Las cuatro primitivas de abajo cubren esas cuatro relaciones. Ninguna es
+   decorativa: cada una existe porque la anterior afirmaba algo falso sobre
+   la estructura del dato. */
+
+/** DESVIACIÓN — valores contra una referencia fija (FT: «Deviation»).
+
+    Para I-04: el FWCI se lee contra el 1,00 mundial. Dibujarlo como columnas
+    desde cero obliga a comparar alturas contra una línea punteada; dibujarlo
+    como desviación pone el 1,00 en el eje y el déficit o el superávit se lee
+    como lo que es, sin aritmética mental. */
+export function desviacion(datos, {
+  referencia = 1, etiquetaX = 'anio', etiquetaY = 'valor', decimales = 2,
+  ancho = 680, alto = 260, titulo = '', refEtiqueta = '',
+} = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const mIzq = 58, mDer = 20, mAb = 40, mArr = 30;
+  const vals = datos.map(d => d[etiquetaY]).filter(v => v !== null && v !== undefined);
+  const desv = vals.map(v => v - referencia);
+  const tope = Math.max(...desv.map(Math.abs), 0.01) * 1.25;
+  const base = alto - mAb, arriba = mArr;
+  const cero = arriba + (base - arriba) / 2;          // la referencia va al centro
+  const y = d => cero - (d / tope) * ((base - arriba) / 2);
+  const bw = (ancho - mIzq - mDer) / datos.length;
+  const w = Math.min(56, bw * 0.5);
+
+  const marcasY = [tope, 0, -tope].map(v => `
+    <line class="red" x1="${mIzq}" x2="${ancho - mDer}" y1="${y(v)}" y2="${y(v)}"/>
+    <text class="tick" x="${mIzq - 8}" y="${y(v) + 3.5}" text-anchor="end">${
+      v === 0 ? num(referencia, decimales) : (v > 0 ? '+' : '−') + num(Math.abs(v), decimales)}</text>`).join('');
+
+  const barras = datos.map((d, i) => {
+    const v = d[etiquetaY];
+    const x = mIzq + i * bw + (bw - w) / 2;
+    if (v === null || v === undefined) {
+      return `<g class="marca" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
+        <text class="tick" x="${x + w / 2}" y="${cero - 8}" text-anchor="middle">sin dato</text>
+        <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text></g>`;
+    }
+    const dv = v - referencia, yy = y(Math.max(dv, 0)), h = Math.abs(y(dv) - cero);
+    const bajo = dv < 0;
+    return `<g class="marca" tabindex="0" role="listitem"
+        aria-label="${escapar(String(d[etiquetaX]))}: ${num(v, decimales)}, ${
+          bajo ? 'por debajo de' : 'por encima de'} la referencia ${num(referencia, decimales)}"
+        data-tip="${escapar(String(d[etiquetaX]))}" data-tip-v="${num(v, decimales)}"
+        data-tip-n="${bajo ? '−' : '+'}${num(Math.abs(dv), decimales)} respecto de ${num(referencia, decimales)}">
+      <rect class="barra ${bajo ? 'deficit' : 'superavit'}" x="${x}" y="${yy}"
+        width="${w}" height="${Math.max(2, h)}" rx="3"/>
+      <text class="valor" x="${x + w / 2}" y="${bajo ? y(dv) + 16 : yy - 7}" text-anchor="middle">${num(v, decimales)}</text>
+      <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text>
+    </g>`;
+  }).join('');
+
+  const etq = titulo ? `${titulo} — desviación respecto de ${num(referencia, decimales)}, ${datos.length} valores`
+                     : `Gráfico de desviación, ${datos.length} valores`;
+  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
+    role="list" aria-label="${escapar(etq)}">
+    ${marcasY}${barras}
+    <line class="ref" x1="${mIzq}" x2="${ancho - mDer}" y1="${cero}" y2="${cero}"/>
+    <text class="ref-etq" x="${ancho - mDer}" y="${cero - 8}" text-anchor="end">${
+      escapar(refEtiqueta || `referencia ${num(referencia, decimales)}`)}</text>
+  </svg></div>`;
+}
+
+/** DISTRIBUCIÓN ACUMULADA — umbrales anidados (FT: «Distribution»).
+
+    Para I-05. Los tramos son ACUMULADOS: las 3 publicaciones del top 1 % están
+    también en el top 5 %, en el top 10 % y en el top 25 %. Dibujarlos como
+    cuatro barras hermanas sugiere cuatro grupos disjuntos que podrían sumarse
+    —322, una cifra sin significado—. Aquí cada tramo se dibuja CONTENIDO en el
+    siguiente, que es la relación real. */
+export function acumulada(datos, { titulo = '', total = null, ancho = 680, sufijo = '' } = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const orden = datos.slice().sort((a, b) => a.n - b.n);
+  const max = total || Math.max(...orden.map(d => d.n));
+  const alto = 46 + orden.length * 44;
+  const mIzq = 96, mDer = 78;
+  const pista = ancho - mIzq - mDer;
+
+  const filas = orden.map((d, i) => {
+    const y = 30 + i * 44;
+    const w = Math.max(3, pista * (d.n / max));
+    const cuota = total ? ` · ${num(100 * d.n / total, 1)} % de ${nf.format(total)}` : '';
+    return `<g class="marca" tabindex="0" role="listitem"
+        aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}${cuota}"
+        data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
+        ${total ? `data-tip-n="${num(100 * d.n / total, 1)} % de ${nf.format(total)}"` : ''}>
+      <text x="${mIzq - 12}" y="${y + 21}" text-anchor="end">${escapar(d.valor)}</text>
+      <rect class="acum-pista" x="${mIzq}" y="${y + 6}" width="${pista}" height="26" rx="3"/>
+      <rect class="barra" x="${mIzq}" y="${y + 6}" width="${w}" height="26" rx="3"/>
+      <text class="valor" x="${mIzq + w + 9}" y="${y + 24}">${nf.format(d.n)}${sufijo}</text>
+    </g>`;
+  }).join('');
+
+  // Las llaves de anidamiento: cada tramo cabe dentro del siguiente.
+  const llaves = orden.slice(0, -1).map((d, i) => {
+    const y = 30 + i * 44, w = Math.max(3, pista * (d.n / max));
+    return `<path class="acum-nido" d="M ${mIzq + w} ${y + 32} L ${mIzq + w} ${y + 44}" />`;
+  }).join('');
+
+  const etq = titulo ? `${titulo} — tramos acumulados anidados, ${orden.length} umbrales`
+                     : `Gráfico de tramos acumulados, ${orden.length} umbrales`;
+  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
+    role="list" aria-label="${escapar(etq)}">
+    <text class="tick" x="${mIzq}" y="18">cada tramo CONTIENE a los de arriba — no se suman</text>
+    ${llaves}${filas}
+  </svg></div>`;
+}
+
+/** DISTRIBUCIÓN — cuántos casos caen en cada tramo (FT: «Distribution»).
+
+    Para C-06. El tamaño del equipo es un continuo tramificado: 1, 2–3, 4–6…
+    Dibujarlo como ranking ordena los tramos por frecuencia y destruye el eje,
+    que es justo la información. Aquí los tramos conservan su orden natural y
+    la altura dice la frecuencia. */
+export function distribucion(datos, { titulo = '', ancho = 680, alto = 250, etiquetaEje = '' } = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const mIzq = 52, mDer = 16, mAb = 52, mArr = 26;
+  const max = Math.max(...datos.map(d => d.n), 1) * 1.18;
+  const base = alto - mAb;
+  const bw = (ancho - mIzq - mDer) / datos.length;
+  const y = v => mArr + (base - mArr) * (1 - v / max);
+  const total = datos.reduce((s, d) => s + d.n, 0);
+
+  const red = [0, max / 2, max].map(v => `
+    <line class="red" x1="${mIzq}" x2="${ancho - mDer}" y1="${y(v)}" y2="${y(v)}"/>
+    <text class="tick" x="${mIzq - 8}" y="${y(v) + 3.5}" text-anchor="end">${v === 0 ? '0' : num(v, 0)}</text>`).join('');
+
+  // Sin hueco entre columnas: es una distribución sobre un continuo, y el
+  // hueco de un gráfico de barras sugiere categorías sin relación entre sí.
+  const cols = datos.map((d, i) => {
+    const x = mIzq + i * bw, yy = y(d.n);
+    return `<g class="marca" tabindex="0" role="listitem"
+        aria-label="${escapar(d.valor)}: ${nf.format(d.n)} publicaciones, ${num(100 * d.n / total, 1)} %"
+        data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}"
+        data-tip-n="${num(100 * d.n / total, 1)} % de ${nf.format(total)}">
+      <rect class="barra" x="${x + 0.5}" y="${yy}" width="${bw - 1}" height="${Math.max(2, base - yy)}"/>
+      <text class="valor" x="${x + bw / 2}" y="${yy - 7}" text-anchor="middle">${nf.format(d.n)}</text>
+      <text x="${x + bw / 2}" y="${base + 18}" text-anchor="middle">${escapar(d.valor)}</text>
+    </g>`;
+  }).join('');
+
+  const eje = etiquetaEje
+    ? `<text class="tick" x="${mIzq + (ancho - mIzq - mDer) / 2}" y="${alto - 10}" text-anchor="middle">${escapar(etiquetaEje)}</text>` : '';
+  const etq = titulo ? `${titulo} — distribución en ${datos.length} tramos`
+                     : `Distribución en ${datos.length} tramos`;
+  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
+    role="list" aria-label="${escapar(etq)}">
+    ${red}${cols}${eje}
+    <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
+  </svg></div>`;
+}
+
+/** PARTE-DE-UN-TODO ordenado (FT: «Part-to-whole»).
+
+    Para R-01. Q1–Q4 más la ausencia reparten un total conocido. Cuatro barras
+    sueltas obligan a sumar de cabeza para saber qué fracción es Q1; una barra
+    proporcional lo muestra. Usa la rampa ordinal —un solo tono en cuatro
+    pasos— porque Q1 y Q4 son posiciones de una escala, no categorías sueltas;
+    la ausencia se sale de la rampa y va en gris con trama. */
+export function proporcional(datos, { titulo = '', ancho = 680, alto = 128 } = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const total = datos.reduce((s, d) => s + d.n, 0) || 1;
+  const h = 42, y0 = 16;
+  let x = 0;
+  const idOrd = `ordTrama${++idGrafico}`;
+
+  const seg = datos.map((d, i) => {
+    const w = (ancho * d.n) / total;
+    const xi = x; x += w;
+    const sd = esSinDato(d.valor);
+    const relleno = sd ? `url(#${idOrd})` : ORDINAL[Math.min(i, ORDINAL.length - 1)];
+    const pct = num(100 * d.n / total, 1);
+    return `<g class="marca" tabindex="0" role="listitem"
+        aria-label="${escapar(d.valor)}: ${nf.format(d.n)}, ${pct} % del total"
+        data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}" data-tip-n="${pct} % de ${nf.format(total)}">
+      <rect class="segmento" x="${xi.toFixed(1)}" y="${y0}" width="${Math.max(w - 1.5, 1).toFixed(1)}" height="${h}"
+        fill="${relleno}"${sd ? ' stroke="var(--sin-dato)" stroke-width="1"' : ''}/>
+      ${w > 46 ? `<text class="seg-pct" x="${(xi + w / 2).toFixed(1)}" y="${y0 + h / 2 + 4}" text-anchor="middle">${pct} %</text>` : ''}
+    </g>`;
+  }).join('');
+
+  const leyenda = datos.map((d, i) => {
+    const sd = esSinDato(d.valor);
+    return `<span class="seg-leyenda"><span class="punto" style="background:${
+      sd ? 'var(--sin-dato)' : ORDINAL[Math.min(i, ORDINAL.length - 1)]}"></span>${
+      escapar(d.valor)} <strong>${nf.format(d.n)}</strong></span>`;
+  }).join('');
+
+  const etq = titulo ? `${titulo} — barra proporcional de ${datos.length} tramos sobre ${nf.format(total)}`
+                     : `Barra proporcional de ${datos.length} tramos`;
+  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto - 40}"
+    role="list" aria-label="${escapar(etq)}" preserveAspectRatio="none" style="height:74px">
+    <defs><pattern id="${idOrd}" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="5" height="5" fill="var(--sin-dato)"/>
+      <line x1="0" y1="0" x2="0" y2="5" stroke="var(--superficie)" stroke-width="1.7"/></pattern></defs>
+    ${seg}
+  </svg><div class="leyenda leyenda-seg">${leyenda}</div></div>`;
+}
+
 /* ------------------------------------------------------ tooltip común */
 
 /* Un gráfico HTML es interactivo por naturaleza: `<title>` sólo aparece tras

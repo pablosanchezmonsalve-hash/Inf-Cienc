@@ -36,18 +36,19 @@ export const RENDER = {
   'P-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'P-07': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
   'I-01': s => c.barrasV(s.datos, { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n' }),
-  'I-04': s => c.barrasV(s.datos.map(d => ({ anio: d.anio, n: d.valor })), {
-    titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n', decimales: 2,
+  // DESVIACIÓN, no magnitud: el FWCI se lee CONTRA el 1,00 mundial, así que el
+  // 1,00 va en el eje y el déficit se lee sin aritmética mental (FT: Deviation).
+  'I-04': s => c.desviacion(s.datos.map(d => ({ anio: d.anio, valor: d.valor })), {
+    titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'valor', decimales: 2,
     referencia: 1, refEtiqueta: '1,00 — promedio mundial',
   }),
-  'I-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado,
-    // El trazo dice qué cabría esperar bajo el promedio mundial. Sin él, «75
-    // en el top 10 %» es un número sin escala: nadie sabe si son muchos.
-    refEtiqueta: `Lo esperable bajo el promedio mundial: el top k % contiene el k % `
-      + `de las ${c.nf.format(s.base_percentil)} publicaciones con percentil.` }),
+  // Los tramos son ACUMULADOS y anidados: las 3 del top 1 % están también en el
+  // top 5, 10 y 25. Cuatro barras hermanas sugerían cuatro grupos disjuntos que
+  // podrían sumarse —322, una cifra sin significado— (FT: Distribution).
+  'I-05': s => c.acumulada(s.datos, { titulo: s.nombre, total: s.base_percentil }),
   // Q1–Q4 es una escala ORDENADA, no cuatro categorías sueltas: un solo tono en
   // cuatro pasos, del más oscuro (mejor posición) al más claro.
-  'R-01': s => c.barrasH(s.datos, { titulo: s.nombre, escala: 'ordinal', cuotaValida: true, trama: s.multivaluado }),
+  'R-01': s => c.proporcional(s.datos, { titulo: s.nombre }),
   // Acceso abierto se queda en una sola serie a propósito: las categorías se
   // llaman Gold, Green y Bronze, y pintarlas con la paleta categórica dejaría
   // «Green» de color naranja. Cuando el nombre de la categoría ya es un color,
@@ -56,7 +57,9 @@ export const RENDER = {
   'C-01': s => c.anillo(s.datos, { titulo: s.nombre }),
   'C-03': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'C-04': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-  'C-06': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
+  // El tamaño del equipo es un continuo tramificado: ordenarlo por frecuencia
+  // destruiría el eje, que es justo la información (FT: Distribution).
+  'C-06': s => c.distribucion(s.datos, { titulo: s.nombre, etiquetaEje: 'autores por publicación' }),
   'T-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'T-01': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'T-04': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),

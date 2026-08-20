@@ -88,37 +88,37 @@
      que light-dark() consulta. */
   color-scheme: light dark;
 
-  /* ---- Superficies. Teñidas hacia la familia de la marca. ---- */
-  --plano:        light-dark(#faf7f8, #100b0d);
-  --superficie:   light-dark(#ffffff, #171214);
-  --superficie-2: light-dark(#f5eef0, #211a1d);
+  /* ---- Superficies. Teñidas con Peach Glow al 6–10 %; en oscuro, Ink Black. ---- */
+  --plano:        light-dark(#f6efe6, #041417);
+  --superficie:   light-dark(#fffcf8, #0d2a2f);
+  --superficie-2: light-dark(#f7efe5, #113236);
 
   /* ---- Tinta. Tres niveles, todos derivados del rojo de la marca. ---- */
-  --tinta:   light-dark(#1c1013, #f2e9ec);
-  --tinta-2: light-dark(#5b4a4f, #bfaab0);
-  --tinta-3: light-dark(#6d585e, #a48f95);
+  --tinta:   light-dark(#071e22, #eef1ee);
+  --tinta-2: light-dark(#33484a, #b9c6c3);
+  --tinta-3: light-dark(#516365, #93a3a1);
 
-  --linea:        light-dark(#e8dade, #2e2327);
-  --linea-fuerte: light-dark(#d3bcc2, #453539);
+  --linea:        light-dark(#e8ddce, #1c4045);
+  --linea-fuerte: light-dark(#cbbca9, #2c5459);
 
   /* ---- Marca. Identidad institucional. Nunca codifica un dato. ---- */
-  --marca:       light-dark(#7a0f2b, #2a1016);
-  --marca-honda: light-dark(#5c0a20, #1a0a0e);
-  --marca-alta:  light-dark(#a4123f, #e2607e);
-  --marca-tinta: light-dark(#f7d9e0, #e8b9c6);
+  --marca:       light-dark(#071e22, #041417);
+  --marca-honda: light-dark(#041417, #020c0e);
+  --marca-alta:  light-dark(#1d7874, #45b0aa);
+  --marca-tinta: light-dark(#f4c095, #f4c095);
 
   /* Tinta de las cifras grandes. Existe aparte de --marca porque --marca
      cambia de OFICIO entre temas: en claro es tinta, en oscuro es la
      superficie de la cabecera. Usarla para el texto de un KPI funcionaba en
      claro y en oscuro pintaba la cifra a 1,05:1, o sea invisible. Este token
      es tinta en los dos temas y sólo eso. */
-  --cifra: light-dark(#8f1236, #f090a6);
+  --cifra: light-dark(#12514e, #f4c095);
 
   /* ---- Acción. Estado interactivo. Tampoco codifica un dato. ---- */
-  --accion:        light-dark(#a4123f, #f08ba3);
-  --accion-viva:   light-dark(#c03457, #e2607e);
-  --accion-suave:  light-dark(#fdf0f3, #2c161c);
-  --accion-anillo: light-dark(rgba(164, 18, 63, .32), rgba(226, 96, 126, .38));
+  --accion:        light-dark(#145956, #f4c095);
+  --accion-viva:   light-dark(#1d7874, #f4c095);
+  --accion-suave:  light-dark(#e4f0ee, #12333a);
+  --accion-anillo: light-dark(rgba(29, 120, 116, .34), rgba(244, 192, 149, .38));
 
   /* ---- Series categóricas ----
           MEDIDO: de las seis ranuras, el sitio dibuja DOS. El anillo de
@@ -147,38 +147,38 @@
 
           La sexta ranura era carmín. Con la marca en rojo, un carmín a dos
           pasos de --serie-1 es una trampa a la espera: se cambió por azul. ---- */
-  --serie-1: light-dark(#a4123f, #e2607e);   /* rojo de marca · EN USO */
-  --serie-2: light-dark(#0f6f86, #45b2cd);   /* azul-teal · EN USO (anillo C-01) */
+  --serie-1: light-dark(#1d7874, #45b0aa);   /* Deep Ocean · el dato, teal en ambos temas */
+  --serie-2: light-dark(#071e22, #f4c095);   /* Ink Black / Peach Glow · EN USO (anillo C-01) */
   --serie-3: light-dark(#6b4bbd, #a48ae8);   /* violeta   · RESERVADA, sin validar */
   --serie-4: light-dark(#1f7d4f, #4fbb85);   /* verde     · RESERVADA, sin validar */
   --serie-5: light-dark(#8a5a06, #d09a2a);   /* ámbar     · RESERVADA, sin validar */
   --serie-6: light-dark(#1c5fa8, #6fa8e8);   /* azul      · RESERVADA, sin validar */
 
   /* ---- Rampa ordinal. Un solo tono, cuatro pasos, luminosidad monótona. ---- */
-  --ord-1: light-dark(#520a1c, #ffc3d0);
-  --ord-2: light-dark(#851334, #f28ba4);
-  --ord-3: light-dark(#af2c4d, #d95b7a);
-  --ord-4: light-dark(#c96c81, #b03a58);
+  --ord-1: light-dark(#04262a, #cfeae5);
+  --ord-2: light-dark(#0f4e4b, #93cdc6);
+  --ord-3: light-dark(#1d7874, #6ab4ad);
+  --ord-4: light-dark(#469b93, #469690);
 
   /* ---- Ausencia de dato: gris, siempre (decisión D-09). ---- */
-  --sin-dato: light-dark(#8d7d81, #7d6b70);
+  --sin-dato: light-dark(#87807a, #7d8886);
 
   /* ---- Cromo del gráfico: recesivo por definición. ---- */
-  --red: light-dark(#f0e7ea, #241c1f);
-  --eje: light-dark(#d3bcc2, #453539);
+  --red: light-dark(#efe6d8, #123033);
+  --eje: light-dark(#cbbca9, #2c5459);
 
   /* ---- Advertencia metodológica. Ámbar, fuera de la familia del dato. ---- */
-  --aviso-fondo: light-dark(#fdf6e7, #2a2109);
+  --aviso-fondo: light-dark(#fdefdc, #2e2210);
   /* El ámbar OSCURO se subió de #c8901a a #f0b429. El valor anterior venía de
      la paleta teal y sobrevivió al cambio de identidad sin que nadie lo mirara:
      contra un dato teal la separación sobraba, contra un dato ROJO caía a
      ΔE 17,9, bajo el piso de 20 que este mismo proyecto declara. Lo encontró
      `src/design/validar_paleta.py`, no una revisión visual. Ahora ΔE 24,1. */
-  --aviso-borde: light-dark(#b8830f, #f0b429);
-  --aviso-tinta: light-dark(#5e4104, #f0dca8);
+  --aviso-borde: light-dark(#c07a2a, #e0a445);
+  --aviso-tinta: light-dark(#6b3d10, #f0cf9c);
   /* El ámbar del trazo (--aviso-borde) no llega a 4,5:1 como texto. La línea de
      referencia puede tenerlo; su ETIQUETA, que dice el promedio mundial, no. */
-  --aviso-tinta-grafico: light-dark(#7d5709, #e0ac26);
+  --aviso-tinta-grafico: light-dark(#8a5518, #e0a445);
 
   /* ---- Tipografía ---- */
   --f-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -949,6 +949,38 @@ svg.chart text { fill: var(--tinta-2); font: 400 11px/1 var(--f-ui); }
 svg.chart text.valor { fill: var(--tinta); font-weight: 650; font-variant-numeric: tabular-nums; }
 svg.chart text.tick { fill: var(--tinta-3); font-size: 10px; font-variant-numeric: tabular-nums; }
 svg.chart .ref { stroke: var(--aviso-borde); stroke-dasharray: 5 4; stroke-width: 1.5; }
+
+/* ---- Formas nuevas: desviación, acumulada, distribución, proporcional ----
+   No son adornos. Cada una existe porque la forma anterior afirmaba algo falso
+   sobre la estructura del dato; el criterio de elección es la RELACIÓN que
+   expresa el indicador, según el Visual Vocabulary del Financial Times. */
+
+/* Desviación: déficit y superávit se distinguen por posición respecto del eje
+   —arriba o abajo—, que es un canal que no depende del color. El tono sólo
+   refuerza. */
+/* Ambos van en el color del dato a propósito: una primera versión pintaba el
+   déficit con --sin-dato y eso decía otra cosa. Ese gris significa AUSENCIA de
+   dato (D-09), y un FWCI por debajo del promedio es un valor MEDIDO. Teñirlo
+   de gris confundía «no lo sabemos» con «lo sabemos y es bajo». */
+svg.chart .barra.deficit,
+svg.chart .barra.superavit { fill: var(--serie-1); }
+
+/* Acumulada: la pista muestra el total contra el que se lee cada tramo, y la
+   línea vertical dice que un tramo está CONTENIDO en el siguiente. */
+svg.chart .acum-pista { fill: var(--red); }
+svg.chart .acum-nido {
+  stroke: var(--linea-fuerte); stroke-width: 1.4; stroke-dasharray: 3 3; fill: none;
+}
+
+/* Proporcional: sin hueco entre segmentos —son partes de un mismo total— y con
+   el porcentaje dentro cuando cabe. */
+svg.chart .segmento { transition: opacity .13s; }
+svg.chart text.seg-pct {
+  fill: var(--superficie); font-weight: 650; font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.leyenda-seg { gap: var(--e1) var(--e4); }
+.seg-leyenda { white-space: nowrap; }
 svg.chart text.ref-etq { fill: var(--aviso-tinta-grafico); font-weight: 650; font-size: 10px; }
 
 /* ---- red() · C-05, red de coautoría ----
