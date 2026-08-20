@@ -154,6 +154,33 @@ def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None
     return out
 
 
+def _evidencia_orcid(firmas: list[str], orcid: str) -> str:
+    """Con qué respaldo entró ese ORCID en cada firma.
+
+    La cola decía que varias firmas comparten identificador y ahí se acababa.
+    Pero no todas las asignaciones pesan igual: una declarada por el titular en
+    su registro no es lo mismo que una deducida de un DOI, y una respaldada por
+    cuatro publicaciones no es lo mismo que una por una sola. Sin eso, quien
+    revisa tenía que ir a buscar el CSV para decidir; con eso, decide leyendo.
+
+    Importa además por una razón concreta de este corpus: el vínculo con
+    Crossref se hace por apellido e inicial DENTRO de una publicación. Cuando
+    dos firmas con apellidos distintos comparten identificador, la coincidencia
+    no puede venir del nombre —tuvo que venir del identificador que el autor
+    depositó—, y eso es evidencia de otra naturaleza.
+    """
+    try:
+        o = pd.read_csv(ROOT / "data" / "enriched" / "authors_orcid.csv", dtype=str)
+    except Exception:
+        return ""
+    filas = o[(o.orcid == orcid) & (o.nombre_en_fuente.isin(firmas))]
+    if filas.empty:
+        return ""
+    partes = [f"{r['nombre_en_fuente']} ({r['fuente']}, confianza {r['confianza']}, "
+              f"{r['publicaciones_de_respaldo']} pub.)" for _, r in filas.iterrows()]
+    return "Respaldo de cada asignación: " + " · ".join(partes) + "."
+
+
 def cruces(a: dict, b: dict) -> dict:
     """Las tres señales que deciden un caso, calculadas entre dos firmas."""
     comunes = set(a["eids"]) & set(b["eids"])
@@ -203,15 +230,35 @@ def casos(d: dict, perf: dict) -> list[dict]:
             fs = firmas_de(r["firmas"].split(" | "))
             if len(fs) < 2:
                 continue
+
+            # Igual que en la cola de variantes: lo que sólo se diferencia en
+            # diacríticos o separadores no se pregunta, porque no es un juicio.
+            # Aquí importa más todavía: un caso cuyas tres formas son la misma
+            # cadena —«Henriquez-Olguin C.», «Henriquez-Olguín C.»,
+            # «Henríquez-Olguín C.»— no plantea ninguna duda de identidad, y
+            # ocupaba un puesto en la cola de prioridad 1.
+            clases = EQ.subgrupos([f["nombre"] for f in fs])
+            por_nombre = {f["nombre"]: f for f in fs}
+            rep = [por_nombre[c[0]] for c in clases]
+            agrupadas = [c for c in clases if len(c) > 1]
+            if len(rep) < 2:
+                continue
+
+            ctx = ("El apellido no las agrupa: este hallazgo sólo lo aporta "
+                   "el identificador persistente."
+                   if r.get("hallazgo_nuevo") == "True" else
+                   "El apellido también las agrupa.")
+            if agrupadas:
+                detalle = " · ".join(" = ".join(v) for v in agrupadas)
+                ctx += f" Ya unidas por equivalencia ortográfica: {detalle}."
+            ctx += " " + _evidencia_orcid([f["nombre"] for f in rep], r["orcid"])
+
             out.append({
                 "id": f"orcid-{r['orcid']}", "cola": "ORCID compartido",
                 "prioridad": 1,
-                "titulo": f"{len(fs)} firmas comparten {r['orcid']}",
-                "contexto": ("El apellido no las agrupa: este hallazgo sólo lo aporta "
-                             "el identificador persistente."
-                             if r.get("hallazgo_nuevo") == "True" else
-                             "El apellido también las agrupa."),
-                "firmas": fs, "cruces": cruces(fs[0], fs[1]) if len(fs) == 2 else None,
+                "titulo": f"{len(rep)} firmas comparten {r['orcid']}",
+                "contexto": ctx,
+                "firmas": rep, "cruces": cruces(rep[0], rep[1]) if len(rep) == 2 else None,
             })
 
     # ── Una firma con más de un ORCID.

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `e66d76c` · T-03: separar la equivalencia ortográfica del juicio de identidad
+Último commit: `e4e4093` · P-04: medir qué está en juego en cada nombre con varios Scopus ID
 Snapshot: 2026-08-20
 
 ---
@@ -64,7 +64,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 4 |
 
-`make revision` reúne estas colas en 118 casos, de los que **85 siguen pendientes**: 33 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 111 casos, de los que **84 siguen pendientes**: 27 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
