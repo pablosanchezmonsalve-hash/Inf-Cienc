@@ -269,12 +269,72 @@ export function paginaModulos(codigos, series, eje, catalogo = null) {
   const presentes = codigos.filter(cod =>
     series[cod] || (porCodigo[cod] && porCodigo[cod].estado !== 'publicado'));
 
-  const bloques = presentes.map(cod => series[cod]
-    ? modulo(cod, series[cod])
-    : moduloDiferido(cod, porCodigo[cod])).join('');
+  // Los diferidos se separan de los publicados porque van a bandas distintas:
+  // lo que el informe NO sabe merece su propio suelo, no una tarjeta más en la
+  // fila. Dentro de cada grupo se conserva el orden declarado en la página.
+  const publicados = presentes.filter(cod => series[cod]);
+  const diferidos = presentes.filter(cod => !series[cod]);
 
-  return panelEje(eje) + rail(presentes, series, porCodigo)
-    + `<div class="modulos">${bloques}</div>`;
+  const bandas = [];
+
+  // 1 · APERTURA — qué responde la sección y qué NO responde. Va primero
+  //     porque condiciona todo lo que viene después.
+  bandas.push(banda('papel', panelEje(eje)));
+
+  // 2 · TRABAJO — el índice y los módulos publicados. Es la banda de consulta:
+  //     aquí la narrativa cede y manda la función de referencia.
+  if (publicados.length) {
+    bandas.push(banda('papel-2', `<div class="disposicion">${
+      rail(presentes, series, porCodigo)}<div class="modulos">${
+      publicados.map(cod => modulo(cod, series[cod])).join('')}</div></div>`));
+  }
+
+  // 3 · AUSENCIA — sobre el suelo de contraste. Un indicador diferido metido
+  //     entre los publicados se lee como uno más; aquí se lee como lo que es.
+  if (diferidos.length) {
+    bandas.push(banda('contraste', `
+      <div class="banda-titulo">
+        <p class="banda-gancho">Lo que esta sección todavía no puede mostrar</p>
+        <h2>${diferidos.length === 1 ? 'Un indicador' : `${diferidos.length} indicadores`}
+          de esta sección está${diferidos.length === 1 ? '' : 'n'} verificado${
+          diferidos.length === 1 ? '' : 's'} pero no se publica${diferidos.length === 1 ? '' : 'n'}.</h2>
+        <p>Se dice cuál y por qué. Un hueco se leería como que el fenómeno no existe.</p>
+      </div>
+      <div class="modulos">${diferidos.map(cod => moduloDiferido(cod, porCodigo[cod])).join('')}</div>`));
+  }
+
+  // 4 · CIERRE — sobre Peach, SÓLO tipografía y enlaces: sobre ese suelo el
+  //     color del dato no despeja 4,5:1 y la marca de ausencia no despeja 3:1.
+  bandas.push(banda('enfasis', cierre(eje)));
+
+  return bandas.join('');
+}
+
+/** Envoltura de una banda: franja a sangre con su contenido en el contenedor. */
+function banda(suelo, contenido) {
+  return `<section class="banda banda-${suelo}"><div class="contenedor">${contenido}</div></section>`;
+}
+
+/** Banda de cierre: el denominador de la sección y la salida a las demás.
+
+    Repite el denominador a propósito. Es la última cosa que se lee y la que
+    más se cita de memoria: «823» y «816» no son la misma cifra medida dos
+    veces, y decirlo una vez arriba no basta. */
+function cierre(eje) {
+  const salidas = c.PAGINAS
+    .filter(([href]) => !['index.html', 'publicaciones.html', 'autores.html'].includes(href))
+    .slice(0, 3);
+  return `
+    <div class="banda-titulo">
+      <h2>Cada indicador declara su propio denominador.</h2>
+      <p>${eje && eje.sobre_que ? c.escapar(eje.sobre_que)
+        : 'Los denominadores del informe no son intercambiables.'}
+        Ninguna sección los mezcla, y por eso dos cifras del mismo informe
+        pueden medirse sobre conjuntos distintos sin contradecirse.</p>
+    </div>
+    <div class="banda-salidas">${salidas.map(([href, txt]) => `
+      <a href="${href}"><strong>${c.escapar(txt)}</strong><span>Ver la sección →</span></a>`).join('')}
+    </div>`;
 }
 
 /* ══════════════════════════════════════════════════════════════ portada */
