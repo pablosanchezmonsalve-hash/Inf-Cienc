@@ -24,6 +24,7 @@ async function portada() {
     cont.innerHTML = v.kpis(resto);
     document.getElementById('panorama').innerHTML = v.panorama(series);
     document.getElementById('lectura').innerHTML = v.lectura(kpis);
+    document.getElementById('cierre').innerHTML = v.cierrePortada();
   }
 }
 

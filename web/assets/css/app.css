@@ -93,6 +93,12 @@
   --superficie:   light-dark(#fffcf8, #0d2a2f);
   --superficie-2: light-dark(#f7efe5, #113236);
 
+  /* Segundo suelo de banda. Es un TOKEN y no un valor suelto para que
+     validar_paleta.py lo mida: las cifras que lo justifican están en la regla
+     de .banda-papel-2, y una cifra que sólo vive en un comentario deja de ser
+     cierta en silencio. */
+  --banda-papel-2: light-dark(#e1e7e4, #113236);
+
   /* ---- Tinta. Tres niveles, todos derivados del rojo de la marca. ---- */
   --tinta:   light-dark(#071e22, #eef1ee);
   --tinta-2: light-dark(#33484a, #b9c6c3);
@@ -484,8 +490,30 @@ main { padding: var(--e5) 0 var(--e8); }
 .banda { padding: var(--e7) 0; }
 .banda + .banda { padding-top: var(--e7); }
 .banda-papel    { background: var(--plano); }
-.banda-papel-2  { background: var(--superficie-2); }
 .banda-enfasis  { background: light-dark(#f4c095, #2e2210); }
+
+/* El segundo papel NO puede ser --superficie-2. Ese token es un tinte que se
+   aplica ENCIMA del blanco de tarjeta (chips, cabeceras de tabla, hover) y en
+   tema claro vale #f7efe5, que contra el papel #f6efe6 mide ΔE OKLab 0,18 y
+   1,00:1: el mismo color. La alternancia sólo funcionaba en oscuro, y en claro
+   dejaba 6rem de aire entre dos bandas sin nada que explicara el corte.
+
+   Este suelo tiene valor propio y es FRÍO, no un peach más oscuro. La razón es
+   medida: oscurecer el papel hacia el peach rompe la marca de ausencia
+   (--sin-dato cae bajo 3:1 pasado #dbe3df) y además lo acercaba al Peach del
+   cierre. Un papel frío se separa del papel cálido y del cierre a la vez.
+
+   #e1e7e4 es el límite útil: ΔE 3,63 contra el papel, y todos los pisos con
+   holgura —sin-dato 3,10:1, tinta-3 5,04:1, serie-1 4,20:1—. Un paso más
+   (#dbe3df) da ΔE 4,97 pero deja la ausencia en 2,98:1, o sea la rompe. */
+.banda-papel-2  { background: var(--banda-papel-2); }
+
+/* El borde de ese suelo mide 1,10:1 en claro: es real, pero no alcanza para
+   sostener solo un corte de sección. En oscuro no hace falta —#041417 contra
+   #113236 da ΔE 11,75—, así que la costura existe sólo donde el papel no
+   puede separarse más. */
+.banda-papel + .banda-papel-2,
+.banda-papel-2 + .banda-papel { border-top: 1px solid light-dark(#cbbca9, transparent); }
 
 /* Sobre Peach, --tinta-3 no llega a 4,5:1. Se sube al valor de --tinta-2 para
    que un metadato que se cuele siga siendo legible en vez de fallar en
@@ -508,6 +536,16 @@ main { padding: var(--e5) 0 var(--e8); }
   --serie-1:      #45b0aa;
   --serie-2:      #f4c095;
   --sin-dato:     #7d8886;
+  /* La rampa ordinal y la tinta del botón faltaban. Como la banda es oscura en
+     LOS DOS temas, en claro conservaban su valor claro y caían encima de un
+     suelo oscuro: --ord-1 medía 1,06:1, o sea invisible, y la tinta del botón
+     1,64:1 sobre el Peach. Toman el valor oscuro, que ya está validado.
+     Lo encontró validar_paleta.py al empezar a medir este ámbito. */
+  --ord-1:        #cfeae5;
+  --ord-2:        #93cdc6;
+  --ord-3:        #6ab4ad;
+  --ord-4:        #469690;
+  --boton-tinta:  #171214;
   --accion:       #f4c095;
   --accion-viva:  #f4c095;
   --cifra:        #f4c095;
