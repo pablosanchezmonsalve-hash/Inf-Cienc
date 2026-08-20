@@ -60,7 +60,8 @@ from pathlib import Path
 
 # --------------------------------------------------------------- construcción
 
-def construir(autoria, excluir: set[str] | None = None) -> dict:
+def construir(autoria, excluir: set[str] | None = None,
+              unidades: dict[str, str] | None = None) -> dict:
     """Pares (persona, publicación) -> nodos y aristas.
 
     `autoria` es cualquier iterable de pares. Se deduplica antes de nada: una
@@ -94,6 +95,7 @@ def construir(autoria, excluir: set[str] | None = None) -> dict:
                for a, c in sorted(peso)]
     nodos = sorted({p for p, _ in pares})
     return {"nodos": nodos, "aristas": aristas,
+            "unidades": {n: (unidades or {}).get(n, "No determinada") for n in nodos},
             "publicaciones_por_persona": dict(sorted(pubs_por_persona.items())),
             "publicaciones": len(por_pub),
             "publicaciones_con_dos_o_mas": sum(1 for g in por_pub.values() if len(g) > 1)}
@@ -212,7 +214,13 @@ def main() -> int:
 
     autoria = b.load_authorship()
     fragmentos = b.firmas_e09_encoladas()
-    g = construir(zip(autoria["nombre_en_fuente"], autoria["eid"]), excluir=fragmentos)
+    # La unidad se toma de la primera declarada por la persona. Una persona con
+    # dos unidades es una ambigüedad aparte (I-06) y no se resuelve aquí; el
+    # nodo se pinta con la trama de ausencia si no hay ninguna.
+    unidades = (autoria.dropna(subset=["unidad_academica"])
+                .groupby("nombre_en_fuente")["unidad_academica"].first().to_dict())
+    g = construir(zip(autoria["nombre_en_fuente"], autoria["eid"]),
+                  excluir=fragmentos, unidades=unidades)
 
     comp = componentes(g["nodos"], g["aristas"])
     coms = comunidades(g["nodos"], g["aristas"])
@@ -236,7 +244,8 @@ def main() -> int:
             "componente_mayor": max(_tamanos(comp).values()) if comp else 0,
             "comunidades_louvain": len(set(coms.values())),
         },
-        "nodos": [{"persona": n, "publicaciones": g["publicaciones_por_persona"][n],
+        "nodos": [{"persona": n, "unidad": g["unidades"][n],
+                   "publicaciones": g["publicaciones_por_persona"][n],
                    "grado": sum(1 for e in g["aristas"] if n in (e["a"], e["b"])),
                    "componente": comp[n], "comunidad_louvain": coms[n]}
                   for n in g["nodos"]],
