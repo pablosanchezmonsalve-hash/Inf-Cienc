@@ -471,6 +471,27 @@ export function lectura(kpisLista) {
   </div>`;
 }
 
+/** Banda de cierre de la portada: la salida a las secciones.
+
+    Se genera en vez de escribirse en el HTML para que no pueda divergir de
+    PAGINAS: si mañana se añade una sección, aparece aquí sola. Va sobre el
+    suelo de énfasis, que sólo admite tipografía y enlaces. */
+export function cierrePortada() {
+  const salidas = c.PAGINAS.filter(([href]) =>
+    ['produccion.html', 'impacto.html', 'colaboracion.html', 'tematica.html'].includes(href));
+  return `
+    <div class="banda-titulo">
+      <h2>Cada indicador declara su propio denominador.</h2>
+      <p>Las cifras de este informe no se miden todas sobre el mismo conjunto,
+      y por eso dos de ellas pueden diferir sin contradecirse. Cada gráfico
+      lleva pegada su fuente, su fecha de corte y sobre cuántos casos está
+      medido.</p>
+    </div>
+    <div class="banda-salidas">${salidas.map(([href, txt]) => `
+      <a href="${href}"><strong>${c.escapar(txt)}</strong><span>Ver la sección →</span></a>`).join('')}
+    </div>`;
+}
+
 /* ------------------------------------------------------------ catálogo */
 
 /** El catálogo completo de indicadores: los 40 evaluados, no los 27 que se
