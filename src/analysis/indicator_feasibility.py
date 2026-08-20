@@ -25,6 +25,38 @@ import common as c  # noqa: E402
 RESULTS: list[dict] = []
 
 
+
+def _tamano_red(log: pd.DataFrame) -> dict[str, int]:
+    """Qué tamaño tendría la red de coautoría con los datos de hoy.
+
+    Se cuenta sobre PERSONAS, aplicando la consolidación de identidades
+    vigente, y sobre pares DISTINTOS: una firma repetida dentro de una misma
+    publicación no es una coautoría consigo misma.
+    """
+    import itertools
+    import yaml
+
+    # Se lee el YAML directamente en vez de importar el mapa del build: este
+    # módulo es de análisis y no depende de la capa de construcción.
+    ruta = c.ROOT / "config" / "identidades_consolidadas.yml" if hasattr(c, "ROOT") \
+        else Path(__file__).resolve().parents[2] / "config" / "identidades_consolidadas.yml"
+    mapa: dict[str, str] = {}
+    if ruta.exists():
+        cfg = yaml.safe_load(ruta.read_text(encoding="utf-8")) or {}
+        mapa = {v: g["canonica"] for g in (cfg.get("grupos") or [])
+                for v in g["variantes"]}
+
+    persona = log["nombre_en_fuente"].map(lambda n: mapa.get(n, n))
+    par = pd.DataFrame({"persona": persona, "eid": log["eid"]}).drop_duplicates()
+    por_pub = par.groupby("eid")["persona"].apply(list)
+    multi = [p for p in por_pub if len(p) > 1]
+    aristas = {tuple(sorted(x)) for ps in multi
+               for x in itertools.combinations(sorted(set(ps)), 2)}
+    nodos = {p for a in aristas for p in a}
+    return {"pares": len(par), "pubs": int(par["eid"].nunique()),
+            "pubs_multi": len(multi), "aristas": len(aristas), "nodos": len(nodos)}
+
+
 def record(code: str, nombre: str, categoria: str, disponible: str,
            cobertura: str, confiabilidad: str, prioridad: str, nota: str) -> None:
     RESULTS.append({
@@ -203,9 +235,21 @@ def main() -> None:
            "SciVal advierte truncamiento en 'Affiliation names'. Usar "
            "Institution IDs como clave.")
 
+    # Las cifras se MIDEN aquí en vez de escribirse. La anterior decía
+    # «derivable de 1207 pares autor x publicación» y 1207 son las FILAS del
+    # log, o sea apariciones: una firma que ocupa tres posiciones de la misma
+    # publicación —«School of Psychology», un fragmento de cadena de afiliación
+    # que la regla E-09 ya detecta— se contaba tres veces. Los pares distintos
+    # son 1205, y sobre todo no son lo que describe a este indicador: lo que
+    # describe una red es cuántas publicaciones tienen DOS o más personas UFT,
+    # porque las demás no producen ninguna arista.
+    red = _tamano_red(log)
     record("C-05", "Red de coautoría autor-autor", "colaboracion", "parcial",
-           f"derivable de {len(log)} pares autor x publicación", "media", "V2",
-           "Técnicamente derivable, pero hereda las 123 variantes de nombre sin "
+           f"{red['aristas']} pares de coautoría entre {red['nodos']} personas, "
+           f"derivados de las {red['pubs_multi']} publicaciones con 2+ personas UFT "
+           f"(de {red['pubs']}); {red['pares']} pares persona x publicación",
+           "media", "V2",
+           "Técnicamente derivable, pero hereda las variantes de nombre sin "
            "resolver: la red tendría nodos duplicados. Diferido hasta T-03.")
 
     nau = numeric(scival, "Number of Authors")
