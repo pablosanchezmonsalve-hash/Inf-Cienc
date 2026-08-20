@@ -24,6 +24,7 @@ async function portada() {
     cont.innerHTML = v.kpis(resto);
     document.getElementById('panorama').innerHTML = v.panorama(series);
     document.getElementById('lectura').innerHTML = v.lectura(kpis);
+    document.getElementById('cierre').innerHTML = v.cierrePortada();
   }
 }
 
@@ -38,7 +39,10 @@ async function modulos() {
     // por el mismo motivo: es la clave de la sección y ya está en la URL.
     const clave = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
     const { ejes } = await c.cargar('ejes.json');
-    cont.innerHTML = v.paginaModulos(codigos, series, ejes[clave]);
+    // El catálogo se pide para que un indicador declarado en la página pero no
+    // publicado se dibuje como diferido en vez de desaparecer.
+    const catalogo = await c.cargar('catalogo.json');
+    cont.innerHTML = v.paginaModulos(codigos, series, ejes[clave], catalogo);
   }
   conmutadorVistas(cont);
   scrollSpy(cont);
@@ -395,7 +399,15 @@ async function autores() {
 async function fichaAutor() {
   const id = new URLSearchParams(location.search).get('id');
   const cont = document.getElementById('ficha');
-  if (!id) { cont.innerHTML = '<div class="vacio">Falta el identificador de autor.</div>'; return; }
+  // Sin identificador la página quedaba en blanco: ni encabezado —la ficha es
+  // la única del sitio sin h1 propio en el archivo, porque lo pone el JS— ni
+  // salida hacia ningún lado. Un callejón sin salida se corrige con una puerta.
+  if (!id) {
+    cont.innerHTML = `<h1>Ficha de autor</h1>
+      <div class="vacio">La dirección no trae identificador de autor, así que no
+      hay ficha que mostrar.<br><a href="autores.html">Ir al directorio de autores →</a></div>`;
+    return;
+  }
 
   let a;
   try { a = await c.cargar(`author/${id}.json`); }
@@ -408,11 +420,11 @@ async function fichaAutor() {
     <div><span>Nombre en fuente</span>${c.escapar(a.nombre_en_fuente)}</div>
     <div><span>Unidad académica</span>${c.escapar(a.unidades_academicas.join(' · '))}</div>
     <div><span>Scopus Author ID</span>${a.scopus_author_ids.length
-      ? a.scopus_author_ids.map(s => `<a href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
+      ? a.scopus_author_ids.map(s => `<a class="enlace-dato" href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
           target="_blank" rel="noopener">${s}</a>`).join(' · ')
       : '<span class="sin-dato-txt">No resuelto</span>'}</div>
     <div><span>ORCID</span>${a.orcid
-      ? `<a href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`
+      ? `<a class="enlace-dato" href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`
         // Qué evidencia respalda este ORCID, en orden de fuerza. El veredicto
         // sale de contrastar la asignación contra el registro del propio
         // titular, así que cuando existe desplaza a la confianza, que sólo
@@ -482,7 +494,7 @@ async function fichaAutor() {
     <section class="modulo">
       <header><h2>Publicaciones (${a.publicaciones.length})</h2></header>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Año</th><th>Título</th><th>Fuente</th><th>Tipo</th><th class="num">Citas</th></tr></thead>
+        <thead><tr><th scope="col">Año</th><th scope="col">Título</th><th scope="col">Fuente</th><th scope="col">Tipo</th><th scope="col" class="num">Citas</th></tr></thead>
         <tbody>${a.publicaciones.map(p => `<tr>
           <td>${c.anio(p.anio)}</td>
           <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>` : c.escapar(p.titulo)}</td>
@@ -530,6 +542,44 @@ async function catalogo() {
   if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'));
 }
 
+/* ══════════════════════════════════════════ teclado dentro de un gráfico */
+
+/* Cada barra era un punto de tabulación. Medido en Áreas temáticas: 41 de los
+   70 puntos de la página eran barras, así que pasar del primer gráfico al
+   enlace siguiente costaba veinte pulsaciones de Tab. Un gráfico no es una
+   lista de veinte controles: es UN control con veinte posiciones.
+
+   Patrón de composición de las prácticas ARIA: el gráfico es un solo punto de
+   tabulación y por dentro se recorre con las flechas. El tabindex «rueda» —la
+   marca enfocada vale 0 y las demás −1—, así que al volver con Tab se entra
+   por donde se salió y no por el principio.
+
+   Con esto el recorrido de la página baja de 70 puntos a 32, y explorar el
+   gráfico se vuelve más rápido en vez de más lento. */
+function tecladoGraficos() {
+  document.addEventListener('keydown', e => {
+    const marca = e.target.closest?.('svg.chart g.marca');
+    if (!marca) return;
+    const marcas = [...marca.closest('svg.chart').querySelectorAll('g.marca')];
+    const i = marcas.indexOf(marca);
+    let j = null;
+    // Las dos orientaciones responden a los cuatro cursores a propósito: el
+    // lector no tiene por qué saber si la serie se dibujó en horizontal o en
+    // vertical para poder recorrerla.
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = Math.min(i + 1, marcas.length - 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = Math.max(i - 1, 0);
+    else if (e.key === 'Home') j = 0;
+    else if (e.key === 'End') j = marcas.length - 1;
+    else return;
+
+    e.preventDefault();
+    if (j === i) return;
+    marca.setAttribute('tabindex', '-1');
+    marcas[j].setAttribute('tabindex', '0');
+    marcas[j].focus();
+  });
+}
+
 /* ============================================================== arranque */
 const PAGINAS = { portada, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
 
@@ -541,6 +591,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await c.montarAyuda();
     c.montarTooltip();
     if (PAGINAS[pagina]) await PAGINAS[pagina]();
+    // Delegado en document: vale para los gráficos pre-renderizados y para los
+    // que se repintan después de un filtro, sin volver a enganchar nada.
+    tecladoGraficos();
   } catch (e) {
     c.mostrarError(document.getElementById('contenido') || document.body, e);
   }

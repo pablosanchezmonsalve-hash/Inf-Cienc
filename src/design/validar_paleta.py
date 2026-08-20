@@ -120,16 +120,57 @@ def simular(h: str, tipo: str) -> str:
 TOKEN = re.compile(
     r"(--[a-z0-9-]+):\s*light-dark\(\s*(#[0-9a-fA-F]{6})\s*,\s*(#[0-9a-fA-F]{6})\s*\)")
 
+# Un token puede declararse con un solo hex, y entonces vale igual en los dos
+# temas. Dentro de .banda-contraste es lo habitual: la banda es oscura en claro
+# y en oscuro, así que su tinta no cambia.
+TOKEN_PLANO = re.compile(r"(--[a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\s*;")
+
+
+def _bloque(texto: str, selector: str) -> str:
+    """Devuelve el cuerpo de la primera regla `selector { ... }`.
+
+    Leer la hoja entera y quedarse con la ÚLTIMA aparición de cada token era un
+    error real: .banda-contraste redefine --superficie, --superficie-2 y --plano
+    en su propio ámbito, y esos valores pisaban los de :root. El validador
+    terminaba midiendo tinta clara contra suelo oscuro y declaraba 12 fallos que
+    no existían. Un instrumento que da falsos positivos se deja de mirar, y
+    entonces tampoco atrapa los verdaderos.
+    """
+    i = texto.find(selector + " {")
+    if i < 0:
+        i = texto.find(selector + "{")
+        if i < 0:
+            sys.exit(f"No se encuentra la regla `{selector}` en {HOJA.name}")
+    a = texto.index("{", i)
+    fin = texto.index("}", a)
+    return texto[a + 1:fin]
+
+
+def _tokens_de(cuerpo: str) -> dict[str, dict[str, str]]:
+    t = {m.group(1): {"claro": m.group(2).lower(), "oscuro": m.group(3).lower()}
+         for m in TOKEN.finditer(cuerpo)}
+    for m in TOKEN_PLANO.finditer(cuerpo):
+        t.setdefault(m.group(1), {"claro": m.group(2).lower(),
+                                  "oscuro": m.group(2).lower()})
+    return t
+
 
 def leer_tokens() -> dict[str, dict[str, str]]:
     if not HOJA.exists():
         sys.exit(f"No se encuentra {HOJA}")
-    texto = HOJA.read_text(encoding="utf-8")
-    tokens = {m.group(1): {"claro": m.group(2).lower(), "oscuro": m.group(3).lower()}
-              for m in TOKEN.finditer(texto)}
+    tokens = _tokens_de(_bloque(HOJA.read_text(encoding="utf-8"), ":root"))
     if not tokens:
-        sys.exit("No se leyó ningún token light-dark() de la hoja.")
+        sys.exit("No se leyó ningún token light-dark() de :root.")
     return tokens
+
+
+def leer_ambito(selector: str) -> dict[str, dict[str, str]]:
+    """Los tokens vigentes DENTRO de un ámbito: los de :root con los que ese
+    ámbito redefine encima. Es lo que hace la cascada, y es la paleta que ve de
+    verdad quien lee esa parte de la página."""
+    texto = HOJA.read_text(encoding="utf-8")
+    return {**_tokens_de(_bloque(texto, ":root")),
+            **_tokens_de(_bloque(texto, selector))}
 
 
 # ───────────────────────────────────────────────────── la tabla de reglas
@@ -155,6 +196,18 @@ REGLAS = [
     ("--boton-tinta",         "--accion",       4.5, "tinta del botón primario"),
 ]
 
+# El segundo suelo de banda lleva figuras, así que tiene que sostener la tinta
+# fina, el color del dato y —sobre todo— la marca de ausencia. Ese último piso
+# es el que fija cuánto puede oscurecerse el papel: es la regla que impide
+# repetir en papel-2 el error de poner figuras sobre el Peach del cierre.
+REGLAS_BANDA_PAPEL_2 = [
+    ("--tinta",    "--banda-papel-2", 4.5, "texto principal"),
+    ("--tinta-3",  "--banda-papel-2", 4.5, "metadatos"),
+    ("--accion",   "--banda-papel-2", 4.5, "texto de enlace"),
+    ("--serie-1",  "--banda-papel-2", 3.0, "barra de dato"),
+    ("--sin-dato", "--banda-papel-2", 3.0, "barra de ausencia"),
+]
+
 RAMPA = ["--ord-1", "--ord-2", "--ord-3", "--ord-4"]
 PAR_CATEGORICO = ("--serie-1", "--serie-2")
 PISO_DE = 20.0        # dato vs advertencia
@@ -171,26 +224,47 @@ def main() -> None:
     def val(tok: str, tema: str) -> str | None:
         return T.get(tok, {}).get(tema)
 
-    # ---- 1. Contraste, token a token, en los dos temas
-    for tema in ("claro", "oscuro"):
-        print(f"\n  {tema.upper()}")
-        for tok, fondo, piso, uso in REGLAS:
-            a, b = val(tok, tema), val(fondo, tema)
+    def medir(tabla: dict, reglas: list, tema: str) -> int:
+        malos = 0
+        for tok, fondo, piso, uso in reglas:
+            a = tabla.get(tok, {}).get(tema)
+            b = tabla.get(fondo, {}).get(tema)
             if a is None or b is None:
                 print(f"    ---- {tok} o {fondo} no existen en la hoja")
-                fallos += 1
+                malos += 1
                 continue
             r = contraste(a, b)
             ok = r >= piso
-            fallos += 0 if ok else 1
+            malos += 0 if ok else 1
             print(f"    {'OK  ' if ok else 'FALLA'} {r:6.2f}:1 (piso {piso})  "
                   f"{tok:22s} sobre {fondo:16s} {uso}")
+        return malos
+
+    # ---- 1. Contraste, token a token, en los dos temas
+    for tema in ("claro", "oscuro"):
+        print(f"\n  {tema.upper()}")
+        fallos += medir(T, REGLAS, tema)
         # Blanco sobre la marca: es donde va el título de la cabecera.
         r = contraste("#ffffff", val("--marca", tema))
         ok = r >= 4.5
         fallos += 0 if ok else 1
         print(f"    {'OK  ' if ok else 'FALLA'} {r:6.2f}:1 (piso 4.5)  "
               f"{'blanco':22s} sobre {'--marca':16s} título de cabecera")
+
+    # ---- 1b. Los suelos de banda, que no son :root
+    print("\n  BANDA PAPEL-2 (segundo suelo, admite figuras)")
+    for tema in ("claro", "oscuro"):
+        print(f"    · {tema}")
+        fallos += medir(T, REGLAS_BANDA_PAPEL_2, tema)
+
+    # La banda de contraste es oscura en LOS DOS temas, así que hay que medirla
+    # en los dos: en claro es donde un token que la banda no redefine se queda
+    # con su valor claro y termina cayendo sobre un suelo oscuro.
+    print("\n  BANDA DE CONTRASTE (redefine sus tokens en su ámbito)")
+    B = leer_ambito(".banda-contraste")
+    for tema in ("claro", "oscuro"):
+        print(f"    · {tema}")
+        fallos += medir(B, REGLAS, tema)
 
     # ---- 2. Separación dato ↔ advertencia
     print("\n  SEPARACIÓN DATO ↔ ADVERTENCIA (OKLab ΔE)")

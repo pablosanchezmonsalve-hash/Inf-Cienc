@@ -25,6 +25,41 @@ import common as c  # noqa: E402
 RESULTS: list[dict] = []
 
 
+
+def _tamano_red(log: pd.DataFrame) -> dict[str, int]:
+    """Qué tamaño tendría la red de coautoría con los datos de hoy.
+
+    Delega en src/build/grafo_coautoria.py en vez de contar aquí. Tener dos
+    implementaciones ya produjo dos cifras: 818 publicaciones en un sitio y 814
+    en el otro, porque sólo una excluía las firmas E-09. Las funciones de ese
+    módulo son puras y no arrastran la capa de build.
+    """
+    import yaml
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "build"))
+    import grafo_coautoria as G
+
+    raiz = Path(__file__).resolve().parents[2]
+    cfg = yaml.safe_load((raiz / "config" / "identidades_consolidadas.yml")
+                         .read_text(encoding="utf-8")) or {}
+    mapa = {v: g["canonica"] for g in (cfg.get("grupos") or []) for v in g["variantes"]}
+
+    # Las mismas exclusiones que el grafo: un fragmento de cadena de afiliación
+    # no es una persona y no puede coautorar con nadie.
+    amb = pd.read_csv(raiz / "internal" / "ambiguities_authors.csv", dtype=str)
+    e09 = set(amb[amb["tipo"] == "E-09_firma_sin_forma_de_persona"]["nombre_en_fuente"])
+
+    pares = ((mapa.get(n, n), e) for n, e in
+             zip(log["nombre_en_fuente"], log["eid"]))
+    g = G.construir(pares, excluir={mapa.get(f, f) for f in e09} | e09)
+    comp = G.componentes(g["nodos"], g["aristas"])
+    con_arista = {p for e in g["aristas"] for p in (e["a"], e["b"])}
+    return {"pares": sum(g["publicaciones_por_persona"].values()),
+            "pubs": g["publicaciones"],
+            "pubs_multi": g["publicaciones_con_dos_o_mas"],
+            "aristas": len(g["aristas"]), "nodos": len(con_arista),
+            "componentes": len(set(comp.values()))}
+
+
 def record(code: str, nombre: str, categoria: str, disponible: str,
            cobertura: str, confiabilidad: str, prioridad: str, nota: str) -> None:
     RESULTS.append({
@@ -203,9 +238,21 @@ def main() -> None:
            "SciVal advierte truncamiento en 'Affiliation names'. Usar "
            "Institution IDs como clave.")
 
+    # Las cifras se MIDEN aquí en vez de escribirse. La anterior decía
+    # «derivable de 1207 pares autor x publicación» y 1207 son las FILAS del
+    # log, o sea apariciones: una firma que ocupa tres posiciones de la misma
+    # publicación —«School of Psychology», un fragmento de cadena de afiliación
+    # que la regla E-09 ya detecta— se contaba tres veces. Los pares distintos
+    # son 1205, y sobre todo no son lo que describe a este indicador: lo que
+    # describe una red es cuántas publicaciones tienen DOS o más personas UFT,
+    # porque las demás no producen ninguna arista.
+    red = _tamano_red(log)
     record("C-05", "Red de coautoría autor-autor", "colaboracion", "parcial",
-           f"derivable de {len(log)} pares autor x publicación", "media", "V2",
-           "Técnicamente derivable, pero hereda las 123 variantes de nombre sin "
+           f"{red['aristas']} pares de coautoría entre {red['nodos']} personas, "
+           f"derivados de las {red['pubs_multi']} publicaciones con 2+ personas UFT "
+           f"(de {red['pubs']}); {red['pares']} pares persona x publicación",
+           "media", "V2",
+           "Técnicamente derivable, pero hereda las variantes de nombre sin "
            "resolver: la red tendría nodos duplicados. Diferido hasta T-03.")
 
     nau = numeric(scival, "Number of Authors")

@@ -88,16 +88,35 @@ if faltan:
     print(f'    {", ".join(faltan)}')
 
 # ---- 5. Coherencia de artefactos: todo indicador pedido por una página existe
+#
+# Un código declarado en `data-indicadores` es válido por una de dos vías, y no
+# hay una tercera:
+#   · está en series.json          -> se publica y se dibuja su figura;
+#   · está en catalogo.json como NO publicado -> se dibuja su módulo diferido.
+# Un código que no esté en ninguna de las dos es un error de escritura o un
+# indicador que se borró de config y quedó pedido por la página.
+#
+# En AMBOS casos se exige además que el HTML pre-renderizado lo contenga: es la
+# mitad del chequeo que prueba que de verdad se dibujó, y vale igual para el
+# diferido —cuyo módulo es lo único que impide que la sección diga, por
+# omisión, que el fenómeno no existe—.
 series = json.loads((DIST / 'data/series.json').read_text(encoding='utf-8'))
+catalogo = json.loads((DIST / 'data/catalogo.json').read_text(encoding='utf-8'))
+no_publicados = {r['codigo'] for r in catalogo['indicadores']
+                 if r.get('estado') != 'publicado'}
 for p in sorted(DIST.glob('*.html')):
-    m = re.search(r'data-indicadores="([^"]+)"', p.read_text(encoding='utf-8'))
+    html = p.read_text(encoding='utf-8')
+    m = re.search(r'data-indicadores="([^"]+)"', html)
     if not m:
         continue
     for cod in [c.strip() for c in m.group(1).split(',')]:
-        if cod not in series:
-            fallos.append(f'{p.name} pide {cod} y series.json no lo trae')
-        elif f'id="{cod}"' not in p.read_text(encoding='utf-8'):
-            fallos.append(f'{p.name} pide {cod} y el HTML pre-renderizado no lo contiene')
+        if cod not in series and cod not in no_publicados:
+            fallos.append(f'{p.name} pide {cod} y no está ni en series.json '
+                          f'ni en catalogo.json como no publicado')
+        elif f'id="{cod}"' not in html:
+            comor = 'diferido' if cod not in series else 'publicado'
+            fallos.append(f'{p.name} pide {cod} ({comor}) y el HTML '
+                          f'pre-renderizado no lo contiene')
 
 # ---- 6. La capa interna no puede haber viajado
 PROHIBIDOS = ['matching_log', 'ambiguities_', 'orcid_conflicts', 'identity_candidates',

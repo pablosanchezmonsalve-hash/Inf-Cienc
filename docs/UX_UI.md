@@ -98,6 +98,67 @@ responde» es justo el que no hacía falta escribir.
 Es institucionalmente neutro: describe la metodología, no a esta universidad.
 Otra institución lo reutiliza sin tocarlo.
 
+## 4 ter. La banda: unidad de composición
+
+Seis de las diez páginas —portada, las cuatro secciones y metodología— se
+componen como una **secuencia de bandas a sangre**. Una banda sostiene UNA
+afirmación, y los suelos alternan para que dos bandas seguidas no se lean como
+una sola.
+
+| Banda | Suelo | Qué sostiene |
+|---|---|---|
+| apertura | papel | qué responde la sección y qué **no** responde |
+| trabajo | papel-2 | el índice y los módulos publicados |
+| ausencia | contraste | los indicadores diferidos, si los hay |
+| cierre | énfasis | el denominador y la salida a otras secciones |
+
+La banda de **ausencia** existe porque un indicador diferido metido entre los
+publicados se lee como uno más; sobre su propio suelo se lee como lo que es. La
+de **cierre** repite el denominador a propósito: es lo último que se lee y lo
+que más se cita de memoria, y 823 y 816 no son la misma cifra medida dos veces.
+
+`main` deja de ser el contenedor en esas páginas; cada banda monta el suyo por
+dentro. Es lo que permite el sangrado sin trucos de márgenes negativos.
+
+### La banda de contraste redefine sus tokens
+
+En vez de una segunda hoja de estilo para «lo que va sobre fondo oscuro»,
+`.banda-contraste` redefine los tokens **en su propio ámbito**. Módulos,
+gráficos, sellos y tablas que caen dentro se adaptan solos, sin que ninguno
+sepa que está sobre otro suelo.
+
+### Tres reglas medidas
+
+**La banda de énfasis no lleva figuras.** Sobre Peach Glow el color del dato cae
+a 3,21:1 y la marca de ausencia a **2,35:1**. Por eso el cierre es sólo
+tipografía y enlaces, y la regla queda escrita junto al componente.
+
+**El segundo papel no podía ser `--superficie-2`.** Ese token es un tinte que se
+aplica *encima* del blanco de tarjeta —chips, cabeceras de tabla, hover— y en
+claro vale `#f7efe5`, que contra el papel `#f6efe6` mide ΔE **0,18** y
+**1,00:1**: el mismo color. La alternancia sólo funcionaba en oscuro, y en claro
+dejaba 6 rem de aire entre dos bandas sin nada que explicara el corte.
+
+**Y el suelo nuevo es frío, no un peach más oscuro.** Oscurecer el papel hacia
+el peach rompe la marca de ausencia —`--sin-dato` cae bajo 3:1 pasado
+`#dbe3df`— y además lo acercaba al Peach del cierre. Un papel frío se separa del
+papel cálido y del cierre a la vez. `#e1e7e4` es el límite útil: ΔE 3,63 contra
+el papel, con `--sin-dato` en 3,10:1, `--tinta-3` en 5,04:1 y `--serie-1` en
+4,20:1. Un paso más (`#dbe3df`) gana ΔE 4,97 pero deja la ausencia en 2,98:1.
+
+Ese borde mide **1,10:1**: es real, pero no sostiene solo un corte de sección,
+así que en tema claro las bandas de papel llevan una **costura de 1 px**. En
+oscuro los dos suelos ya se separan ΔE 11,75 y la costura sobra.
+
+### Dónde NO manda la banda
+
+Publicaciones, Autores, la ficha de autor y el catálogo no se componen en
+bandas. Son **superficies de consulta** con filtro y paginación: quien llega ahí
+viene a buscar, no a que le cuenten. Convertirlas en narrativa habría arreglado
+la estética y roto la función.
+
+---
+
 ## 5. Módulos analíticos
 
 | Módulo | Visualización | Pregunta que responde | Por qué esa forma |
@@ -216,6 +277,48 @@ distintos.
 
 ---
 
+
+### 10.1 Lo que la auditoría encontró y se corrigió
+
+Medido sobre las 10 páginas a 360 px de ancho:
+
+**Objetivos de puntero (WCAG 2.2 · SC 2.5.8).** Siete controles bajo el mínimo
+de 24×24: el botón de ayuda a 17×17, las etiquetas ORCID y el enlace de vigencia
+a 20 de alto, el de seguimiento a 15 y la casilla de filtro a **13×13**. Los
+enlaces dentro de un párrafo se dejan como están —la norma los exceptúa y
+agrandarlos rompería el interlineado de la prosa—. El botón de ayuda separa área
+y dibujo: el botón es el objetivo de 24×24 y el círculo lo pinta `::before`.
+
+> Una primera versión amplió el área con un pseudo-elemento superpuesto. Se veía
+> correcta en la hoja y **al comprobarla por hit-test real no recibía el
+> evento**: el área existía en el CSS y no en la pantalla. Se reemplazó por
+> padding con margen negativo, que agranda la caja real —medible— sin mover la
+> maquetación.
+
+**Esquema de encabezados.** Todo el sitio era `h2`, así que la banda y los
+módulos que contiene competían al mismo nivel: quien navega por encabezados no
+tenía forma de saber que los módulos cuelgan de algo. Ahora `h1` página → `h2`
+banda → `h3` módulo. El catálogo **no** usa bandas, así que sus secciones se
+quedan en `h2`: bajarlas habría creado el salto `h1`→`h3` que se corregía.
+
+**Teclado dentro de un gráfico.** Cada barra era un punto de tabulación: en
+Áreas temáticas, **41 de los 70 puntos de la página eran barras**, así que pasar
+del primer gráfico al enlace siguiente costaba veinte pulsaciones de Tab. Un
+gráfico no es una lista de veinte controles: es *un* control con veinte
+posiciones. Con el patrón de composición de las prácticas ARIA —un punto de
+tabulación y flechas por dentro, con `Inicio` y `Fin` en los extremos— la página
+baja de **70 puntos a 32**. El `tabindex` rueda, así que al volver con Tab se
+entra por donde se salió.
+
+La pista del atajo aparece al entrar el foco y va **debajo** del gráfico: probada
+encima, tapaba la primera barra y su valor.
+
+**Otros:** los tres «Ver la sección completa» de la portada eran indistintos
+fuera de contexto (SC 2.4.4) y ahora nombran su sección en `aria-label`;
+cabeceras de tabla sin `scope` en tres tablas (SC 1.3.1); y `autor.html` sin
+parámetro quedaba en blanco, sin encabezado ni salida.
+
+
 ## 11. Responsive
 
 Prioridad de contenido en pantallas estrechas: KPIs → módulo actual → filtros
@@ -231,59 +334,68 @@ ninguna fuente, hoja ni script se carga desde un CDN.
 
 ### 12.1 Paleta: de dónde sale cada color
 
-**La identidad es roja.** El sistema anterior era teal-azul (`#22577A` ·
-`#38A3A5` · …); se sustituyó por decisión del proyecto. Lo que hizo el cambio
-viable sin reabrir todo el diseño es un hecho medido: **el sitio usa un solo
-color de dato**, así que cambiarlo no obliga a revalidar un conjunto categórico.
+**La paleta la fijó el proyecto**: Ink Black `#071e22` · Deep Ocean `#1d7874` ·
+Jungle Teal `#679289` · Peach Glow `#f4c095` · Racing Red `#ee2e31`. Sustituye a
+la identidad roja anterior, que a su vez había sustituido a un teal-azul. Los
+cinco colores entran **donde la medición los admite**, y dos no entraron donde
+se pretendía.
 
-**El rojo no es el rojo institucional oficial de la UFT.** No se pudo verificar
-su valor exacto —`finis.cl` y los directorios de marca respondieron 403— y ante
-la duda **no se inventó**. Los tonos están *diseñados por medición*. El día que
-exista el hex oficial se cambia `--marca` y sus derivados: son tokens, no
-literales repartidos por la hoja.
+El papel se tiñe con Peach al 6–10 %, la tinta es Ink Black literal y el dato es
+Deep Ocean. En tema oscuro Ink Black cambia de papel a suelo: deja de ser tinta
+y pasa a ser fondo.
+
+Dos correcciones que impuso [`validar_paleta.py`](../src/design/validar_paleta.py),
+no el gusto:
+
+> **Peach Glow no puede ser el color del dato en oscuro.** Chocaba con el ámbar
+> de advertencia: ΔE OKLab **10,2** contra un piso de 20. Es exactamente lo que
+> esa regla existe para atrapar — confundir «esto es el dato» con «esto es una
+> advertencia sobre el dato». El dato pasa a ser teal en los **dos** temas y
+> Peach baja a segunda ranura.
+>
+> **El cuarto escalón de la rampa ordinal no llegaba a 3:1** contra su
+> superficie. Los cuatro escalones se buscaron con la propia matemática del
+> validador en vez de afinarse a ojo.
+
+El par categórico del anillo `C-01` mejora de ΔE 12,2 a **30,1** en claro: teal
+contra Ink Black se separa por luminosidad, que ninguna dicromacia colapsa.
 
 Cada token despeja un umbral comprobable, medido en los **dos** temas:
 
 | Token | Fondo | Claro | Oscuro | Piso |
 |---|---|---|---|---|
-| `--tinta` | `--superficie` | 18,54 | 15,57 | 4,5 (WCAG 1.4.3) |
-| `--tinta-2` | `--superficie` | 8,28 | 8,47 | 4,5 |
-| `--tinta-3` | `--superficie-2` | 5,73 | 5,64 | 4,5 |
-| `--cifra` | `--superficie` | 9,10 | 8,16 | 3,0 (texto grande) |
-| `--accion` | `--superficie` | 7,67 | 7,88 | 4,5 |
-| `--accion` | `--superficie-2` | 6,71 | 7,26 | 4,5 |
-| `--serie-1` | `--superficie` | 7,67 | 5,48 | 3,0 (WCAG 1.4.11) |
-| `--sin-dato` | `--superficie` | 3,90 | 3,71 | 3,0 |
-| `--ord-1` … `--ord-4` | `--superficie` | 14,80 … 3,53 | 12,33 … 3,17 | 3,0 |
-| `--marca-tinta` | `--marca` | 8,26 | 10,29 | 4,5 |
-| blanco | `--marca` | 10,88 | 17,73 | 4,5 |
-| `--aviso-tinta` | `--aviso-fondo` | 8,74 | 11,75 | 4,5 |
+| `--tinta` | `--superficie` | 16,86 | 13,28 | 4,5 (WCAG 1.4.3) |
+| `--tinta-2` | `--superficie` | 9,48 | 8,59 | 4,5 |
+| `--tinta-3` | `--superficie-2` | 5,55 | 5,21 | 4,5 |
+| `--cifra` | `--superficie` | 8,88 | 9,23 | 3,0 (texto grande) |
+| `--accion` | `--superficie` | 7,92 | 9,23 | 4,5 |
+| `--serie-1` | `--superficie` | 5,14 | 5,79 | 3,0 (WCAG 1.4.11) |
+| `--sin-dato` | `--superficie` | 3,80 | 4,13 | 3,0 |
+| `--ord-1` … `--ord-4` | `--superficie` | 15,60 … 3,22 | 11,91 … 4,34 | 3,0 |
+| `--marca-tinta` | `--marca` | 10,53 | 11,47 | 4,5 |
+| `--aviso-tinta` | `--aviso-fondo` | 8,07 | 10,43 | 4,5 |
 
-Dos condiciones que el contraste solo no cubre:
+**Separación dato ↔ advertencia:** ΔE OKLab **22,1** en claro y **20,3** en
+oscuro, sobre un piso de 20. **Rampa ordinal:** paso mínimo ΔE **11,4** y
+**8,8**, sobre un piso de 8, con luminosidad monótona.
 
-**Separación dato ↔ advertencia.** El dato es rojo y la advertencia metodológica
-es ámbar: dos familias cálidas contiguas podrían confundirse. Medido en OKLab
-entre `--serie-1` y `--aviso-borde` —el par que de verdad se dibuja junto, barra
-de dato contra línea de referencia—: ΔE **25,1** en claro y **24,1** en oscuro,
-sobre un piso de 20.
+#### El validador estaba midiendo otra paleta
 
-> **Corrección.** Una versión anterior publicaba 28,6 y 21,2. Estaban medidas
-> contra `#d9a520`, que era `--aviso-tinta-grafico` de la paleta teal anterior y
-> ya no existe en la hoja. Con el valor real, el tema oscuro daba **17,9 y no
-> cumplía**: `--aviso-borde` en oscuro era `#c8901a`, un resto de la paleta teal
-> que sobrevivió al cambio de identidad sin que nadie lo mirara. Contra un dato
-> teal la separación sobraba; contra un dato rojo, no. Lo encontró
-> [`src/design/validar_paleta.py`](../src/design/validar_paleta.py), que lee los
-> tokens de la hoja en vez de creerse una tabla. Corregido a `#f0b429`.
+`validar_paleta.py` leía la hoja entera y se quedaba con la **última** aparición
+de cada token. Desde que `.banda-contraste` redefine `--superficie`,
+`--superficie-2` y `--plano` en su ámbito, esos valores pisaban los de `:root`:
+el validador comparaba tinta clara contra suelo oscuro y declaraba **12 fallos
+inexistentes**. Ahora lee sólo el bloque `:root`.
 
-**Rampa ordinal (Q1–Q4).** Un solo tono en cuatro pasos con luminosidad
-monótona; paso mínimo ΔE **10,5** y **11,3**, sobre un piso de 8. Cuatro tonos
-distintos habrían afirmado que Q1 y Q4 no tienen relación entre sí, cuando son
-posiciones de una misma escala.
+No es cosmético. Un instrumento que da falsos positivos se deja de mirar, y
+entonces tampoco atrapa los verdaderos — que era el caso:
 
-**Superficie oscura cálida.** El tema oscuro pasó de pizarra fría (`#12222a`) a
-pizarra cálida (`#171214`). Un rojo sobre fondo azulado se lee sucio: el fondo
-tira del tono hacia el magenta.
+> Al medir la banda de contraste **como ámbito propio**, aparecieron cuatro
+> fallos reales. La banda redefine `--serie-1`, `--serie-2` y `--sin-dato` pero
+> se había olvidado de la rampa ordinal y de la tinta del botón. Como la banda
+> es oscura en los **dos** temas, en claro esos tokens conservaban su valor
+> claro y caían sobre un suelo oscuro: `--ord-1` medía **1,06:1**, o sea
+> invisible.
 
 #### Series categóricas: qué se dibuja de verdad
 
@@ -372,6 +484,32 @@ Tres reglas que no se negocian:
    disponible para codificar.** Por eso `A-01` (Gold, Green, Bronze) se dibuja
    en una sola serie: la paleta categórica dejaría «Green» de color naranja.
 
+#### La forma la elige la relación del dato, no la costumbre
+
+El sitio dibujaba **11 de sus 16 indicadores con `barrasH`**. No era una
+preferencia: era la forma por defecto aplicándose a relaciones de datos
+distintas. Contrastado contra el
+[Visual Vocabulary del Financial Times](https://github.com/Financial-Times/chart-doctor),
+que clasifica los gráficos por la RELACIÓN que expresan, cuatro estaban en la
+categoría equivocada:
+
+| | Relación | Forma |
+|---|---|---|
+| `I-04` | FWCI contra el 1,00 mundial | `desviacion()` |
+| `I-05` | umbrales de percentil, **anidados** | `acumulada()` |
+| `C-06` | autores por publicación, continuo tramificado | `distribucion()` |
+| `R-01` | cuartiles Q1–Q4 de un total conocido | `proporcional()` |
+
+`I-05` era un problema de **correctitud**, no de estética: los tramos son
+anidados —las 3 publicaciones del top 1 % están también en el top 5, 10 y 25— y
+cuatro barras hermanas sugerían cuatro grupos disjuntos que podían sumarse. La
+suma daba 322, una cifra sin significado.
+
+> **Corrección sobre una primera versión.** El déficit de `I-04` se pintaba con
+> `--sin-dato`. Ese gris significa **ausencia** de dato (`D-09`) y un FWCI bajo
+> el promedio es un valor **medido**. Ahora la dirección la lleva sólo la
+> posición respecto del eje, que no gasta color ni inventa semántica.
+
 ### 12.5 Interacción
 
 **Gráficos.** Señalar una marca **atenúa las demás** al 34 % y contornea la
@@ -407,8 +545,14 @@ con 51 filas en pantalla, una flecha arriba del todo se pierde.
 ### 12.6 Modo claro y oscuro
 
 El modo oscuro es una paleta **elegida y revalidada contra su propia
-superficie** (`#171214`, pizarra cálida, no un gris neutro), no una inversión.
-Invertir una paleta validada no produce una paleta validada.
+superficie**, no una inversión. Invertir una paleta validada no produce una
+paleta validada.
+
+El suelo es Ink Black (`--plano: #041417`) y las tarjetas se levantan sobre él
+(`--superficie: #0d2a2f`). El color de la identidad cambia de papel a suelo: en
+claro Ink Black es la tinta; en oscuro es el fondo. El dato, en cambio, **no
+cambia** —teal en los dos temas—, y esa fue una decisión del validador y no del
+gusto: Peach Glow como dato en oscuro chocaba con el ámbar de advertencia.
 
 El selector de la cabecera tiene tres estados —automático, claro, oscuro—; el
 automático sigue al sistema operativo. La elección se recuerda y se aplica antes

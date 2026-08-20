@@ -36,18 +36,19 @@ export const RENDER = {
   'P-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'P-07': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
   'I-01': s => c.barrasV(s.datos, { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n' }),
-  'I-04': s => c.barrasV(s.datos.map(d => ({ anio: d.anio, n: d.valor })), {
-    titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n', decimales: 2,
+  // DESVIACIÓN, no magnitud: el FWCI se lee CONTRA el 1,00 mundial, así que el
+  // 1,00 va en el eje y el déficit se lee sin aritmética mental (FT: Deviation).
+  'I-04': s => c.desviacion(s.datos.map(d => ({ anio: d.anio, valor: d.valor })), {
+    titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'valor', decimales: 2,
     referencia: 1, refEtiqueta: '1,00 — promedio mundial',
   }),
-  'I-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado,
-    // El trazo dice qué cabría esperar bajo el promedio mundial. Sin él, «75
-    // en el top 10 %» es un número sin escala: nadie sabe si son muchos.
-    refEtiqueta: `Lo esperable bajo el promedio mundial: el top k % contiene el k % `
-      + `de las ${c.nf.format(s.base_percentil)} publicaciones con percentil.` }),
+  // Los tramos son ACUMULADOS y anidados: las 3 del top 1 % están también en el
+  // top 5, 10 y 25. Cuatro barras hermanas sugerían cuatro grupos disjuntos que
+  // podrían sumarse —322, una cifra sin significado— (FT: Distribution).
+  'I-05': s => c.acumulada(s.datos, { titulo: s.nombre, total: s.base_percentil }),
   // Q1–Q4 es una escala ORDENADA, no cuatro categorías sueltas: un solo tono en
   // cuatro pasos, del más oscuro (mejor posición) al más claro.
-  'R-01': s => c.barrasH(s.datos, { titulo: s.nombre, escala: 'ordinal', cuotaValida: true, trama: s.multivaluado }),
+  'R-01': s => c.proporcional(s.datos, { titulo: s.nombre }),
   // Acceso abierto se queda en una sola serie a propósito: las categorías se
   // llaman Gold, Green y Bronze, y pintarlas con la paleta categórica dejaría
   // «Green» de color naranja. Cuando el nombre de la categoría ya es un color,
@@ -56,7 +57,9 @@ export const RENDER = {
   'C-01': s => c.anillo(s.datos, { titulo: s.nombre }),
   'C-03': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'C-04': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-  'C-06': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
+  // El tamaño del equipo es un continuo tramificado: ordenarlo por frecuencia
+  // destruiría el eje, que es justo la información (FT: Distribution).
+  'C-06': s => c.distribucion(s.datos, { titulo: s.nombre, etiquetaEje: 'autores por publicación' }),
   'T-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'T-01': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
   'T-04': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
@@ -154,7 +157,7 @@ export function modulo(cod, s) {
   return `<section class="modulo" id="${cod}" tabindex="-1">
     <header>
       <div class="modulo-id">
-        <h2>${c.escapar(s.nombre)}</h2>
+        <h3>${c.escapar(s.nombre)}</h3>
         <span class="codigo">${cod}</span>
       </div>
       ${conmutador(cod)}
@@ -181,10 +184,18 @@ export function modulo(cod, s) {
     saltar sin recorrer la página entera es la diferencia entre consultar y
     resignarse a leer en orden. El indicador activo se marca por scroll-spy
     desde paginas.js; sin JavaScript sigue siendo una lista de anclas útil. */
-export function rail(codigos, series) {
-  const items = codigos.filter(cod => series[cod]).map(cod =>
-    `<li><a href="#${cod}"><span class="rail-cod">${cod}</span>
-      <span class="rail-txt">${c.escapar(series[cod].nombre)}</span></a></li>`).join('');
+export function rail(codigos, series, porCodigo = {}) {
+  // Un indicador diferido sigue en el índice: si desapareciera de aquí, la
+  // página diría que no existe, que es justo lo que el módulo evita decir.
+  const items = codigos.map(cod => {
+    const s = series[cod] || porCodigo[cod];
+    if (!s) return '';
+    const dif = !series[cod];
+    return `<li><a href="#${cod}"${dif ? ' class="rail-diferido"' : ''}>
+      <span class="rail-cod">${cod}</span>
+      <span class="rail-txt">${c.escapar(s.nombre)}</span>
+      ${dif ? '<span class="rail-marca">diferido</span>' : ''}</a></li>`;
+  }).join('');
   return `<nav class="rail" aria-label="Indicadores de esta página">
     <p class="rail-titulo">En esta página</p>
     <ol>${items}</ol>
@@ -213,11 +224,118 @@ export function panelEje(eje) {
   </section>`;
 }
 
-/** Los módulos de una página de sección, con su panel y su índice. */
-export function paginaModulos(codigos, series, eje) {
-  const presentes = codigos.filter(cod => series[cod]);
-  return panelEje(eje) + rail(presentes, series)
-    + `<div class="modulos">${presentes.map(cod => modulo(cod, series[cod])).join('')}</div>`;
+/** Módulo de un indicador que NO se publica.
+
+    Un indicador diferido que simplemente no aparece se lee como que el
+    fenómeno no existe: en colaboración, un hueco donde iría la red de
+    coautoría dice «no hay coautoría interna», que es una afirmación distinta
+    y falsa. Es la misma regla que `D-09` aplica a la celda —ausencia de dato
+    y cero nunca se ven igual— llevada al módulo completo.
+
+    No inventa texto: el motivo sale de `catalogo.json`, que a su vez lo toma
+    de `config/indicators.yml`. Se combinan `razon` y `advertencia` con el
+    mismo criterio que la tabla del catálogo, para que las dos vistas del
+    mismo hecho no puedan divergir. */
+export function moduloDiferido(cod, r) {
+  const motivo = [r.razon, r.advertencia].filter(Boolean).join(' ');
+  return `<section class="modulo modulo-diferido" id="${cod}" tabindex="-1">
+    <header>
+      <div class="modulo-id">
+        <h3>${c.escapar(r.nombre)}</h3>
+        <span class="codigo">${cod}</span>
+      </div>
+      <span class="estado" data-e="${r.estado}">${c.escapar(r.estado_etiqueta)}</span>
+    </header>
+    <p class="diferido-detalle">${c.escapar(r.estado_detalle)}</p>
+    ${motivo ? `<p class="nota-destacada"><b>Por qué no se publica</b>${c.escapar(motivo)}</p>` : ''}
+    ${r.que_falta ? `<p class="nota"><strong>Qué falta:</strong> ${c.escapar(r.que_falta)}</p>` : ''}
+    <p class="nota">Este módulo no muestra un gráfico vacío ni un cero: el dato
+      todavía no se ha construido, que no es lo mismo que valer cero. Ver el
+      <a href="indicadores.html#${cod}">catálogo de indicadores</a>.</p>
+  </section>`;
+}
+
+/** Los módulos de una página de sección, con su panel y su índice.
+
+    `catalogo` es opcional: sin él la página se comporta como antes. Con él,
+    los códigos declarados en la página que no tienen serie porque no se
+    publican se dibujan como módulo diferido en lugar de desaparecer. */
+export function paginaModulos(codigos, series, eje, catalogo = null) {
+  const porCodigo = {};
+  if (catalogo) for (const r of catalogo.indicadores) porCodigo[r.codigo] = r;
+
+  // Se conserva el orden declarado en la página: el diferido ocupa el lugar
+  // que le corresponde en la secuencia, no se relega al final.
+  const presentes = codigos.filter(cod =>
+    series[cod] || (porCodigo[cod] && porCodigo[cod].estado !== 'publicado'));
+
+  // Los diferidos se separan de los publicados porque van a bandas distintas:
+  // lo que el informe NO sabe merece su propio suelo, no una tarjeta más en la
+  // fila. Dentro de cada grupo se conserva el orden declarado en la página.
+  const publicados = presentes.filter(cod => series[cod]);
+  const diferidos = presentes.filter(cod => !series[cod]);
+
+  const bandas = [];
+
+  // 1 · APERTURA — qué responde la sección y qué NO responde. Va primero
+  //     porque condiciona todo lo que viene después.
+  bandas.push(banda('papel', panelEje(eje)));
+
+  // 2 · TRABAJO — el índice y los módulos publicados. Es la banda de consulta:
+  //     aquí la narrativa cede y manda la función de referencia.
+  if (publicados.length) {
+    bandas.push(banda('papel-2', `<h2 class="solo-lectores">Indicadores publicados</h2>
+      <div class="disposicion">${
+      rail(presentes, series, porCodigo)}<div class="modulos">${
+      publicados.map(cod => modulo(cod, series[cod])).join('')}</div></div>`));
+  }
+
+  // 3 · AUSENCIA — sobre el suelo de contraste. Un indicador diferido metido
+  //     entre los publicados se lee como uno más; aquí se lee como lo que es.
+  if (diferidos.length) {
+    bandas.push(banda('contraste', `
+      <div class="banda-titulo">
+        <p class="banda-gancho">Lo que esta sección todavía no puede mostrar</p>
+        <h2>${diferidos.length === 1 ? 'Un indicador' : `${diferidos.length} indicadores`}
+          de esta sección está${diferidos.length === 1 ? '' : 'n'} verificado${
+          diferidos.length === 1 ? '' : 's'} pero no se publica${diferidos.length === 1 ? '' : 'n'}.</h2>
+        <p>Se dice cuál y por qué. Un hueco se leería como que el fenómeno no existe.</p>
+      </div>
+      <div class="modulos">${diferidos.map(cod => moduloDiferido(cod, porCodigo[cod])).join('')}</div>`));
+  }
+
+  // 4 · CIERRE — sobre Peach, SÓLO tipografía y enlaces: sobre ese suelo el
+  //     color del dato no despeja 4,5:1 y la marca de ausencia no despeja 3:1.
+  bandas.push(banda('enfasis', cierre(eje)));
+
+  return bandas.join('');
+}
+
+/** Envoltura de una banda: franja a sangre con su contenido en el contenedor. */
+function banda(suelo, contenido) {
+  return `<section class="banda banda-${suelo}"><div class="contenedor">${contenido}</div></section>`;
+}
+
+/** Banda de cierre: el denominador de la sección y la salida a las demás.
+
+    Repite el denominador a propósito. Es la última cosa que se lee y la que
+    más se cita de memoria: «823» y «816» no son la misma cifra medida dos
+    veces, y decirlo una vez arriba no basta. */
+function cierre(eje) {
+  const salidas = c.PAGINAS
+    .filter(([href]) => !['index.html', 'publicaciones.html', 'autores.html'].includes(href))
+    .slice(0, 3);
+  return `
+    <div class="banda-titulo">
+      <h2>Cada indicador declara su propio denominador.</h2>
+      <p>${eje && eje.sobre_que ? c.escapar(eje.sobre_que)
+        : 'Los denominadores del informe no son intercambiables.'}
+        Ninguna sección los mezcla, y por eso dos cifras del mismo informe
+        pueden medirse sobre conjuntos distintos sin contradecirse.</p>
+    </div>
+    <div class="banda-salidas">${salidas.map(([href, txt]) => `
+      <a href="${href}"><strong>${c.escapar(txt)}</strong><span>Ver la sección →</span></a>`).join('')}
+    </div>`;
 }
 
 /* ══════════════════════════════════════════════════════════════ portada */
@@ -325,12 +443,14 @@ export function panorama(series) {
       <section class="modulo modulo-compacto">
         <header>
           <div class="modulo-id">
-            <h2>${c.escapar(series[cod].nombre)}</h2>
+            <h3>${c.escapar(series[cod].nombre)}</h3>
             <span class="codigo">${cod}</span>
           </div>
         </header>
         ${dibujar(series[cod])}
-        <p class="nota"><a class="enlace-seguir" href="${destino}">Ver la sección completa →</a></p>
+        <p class="nota"><a class="enlace-seguir" href="${destino}"
+           aria-label="Ver la sección completa de ${c.escapar(series[cod].nombre)}"
+           >Ver la sección completa →</a></p>
       </section>`).join('')}</div>`;
 }
 
@@ -352,6 +472,27 @@ export function lectura(kpisLista) {
     calcula. No todas las publicaciones tienen métricas: el denominador
     cambia según el indicador.</p>
   </div>`;
+}
+
+/** Banda de cierre de la portada: la salida a las secciones.
+
+    Se genera en vez de escribirse en el HTML para que no pueda divergir de
+    PAGINAS: si mañana se añade una sección, aparece aquí sola. Va sobre el
+    suelo de énfasis, que sólo admite tipografía y enlaces. */
+export function cierrePortada() {
+  const salidas = c.PAGINAS.filter(([href]) =>
+    ['produccion.html', 'impacto.html', 'colaboracion.html', 'tematica.html'].includes(href));
+  return `
+    <div class="banda-titulo">
+      <h2>Cada indicador declara su propio denominador.</h2>
+      <p>Las cifras de este informe no se miden todas sobre el mismo conjunto,
+      y por eso dos de ellas pueden diferir sin contradecirse. Cada gráfico
+      lleva pegada su fuente, su fecha de corte y sobre cuántos casos está
+      medido.</p>
+    </div>
+    <div class="banda-salidas">${salidas.map(([href, txt]) => `
+      <a href="${href}"><strong>${c.escapar(txt)}</strong><span>Ver la sección →</span></a>`).join('')}
+    </div>`;
 }
 
 /* ------------------------------------------------------------ catálogo */
@@ -396,7 +537,7 @@ export function catalogo(cat) {
         </td>
       </tr>` : '';
     return `
-      <tr>
+      <tr id="${r.codigo}">
         <td><span class="codigo">${r.codigo}</span></td>
         <td>
           <strong>${c.escapar(r.nombre)}</strong>

@@ -20,12 +20,33 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
 <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
 <header class="cabecera" id="cabecera"></header>
 <div class="vigencia" id="vigencia"></div>
-<main id="contenido" class="contenedor">
-  <div id="titular"></div>
-  <h2 class="titulo-seccion">Indicadores de cabecera</h2>
-  <div class="kpis" id="kpis"></div>
-  <div id="panorama"></div>
-  <div id="lectura"></div>
+<main id="contenido">
+  <!-- Las bandas son estáticas; su contenido lo inyecta el pre-renderizado.
+       El orden cambió respecto de la versión anterior: «Cómo leer estas
+       cifras» estaba al FINAL, después de todos los gráficos. Explica la
+       diferencia entre la media y la mediana del FWCI, que es la primera
+       cifra del titular, así que ahora va inmediatamente después de él. Una
+       advertencia que llega tras la figura que califica llega tarde. -->
+  <section class="banda banda-papel"><div class="contenedor">
+    <div id="titular"></div>
+  </div></section>
+
+  <section class="banda banda-papel-2"><div class="contenedor">
+    <div id="lectura"></div>
+  </div></section>
+
+  <section class="banda banda-papel"><div class="contenedor">
+    <h2 class="titulo-seccion">Indicadores de cabecera</h2>
+    <div class="kpis" id="kpis"></div>
+  </div></section>
+
+  <section class="banda banda-papel-2"><div class="contenedor">
+    <div id="panorama"></div>
+  </div></section>
+
+  <section class="banda banda-enfasis"><div class="contenedor">
+    <div id="cierre"></div>
+  </div></section>
 </main>
 <footer class="pie" id="pie"></footer>
 <script type="module" src="assets/js/paginas.js"></script>
