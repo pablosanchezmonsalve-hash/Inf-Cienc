@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `c304223` · La revisión de identidad también tiene asistente en Windows
-Snapshot: 2026-08-19
+Último commit: `ed0c75e` · Accesibilidad: esquema de encabezados, objetivos de puntero y bandas e
+Snapshot: 2026-08-20
 
 ---
 
