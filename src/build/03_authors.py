@@ -329,8 +329,17 @@ def main() -> None:
         # unido varias variantes, cada una con su identificador. Marcarla
         # igual presentaría como incertidumbre justo lo que se acaba de
         # resolver.
+        #
+        # PERO ESO NO VALE PARA UNA CONSOLIDACIÓN ORTOGRÁFICA. Ahí las grafías
+        # unidas cuelgan del MISMO nombre completo en la fuente, así que los
+        # varios identificadores no son «uno por variante»: son la duda P-04
+        # original, intacta. Tratarlas igual apagaba la advertencia de una
+        # ficha sobre la que nadie había decidido nada —«De la Fuente López M.»
+        # perdió la suya— y eso es exactamente lo que la bandera existe para
+        # impedir.
         variantes = CONSOLIDADAS.get(nombre, [])
-        identidad_ambigua = bool(n_ids and n_ids > 1) and not variantes
+        revisada = b.ORIGEN_CONSOLIDACION.get(nombre) in ("humana", "mixta")
+        identidad_ambigua = bool(n_ids and n_ids > 1) and not (variantes and revisada)
 
         veredicto = (orcid_map.get(nombre) or {}).get("veredicto")
         coincidentes = (orcid_map.get(nombre) or {}).get("dois_coincidentes")
