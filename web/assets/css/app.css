@@ -463,6 +463,85 @@ main { padding: var(--e5) 0 var(--e8); }
    Debajo de 1040 px no hay ancho para dos columnas y el índice se convierte en
    una fila de pastillas desplazable sobre el contenido. No se oculta: es la
    única vista general de la página. */
+/* ═══════════════════════════════════ BANDAS · unidad de composición
+
+   Una banda es una franja a sangre con su propio suelo. El patrón viene del
+   informe narrativo: una banda sostiene UNA afirmación, y los suelos alternan
+   para que dos bandas seguidas no se lean como una sola.
+
+   Cinco variantes cerradas, no composiciones sueltas: si cada banda fuera
+   dibujada a mano, cada página nueva empezaría de cero.
+
+   QUÉ ADMITE CADA SUELO (medido; ver la lámina «Sistema de bandas»):
+     papel · papel-2 · contraste  admiten todo, incluidas figuras y ausencia.
+     énfasis (Peach)              SÓLO titular y prosa: sobre él el color del
+                                  dato cae a 3,21:1 y la marca de ausencia a
+                                  2,35:1. Por eso el cierre no lleva figuras.
+
+   La banda de contraste REDEFINE los tokens en su propio ámbito. Así los
+   módulos, gráficos y sellos que caen dentro se adaptan solos: no hay una
+   segunda hoja de estilo para «lo que va sobre fondo oscuro». */
+.banda { padding: var(--e7) 0; }
+.banda + .banda { padding-top: var(--e7); }
+.banda-papel    { background: var(--plano); }
+.banda-papel-2  { background: var(--superficie-2); }
+.banda-enfasis  { background: light-dark(#f4c095, #2e2210); }
+
+/* Sobre Peach, --tinta-3 no llega a 4,5:1. Se sube al valor de --tinta-2 para
+   que un metadato que se cuele siga siendo legible en vez de fallar en
+   silencio. */
+.banda-enfasis { --tinta-3: light-dark(#33484a, #d9c39e); }
+
+.banda-contraste {
+  background: light-dark(#071e22, #113236);
+  --superficie:   light-dark(#0d2a2f, #17393d);
+  --superficie-2: light-dark(#113236, #1c4045);
+  --plano:        light-dark(#071e22, #113236);
+  --tinta:        #eef1ee;
+  --tinta-2:      #b9c6c3;
+  /* Más claro que el --tinta-3 global: dentro de la banda, --superficie-2 sube
+     en el tema oscuro y el chip de código caía a 4,28:1. Medido contra los
+     cuatro fondos que la banda puede presentar. */
+  --tinta-3:      #a1b0ae;
+  --linea:        light-dark(#1c4045, #2c5459);
+  --linea-fuerte: light-dark(#2c5459, #3a666b);
+  --serie-1:      #45b0aa;
+  --serie-2:      #f4c095;
+  --sin-dato:     #7d8886;
+  --accion:       #f4c095;
+  --accion-viva:  #f4c095;
+  --cifra:        #f4c095;
+  --red:          light-dark(#123033, #1a3d41);
+  --eje:          light-dark(#2c5459, #3a666b);
+  --aviso-fondo:  #2e2210;
+  --aviso-borde:  #e0a445;
+  --aviso-tinta:  #f0cf9c;
+  --aviso-tinta-grafico: #e0a445;
+  color: var(--tinta);
+}
+
+/* Encabezado de banda: el gancho y la afirmación que la banda sostiene. */
+.banda-titulo { max-width: 62ch; margin: 0 0 var(--e5); }
+.banda-gancho {
+  font: 650 var(--t-xs)/1 var(--f-ui); letter-spacing: .18em; text-transform: uppercase;
+  color: var(--accion); margin: 0 0 var(--e3);
+}
+.banda-titulo h2 { margin: 0 0 var(--e2); }
+.banda-titulo p { color: var(--tinta-2); margin: 0; }
+
+/* Cierre: enlaces a las demás secciones, sin figuras. */
+.banda-salidas {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--e5); margin-top: var(--e5);
+}
+.banda-salidas a {
+  border-top: 2px solid currentColor; padding-top: var(--e3);
+  text-decoration: none; color: var(--tinta); display: block;
+}
+.banda-salidas a strong { display: block; font-size: var(--t-l); margin-bottom: var(--e1); }
+.banda-salidas a span { font-size: var(--t-s); font-weight: 650; color: var(--accion); }
+.banda-salidas a:hover span { text-decoration: underline; }
+
 .disposicion { display: block; }
 @media (min-width: 1040px) {
   .disposicion {
