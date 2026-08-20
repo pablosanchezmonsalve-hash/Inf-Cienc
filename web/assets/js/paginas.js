@@ -542,6 +542,44 @@ async function catalogo() {
   if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'));
 }
 
+/* ══════════════════════════════════════════ teclado dentro de un gráfico */
+
+/* Cada barra era un punto de tabulación. Medido en Áreas temáticas: 41 de los
+   70 puntos de la página eran barras, así que pasar del primer gráfico al
+   enlace siguiente costaba veinte pulsaciones de Tab. Un gráfico no es una
+   lista de veinte controles: es UN control con veinte posiciones.
+
+   Patrón de composición de las prácticas ARIA: el gráfico es un solo punto de
+   tabulación y por dentro se recorre con las flechas. El tabindex «rueda» —la
+   marca enfocada vale 0 y las demás −1—, así que al volver con Tab se entra
+   por donde se salió y no por el principio.
+
+   Con esto el recorrido de la página baja de 70 puntos a 32, y explorar el
+   gráfico se vuelve más rápido en vez de más lento. */
+function tecladoGraficos() {
+  document.addEventListener('keydown', e => {
+    const marca = e.target.closest?.('svg.chart g.marca');
+    if (!marca) return;
+    const marcas = [...marca.closest('svg.chart').querySelectorAll('g.marca')];
+    const i = marcas.indexOf(marca);
+    let j = null;
+    // Las dos orientaciones responden a los cuatro cursores a propósito: el
+    // lector no tiene por qué saber si la serie se dibujó en horizontal o en
+    // vertical para poder recorrerla.
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = Math.min(i + 1, marcas.length - 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = Math.max(i - 1, 0);
+    else if (e.key === 'Home') j = 0;
+    else if (e.key === 'End') j = marcas.length - 1;
+    else return;
+
+    e.preventDefault();
+    if (j === i) return;
+    marca.setAttribute('tabindex', '-1');
+    marcas[j].setAttribute('tabindex', '0');
+    marcas[j].focus();
+  });
+}
+
 /* ============================================================== arranque */
 const PAGINAS = { portada, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
 
@@ -553,6 +591,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await c.montarAyuda();
     c.montarTooltip();
     if (PAGINAS[pagina]) await PAGINAS[pagina]();
+    // Delegado en document: vale para los gráficos pre-renderizados y para los
+    // que se repintan después de un filtro, sin volver a enganchar nada.
+    tecladoGraficos();
   } catch (e) {
     c.mostrarError(document.getElementById('contenido') || document.body, e);
   }

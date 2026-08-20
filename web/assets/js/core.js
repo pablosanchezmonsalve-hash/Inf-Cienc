@@ -376,7 +376,7 @@ export function barrasH(datos, {
       ? `<rect class="trama" x="${anchoEtiqueta}" y="${y + 6}" width="${w}"
            height="${alto - 12}" rx="4" fill="url(#${id}-t)"/>` : '';
 
-    return `<g class="marca" tabindex="0" role="listitem"
+    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}${refAria}"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
         ${nota ? `data-tip-n="${escapar(nota)}"` : ''}>
@@ -452,7 +452,7 @@ export function barrasV(datos, {
       </g>`;
     }
     const yy = y(v);
-    return `<g class="marca" tabindex="0" role="listitem"
+    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(String(d[etiquetaX]))}: ${num(v, decimales)}"
         data-tip="${escapar(String(d[etiquetaX]))}" data-tip-v="${num(v, decimales)}"
         ${d.nota ? `data-tip-n="${escapar(d.nota)}"` : ''}>
@@ -909,7 +909,7 @@ export function desviacion(datos, {
     }
     const dv = v - referencia, yy = y(Math.max(dv, 0)), h = Math.abs(y(dv) - cero);
     const bajo = dv < 0;
-    return `<g class="marca" tabindex="0" role="listitem"
+    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(String(d[etiquetaX]))}: ${num(v, decimales)}, ${
           bajo ? 'por debajo de' : 'por encima de'} la referencia ${num(referencia, decimales)}"
         data-tip="${escapar(String(d[etiquetaX]))}" data-tip-v="${num(v, decimales)}"
@@ -951,7 +951,7 @@ export function acumulada(datos, { titulo = '', total = null, ancho = 680, sufij
     const y = 30 + i * 44;
     const w = Math.max(3, pista * (d.n / max));
     const cuota = total ? ` · ${num(100 * d.n / total, 1)} % de ${nf.format(total)}` : '';
-    return `<g class="marca" tabindex="0" role="listitem"
+    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}${cuota}"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
         ${total ? `data-tip-n="${num(100 * d.n / total, 1)} % de ${nf.format(total)}"` : ''}>
@@ -1000,7 +1000,7 @@ export function distribucion(datos, { titulo = '', ancho = 680, alto = 250, etiq
   // hueco de un gráfico de barras sugiere categorías sin relación entre sí.
   const cols = datos.map((d, i) => {
     const x = mIzq + i * bw, yy = y(d.n);
-    return `<g class="marca" tabindex="0" role="listitem"
+    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)} publicaciones, ${num(100 * d.n / total, 1)} %"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}"
         data-tip-n="${num(100 * d.n / total, 1)} % de ${nf.format(total)}">
@@ -1041,7 +1041,7 @@ export function proporcional(datos, { titulo = '', ancho = 680, alto = 128 } = {
     const sd = esSinDato(d.valor);
     const relleno = sd ? `url(#${idOrd})` : ORDINAL[Math.min(i, ORDINAL.length - 1)];
     const pct = num(100 * d.n / total, 1);
-    return `<g class="marca" tabindex="0" role="listitem"
+    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)}, ${pct} % del total"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}" data-tip-n="${pct} % de ${nf.format(total)}">
       <rect class="segmento" x="${xi.toFixed(1)}" y="${y0}" width="${Math.max(w - 1.5, 1).toFixed(1)}" height="${h}"
