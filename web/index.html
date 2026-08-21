@@ -20,33 +20,39 @@ try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(
 <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
 <header class="cabecera" id="cabecera"></header>
 <div class="vigencia" id="vigencia"></div>
-<main id="contenido">
-  <!-- Las bandas son estáticas; su contenido lo inyecta el pre-renderizado.
-       El orden cambió respecto de la versión anterior: «Cómo leer estas
-       cifras» estaba al FINAL, después de todos los gráficos. Explica la
-       diferencia entre la media y la mediana del FWCI, que es la primera
-       cifra del titular, así que ahora va inmediatamente después de él. Una
-       advertencia que llega tras la figura que califica llega tarde. -->
-  <section class="banda banda-papel"><div class="contenedor">
+<main id="contenido" class="contenedor">
+  <!-- LA PORTADA ES UN EXPLORADOR, no un informe que se lee de arriba abajo.
+       El lector elige el recorte y todas las cifras y gráficos se recalculan
+       sobre él, en el navegador, desde publications.json.
+
+       El pre-renderizado deja escrito el estado SIN FILTRAR, que es el informe
+       completo: sin JavaScript se ve exactamente eso, con sus cifras y sus
+       gráficos. La interacción se añade encima. Los `details` de los filtros
+       se abren y se leen sin guion, que es la razón de usarlos. -->
+  <header class="portada-cabecera">
     <div id="titular"></div>
-  </div></section>
+  </header>
 
-  <section class="banda banda-papel-2"><div class="contenedor">
-    <div id="lectura"></div>
-  </div></section>
+  <div id="estado-recorte"></div>
 
-  <section class="banda banda-papel"><div class="contenedor">
-    <h2 class="titulo-seccion">Indicadores de cabecera</h2>
-    <div class="kpis" id="kpis"></div>
-  </div></section>
+  <div class="explorador">
+    <aside class="explorador-panel" aria-label="Filtros">
+      <h2 class="solo-lectores">Filtrar las publicaciones</h2>
+      <div id="controles"></div>
+    </aside>
 
-  <section class="banda banda-papel-2"><div class="contenedor">
-    <div id="panorama"></div>
-  </div></section>
+    <div class="explorador-resultado">
+      <h2 class="solo-lectores">Indicadores del recorte</h2>
+      <div id="cifras"></div>
 
-  <section class="banda banda-enfasis"><div class="contenedor">
-    <div id="cierre"></div>
-  </div></section>
+      <h2 class="titulo-seccion">Cómo se reparte</h2>
+      <div class="cortes" id="cortes"></div>
+
+      <details class="metodo" id="lectura"></details>
+    </div>
+  </div>
+
+  <div id="cierre"></div>
 </main>
 <footer class="pie" id="pie"></footer>
 <script type="module" src="assets/js/paginas.js"></script>
