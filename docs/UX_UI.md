@@ -828,10 +828,76 @@ que ligaba `EJES.md` con `id="modulos"`, y la de los filtros de publicaciones.
 En los tres casos el flujo seguía existiendo con otra forma, y bajar la
 comprobación habría dejado sin cubrir justo lo que se acababa de reescribir.
 
-**Presupuestos, y un techo que hay que rehacer.** Medido sobre `dist/`:
+### 15.1 El presupuesto de peso, rehecho contra la evidencia
 
-| | Bruto | Con gzip | Techo declarado |
+Los techos anteriores —CSS 55 KB, JavaScript 60 KB— estaban **excedidos desde
+hacía dos rediseños sin que nada avisara**, porque vivían en una frase de este
+documento. Se rehicieron con tres cambios, todos justificados por medición:
+
+**1. Se miden con gzip, que es como viaja el contenido.** Los anteriores estaban
+en bruto y se comparaban contra recomendaciones expresadas en comprimido, así
+que declaraban excedido lo que no lo estaba. GitHub Pages, donde esto se
+publica, sirve comprimido.
+
+**2. Los techos son externos.** Se adopta la recomendación de presupuesto para
+móvil de uso corriente: JavaScript < 150 KB y CSS < 60 KB con gzip. No los fija
+quien tiene que cumplirlos.
+
+**3. Se añade el techo que faltaba, el de DATOS**, que es lo que de verdad pesa
+en este sitio: el explorador manda `publications.json` entero al navegador.
+
+| | Comprimido | Techo | Uso |
 |---|---|---|---|
+| CSS | 22,4 KB | 60 KB | 37 % |
+| JavaScript | 51,4 KB | 150 KB | 34 % |
+| Datos | 204,3 KB | 250 KB | **82 %** |
+
+#### Por qué el techo de datos puede ser tan alto
+
+Porque el peso está **fuera de la ruta crítica de pintado**, y eso está medido,
+no supuesto. El contenido llega pre-renderizado en el HTML y el JSON se descarga
+después:
+
+| Medición | Resultado | Umbral |
+|---|---|---|
+| LCP en *Slow 4G* | **916 ms** | 2.500 ms (Core Web Vitals) |
+| Latencia al recortar el conjunto | **21–37 ms** | 200 ms (INP) |
+
+Los dos con holgura de más del doble. El peso de los datos es el precio de la
+arquitectura —cualquier pregunta se responde sin volver al servidor— y está
+comprado con margen.
+
+#### La decisión de no recortar el dataset
+
+Seis campos de `publications.json` —`editorial`, `idioma`, `topic`,
+`tipo_fuente`, `n_paises`, `n_instituciones`— **no los consume el explorador**.
+Quitarlos ahorraría 28 KB comprimidos, un 17 %.
+
+**No se quitan**, por dos razones:
+
+- `publications.json` no es sólo el combustible del explorador: es el **dataset
+  publicable** del informe. Quien lo descargue esperando los campos del corpus
+  no debería encontrarse un recorte hecho para que una página cargue antes.
+- El orden de prioridades del proyecto pone **integridad de datos (2) por
+  encima de rendimiento (5)**, y aquí no hay conflicto real: el techo está en el
+  82 % y el efecto medido está a menos de la mitad del umbral.
+
+Queda **anotado como la palanca disponible** para cuando el techo apriete. Con
+el corpus creciendo cada año, ese momento llegará; lo dirá la batería, no una
+frase de este documento.
+
+#### Y ahora es una compuerta, no una nota
+
+[`src/verify/peso.mjs`](../src/verify/peso.mjs) corre **dentro de la batería**:
+sólo lee archivos y los comprime, así que tarda menos de un segundo. Un
+presupuesto escrito en prosa envejece en silencio — que es exactamente lo que
+había pasado.
+
+Subir un techo sigue siendo posible, pero es una **decisión** y no un arreglo: el
+propio verificador lo dice al fallar, y obliga a declarar contra qué evidencia se
+sube.
+
+---|---|---|---|
 | CSS | 75 KB | **22 KB** | 55 KB · **excedido** |
 | JavaScript | 151 KB | **47 KB** | 60 KB · **excedido** |
 
