@@ -3,6 +3,8 @@
 
 import * as c from './core.js';
 import * as v from './vista.js';
+import * as X from './explorador.js';
+import * as VX from './vista_explorador.js';
 
 /* ============================================================== portada */
 
@@ -11,21 +13,82 @@ import * as v from './vista.js';
    veinte SVG. Si el marcado está, sólo se enganchan los comportamientos. */
 const yaPintado = el => el && el.dataset.prerender === '1';
 
+/* La portada es un EXPLORADOR: el lector elige un recorte y las cifras y los
+   gráficos se recalculan sobre él, aquí, sin volver al servidor.
+
+   El HTML llega pre-renderizado con el recorte VACÍO —el informe completo—, así
+   que sin JavaScript se ve el informe entero. Esta función no reescribe nada
+   hasta que alguien toca un filtro: engancha el comportamiento y se aparta. */
 async function portada() {
-  const cont = document.getElementById('kpis');
-  if (!yaPintado(cont)) {
-    const { kpis } = await c.cargar('kpis.json');
-    const series = await c.cargar('series.json');
+  const cabecera = document.getElementById('titular');
+  const zonas = {
+    estado: document.getElementById('estado-recorte'),
+    controles: document.getElementById('controles'),
+    cifras: document.getElementById('cifras'),
+    cortes: document.getElementById('cortes'),
+  };
+  if (!zonas.cifras) return;
+
+  const { publicaciones } = await c.cargar('publications.json');
+
+  if (!yaPintado(zonas.cifras)) {
     const meta = await c.cargar('meta.json');
-    const cabecera = document.getElementById('titular');
-    if (cabecera) cabecera.innerHTML = v.hero(meta, kpis);
-    const resto = v.kpisRestantes(kpis);
-    cont.dataset.n = String(resto.length);
-    cont.innerHTML = v.kpis(resto);
-    document.getElementById('panorama').innerHTML = v.panorama(series);
+    const { kpis } = await c.cargar('kpis.json');
+    if (cabecera) cabecera.innerHTML = VX.cabecera(meta);
     document.getElementById('lectura').innerHTML = v.lectura(kpis);
     document.getElementById('cierre').innerHTML = v.cierrePortada();
   }
+
+  let sel = X.leerURL();
+
+  function pintar({ nuevaEntrada = false } = {}) {
+    const partes = VX.explorador(publicaciones, sel);
+    // Se comparan los valores ANTES de reemplazar el marcado: la señal de
+    // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
+    const antes = new Map([...zonas.cifras.querySelectorAll('[data-valor]')]
+      .map(e => [e.dataset.valor, e.textContent]));
+
+    zonas.estado.innerHTML = partes.estado;
+    zonas.controles.innerHTML = partes.controles;
+    zonas.cifras.innerHTML = partes.cifras;
+    zonas.cortes.innerHTML = partes.cortes;
+
+    zonas.cifras.querySelectorAll('[data-valor]').forEach(e => {
+      if (antes.size && antes.get(e.dataset.valor) !== e.textContent) e.classList.add('cambia');
+    });
+    X.escribirURL(sel, !nuevaEntrada);
+  }
+
+  // Un solo escucha delegado para los chips y para el botón de limpiar: los
+  // controles se repintan enteros a cada cambio, así que enganchar escuchas a
+  // cada botón los dejaría colgando del marcado anterior.
+  document.addEventListener('click', e => {
+    const chip = e.target.closest('.chip[data-dim]');
+    if (chip) {
+      const { dim, valor } = chip.dataset;
+      const actual = sel[dim] || [];
+      sel = { ...sel, [dim]: actual.includes(valor)
+        ? actual.filter(x => x !== valor) : [...actual, valor] };
+      pintar({ nuevaEntrada: true });
+      // El foco se pierde al reemplazar el marcado; se devuelve al mismo
+      // control para que se pueda seguir filtrando con el teclado.
+      const vuelta = zonas.controles.querySelector(
+        `.chip[data-dim="${CSS.escape(dim)}"][data-valor="${CSS.escape(valor)}"]`);
+      if (vuelta) vuelta.focus();
+      return;
+    }
+    if (e.target.closest('#limpiar-recorte')) {
+      sel = {};
+      pintar({ nuevaEntrada: true });
+      zonas.estado.querySelector('.recorte-n')?.scrollIntoView({ block: 'nearest' });
+    }
+  });
+
+  // El recorte vive en la URL, así que el botón de volver del navegador tiene
+  // que deshacer un filtro. Sin esto, volver saca al lector del sitio.
+  addEventListener('popstate', () => { sel = X.leerURL(); pintar(); });
+
+  if (!yaPintado(zonas.cifras) || X.hayRecorte(sel)) pintar();
 }
 
 /* ============================================================== módulos */

@@ -57,11 +57,13 @@ function rellenar(html, id, contenido, aviso) {
 async function main() {
   const c = await mod('core.js');
   const v = await mod('vista.js');
+  const vx = await mod('vista_explorador.js');
 
   const meta = await leerJSON('meta.json');
   const series = await leerJSON('series.json');
   const { kpis } = await leerJSON('kpis.json');
   const { ejes } = await leerJSON('ejes.json');
+  const { publicaciones } = await leerJSON('publications.json');
 
   const archivos = (await readdir(dist)).filter(f => f.endsWith('.html'));
   const faltantes = [];
@@ -90,12 +92,17 @@ async function main() {
 
     if (tipo === 'portada') {
       const a = [];
-      html = rellenar(html, 'titular', v.hero(meta, kpis), a);
-      const resto = v.kpisRestantes(kpis);
-      html = rellenar(html, 'kpis', v.kpis(resto), a);
-      html = html.replace('<div class="kpis" id="kpis" data-prerender="1">',
-        `<div class="kpis" id="kpis" data-prerender="1" data-n="${resto.length}">`);
-      html = rellenar(html, 'panorama', v.panorama(series), a);
+      // La portada es un explorador. Se deja escrito el estado SIN FILTRAR,
+      // que es exactamente el informe completo: quien llegue sin JavaScript ve
+      // las cifras y los gráficos del conjunto entero, y sólo pierde la
+      // capacidad de recortarlo. Los `details` de los filtros se abren y se
+      // leen igual sin guion.
+      const vacio = vx.explorador(publicaciones, {});
+      html = rellenar(html, 'titular', vx.cabecera(meta), a);
+      html = rellenar(html, 'estado-recorte', vacio.estado, a);
+      html = rellenar(html, 'controles', vacio.controles, a);
+      html = rellenar(html, 'cifras', vacio.cifras, a);
+      html = rellenar(html, 'cortes', vacio.cortes, a);
       html = rellenar(html, 'lectura', v.lectura(kpis), a);
       html = rellenar(html, 'cierre', v.cierrePortada(), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
