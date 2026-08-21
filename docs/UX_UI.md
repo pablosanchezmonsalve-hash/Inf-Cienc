@@ -14,7 +14,14 @@ decorativo. Si un dato no sostiene una lectura, no se grafica: se tabula o se
 omite.
 
 Corolario operativo: **la advertencia metodológica es parte del componente**, no
-una nota al pie. Un KPI sin su denominador y su fecha de corte está incompleto.
+una nota al pie. Una cifra sin su denominador y su fecha de corte está
+incompleta.
+
+Segundo corolario, más reciente: **el lector pregunta, el sitio responde**. Un
+informe entrega las cifras que alguien decidió por él; una plataforma le deja
+recortar el conjunto y ver qué pasa. Todo lo que sigue está subordinado a eso —
+incluida la decisión de que el contexto metodológico se pliegue tras un control
+en vez de ocupar la pantalla que le toca al dato.
 
 ---
 
@@ -49,174 +56,239 @@ captura de pantalla del dashboard siga siendo interpretable fuera de contexto.
 
 ---
 
-## 4. Panel de KPIs
+## 4. El explorador
 
-Seis tarjetas, orden fijo. Cada una: valor, etiqueta, denominador, icono de
-información con tooltip.
+**La decisión que ordena todo lo demás.** El sitio dejó de servir indicadores ya
+calculados y pasó a derivarlos en el navegador sobre el subconjunto que el
+lector elige.
 
-| KPI | Valor | Denominador visible | Tooltip |
-|---|---|---|---|
-| Publicaciones | 823 | 2023–2025 | Qué cuenta y qué no |
-| Citas | 3.935 | 816 con métrica | Fuente y corte |
-| Citas/publicación | 4,82 | 816 | Tipos incluidos |
-| FWCI | 0,87 · mediana 0,41 | 816 | **Qué significa 1,0** |
-| Colab. internacional | 51,2 % | 816 | Definición (>1 país) |
-| Autores UFT | 589 | firmas, no personas | **Por qué firmas** |
+Antes el build dejaba `series.json` con las cifras del conjunto completo y la
+página las pintaba. Eso hacía un **informe**: el lector veía las cifras que
+alguien decidió por él y no podía preguntar nada más. Ahora *«las publicaciones
+de la Facultad de Medicina de 2024 con colaboración internacional»* no es una
+vista preparada — es una pregunta que se responde al momento, porque el dato de
+cada publicación viaja entero en `publications.json`.
 
-**Decisiones de diseño:**
+Tres superficies comparten un solo motor
+([`explorador.js`](../web/assets/js/explorador.js)): la portada, las cuatro
+secciones y el listado de publicaciones.
 
-- El FWCI muestra **media y mediana juntas**. Mostrar sólo la media (0,87)
-  ocultaría que la mediana es 0,41 y sugeriría un desempeño más uniforme del
-  real.
-- «589 firmas» en vez de «589 investigadores». La etiqueta honesta es más larga
-  y peor de leer; se prefiere igual.
-- Ningún KPI usa flecha de tendencia: con 3 años y sin datos previos, una
-  flecha implicaría una tendencia que los datos no sostienen.
+### 4.1 El recorte vive en la URL
+
+`?anio=2024&unidad=Facultad+de+Medicina` es el estado completo. De ahí salen
+tres propiedades que un tablero sin URL no tiene:
+
+- una vista concreta se puede **citar** en un correo o en un informe;
+- el **botón de volver** del navegador deshace un filtro;
+- el recorte **viaja entre páginas**: se hace en el tablero y el listado lo
+  hereda.
+
+Medido: 823 → 113 publicaciones al pedir Medicina 2024, con las seis cifras y
+los cuatro gráficos recalculados, y esas mismas 113 en la tabla al seguir el
+enlace.
+
+### 4.2 Qué NO recalcula, y por qué
+
+**El FWCI y los percentiles no se promedian sobre un recorte.** Son métricas
+*normalizadas* que SciVal computa contra el mundo; promediarlas sobre un
+subconjunto arbitrario daría un número con aspecto de FWCI que no lo es. Sobre
+un recorte se informa la **mediana** de los valores que la fuente ya asignó a
+cada publicación, y se dice que es eso.
+
+Confundir «promedio de FWCI» con «FWCI del conjunto» es exactamente el error que
+el Leiden Manifesto pide no cometer, y la tentación aparece justo aquí: el dato
+está disponible y sumar es fácil.
+
+La mediana, además, no es una preferencia: la distribución del FWCI es
+asimétrica —unas pocas publicaciones muy citadas tiran del promedio— y sobre el
+recorte de una facultad la media miente más todavía.
+
+### 4.3 El tablero de cifras
+
+Seis fichas, siempre las mismas, que se recalculan enteras a cada recorte. Cada
+una lleva **su propio denominador pegado** (`D-16`): son bases distintas, y
+presentarlas juntas sin decirlo invita a dividir una por otra.
+
+| Cifra | Base declarada |
+|---|---|
+| Publicaciones | las del recorte |
+| Citas recibidas | las que tienen métricas |
+| Citas por publicación | las que tienen métricas |
+| FWCI mediano | las que tienen FWCI |
+| Colaboración internacional | las que declaran país |
+| Autores UFT | las que tienen autoría nombrada |
+
+Al recalcularse, la cifra que **cambió** parpadea una vez. Sin esa señal, un
+filtro que mueve poco parece no haber hecho nada. Bajo
+`prefers-reduced-motion` no ocurre.
+
+El glosario contextual cuelga de las fichas. Vivía en los KPI de la portada
+anterior y se habría perdido al sustituirlos; aquí hace más falta todavía,
+porque **una cifra recalculada sobre un recorte se malinterpreta con más
+facilidad que una del total**.
+
+### 4.4 Los controles
+
+Un `<details>` por dimensión, con chips dentro. La elección del elemento no es
+estética: **un `details` se abre y se lee sin JavaScript**, que es lo que
+permite que la garantía de la §14 siga en pie con un panel de filtros en la
+página.
+
+Los recuentos de cada faceta se calculan con las **demás** dimensiones
+aplicadas pero no la propia. Si una faceta se contara a sí misma, al elegirla
+todas sus hermanas caerían a cero y el filtro dejaría de poder cambiarse sin
+limpiarlo antes.
+
+### 4.5 Un solo motor, y qué costó unificarlo
+
+Publicaciones tenía su propio sistema de filtros, anterior al explorador: dos
+implementaciones del mismo concepto, con **claves distintas para la misma
+dimensión** —`internacional` en una, `colaboracion` en la otra— y dos lectores
+de URL que no se entendían.
+
+> **Unificar no puede romper lo que alguien ya citó.** La dimensión se unifica
+> bajo `colaboracion`, pero el nombre viejo se sigue leyendo: un enlace guardado
+> o pegado en un correo sigue recortando. Está cubierto por la batería, no sólo
+> por el código.
+
+Dos cosas que hubo que añadir al motor:
+
+- **Búsqueda de texto insensible a acentos.** Buscar «Nunez» encuentra «Núñez»:
+  en un corpus con nombres en español, exigir la tilde convierte el buscador en
+  un examen de ortografía. Medido: 5 resultados con y sin ella.
+- **`consulta(sel)`**, que serializa el recorte. Se calcula del *recorte* y no
+  de `location.search` por dos razones: es la verdad —la URL puede ir un paso
+  por detrás— y `location` no existe bajo Node, donde corre el pre-renderizado.
+  El build abortó al primer intento justamente por eso.
+
+> **Un detalle que habría hecho inusable el buscador.** Los controles se
+> repintan enteros a cada pulsación, así que el campo de texto se reemplaza
+> mientras se escribe: la primera letra expulsaba el foco. Se devuelven el foco
+> y la posición del cursor. Es la clase de fallo que sólo aparece usándolo, y
+> por eso quedó cubierto por la batería.
 
 ---
 
 ## 4 bis. Panel conceptual de sección
 
-Cada sección de indicadores abre con un panel que declara tres cosas antes de
-mostrar ningún gráfico: **qué responde**, **qué no responde** y **sobre qué base**
-está calculada.
+Cada sección abre declarando **qué responde y qué NO responde**. El «no
+responde» es la parte que justifica el panel; sin ella esto sería un subtítulo.
 
-La segunda es la que justifica el panel. Cada sección invita a una lectura
-equivocada concreta —producción se lee como rendimiento, impacto como calidad,
-colaboración como influencia, la clasificación temática como el tema real del
-artículo— y un lector que llega sin saber qué pregunta responde la sección no
-tiene forma de saber cuál **no** responde. Decirlo después de los gráficos es
-decirlo tarde, así que va delante y ocupa el ancho completo: en la rejilla de dos
-columnas caería en la del índice, y esto no es material de barra lateral.
+| Sección | Qué NO dice |
+|---|---|
+| Producción | El volumen no mide calidad ni esfuerzo: cuenta documentos indexados. |
+| Impacto | Las citas miden atención recibida, no calidad ni utilidad social. |
+| Colaboración | Colaborar no es por sí mismo mejor: describe una forma de trabajo, no un logro. |
+| Áreas temáticas | La categoría de la revista no es el tema exacto del artículo. |
 
-El texto vive en **`docs/EJES.md`** y se serializa a `ejes.json` en el build, por
-lo mismo que el glosario: son afirmaciones metodológicas y se revisan como
-documento, no como cadenas dentro de un archivo de JavaScript. Si a un eje le
-falta cualquiera de las tres partes, **el build aborta** — un panel sin el «no
-responde» es justo el que no hacía falta escribir.
-
-Es institucionalmente neutro: describe la metodología, no a esta universidad.
-Otra institución lo reutiliza sin tocarlo.
-
-## 4 ter. La banda: unidad de composición
-
-Seis de las diez páginas —portada, las cuatro secciones y metodología— se
-componen como una **secuencia de bandas a sangre**. Una banda sostiene UNA
-afirmación, y los suelos alternan para que dos bandas seguidas no se lean como
-una sola.
-
-| Banda | Suelo | Qué sostiene |
-|---|---|---|
-| apertura | papel | qué responde la sección y qué **no** responde |
-| trabajo | papel-2 | el índice y los módulos publicados |
-| ausencia | contraste | los indicadores diferidos, si los hay |
-| cierre | énfasis | el denominador y la salida a otras secciones |
-
-La banda de **ausencia** existe porque un indicador diferido metido entre los
-publicados se lee como uno más; sobre su propio suelo se lee como lo que es. La
-de **cierre** repite el denominador a propósito: es lo último que se lee y lo
-que más se cita de memoria, y 823 y 816 no son la misma cifra medida dos veces.
-
-`main` deja de ser el contenedor en esas páginas; cada banda monta el suyo por
-dentro. Es lo que permite el sangrado sin trucos de márgenes negativos.
-
-### La banda de contraste redefine sus tokens
-
-En vez de una segunda hoja de estilo para «lo que va sobre fondo oscuro»,
-`.banda-contraste` redefine los tokens **en su propio ámbito**. Módulos,
-gráficos, sellos y tablas que caen dentro se adaptan solos, sin que ninguno
-sepa que está sobre otro suelo.
-
-### Tres reglas medidas
-
-**La banda de énfasis no lleva figuras.** Sobre Peach Glow el color del dato cae
-a 3,21:1 y la marca de ausencia a **2,35:1**. Por eso el cierre es sólo
-tipografía y enlaces, y la regla queda escrita junto al componente.
-
-**El segundo papel no podía ser `--superficie-2`.** Ese token es un tinte que se
-aplica *encima* del blanco de tarjeta —chips, cabeceras de tabla, hover— y en
-claro vale `#f7efe5`, que contra el papel `#f6efe6` mide ΔE **0,18** y
-**1,00:1**: el mismo color. La alternancia sólo funcionaba en oscuro, y en claro
-dejaba 6 rem de aire entre dos bandas sin nada que explicara el corte.
-
-**Y el suelo nuevo es frío, no un peach más oscuro.** Oscurecer el papel hacia
-el peach rompe la marca de ausencia —`--sin-dato` cae bajo 3:1 pasado
-`#dbe3df`— y además lo acercaba al Peach del cierre. Un papel frío se separa del
-papel cálido y del cierre a la vez. `#e1e7e4` es el límite útil: ΔE 3,63 contra
-el papel, con `--sin-dato` en 3,10:1, `--tinta-3` en 5,04:1 y `--serie-1` en
-4,20:1. Un paso más (`#dbe3df`) gana ΔE 4,97 pero deja la ausencia en 2,98:1.
-
-Ese borde mide **1,10:1**: es real, pero no sostiene solo un corte de sección,
-así que en tema claro las bandas de papel llevan una **costura de 1 px**. En
-oscuro los dos suelos ya se separan ΔE 11,75 y la costura sobra.
-
-### Dónde NO manda la banda
-
-Publicaciones, Autores, la ficha de autor y el catálogo no se componen en
-bandas. Son **superficies de consulta** con filtro y paginación: quien llega ahí
-viene a buscar, no a que le cuenten. Convertirlas en narrativa habría arreglado
-la estética y roto la función.
+Va **plegado** tras un control, como el resto del contexto metodológico (§12.8):
+la pantalla la manda el dato, y la advertencia sigue a un clic para quien la
+necesite.
 
 ---
 
-## 5. Módulos analíticos
+## 4 ter. La banda, y dónde quedó
 
-| Módulo | Visualización | Pregunta que responde | Por qué esa forma |
-|---|---|---|---|
-| **Producción anual** | Barras verticales, 3 barras | ¿Cuánto se publica por año? | Barras y no línea: 3 puntos no son una serie temporal |
-| **Tipo documental** | Barras horizontales ordenadas | ¿Qué se publica? | 10 categorías muy desbalanceadas (595 vs 2); barras horizontales legibles |
-| **Ranking de fuentes** | Tabla ordenable, top 20 + «ver todas» | ¿Dónde se publica? | 495 fuentes: tabla, no gráfico |
-| **Citas** | Barras por año + total | ¿Cuánto se cita? | Con advertencia de ventana de citación |
-| **FWCI** | Indicador + histograma de distribución | ¿Cuál es el impacto normalizado? | El histograma es lo que revela la asimetría; el número solo la esconde |
-| **Top percentiles** | Barras: top 1/5/10/25 % | ¿Cuánta producción destacada? | 4 categorías anidadas, comparación directa |
-| **Cuartil de revista** | Barras apiladas Q1–Q4 + «sin dato» | ¿En qué revistas se publica? | **«Sin dato» visible**, no excluido del 100 % |
-| **Colaboración internacional** | Anillo + valor | ¿Cuánta colaboración externa? | Proporción binaria: el anillo funciona |
-| **Países colaboradores** | Barras horizontales top 15 | ¿Con quién se colabora? | Mapa descartado: 23 países, un mapa mundial sería casi vacío |
-| **Instituciones** | Tabla ordenable | ¿Con qué instituciones? | Nombres largos; tabla legible |
-| **Tamaño de equipo** | Histograma | ¿Cuántos autores por publicación? | Media 7 / mediana 5: la distribución es el dato |
-| **Áreas QS** | Barras, 5 categorías | ¿En qué grandes áreas? | Vista de entrada |
-| **Áreas ASJC** | Barras horizontales top 20 | ¿En qué disciplinas? | 249 categorías: top 20 + acceso al resto |
-| **Unidades académicas** | Barras + **banda de advertencia** | ¿Cómo se distribuye internamente? | Cobertura 63,8 % y sesgo disciplinar: la advertencia es obligatoria |
-| **Ranking de autores** | Tabla ordenable y paginada | ¿Quién publica más? | 589 filas |
+La banda fue durante un tiempo la unidad de composición de las páginas
+narrativas. **Ya no lo es**: el explorador la sustituyó en la portada y en las
+cuatro secciones, porque un tablero que se interroga no se compone como un
+texto que se lee de arriba abajo.
+
+Sobrevive donde su trabajo sigue siendo necesario: **el suelo de contraste de
+los indicadores diferidos**.
+
+Que un indicador esté verificado y no se publique es información del informe —
+un hueco se leería como que el fenómeno no existe. Y como esos indicadores **no
+responden al recorte** (no se calculan en el navegador), mezclarlos con los
+cortes que sí responden haría creer que el filtro los cambia. Su propio suelo es
+lo que dice, sin escribirlo, que son otra cosa.
+
+`.banda-contraste` sigue redefiniendo los tokens **en su propio ámbito**, que es
+lo que permite que módulos, sellos y tablas que caen dentro se adapten solos sin
+una segunda hoja de estilo para «lo que va sobre fondo oscuro».
+
+---
+
+## 5. Los cortes
+
+Un **corte** es la unidad de la sección: un gráfico que responde al recorte, con
+su conmutador Gráfico ⇄ Tabla y su advertencia si la tiene. Sustituye al
+«módulo» de la versión anterior, que dibujaba una serie ya calculada.
+
+Catorce de los quince indicadores del sitio se derivan de `publications.json`,
+así que son cortes de pleno derecho. La forma la elige **la relación del dato**
+(§12.4), no la costumbre.
+
+| Corte | Forma | Por qué esa forma |
+|---|---|---|
+| `P-02` Publicaciones por año | Barras verticales | 3 puntos no son una serie temporal |
+| `P-03` Tipo documental | Barras horizontales | 10 categorías muy desbalanceadas |
+| `P-05` Fuentes | Barras horizontales, top 15 | 495 fuentes: hay que recortar y decirlo |
+| `P-07` Unidad académica | Barras horizontales | Cobertura parcial: la advertencia es obligatoria |
+| `I-01` Citas por año | Barras verticales | Con advertencia de ventana de citación |
+| `I-04` FWCI mediano por año | Desviación contra 1,00 | Se lee CONTRA el mundo, no en magnitud |
+| `I-05` Umbrales de percentil | Acumulada | Tramos **anidados**: no se suman |
+| `R-01` Cuartil de revista | Proporcional | Reparten un total conocido |
+| `A-01` Vías de acceso abierto | Barras horizontales | Multivaluado |
+| `C-01` Nacional o internacional | Barras horizontales | Proporción con «sin dato» visible |
+| `C-03` Países | Barras horizontales, top 15 | Mapa descartado: 23 países sobre ~200 |
+| `C-04` Instituciones | Barras horizontales, top 15 | Nombres largos |
+| `C-06` Autores por publicación | Distribución | Continuo tramificado: el eje ES el dato |
+| `T-05` / `T-01` / `T-04` | Barras horizontales | 249 ASJC: top 20 + acceso al resto |
+
+> **C-04 era el único que no se podía derivar.** «Instituciones colaboradoras»
+> salía de una columna que no viajaba por publicación: `publications.json` traía
+> el recuento pero no los nombres. Se añadió la lista. Sin eso, la sección de
+> colaboración habría tenido un gráfico que **ignora el filtro sin decirlo**,
+> que es peor que no tenerlo.
 
 **Descartado:** mapa coroplético de colaboración (23 países sobre ~200 → mapa
 mayoritariamente vacío que exagera visualmente la dispersión), nube de palabras
 (sin lectura cuantitativa), gráfico de torta para ASJC (multivaluado: los
 porcentajes no suman 100 %).
 
+### 5.1 El índice de la sección
+
+El panel lateral pasó de ser un índice de módulos a ser los controles del
+recorte, y con eso se habría perdido la navegación rápida entre gráficos.
+Vuelve **debajo de los filtros**, con su scroll-spy.
+
+> **El ancla al último corte no movía nada.** Medido: el corte se quedaba a
+> 351 px del borde con un `scroll-margin` correcto de 120. No era el margen —
+> la página se acababa antes y no había recorrido que gastar. Con espacio al
+> final, el último sube hasta la cabecera como los demás.
+
 ---
 
 ## 6. Filtros
 
-| Filtro | Tipo | Origen | Notas |
-|---|---|---|---|
-| Año | Botones múltiples | `anio` | 3 valores |
-| Tipo documental | Multi-select | `tipo_documental` | 10 valores |
-| Área QS | Multi-select | QS area | 5 valores |
-| Área ASJC | Buscador + multi-select | ASJC | 249 valores: requiere búsqueda |
-| Unidad académica | Multi-select | `unidad_academica` | Incluye «No determinada» como opción real |
-| Acceso abierto | Multi-select | `Open Access` | Incluye «Sin dato declarado» |
-| Colaboración internacional | Toggle | derivado | Sí/No |
-| Autor | Autocompletado | tabla maestra | 589 entradas |
-| Texto libre | Input con debounce 250 ms | título, fuente | — |
+Los filtros son **el motor del explorador**, no un accesorio de una página. Su
+comportamiento y su modelo de estado están en la §4; aquí quedan sólo las
+dimensiones y las reglas que las gobiernan.
+
+| Dimensión | Origen | Notas |
+|---|---|---|
+| Año | `anio` | 3 valores |
+| Área QS | `qs_area` | 5 valores · multivaluado |
+| Unidad académica | `unidades` | incluye «Sin dato declarado» como opción real |
+| Tipo documental | `tipo` | 10 valores |
+| Acceso abierto | `open_access` | multivaluado · incluye «Sin dato declarado» |
+| Colaboración | derivado de `es_internacional` | Internacional / Nacional / Sin dato |
+| Texto libre | título, fuente, autores UFT | debounce 250 ms · insensible a acentos |
 
 ### Reglas de comportamiento
 
-1. **AND entre filtros, OR dentro de un filtro.** Convención estándar; se
-   documenta en la interfaz.
-2. **Recuento en cada faceta**, calculado sobre los demás filtros activos.
-3. **Facetas con 0 resultados se muestran deshabilitadas**, no se ocultan: su
-   ausencia es información.
-4. **`No determinada` y `Sin dato declarado` son opciones seleccionables.**
-   Consecuencia directa de la decisión D-09: no imputar.
-5. **Persistencia en URL** (query string). Es `<v1_scope_desirable>` y su coste
-   es bajo; permite compartir una vista filtrada.
-6. **Los filtros que reducen el denominador lo declaran.** Al filtrar por área
-   temática, el conteo base pasa de 823 a 816: la interfaz lo indica en vez de
-   dejar que el usuario note una inconsistencia.
-7. **Chips de filtros activos** siempre visibles, con opción de limpiar.
-
----
+1. **AND entre dimensiones, OR dentro de una dimensión.** Es lo que espera
+   cualquiera que haya usado un filtro; al revés, cada clic adicional daría
+   menos resultados sin que se entienda por qué.
+2. **«Sin dato declarado» es una opción de filtro, no un hueco.** Poder pedir
+   *«las publicaciones cuya unidad no se determinó»* es parte de auditar la
+   cobertura, y esconderlas las volvería invisibles justo para quien las busca.
+3. **Los recuentos de una faceta se calculan sin aplicarse a sí misma.** Si no,
+   al elegir un valor todos sus hermanos caerían a cero.
+4. **Una faceta en 0 se muestra deshabilitada, no se oculta.** Su ausencia es
+   información.
+5. **El recorte es el estado de la aplicación** y vive en la URL (§4.1).
 
 ## 7. Buscador
 
@@ -332,52 +404,66 @@ contenedor; la página nunca scrollea en horizontal.
 Implementado en `web/assets/css/app.css`, hoja única. Sin dependencias externas:
 ninguna fuente, hoja ni script se carga desde un CDN.
 
-### 12.1 Paleta: de dónde sale cada color
+### 12.1 Paleta: alto contraste, y el dato en una sola familia
 
-**La paleta la fijó el proyecto**: Ink Black `#071e22` · Deep Ocean `#1d7874` ·
-Jungle Teal `#679289` · Peach Glow `#f4c095` · Racing Red `#ee2e31`. Sustituye a
-la identidad roja anterior, que a su vez había sustituido a un teal-azul. Los
-cinco colores entran **donde la medición los admite**, y dos no entraron donde
-se pretendía.
+La dirección es **científico moderno de alto contraste**: papel blanco puro o
+suelo casi negro, cifras enormes, y el color reservado al dato. Sustituye a una
+paleta cálida (Ink Black · Deep Ocean · Peach Glow) que a su vez había
+sustituido a una identidad roja.
 
-El papel se tiñe con Peach al 6–10 %, la tinta es Ink Black literal y el dato es
-Deep Ocean. En tema oscuro Ink Black cambia de papel a suelo: deja de ser tinta
-y pasa a ser fondo.
+El motivo del cambio es legible en las cifras: la tinta pasa a **19,34:1** en
+claro y **16,58:1** en oscuro. Un informe que se lee en una sala de reuniones,
+en un proyector o con presbicia no puede permitirse menos.
 
-Dos correcciones que impuso [`validar_paleta.py`](../src/design/validar_paleta.py),
-no el gusto:
-
-> **Peach Glow no puede ser el color del dato en oscuro.** Chocaba con el ámbar
-> de advertencia: ΔE OKLab **10,2** contra un piso de 20. Es exactamente lo que
-> esa regla existe para atrapar — confundir «esto es el dato» con «esto es una
-> advertencia sobre el dato». El dato pasa a ser teal en los **dos** temas y
-> Peach baja a segunda ranura.
->
-> **El cuarto escalón de la rampa ordinal no llegaba a 3:1** contra su
-> superficie. Los cuatro escalones se buscaron con la propia matemática del
-> validador en vez de afinarse a ojo.
-
-El par categórico del anillo `C-01` mejora de ΔE 12,2 a **30,1** en claro: teal
-contra Ink Black se separa por luminosidad, que ninguna dicromacia colapsa.
-
-Cada token despeja un umbral comprobable, medido en los **dos** temas:
+El dato es **azul índigo**: `#2b44d9` en claro, `#7c93ff` en oscuro. Se eligió
+por medición y no por gusto — ver más abajo la separación frente al ámbar de
+advertencia.
 
 | Token | Fondo | Claro | Oscuro | Piso |
 |---|---|---|---|---|
-| `--tinta` | `--superficie` | 16,86 | 13,28 | 4,5 (WCAG 1.4.3) |
-| `--tinta-2` | `--superficie` | 9,48 | 8,59 | 4,5 |
-| `--tinta-3` | `--superficie-2` | 5,55 | 5,21 | 4,5 |
-| `--cifra` | `--superficie` | 8,88 | 9,23 | 3,0 (texto grande) |
-| `--accion` | `--superficie` | 7,92 | 9,23 | 4,5 |
-| `--serie-1` | `--superficie` | 5,14 | 5,79 | 3,0 (WCAG 1.4.11) |
-| `--sin-dato` | `--superficie` | 3,80 | 4,13 | 3,0 |
-| `--ord-1` … `--ord-4` | `--superficie` | 15,60 … 3,22 | 11,91 … 4,34 | 3,0 |
-| `--marca-tinta` | `--marca` | 10,53 | 11,47 | 4,5 |
-| `--aviso-tinta` | `--aviso-fondo` | 8,07 | 10,43 | 4,5 |
+| `--tinta` | `--superficie` | **19,34** | **16,58** | 4,5 (WCAG 1.4.3) |
+| `--tinta-2` | `--superficie` | 9,00 | 9,95 | 4,5 |
+| `--tinta-3` | `--superficie-2` | 5,22 | 6,07 | 4,5 |
+| `--cifra` | `--superficie` | 19,34 | 16,58 | 3,0 (texto grande) |
+| `--accion` | `--superficie` | 8,55 | 7,61 | 4,5 |
+| `--serie-1` | `--superficie` | 7,16 | 6,40 | 3,0 (WCAG 1.4.11) |
+| `--sin-dato` | `--superficie` | 3,42 | 3,78 | 3,0 |
+| `--ord-1` … `--ord-4` | `--superficie` | 14,91 … 3,21 | 14,07 … 3,34 | 3,0 |
+| `--marca-tinta` | `--marca` | 15,14 | 15,14 | 4,5 |
+| `--aviso-tinta` | `--aviso-fondo` | 7,84 | 10,43 | 4,5 |
 
-**Separación dato ↔ advertencia:** ΔE OKLab **22,1** en claro y **20,3** en
-oscuro, sobre un piso de 20. **Rampa ordinal:** paso mínimo ΔE **11,4** y
-**8,8**, sobre un piso de 8, con luminosidad monótona.
+**La cifra no lleva color.** `--cifra` es tinta pura en los dos temas, a
+19,34:1. En un tablero donde el número es lo que se viene a ver, teñirlo lo
+convierte en decoración y le quita contraste; el color queda libre para lo único
+que codifica algo, que es el dato de los gráficos.
+
+#### Las tres condiciones que el contraste solo no cubre
+
+**Separación dato ↔ advertencia:** ΔE OKLab **36,0** en claro y **33,3** en
+oscuro, sobre un piso de 20. Es holgura, y viene de que las dos familias
+—índigo y ámbar— están lejos en el círculo. La paleta cálida anterior vivía al
+borde de este piso y una de sus versiones llegó a incumplirlo.
+
+**Rampa ordinal Q1–Q4:** paso mínimo ΔE **11,8** y **11,2**, sobre un piso de 8,
+con luminosidad monótona. Un solo tono en cuatro pasos: cuatro tonos distintos
+habrían afirmado que Q1 y Q4 no tienen relación entre sí, cuando son posiciones
+de una misma escala.
+
+**Par categórico bajo daltonismo:** peor caso ΔE **37,9** en claro y **22,0** en
+oscuro. El par se separa por **luminosidad** —índigo contra casi negro— y eso
+ninguna dicromacia lo colapsa.
+
+#### Dos correcciones que impuso la medición
+
+> **`--ord-4` no llegaba a 3:1.** El cuarto escalón de la rampa quedaba en
+> 1,94:1 sobre blanco. No bastaba con oscurecerlo: al hacerlo se comía la
+> separación con `--ord-3`. La rampa entera se rebalanceó con la matemática del
+> validador hasta que los cuatro escalones cumplieran a la vez el piso de
+> contraste y el de ΔE.
+>
+> **La marca de ausencia se quedaba corta.** `--sin-dato` medía 2,56:1 sobre
+> blanco y 2,95 sobre el segundo suelo. Un gris que no se ve es peor que no
+> marcar la ausencia, porque la deja pasar por dato.
 
 #### El validador estaba midiendo otra paleta
 
@@ -397,62 +483,36 @@ entonces tampoco atrapa los verdaderos — que era el caso:
 > claro y caían sobre un suelo oscuro: `--ord-1` medía **1,06:1**, o sea
 > invisible.
 
-#### Series categóricas: qué se dibuja de verdad
-
-De las seis ranuras declaradas, **el sitio dibuja dos**: el anillo de `C-01`
-pide escala categórica y gasta `--serie-1` y `--serie-2`. Todo lo demás cae en
-`--serie-1` sola o en la rampa ordinal.
-
-> Corrección. Una versión anterior de esta documentación afirmaba que «ningún
-> módulo pide `escala: 'serie'`» y que el sitio usaba una sola ranura. Era
-> **falso**: `anillo()` pide siempre escala de serie, así que la segunda ranura
-> llevaba dibujándose desde el principio. Queda anotado porque una paleta
-> declarada sin usar y una paleta en uso sin validar son problemas distintos, y
-> sólo el segundo es urgente.
-
-El par en uso **sí** está validado, y como par, que es como se dibuja:
-
-| Medida | Claro | Oscuro | Piso |
-|---|---|---|---|
-| Contraste `--serie-1` / `--serie-2` | 7,67 y 5,77 | 5,48 y 7,50 | 3,0 |
-| ΔE visión normal | 25,9 | 26,6 | — |
-| ΔE protanopía | 17,5 | 17,9 | 8 |
-| **ΔE deuteranopía** | **12,2** | **12,1** | **8** ← peor caso |
-| ΔE tritanopía | 32,4 | 33,1 | 8 |
-
-Las **cuatro restantes** siguen reservadas y **sin validar**: nunca se han
-dibujado juntas. Quien las estrene debe revalidarlas *para el número de ranuras
-que vaya a usar*, no para seis. La sexta era carmín y se cambió por azul: con la
-marca en rojo, un carmín a dos pasos de `--serie-1` es una trampa a la espera.
-
-#### Una sola declaración por token
-
-La paleta oscura estaba escrita **tres veces** —en el `@media`, en el selector
-explícito y en los comentarios— y las tres copias podían separarse sin que nada
-avisara. Ahora cada token se declara una vez con `light-dark()` y el conmutador
-de tema sólo cambia `color-scheme`. Son unas 90 líneas menos y **un modo entero
-de error menos**.
-
 ### 12.2 Tipografía
 
-**Pila del sistema, no fuente web.** El proyecto prohíbe cargar nada desde un
-CDN, y autoalojar una familia añadiría binarios al repositorio y peso al bundle
-por una mejora que no cambia ninguna lectura analítica. La jerarquía se
-construye con peso, tamaño, interletrado y cifras tabulares.
+**La escala subió entera.** La anterior arrancaba en 11 px y ponía las notas a
+12,5 y las tablas a 14: por debajo de los 16 px que las guías de accesibilidad
+dan como suelo de lectura cómoda, y el primer texto que deja de leerse cuando la
+vista cambia con la edad.
 
-| Rol | Token | Tratamiento |
+| Token | Valor | Uso |
 |---|---|---|
-| Interfaz y prosa | `--f-ui` | `system-ui` con respaldos. Interletrado negativo creciente con el tamaño |
-| Cifras | `--f-cifra` | Misma pila. `tabular-nums` **sólo** donde deben alinearse en columna |
-| Identificadores | `--f-mono` | `ui-monospace`. Códigos de indicador, ORCID, DOI |
+| `--t-xs` | 13 px | códigos, micro-etiquetas |
+| `--t-s` | 15 px | notas, pie |
+| `--t-m` | 16 px | tablas, controles |
+| `--t-base` | 17 px | prosa |
+| `--t-l` | 20 px | — |
+| `--t-xl` | 24 px | título de módulo |
+| `--t-2xl` | 2–3,25 rem | h1 |
+| `--t-cifra` | 2,75–4,5 rem | valor de ficha |
+| `--t-display` | 3,5–7 rem | cifra de titular |
 
-Escala: `--t-xs` 11 px (códigos) · `--t-s` 12,5 px (notas) · `--t-m` 14 px
-(tablas y controles) · `--t-base` 16 px (prosa) · `--t-xl` 19 px (h2) ·
-`--t-2xl` y `--t-cifra` fluidos con `clamp()`.
+**Todo en `rem`, nunca en `px`.** WCAG 1.4.4 exige que el texto llegue al 200 %
+sin perder contenido ni función, y eso sólo se cumple si la escala entera cuelga
+del tamaño raíz que el lector puede cambiar en su navegador.
 
-Un detalle deliberado: las cifras tabulares se reservan a tablas, ejes y
-tooltips. En un KPI suelto las proporcionales se leen mejor, y forzar la
-tabulación ahí sólo separa los dígitos sin ganar nada.
+Las cifras usan `tabular-nums`. En un explorador el número cambia a cada filtro,
+y con cifras proporcionales el bloque entero salta a cada pulsación.
+
+> **El texto dentro del SVG no heredaba la escala.** Son píxeles fijos en la
+> hoja, así que se quedó a 11 px mientras el resto subía. Se movió a 13 — y con
+> él el medidor de ancho de etiqueta de `core.js`, porque si esos dos números se
+> separan las etiquetas se recortan donde no toca.
 
 ### 12.3 Espacio y trazo
 
@@ -548,32 +608,17 @@ El modo oscuro es una paleta **elegida y revalidada contra su propia
 superficie**, no una inversión. Invertir una paleta validada no produce una
 paleta validada.
 
-El suelo es Ink Black (`--plano: #041417`) y las tarjetas se levantan sobre él
-(`--superficie: #0d2a2f`). El color de la identidad cambia de papel a suelo: en
-claro Ink Black es la tinta; en oscuro es el fondo. El dato, en cambio, **no
-cambia** —teal en los dos temas—, y esa fue una decisión del validador y no del
-gusto: Peach Glow como dato en oscuro chocaba con el ámbar de advertencia.
+- **Claro:** papel blanco puro (`#ffffff`), tinta casi negra (`#0a0e14`).
+- **Oscuro:** suelo `#070a0f`, tarjetas levantadas sobre él en `#111721`.
+
+El color del dato **cambia de valor pero no de familia**: índigo en los dos
+temas, `#2b44d9` sobre blanco y `#7c93ff` sobre el suelo oscuro. Que la familia
+no cambie importa — un lector que alterna de tema no debería tener que reaprender
+qué significa el color.
 
 El selector de la cabecera tiene tres estados —automático, claro, oscuro—; el
 automático sigue al sistema operativo. La elección se recuerda y se aplica antes
-de pintar, con un script en línea en el `<head>`, para que no aparezca un
-destello del tema equivocado.
-
-**Un token no puede cambiar de oficio entre temas.** `--marca` es tinta en el
-tema claro y superficie de cabecera en el oscuro. Las cifras grandes de los KPI
-lo usaban como color de texto: en claro daban 7,74:1 y en oscuro **1,05:1** —los
-números más grandes de cada página, invisibles—. Por eso existe `--cifra`, que
-es tinta en los dos temas y sólo eso.
-
-El fallo sobrevivió a una revisión de la paleta porque no está en la paleta: los
-dos valores son correctos por separado y sólo el uso los enfrenta. Se detecta
-midiendo el color computado contra el fondo compuesto, página por página y tema
-por tema, no leyendo la hoja de estilos.
-
-El mismo fallo, con otra cara, obligó a crear `--boton-tinta`: el botón primario
-llevaba texto blanco fijo sobre `--accion`. En claro es un rojo hondo y el
-blanco da 7,67:1; en oscuro el mismo token se aclara a un rosa y el blanco
-caería a 2,84:1. La tinta del botón cambia con el tema, igual que su fondo.
+de pintar, para que la página no aparezca un instante con el tema equivocado.
 
 ### 12.6 bis Codificación por naturaleza del dato
 
@@ -680,16 +725,17 @@ Lo que **no** se copió, y por qué:
   documentos completos, que este proyecto no tiene, y produce una figura que se
   interpreta como si midiera algo. No se emula con datos que no la sostienen.
 
-### 13.1 Titular de portada
+### 13.1 Cabecera de portada
 
-Tres indicadores, no seis: un titular con seis cifras no tiene titular. Son
-`P-01` (cuánto se produce), `I-03` (con qué impacto normalizado) y `C-01` (con
-quién se colabora) — los tres ejes que el proyecto declara.
+**Sin cifras.** La cabecera anterior gastaba media pantalla en un título de tres
+líneas, un párrafo de cuatro y tres cifras que el tablero repetía justo debajo.
+En un explorador eso es ruido dos veces: gasta la pantalla que le toca al dato y
+enseña una cifra del total mientras el lector mira un recorte, que es la manera
+de que se lea la que no es.
 
-Cada cifra arrastra **su** denominador y, si la tiene, su referencia: un 0,87 de
-FWCI sin el «1 = promedio mundial» al lado no es un titular, es un número
-suelto. Los tres suben al titular y **bajan de la rejilla de KPI**: un indicador
-repetido a cuatro centímetros de sí mismo no gana énfasis, lo pierde.
+Queda el nombre, la procedencia —que no es decorativa: dice de dónde salen las
+cifras— y la explicación **detrás de un control**. Las cifras están donde deben,
+en el tablero, y cambian con el recorte.
 
 ### 13.2 Conmutador Gráfico ⇄ Tabla
 
@@ -768,19 +814,47 @@ estilos:
 | Comprobación | Alcance | Resultado |
 |---|---|---|
 | Contraste WCAG 2.1 (1.4.3 y 1.4.11) | 10 páginas × 2 temas, con composición alfa, paradas de degradado y exclusión de decoración | **0 fallos** |
+| Sistema cromático | 36 pares, separación dato↔advertencia, rampa ordinal y par categórico bajo daltonismo, en `:root` y en cada ámbito de banda | **válido** |
+| Estructura y consola | 10 páginas | **0 problemas** |
+| Flujos interactivos | recorte, recálculo, URL, botón de volver, «Ver todo», conmutador, índice, glosario, buscador, enlaces antiguos | **0 fallos**, 0 excepciones de JavaScript |
 | Desborde horizontal | 430 px y 860 px | **0 px** |
-| Sitio sin JavaScript | `index`, `impacto`, `tematica` | módulos, gráficos, tablas y sellos presentes |
-| LCP | *Slow 4G*, mediana de 5 corridas | 756–784 ms (presupuesto: < 2.000 ms) |
-| Auditoría de datos | 29 reglas | 28 pasan, 0 bloqueantes fallando |
-| Barrera pública/interna | artefactos de `dist/` | 0 fallas |
+| Sitio sin JavaScript | `index`, `impacto`, `produccion`, `colaboracion`, `tematica` | cifras, gráficos, tablas y sellos presentes |
+| Auditoría de datos | 30 reglas | 29 pasan, **0 bloqueantes fallando** |
+| Barrera pública/interna | artefactos de `dist/` | **0 fallas** |
 
-**Presupuestos.** CSS **51,4 KB** en bruto (15,2 KB con gzip), dentro del techo
-de 55 KB. JavaScript **72,1 KB** en bruto, **por encima** del techo de 60 KB
-declarado; con gzip son **23,7 KB**. Dos cosas relevantes para juzgarlo: el
-28 % del JavaScript es comentario en prosa, que este proyecto trata como parte
-del entregable, y con el sitio pre-renderizado el JavaScript ya **no está en la
-ruta crítica de pintado** —es `type="module"`, o sea diferido, y el contenido ya
-está en el HTML—. Queda declarado como excedido, no como resuelto.
+Tres de esas comprobaciones **se reformularon, no se debilitaron**, cuando la
+interfaz cambió: la que buscaba el botón de ayuda en los KPI de la portada, la
+que ligaba `EJES.md` con `id="modulos"`, y la de los filtros de publicaciones.
+En los tres casos el flujo seguía existiendo con otra forma, y bajar la
+comprobación habría dejado sin cubrir justo lo que se acababa de reescribir.
+
+**Presupuestos, y un techo que hay que rehacer.** Medido sobre `dist/`:
+
+| | Bruto | Con gzip | Techo declarado |
+|---|---|---|---|
+| CSS | 75 KB | **22 KB** | 55 KB · **excedido** |
+| JavaScript | 151 KB | **47 KB** | 60 KB · **excedido** |
+
+Los dos techos se fijaron para un sitio que servía indicadores ya calculados.
+El explorador cambió el trato: **`publications.json` viaja entero al navegador**
+—699 KB, 823 registros con sus 28 campos— y a cambio cualquier pregunta se
+responde sin volver al servidor. Un sitio que sólo pintaba series no necesitaba
+ese peso; uno que se interroga, sí.
+
+Cuatro cosas relevantes para juzgarlo, ninguna de las cuales lo resuelve:
+
+- El **30 %** del JavaScript es comentario en prosa, que este proyecto trata
+  como parte del entregable y no como sobra.
+- El JavaScript es `type="module"`, o sea diferido, y con el sitio
+  pre-renderizado **no está en la ruta crítica de pintado**: el contenido ya
+  está en el HTML cuando llega.
+- Con gzip, que es como viaja, son 47 y 22 KB.
+- El coste real no es el código sino los datos, y ése es el precio de la
+  arquitectura, no un descuido de implementación.
+
+Queda **declarado como excedido, no como resuelto**. Los techos hay que
+rehacerlos contra la arquitectura nueva en vez de arrastrar los de la anterior,
+que medían otra cosa.
 
 ---
 
