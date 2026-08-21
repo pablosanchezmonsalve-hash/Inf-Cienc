@@ -98,23 +98,41 @@ await pg.waitForTimeout(400);
 ok(await pg.locator('.recorte-chip').count() === 0, '«Ver todo» limpia el recorte');
 
 // ─────────────────────────────────────────────────────────────────── filtros
+// Publicaciones usa EL MISMO motor que la portada y las secciones. Lo que se
+// comprueba aquí es justo eso: que un recorte hecho en el tablero llegue por la
+// URL y siga valiendo, que el buscador no expulse el foco al repintar, y que
+// los enlaces antiguos con `internacional=` no se hayan roto al unificar.
 console.log('  Filtros de publicaciones');
-await pg.goto(`http://127.0.0.1:${P}/publicaciones.html`, { waitUntil: 'networkidle' });
-await pg.waitForTimeout(600);
-const total = await pg.locator('#tabla-cuerpo tr').count();
-ok(total > 0, `la tabla trae filas (${total})`);
-await pg.click('input[data-filtro="anio"][value="2024"]');
-await pg.waitForTimeout(400);
-const resumen = await pg.textContent('#resumen');
-ok(/filtros aplicados/.test(resumen), `el resumen declara el filtro: «${resumen.trim().replace(/\s+/g, ' ')}»`);
-ok(await pg.locator('.chip').count() === 1, 'aparece la pastilla del filtro');
-ok(new URL(pg.url()).searchParams.get('anio') === '2024', 'el estado viaja en la URL');
+await pg.goto(`http://127.0.0.1:${P}/publicaciones.html?anio=2024&unidad=Facultad+de+Medicina`,
+  { waitUntil: 'networkidle' });
+await pg.waitForTimeout(700);
+const heredado = await pg.textContent('.recorte-n');
+ok(heredado.trim() === '113', `el recorte de la portada llega intacto (${heredado.trim()})`);
+ok(await pg.locator('.chip-on').count() === 2, 'los controles reflejan el recorte heredado');
+const filas = await pg.locator('#tabla-cuerpo tr').count();
+ok(filas > 0, `la tabla trae filas (${filas})`);
+
+await pg.fill('#q', 'salud');
+await pg.waitForTimeout(500);
+ok(await pg.evaluate(() => document.activeElement?.id) === 'q',
+   'el buscador conserva el foco tras repintarse');
+ok(new URL(pg.url()).searchParams.get('q') === 'salud', 'la búsqueda viaja en la URL');
+
 await pg.reload({ waitUntil: 'networkidle' });
-await pg.waitForTimeout(600);
-ok(await pg.isChecked('input[data-filtro="anio"][value="2024"]'), 'el filtro sobrevive a la recarga');
-await pg.click('#limpiar');
+await pg.waitForTimeout(700);
+ok(await pg.locator('.chip-on').count() === 2, 'el recorte sobrevive a la recarga');
+
+await pg.click('#limpiar-recorte');
 await pg.waitForTimeout(400);
-ok(await pg.locator('.chip').count() === 0, 'limpiar quita las pastillas');
+ok(await pg.locator('.recorte-chip').count() === 0, '«Ver todo» limpia el recorte');
+
+// Un enlace guardado con el nombre viejo de la dimensión tiene que seguir
+// funcionando: unificar no puede romper lo que alguien ya citó.
+await pg.goto(`http://127.0.0.1:${P}/publicaciones.html?internacional=Internacional`,
+  { waitUntil: 'networkidle' });
+await pg.waitForTimeout(700);
+ok(await pg.locator('.chip-on').count() === 1,
+   'un enlace antiguo con «internacional=» sigue recortando');
 
 // ───────────────────────────────────────────────────── autores: orden y búsqueda
 console.log('  Autores: búsqueda y ordenación');

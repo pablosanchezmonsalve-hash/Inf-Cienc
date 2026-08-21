@@ -1577,3 +1577,18 @@ svg.chart .trama { pointer-events: none; }
    recorrido. Es la razón de que exista, no un margen decorativo. */
 .explorador-resultado > .cortes:last-child,
 .explorador-resultado > .cortes { padding-bottom: 45vh; }
+
+/* Buscador dentro del panel de filtros: misma caja que las dimensiones. */
+.dim-busca { padding: var(--e3) var(--e4) var(--e4); margin-bottom: var(--e2); }
+.dim-busca label {
+  display: block; font: 700 var(--t-m)/1 var(--f-ui); margin-bottom: var(--e2);
+}
+.dim-busca input {
+  width: 100%; font: 400 var(--t-m)/1.4 var(--f-ui);
+  padding: .55rem .7rem; border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s); background: var(--plano); color: var(--tinta);
+}
+
+.acciones-tabla { display: flex; gap: var(--e3); margin-bottom: var(--e4); }
+
+.enlace-lista { font-weight: 650; font-size: var(--t-s); white-space: nowrap; }

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `b07a902` · Interfaz nueva: la portada es un explorador de datos
+Último commit: `3441d64` · Las cuatro secciones también son explorables
 Snapshot: 2026-08-21
 
 ---

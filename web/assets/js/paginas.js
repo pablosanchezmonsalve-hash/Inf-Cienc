@@ -203,109 +203,40 @@ const POR_PAGINA = 50;
 
 async function publicaciones() {
   const { publicaciones: pubs } = await c.cargar('publications.json');
-  const facetas = await c.cargar('facets.json');
-  const estado = leerURL();
+  const zonas = {
+    estado: document.getElementById('estado-recorte'),
+    controles: document.getElementById('controles'),
+  };
+  let sel = X.leerURL();
   let pagina = 1;
 
-  const FILTROS = [
-    ['anio', 'Año', facetas.anio],
-    ['tipo', 'Tipo documental', facetas.tipo],
-    ['qs_area', 'Área QS', facetas.qs_area],
-    ['unidad', 'Unidad académica', facetas.unidad],
-    ['open_access', 'Acceso abierto', facetas.open_access],
-    ['internacional', 'Colaboración', facetas.internacional],
-  ];
+  function pintar({ nuevaEntrada = false, soloTabla = false } = {}) {
+    const res = X.recorte(pubs, sel);
 
-  function coincide(p, omitir = null) {
-    for (const [clave] of FILTROS) {
-      if (clave === omitir) continue;
-      const sel = estado[clave];
-      if (!sel || !sel.length) continue;
-      let vals;
-      if (clave === 'anio') vals = [String(p.anio)];
-      else if (clave === 'tipo') vals = [p.tipo];
-      else if (clave === 'qs_area') vals = p.qs_area;
-      else if (clave === 'unidad') vals = p.unidades.length ? p.unidades : ['Sin dato declarado'];
-      else if (clave === 'open_access') vals = p.open_access.length ? p.open_access : ['Sin dato declarado'];
-      else if (clave === 'internacional') vals = [p.es_internacional === null
-        ? 'Sin dato declarado' : (p.es_internacional ? 'Internacional' : 'Nacional')];
-      // OR dentro de un filtro, AND entre filtros.
-      if (!vals.some(v => sel.includes(String(v)))) return false;
-    }
-    if (estado.q) {
-      const q = estado.q.toLowerCase();
-      const heno = `${p.titulo} ${p.fuente} ${p.autores_uft.join(' ')}`
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      if (!heno.includes(q.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))) return false;
-    }
-    return true;
-  }
-
-  function pintarFiltros() {
-    document.getElementById('filtros').innerHTML = FILTROS.map(([clave, etiqueta, opciones]) => {
-      // Recuento calculado con los demás filtros activos: una faceta en 0 se
-      // muestra deshabilitada, no se oculta (su ausencia es información).
-      const visibles = publicacionesQue(clave);
-      const items = opciones.map(o => {
-        const n = contarFaceta(visibles, clave, o.valor);
-        const sel = (estado[clave] || []).includes(String(o.valor));
-        return `<label class="opcion ${n === 0 && !sel ? 'desactivada' : ''}">
-          <input type="checkbox" value="${c.escapar(String(o.valor))}" data-filtro="${clave}"
-            ${sel ? 'checked' : ''} ${n === 0 && !sel ? 'disabled' : ''}>
-          ${c.escapar(String(o.valor))} <span class="n">${n}</span></label>`;
-      }).join('');
-      return `<div class="grupo-filtro"><span class="etiqueta">${etiqueta}</span>
-        <div class="opciones">${items}</div></div>`;
-    }).join('') + `
-      <div class="grupo-filtro">
-        <label for="q">Buscar en título, fuente o autor</label>
-        <input type="search" id="q" value="${c.escapar(estado.q || '')}" placeholder="Escriba para filtrar…">
-      </div>
-      <button class="boton" id="limpiar">Limpiar filtros</button>
-      <button class="boton boton-primario" id="exportar">Exportar CSV</button>`;
-  }
-
-  const publicacionesQue = (omitir) => pubs.filter(p => coincide(p, omitir));
-
-  function contarFaceta(lista, clave, valor) {
-    return lista.filter(p => {
-      if (clave === 'anio') return String(p.anio) === String(valor);
-      if (clave === 'tipo') return p.tipo === valor;
-      if (clave === 'qs_area') return p.qs_area.includes(valor);
-      if (clave === 'unidad') return valor === 'Sin dato declarado'
-        ? !p.unidades.length : p.unidades.includes(valor);
-      if (clave === 'open_access') return valor === 'Sin dato declarado'
-        ? !p.open_access.length : p.open_access.includes(valor);
-      if (clave === 'internacional') {
-        if (valor === 'Sin dato declarado') return p.es_internacional === null;
-        return p.es_internacional === (valor === 'Internacional');
+    if (!soloTabla) {
+      zonas.estado.innerHTML = VX.estado(res.length, pubs.length, sel);
+      // El buscador se repinta con el resto, así que hay que devolverle el
+      // foco y el cursor: si no, escribir una letra lo expulsa del campo.
+      const antes = document.getElementById('q');
+      const tenia = document.activeElement === antes;
+      const pos = antes ? antes.selectionStart : null;
+      zonas.controles.innerHTML = VX.controles(pubs, sel, { buscador: true });
+      if (tenia) {
+        const ahora = document.getElementById('q');
+        ahora.focus();
+        if (pos !== null) ahora.setSelectionRange(pos, pos);
       }
-      return false;
-    }).length;
-  }
-
-  function pintar() {
-    const res = pubs.filter(p => coincide(p));
-    const chips = Object.entries(estado).flatMap(([k, v]) =>
-      k === 'q' ? (v ? [[k, v]] : []) : (v || []).map(x => [k, x]))
-      .map(([k, v]) => `<span class="chip">${c.escapar(String(v))}
-        <button data-quitar="${k}" data-valor="${c.escapar(String(v))}" aria-label="Quitar filtro">×</button></span>`).join('');
-    document.getElementById('chips').innerHTML = chips;
+    }
+    X.escribirURL(sel, !nuevaEntrada);
 
     const totalPag = Math.max(1, Math.ceil(res.length / POR_PAGINA));
     pagina = Math.min(pagina, totalPag);
     const pag = res.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
-
-    document.getElementById('resumen').innerHTML =
-      `<strong>${c.nf.format(res.length)}</strong> de ${c.nf.format(pubs.length)} publicaciones` +
-      (res.length !== pubs.length ? ' · filtros aplicados' : '');
-
     const cuerpo = document.getElementById('tabla-cuerpo');
+
     if (!res.length) {
       cuerpo.innerHTML = `<tr><td colspan="6"><div class="vacio">
-        <p>Ningún resultado con estos filtros.</p>
-        <button class="boton" id="limpiar2">Limpiar filtros</button></div></td></tr>`;
-      document.getElementById('limpiar2').onclick = limpiar;
+        <p>Ningún resultado con este recorte.</p></div></td></tr>`;
       document.getElementById('paginacion').innerHTML = '';
       return;
     }
@@ -330,54 +261,37 @@ async function publicaciones() {
       <span>Página ${pagina} de ${totalPag}</span>
       <button class="boton" id="sig" ${pagina === totalPag ? 'disabled' : ''}>Siguiente</button>` : '';
     const ant = document.getElementById('ant'), sig = document.getElementById('sig');
-    if (ant) ant.onclick = () => { pagina--; pintar(); };
-    if (sig) sig.onclick = () => { pagina++; pintar(); };
+    if (ant) ant.onclick = () => { pagina--; pintar({ soloTabla: true }); };
+    if (sig) sig.onclick = () => { pagina++; pintar({ soloTabla: true }); };
   }
 
-  function leerURL() {
-    const p = new URLSearchParams(location.search), e = {};
-    for (const [k, v] of p) e[k] = k === 'q' ? v : v.split('|');
-    return e;
-  }
-  function escribirURL() {
-    const p = new URLSearchParams();
-    for (const [k, v] of Object.entries(estado)) {
-      if (k === 'q' && v) p.set(k, v);
-      else if (Array.isArray(v) && v.length) p.set(k, v.join('|'));
+  // Mismo escucha delegado que el explorador: los controles se repintan
+  // enteros y los escuchas colgados de cada chip morirían con el marcado.
+  document.addEventListener('click', e => {
+    const chip = e.target.closest('.chip[data-dim]');
+    if (chip) {
+      const { dim, valor } = chip.dataset;
+      const actual = sel[dim] || [];
+      sel = { ...sel, [dim]: actual.includes(valor)
+        ? actual.filter(x => x !== valor) : [...actual, valor] };
+      pagina = 1; pintar({ nuevaEntrada: true });
+      document.querySelector(
+        `.chip[data-dim="${CSS.escape(dim)}"][data-valor="${CSS.escape(valor)}"]`)?.focus();
+      return;
     }
-    history.replaceState(null, '', p.toString() ? `?${p}` : location.pathname);
-  }
-  function refrescar() { escribirURL(); pintarFiltros(); pintar(); }
-  function limpiar() { for (const k of Object.keys(estado)) delete estado[k]; pagina = 1; refrescar(); }
-
-  document.getElementById('filtros').addEventListener('change', e => {
-    const cb = e.target.closest('[data-filtro]'); if (!cb) return;
-    const k = cb.dataset.filtro;
-    estado[k] = estado[k] || [];
-    if (cb.checked) estado[k].push(cb.value);
-    else estado[k] = estado[k].filter(v => v !== cb.value);
-    if (!estado[k].length) delete estado[k];
-    pagina = 1; refrescar();
+    if (e.target.closest('#limpiar-recorte')) { sel = {}; pagina = 1; pintar({ nuevaEntrada: true }); }
+    if (e.target.id === 'exportar') exportar(X.recorte(pubs, sel));
   });
-  document.getElementById('filtros').addEventListener('input', c.debounce(e => {
+
+  document.addEventListener('input', c.debounce(e => {
     if (e.target.id !== 'q') return;
-    estado.q = e.target.value || undefined;
-    if (!estado.q) delete estado.q;
-    pagina = 1; escribirURL(); pintar();
+    sel = { ...sel, q: e.target.value || undefined };
+    if (!sel.q) delete sel.q;
+    pagina = 1; pintar();
   }, 250));
-  document.getElementById('filtros').addEventListener('click', e => {
-    if (e.target.id === 'limpiar') limpiar();
-    if (e.target.id === 'exportar') exportar(pubs.filter(p => coincide(p)));
-  });
-  document.getElementById('chips').addEventListener('click', e => {
-    const b = e.target.closest('[data-quitar]'); if (!b) return;
-    const k = b.dataset.quitar;
-    if (k === 'q') delete estado.q;
-    else { estado[k] = (estado[k] || []).filter(v => v !== b.dataset.valor); if (!estado[k].length) delete estado[k]; }
-    refrescar();
-  });
 
-  refrescar();
+  addEventListener('popstate', () => { sel = X.leerURL(); pagina = 1; pintar(); });
+  pintar();
 }
 
 /** La exportación arrastra la procedencia: un CSV sin fecha de corte deja de
