@@ -82,9 +82,16 @@ export function cifras(res) {
 /** La frase que dice qué se está mirando. Es obligatoria, no decorativa:
     quien llega por un enlace con filtros tiene que saber que lo que ve es un
     subconjunto, o leerá las cifras como si fueran las del total. */
-export function estado(n, total, sel) {
+export function estado(n, total, sel, { enlaceLista = false } = {}) {
   const partes = X.describir(sel);
   const filtrado = partes.length > 0;
+  // El puente entre el tablero y el listado: mirando un recorte, lo siguiente
+  // que se quiere es ver QUÉ publicaciones lo componen. Sin este enlace había
+  // que rehacer el mismo filtro a mano en la otra página.
+  const q = X.consulta(sel);
+  const aLista = enlaceLista
+    ? `<a class="enlace-lista" href="publicaciones.html${q ? '?' + q : ''}">Ver las ${
+        c.nf.format(n)} publicaciones →</a>` : '';
   return `<p class="recorte-estado" role="status">
     <span class="recorte-n">${c.nf.format(n)}</span>
     <span class="recorte-de">de ${c.nf.format(total)} publicaciones</span>
@@ -93,14 +100,20 @@ export function estado(n, total, sel) {
           `<span class="recorte-chip">${c.escapar(p)}</span>`).join('')}</span>
          <button type="button" class="boton boton-limpiar" id="limpiar-recorte">Ver todo</button>`
       : `<span class="recorte-que recorte-todo">sin filtros · el informe completo</span>`}
+    ${aLista}
   </p>`;
 }
 
 /** Los controles. Un `details` por dimensión: sin JavaScript se abren y se
     leen igual, que es la razón de usarlo en vez de un panel montado por
     guion. La primera dimensión va abierta para que el mecanismo se vea. */
-export function controles(pubs, sel) {
-  return `<div class="filtros-explorador">${X.DIMENSIONES.map(([clave, etiqueta], i) => {
+export function controles(pubs, sel, { buscador = false } = {}) {
+  const busca = buscador ? `<div class="dim dim-busca">
+    <label for="q">Buscar en título, fuente o autor</label>
+    <input type="search" id="q" name="q" value="${c.escapar(sel.q || '')}"
+      placeholder="Escriba para filtrar…" autocomplete="off">
+  </div>` : '';
+  return busca + `<div class="filtros-explorador">${X.DIMENSIONES.map(([clave, etiqueta], i) => {
     const cuenta = X.facetas(pubs, sel, clave);
     const elegidos = sel[clave] || [];
     const opciones = [...cuenta.entries()]
@@ -156,7 +169,7 @@ export function cortes(pubs_sel) {
 export function explorador(pubs, sel) {
   const sub = X.recorte(pubs, sel);
   return {
-    estado: estado(sub.length, pubs.length, sel),
+    estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel),
     cifras: cifras(X.resumen(sub)),
     cortes: cortes(sub),
@@ -328,7 +341,7 @@ export function cabeceraSeccion(clave, titulo) {
 export function seccion(pubs, sel, clave) {
   const sub = X.recorte(pubs, sel);
   return {
-    estado: estado(sub.length, pubs.length, sel),
+    estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
     cifras: cifras(X.resumen(sub)),
     cortes: cortesSeccion(sub, clave),

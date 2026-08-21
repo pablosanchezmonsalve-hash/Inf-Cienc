@@ -40,10 +40,21 @@ export const DIMENSIONES = [
 
 const EXTRAE = Object.fromEntries(DIMENSIONES.map(([k, , f]) => [k, f]));
 
+/* Comparación insensible a acentos y a mayúsculas. Buscar «Nunez» tiene que
+   encontrar «Núñez»: en un corpus con nombres en español, exigir el acento
+   convierte el buscador en un examen de ortografía. */
+const plano = s => String(s).normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/** El texto sobre el que busca `q`. Título, fuente y autores UFT: lo que una
+    persona recuerda de una publicación cuando la busca. */
+const heno = p => plano(`${p.titulo} ${p.fuente} ${(p.autores_uft || []).join(' ')}`);
+
 /** ¿Esta publicación entra en el recorte? `omitir` deja fuera una dimensión,
     que es como se cuentan las facetas de la propia dimensión sin que se
     anulen a sí mismas. */
 export function pasa(p, sel, omitir = null) {
+  if (sel.q && omitir !== 'q' && !heno(p).includes(plano(sel.q))) return false;
   for (const [clave] of DIMENSIONES) {
     if (clave === omitir) continue;
     const elegidos = sel[clave];
@@ -142,25 +153,45 @@ export function leerURL(busqueda = location.search) {
     const v = q.get(clave);
     if (v) sel[clave] = v.split('|').filter(Boolean);
   }
+  // `internacional` es como se llamaba esta dimensión en la página de
+  // publicaciones antes de unificar el filtrado. Se sigue leyendo para que un
+  // enlace guardado o citado no deje de funcionar.
+  if (!sel.colaboracion) {
+    const viejo = q.get('internacional');
+    if (viejo) sel.colaboracion = viejo.split('|').filter(Boolean);
+  }
+  const texto = q.get('q');
+  if (texto) sel.q = texto;
   return sel;
 }
 
-export function escribirURL(sel, reemplazar = true) {
+/** El recorte serializado a query. Se calcula del RECORTE y no de
+    `location.search`, por dos razones: es la verdad —la URL puede ir un paso
+    por detrás— y `location` no existe bajo Node, donde corre el
+    pre-renderizado. */
+export function consulta(sel) {
   const q = new URLSearchParams();
   for (const [clave] of DIMENSIONES) {
     if (sel[clave] && sel[clave].length) q.set(clave, sel[clave].join('|'));
   }
-  const url = q.toString() ? `?${q}` : location.pathname;
-  history[reemplazar ? 'replaceState' : 'pushState'](null, '', url);
+  if (sel.q) q.set('q', sel.q);
+  return q.toString();
 }
 
-export const hayRecorte = sel => DIMENSIONES.some(([c]) => sel[c] && sel[c].length);
+export function escribirURL(sel, reemplazar = true) {
+  const q = consulta(sel);
+  history[reemplazar ? 'replaceState' : 'pushState'](null, '', q ? `?${q}` : location.pathname);
+}
+
+export const hayRecorte = sel =>
+  Boolean(sel.q) || DIMENSIONES.some(([c]) => sel[c] && sel[c].length);
 
 /** Cómo se llama el recorte activo, en palabras. Un tablero que sólo muestra
     cifras filtradas sin decir por qué está filtrado produce lecturas falsas:
     quien llega por un enlace tiene que saber qué está mirando. */
 export function describir(sel) {
   const partes = [];
+  if (sel.q) partes.push(`Texto: «${sel.q}»`);
   for (const [clave, etiqueta] of DIMENSIONES) {
     const v = sel[clave];
     if (v && v.length) partes.push(`${etiqueta}: ${v.join(' o ')}`);
