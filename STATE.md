@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `59b7a2a` · Un solo motor de filtrado para todo el sitio
+Último commit: `962710b` · docs/UX_UI.md: describir el explorador, no las bandas
 Snapshot: 2026-08-21
 
 ---

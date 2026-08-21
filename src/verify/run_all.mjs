@@ -24,6 +24,8 @@
      higiene       tokens y clases declarados vs usados, exportaciones sin
                    consumidor, id que el JS busca y no existen, y que la capa
                    interna no haya viajado
+     peso          CSS, JavaScript y datos contra su techo, medidos con gzip
+                   porque es como viajan
 
    `rendimiento.mjs` queda FUERA de la batería por diseño: mide LCP con cinco
    corridas por página contra dos servidores y tarda minutos. Se corre a mano
@@ -60,6 +62,9 @@ const PASOS = [
   ['flujos', 'node', ['src/verify/flujos.mjs']],
   ['responsive', 'node', ['src/verify/responsive.mjs']],
   ['higiene', 'python3', ['src/verify/higiene.py', DIST]],
+  // Sólo lee archivos y los comprime: tarda menos de un segundo, así que
+  // no hay razón para dejarlo fuera como a rendimiento.mjs.
+  ['peso', 'node', ['src/verify/peso.mjs', DIST]],
 ];
 
 const correr = (cmd, args) => new Promise((res) => {
