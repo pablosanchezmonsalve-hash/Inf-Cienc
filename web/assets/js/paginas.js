@@ -19,7 +19,17 @@ const yaPintado = el => el && el.dataset.prerender === '1';
    El HTML llega pre-renderizado con el recorte VACÍO —el informe completo—, así
    que sin JavaScript se ve el informe entero. Esta función no reescribe nada
    hasta que alguien toca un filtro: engancha el comportamiento y se aparta. */
-async function portada() {
+async function portada() { return montarExplorador(null); }
+
+/* Las secciones son el mismo explorador con OTROS cortes. Se comparte la
+   función entera en vez de duplicarla: filtros, estado, URL y navegación son
+   idénticos, y lo único que cambia es qué se dibuja con el recorte. */
+async function seccion() {
+  const clave = document.getElementById('contenido')?.dataset.seccion;
+  return montarExplorador(clave || null);
+}
+
+async function montarExplorador(claveSeccion) {
   const cabecera = document.getElementById('titular');
   const zonas = {
     estado: document.getElementById('estado-recorte'),
@@ -33,16 +43,33 @@ async function portada() {
 
   if (!yaPintado(zonas.cifras)) {
     const meta = await c.cargar('meta.json');
-    const { kpis } = await c.cargar('kpis.json');
-    if (cabecera) cabecera.innerHTML = VX.cabecera(meta);
-    document.getElementById('lectura').innerHTML = v.lectura(kpis);
-    document.getElementById('cierre').innerHTML = v.cierrePortada();
+    if (cabecera) {
+      cabecera.innerHTML = claveSeccion
+        ? VX.cabeceraSeccion(claveSeccion, document.title.split('·')[0].trim())
+        : VX.cabecera(meta);
+    }
+    const lectura = document.getElementById('lectura');
+    if (lectura) lectura.innerHTML = v.lectura((await c.cargar('kpis.json')).kpis);
+    const cierre = document.getElementById('cierre');
+    if (cierre) cierre.innerHTML = v.cierrePortada();
+
+    // Los indicadores DIFERIDOS siguen apareciendo. Que un indicador esté
+    // verificado y no se publique es información del informe: un hueco se
+    // leería como que el fenómeno no existe. No responden al recorte —no se
+    // calculan— y por eso van sobre su propio suelo, separados de lo que sí.
+    const dif = document.getElementById('diferidos');
+    if (dif && claveSeccion) {
+      const catalogo = await c.cargar('catalogo.json');
+      dif.innerHTML = VX.diferidos(catalogo, claveSeccion);
+    }
   }
 
   let sel = X.leerURL();
 
   function pintar({ nuevaEntrada = false } = {}) {
-    const partes = VX.explorador(publicaciones, sel);
+    const partes = claveSeccion
+      ? VX.seccion(publicaciones, sel, claveSeccion)
+      : VX.explorador(publicaciones, sel);
     // Se comparan los valores ANTES de reemplazar el marcado: la señal de
     // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
     const antes = new Map([...zonas.cifras.querySelectorAll('[data-valor]')]
@@ -57,6 +84,7 @@ async function portada() {
       if (antes.size && antes.get(e.dataset.valor) !== e.textContent) e.classList.add('cambia');
     });
     X.escribirURL(sel, !nuevaEntrada);
+    if (claveSeccion) scrollSpy(document.getElementById('contenido'));
   }
 
   // Un solo escucha delegado para los chips y para el botón de limpiar: los
@@ -83,6 +111,14 @@ async function portada() {
       zonas.estado.querySelector('.recorte-n')?.scrollIntoView({ block: 'nearest' });
     }
   });
+
+  // El conmutador Gráfico ⇄ Tabla se engancha al CONTENEDOR, no a cada corte:
+  // los cortes se reemplazan enteros a cada recorte y los escuchas colgados de
+  // ellos morirían con el marcado anterior.
+  conmutadorVistas(zonas.cortes);
+  // El scroll-spy se re-engancha tras cada recorte: los cortes se reemplazan
+  // y el observador anterior apuntaba a nodos que ya no están en el documento.
+  if (claveSeccion) scrollSpy(document.getElementById('contenido'));
 
   // El recorte vive en la URL, así que el botón de volver del navegador tiene
   // que deshacer un filtro. Sin esto, volver saca al lector del sitio.
@@ -117,7 +153,10 @@ function conmutadorVistas(raiz) {
   raiz.addEventListener('click', e => {
     const btn = e.target.closest('.vistas button');
     if (!btn) return;
-    const modulo = btn.closest('.modulo');
+    // `.corte` es el módulo del explorador. Sin esto el conmutador no
+    // encontraba su contenedor y las secciones perdían la vista de tabla, que
+    // es la vía equivalente al gráfico y no un extra.
+    const modulo = btn.closest('.modulo, .corte');
     modulo.querySelectorAll('.vistas button').forEach(b =>
       b.setAttribute('aria-pressed', String(b === btn)));
     modulo.querySelectorAll(':scope > .vista').forEach(p =>
@@ -644,7 +683,7 @@ function tecladoGraficos() {
 }
 
 /* ============================================================== arranque */
-const PAGINAS = { portada, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
+const PAGINAS = { portada, seccion, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
 
 document.addEventListener('DOMContentLoaded', async () => {
   const pagina = document.body.dataset.pagina;

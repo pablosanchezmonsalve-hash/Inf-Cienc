@@ -1551,3 +1551,29 @@ svg.chart .trama { pointer-events: none; }
 
 /* El símbolo no compite con la cifra: va menor y en la misma línea. */
 .ficha-sufijo { font-size: .5em; margin-left: .12em; font-weight: 700; }
+
+/* Cabecera de corte: el título y el conmutador Gráfico ⇄ Tabla en una línea. */
+.corte-cab {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--e3);
+  margin-bottom: var(--e3);
+}
+.corte-cab > h3 { margin: 0; flex: 1 1 auto; min-width: 0; }
+.corte-cab .vistas { flex: none; }
+
+/* Índice de cortes, bajo los filtros. */
+.rail-titulo {
+  font: 700 var(--t-xs)/1 var(--f-ui); text-transform: uppercase;
+  letter-spacing: .07em; color: var(--tinta-3); margin: var(--e5) 0 var(--e2);
+}
+
+/* El ancla del índice tiene que dejar el corte BAJO la cabecera fija, no
+   detrás de ella. Es el mismo margen que ya usaban los módulos. */
+.corte { scroll-margin-top: var(--e4); }
+@media (min-width: 900px) { .corte { scroll-margin-top: 7.5rem; } }
+
+/* Espacio al final para que el ÚLTIMO corte pueda subir hasta la cabecera.
+   Sin esto el documento se acaba antes y el enlace del índice al último
+   indicador no movía nada: el ancla parecía rota cuando lo que faltaba era
+   recorrido. Es la razón de que exista, no un margen decorativo. */
+.explorador-resultado > .cortes:last-child,
+.explorador-resultado > .cortes { padding-bottom: 45vh; }
