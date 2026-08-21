@@ -79,7 +79,7 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
 <header><div class="c">
   <h1>Revisión de identidad de autor</h1>
   <p>Capa interna · 89 pendientes de
-     141 casos · generado el 2026-08-20 desde
+     141 casos · generado el 2026-08-21 desde
      589 formas de firma</p>
 </div></header>
 
@@ -2642,12 +2642,44 @@ document.getElementById('exportar').addEventListener('click', () => {
             d.veredicto || 'pendiente', (d.orcid || '').trim().toUpperCase(),
             d.nota || '', d.fecha || ''].map(esc).join(',');
   });
-  const csv = [cab, cols.join(','), ...filas].join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = 'identity_decisions.csv';
-  a.click();
+  entregar('identity_decisions', '\ufeff' + [cab, cols.join(','), ...filas].join('\n'));
 });
+
+/* Entregar el CSV por las dos vías, porque la herramienta vive en dos sitios.
+
+   Abierta como archivo local, `<a download>` basta y es lo que hacía. Servida
+   como página publicada, el marco de aislamiento ANULA esa vía en silencio: el
+   clic no hace nada, no salta ningún error, y quien acaba de decidir treinta
+   casos cree que los ha exportado. Ese es el fallo que esto evita.
+
+   Ahí la salida es la capacidad `downloads` del anfitrión, que además pide
+   confirmación. El .csv puede no estar habilitado en toda vista; entonces se
+   entrega el MISMO contenido como .txt, que siempre lo está.
+   `apply_decisions.py` lee por ruta y no mira la extensión. */
+async function entregar(nombre, csv) {
+  try {
+    const d = await window.claude?.use?.('downloads');
+    if (d) {
+      try {
+        await d.save({ filename: nombre + '.csv', data: csv });
+      } catch (e) {
+        if (e && e.code === 'declined') return;
+        if (e && e.code === 'extension_not_enabled') {
+          await d.save({ filename: nombre + '.txt', data: csv });
+        } else { throw e; }
+      }
+      return;
+    }
+  } catch (e) {
+    alert('No se pudo entregar el archivo: ' + (e && e.message ? e.message : e)
+      + '\n\nSus decisiones NO se han perdido: siguen guardadas en este navegador.');
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = nombre + '.csv';
+  a.click();
+}
 
 /* Borra el trabajo de ESTE navegador y vuelve a lo que registra el CSV. No
    borra el registro: un botón que destruyera 52 decisiones ya tomadas, sin

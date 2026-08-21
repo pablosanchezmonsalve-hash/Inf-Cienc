@@ -611,12 +611,44 @@ document.getElementById('exportar').addEventListener('click', () => {
             d.veredicto || 'pendiente', (d.orcid || '').trim().toUpperCase(),
             d.nota || '', d.fecha || ''].map(esc).join(',');
   });
-  const csv = [cab, cols.join(','), ...filas].join('\\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = 'identity_decisions.csv';
-  a.click();
+  entregar('identity_decisions', '\\ufeff' + [cab, cols.join(','), ...filas].join('\\n'));
 });
+
+/* Entregar el CSV por las dos vías, porque la herramienta vive en dos sitios.
+
+   Abierta como archivo local, `<a download>` basta y es lo que hacía. Servida
+   como página publicada, el marco de aislamiento ANULA esa vía en silencio: el
+   clic no hace nada, no salta ningún error, y quien acaba de decidir treinta
+   casos cree que los ha exportado. Ese es el fallo que esto evita.
+
+   Ahí la salida es la capacidad `downloads` del anfitrión, que además pide
+   confirmación. El .csv puede no estar habilitado en toda vista; entonces se
+   entrega el MISMO contenido como .txt, que siempre lo está.
+   `apply_decisions.py` lee por ruta y no mira la extensión. */
+async function entregar(nombre, csv) {
+  try {
+    const d = await window.claude?.use?.('downloads');
+    if (d) {
+      try {
+        await d.save({ filename: nombre + '.csv', data: csv });
+      } catch (e) {
+        if (e && e.code === 'declined') return;
+        if (e && e.code === 'extension_not_enabled') {
+          await d.save({ filename: nombre + '.txt', data: csv });
+        } else { throw e; }
+      }
+      return;
+    }
+  } catch (e) {
+    alert('No se pudo entregar el archivo: ' + (e && e.message ? e.message : e)
+      + '\\n\\nSus decisiones NO se han perdido: siguen guardadas en este navegador.');
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = nombre + '.csv';
+  a.click();
+}
 
 /* Borra el trabajo de ESTE navegador y vuelve a lo que registra el CSV. No
    borra el registro: un botón que destruyera 52 decisiones ya tomadas, sin
@@ -1121,6 +1153,23 @@ footer{border-top:1px solid var(--linea);padding:22px 0 40px;font-size:12.5px;co
 """
 
 
+def enlace_herramienta() -> str:
+    """A dónde apuntan los botones «Decidir en la herramienta».
+
+    Relativo por defecto —el archivo está al lado— y absoluto si alguien dejó
+    una URL en `internal/enlace_herramienta.txt`. Hace falta porque la lista se
+    publica y la herramienta también: desde una página servida, un enlace
+    relativo a `revision_identidad.html` no lleva a ninguna parte, y el botón
+    que prometía la herramienta era justo el que no funcionaba.
+    """
+    f = INTERNAL / "enlace_herramienta.txt"
+    if f.exists():
+        url = f.read_text(encoding="utf-8").strip()
+        if url.startswith("http"):
+            return url
+    return "revision_identidad.html"
+
+
 def lista_html(cs: list[dict], meta: dict) -> str:
     """La cola de pendientes como página autónoma, para consultar desde donde sea.
 
@@ -1168,8 +1217,11 @@ def lista_html(cs: list[dict], meta: dict) -> str:
                 '<div class="chips">'
                 + "".join(f'<a class="chip" href="{esc(u)}" target="_blank" '
                           f'rel="noopener">{esc(t)}</a>' for t, u in enlaces)
-                + f'<a class="chip local" href="revision_identidad.html#{esc(ancla(c["id"]))}">'
-                  "Decidir en la herramienta</a></div>")
+                + f'<a class="chip local" href="{esc(meta["herramienta"])}'
+                + f'#{esc(ancla(c["id"]))}"'
+                + (' target="_blank" rel="noopener"'
+                   if meta["herramienta"].startswith("http") else "")
+                + ">Decidir en la herramienta</a></div>")
             if obras and cola in D.FAMILIA_ORCID:
                 cuerpo += "<ol class=\"obras\">" + "".join(
                     f'<li><span class="anio">{esc(a or "—")}</span>{esc(t or "(sin título)")}'
@@ -1282,7 +1334,8 @@ def main() -> int:
     (INTERNAL / "pendientes_consolidacion.md").write_text(
         lista_pendientes(cs, hoy), encoding="utf-8")
     (INTERNAL / "pendientes_consolidacion.html").write_text(
-        lista_html(cs, {"fecha": hoy, "decididos": decididos}), encoding="utf-8")
+        lista_html(cs, {"fecha": hoy, "decididos": decididos,
+                        "herramienta": enlace_herramienta()}), encoding="utf-8")
 
     salida = INTERNAL / "revision_identidad.html"
     salida.write_text(render(cs, {

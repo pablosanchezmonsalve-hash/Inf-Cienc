@@ -39,3 +39,8 @@ internal/.respaldos/
 # la FUENTE del diseño, no el paquete.
 design/informe/*.html
 !design/informe/*.dc.html
+
+# Puntero a la herramienta de revisión publicada como artefacto privado. Es de
+# una cuenta y una máquina, no del proyecto: `build_review.py` funciona sin él
+# y entonces enlaza al archivo local, que es el comportamiento por defecto.
+internal/enlace_herramienta.txt
