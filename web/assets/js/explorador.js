@@ -167,3 +167,107 @@ export function describir(sel) {
   }
   return partes;
 }
+
+/* ═════════════════════════════════════ cortes derivados, por sección ═════ */
+
+/* Catorce de los quince indicadores del sitio se pueden derivar de
+   publications.json, así que las secciones también responden al recorte. El
+   que no —C-04, instituciones colaboradoras— se declara aparte: la lista de
+   nombres de institución no viaja por publicación, y fingir que responde al
+   filtro sería peor que decir que no.
+
+   Cada corte declara DE QUÉ CAMPO sale y CÓMO se agrega. Tenerlo en una tabla
+   y no repartido por el código es lo que permite comprobar de un vistazo que
+   ningún indicador cambió de significado al volverse filtrable. */
+
+const TRAMOS_AUTORES = [
+  [1, 1, '1'], [2, 2, '2'], [3, 3, '3'], [4, 5, '4–5'],
+  [6, 10, '6–10'], [11, 20, '11–20'], [21, Infinity, '21 o más'],
+];
+
+/** Campos que no son dimensiones de filtro pero sí ejes de un gráfico. */
+export const CAMPOS = {
+  fuente:  p => (p.fuente ? [p.fuente] : []),
+  paises:  p => p.paises || [],
+  instituciones: p => p.instituciones || [],
+  asjc:    p => p.asjc || [],
+  ods:     p => p.ods || [],
+  autores_tramo: p => {
+    const n = p.n_autores;
+    if (typeof n !== 'number') return [];
+    const t = TRAMOS_AUTORES.find(([a, b]) => n >= a && n <= b);
+    return t ? [t[2]] : [];
+  },
+  // El cuartil sale del percentil SJR de la revista. Q1 es el mejor, y el
+  // percentil alto es el mejor, así que el corte va de mayor a menor.
+  cuartil: p => {
+    const q = p.sjr_percentil;
+    if (typeof q !== 'number') return [];
+    return [q >= 75 ? 'Q1' : q >= 50 ? 'Q2' : q >= 25 ? 'Q3' : 'Q4'];
+  },
+};
+
+const ORDEN_FIJO = {
+  autores_tramo: TRAMOS_AUTORES.map(t => t[2]),
+  cuartil: ['Q1', 'Q2', 'Q3', 'Q4'],
+};
+
+/** Recuento por un campo cualquiera —dimensión de filtro o eje de gráfico—. */
+export function porCampo(pubs_sel, clave, { tope = 0 } = {}) {
+  const saca = EXTRAE[clave] || CAMPOS[clave];
+  if (!saca) return [];
+  const cuenta = new Map();
+  for (const p of pubs_sel) {
+    for (const v of saca(p)) cuenta.set(String(v), (cuenta.get(String(v)) || 0) + 1);
+  }
+  let filas = [...cuenta].map(([valor, n]) => ({ valor, n }));
+  const fijo = ORDEN_FIJO[clave];
+  if (fijo) {
+    // Un tramo vacío se DIBUJA en cero, no desaparece: en una distribución, un
+    // hueco que se salta miente sobre la forma de la curva.
+    filas = fijo.map(v => ({ valor: v, n: cuenta.get(v) || 0 }));
+  } else if (clave === 'anio') {
+    filas.sort((a, b) => a.valor.localeCompare(b.valor));
+  } else {
+    filas.sort((a, b) => b.n - a.n || a.valor.localeCompare(b.valor));
+  }
+  return tope ? filas.slice(0, tope) : filas;
+}
+
+/** Suma de un campo numérico, agrupada por año. */
+export function sumaPorAnio(pubs_sel, campo) {
+  const acc = new Map();
+  for (const p of pubs_sel) {
+    if (typeof p[campo] !== 'number') continue;
+    acc.set(String(p.anio), (acc.get(String(p.anio)) || 0) + p[campo]);
+  }
+  return [...acc].sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([anio, n]) => ({ anio, n }));
+}
+
+/** Mediana de un campo numérico, agrupada por año.
+
+    MEDIANA y no media, y no es un detalle: la distribución del FWCI es
+    asimétrica —unas pocas publicaciones muy citadas tiran del promedio— y
+    sobre el recorte de una facultad o un año la media miente más todavía. */
+export function medianaPorAnio(pubs_sel, campo) {
+  const grupos = new Map();
+  for (const p of pubs_sel) {
+    if (typeof p[campo] !== 'number') continue;
+    if (!grupos.has(String(p.anio))) grupos.set(String(p.anio), []);
+    grupos.get(String(p.anio)).push(p[campo]);
+  }
+  return [...grupos].sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([anio, xs]) => ({ anio, valor: mediana(xs) }));
+}
+
+/** Umbrales de percentil de citación. Son ANIDADOS: lo que está en el top 1 %
+    está también en el top 5, el 10 y el 25. Se devuelven como tales para que
+    el gráfico no invite a sumarlos. */
+export function umbralesPercentil(pubs_sel) {
+  const v = pubs_sel.map(p => p.percentil_citacion).filter(x => typeof x === 'number');
+  return {
+    base: v.length,
+    datos: [1, 5, 10, 25].map(u => ({ valor: `Top ${u} %`, n: v.filter(x => x <= u).length })),
+  };
+}

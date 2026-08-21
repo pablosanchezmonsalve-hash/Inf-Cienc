@@ -64,6 +64,7 @@ async function main() {
   const { kpis } = await leerJSON('kpis.json');
   const { ejes } = await leerJSON('ejes.json');
   const { publicaciones } = await leerJSON('publications.json');
+  const catalogo = await leerJSON('catalogo.json');
 
   const archivos = (await readdir(dist)).filter(f => f.endsWith('.html'));
   const faltantes = [];
@@ -105,6 +106,20 @@ async function main() {
       html = rellenar(html, 'cortes', vacio.cortes, a);
       html = rellenar(html, 'lectura', v.lectura(kpis), a);
       html = rellenar(html, 'cierre', v.cierrePortada(), a);
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    } else if (tipo === 'seccion') {
+      // Mismo explorador que la portada, con los cortes del eje. Se deja
+      // escrito el estado sin filtrar: el informe completo.
+      const a = [];
+      const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
+      const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
+      const sec = vx.seccion(publicaciones, {}, clave);
+      html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo), a);
+      html = rellenar(html, 'estado-recorte', sec.estado, a);
+      html = rellenar(html, 'controles', sec.controles, a);
+      html = rellenar(html, 'cifras', sec.cifras, a);
+      html = rellenar(html, 'cortes', sec.cortes, a);
+      html = rellenar(html, 'diferidos', vx.diferidos(catalogo, clave), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'catalogo') {
       // Se pre-renderiza porque es contenido de referencia: es justo la página

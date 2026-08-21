@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `b6ecf87` · Rediseño de la interfaz: paleta, bandas y formas por relación del dato
-Snapshot: 2026-08-20
+Último commit: `b07a902` · Interfaz nueva: la portada es un explorador de datos
+Snapshot: 2026-08-21
 
 ---
 
