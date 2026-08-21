@@ -297,7 +297,9 @@ function colorDe(d, i, escala) {
 /* Ancho aproximado de un texto a 11px en la fuente de sistema. No hay forma de
    medir dentro de una cadena SVG que aún no está en el documento, y el error de
    una estimación es preferible a que la etiqueta se salga del lienzo. */
-const anchoTexto = (s, px = 11) => String(s).length * px * 0.58;
+// 13 px, que es lo que mide ahora `svg.chart text` en la hoja. Si este
+// número y el del CSS se separan, las etiquetas se recortan donde no toca.
+const anchoTexto = (s, px = 13) => String(s).length * px * 0.58;
 
 /** Recorta una etiqueta al ancho disponible, con puntos suspensivos. */
 function recortar(txt, maxPx, px = 11) {

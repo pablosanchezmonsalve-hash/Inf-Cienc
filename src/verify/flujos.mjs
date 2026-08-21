@@ -62,12 +62,40 @@ await pg.waitForTimeout(150);
 ok(!await pg.isVisible('.tip'), 'Escape lo cierra');
 
 // ──────────────────────────────────────────────────────────── ayuda de glosario
+// La portada dejó de ser una lista de KPI y pasó a ser el explorador, pero el
+// glosario contextual sigue ahí: cuelga de las fichas del tablero, donde hace
+// más falta que antes porque una cifra recalculada sobre un recorte se
+// malinterpreta con más facilidad que una del total.
 console.log('  Ayuda contextual');
 await pg.goto(`http://127.0.0.1:${P}/index.html`, { waitUntil: 'networkidle' });
 await pg.waitForTimeout(400);
 await pg.hover('button.ayuda');
 await pg.waitForTimeout(300);
 ok(await pg.isVisible('.ayuda-panel'), 'el panel de glosario abre sobre HTML pre-renderizado');
+
+// ──────────────────────────────────────────────────────── explorador de portada
+// Lo que hace la portada AHORA: recortar el conjunto y recalcular. Es el flujo
+// con más superficie del sitio y no lo cubría nada.
+console.log('  Explorador de la portada');
+await pg.goto(`http://127.0.0.1:${P}/index.html`, { waitUntil: 'networkidle' });
+await pg.waitForTimeout(500);
+const antes = await pg.textContent('.ficha-valor[data-valor="publicaciones"]');
+ok(/^[\d.]+$/.test(antes.trim()), `las cifras llegan pre-renderizadas (${antes.trim()})`);
+await pg.locator('.chip[data-dim="anio"]').first().click();
+await pg.waitForTimeout(400);
+const luego = await pg.textContent('.ficha-valor[data-valor="publicaciones"]');
+ok(luego.trim() !== antes.trim(), `el recorte recalcula las cifras (${antes.trim()} -> ${luego.trim()})`);
+ok(new URL(pg.url()).searchParams.has('anio'), 'el recorte viaja en la URL');
+ok(await pg.locator('.recorte-chip').count() > 0, 'el recorte se declara en pantalla');
+await pg.goBack();
+await pg.waitForTimeout(400);
+ok(await pg.textContent('.ficha-valor[data-valor="publicaciones"]') === antes,
+   'volver atrás deshace el recorte');
+await pg.goForward();
+await pg.waitForTimeout(400);
+await pg.click('#limpiar-recorte');
+await pg.waitForTimeout(400);
+ok(await pg.locator('.recorte-chip').count() === 0, '«Ver todo» limpia el recorte');
 
 // ─────────────────────────────────────────────────────────────────── filtros
 console.log('  Filtros de publicaciones');
