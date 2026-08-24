@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `203eddf` · V2-19: OpenAlex, y la independencia que yo mismo había afirmado de más
-Snapshot: 2026-08-19
+Último commit: `57e0a69` · El botón «Decidir en la herramienta» ahora lleva a la herramienta
+Snapshot: 2026-08-24
 
 ---
 
