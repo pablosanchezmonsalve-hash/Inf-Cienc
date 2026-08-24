@@ -89,41 +89,41 @@
   color-scheme: light dark;
 
   /* ---- Superficies. Teñidas con Peach Glow al 6–10 %; en oscuro, Ink Black. ---- */
-  --plano:        light-dark(#ffffff, #070a0f);
-  --superficie:   light-dark(#ffffff, #111721);
-  --superficie-2: light-dark(#f1f4f8, #1a2230);
+  --plano:        light-dark(#f6efe6, #041417);
+  --superficie:   light-dark(#fffcf8, #0d2a2f);
+  --superficie-2: light-dark(#f7efe5, #113236);
 
   /* Segundo suelo de banda. Es un TOKEN y no un valor suelto para que
      validar_paleta.py lo mida: las cifras que lo justifican están en la regla
      de .banda-papel-2, y una cifra que sólo vive en un comentario deja de ser
      cierta en silencio. */
-  --banda-papel-2: light-dark(#f1f4f8, #1a2230);
+  --banda-papel-2: light-dark(#e1e7e4, #113236);
 
   /* ---- Tinta. Tres niveles, todos derivados del rojo de la marca. ---- */
-  --tinta:   light-dark(#0a0e14, #f3f6fa);
-  --tinta-2: light-dark(#3d4a5c, #b6c2d1);
-  --tinta-3: light-dark(#59677a, #93a1b3);
+  --tinta:   light-dark(#071e22, #eef1ee);
+  --tinta-2: light-dark(#33484a, #b9c6c3);
+  --tinta-3: light-dark(#516365, #93a3a1);
 
-  --linea:        light-dark(#e2e8f0, #253040);
-  --linea-fuerte: light-dark(#cbd5e1, #33415a);
+  --linea:        light-dark(#e8ddce, #1c4045);
+  --linea-fuerte: light-dark(#cbbca9, #2c5459);
 
   /* ---- Marca. Identidad institucional. Nunca codifica un dato. ---- */
-  --marca:       light-dark(#0a0e14, #070a0f);
-  --marca-honda: light-dark(#05080c, #04060a);
-  --marca-alta:  light-dark(#2b44d9, #7c93ff);
-  --marca-tinta: light-dark(#dbe3ff, #dbe3ff);
+  --marca:       light-dark(#071e22, #041417);
+  --marca-honda: light-dark(#041417, #020c0e);
+  --marca-alta:  light-dark(#1d7874, #45b0aa);
+  --marca-tinta: light-dark(#f4c095, #f4c095);
 
   /* Tinta de las cifras grandes. Existe aparte de --marca porque --marca
      cambia de OFICIO entre temas: en claro es tinta, en oscuro es la
      superficie de la cabecera. Usarla para el texto de un KPI funcionaba en
      claro y en oscuro pintaba la cifra a 1,05:1, o sea invisible. Este token
      es tinta en los dos temas y sólo eso. */
-  --cifra: light-dark(#0a0e14, #f3f6fa);
+  --cifra: light-dark(#12514e, #f4c095);
 
   /* ---- Acción. Estado interactivo. Tampoco codifica un dato. ---- */
-  --accion:        light-dark(#2439c4, #8da4ff);
-  --accion-viva:   light-dark(#2b44d9, #7c93ff);
-  --accion-suave:  light-dark(#eef1fe, #16203a);
+  --accion:        light-dark(#145956, #f4c095);
+  --accion-viva:   light-dark(#1d7874, #f4c095);
+  --accion-suave:  light-dark(#e4f0ee, #12333a);
   --accion-anillo: light-dark(rgba(29, 120, 116, .34), rgba(244, 192, 149, .38));
 
   /* ---- Series categóricas ----
@@ -153,38 +153,38 @@
 
           La sexta ranura era carmín. Con la marca en rojo, un carmín a dos
           pasos de --serie-1 es una trampa a la espera: se cambió por azul. ---- */
-  --serie-1: light-dark(#2b44d9, #7c93ff);   /* Deep Ocean · el dato, teal en ambos temas */
-  --serie-2: light-dark(#0a0e14, #cbd5e1);   /* Ink Black / Peach Glow · EN USO (anillo C-01) */
+  --serie-1: light-dark(#1d7874, #45b0aa);   /* Deep Ocean · el dato, teal en ambos temas */
+  --serie-2: light-dark(#071e22, #f4c095);   /* Ink Black / Peach Glow · EN USO (anillo C-01) */
   --serie-3: light-dark(#6b4bbd, #a48ae8);   /* violeta   · RESERVADA, sin validar */
   --serie-4: light-dark(#1f7d4f, #4fbb85);   /* verde     · RESERVADA, sin validar */
   --serie-5: light-dark(#8a5a06, #d09a2a);   /* ámbar     · RESERVADA, sin validar */
   --serie-6: light-dark(#1c5fa8, #6fa8e8);   /* azul      · RESERVADA, sin validar */
 
   /* ---- Rampa ordinal. Un solo tono, cuatro pasos, luminosidad monótona. ---- */
-  --ord-1: light-dark(#141c6b, #dbe3ff);
-  --ord-2: light-dark(#2439c4, #a8b8f5);
-  --ord-3: light-dark(#4a63e0, #7183ee);
-  --ord-4: light-dark(#7889e8, #4a5fd6);
+  --ord-1: light-dark(#04262a, #cfeae5);
+  --ord-2: light-dark(#0f4e4b, #93cdc6);
+  --ord-3: light-dark(#1d7874, #6ab4ad);
+  --ord-4: light-dark(#469b93, #469690);
 
   /* ---- Ausencia de dato: gris, siempre (decisión D-09). ---- */
-  --sin-dato: light-dark(#7f8c9c, #64748b);
+  --sin-dato: light-dark(#87807a, #7d8886);
 
   /* ---- Cromo del gráfico: recesivo por definición. ---- */
   --red: light-dark(#efe6d8, #123033);
   --eje: light-dark(#cbbca9, #2c5459);
 
   /* ---- Advertencia metodológica. Ámbar, fuera de la familia del dato. ---- */
-  --aviso-fondo: light-dark(#fff8e6, #241a05);
+  --aviso-fondo: light-dark(#fdefdc, #2e2210);
   /* El ámbar OSCURO se subió de #c8901a a #f0b429. El valor anterior venía de
      la paleta teal y sobrevivió al cambio de identidad sin que nadie lo mirara:
      contra un dato teal la separación sobraba, contra un dato ROJO caía a
      ΔE 17,9, bajo el piso de 20 que este mismo proyecto declara. Lo encontró
      `src/design/validar_paleta.py`, no una revisión visual. Ahora ΔE 24,1. */
-  --aviso-borde: light-dark(#b45309, #f0b429);
-  --aviso-tinta: light-dark(#7c3d06, #f5d59a);
+  --aviso-borde: light-dark(#c07a2a, #e0a445);
+  --aviso-tinta: light-dark(#6b3d10, #f0cf9c);
   /* El ámbar del trazo (--aviso-borde) no llega a 4,5:1 como texto. La línea de
      referencia puede tenerlo; su ETIQUETA, que dice el promedio mundial, no. */
-  --aviso-tinta-grafico: light-dark(#b45309, #f0b429);
+  --aviso-tinta-grafico: light-dark(#8a5518, #e0a445);
 
   /* ---- Tipografía ---- */
   --f-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -233,7 +233,7 @@
 
   /* Tinta sobre el fondo del botón primario: blanco en claro, la tinta oscura
      del sitio en oscuro. Medido: 7,67:1 y 7,88:1. */
-  --boton-tinta: light-dark(#ffffff, #070a0f);
+  --boton-tinta: light-dark(#ffffff, #171214);
 
   /* Icono de la advertencia metodológica, como máscara: hereda el color del
      token de aviso en vez de traerlo pintado, así que sigue al tema. */
@@ -534,34 +534,43 @@ main { padding: var(--e5) 0 var(--e8); }
 .banda-enfasis { --tinta-3: light-dark(#59677a, #93a1b3); }
 
 .banda-contraste {
-  background: light-dark(#0a0e14, #111721);
-  --superficie:   light-dark(#141a24, #1a2230);
-  --superficie-2: light-dark(#1a2230, #232c3d);
-  --plano:        light-dark(#0a0e14, #111721);
-  --tinta:        #f3f6fa;
-  --tinta-2:      #b6c2d1;
-  --tinta-3:      #93a1b3;
-  --linea:        light-dark(#232c3d, #2d3850);
-  --linea-fuerte: light-dark(#33415a, #3d4b68);
-  --serie-1:      #8da4ff;
-  --serie-2:      #cbd5e1;
-  --sin-dato:     #7d8a9c;
-  --ord-1:        #dbe3ff;
-  --ord-2:        #a8b8f5;
-  --ord-3:        #7183ee;
-  --ord-4:        #5a6ee0;
-  --boton-tinta:  #070a0f;
-  --accion:       #8da4ff;
-  --accion-viva:  #a8b8f5;
-  --cifra:        #f3f6fa;
-  --red:          light-dark(#141a24, #1a2230);
-  --eje:          light-dark(#33415a, #3d4b68);
-  --aviso-fondo:  #241a05;
-  --aviso-borde:  #f0b429;
-  --aviso-tinta:  #f5d59a;
-  --aviso-tinta-grafico: #f0b429;
+  background: light-dark(#071e22, #113236);
+  --superficie:   light-dark(#0d2a2f, #17393d);
+  --superficie-2: light-dark(#113236, #1c4045);
+  --plano:        light-dark(#071e22, #113236);
+  --tinta:        #eef1ee;
+  --tinta-2:      #b9c6c3;
+  /* Más claro que el --tinta-3 global: dentro de la banda, --superficie-2 sube
+     en el tema oscuro y el chip de código caía a 4,28:1. Medido contra los
+     cuatro fondos que la banda puede presentar. */
+  --tinta-3:      #a1b0ae;
+  --linea:        light-dark(#1c4045, #2c5459);
+  --linea-fuerte: light-dark(#2c5459, #3a666b);
+  --serie-1:      #45b0aa;
+  --serie-2:      #f4c095;
+  --sin-dato:     #7d8886;
+  /* La rampa ordinal y la tinta del botón faltaban. Como la banda es oscura en
+     LOS DOS temas, en claro conservaban su valor claro y caían encima de un
+     suelo oscuro: --ord-1 medía 1,06:1, o sea invisible, y la tinta del botón
+     1,64:1 sobre el Peach. Toman el valor oscuro, que ya está validado.
+     Lo encontró validar_paleta.py al empezar a medir este ámbito. */
+  --ord-1:        #cfeae5;
+  --ord-2:        #93cdc6;
+  --ord-3:        #6ab4ad;
+  --ord-4:        #469690;
+  --boton-tinta:  #171214;
+  --accion:       #f4c095;
+  --accion-viva:  #f4c095;
+  --cifra:        #f4c095;
+  --red:          light-dark(#123033, #1a3d41);
+  --eje:          light-dark(#2c5459, #3a666b);
+  --aviso-fondo:  #2e2210;
+  --aviso-borde:  #e0a445;
+  --aviso-tinta:  #f0cf9c;
+  --aviso-tinta-grafico: #e0a445;
   color: var(--tinta);
 }
+
 
 /* Encabezado de banda: el gancho y la afirmación que la banda sostiene. */
 .banda-titulo { max-width: 62ch; margin: 0 0 var(--e5); }
