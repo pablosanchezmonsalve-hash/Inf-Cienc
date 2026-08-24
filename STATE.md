@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `962710b` · docs/UX_UI.md: describir el explorador, no las bandas
-Snapshot: 2026-08-21
+Último commit: `cfe3137` · El presupuesto de peso pasa de nota en prosa a compuerta medida
+Snapshot: 2026-08-24
 
 ---
 
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 229
+## Decisiones tomadas: 231
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
