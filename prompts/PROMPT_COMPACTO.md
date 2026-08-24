@@ -15,7 +15,7 @@ Trabajarás sobre el proyecto definido en:
 - PLAN.md
 - SESSION_NOTES.md
 
-El entorno puede contar con Claude-Mem; si existe memoria relevante, recupérala de forma progresiva y económica en tokens.
+La memoria del proyecto es versionada: `STATE.md` primero, y `docs/DECISIONS.md` si necesitas el porqué de una decisión concreta. Recupera de forma progresiva y económica en tokens; no leas PLAN.md ni SESSION_NOTES.md por adelantado.
 </context>
 
 <before_starting>
