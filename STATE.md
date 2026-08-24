@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `57e0a69` · El botón «Decidir en la herramienta» ahora lleva a la herramienta
+Último commit: `ce1f9eb` · Un enlace que abre la herramienta ya acotada a lo urgente
 Snapshot: 2026-08-24
 
 ---
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 229
+## Decisiones tomadas: 233
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

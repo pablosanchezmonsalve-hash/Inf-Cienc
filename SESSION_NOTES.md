@@ -2420,3 +2420,54 @@ sólo corre en una dirección. Esta consulta va al revés —le pregunta a OpenA
 
 Sigue siendo suyo: `make ror` desbloquea `make openalex` **y** `make cobertura`,
 que son las dos consultas que hoy no pueden correr.
+
+---
+
+## Cierre · Claude-Mem no existe, y la constitución existía dos veces
+
+El encargo era «aplica Claude-Mem al proyecto». No se puede: **no está en este
+entorno**, comprobado por cuatro vías —sin binario, sin paquete npm global, sin
+servidor MCP y sin plugin ni skill—. La única capacidad de memoria disponible
+importa exportaciones de otro asistente, que es otra cosa.
+
+Y no era un hallazgo nuevo: `SESSION_NOTES.md` ya lo tenía en su tabla de
+supuestos descartados desde una sesión anterior. Lo que había era una
+**contradicción**: `CLAUDE.md` —el archivo de mayor precedencia después de una
+decisión del usuario— afirmaba «Este proyecto usa Claude-Mem» mientras el propio
+repositorio documentaba lo contrario.
+
+### Lo que apareció al buscarlo, y era peor
+
+**`CLAUDE (1).md` estaba versionado en la raíz: una segunda constitución, y
+divergente.** Una copia de descarga que se commiteó. No era idéntica: describía
+el arranque de sesión **anterior** —«revisa la memoria, luego PLAN.md, luego
+SESSION_NOTES»—, que es exactamente el comportamiento que la versión vigente
+sustituyó por «lee STATE.md primero», porque leer todo por adelantado son ~3.700
+líneas y consume el contexto que hace falta para trabajar. Le faltaban además
+los dos párrafos que declaran que `STATE.md` es una vista derivada y no fuente
+de autoridad.
+
+El archivo de mayor autoridad del proyecto existía en dos versiones, y la
+equivocada ordenaba justo lo que la vigente vino a corregir.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-230 | La memoria del proyecto se declara por lo que **es**: `STATE.md`, `SESSION_NOTES.md` y `docs/DECISIONS.md`, versionadas | Afirmar una capacidad ausente hace que cada sesión empiece buscando algo que no está. Y lo versionado es mejor para lo que aquí importa: se audita, se replica y sobrevive a cambiar de asistente |
+| D-231 | Se elimina `CLAUDE (1).md` | Dos constituciones divergentes son peor que ninguna: la precedencia deja de significar nada si no se sabe cuál manda |
+| D-232 | La memoria sale del orden de precedencia; queda en seis niveles | El sexto remitía a una memoria inexistente |
+| D-233 | Los cinco `PROMPT_*.md` viven sólo en `prompts/` | Estaban duplicados en la raíz. Idénticos —desorden, no ambigüedad—, pero la raíz es donde se busca la constitución y conviene que sólo esté ella |
+
+### Lo que sigue abierto
+
+`make estado` **no corre solo al cerrar**. Hoy encontré `STATE.md` apuntando a
+un commit anterior a seis: el punto de entrada de cada sesión, seis commits
+viejo. Automatizarlo —un hook de cierre, o un paso más en `make sitio`— es el
+trabajo con más rendimiento para la continuidad, más que cualquier memoria
+propietaria.
+
+### Próximo paso recomendado
+
+Sin cambios: las 13 verificaciones urgentes, y los tres conectores escritos sin
+ejecutar.
