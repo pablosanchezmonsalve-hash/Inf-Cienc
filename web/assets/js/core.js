@@ -231,6 +231,11 @@ export function botonAyuda(termino) {
     aria-label="Qué significa ${escapar(termino)}">?</button>`;
 }
 
+/* `data-k` en cada marca es la CLAVE de la categoría. La usa animar.js para
+   reconocer una barra entre dos repintados: sin ella, al recortar el conjunto
+   toda figura sería nueva y no habría nada que mover, sólo un reemplazo.
+   Se emite aquí, junto al dato, y no se calcula fuera. */
+
 /* ------------------------------------------------------------ gráficos */
 
 /* Una categoría que representa AUSENCIA de dato nunca se pinta como una que
@@ -378,7 +383,7 @@ export function barrasH(datos, {
       ? `<rect class="trama" x="${anchoEtiqueta}" y="${y + 6}" width="${w}"
            height="${alto - 12}" rx="4" fill="url(#${id}-t)"/>` : '';
 
-    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
+    return `<g class="marca" data-k="${escapar(String(d.valor))}" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}${refAria}"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
         ${nota ? `data-tip-n="${escapar(nota)}"` : ''}>
@@ -448,13 +453,13 @@ export function barrasV(datos, {
     const v = d[etiquetaY];
     const x = mIzq + i * bw + (bw - w) / 2;
     if (v === null || v === undefined) {
-      return `<g class="marca" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
+      return `<g class="marca" data-k="${escapar(String(d[etiquetaX]))}" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
         <text class="tick" x="${x + w / 2}" y="${base - 8}" text-anchor="middle">sin dato</text>
         <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text>
       </g>`;
     }
     const yy = y(v);
-    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
+    return `<g class="marca" data-k="${escapar(String(d[etiquetaX]))}" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(String(d[etiquetaX]))}: ${num(v, decimales)}"
         data-tip="${escapar(String(d[etiquetaX]))}" data-tip-v="${num(v, decimales)}"
         ${d.nota ? `data-tip-n="${escapar(d.nota)}"` : ''}>
@@ -905,13 +910,13 @@ export function desviacion(datos, {
     const v = d[etiquetaY];
     const x = mIzq + i * bw + (bw - w) / 2;
     if (v === null || v === undefined) {
-      return `<g class="marca" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
+      return `<g class="marca" data-k="${escapar(String(d[etiquetaX]))}" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
         <text class="tick" x="${x + w / 2}" y="${cero - 8}" text-anchor="middle">sin dato</text>
         <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text></g>`;
     }
     const dv = v - referencia, yy = y(Math.max(dv, 0)), h = Math.abs(y(dv) - cero);
     const bajo = dv < 0;
-    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
+    return `<g class="marca" data-k="${escapar(String(d[etiquetaX]))}" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(String(d[etiquetaX]))}: ${num(v, decimales)}, ${
           bajo ? 'por debajo de' : 'por encima de'} la referencia ${num(referencia, decimales)}"
         data-tip="${escapar(String(d[etiquetaX]))}" data-tip-v="${num(v, decimales)}"
@@ -1002,7 +1007,7 @@ export function distribucion(datos, { titulo = '', ancho = 680, alto = 250, etiq
   // hueco de un gráfico de barras sugiere categorías sin relación entre sí.
   const cols = datos.map((d, i) => {
     const x = mIzq + i * bw, yy = y(d.n);
-    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
+    return `<g class="marca" data-k="${escapar(String(d.valor))}" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)} publicaciones, ${num(100 * d.n / total, 1)} %"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}"
         data-tip-n="${num(100 * d.n / total, 1)} % de ${nf.format(total)}">
@@ -1043,7 +1048,7 @@ export function proporcional(datos, { titulo = '', ancho = 680, alto = 128 } = {
     const sd = esSinDato(d.valor);
     const relleno = sd ? `url(#${idOrd})` : ORDINAL[Math.min(i, ORDINAL.length - 1)];
     const pct = num(100 * d.n / total, 1);
-    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
+    return `<g class="marca" data-k="${escapar(String(d.valor))}" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)}, ${pct} % del total"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}" data-tip-n="${pct} % de ${nf.format(total)}">
       <rect class="segmento" x="${xi.toFixed(1)}" y="${y0}" width="${Math.max(w - 1.5, 1).toFixed(1)}" height="${h}"

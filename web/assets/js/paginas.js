@@ -5,6 +5,7 @@ import * as c from './core.js';
 import * as v from './vista.js';
 import * as X from './explorador.js';
 import * as VX from './vista_explorador.js';
+import * as anim from './animar.js';
 
 /* ============================================================== portada */
 
@@ -78,7 +79,10 @@ async function montarExplorador(claveSeccion) {
     zonas.estado.innerHTML = partes.estado;
     zonas.controles.innerHTML = partes.controles;
     zonas.cifras.innerHTML = partes.cifras;
-    zonas.cortes.innerHTML = partes.cortes;
+    // Los cortes se repintan DENTRO de la transición: hay que medir la
+    // geometría antes y después del cambio, y el orden sólo se garantiza si el
+    // repintado ocurre en medio.
+    anim.transicion(zonas.cortes, () => { zonas.cortes.innerHTML = partes.cortes; });
 
     zonas.cifras.querySelectorAll('[data-valor]').forEach(e => {
       if (antes.size && antes.get(e.dataset.valor) !== e.textContent) e.classList.add('cambia');
@@ -116,6 +120,7 @@ async function montarExplorador(claveSeccion) {
   // los cortes se reemplazan enteros a cada recorte y los escuchas colgados de
   // ellos morirían con el marcado anterior.
   conmutadorVistas(zonas.cortes);
+  anim.entradaAlVer(zonas.cortes);
   // El scroll-spy se re-engancha tras cada recorte: los cortes se reemplazan
   // y el observador anterior apuntaba a nodos que ya no están en el documento.
   if (claveSeccion) scrollSpy(document.getElementById('contenido'));
