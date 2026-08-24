@@ -493,6 +493,9 @@ border:1px solid #bccdd2;border-radius:4px;background:var(--sup);color:var(--tin
 .aviso{background:#fdf6e7;border:1px solid #c8901a55;border-left:3px solid #c8901a;
 border-radius:4px;padding:.7rem .9rem;font-size:.85rem;color:#6a4a05;margin-bottom:1.2rem}
 .visibles{color:var(--tinta3);font-size:.8rem;font-variant-numeric:tabular-nums}
+.urg{display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--tinta2);
+white-space:nowrap}
+.urg input{accent-color:var(--no);width:15px;height:15px}
 .enlaces{display:flex;flex-wrap:wrap;gap:.9rem;align-items:baseline;margin:0 0 .8rem;font-size:.82rem}
 .enlaces a{color:var(--accion);font-weight:600}
 .obras{background:var(--sup2);border:1px solid var(--linea);border-radius:4px;
@@ -543,12 +546,14 @@ function pintarAvance() {
 function filtrar() {
   const f = document.getElementById('filtro').value;
   const fam = document.getElementById('familia').value;
+  const soloUrg = document.getElementById('solo-urgentes').checked;
   document.querySelectorAll('.caso').forEach(el => {
     const d = dec[el.dataset.id];
     const resuelto = !!(d && d.veredicto && d.veredicto !== 'pendiente');
     el.classList.toggle('oculto',
       (f === 'pendientes' && resuelto) || (f === 'resueltos' && !resuelto)
-      || (fam !== 'todas' && el.dataset.familia !== fam));
+      || (fam !== 'todas' && el.dataset.familia !== fam)
+      || (soloUrg && el.dataset.urgente !== '1'));
   });
   const vis = document.querySelectorAll('.caso:not(.oculto)').length;
   document.getElementById('visibles').textContent = `${vis} a la vista`;
@@ -595,6 +600,16 @@ document.addEventListener('input', e => {
 
 document.getElementById('filtro').addEventListener('change', filtrar);
 document.getElementById('familia').addEventListener('change', filtrar);
+document.getElementById('solo-urgentes').addEventListener('change', filtrar);
+
+/* `…#urgentes` abre la herramienta ya acotada. Un enlace que hay que acompañar
+   de «y ahora marque tal casilla» es un enlace a medias, y quien lo recibe
+   empieza por 141 casos en vez de por los que tocan.
+
+   No pisa a un ancla de caso: `#caso-…` sigue llevando a su caso. */
+if (location.hash === '#urgentes') {
+  document.getElementById('solo-urgentes').checked = true;
+}
 
 document.getElementById('exportar').addEventListener('click', () => {
   const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
@@ -892,7 +907,8 @@ def render(cs: list[dict], meta: dict) -> str:
                  if c["cola"] in D.PIDEN_ORCID else "")
         cuerpo += f"""
     <article class="caso" id="{html.escape(ancla(c['id']))}" data-id="{html.escape(c['id'])}" data-decidido="0"
-             data-familia="{'orcid' if orc else 'identidad'}">
+             data-familia="{'orcid' if orc else 'identidad'}"
+             data-urgente="{'1' if c['prioridad'] <= 1 else '0'}">
       <span class="cola">{html.escape(c['cola'])}</span>
       <h2>{html.escape(c['titulo'])}</h2>
       <p class="ctx">{html.escape(c['contexto'])}</p>
@@ -941,6 +957,7 @@ def render(cs: list[dict], meta: dict) -> str:
     <option value="orcid">Sólo ORCID: ¿qué identificador le corresponde?</option>
     <option value="identidad">Sólo identidad: ¿son la misma persona?</option>
   </select>
+  <label class="urg"><input type="checkbox" id="solo-urgentes"> Sólo urgentes</label>
   <span class="visibles" id="visibles"></span>
   <button type="button" class="pri" id="exportar">Exportar decisiones (CSV)</button>
   <button type="button" id="limpiar">Borrar todo</button>

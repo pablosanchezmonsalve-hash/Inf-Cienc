@@ -56,6 +56,9 @@ border:1px solid #bccdd2;border-radius:4px;background:var(--sup);color:var(--tin
 .aviso{background:#fdf6e7;border:1px solid #c8901a55;border-left:3px solid #c8901a;
 border-radius:4px;padding:.7rem .9rem;font-size:.85rem;color:#6a4a05;margin-bottom:1.2rem}
 .visibles{color:var(--tinta3);font-size:.8rem;font-variant-numeric:tabular-nums}
+.urg{display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--tinta2);
+white-space:nowrap}
+.urg input{accent-color:var(--no);width:15px;height:15px}
 .enlaces{display:flex;flex-wrap:wrap;gap:.9rem;align-items:baseline;margin:0 0 .8rem;font-size:.82rem}
 .enlaces a{color:var(--accion);font-weight:600}
 .obras{background:var(--sup2);border:1px solid var(--linea);border-radius:4px;
@@ -79,7 +82,7 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
 <header><div class="c">
   <h1>Revisión de identidad de autor</h1>
   <p>Capa interna · 89 pendientes de
-     141 casos · generado el 2026-08-21 desde
+     141 casos · generado el 2026-08-24 desde
      589 formas de firma</p>
 </div></header>
 
@@ -95,6 +98,7 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
     <option value="orcid">Sólo ORCID: ¿qué identificador le corresponde?</option>
     <option value="identidad">Sólo identidad: ¿son la misma persona?</option>
   </select>
+  <label class="urg"><input type="checkbox" id="solo-urgentes"> Sólo urgentes</label>
   <span class="visibles" id="visibles"></span>
   <button type="button" class="pri" id="exportar">Exportar decisiones (CSV)</button>
   <button type="button" id="limpiar">Borrar todo</button>
@@ -131,7 +135,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
   </div>
   
     <article class="caso" id="caso-e09-metabolism" data-id="e09-Metabolism" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="1">
       <span class="cola">Firma sin forma de persona</span>
       <h2>Metabolism</h2>
       <p class="ctx">probable fragmento de cadena de afiliación, no una persona; es la única detección UFT de la publicación en que aparece, que quedaría sin autoría UFT nombrada. Señales: sin_inicial_de_nombre (el nombre no contiene ninguna inicial con punto); publicaciones: 2-s2.0-85199751688</p>
@@ -148,7 +153,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-e09-movement-sciences-nutrim" data-id="e09-Movement Sciences (NUTRIM)" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="1">
       <span class="cola">Firma sin forma de persona</span>
       <h2>Movement Sciences (NUTRIM)</h2>
       <p class="ctx">probable fragmento de cadena de afiliación, no una persona; es la única detección UFT de la publicación en que aparece, que quedaría sin autoría UFT nombrada. Señales: sin_inicial_de_nombre (el nombre no contiene ninguna inicial con punto); publicaciones: 2-s2.0-85207388806</p>
@@ -165,7 +171,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-e09-school-of-psychology" data-id="e09-School of Psychology" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="1">
       <span class="cola">Firma sin forma de persona</span>
       <h2>School of Psychology</h2>
       <p class="ctx">probable fragmento de cadena de afiliación, no una persona; es la única detección UFT de la publicación en que aparece, que quedaría sin autoría UFT nombrada. Señales: firma_repetida_en_publicacion (3 posiciones distintas en 2-s2.0-85151493381); sin_inicial_de_nombre (el nombre no contiene ninguna inicial con punto); publicaciones: 2-s2.0-85151493381</p>
@@ -182,7 +189,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-e09-and-senior-lecturer" data-id="e09-and Senior Lecturer" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="1">
       <span class="cola">Firma sin forma de persona</span>
       <h2>and Senior Lecturer</h2>
       <p class="ctx">probable fragmento de cadena de afiliación, no una persona; es la única detección UFT de la publicación en que aparece, que quedaría sin autoría UFT nombrada. Señales: posicion_fuera_de_rango (posición 9 de 7 autores en 2-s2.0-85190421197); sin_inicial_de_nombre (el nombre no contiene ninguna inicial con punto); publicaciones: 2-s2.0-85190421197</p>
@@ -199,7 +207,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-multi-0000-0001-7380-4753" data-id="afil-multi-0000-0001-7380-4753" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">Mismo ORCID por afiliación</span>
       <h2>2 firmas apuntan a 0000-0001-7380-4753</h2>
       <p class="ctx">Varias formas de firma coinciden en nombre con el mismo titular, que declara la institución: «Elian Facundo Giordanino». Sugiere que son la misma persona. NO se ha fusionado nada.</p>
@@ -216,7 +225,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0001-6065-5218" data-id="orcid-0000-0001-6065-5218" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0001-6065-5218</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -233,7 +243,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-1781-062x" data-id="orcid-0000-0002-1781-062X" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0002-1781-062X</h2>
       <p class="ctx">El apellido también las agrupa.</p>
@@ -250,7 +261,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-2270-299x" data-id="orcid-0000-0002-2270-299X" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0002-2270-299X</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -267,7 +279,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-4312-1318" data-id="orcid-0000-0002-4312-1318" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0002-4312-1318</h2>
       <p class="ctx">El apellido también las agrupa.</p>
@@ -284,7 +297,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-4411-8655" data-id="orcid-0000-0002-4411-8655" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0002-4411-8655</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -301,7 +315,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-5832-7327" data-id="orcid-0000-0002-5832-7327" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0002-5832-7327</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -318,7 +333,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-7140-4294" data-id="orcid-0000-0002-7140-4294" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0002-7140-4294</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -335,7 +351,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0003-0051-9833" data-id="orcid-0000-0003-0051-9833" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0003-0051-9833</h2>
       <p class="ctx">El apellido también las agrupa.</p>
@@ -352,7 +369,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0003-0402-5072" data-id="orcid-0000-0003-0402-5072" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0003-0402-5072</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -369,7 +387,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0003-3454-4252" data-id="orcid-0000-0003-3454-4252" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0003-3454-4252</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -386,7 +405,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0003-3620-9861" data-id="orcid-0000-0003-3620-9861" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0003-3620-9861</h2>
       <p class="ctx">El apellido también las agrupa.</p>
@@ -403,7 +423,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0003-4763-074x" data-id="orcid-0000-0003-4763-074X" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0000-0003-4763-074X</h2>
       <p class="ctx">El apellido también las agrupa.</p>
@@ -420,7 +441,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0009-0008-1613-0156" data-id="orcid-0009-0008-1613-0156" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>2 firmas comparten 0009-0008-1613-0156</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -437,7 +459,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-0533-4531" data-id="orcid-0000-0002-0533-4531" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>3 firmas comparten 0000-0002-0533-4531</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -454,7 +477,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-6357-3469" data-id="orcid-0000-0002-6357-3469" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>3 firmas comparten 0000-0002-6357-3469</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -471,7 +495,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0002-9315-9365" data-id="orcid-0000-0002-9315-9365" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>3 firmas comparten 0000-0002-9315-9365</h2>
       <p class="ctx">El apellido también las agrupa.</p>
@@ -488,7 +513,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-orcid-0000-0003-2175-2941" data-id="orcid-0000-0003-2175-2941" data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID compartido</span>
       <h2>3 firmas comparten 0000-0003-2175-2941</h2>
       <p class="ctx">El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.</p>
@@ -505,7 +531,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-desac-castro-m" data-id="desac-Castro M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">Fuentes en desacuerdo</span>
       <h2>Castro M.: dos fuentes, dos ORCID</h2>
       <p class="ctx">Crossref y el registro de ORCID atribuyen identificadores distintos a la misma firma. Identificadores: 0000-0002-2270-299X (Crossref)  ·  0000-0002-5482-4676 (ORCID). La asignación vigente NO se ha modificado.</p>
@@ -522,7 +549,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-conf-castro-sep-lveda-m" data-id="conf-Castro-Sepúlveda M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID en conflicto</span>
       <h2>Castro-Sepúlveda M. aparece con 2 ORCID</h2>
       <p class="ctx">Una misma forma de firma recibe identificadores distintos según la publicación: o son dos personas que firman igual, o una de las asignaciones es incorrecta. ORCID: 0000-0001-7673-7269 · 0000-0002-2270-299X</p>
@@ -539,7 +567,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-ver-de-la-fuente-m" data-id="ver-De la Fuente M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID sin confirmar</span>
       <h2>De la Fuente M. → 0000-0003-0577-7604: ¿es suyo?</h2>
       <p class="ctx">El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.</p>
@@ -556,7 +585,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-ver-d-az-f" data-id="ver-Díaz F." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID sin confirmar</span>
       <h2>Díaz F. → 0000-0003-4763-074X: ¿es suyo?</h2>
       <p class="ctx">El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.</p>
@@ -573,7 +603,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-desac-elorrieta-v" data-id="desac-Elorrieta V." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">Fuentes en desacuerdo</span>
       <h2>Elorrieta V.: dos fuentes, dos ORCID</h2>
       <p class="ctx">Crossref y el registro de ORCID atribuyen identificadores distintos a la misma firma. Identificadores: 0000-0003-1268-9784 (Crossref)  ·  0009-0008-1470-4670 (ORCID). La asignación vigente NO se ha modificado.</p>
@@ -590,7 +621,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-ver-gaete-m" data-id="ver-Gaete M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID sin confirmar</span>
       <h2>Gaete M. → 0000-0003-1846-2417: ¿es suyo?</h2>
       <p class="ctx">El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.</p>
@@ -607,7 +639,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-ver-rojas-d" data-id="ver-Rojas D." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="1">
       <span class="cola">ORCID sin confirmar</span>
       <h2>Rojas D. → 0000-0002-1675-2958: ¿es suyo?</h2>
       <p class="ctx">El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.</p>
@@ -624,7 +657,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-arenasmassa" data-id="p03-arenasmassa" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Arenas-Massa A. · Arenas-Massa Á.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -641,7 +675,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-avilesdorlhiac" data-id="p03-avilesdorlhiac" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Avilès Dorlhiac R. · Avilés-Dorlhiac R.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -658,7 +693,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-ballesteros" data-id="p03-ballesteros" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Ballesteros P. · Ballesteros P. P.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -675,7 +711,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-caffarenabarcenilla" data-id="p03-caffarenabarcenilla" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Caffarena Barcenilla P. · Caffarena-Barcenilla C.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -692,7 +729,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-cancinolopez" data-id="p03-cancinolopez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Cancino-Lopez J. · Cancino-López J.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -709,7 +747,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-carvajal" data-id="p03-carvajal" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Carvajal C. · Carvajal G.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -726,7 +765,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-castillo" data-id="p03-castillo" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Castillo N. · Castillo O.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -743,7 +783,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-castillovalenzuela" data-id="p03-castillovalenzuela" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Castillo Valenzuela O. · Castillo-Valenzuela O.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -760,7 +801,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-castrosepulveda" data-id="p03-castrosepulveda" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Castro-Sepulveda M. · Castro-Sepúlveda M.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -777,7 +819,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-ceronml" data-id="p03-ceronml" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Ceron M.L. · Cerón M.L.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -794,7 +837,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-crisostomoflores" data-id="p03-crisostomoflores" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Crisóstomo Flores P. · Crisóstomo-Flores P.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -811,7 +855,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-dela" data-id="p03-dela" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>De la Fuente López M. · De la Fuente M. · De la fuente López M. · de la Cruz P.S. · de la Fuente M.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -828,7 +873,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-diaz" data-id="p03-diaz" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Diaz F. · Díaz F.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -845,7 +891,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-dominguez" data-id="p03-dominguez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Dominguez A. · Domínguez A.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -862,7 +909,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-garcia" data-id="p03-garcia" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Garcia J. · Garcia K. · García F. · García J.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -879,7 +927,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-gigliojimenez" data-id="p03-gigliojimenez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Giglio Jimenez A. · Giglio Jiménez A.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -896,7 +945,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-gomezbarbieri" data-id="p03-gomezbarbieri" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Gomez Barbieri G. · Gómez Barbieri G.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -913,7 +963,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-gonzalezvalderrama" data-id="p03-gonzalezvalderrama" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Gonzalez- Valderrama A. · Gonzalez-Valderrama A. · González-Valderrama A.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -930,7 +981,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-gonzalez" data-id="p03-gonzalez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>González A. · González I.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -947,7 +999,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-gutierrez" data-id="p03-gutierrez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Gutierrez M. · Gutiérrez J. · Gutiérrez S.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -964,7 +1017,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-hasbun" data-id="p03-hasbun" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Hasbun P. · Hasbún P.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -981,7 +1035,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-henriquezolguin" data-id="p03-henriquezolguin" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Henriquez-Olguin C. · Henriquez-Olguín C. · Henríquez-Olguin C. · Henríquez-Olguín C.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -998,7 +1053,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-ibanez" data-id="p03-ibanez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Ibañez H. · Ibañez V.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1015,7 +1071,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-jimenezag" data-id="p03-jimenezag" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Jimenez A.G. · Jiménez A.G.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1032,7 +1089,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-lopezarana" data-id="p03-lopezarana" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Lopez-Arana S. · López Arana S. · López-Arana S.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1049,7 +1107,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-martinez" data-id="p03-martinez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Martinez M. · Martínez M.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1066,7 +1125,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-martinezmardones" data-id="p03-martinezmardones" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Martinez-Mardones M. · Martinez-Mardones M.B. · Martínez-Mardones M.B.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1083,7 +1143,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-massaaa" data-id="p03-massaaa" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Massa A.A. · Massa Á.A.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1100,7 +1161,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-molina" data-id="p03-molina" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Molina C. · Molina M.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1117,7 +1179,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-moralessepulveda" data-id="p03-moralessepulveda" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Morales Sepúlveda J.P. · Morales-Sepulveda J.P.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1134,7 +1197,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-moyanodavila" data-id="p03-moyanodavila" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Moyano Davila C. · Moyano Dávila C.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1151,7 +1215,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-nunezlisboa" data-id="p03-nunezlisboa" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Nuñez-Lisboa M. · Nùñez-Lisboa M. · Núnez-Lisboa M. · Núñez-Lisboa M. · Núñez-Lisboa M.N.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1168,7 +1233,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-orellanadonoso" data-id="p03-orellanadonoso" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Orellana Donoso M. · Orellana-Donoso M. · Orellana-Donoso M.I.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1185,7 +1251,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-pinozuniga" data-id="p03-pinozuniga" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Pino-Zuñiga J. · Pino-Zúñiga J.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1202,7 +1269,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-ponce" data-id="p03-ponce" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Ponce D. · Ponce N. · Ponce P.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1219,7 +1287,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-ramos" data-id="p03-ramos" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Ramos A. · Ramos T.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1236,7 +1305,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-reyes" data-id="p03-reyes" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Reyes J. · Reyes M.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1253,7 +1323,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-rodriguez" data-id="p03-rodriguez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Rodríguez C. · Rodríguez I.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1270,7 +1341,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-ruizriquelme" data-id="p03-ruizriquelme" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Ruiz Riquelme P. · Ruiz-Riquelme P.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1287,7 +1359,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-salas" data-id="p03-salas" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Salas C. · Salas N.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1304,7 +1377,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-sanchezduque" data-id="p03-sanchezduque" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Sanchez-Duque C.G. · Sánchez-Duque C.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1321,7 +1395,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-sepulveda" data-id="p03-sepulveda" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Sepulveda I. · Sepúlveda A I. · Sepúlveda P. P.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1338,7 +1413,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-soto" data-id="p03-soto" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Soto L. · Soto M.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1355,7 +1431,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-tabiloprieto" data-id="p03-tabiloprieto" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Tabilo Prieto I. · Tabilo-Prieto I.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1372,7 +1449,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-tapia" data-id="p03-tapia" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Tapia I. · Tapia V.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1389,7 +1467,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-valderrama" data-id="p03-valderrama" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Valderrama E P. · Valderrama P. · Valderrama Y.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1406,7 +1485,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-valenzuela" data-id="p03-valenzuela" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Valenzuela C. · Valenzuela L. G. · Valenzuela R. · Valenzuela T.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1423,7 +1503,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-vallejos" data-id="p03-vallejos" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Vallejos G. · Vallejos P. G.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1440,7 +1521,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-vansint" data-id="p03-vansint" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Van Sint Jan N. · van Sint Jan D N.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1457,7 +1539,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-vasquez" data-id="p03-vasquez" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Vasquez F. · Vásquez F. · Vásquez G.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1474,7 +1557,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p03-zamorano" data-id="p03-zamorano" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Variantes de nombre</span>
       <h2>Zamorano A. · Zamorano S.</h2>
       <p class="ctx">Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.</p>
@@ -1491,7 +1575,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-bressan-rodrigo" data-id="p04-Bressan, Rodrigo" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Bressan, Rodrigo</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57217026032 · 7005575041</p>
@@ -1508,7 +1593,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-castillo-oscar" data-id="p04-Castillo, Oscar" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Castillo, Oscar</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 60129542700 · 7007101727</p>
@@ -1525,7 +1611,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-de-la-fuente-l-pez-marjorie" data-id="p04-De la Fuente López, Marjorie" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>De la Fuente López, Marjorie</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 23090504600 · 60150573200</p>
@@ -1542,7 +1629,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-franco-pamela" data-id="p04-Franco, Pamela" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Franco, Pamela</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57204045244 · 59390952700</p>
@@ -1559,7 +1647,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-guti-rrez-juan" data-id="p04-Gutiérrez, Juan" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Gutiérrez, Juan</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57192703299 · 59221961900</p>
@@ -1576,7 +1665,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-hartmann-schatloff-dan" data-id="p04-Hartmann Schatloff, Dan" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Hartmann Schatloff, Dan</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 58612624500 · 59093175300</p>
@@ -1593,7 +1683,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-ib-ez-agust-n" data-id="p04-Ibáñez, Agustín" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Ibáñez, Agustín</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 55172691400 · 59795107500</p>
@@ -1610,7 +1701,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-lin-john-c" data-id="p04-Lin, John C." data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Lin, John C.</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56009348900 · 59503986900</p>
@@ -1627,7 +1719,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-marques-tiago-reis" data-id="p04-Marques, Tiago Reis" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Marques, Tiago Reis</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 54785084900 · 59663513800</p>
@@ -1644,7 +1737,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-miyata-jun" data-id="p04-Miyata, Jun" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Miyata, Jun</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 35570650200 · 57226205586</p>
@@ -1661,7 +1755,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-moreno-sergio" data-id="p04-Moreno, Sergio" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Moreno, Sergio</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56229831900 · 59919704200</p>
@@ -1678,7 +1773,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-moya-patricia" data-id="p04-Moya, Patricia" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Moya, Patricia</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57767862900 · 60235456000</p>
@@ -1695,7 +1791,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-qian-hongwei" data-id="p04-Qian, Hongwei" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Qian, Hongwei</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 60077451400 · 7201520523</p>
@@ -1712,7 +1809,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-quezada-mauricio" data-id="p04-Quezada, Mauricio" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Quezada, Mauricio</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56013972600 · 60138063800</p>
@@ -1729,7 +1827,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-richter-erik-a" data-id="p04-Richter, Erik A." data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Richter, Erik A.</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 35475650900 · 57218256582</p>
@@ -1746,7 +1845,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-rojas-dario" data-id="p04-Rojas, Dario" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Rojas, Dario</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57196001996 · 60585234300</p>
@@ -1763,7 +1863,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-rojas-costa-gonzalo-m" data-id="p04-Rojas-Costa, Gonzalo M." data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Rojas-Costa, Gonzalo M.</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 58805405100 · 7004503519</p>
@@ -1780,7 +1881,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-schumann-gunter" data-id="p04-Schumann, Gunter" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Schumann, Gunter</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57204862136 · 7103329271</p>
@@ -1797,7 +1899,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-torres-keila" data-id="p04-Torres, Keila" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Torres, Keila</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57224867683 · 60596438800</p>
@@ -1814,7 +1917,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-p04-wolvius-eppo" data-id="p04-Wolvius, Eppo" data-decidido="0"
-             data-familia="identidad">
+             data-familia="identidad"
+             data-urgente="0">
       <span class="cola">Varios Scopus ID</span>
       <h2>Wolvius, Eppo</h2>
       <p class="ctx">Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57201454707 · 6602721170</p>
@@ -1831,7 +1935,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-arenas-massa-a" data-id="afil-Arenas-Massa A." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Arenas-Massa A. → 0000-0003-3188-0189?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Angela Arenas Massa». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1848,7 +1953,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-barbieri-g-g" data-id="afil-Barbieri G.G." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Barbieri G.G. → 0009-0006-1130-7157?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Giuseppina Barbieri». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1865,7 +1971,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-busquets-p" data-id="afil-Busquets P." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Busquets P. → 0000-0002-1041-0543?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Pilar Busquets». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1882,7 +1989,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-caffarena-p" data-id="afil-Caffarena P." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Caffarena P. → 0000-0002-2609-6413?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Paula Caffarena». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1899,7 +2007,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-escobar-gonz-lez-s" data-id="afil-Escobar-González S." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Escobar-González S. → 0000-0003-2786-1487?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Sebastián Escobar González». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1916,7 +2025,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-ferre-contreras-a" data-id="afil-Ferre Contreras A." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Ferre Contreras A. → 0000-0003-1770-244X?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Andrés Alberto Ferre Contreras». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1933,7 +2043,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-jeria-espinoza-v" data-id="afil-Jeria-Espinoza V." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Jeria-Espinoza V. → 0009-0000-4168-198X?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Valentina De los Angeles Jeria Espinoza». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1950,7 +2061,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-landskron-g" data-id="afil-Landskron G." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Landskron G. → 0000-0002-7953-6769?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Glauben Landskron». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1967,7 +2079,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-l-pez-v" data-id="afil-López V." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>López V. → 0000-0003-1323-7843?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Valentin Lopez». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -1984,7 +2097,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-l-pez-soto-p" data-id="afil-López-Soto P." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>López-Soto P. → 0000-0003-2559-6464?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Paulo López-Soto». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2001,7 +2115,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-mendez-rebolledo-g" data-id="afil-Mendez-Rebolledo G." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Mendez-Rebolledo G. → 0000-0001-7948-3807?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Guillermo Mendez-Rebolledo». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2018,7 +2133,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-ortiz-f" data-id="afil-Ortiz F." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Ortiz F. → 0000-0001-7665-7488?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Francisca Andrea Ortiz». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2035,7 +2151,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-poblete-alday-p" data-id="afil-Poblete Alday P." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Poblete Alday P. → 0000-0001-6191-8518?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Patricia Poblete Alday». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2052,7 +2169,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-ramos-alarc-n-m-b" data-id="afil-Ramos-Alarcón M.B." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Ramos-Alarcón M.B. → 0009-0009-5482-9467?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Maria Beatriz Ramos Alarcon». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2069,7 +2187,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-s-nchez-m" data-id="afil-Sánchez M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Sánchez M. → 0000-0003-3976-6997?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Macarena Sanchez». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2086,7 +2205,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-s-nchez-duque-c" data-id="afil-Sánchez-Duque C." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Sánchez-Duque C. → 0009-0000-9651-2841?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «CARMEN GLORIA SANCHEZ-DUQUE». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2103,7 +2223,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-venegas-m" data-id="afil-Venegas M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>Venegas M. → 0000-0002-1944-4686?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Mauricio Venegas». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2120,7 +2241,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-afil-de-la-fuente-m" data-id="afil-de la Fuente M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Candidato por afiliación</span>
       <h2>de la Fuente M. → 0000-0003-0577-7604?</h2>
       <p class="ctx">Este titular declara la institución en su registro de ORCID y se llama «Marjorie De la Fuente». Coincidencia única en ambos sentidos. No hay ninguna publicación compartida que lo respalde: por eso es un candidato y no una asignación.</p>
@@ -2137,7 +2259,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-bencina-matus-f" data-id="noverif-Bencina Matus F." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Bencina Matus F. → 0000-0002-7490-514X: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2154,7 +2277,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-beytia-osses-i" data-id="noverif-Beytia Osses I." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Beytia Osses I. → 0009-0008-4178-5429: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2171,7 +2295,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-buchuk-p" data-id="noverif-Buchuk P." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Buchuk P. → 0009-0009-8078-2738: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2188,7 +2313,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-cartaya-m-a" data-id="noverif-Cartaya M.A." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Cartaya M.A. → 0000-0001-8098-9960: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2205,7 +2331,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-c-rdenas-larenas-j-p" data-id="noverif-Cárdenas Larenas J.P." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Cárdenas Larenas J.P. → 0009-0001-5706-8570: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2222,7 +2349,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-figueroa-f-c" data-id="noverif-Figueroa F.C." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Figueroa F.C. → 0000-0002-1280-9742: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2239,7 +2367,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-g-lvez-m" data-id="noverif-Gálvez M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Gálvez M. → 0000-0002-8638-5268: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2256,7 +2385,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-lucero-mora-j" data-id="noverif-Lucero-Mora J." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Lucero-Mora J. → 0000-0002-8554-7181: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2273,7 +2403,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-mancilla-r" data-id="noverif-Mancilla R." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Mancilla R. → 0000-0002-2143-6386: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2290,7 +2421,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-molina-m" data-id="noverif-Molina M." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Molina M. → 0000-0002-7091-2633: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2307,7 +2439,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-moraga-concha-j" data-id="noverif-Moraga Concha J." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Moraga Concha J. → 0009-0007-5923-0205: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2324,7 +2457,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-moyano-c" data-id="noverif-Moyano C." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Moyano C. → 0000-0002-6357-3469: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2341,7 +2475,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-moyano-davila-c" data-id="noverif-Moyano Davila C." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Moyano Davila C. → 0000-0002-6357-3469: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2358,7 +2493,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-moyano-d-vila-c" data-id="noverif-Moyano Dávila C." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Moyano Dávila C. → 0000-0002-6357-3469: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2375,7 +2511,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-murray-n-p" data-id="noverif-Murray N.P." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Murray N.P. → 0000-0001-8154-8550: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2392,7 +2529,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-valencia-i" data-id="noverif-Valencia I." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Valencia I. → 0000-0002-2695-8044: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2409,7 +2547,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-noverif-vasquez-f" data-id="noverif-Vasquez F." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">ORCID no verificable</span>
       <h2>Vasquez F. → 0000-0003-1769-3969: sin nada contra qué contrastar</h2>
       <p class="ctx">El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.</p>
@@ -2426,7 +2565,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-sinorcid-dreyse-j" data-id="sinorcid-Dreyse J." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Firma sin ORCID</span>
       <h2>Dreyse J.: 16 publicaciones y ningún ORCID</h2>
       <p class="ctx">Ninguna de las tres vías automáticas encontró identificador para esta firma. Con 16 publicaciones es de las pocas que una búsqueda manual en el registro puede resolver. Si lo encuentra, tecléelo: se comprueba el dígito de control antes de aplicarlo.</p>
@@ -2443,7 +2583,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-sinorcid-gonzalez-valderrama-a" data-id="sinorcid-Gonzalez-Valderrama A." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Firma sin ORCID</span>
       <h2>Gonzalez-Valderrama A.: 6 publicaciones y ningún ORCID</h2>
       <p class="ctx">Ninguna de las tres vías automáticas encontró identificador para esta firma. Con 6 publicaciones es de las pocas que una búsqueda manual en el registro puede resolver. Si lo encuentra, tecléelo: se comprueba el dígito de control antes de aplicarlo.</p>
@@ -2460,7 +2601,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-sinorcid-jorquera-j" data-id="sinorcid-Jorquera J." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Firma sin ORCID</span>
       <h2>Jorquera J.: 5 publicaciones y ningún ORCID</h2>
       <p class="ctx">Ninguna de las tres vías automáticas encontró identificador para esta firma. Con 5 publicaciones es de las pocas que una búsqueda manual en el registro puede resolver. Si lo encuentra, tecléelo: se comprueba el dígito de control antes de aplicarlo.</p>
@@ -2477,7 +2619,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-sinorcid-pedreros-c" data-id="sinorcid-Pedreros C." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Firma sin ORCID</span>
       <h2>Pedreros C.: 6 publicaciones y ningún ORCID</h2>
       <p class="ctx">Ninguna de las tres vías automáticas encontró identificador para esta firma. Con 6 publicaciones es de las pocas que una búsqueda manual en el registro puede resolver. Si lo encuentra, tecléelo: se comprueba el dígito de control antes de aplicarlo.</p>
@@ -2494,7 +2637,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-sinorcid-reccius-a" data-id="sinorcid-Reccius A." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Firma sin ORCID</span>
       <h2>Reccius A.: 8 publicaciones y ningún ORCID</h2>
       <p class="ctx">Ninguna de las tres vías automáticas encontró identificador para esta firma. Con 8 publicaciones es de las pocas que una búsqueda manual en el registro puede resolver. Si lo encuentra, tecléelo: se comprueba el dígito de control antes de aplicarlo.</p>
@@ -2511,7 +2655,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
       </div>
     </article>
     <article class="caso" id="caso-sinorcid-salas-guzm-n-n" data-id="sinorcid-Salas-Guzmán N." data-decidido="0"
-             data-familia="orcid">
+             data-familia="orcid"
+             data-urgente="0">
       <span class="cola">Firma sin ORCID</span>
       <h2>Salas-Guzmán N.: 5 publicaciones y ningún ORCID</h2>
       <p class="ctx">Ninguna de las tres vías automáticas encontró identificador para esta firma. Con 5 publicaciones es de las pocas que una búsqueda manual en el registro puede resolver. Si lo encuentra, tecléelo: se comprueba el dígito de control antes de aplicarlo.</p>
@@ -2566,12 +2711,14 @@ function pintarAvance() {
 function filtrar() {
   const f = document.getElementById('filtro').value;
   const fam = document.getElementById('familia').value;
+  const soloUrg = document.getElementById('solo-urgentes').checked;
   document.querySelectorAll('.caso').forEach(el => {
     const d = dec[el.dataset.id];
     const resuelto = !!(d && d.veredicto && d.veredicto !== 'pendiente');
     el.classList.toggle('oculto',
       (f === 'pendientes' && resuelto) || (f === 'resueltos' && !resuelto)
-      || (fam !== 'todas' && el.dataset.familia !== fam));
+      || (fam !== 'todas' && el.dataset.familia !== fam)
+      || (soloUrg && el.dataset.urgente !== '1'));
   });
   const vis = document.querySelectorAll('.caso:not(.oculto)').length;
   document.getElementById('visibles').textContent = `${vis} a la vista`;
@@ -2618,6 +2765,16 @@ document.addEventListener('input', e => {
 
 document.getElementById('filtro').addEventListener('change', filtrar);
 document.getElementById('familia').addEventListener('change', filtrar);
+document.getElementById('solo-urgentes').addEventListener('change', filtrar);
+
+/* `…#urgentes` abre la herramienta ya acotada. Un enlace que hay que acompañar
+   de «y ahora marque tal casilla» es un enlace a medias, y quien lo recibe
+   empieza por 141 casos en vez de por los que tocan.
+
+   No pisa a un ancla de caso: `#caso-…` sigue llevando a su caso. */
+if (location.hash === '#urgentes') {
+  document.getElementById('solo-urgentes').checked = true;
+}
 
 document.getElementById('exportar').addEventListener('click', () => {
   const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
