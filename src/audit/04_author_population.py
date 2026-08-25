@@ -34,6 +34,36 @@ def scopus_id_map(scopus: pd.DataFrame) -> dict[str, set[str]]:
     return out
 
 
+
+def _firma_corta(full: str) -> str:
+    """«Apellido, Nombre» -> «Apellido N.», la forma con la que firma.
+
+    Es el mismo cálculo que arma `id_by_short`. Se extrae a función porque
+    ahora lo necesitan dos sitios, y tenerlo dos veces era la forma segura de
+    que un día dejaran de coincidir.
+    """
+    parts = full.split(",")
+    short = parts[0].strip()
+    if len(parts) > 1:
+        initials = "".join(w[0] + "." for w in parts[1].split() if w[:1].isalpha())
+        short = f"{short} {initials}".strip()
+    return short
+
+
+def _ids_por_publicacion(scopus: pd.DataFrame) -> dict[str, set[str]]:
+    """EID -> los Scopus Author ID que firman esa publicación."""
+    col = "EID" if "EID" in scopus.columns else scopus.columns[0]
+    out: dict[str, set[str]] = {}
+    for _, r in scopus.iterrows():
+        full = r.get("Author full names")
+        if not isinstance(full, str):
+            continue
+        out[r[col]] = {m.group(2) for m in
+                       (re.match(r"(.+?)\s+\((\d+)\)$", p.strip())
+                        for p in full.split("; ")) if m}
+    return out
+
+
 # Una firma de persona en esta fuente lleva siempre inicial con punto:
 # «Apellido X.», «Apellido-Compuesto X.Y.». Un fragmento de cadena de afiliación
 # —«School of Psychology», «and Senior Lecturer»— no.
@@ -197,14 +227,38 @@ def main() -> None:
                     "resolucion": "NO_RESOLVER_AUTOMATICAMENTE",
                 })
 
+    # P-04 se acompaña de DOS HECHOS MEDIDOS. Ninguno decide la ambigüedad —eso
+    # sigue siendo juicio humano— pero los dos cambian cuánto importa y qué
+    # lecturas quedan en pie:
+    #
+    #   en_poblacion_uft  si la firma no está en el log de matching, no tiene
+    #                     ficha, no cuenta en «autores UFT distintos» y no
+    #                     entraría en la red de coautoría. La ambigüedad existe
+    #                     y se declara, pero no afecta a ninguna cifra
+    #                     publicada. Diez de los veinte casos son de coautores
+    #                     externos, y mezclarlos con los diez que sí son UFT
+    #                     hacía la cola el doble de larga sin ningún efecto.
+    #
+    #   coocurren         si los dos identificadores figuran como coautores del
+    #                     MISMO trabajo, «perfil fragmentado» queda descartado:
+    #                     un perfil fragmentado es que la fuente repartió los
+    #                     trabajos de una persona entre dos identificadores, y
+    #                     eso no puede ocurrir dentro de una sola publicación.
+    #                     Se reporta el hecho, no el veredicto: entre homonimia
+    #                     y error de la fuente decide quien revisa.
+    firmas_uft = set(log["nombre_en_fuente"])
+    ids_por_pub = _ids_por_publicacion(scopus)
     for full, sids in ids.items():
         if len(sids) > 1:
+            coocurren = sum(1 for s in ids_por_pub.values() if len(s & sids) > 1)
             amb.append({
                 "tipo": "P-04_nombre_con_multiples_scopus_id", "severidad": "alta",
                 "clave": full, "nombre_en_fuente": full,
                 "detalle": "|".join(sorted(sids)),
                 "consecuencia": "perfil Scopus fragmentado u homonimia",
                 "resolucion": "NO_RESOLVER_AUTOMATICAMENTE",
+                "en_poblacion_uft": _firma_corta(full) in firmas_uft,
+                "coocurren_en_publicaciones": coocurren,
             })
 
     by_sid: dict[str, set[str]] = {}

@@ -43,6 +43,7 @@ import pandas as pd
 import yaml
 
 import decisiones as D
+import equivalencia_ortografica as EQ
 
 ROOT = Path(__file__).resolve().parents[2]
 INTERNAL = ROOT / "internal"
@@ -67,8 +68,16 @@ def leer_decisiones(path: Path) -> pd.DataFrame:
     return d
 
 
-def grupos_de_identidad(d: pd.DataFrame) -> tuple[list[list[str]], list[tuple]]:
+def grupos_de_identidad(d: pd.DataFrame,
+                        ortograficos: list[list[str]] | None = None
+                        ) -> tuple[list[list[str]], list[tuple]]:
     """Une por transitividad las firmas declaradas la misma persona.
+
+    `ortograficos` son clases de equivalencia de CADENA, no de identidad: la
+    misma firma escrita con otros diacríticos o separadores. Se unen aquí
+    porque el resultado es el mismo grupo, pero su origen se registra aparte
+    para que el archivo generado no las presente como algo que alguien
+    verificó. Ver equivalencia_ortografica.py.
 
     Devuelve también las contradicciones: pares declarados «distintas» que la
     cadena de «misma» ya había unido. No se resuelven aquí porque no hay forma
@@ -88,6 +97,10 @@ def grupos_de_identidad(d: pd.DataFrame) -> tuple[list[list[str]], list[tuple]]:
         for a, b in itertools.pairwise(fs):
             padre[find(a)] = find(b)
 
+    for clase in (ortograficos or []):
+        for a, b in itertools.pairwise(clase):
+            padre[find(a)] = find(b)
+
     conflictos = []
     for _, r in d[d.veredicto == "distintas"].iterrows():
         fs = firmas_de(r)
@@ -99,6 +112,46 @@ def grupos_de_identidad(d: pd.DataFrame) -> tuple[list[list[str]], list[tuple]]:
     for f in padre:
         agrup.setdefault(find(f), []).append(f)
     return [sorted(v) for v in agrup.values() if len(v) > 1], conflictos
+
+
+
+def casos_pendientes_variantes(d: pd.DataFrame) -> list[tuple[str, list[str]]]:
+    """Los casos de la cola de variantes que nadie ha resuelto todavía."""
+    sel = d[(d.cola == "Variantes de nombre") & (d.veredicto == "pendiente")]
+    return [(r["caso_id"], firmas_de(r)) for _, r in sel.iterrows()]
+
+
+def pares_declarados_distintos(d: pd.DataFrame) -> set[frozenset[str]]:
+    """Pares que una persona declaró de personas distintas.
+
+    Bloquean la fusión ortográfica: un veredicto humano manda sobre la
+    normalización, siempre y en esa dirección.
+    """
+    pares = set()
+    for _, r in d[d.veredicto == "distintas"].iterrows():
+        for a, b in itertools.combinations(firmas_de(r), 2):
+            pares.add(frozenset({a, b}))
+    return pares
+
+
+def origen_de_grupos(grupos: list[list[str]], d: pd.DataFrame) -> dict[int, str]:
+    """Qué sostiene cada grupo: revisión humana, normalización, o las dos.
+
+    Un grupo es «humana» si alguna decisión con veredicto «misma» tocó alguna
+    de sus firmas. Si además hay formas que sólo entraron por equivalencia de
+    cadena, es «mixta». Se registra porque el archivo generado se lee como
+    evidencia, y una afirmación verificada y una normalizada no pueden verse
+    igual.
+    """
+    humanas = set()
+    for _, r in d[d.veredicto == "misma"].iterrows():
+        humanas.update(firmas_de(r))
+    origen = {}
+    for i, g in enumerate(grupos):
+        dentro = [f in humanas for f in g]
+        origen[i] = ("humana" if all(dentro)
+                     else "mixta" if any(dentro) else "ortografica")
+    return origen
 
 
 def _tildes_apellido(firma: str) -> int:
@@ -114,13 +167,23 @@ def _tildes_apellido(firma: str) -> int:
     «Arenas-Massa Á.» y otra como «Arenas-Massa A.», elegir la acentuada
     afirmaría que el nombre de pila lleva tilde, y eso no se deduce de aquí.
     Por eso sólo cuentan los tokens de más de una letra.
+
+    NO TODO DIACRÍTICO CUENTA IGUAL. Contarlos a bulto elegía «Nùñez-Lisboa M.»
+    frente a «Núñez-Lisboa M.»: las dos llevan dos marcas, empataban, y el
+    desempate alfabético publicaba la forma con acento grave. En español el
+    acento grave sobre vocal no existe; es la misma clase de corrupción de
+    exportación que «Ingenierı́a». Así que las marcas del repertorio del español
+    suman y las ajenas restan, y una forma corrupta no puede ganar por empate.
     """
     import unicodedata
+    # agudo, tilde de eñe, diéresis: lo que el español escribe.
+    ESPANOL = {"\u0301", "\u0303", "\u0308"}
     palabras = [t for t in firma.replace(".", " ").replace("-", " ").split()
                 if len(t) > 1]
-    return sum(1 for t in palabras
-               for ch in unicodedata.normalize("NFD", t)
-               if unicodedata.category(ch) == "Mn")
+    marcas = [ch for t in palabras
+              for ch in unicodedata.normalize("NFD", t)
+              if unicodedata.category(ch) == "Mn"]
+    return sum(1 if m in ESPANOL else -1 for m in marcas)
 
 
 def canonica(firmas: list[str], frec: dict[str, int] | None = None) -> str:
@@ -395,7 +458,8 @@ def yaml_e09(descartadas: list[tuple[str, str]], confirmadas: list[tuple[str, st
 
 
 def yaml_consolidacion(grupos: list[list[str]], fecha: str, n_dec: int,
-                       frec: dict[str, int]) -> str:
+                       frec: dict[str, int],
+                       origen: dict[int, str] | None = None) -> str:
     """Escribe el mapa a mano en vez de volcarlo con yaml.dump.
 
     Un volcado automático perdería los comentarios, y este archivo se lee tanto
@@ -414,6 +478,13 @@ def yaml_consolidacion(grupos: list[list[str]], fecha: str, n_dec: int,
         "#   variantes se fusionan: el pipeline nunca lo hace por heurística",
         "#   (decisión D-08).",
         "#",
+        "# EL ORIGEN DE CADA GRUPO va declarado:",
+        "#   humana      una persona revisó y decidió que son la misma",
+        "#   ortografica la MISMA firma escrita con otros diacríticos o",
+        "#               separadores. No es un juicio sobre personas: es",
+        "#               equivalencia de cadena. Ver equivalencia_ortografica.py",
+        "#   mixta       las dos cosas dentro del mismo grupo",
+        "#",
         "# LA FORMA CANÓNICA no es un nombre nuevo: es la que la fuente usa más,",
         "# medida en publicaciones distintas. Entre paréntesis, ese recuento.",
         "# Se elige así y no por longitud porque el desempate alfabético",
@@ -424,8 +495,13 @@ def yaml_consolidacion(grupos: list[list[str]], fecha: str, n_dec: int,
         "",
         "grupos:",
     ]
-    for g in sorted(grupos, key=lambda x: canonica(x, frec)):
+    origen = origen or {}
+    por_origen = {g_id: origen.get(g_id, "humana") for g_id in range(len(grupos))}
+    orden = sorted(range(len(grupos)), key=lambda i: canonica(grupos[i], frec))
+    for i in orden:
+        g = grupos[i]
         lineas.append(f"  - canonica: {canonica(g, frec)!r}")
+        lineas.append(f"    origen: {por_origen[i]}")
         lineas.append("    variantes:")
         for v in g:
             lineas.append(f"      - {v!r}   # {frec.get(v, 0)} publicaciones")
@@ -467,6 +543,10 @@ def autotest() -> int:
     casos.append(("la tilde del apellido vence al empate",
                   canonica(["Núnez-Lisboa M.", "Núñez-Lisboa M."],
                            {"Núnez-Lisboa M.": 1, "Núñez-Lisboa M.": 1}) == "Núñez-Lisboa M.", None))
+    casos.append(("un acento que el español no usa no gana el empate",
+                  canonica(["Nuñez-Lisboa M.", "Nùñez-Lisboa M.",
+                            "Núnez-Lisboa M.", "Núñez-Lisboa M."],
+                           {}) == "Núñez-Lisboa M.", None))
     # Ni siquiera perdiendo en frecuencia: «Sepulveda» sigue siendo un apellido
     # al que la exportación le quitó la tilde.
     casos.append(("la tilde del apellido vence a la frecuencia",
@@ -687,7 +767,23 @@ def main() -> int:
     print(f"    resueltas         : {len(resueltas)}")
     print(f"    pendientes        : {int((d.veredicto == 'pendiente').sum())}")
 
-    grupos, conflictos = grupos_de_identidad(d)
+    # EQUIVALENCIA ORTOGRÁFICA. No decide identidades: reconoce que la fuente
+    # escribió la misma firma de varias maneras. Se calcula sólo sobre lo que
+    # sigue pendiente y nunca contra un veredicto humano de «distintas».
+    prohibidos = pares_declarados_distintos(d)
+    eq_res, eq_resp = EQ.resolver(casos_pendientes_variantes(d), prohibidos)
+    ortograficos = [clase for _, clase in eq_res]
+    if ortograficos:
+        print(f"\n  equivalencia ortográfica: {len(ortograficos)} clase(s), "
+              f"{sum(len(c) for c in ortograficos)} formas de firma")
+        for cid, clase in eq_res:
+            print(f"    {cid}: {' = '.join(clase)}")
+    if eq_resp:
+        print(f"\n  NO fusionadas por veredicto humano de «distintas»: {len(eq_resp)}")
+        for cid, clase in eq_resp:
+            print(f"    {cid}: {' | '.join(clase)}")
+
+    grupos, conflictos = grupos_de_identidad(d, ortograficos)
     if conflictos:
         print("\n  CONTRADICCIONES:")
         for cid, a, b in conflictos:
@@ -768,7 +864,7 @@ def main() -> int:
     frec = frecuencias(INTERNAL / "matching_log.csv")
     hoy = date.today().isoformat()
     (CONFIG / "identidades_consolidadas.yml").write_text(
-        yaml_consolidacion(grupos, hoy, len(d), frec), encoding="utf-8")
+        yaml_consolidacion(grupos, hoy, len(d), frec, origen_de_grupos(grupos, d)), encoding="utf-8")
     (CONFIG / "firmas_e09_resueltas.yml").write_text(
         yaml_e09(desc, conf, hoy), encoding="utf-8")
     (CONFIG / "orcid_revisado.yml").write_text(

@@ -1,8 +1,8 @@
 # Pendientes de consolidación
 
-**Generado** el 2026-08-24 por `src/review/build_review.py`. Regenerable.
+**Generado** el 2026-08-25 por `src/review/build_review.py`. Regenerable.
 
-Quedan **89 casos** de 141. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **84 casos** de 111. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -74,11 +74,11 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ---
 
-## ORCID compartido — 3 pendiente(s)
+## ORCID compartido — 2 pendiente(s)
 
-### [3 firmas comparten 0000-0002-6357-3469](revision_identidad.html#caso-orcid-0000-0002-6357-3469)
+### [2 firmas comparten 0000-0002-6357-3469](revision_identidad.html#caso-orcid-0000-0002-6357-3469)
 
-El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.
+El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente. Ya unidas por equivalencia ortográfica: Moyano Davila C. = Moyano Dávila C.. Respaldo de cada asignación: Moyano C. (Crossref, confianza media, 1 pub.) · Moyano Davila C. (Crossref, confianza media, 1 pub.).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -87,41 +87,15 @@ El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persis
 | Perfil 60078986100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60078986100> |
 | Buscar «Moyano Davila C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Moyano%20Davila%20C.> |
 | Perfil 57201182805 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57201182805> |
-| Buscar «Moyano Dávila C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Moyano%20D%C3%A1vila%20C.> |
 
 Publicaciones atribuidas, para comparar contra el registro:
 
 - 2025 · School choice in Indigenous families as a conflicting path between territories and cultures: The case of rural Mapuche families in Chile — <https://doi.org/10.55146/ajie.v54i1.1035>
 - 2024 · What time does the bell ring? Problems and potentialities in experiences of temporality in school — <https://doi.org/10.1080/09518398.2023.2233930>
-- 2025 · Merit as an Attitude: Chilean School Communities’ Repertoires in Chile and the Perception of the “Good Student” in a Post-pandemic Scenario — <https://doi.org/10.1007/s11211-025-00456-2>
-- 2023 · Silenced Conflict: Surveillance and Normalization Using WhatsApp Groups at School — <https://doi.org/10.1111/fare.12816>
-- 2023 · Normative Becoming in the Digital Sphere: WhatsApp Parent’s Group in Chilean Education; [Devir normativo na esfera digital: Grupo de pais do WhatsApp na educação chilena]; [Devenir normativo en el ámbito digital: Grupo de padres de WhatsApp en la educación chilena] — <https://doi.org/10.14507/epaa.31.7907>
-
-### [3 firmas comparten 0000-0002-9315-9365](revision_identidad.html#caso-orcid-0000-0002-9315-9365)
-
-El apellido también las agrupa.
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0002-9315-9365> |
-| Buscar «Henriquez-Olguin C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Henriquez-Olguin%20C.> |
-| Perfil 35102305800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=35102305800> |
-| Buscar «Henriquez-Olguín C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Henriquez-Olgu%C3%ADn%20C.> |
-| Buscar «Henríquez-Olguín C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Henr%C3%ADquez-Olgu%C3%ADn%20C.> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · Muscle-specific AXIN1 and AXIN2 double knockout does not alter AMPK/mTORC1 signalling or glucose metabolism — <https://doi.org/10.1113/JP288854>
-- 2025 · Redox biology at the intersection of physical activity and air pollution: Mechanisms, consequences, and complexity — <https://doi.org/10.1016/j.freeradbiomed.2025.09.047>
-- 2023 · The Rho guanine dissociation inhibitor α inhibits skeletal muscle Rac1 activity and insulin action — <https://doi.org/10.1073/pnas.2211041120>
-- 2023 · NOX2 deficiency exacerbates diet-induced obesity and impairs molecular training adaptations in skeletal muscle — <https://doi.org/10.1016/j.redox.2023.102842>
-- 2023 · From workout to molecular switches: How does skeletal muscle produce, sense, and transduce subcellular redox signals? — <https://doi.org/10.1016/j.freeradbiomed.2023.10.404>
-- 2025 · mTOR Ser1261 is an AMPK-dependent phosphosite in mouse and human skeletal muscle not required for mTORC2 activity — <https://doi.org/10.1096/fj.202402064R>
-- … y 9 más
 
 ### [3 firmas comparten 0000-0003-2175-2941](revision_identidad.html#caso-orcid-0000-0003-2175-2941)
 
-El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente.
+El apellido no las agrupa: este hallazgo sólo lo aporta el identificador persistente. Respaldo de cada asignación: Foxley V.G. (Crossref, confianza media, 1 pub.) · Gubbins V. (Crossref, confianza alta, 2 pub.) · Gubbins-Foxley V. (Crossref, confianza media, 1 pub.).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -239,7 +213,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ---
 
-## Variantes de nombre — 31 pendiente(s)
+## Variantes de nombre — 27 pendiente(s)
 
 ### [Ballesteros P. · Ballesteros P. P.](revision_identidad.html#caso-p03-ballesteros)
 
@@ -290,9 +264,9 @@ Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identida
 | Perfil 60129542700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60129542700> |
 | Perfil 7007101727 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=7007101727> |
 
-### [De la Fuente López M. · De la Fuente M. · De la fuente López M. · de la Cruz P.S. · de la Fuente M.](revision_identidad.html#caso-p03-dela)
+### [De la Fuente López M. · De la Fuente M. · de la Cruz P.S.](revision_identidad.html#caso-p03-dela)
 
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
+Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad. Ya unidas por equivalencia ortográfica, no hace falta decidirlas: De la Fuente López M. = De la fuente López M. · De la Fuente M. = de la Fuente M..
 
 | Comprobar en | Enlace |
 |---|---|
@@ -301,14 +275,12 @@ Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identida
 | Perfil 60150573200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60150573200> |
 | Registro del titular en ORCID | <https://orcid.org/0000-0003-0577-7604> |
 | Buscar «De la Fuente M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=De%20la%20Fuente%20M.> |
-| Buscar «De la fuente López M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=De%20la%20fuente%20L%C3%B3pez%20M.> |
 | Buscar «de la Cruz P.S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=de%20la%20Cruz%20P.S.> |
 | Perfil 57218895503 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57218895503> |
-| Buscar «de la Fuente M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=de%20la%20Fuente%20M.> |
 
-### [Garcia J. · Garcia K. · García F. · García J.](revision_identidad.html#caso-p03-garcia)
+### [Garcia J. · Garcia K. · García F.](revision_identidad.html#caso-p03-garcia)
 
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
+Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad. Ya unidas por equivalencia ortográfica, no hace falta decidirlas: Garcia J. = García J..
 
 | Comprobar en | Enlace |
 |---|---|
@@ -319,18 +291,6 @@ Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identida
 | Buscar «García F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Garc%C3%ADa%20F.> |
 | Perfil 58857164000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58857164000> |
 | Perfil 59465758900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59465758900> |
-| Buscar «García J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Garc%C3%ADa%20J.> |
-
-### [Gonzalez- Valderrama A. · Gonzalez-Valderrama A. · González-Valderrama A.](revision_identidad.html#caso-p03-gonzalezvalderrama)
-
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Gonzalez- Valderrama A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gonzalez-%20Valderrama%20A.> |
-| Perfil 56586062200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56586062200> |
-| Buscar «Gonzalez-Valderrama A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gonzalez-Valderrama%20A.> |
-| Buscar «González-Valderrama A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gonz%C3%A1lez-Valderrama%20A.> |
 
 ### [González A. · González I.](revision_identidad.html#caso-p03-gonzalez)
 
@@ -358,19 +318,6 @@ Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identida
 | Buscar «Gutiérrez S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Guti%C3%A9rrez%20S.> |
 | Perfil 57206252422 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57206252422> |
 
-### [Henriquez-Olguin C. · Henriquez-Olguín C. · Henríquez-Olguin C. · Henríquez-Olguín C.](revision_identidad.html#caso-p03-henriquezolguin)
-
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0002-9315-9365> |
-| Buscar «Henriquez-Olguin C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Henriquez-Olguin%20C.> |
-| Perfil 35102305800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=35102305800> |
-| Buscar «Henriquez-Olguín C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Henriquez-Olgu%C3%ADn%20C.> |
-| Buscar «Henríquez-Olguin C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Henr%C3%ADquez-Olguin%20C.> |
-| Buscar «Henríquez-Olguín C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Henr%C3%ADquez-Olgu%C3%ADn%20C.> |
-
 ### [Ibañez H. · Ibañez V.](revision_identidad.html#caso-p03-ibanez)
 
 Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
@@ -382,40 +329,15 @@ Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identida
 | Buscar «Ibañez V.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Iba%C3%B1ez%20V.> |
 | Perfil 59502611000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59502611000> |
 
-### [Lopez-Arana S. · López Arana S. · López-Arana S.](revision_identidad.html#caso-p03-lopezarana)
+### [Martinez-Mardones M. · Martinez-Mardones M.B.](revision_identidad.html#caso-p03-martinezmardones)
 
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0002-4312-1318> |
-| Buscar «Lopez-Arana S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Lopez-Arana%20S.> |
-| Perfil 23089038400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23089038400> |
-| Buscar «López Arana S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=L%C3%B3pez%20Arana%20S.> |
-| Buscar «López-Arana S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=L%C3%B3pez-Arana%20S.> |
-
-### [Martinez M. · Martínez M.](revision_identidad.html#caso-p03-martinez)
-
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0002-8127-7620> |
-| Buscar «Martinez M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Martinez%20M.> |
-| Perfil 56499734000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56499734000> |
-| Buscar «Martínez M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Mart%C3%ADnez%20M.> |
-| Perfil 58088132900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58088132900> |
-
-### [Martinez-Mardones M. · Martinez-Mardones M.B. · Martínez-Mardones M.B.](revision_identidad.html#caso-p03-martinezmardones)
-
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
+Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad. Ya unidas por equivalencia ortográfica, no hace falta decidirlas: Martinez-Mardones M.B. = Martínez-Mardones M.B..
 
 | Comprobar en | Enlace |
 |---|---|
 | Buscar «Martinez-Mardones M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Martinez-Mardones%20M.> |
 | Perfil 57225050522 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57225050522> |
 | Buscar «Martinez-Mardones M.B.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Martinez-Mardones%20M.B.> |
-| Buscar «Martínez-Mardones M.B.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Mart%C3%ADnez-Mardones%20M.B.> |
 
 ### [Molina C. · Molina M.](revision_identidad.html#caso-p03-molina)
 
@@ -430,30 +352,26 @@ Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identida
 | Buscar «Molina M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Molina%20M.> |
 | Perfil 55764694200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55764694200> |
 
-### [Nuñez-Lisboa M. · Nùñez-Lisboa M. · Núnez-Lisboa M. · Núñez-Lisboa M. · Núñez-Lisboa M.N.](revision_identidad.html#caso-p03-nunezlisboa)
+### [Nuñez-Lisboa M. · Núñez-Lisboa M.N.](revision_identidad.html#caso-p03-nunezlisboa)
 
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
+Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad. Ya unidas por equivalencia ortográfica, no hace falta decidirlas: Nuñez-Lisboa M. = Nùñez-Lisboa M. = Núnez-Lisboa M. = Núñez-Lisboa M..
 
 | Comprobar en | Enlace |
 |---|---|
 | Registro del titular en ORCID | <https://orcid.org/0000-0003-0051-9833> |
 | Buscar «Nuñez-Lisboa M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Nu%C3%B1ez-Lisboa%20M.> |
 | Perfil 57317659600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57317659600> |
-| Buscar «Nùñez-Lisboa M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=N%C3%B9%C3%B1ez-Lisboa%20M.> |
-| Buscar «Núnez-Lisboa M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=N%C3%BAnez-Lisboa%20M.> |
-| Buscar «Núñez-Lisboa M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=N%C3%BA%C3%B1ez-Lisboa%20M.> |
 | Buscar «Núñez-Lisboa M.N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=N%C3%BA%C3%B1ez-Lisboa%20M.N.> |
 
-### [Orellana Donoso M. · Orellana-Donoso M. · Orellana-Donoso M.I.](revision_identidad.html#caso-p03-orellanadonoso)
+### [Orellana Donoso M. · Orellana-Donoso M.I.](revision_identidad.html#caso-p03-orellanadonoso)
 
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
+Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad. Ya unidas por equivalencia ortográfica, no hace falta decidirlas: Orellana Donoso M. = Orellana-Donoso M..
 
 | Comprobar en | Enlace |
 |---|---|
 | Registro del titular en ORCID | <https://orcid.org/0000-0002-1781-062X> |
 | Buscar «Orellana Donoso M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Orellana%20Donoso%20M.> |
 | Perfil 57219486372 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57219486372> |
-| Buscar «Orellana-Donoso M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Orellana-Donoso%20M.> |
 | Buscar «Orellana-Donoso M.I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Orellana-Donoso%20M.I.> |
 
 ### [Ponce D. · Ponce N. · Ponce P.](revision_identidad.html#caso-p03-ponce)
@@ -606,16 +524,15 @@ Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identida
 | Buscar «van Sint Jan D N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=van%20Sint%20Jan%20D%20N.> |
 | Perfil 58875319100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58875319100> |
 
-### [Vasquez F. · Vásquez F. · Vásquez G.](revision_identidad.html#caso-p03-vasquez)
+### [Vasquez F. · Vásquez G.](revision_identidad.html#caso-p03-vasquez)
 
-Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.
+Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad. Ya unidas por equivalencia ortográfica, no hace falta decidirlas: Vasquez F. = Vásquez F..
 
 | Comprobar en | Enlace |
 |---|---|
 | Registro del titular en ORCID | <https://orcid.org/0000-0003-1769-3969> |
 | Buscar «Vasquez F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Vasquez%20F.> |
 | Perfil 24400395100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=24400395100> |
-| Buscar «Vásquez F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=V%C3%A1squez%20F.> |
 | Buscar «Vásquez G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=V%C3%A1squez%20G.> |
 | Perfil 59180378800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59180378800> |
 
@@ -635,10 +552,6 @@ Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identida
 
 ## Varios Scopus ID — 20 pendiente(s)
 
-### [Bressan, Rodrigo](revision_identidad.html#caso-p04-bressan-rodrigo)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57217026032 · 7005575041
-
 ### [Castillo, Oscar](revision_identidad.html#caso-p04-castillo-oscar)
 
 Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 60129542700 · 7007101727
@@ -646,10 +559,6 @@ Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentad
 ### [De la Fuente López, Marjorie](revision_identidad.html#caso-p04-de-la-fuente-l-pez-marjorie)
 
 Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 23090504600 · 60150573200
-
-### [Franco, Pamela](revision_identidad.html#caso-p04-franco-pamela)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57204045244 · 59390952700
 
 ### [Gutiérrez, Juan](revision_identidad.html#caso-p04-guti-rrez-juan)
 
@@ -659,22 +568,6 @@ Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentad
 
 Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 58612624500 · 59093175300
 
-### [Ibáñez, Agustín](revision_identidad.html#caso-p04-ib-ez-agust-n)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 55172691400 · 59795107500
-
-### [Lin, John C.](revision_identidad.html#caso-p04-lin-john-c)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56009348900 · 59503986900
-
-### [Marques, Tiago Reis](revision_identidad.html#caso-p04-marques-tiago-reis)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 54785084900 · 59663513800
-
-### [Miyata, Jun](revision_identidad.html#caso-p04-miyata-jun)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 35570650200 · 57226205586
-
 ### [Moreno, Sergio](revision_identidad.html#caso-p04-moreno-sergio)
 
 Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56229831900 · 59919704200
@@ -683,17 +576,9 @@ Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentad
 
 Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57767862900 · 60235456000
 
-### [Qian, Hongwei](revision_identidad.html#caso-p04-qian-hongwei)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 60077451400 · 7201520523
-
 ### [Quezada, Mauricio](revision_identidad.html#caso-p04-quezada-mauricio)
 
 Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56013972600 · 60138063800
-
-### [Richter, Erik A.](revision_identidad.html#caso-p04-richter-erik-a)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 35475650900 · 57218256582
 
 ### [Rojas, Dario](revision_identidad.html#caso-p04-rojas-dario)
 
@@ -703,17 +588,49 @@ Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentad
 
 Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 58805405100 · 7004503519
 
-### [Schumann, Gunter](revision_identidad.html#caso-p04-schumann-gunter)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57204862136 · 7103329271
-
 ### [Torres, Keila](revision_identidad.html#caso-p04-torres-keila)
 
 Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57224867683 · 60596438800
 
+### [Bressan, Rodrigo](revision_identidad.html#caso-p04-bressan-rodrigo)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57217026032 · 7005575041. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
+### [Franco, Pamela](revision_identidad.html#caso-p04-franco-pamela)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57204045244 · 59390952700. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
+### [Ibáñez, Agustín](revision_identidad.html#caso-p04-ib-ez-agust-n)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 55172691400 · 59795107500. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
+### [Lin, John C.](revision_identidad.html#caso-p04-lin-john-c)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 56009348900 · 59503986900. Los dos identificadores firman 1 publicación(es) EN COMÚN, así que «perfil fragmentado» queda descartado: la fuente no puede haber repartido entre dos identificadores los trabajos de una persona dentro de un mismo trabajo. Queda decidir entre homonimia y error de la fuente. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
+### [Marques, Tiago Reis](revision_identidad.html#caso-p04-marques-tiago-reis)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 54785084900 · 59663513800. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
+### [Miyata, Jun](revision_identidad.html#caso-p04-miyata-jun)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 35570650200 · 57226205586. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
+### [Qian, Hongwei](revision_identidad.html#caso-p04-qian-hongwei)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 60077451400 · 7201520523. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
+### [Richter, Erik A.](revision_identidad.html#caso-p04-richter-erik-a)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 35475650900 · 57218256582. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
+### [Schumann, Gunter](revision_identidad.html#caso-p04-schumann-gunter)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57204862136 · 7103329271. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
+
 ### [Wolvius, Eppo](revision_identidad.html#caso-p04-wolvius-eppo)
 
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57201454707 · 6602721170
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57201454707 · 6602721170. FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de matching, así que no tiene ficha, no cuenta en «autores UFT distintos» y no entraría en la red de coautoría. La ambigüedad es real y por eso se declara, pero no afecta a ninguna cifra publicada
 
 ---
 

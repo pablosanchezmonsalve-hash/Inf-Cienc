@@ -7,11 +7,38 @@
 <header class="cabecera" id="cabecera"></header>
 <div class="vigencia" id="vigencia"></div>
 <main id="contenido" class="contenedor">
-  <div id="titular"></div>
-  <h2 class="titulo-seccion">Indicadores de cabecera</h2>
-  <div class="kpis" id="kpis"></div>
-  <div id="panorama"></div>
-  <div id="lectura"></div>
+  <!-- LA PORTADA ES UN EXPLORADOR, no un informe que se lee de arriba abajo.
+       El lector elige el recorte y todas las cifras y gráficos se recalculan
+       sobre él, en el navegador, desde publications.json.
+
+       El pre-renderizado deja escrito el estado SIN FILTRAR, que es el informe
+       completo: sin JavaScript se ve exactamente eso, con sus cifras y sus
+       gráficos. La interacción se añade encima. Los `details` de los filtros
+       se abren y se leen sin guion, que es la razón de usarlos. -->
+  <header class="portada-cabecera">
+    <div id="titular"></div>
+  </header>
+
+  <div id="estado-recorte"></div>
+
+  <div class="explorador">
+    <aside class="explorador-panel" aria-label="Filtros">
+      <h2 class="solo-lectores">Filtrar las publicaciones</h2>
+      <div id="controles"></div>
+    </aside>
+
+    <div class="explorador-resultado">
+      <h2 class="solo-lectores">Indicadores del recorte</h2>
+      <div id="cifras"></div>
+
+      <h2 class="titulo-seccion">Cómo se reparte</h2>
+      <div class="cortes" id="cortes"></div>
+
+      <details class="metodo" id="lectura"></details>
+    </div>
+  </div>
+
+  <div id="cierre"></div>
 </main>
 <footer class="pie" id="pie"></footer>
 <script type="module" src="assets/js/paginas.js"></script>

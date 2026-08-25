@@ -47,6 +47,11 @@ def main() -> None:
             "n_paises": b.to_num(r["n_paises"]),
             "paises": b.split_multi(r["paises"]),
             "n_instituciones": b.to_num(r["n_instituciones"]),
+            # La lista, no sólo el recuento. Sin ella C-04 —instituciones
+            # colaboradoras— era el único indicador publicado que no se podía
+            # recalcular sobre un recorte, y la sección de colaboración habría
+            # tenido un gráfico que ignora el filtro sin decirlo.
+            "instituciones": b.split_multi(r["instituciones"]),
             "es_internacional": (r["es_internacional"] == "True")
             if b.clean(r["es_internacional"]) is not None else None,
             "asjc": b.split_multi(r["asjc"]),

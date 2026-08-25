@@ -7,20 +7,37 @@
 <header class="cabecera" id="cabecera"></header>
 <div class="vigencia" id="vigencia"></div>
 <main id="contenido" class="contenedor">
-  <p class="migas"><a href="index.html">Portada</a> › Publicaciones</p>
-  <header class="encabezado-seccion">
-    <h1>Publicaciones</h1>
-    <p class="intro">Los filtros combinan con Y entre categorías y con O dentro de
-  cada categoría. «Sin dato declarado» es una opción de filtro, no un hueco.</p>
+  <!-- Publicaciones usa EL MISMO motor de filtrado que la portada y las
+       secciones. Antes tenía el suyo propio: dos implementaciones del mismo
+       concepto, con claves distintas para la misma dimensión. Ahora un recorte
+       hecho en la portada llega aquí por la URL y sigue valiendo. -->
+  <header class="portada-cabecera">
+    <div class="portada-id">
+      <h1>Publicaciones</h1>
+      <p class="portada-sub">El listado completo, con el mismo recorte que el resto del sitio.</p>
+    </div>
   </header>
-  <section class="filtros"><h2>Filtros</h2><div id="filtros"></div></section>
-  <div class="chips" id="chips"></div>
-  <p class="resumen-resultados" id="resumen"></p>
-  <div class="tabla-envoltura"><table>
-    <thead><tr><th>Año</th><th>Título y autores UFT</th><th>Fuente</th>
-      <th>Tipo</th><th class="num">Citas</th><th class="num">FWCI</th></tr></thead>
+
+  <div id="estado-recorte"></div>
+
+  <div class="explorador">
+    <aside class="explorador-panel" aria-label="Filtros">
+      <h2 class="solo-lectores">Filtrar las publicaciones</h2>
+      <div id="controles"></div>
+    </aside>
+
+    <div class="explorador-resultado">
+      <div class="acciones-tabla">
+        <button class="boton boton-primario" id="exportar">Exportar CSV</button>
+      </div>
+      <div class="tabla-envoltura"><table>
+    <thead><tr><th scope="col">Año</th><th scope="col">Título y autores UFT</th><th scope="col">Fuente</th>
+      <th scope="col">Tipo</th><th scope="col" class="num">Citas</th><th scope="col" class="num">FWCI</th></tr></thead>
     <tbody id="tabla-cuerpo"></tbody></table></div>
-  <div class="paginacion" id="paginacion"></div>
+  
+      <div class="paginacion" id="paginacion"></div>
+    </div>
+  </div>
 </main>
 <footer class="pie" id="pie"></footer>
 <script type="module" src="assets/js/paginas.js"></script>

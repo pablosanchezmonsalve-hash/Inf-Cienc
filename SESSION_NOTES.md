@@ -2355,6 +2355,80 @@ Ejecutar `make ror` primero —el contraste institucional lo necesita— y despu
 
 ---
 
+## Sesión 2026-08-20 — Rediseño de la interfaz
+
+**Estado inicial:** el sitio funcionaba y era metodológicamente sólido, pero el
+usuario lo describió como «austero, técnico, poco moderno, poco dinámico, con
+UX mediocre». Se pidió un replanteo completo, con libertad para cambiar la
+paleta.
+
+### Decisiones tomadas
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-138 | La BANDA es la unidad de composición de las páginas narrativas | Una banda sostiene una afirmación; un indicador diferido metido entre los publicados se lee como uno más |
+| D-139 | Las cuatro superficies de consulta NO llevan bandas | Filtro y paginación: quien llega ahí viene a buscar, no a que le cuenten. Convertirlas en narrativa arreglaba la estética y rompía la función |
+| D-140 | `.banda-contraste` redefine los tokens en su ámbito | Evita una segunda hoja de estilo para «lo que va sobre fondo oscuro»; lo que cae dentro se adapta solo |
+| D-141 | La forma del gráfico la elige la RELACIÓN del dato | Contrastado contra el Visual Vocabulary del FT. `I-05` era correctitud, no estética |
+| D-142 | La equivalencia ortográfica de firmas NO viola `D-08` | Es equivalencia de cadena, no juicio de identidad: la misma firma con otros diacríticos |
+| D-143 | La vista de la red vive en `internal/` mientras `C-05` esté diferido | Una persona partida en dos nodos hace que la figura afirme que dos investigadores no colaboran |
+| D-144 | La paleta institucional es **Ink Black · Deep Ocean · Jungle Teal · Peach Glow · Racing Red** (`071e22 · 1d7874 · 679289 · f4c095 · ee2e31`) | La fijó el usuario. Estuvo aplicada, se sustituyó por un índigo de alto contraste **sin consultarle** y se perdió. Validada: dato 5,14:1 / 5,79:1, ΔE 21,8 / 23,4 frente a la advertencia, daltonismo 30,1 / 22,5. Es más ajustada que el índigo en la separación del ámbar pero cumple |
+| D-145 | Una elección cromática del usuario se registra como DECISIÓN, no como preferencia | `DECISIONS.md` tenía anotado cómo se declaran los tokens y cómo los valida el instrumento, pero no QUÉ colores eligió el usuario. Al no estar registrada, nada la sostuvo cuando el rediseño cambió de rumbo. El hueco no era de código: era de memoria |
+
+### Correcciones sobre el propio trabajo
+
+Quedan anotadas porque el motivo es la parte útil:
+
+- El déficit de `I-04` se pintaba con `--sin-dato`. Ese gris significa
+  **ausencia** (`D-09`) y un FWCI bajo el promedio es un valor **medido**.
+- El segundo suelo de banda era `--superficie-2`, que contra el papel mide
+  ΔE 0,18 y 1,00:1: **el mismo color**. La alternancia sólo funcionaba en
+  oscuro.
+- Se amplió el área táctil con un pseudo-elemento superpuesto; se veía correcto
+  en la hoja y **no recibía el evento** al comprobarlo por hit-test. El área
+  existía en el CSS y no en la pantalla.
+- La pista de teclado, superpuesta, **tapaba la primera barra y su valor**.
+- La exención de «identidad no consolidada» se aplicó también a las
+  consolidaciones ortográficas y **apagó una advertencia real** en
+  `De la Fuente López M.`.
+
+### Un instrumento que estaba ciego
+
+`validar_paleta.py` leía la hoja entera y se quedaba con la última aparición de
+cada token, así que `.banda-contraste` pisaba `:root` y declaraba **12 fallos
+inexistentes**. Al arreglarlo y medir esa banda como ámbito propio, encontró
+**4 fallos reales**: no redefinía la rampa ordinal ni la tinta del botón, y en
+tema claro caían sobre suelo oscuro con `--ord-1` en 1,06:1.
+
+Un instrumento que da falsos positivos se deja de mirar, y entonces tampoco
+atrapa los verdaderos.
+
+### Archivos creados
+
+`src/build/grafo_coautoria.py` · `src/review/equivalencia_ortografica.py` ·
+`src/review/vista_red.py` · `internal/red_coautoria.html`
+
+### Supuestos descartados
+
+- Que el paquete de diseño del prototipo podía copiarse al repositorio real:
+  era una instantánea reducida y vencida, con otro color de marca. Se portó
+  sólo el delta.
+- Que «1207 pares autor × publicación» eran pares. Son **apariciones**, y el
+  exceso lo causa una sola firma: `School of Psychology`, un fragmento de
+  cadena de afiliación que la regla `E-09` ya detecta.
+
+### Ambigüedades abiertas
+
+33 casos de identidad que exigen juicio humano o el registro ORCID externo.
+`C-05` sigue diferido por `T-03`. La regla `E-06` sigue fallando (no
+bloqueante): una columna de cobertura nula en el universo activo.
+
+### Próximo paso recomendado
+
+Resolver `T-03` con `make revision`, apoyándose en `make red`: la vista marca
+los nodos que comparten apellido y la matriz muestra si comparten vecinos.
+Resueltas esas variantes, publicar `C-05` es cambiar `publicar: false` a `true`
+— el grafo, las tres formas y la navegación por teclado ya están construidos.
 ## Cierre · V2-16 y V2-26: la cabecera repetida, y la brecha que por fin se puede medir
 
 Dos pendientes que no dependían de nadie más.

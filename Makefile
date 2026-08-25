@@ -94,6 +94,13 @@ revision: auditoria
 	python3 src/review/build_review.py
 	python3 src/review/build_unit_validation.py
 
+# Vista de la red de coautoría con el grafo REAL, para revisión interna.
+# Depende del grafo, que lo deja el build. No se despliega: lleva nombres de
+# personas y C-05 sigue diferido.
+red: 
+	python3 src/build/grafo_coautoria.py
+	python3 src/review/vista_red.py
+
 limpiar:
 	rm -rf dist data/processed design-system
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +

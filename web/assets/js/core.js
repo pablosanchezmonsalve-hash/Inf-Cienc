@@ -249,6 +249,11 @@ export function botonAyuda(termino) {
     aria-label="Qué significa ${escapar(termino)}">?</button>`;
 }
 
+/* `data-k` en cada marca es la CLAVE de la categoría. La usa animar.js para
+   reconocer una barra entre dos repintados: sin ella, al recortar el conjunto
+   toda figura sería nueva y no habría nada que mover, sólo un reemplazo.
+   Se emite aquí, junto al dato, y no se calcula fuera. */
+
 /* ------------------------------------------------------------ gráficos */
 
 /* Una categoría que representa AUSENCIA de dato nunca se pinta como una que
@@ -315,7 +320,9 @@ function colorDe(d, i, escala) {
 /* Ancho aproximado de un texto a 11px en la fuente de sistema. No hay forma de
    medir dentro de una cadena SVG que aún no está en el documento, y el error de
    una estimación es preferible a que la etiqueta se salga del lienzo. */
-const anchoTexto = (s, px = 11) => String(s).length * px * 0.58;
+// 13 px, que es lo que mide ahora `svg.chart text` en la hoja. Si este
+// número y el del CSS se separan, las etiquetas se recortan donde no toca.
+const anchoTexto = (s, px = 13) => String(s).length * px * 0.58;
 
 /** Recorta una etiqueta al ancho disponible, con puntos suspensivos. */
 function recortar(txt, maxPx, px = 11) {
@@ -394,7 +401,7 @@ export function barrasH(datos, {
       ? `<rect class="trama" x="${anchoEtiqueta}" y="${y + 6}" width="${w}"
            height="${alto - 12}" rx="4" fill="url(#${id}-t)"/>` : '';
 
-    return `<g class="marca" tabindex="0" role="listitem"
+    return `<g class="marca" data-k="${escapar(String(d.valor))}" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}${refAria}"
         data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
         ${nota ? `data-tip-n="${escapar(nota)}"` : ''}>
@@ -464,13 +471,13 @@ export function barrasV(datos, {
     const v = d[etiquetaY];
     const x = mIzq + i * bw + (bw - w) / 2;
     if (v === null || v === undefined) {
-      return `<g class="marca" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
+      return `<g class="marca" data-k="${escapar(String(d[etiquetaX]))}" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
         <text class="tick" x="${x + w / 2}" y="${base - 8}" text-anchor="middle">sin dato</text>
         <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text>
       </g>`;
     }
     const yy = y(v);
-    return `<g class="marca" tabindex="0" role="listitem"
+    return `<g class="marca" data-k="${escapar(String(d[etiquetaX]))}" tabindex="${i ? -1 : 0}" role="listitem"
         aria-label="${escapar(String(d[etiquetaX]))}: ${num(v, decimales)}"
         data-tip="${escapar(String(d[etiquetaX]))}" data-tip-v="${num(v, decimales)}"
         ${d.nota ? `data-tip-n="${escapar(d.nota)}"` : ''}>
@@ -529,6 +536,561 @@ export function anillo(datos, { titulo = '' } = {}) {
       aria-label="${escapar(titulo ? titulo + ' — gráfico de anillo' : 'Gráfico de anillo')}"
       >${arcos}${centro}</svg>
     <div class="leyenda" style="display:grid;gap:.4rem">${leyenda}</div></div>`;
+}
+
+/* ═══════════════════════════════════════════ red() — C-05, coautoría
+
+   Cuarta primitiva, no una variante de las tres anteriores. Las otras tres
+   comparten un supuesto que la red rompe: cada marca es una categoría discreta
+   y su identidad la lleva el color. En un grafo la pertenencia a un grupo la
+   lleva la POSICIÓN —el layout hace visibles los cúmulos como densidad
+   espacial—, así que el color queda libre y se gasta en un solo eje: unidad
+   académica determinada (--serie-1) o no determinada (--sin-dato con trama,
+   por esSinDato(), la misma prueba que usan las barras). El gris no lo decide
+   C-05: lo decide la misma función que en el resto del sitio (D-09).
+
+   ESTADO: la primitiva está integrada pero C-05 NO se publica. `indicators.yml`
+   lo difiere porque la red heredaría los grupos de variantes de nombre sin
+   resolver (T-03), y una firma partida en dos nodos dibuja una colaboración
+   que no existe. Falta además construir el grafo en el pipeline: estas
+   funciones dibujan, no calculan.
+
+   ENTRADA de disponerRed(): nodos con `com` YA asignado. La detección de
+   comunidades es del build, no del renderizador — igual que el resto de los
+   indicadores llega calculado en series.json. */
+
+/** true si la unidad de la firma es ausencia de dato, no una unidad real.
+    Se prueba sobre `unidad ?? 'No determinada'` porque el contrato admite que
+    el pipeline mande esa cadena en vez de null, y una comprobación de
+    veracidad la tomaría por unidad real. */
+export const sinUnidadRed = e => esSinDato(e.unidad ?? 'No determinada');
+
+const rellenoNodoRed = e =>
+  (sinUnidadRed(e) ? 'url(#tramaSinDatoRed)' : 'var(--serie-1)');
+const radioNodoRed = e =>
+  (e.puente ? 3.6 + Math.min(e.grupos, 4) * 1.15 : 3.4);
+
+/** Resuelve posiciones y métricas derivadas de un grafo ya construido.
+
+    `nodos`: [{ i, id, valor, n, unidad, com }] — `com` viene del build.
+    `E`:     [{ a, b, n }] con a y b índices en `nodos`. No dirigida.
+
+    Devuelve el mismo objeto que consumen las tres formas de red(). */
+export function disponerRed(nodos, E) {
+  const ents = nodos;
+  ents.forEach(e => { e.vec = new Set(); e.comsVec = new Set(); });
+  E.forEach(a => { ents[a.a].vec.add(a.b); ents[a.b].vec.add(a.a); });
+  ents.forEach(e => {
+    e.grado = e.vec.size;
+    e.vec.forEach(v => e.comsVec.add(ents[v].com));
+    e.grupos = e.comsVec.size;
+    e.puente = e.grupos >= 2;
+  });
+  const con = ents.filter(e => e.grado > 0), ais = ents.filter(e => e.grado === 0);
+  const W = 1000, HRED = 545;
+  const porCom = {}; con.forEach(e => { (porCom[e.com] = porCom[e.com] || []).push(e); });
+  /* El cúmulo se dimensiona ANTES que la órbita, y la órbita se deriva de él.
+     Al revés —órbita fija, cúmulo libre— los grupos se solapaban. */
+  const SEP = 9.2, radios = {};
+  const grandes = Object.keys(porCom).map(Number).sort((x, y) => porCom[y].length - porCom[x].length);
+  grandes.forEach(c => { radios[c] = SEP * Math.sqrt(porCom[c].length) + 6; });
+  /* Alternar grande/pequeño alrededor del círculo reparte la presión: dos
+     cúmulos grandes contiguos obligarían a una órbita mucho mayor. */
+  const claves = []; let lo = 0, hi = grandes.length - 1;
+  while (lo <= hi) { claves.push(grandes[lo++]); if (lo <= hi) claves.push(grandes[hi--]); }
+  const K = claves.length, GAP = 22, COMP = .82;
+  let R = 0;
+  for (let k = 0; k < K; k++) {
+    const need = radios[claves[k]] + radios[claves[(k + 1) % K]] + GAP;
+    R = Math.max(R, need / (2 * Math.sin(Math.PI / K) * COMP));
+  }
+  const cx = W / 2, cy = HRED / 2, centros = {};
+  claves.forEach((c, k) => {
+    const ang = (k / K) * Math.PI * 2 - Math.PI / 2;
+    centros[c] = { x: cx + Math.cos(ang) * R, y: cy + Math.sin(ang) * R * COMP };
+  });
+  claves.forEach(c => {
+    const ct = centros[c];
+    porCom[c].slice().sort((p, q) => q.grado - p.grado).forEach((e, k) => {
+      const t = k * 2.399963, rr = SEP * Math.sqrt(k + .55);
+      e.x = ct.x + Math.cos(t) * rr; e.y = ct.y + Math.sin(t) * rr * .9;
+    });
+  });
+  // Las firmas puente se tiran hacia el espacio entre los grupos que conectan,
+  // que es literalmente donde su trabajo ocurre.
+  con.filter(e => e.puente).forEach(e => {
+    let sx = 0, sy = 0, n = 0;
+    e.comsVec.forEach(c => { if (centros[c]) { sx += centros[c].x; sy += centros[c].y; n++; } });
+    if (n > 1) { const f = .34 + Math.min(e.grupos, 4) * .05; e.x += (sx / n - e.x) * f; e.y += (sy / n - e.y) * f; }
+  });
+  /* Encajar el dibujo entero en el lienzo, sin recortar posiciones: recortar
+     aplastaría los cúmulos del borde contra el marco y falsearía la lectura.
+     Escala independiente en X e Y: la posición aquí es topológica, no métrica,
+     así que estirar a lo ancho no miente sobre ninguna distancia. */
+  const PAD = 26;
+  const xs = con.map(e => e.x), ys = con.map(e => e.y);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const escX = (W - PAD * 2) / Math.max(x1 - x0, 1), escY = (HRED - PAD * 2) / Math.max(y1 - y0, 1);
+  const esc = Math.min(escX, escY);
+  const dx = PAD - x0 * escX, dy = PAD - y0 * escY;
+  con.forEach(e => { e.x = e.x * escX + dx; e.y = e.y * escY + dy; });
+  claves.forEach(c => { const ct = centros[c]; ct.x = ct.x * escX + dx; ct.y = ct.y * escY + dy; radios[c] *= esc; });
+  /* Descolisión DESPUÉS de encajar: el radio dibujado de un puente no encoge
+     con el lienzo, así que separarlos antes de escalar no serviría de nada. */
+  con.forEach(e => { e.sep = (e.puente ? 3.6 + Math.min(e.grupos, 4) * 1.15 + 3.4 : 3.4) + 1.4; });
+  for (let it = 0; it < 9; it++) {
+    for (let i = 0; i < con.length; i++) for (let j = i + 1; j < con.length; j++) {
+      const p = con[i], q = con[j], ux = q.x - p.x, uy = q.y - p.y;
+      const min = p.sep + q.sep, d2 = ux * ux + uy * uy;
+      if (d2 < min * min && d2 > 1e-6) {
+        const d = Math.sqrt(d2), f = (min - d) / d * .48;
+        p.x -= ux * f; p.y -= uy * f; q.x += ux * f; q.y += uy * f;
+      }
+    }
+  }
+  con.forEach(e => { e.x = Math.max(12, Math.min(W - 12, e.x)); e.y = Math.max(14, Math.min(HRED - 6, e.y)); });
+  /* La etiqueta cuelga de la extensión REAL del cúmulo ya descolisionado, no
+     de su radio teórico, que la descolisión ya invalidó. */
+  claves.forEach(c => {
+    const ct = centros[c];
+    let alto = 0;
+    porCom[c].forEach(e => { alto = Math.max(alto, ct.y - e.y); });
+    ct.etq = Math.max(11, ct.y - alto - 8);
+  });
+  const cols = 46, paso = (W - 24) / cols;
+  ais.forEach((e, k) => { e.x = 12 + (k % cols) * paso + paso / 2; e.y = 604 + Math.floor(k / cols) * 15.5; });
+  /* Para matriz y arcos no basta con el grado global: una firma de grado alto
+     cuyos coautores queden todos fuera del recorte dibuja una fila vacía. Se
+     poda por grado INDUCIDO hasta que ninguna fila quede vacía. */
+  const densos = (cupo, semilla) => {
+    let cand = con.slice().sort((p, q) => q.grado - p.grado).slice(0, semilla);
+    for (let pase = 0; pase < 4; pase++) {
+      const dentro = new Set(cand.map(e => e.i));
+      cand.forEach(e => { e.ind = 0; e.vec.forEach(v => { if (dentro.has(v)) e.ind++; }); });
+      const vivos = cand.filter(e => e.ind > 0);
+      if (vivos.length === cand.length) break;
+      cand = vivos;
+    }
+    let sel = cand.sort((p, q) => q.ind - p.ind).slice(0, cupo);
+    for (let pase = 0; pase < 3; pase++) {
+      const dentro = new Set(sel.map(e => e.i));
+      const vivos = sel.filter(e => { let n = 0; e.vec.forEach(v => { if (dentro.has(v)) n++; }); e.ind = n; return n > 0; });
+      if (vivos.length === sel.length) break;
+      sel = vivos;
+    }
+    return sel.sort((p, q) => p.com - q.com || q.ind - p.ind);
+  };
+  const uniN = {};
+  ents.forEach(e => { const k = sinUnidadRed(e) ? '—' : e.unidad; uniN[k] = (uniN[k] || 0) + 1; });
+  return {
+    ents, E, con, ais, centros, claves, radios, uniN, W, HRED,
+    topM: densos(46, 84), topA: densos(68, 120),
+    nav: con.slice().sort((p, q) => q.grupos - p.grupos || q.grado - p.grado).slice(0, 90),
+    altura: 604 + Math.ceil(ais.length / cols) * 15.5 + 14,
+  };
+}
+
+/* La trama de ausencia es parte de la primitiva, no de una de sus vistas: si
+   viviera dentro de una sola forma, las otras dos referenciarían un paint
+   server que no existe en su propio documento y la ausencia se perdería justo
+   donde la regla del segundo canal la exige. */
+function defsTramaRed() {
+  return `<defs><pattern id="tramaSinDatoRed" width="5" height="5"
+      patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="5" height="5" fill="var(--sin-dato)"/>
+    <line x1="0" y1="0" x2="0" y2="5" stroke="var(--superficie)" stroke-width="1.7"/>
+  </pattern></defs>`;
+}
+
+const tipRed = e => `data-tip="${escapar(e.valor)}"`
+  + ` data-tip-v="${sinUnidadRed(e) ? 'Unidad no determinada' : escapar(e.unidad)}"`
+  + ` data-tip-n="${escapar((e.grado === 0 ? 'Cero coautores internos'
+      : e.grado + ' coautores · ' + e.grupos + (e.grupos === 1 ? ' grupo' : ' grupos'))
+      + ' · ' + e.n + (e.n === 1 ? ' publicación' : ' publicaciones'))}"`;
+
+function svgRedNodos(D, activa, foco) {
+  const hayFoco = foco != null;
+  const vecinosFoco = hayFoco ? D.ents[foco].vec : null;
+  const lineas = D.E.map(a => {
+    const p = D.ents[a.a], q = D.ents[a.b];
+    const cruza = p.com !== q.com;
+    const act = activa(p) && activa(q);
+    const enFoco = hayFoco && (a.a === foco || a.b === foco);
+    let op = act ? (cruza ? .55 : .32) : .07;
+    if (hayFoco) op = enFoco ? .95 : .05;
+    return `<line class="vinculo" x1="${p.x.toFixed(1)}" y1="${p.y.toFixed(1)}"
+      x2="${q.x.toFixed(1)}" y2="${q.y.toFixed(1)}"
+      stroke="${enFoco ? 'var(--tinta)' : (cruza ? 'var(--tinta-3)' : 'var(--eje)')}"
+      stroke-width="${enFoco ? 1.5 : (cruza ? .9 : .7)}" opacity="${op}"/>`;
+  }).join('');
+  const nodos = D.con.map(e => {
+    const act = activa(e);
+    const enFoco = hayFoco && (e.i === foco || vecinosFoco.has(e.i));
+    let op = act ? 1 : .16; if (hayFoco) op = enFoco ? 1 : .12;
+    const esF = e.i === foco;
+    const anillo = e.puente
+      ? `<circle r="${(radioNodoRed(e) + 2.6).toFixed(2)}" fill="none" stroke="var(--tinta)" stroke-width="1.15" opacity=".75"/>` : '';
+    return `<g class="nodo-red" data-red-nodo="${e.i}" role="button" ${tipRed(e)}
+        transform="translate(${e.x.toFixed(1)},${e.y.toFixed(1)})" opacity="${op}">
+      ${anillo}<circle class="marca-nodo" r="${radioNodoRed(e)}" fill="${rellenoNodoRed(e)}"
+        stroke="${esF ? 'var(--accion-viva)' : 'var(--superficie)'}" stroke-width="${esF ? 2.6 : .9}"/>
+    </g>`;
+  }).join('');
+  const cuadros = D.ais.map(e => {
+    const act = activa(e);
+    let op = act ? .95 : .16; if (hayFoco) op = .12;
+    const r = 3.1, sin = sinUnidadRed(e);
+    return `<g class="nodo-red" ${tipRed(e)}
+        transform="translate(${e.x.toFixed(1)},${e.y.toFixed(1)})" opacity="${op}">
+      <rect x="${-r}" y="${-r}" width="${r * 2}" height="${r * 2}"
+        fill="${sin ? 'url(#tramaSinDatoRed)' : 'none'}"
+        stroke="${sin ? 'var(--tinta-3)' : 'var(--serie-1)'}" stroke-width="1.3" opacity="${sin ? .85 : 1}"/>
+    </g>`;
+  }).join('');
+  const etiquetas = D.claves.map(c => {
+    const ct = D.centros[c], txt = 'Grupo ' + (c + 1), an = txt.length * 5.9 + 12, y = ct.etq || ct.y;
+    return `<g opacity="${hayFoco ? .28 : 1}">
+      <rect x="${(ct.x - an / 2).toFixed(1)}" y="${(y - 9).toFixed(1)}" width="${an.toFixed(1)}"
+        height="13" rx="2" fill="var(--superficie)" opacity=".82"/>
+      <text class="etiqueta-grupo" x="${ct.x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle">${escapar(txt)}</text>
+    </g>`;
+  }).join('');
+  // Las firmas sin ningún coautor interno son un dato real, no una ausencia:
+  // van separadas por una línea y rotuladas, nunca omitidas.
+  const sep = `<g>
+    <line x1="0" y1="578" x2="${D.W}" y2="578" stroke="var(--linea)" stroke-width="1"/>
+    <text class="aislados-titulo" x="0" y="594">${D.ais.length} firmas con cero coautores internos — dato real, no ausencia</text>
+  </g>`;
+  return `<div class="grafico"><svg class="chart red-svg${hayFoco ? ' hay-foco' : ''}"
+      viewBox="0 0 ${D.W} ${Math.round(D.altura)}" role="img" tabindex="0"
+      aria-label="Red de coautoría interna: ${D.con.length} firmas conectadas en ${D.claves.length} grupos, ${D.ais.length} sin coautoría interna. Tabla equivalente debajo.">
+    ${defsTramaRed()}${lineas}${nodos}${sep}${cuadros}${etiquetas}
+  </svg></div>`;
+}
+
+function svgRedMatriz(D, activa) {
+  const lista = D.topM, n = lista.length;
+  const M = 84, C = 15, W = M + n * C + 12;
+  const idx = {}; lista.forEach((e, k) => idx[e.i] = k);
+  const cel = [];
+  D.E.forEach(a => {
+    const p = idx[a.a], q = idx[a.b];
+    if (p == null || q == null) return;
+    const act = activa(D.ents[a.a]) && activa(D.ents[a.b]);
+    const cruza = D.ents[a.a].com !== D.ents[a.b].com;
+    [[p, q], [q, p]].forEach(([r, c2]) => cel.push(`<rect x="${M + c2 * C + 1}" y="${M + r * C + 1}"
+      width="${C - 2}" height="${C - 2}" rx="1.5" fill="var(--serie-1)"
+      opacity="${act ? Math.min(.35 + a.n * .3, 1) : .1}"
+      stroke="${cruza ? 'var(--tinta)' : 'none'}" stroke-width="${cruza ? .9 : 0}"/>`));
+  });
+  const rejilla = [];
+  for (let k = 0; k <= n; k++) {
+    rejilla.push(`<line x1="${M + k * C}" y1="${M}" x2="${M + k * C}" y2="${M + n * C}" stroke="var(--red)" stroke-width="1"/>`);
+    rejilla.push(`<line x1="${M}" y1="${M + k * C}" x2="${M + n * C}" y2="${M + k * C}" stroke="var(--red)" stroke-width="1"/>`);
+  }
+  let prev = null;
+  lista.forEach((e, k) => {
+    if (prev !== null && e.com !== prev) {
+      rejilla.push(`<line x1="${M + k * C}" y1="${M - 6}" x2="${M + k * C}" y2="${M + n * C}" stroke="var(--linea-fuerte)" stroke-width="1.4"/>`);
+      rejilla.push(`<line x1="${M - 6}" y1="${M + k * C}" x2="${M + n * C}" y2="${M + k * C}" stroke="var(--linea-fuerte)" stroke-width="1.4"/>`);
+    }
+    prev = e.com;
+  });
+  const etq = [];
+  lista.forEach((e, k) => {
+    const act = activa(e), sin = sinUnidadRed(e);
+    const clase = 'etiqueta-firma' + (sin ? ' sin-unidad' : '');
+    const txt = escapar(e.id) + (sin ? ' ·' : '');
+    etq.push(`<text class="${clase}" x="${M - 7}" y="${M + k * C + C / 2 + 3.4}" text-anchor="end" opacity="${act ? 1 : .32}">${txt}</text>`);
+    etq.push(`<text class="${clase}" x="${M + k * C + C / 2}" y="${M - 7}"
+      transform="rotate(-90 ${M + k * C + C / 2} ${M - 7})" text-anchor="start" opacity="${act ? 1 : .32}">${txt}</text>`);
+  });
+  return `<div class="grafico"><svg class="chart red-svg" viewBox="0 0 ${W} ${W}" role="img"
+      aria-label="Matriz de adyacencia de las ${n} firmas de mayor grado, ordenada por grupo. Los bloques en la diagonal son los grupos; las celdas con contorno son vínculos entre grupos distintos.">
+    ${defsTramaRed()}${rejilla.join('')}${cel.join('')}${etq.join('')}
+  </svg></div>`;
+}
+
+function svgRedArcos(D, activa) {
+  const lista = D.topA, n = lista.length;
+  const W = 1000, H = 340, base = 292, pad = 26;
+  const paso = (W - pad * 2) / Math.max(n - 1, 1);
+  const idx = {}; lista.forEach((e, k) => idx[e.i] = k);
+  const arcos = [];
+  D.E.forEach(a => {
+    const p = idx[a.a], q = idx[a.b];
+    if (p == null || q == null) return;
+    const x1 = pad + Math.min(p, q) * paso, x2 = pad + Math.max(p, q) * paso;
+    const r = (x2 - x1) / 2;
+    const cruza = D.ents[a.a].com !== D.ents[a.b].com;
+    const act = activa(D.ents[a.a]) && activa(D.ents[a.b]);
+    arcos.push(`<path d="M ${x1} ${base} A ${r} ${Math.min(r * 1.15, 250)} 0 0 1 ${x2} ${base}"
+      fill="none" stroke="${cruza ? 'var(--tinta-2)' : 'var(--eje)'}"
+      stroke-width="${cruza ? 1.25 : .8}" opacity="${act ? (cruza ? .72 : .38) : .07}"/>`);
+  });
+  const marcas = [], etq = [];
+  let prev = null;
+  lista.forEach((e, k) => {
+    const x = pad + k * paso, act = activa(e);
+    if (prev !== null && e.com !== prev) marcas.push(`<line x1="${x - paso / 2}" y1="${base - 4}" x2="${x - paso / 2}" y2="${base + 40}" stroke="var(--linea-fuerte)" stroke-width="1.2"/>`);
+    prev = e.com;
+    if (e.puente) marcas.push(`<circle cx="${x}" cy="${base}" r="${(radioNodoRed(e) + 2.4).toFixed(2)}" fill="none" stroke="var(--tinta)" stroke-width="1.1" opacity="${act ? .75 : .12}"/>`);
+    marcas.push(`<circle cx="${x}" cy="${base}" r="${radioNodoRed(e)}" fill="${rellenoNodoRed(e)}" stroke="var(--superficie)" stroke-width=".9" opacity="${act ? 1 : .16}"/>`);
+    etq.push(`<text class="etiqueta-firma${sinUnidadRed(e) ? ' sin-unidad' : ''}" x="${x}" y="${base + 12}"
+      transform="rotate(90 ${x} ${base + 12})" text-anchor="start" opacity="${act ? 1 : .3}">${escapar(e.id)}</text>`);
+  });
+  return `<div class="grafico"><svg class="chart red-svg" viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="Diagrama de arcos: ${n} firmas de mayor grado ordenadas por grupo. Los arcos largos que cruzan las divisiones son la coautoría entre grupos distintos.">
+    ${defsTramaRed()}<line x1="${pad - 10}" y1="${base}" x2="${W - pad + 10}" y2="${base}" stroke="var(--eje)" stroke-width="1"/>${arcos.join('')}${marcas.join('')}${etq.join('')}
+  </svg></div>`;
+}
+
+/** Dibuja la red en una de sus tres formas.
+
+    `activa(e)` decide si una firma pasa el filtro vigente. Filtrar ATENÚA, no
+    oculta ni reordena: así ninguna marca cambia de color ni de sitio al
+    filtrar, que es la misma regla que rige las barras.
+    `foco` es el índice de la firma fijada por clic o teclado, o null.
+
+    Tres formas para el mismo dato porque la maraña de nodos esconde vínculos
+    cuando el grafo crece: la matriz no puede solapar y los arcos ordenan por
+    grupo. No son tres gráficos distintos, son tres lecturas del mismo. */
+export function red(D, forma, activa = () => true, foco = null) {
+  if (forma === 'matriz') return svgRedMatriz(D, activa);
+  if (forma === 'arcos') return svgRedArcos(D, activa);
+  return svgRedNodos(D, activa, foco);
+}
+
+/** Navegación por teclado: un solo punto de tabulación para todo el gráfico,
+    flechas para recorrer las firmas dibujadas, Intro para fijar, Escape para
+    soltar. Devuelve el siguiente { kIdx, foco } o null si la tecla no es suya. */
+export function pasoTecladoRed(D, kIdx, focoActual, key) {
+  if (key === 'Escape') return { kIdx, foco: null };
+  let d = 0;
+  if (key === 'ArrowRight' || key === 'ArrowDown') d = 1;
+  if (key === 'ArrowLeft' || key === 'ArrowUp') d = -1;
+  if (d) {
+    const k = (kIdx + d + D.nav.length) % D.nav.length;
+    return { kIdx: k, foco: D.nav[k].i };
+  }
+  if (key === 'Enter' || key === ' ') {
+    const e = D.nav[kIdx];
+    return { kIdx, foco: focoActual === e.i ? null : e.i };
+  }
+  return null;
+}
+
+/* ═══════════════════════ formas elegidas por la RELACIÓN del dato
+
+   Hasta esta revisión el sitio dibujaba 11 de sus 16 indicadores con
+   `barrasH`. No era una preferencia estética: era la forma por defecto
+   aplicándose a relaciones de datos distintas. El Visual Vocabulary del
+   Financial Times (Financial-Times/chart-doctor) clasifica los gráficos por
+   la RELACIÓN que expresan, y cuatro de los indicadores del sitio estaban en
+   la categoría equivocada:
+
+     I-04  FWCI contra el 1,00 mundial   -> Desviación, no magnitud
+     I-05  umbrales de percentil anidados -> Distribución acumulada, no ranking
+     C-06  autores por publicación        -> Distribución, no ranking
+     R-01  cuartiles Q1–Q4 del total      -> Parte-de-un-todo, no magnitud
+
+   Las cuatro primitivas de abajo cubren esas cuatro relaciones. Ninguna es
+   decorativa: cada una existe porque la anterior afirmaba algo falso sobre
+   la estructura del dato. */
+
+/** DESVIACIÓN — valores contra una referencia fija (FT: «Deviation»).
+
+    Para I-04: el FWCI se lee contra el 1,00 mundial. Dibujarlo como columnas
+    desde cero obliga a comparar alturas contra una línea punteada; dibujarlo
+    como desviación pone el 1,00 en el eje y el déficit o el superávit se lee
+    como lo que es, sin aritmética mental. */
+export function desviacion(datos, {
+  referencia = 1, etiquetaX = 'anio', etiquetaY = 'valor', decimales = 2,
+  ancho = 680, alto = 260, titulo = '', refEtiqueta = '',
+} = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const mIzq = 58, mDer = 20, mAb = 40, mArr = 30;
+  const vals = datos.map(d => d[etiquetaY]).filter(v => v !== null && v !== undefined);
+  const desv = vals.map(v => v - referencia);
+  const tope = Math.max(...desv.map(Math.abs), 0.01) * 1.25;
+  const base = alto - mAb, arriba = mArr;
+  const cero = arriba + (base - arriba) / 2;          // la referencia va al centro
+  const y = d => cero - (d / tope) * ((base - arriba) / 2);
+  const bw = (ancho - mIzq - mDer) / datos.length;
+  const w = Math.min(56, bw * 0.5);
+
+  const marcasY = [tope, 0, -tope].map(v => `
+    <line class="red" x1="${mIzq}" x2="${ancho - mDer}" y1="${y(v)}" y2="${y(v)}"/>
+    <text class="tick" x="${mIzq - 8}" y="${y(v) + 3.5}" text-anchor="end">${
+      v === 0 ? num(referencia, decimales) : (v > 0 ? '+' : '−') + num(Math.abs(v), decimales)}</text>`).join('');
+
+  const barras = datos.map((d, i) => {
+    const v = d[etiquetaY];
+    const x = mIzq + i * bw + (bw - w) / 2;
+    if (v === null || v === undefined) {
+      return `<g class="marca" data-k="${escapar(String(d[etiquetaX]))}" role="listitem" aria-label="${escapar(String(d[etiquetaX]))}: sin dato">
+        <text class="tick" x="${x + w / 2}" y="${cero - 8}" text-anchor="middle">sin dato</text>
+        <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text></g>`;
+    }
+    const dv = v - referencia, yy = y(Math.max(dv, 0)), h = Math.abs(y(dv) - cero);
+    const bajo = dv < 0;
+    return `<g class="marca" data-k="${escapar(String(d[etiquetaX]))}" tabindex="${i ? -1 : 0}" role="listitem"
+        aria-label="${escapar(String(d[etiquetaX]))}: ${num(v, decimales)}, ${
+          bajo ? 'por debajo de' : 'por encima de'} la referencia ${num(referencia, decimales)}"
+        data-tip="${escapar(String(d[etiquetaX]))}" data-tip-v="${num(v, decimales)}"
+        data-tip-n="${bajo ? '−' : '+'}${num(Math.abs(dv), decimales)} respecto de ${num(referencia, decimales)}">
+      <rect class="barra ${bajo ? 'deficit' : 'superavit'}" x="${x}" y="${yy}"
+        width="${w}" height="${Math.max(2, h)}" rx="3"/>
+      <text class="valor" x="${x + w / 2}" y="${bajo ? y(dv) + 16 : yy - 7}" text-anchor="middle">${num(v, decimales)}</text>
+      <text x="${x + w / 2}" y="${base + 18}" text-anchor="middle">${escapar(String(d[etiquetaX]))}</text>
+    </g>`;
+  }).join('');
+
+  const etq = titulo ? `${titulo} — desviación respecto de ${num(referencia, decimales)}, ${datos.length} valores`
+                     : `Gráfico de desviación, ${datos.length} valores`;
+  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
+    role="list" aria-label="${escapar(etq)}">
+    ${marcasY}${barras}
+    <line class="ref" x1="${mIzq}" x2="${ancho - mDer}" y1="${cero}" y2="${cero}"/>
+    <text class="ref-etq" x="${ancho - mDer}" y="${cero - 8}" text-anchor="end">${
+      escapar(refEtiqueta || `referencia ${num(referencia, decimales)}`)}</text>
+  </svg></div>`;
+}
+
+/** DISTRIBUCIÓN ACUMULADA — umbrales anidados (FT: «Distribution»).
+
+    Para I-05. Los tramos son ACUMULADOS: las 3 publicaciones del top 1 % están
+    también en el top 5 %, en el top 10 % y en el top 25 %. Dibujarlos como
+    cuatro barras hermanas sugiere cuatro grupos disjuntos que podrían sumarse
+    —322, una cifra sin significado—. Aquí cada tramo se dibuja CONTENIDO en el
+    siguiente, que es la relación real. */
+export function acumulada(datos, { titulo = '', total = null, ancho = 680, sufijo = '' } = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const orden = datos.slice().sort((a, b) => a.n - b.n);
+  const max = total || Math.max(...orden.map(d => d.n));
+  const alto = 46 + orden.length * 44;
+  const mIzq = 96, mDer = 78;
+  const pista = ancho - mIzq - mDer;
+
+  const filas = orden.map((d, i) => {
+    const y = 30 + i * 44;
+    const w = Math.max(3, pista * (d.n / max));
+    const cuota = total ? ` · ${num(100 * d.n / total, 1)} % de ${nf.format(total)}` : '';
+    return `<g class="marca" tabindex="${i ? -1 : 0}" role="listitem"
+        aria-label="${escapar(d.valor)}: ${nf.format(d.n)}${sufijo}${cuota}"
+        data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}${sufijo}"
+        ${total ? `data-tip-n="${num(100 * d.n / total, 1)} % de ${nf.format(total)}"` : ''}>
+      <text x="${mIzq - 12}" y="${y + 21}" text-anchor="end">${escapar(d.valor)}</text>
+      <rect class="acum-pista" x="${mIzq}" y="${y + 6}" width="${pista}" height="26" rx="3"/>
+      <rect class="barra" x="${mIzq}" y="${y + 6}" width="${w}" height="26" rx="3"/>
+      <text class="valor" x="${mIzq + w + 9}" y="${y + 24}">${nf.format(d.n)}${sufijo}</text>
+    </g>`;
+  }).join('');
+
+  // Las llaves de anidamiento: cada tramo cabe dentro del siguiente.
+  const llaves = orden.slice(0, -1).map((d, i) => {
+    const y = 30 + i * 44, w = Math.max(3, pista * (d.n / max));
+    return `<path class="acum-nido" d="M ${mIzq + w} ${y + 32} L ${mIzq + w} ${y + 44}" />`;
+  }).join('');
+
+  const etq = titulo ? `${titulo} — tramos acumulados anidados, ${orden.length} umbrales`
+                     : `Gráfico de tramos acumulados, ${orden.length} umbrales`;
+  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
+    role="list" aria-label="${escapar(etq)}">
+    <text class="tick" x="${mIzq}" y="18">cada tramo CONTIENE a los de arriba — no se suman</text>
+    ${llaves}${filas}
+  </svg></div>`;
+}
+
+/** DISTRIBUCIÓN — cuántos casos caen en cada tramo (FT: «Distribution»).
+
+    Para C-06. El tamaño del equipo es un continuo tramificado: 1, 2–3, 4–6…
+    Dibujarlo como ranking ordena los tramos por frecuencia y destruye el eje,
+    que es justo la información. Aquí los tramos conservan su orden natural y
+    la altura dice la frecuencia. */
+export function distribucion(datos, { titulo = '', ancho = 680, alto = 250, etiquetaEje = '' } = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const mIzq = 52, mDer = 16, mAb = 52, mArr = 26;
+  const max = Math.max(...datos.map(d => d.n), 1) * 1.18;
+  const base = alto - mAb;
+  const bw = (ancho - mIzq - mDer) / datos.length;
+  const y = v => mArr + (base - mArr) * (1 - v / max);
+  const total = datos.reduce((s, d) => s + d.n, 0);
+
+  const red = [0, max / 2, max].map(v => `
+    <line class="red" x1="${mIzq}" x2="${ancho - mDer}" y1="${y(v)}" y2="${y(v)}"/>
+    <text class="tick" x="${mIzq - 8}" y="${y(v) + 3.5}" text-anchor="end">${v === 0 ? '0' : num(v, 0)}</text>`).join('');
+
+  // Sin hueco entre columnas: es una distribución sobre un continuo, y el
+  // hueco de un gráfico de barras sugiere categorías sin relación entre sí.
+  const cols = datos.map((d, i) => {
+    const x = mIzq + i * bw, yy = y(d.n);
+    return `<g class="marca" data-k="${escapar(String(d.valor))}" tabindex="${i ? -1 : 0}" role="listitem"
+        aria-label="${escapar(d.valor)}: ${nf.format(d.n)} publicaciones, ${num(100 * d.n / total, 1)} %"
+        data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}"
+        data-tip-n="${num(100 * d.n / total, 1)} % de ${nf.format(total)}">
+      <rect class="barra" x="${x + 0.5}" y="${yy}" width="${bw - 1}" height="${Math.max(2, base - yy)}"/>
+      <text class="valor" x="${x + bw / 2}" y="${yy - 7}" text-anchor="middle">${nf.format(d.n)}</text>
+      <text x="${x + bw / 2}" y="${base + 18}" text-anchor="middle">${escapar(d.valor)}</text>
+    </g>`;
+  }).join('');
+
+  const eje = etiquetaEje
+    ? `<text class="tick" x="${mIzq + (ancho - mIzq - mDer) / 2}" y="${alto - 10}" text-anchor="middle">${escapar(etiquetaEje)}</text>` : '';
+  const etq = titulo ? `${titulo} — distribución en ${datos.length} tramos`
+                     : `Distribución en ${datos.length} tramos`;
+  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
+    role="list" aria-label="${escapar(etq)}">
+    ${red}${cols}${eje}
+    <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
+  </svg></div>`;
+}
+
+/** PARTE-DE-UN-TODO ordenado (FT: «Part-to-whole»).
+
+    Para R-01. Q1–Q4 más la ausencia reparten un total conocido. Cuatro barras
+    sueltas obligan a sumar de cabeza para saber qué fracción es Q1; una barra
+    proporcional lo muestra. Usa la rampa ordinal —un solo tono en cuatro
+    pasos— porque Q1 y Q4 son posiciones de una escala, no categorías sueltas;
+    la ausencia se sale de la rampa y va en gris con trama. */
+export function proporcional(datos, { titulo = '', ancho = 680, alto = 128 } = {}) {
+  if (!datos.length) return '<p class="vacio">Sin datos para mostrar.</p>';
+  const total = datos.reduce((s, d) => s + d.n, 0) || 1;
+  const h = 42, y0 = 16;
+  let x = 0;
+  const idOrd = `ordTrama${++idGrafico}`;
+
+  const seg = datos.map((d, i) => {
+    const w = (ancho * d.n) / total;
+    const xi = x; x += w;
+    const sd = esSinDato(d.valor);
+    const relleno = sd ? `url(#${idOrd})` : ORDINAL[Math.min(i, ORDINAL.length - 1)];
+    const pct = num(100 * d.n / total, 1);
+    return `<g class="marca" data-k="${escapar(String(d.valor))}" tabindex="${i ? -1 : 0}" role="listitem"
+        aria-label="${escapar(d.valor)}: ${nf.format(d.n)}, ${pct} % del total"
+        data-tip="${escapar(d.valor)}" data-tip-v="${nf.format(d.n)}" data-tip-n="${pct} % de ${nf.format(total)}">
+      <rect class="segmento" x="${xi.toFixed(1)}" y="${y0}" width="${Math.max(w - 1.5, 1).toFixed(1)}" height="${h}"
+        fill="${relleno}"${sd ? ' stroke="var(--sin-dato)" stroke-width="1"' : ''}/>
+      ${w > 46 ? `<text class="seg-pct" x="${(xi + w / 2).toFixed(1)}" y="${y0 + h / 2 + 4}" text-anchor="middle">${pct} %</text>` : ''}
+    </g>`;
+  }).join('');
+
+  const leyenda = datos.map((d, i) => {
+    const sd = esSinDato(d.valor);
+    return `<span class="seg-leyenda"><span class="punto" style="background:${
+      sd ? 'var(--sin-dato)' : ORDINAL[Math.min(i, ORDINAL.length - 1)]}"></span>${
+      escapar(d.valor)} <strong>${nf.format(d.n)}</strong></span>`;
+  }).join('');
+
+  const etq = titulo ? `${titulo} — barra proporcional de ${datos.length} tramos sobre ${nf.format(total)}`
+                     : `Barra proporcional de ${datos.length} tramos`;
+  return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto - 40}"
+    role="list" aria-label="${escapar(etq)}" preserveAspectRatio="none" style="height:74px">
+    <defs><pattern id="${idOrd}" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="5" height="5" fill="var(--sin-dato)"/>
+      <line x1="0" y1="0" x2="0" y2="5" stroke="var(--superficie)" stroke-width="1.7"/></pattern></defs>
+    ${seg}
+  </svg><div class="leyenda leyenda-seg">${leyenda}</div></div>`;
 }
 
 /* ------------------------------------------------------ tooltip común */

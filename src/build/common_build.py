@@ -161,7 +161,25 @@ def _mapa_consolidacion() -> dict[str, str]:
     return mapa
 
 
+def _origen_consolidacion() -> dict[str, str]:
+    """Canónica -> qué sostiene ese grupo: humana, ortografica o mixta.
+
+    Hace falta porque el texto público NO puede decir «revisión humana caso por
+    caso» de un grupo que resolvió una normalización de cadena. Son dos niveles
+    distintos de evidencia y el informe los tiene que distinguir; si se cuentan
+    juntos, una afirmación verificada y una deducida se leen igual.
+    """
+    if not (CONFIG / "identidades_consolidadas.yml").exists():
+        return {}
+    cfg = load_config("identidades_consolidadas.yml") or {}
+    # `humana` por omisión: los archivos escritos antes de que el origen se
+    # declarara sólo contenían decisiones de una persona.
+    return {g["canonica"]: g.get("origen", "humana")
+            for g in (cfg.get("grupos") or [])}
+
+
 CONSOLIDACION = _mapa_consolidacion()
+ORIGEN_CONSOLIDACION = _origen_consolidacion()
 
 
 # Firmas que una revisión humana declaró que no son personas: fragmentos de
@@ -359,8 +377,20 @@ def nota_p06(publicadas: int) -> dict:
     origen = publicadas - grupos + fusionadas + descartadas
     t = f"Formas de firma, no personas. De las {origen} detectadas en la fuente, "
     if grupos:
-        t += (f"{fusionadas} se fusionaron en {grupos} personas tras una revisión "
-              "humana caso por caso; ")
+        # Misma distinción que en la advertencia de la tabla de autores: un
+        # grupo unido por normalización de cadena no lo revisó nadie.
+        n_ort = sum(1 for o in ORIGEN_CONSOLIDACION.values() if o == "ortografica")
+        n_hum = grupos - n_ort
+        if n_ort and n_hum:
+            t += (f"{fusionadas} se fusionaron en {grupos} personas: {n_hum} tras "
+                  f"una revisión humana caso por caso y {n_ort} por ser la misma "
+                  "firma escrita con distintos diacríticos o separadores; ")
+        elif n_ort:
+            t += (f"{fusionadas} se fusionaron en {grupos} personas por ser la "
+                  "misma firma escrita con distintos diacríticos o separadores; ")
+        else:
+            t += (f"{fusionadas} se fusionaron en {grupos} personas tras una "
+                  "revisión humana caso por caso; ")
     if descartadas:
         t += (f"{descartadas} se descartaron por no ser personas sino fragmentos "
               "de cadena de afiliación; ")

@@ -410,6 +410,51 @@ añadir('componentes/estados.html', ficha({
       </tbody></table></div>`,
 }));
 
+añadir('componentes/bandas.html', ficha({
+  grupo: 'Componentes', nombre: 'Banda', ancho: 1100,
+  subtitulo: 'La unidad de composición de la portada, las secciones y metodología',
+  intro: `Una banda sostiene UNA afirmación y va a sangre. Los suelos alternan para que
+    dos bandas seguidas no se lean como una sola. <strong>No manda en todas partes</strong>:
+    publicaciones, autores, la ficha y el catálogo son superficies de consulta con filtro
+    y paginación —quien llega ahí viene a buscar, no a que le cuenten— y convertirlas en
+    narrativa habría arreglado la estética rompiendo la función.`,
+  cuerpo: () => `
+    <p class="panel-etq" style="margin-top:0">Los cuatro suelos</p>
+    <div class="banda banda-papel"><div style="padding:var(--e4)">
+      <p class="banda-gancho">papel</p>
+      <p style="margin:0">El suelo por defecto. Papel teñido con Peach al 6–10 %.</p></div></div>
+    <div class="banda banda-papel-2"><div style="padding:var(--e4)">
+      <p class="banda-gancho">papel-2</p>
+      <p style="margin:0">El segundo suelo, FRÍO. Admite figuras, incluida la marca de
+      ausencia, que es el piso que fija cuánto puede oscurecerse.</p></div></div>
+    <div class="banda banda-contraste"><div style="padding:var(--e4)">
+      <p class="banda-gancho">contraste</p>
+      <p style="margin:0">Para lo que el informe NO puede afirmar: indicadores diferidos
+      y advertencias metodológicas. Redefine sus tokens en su propio ámbito.</p></div></div>
+    <div class="banda banda-enfasis"><div style="padding:var(--e4)">
+      <p class="banda-gancho">énfasis</p>
+      <p style="margin:0">El cierre. SÓLO titular y prosa.</p></div></div>
+
+    <p class="regla" style="margin-top:var(--e5)">La banda de contraste <b>redefine los
+      tokens en su ámbito</b> en vez de tener una segunda hoja de estilo para «lo que va
+      sobre fondo oscuro». Módulos, gráficos, sellos y tablas que caen dentro se adaptan
+      solos, sin que ninguno sepa que está sobre otro suelo. Al medirla como ámbito propio
+      aparecieron cuatro tokens que no redefinía —la rampa ordinal y la tinta del botón—:
+      como la banda es oscura en los DOS temas, en claro conservaban su valor claro y
+      caían sobre suelo oscuro, con --ord-1 en 1,06:1.</p>
+
+    <p class="regla">La banda de énfasis <b>no lleva figuras</b>. Medido: sobre Peach Glow
+      el color del dato cae a 3,21:1 y la marca de ausencia a 2,35:1. Por eso el cierre es
+      sólo tipografía y enlaces, y la regla queda escrita junto al componente.</p>
+
+    <p class="regla">El segundo papel es frío y no un peach más oscuro por la misma razón:
+      oscurecer el papel hacia el peach rompe la marca de ausencia —cae bajo 3:1 pasado
+      #dbe3df— y lo acercaba al cierre. #e1e7e4 es el límite útil, con la ausencia en
+      3,10:1. Su borde contra el papel mide 1,10:1, que es real pero no sostiene solo un
+      corte de sección, así que en tema claro las bandas de papel llevan una costura de
+      1px; en oscuro los dos suelos ya se separan ΔE 11,75 y la costura sobra.</p>`,
+}));
+
 /* ─────────────────────────────────────────────────────────── gráficos */
 
 añadir('graficos/barras-horizontales.html', ficha({
@@ -419,7 +464,7 @@ añadir('graficos/barras-horizontales.html', ficha({
     lleva una leyenda sino la etiqueta de la propia barra y su valor visible al lado:
     <strong>el color nunca es el único canal</strong>. La columna de etiquetas se
     dimensiona con el contenido real y se acota a un tercio del lienzo.`,
-  cuerpo: () => v.RENDER['I-05'](series['I-05']) + v.RENDER['T-05'](series['T-05']),
+  cuerpo: () => v.RENDER['P-03'](series['P-03']) + v.RENDER['T-05'](series['T-05']),
 }));
 
 añadir('graficos/barras-verticales.html', ficha({
@@ -428,9 +473,10 @@ añadir('graficos/barras-verticales.html', ficha({
   intro: `Para series anuales cortas: tres años no son una línea. El lienzo
     <strong>se ajusta al número de categorías</strong> — tres barras estiradas a lo
     ancho de una tarjeta se leen como «poco dato», que es una impresión y no una
-    medición. La línea de referencia marca el promedio mundial en el ámbar de las
-    referencias, el mismo que la marca de valor esperado.`,
-  cuerpo: () => v.RENDER['I-04'](series['I-04']) + v.RENDER['P-02'](series['P-02']),
+    medición. Un gráfico de citas por año de publicación induce a leer «el impacto
+    está cayendo»: lo que cae es el tiempo disponible para acumular citas, y por eso
+    el módulo lleva esa advertencia pegada.`,
+  cuerpo: () => v.RENDER['I-01'](series['I-01']) + v.RENDER['P-02'](series['P-02']),
 }));
 
 añadir('graficos/anillo.html', ficha({
@@ -441,6 +487,53 @@ añadir('graficos/anillo.html', ficha({
     que gasta la escala categórica: usa las dos primeras ranuras, medidas como par
     incluso bajo deuteranopía (ΔE 12,2, sobre un piso de 8).`,
   cuerpo: () => v.RENDER['C-01'](series['C-01']),
+}));
+
+/* Cuatro formas que antes eran barrasH. La forma la elige la RELACIÓN que
+   expresa el dato, contrastada contra el Visual Vocabulary del Financial
+   Times; no la costumbre de la casa. */
+
+añadir('graficos/desviacion.html', ficha({
+  grupo: 'Gráficos', nombre: 'Desviación', ancho: 1000,
+  subtitulo: 'Un valor que se lee CONTRA una referencia, no en magnitud absoluta',
+  intro: `El FWCI no se lee por su tamaño sino por su distancia al 1,00 mundial. Con
+    barras desde cero, esa distancia había que calcularla de cabeza. Aquí el
+    <strong>1,00 es el eje</strong> y la desviación se ve sin aritmética.
+    La dirección la lleva sólo la POSICIÓN respecto del eje: pintar el déficit de otro
+    color habría gastado color en algo que la posición ya dice, y el gris del sitio
+    significa ausencia de dato, no valor bajo.`,
+  cuerpo: () => v.RENDER['I-04'](series['I-04']),
+}));
+
+añadir('graficos/acumulada.html', ficha({
+  grupo: 'Gráficos', nombre: 'Acumulada', ancho: 1000,
+  subtitulo: 'Umbrales ANIDADOS, que no se suman',
+  intro: `Los umbrales de percentil se contienen unos a otros: las publicaciones del
+    top 1 % están también en el top 5, el 10 y el 25. Dibujarlos como cuatro barras
+    hermanas sugería cuatro grupos disjuntos que se podían sumar —322, una cifra sin
+    significado—. <strong>Era un problema de correctitud, no de estética.</strong>
+    La forma anidada hace visible la contención y vuelve imposible la suma.`,
+  cuerpo: () => v.RENDER['I-05'](series['I-05']),
+}));
+
+añadir('graficos/distribucion.html', ficha({
+  grupo: 'Gráficos', nombre: 'Distribución', ancho: 1000,
+  subtitulo: 'Un continuo tramificado · el eje es la información',
+  intro: `El número de autores por publicación es un continuo partido en tramos.
+    Ordenarlo por frecuencia, como haría un ranking, <strong>destruye el eje</strong>,
+    que es justo lo que hay que leer. La media y la mediana van juntas al pie porque
+    la distribución es asimétrica y la media sola describe mal el caso típico.`,
+  cuerpo: () => v.RENDER['C-06'](series['C-06']),
+}));
+
+añadir('graficos/proporcional.html', ficha({
+  grupo: 'Gráficos', nombre: 'Proporcional', ancho: 1000,
+  subtitulo: 'Partes de un total conocido · rampa ordinal, no escala categórica',
+  intro: `Los cuartiles reparten un total conocido, así que se dibujan repartiendo una
+    barra y no como cuatro barras sueltas que obliguen a sumar de cabeza. Q1–Q4 es una
+    escala <strong>ordenada</strong>: un solo tono en cuatro pasos, del más oscuro al
+    más claro, con luminosidad monótona y ΔE mínimo de 11,4 entre escalones.`,
+  cuerpo: () => v.RENDER['R-01'](series['R-01']),
 }));
 
 añadir('graficos/codificacion.html', ficha({
