@@ -115,7 +115,13 @@ def verificar_denominadores(ejes: dict[str, dict]) -> None:
     problemas = []
     con_pagina = set()
     for pagina in sorted((b.ROOT / "web").glob("*.html")):
-        m = re.search(r'id="modulos"[^>]*data-indicadores="([^"]+)"',
+        # El contenedor pasó a llamarse `cortes` cuando las secciones se
+        # volvieron explorables: los indicadores ya no se dibujan como módulos
+        # precalculados sino como cortes recalculados sobre el recorte. Lo que
+        # esta guarda comprueba no cambió —qué indicadores cubre cada sección y
+        # con qué denominadores—, así que se acepta cualquiera de los dos
+        # contenedores en vez de relajar la comprobación.
+        m = re.search(r'id="(?:modulos|cortes)"[^>]*data-indicadores="([^"]+)"',
                       pagina.read_text(encoding="utf-8"))
         if not m:
             continue

@@ -51,6 +51,7 @@ import pandas as pd
 import yaml
 
 import decisiones as D
+import equivalencia_ortografica as EQ
 
 ROOT = Path(__file__).resolve().parents[2]
 INTERNAL = ROOT / "internal"
@@ -153,6 +154,33 @@ def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None
     return out
 
 
+def _evidencia_orcid(firmas: list[str], orcid: str) -> str:
+    """Con qué respaldo entró ese ORCID en cada firma.
+
+    La cola decía que varias firmas comparten identificador y ahí se acababa.
+    Pero no todas las asignaciones pesan igual: una declarada por el titular en
+    su registro no es lo mismo que una deducida de un DOI, y una respaldada por
+    cuatro publicaciones no es lo mismo que una por una sola. Sin eso, quien
+    revisa tenía que ir a buscar el CSV para decidir; con eso, decide leyendo.
+
+    Importa además por una razón concreta de este corpus: el vínculo con
+    Crossref se hace por apellido e inicial DENTRO de una publicación. Cuando
+    dos firmas con apellidos distintos comparten identificador, la coincidencia
+    no puede venir del nombre —tuvo que venir del identificador que el autor
+    depositó—, y eso es evidencia de otra naturaleza.
+    """
+    try:
+        o = pd.read_csv(ROOT / "data" / "enriched" / "authors_orcid.csv", dtype=str)
+    except Exception:
+        return ""
+    filas = o[(o.orcid == orcid) & (o.nombre_en_fuente.isin(firmas))]
+    if filas.empty:
+        return ""
+    partes = [f"{r['nombre_en_fuente']} ({r['fuente']}, confianza {r['confianza']}, "
+              f"{r['publicaciones_de_respaldo']} pub.)" for _, r in filas.iterrows()]
+    return "Respaldo de cada asignación: " + " · ".join(partes) + "."
+
+
 def cruces(a: dict, b: dict) -> dict:
     """Las tres señales que deciden un caso, calculadas entre dos firmas."""
     comunes = set(a["eids"]) & set(b["eids"])
@@ -202,15 +230,35 @@ def casos(d: dict, perf: dict) -> list[dict]:
             fs = firmas_de(r["firmas"].split(" | "))
             if len(fs) < 2:
                 continue
+
+            # Igual que en la cola de variantes: lo que sólo se diferencia en
+            # diacríticos o separadores no se pregunta, porque no es un juicio.
+            # Aquí importa más todavía: un caso cuyas tres formas son la misma
+            # cadena —«Henriquez-Olguin C.», «Henriquez-Olguín C.»,
+            # «Henríquez-Olguín C.»— no plantea ninguna duda de identidad, y
+            # ocupaba un puesto en la cola de prioridad 1.
+            clases = EQ.subgrupos([f["nombre"] for f in fs])
+            por_nombre = {f["nombre"]: f for f in fs}
+            rep = [por_nombre[c[0]] for c in clases]
+            agrupadas = [c for c in clases if len(c) > 1]
+            if len(rep) < 2:
+                continue
+
+            ctx = ("El apellido no las agrupa: este hallazgo sólo lo aporta "
+                   "el identificador persistente."
+                   if r.get("hallazgo_nuevo") == "True" else
+                   "El apellido también las agrupa.")
+            if agrupadas:
+                detalle = " · ".join(" = ".join(v) for v in agrupadas)
+                ctx += f" Ya unidas por equivalencia ortográfica: {detalle}."
+            ctx += " " + _evidencia_orcid([f["nombre"] for f in rep], r["orcid"])
+
             out.append({
                 "id": f"orcid-{r['orcid']}", "cola": "ORCID compartido",
                 "prioridad": 1,
-                "titulo": f"{len(fs)} firmas comparten {r['orcid']}",
-                "contexto": ("El apellido no las agrupa: este hallazgo sólo lo aporta "
-                             "el identificador persistente."
-                             if r.get("hallazgo_nuevo") == "True" else
-                             "El apellido también las agrupa."),
-                "firmas": fs, "cruces": cruces(fs[0], fs[1]) if len(fs) == 2 else None,
+                "titulo": f"{len(rep)} firmas comparten {r['orcid']}",
+                "contexto": ctx,
+                "firmas": rep, "cruces": cruces(rep[0], rep[1]) if len(rep) == 2 else None,
             })
 
     # ── Una firma con más de un ORCID.
@@ -357,11 +405,31 @@ def casos(d: dict, perf: dict) -> list[dict]:
         fs = firmas_de(sorted(set(g["nombre_en_fuente"])))
         if len(fs) < 2:
             continue
+
+        # LO ORTOGRÁFICO NO SE PREGUNTA. Las formas que sólo se diferencian en
+        # diacríticos o separadores son la misma cadena, así que se colapsan
+        # antes de encolar: preguntarle a una persona si «Henriquez-Olguin C.»
+        # y «Henríquez-Olguín C.» son la misma gasta su atención en algo que no
+        # es un juicio, y la atención es justo el recurso escaso de esta cola.
+        clases = EQ.subgrupos([f["nombre"] for f in fs])
+        por_nombre = {f["nombre"]: f for f in fs}
+        rep = [por_nombre[c[0]] for c in clases]
+        agrupadas = {c[0]: c for c in clases if len(c) > 1}
+
+        # Si al colapsar queda una sola forma, no queda nada que decidir.
+        if len(rep) < 2:
+            continue
+
+        ctx = "Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad."
+        if agrupadas:
+            detalle = " · ".join(" = ".join(v) for v in agrupadas.values())
+            ctx += (f" Ya unidas por equivalencia ortográfica, no hace falta"
+                    f" decidirlas: {detalle}.")
         out.append({
             "id": f"p03-{clave}", "cola": "Variantes de nombre", "prioridad": 2,
-            "titulo": " · ".join(f["nombre"] for f in fs),
-            "contexto": "Mismo apellido normalizado. Agrupadas por heurística, sin evidencia de identidad.",
-            "firmas": fs, "cruces": cruces(fs[0], fs[1]) if len(fs) == 2 else None,
+            "titulo": " · ".join(f["nombre"] for f in rep),
+            "contexto": ctx,
+            "firmas": rep, "cruces": cruces(rep[0], rep[1]) if len(rep) == 2 else None,
         })
 
     # ── Firmas sin forma de persona (E-09): fragmentos de cadena de afiliación.
@@ -388,12 +456,37 @@ def casos(d: dict, perf: dict) -> list[dict]:
     p04 = d["amb"][d["amb"].tipo.str.startswith("P-04")]
     for _, r in p04.iterrows():
         f = perf.get(r["nombre_en_fuente"])
+        # La auditoría ya midió dos cosas sobre este caso. Se usan para ordenar
+        # la cola y para decir qué lecturas siguen en pie, nunca para decidir.
+        uft = str(r.get("en_poblacion_uft", "True")) == "True"
+        coo = int(float(r.get("coocurren_en_publicaciones") or 0))
+
+        ctx = ("Un mismo nombre completo con varios identificadores de Scopus: "
+               "perfil fragmentado en la fuente, u homonimia. IDs: "
+               + r["detalle"].replace("|", " · "))
+        if coo:
+            ctx += (f". Los dos identificadores firman {coo} publicación(es) EN COMÚN, "
+                    "así que «perfil fragmentado» queda descartado: la fuente no puede "
+                    "haber repartido entre dos identificadores los trabajos de una "
+                    "persona dentro de un mismo trabajo. Queda decidir entre homonimia "
+                    "y error de la fuente")
+        if not uft:
+            ctx += (". FUERA DE LA POBLACIÓN UFT: esta firma no aparece en el log de "
+                    "matching, así que no tiene ficha, no cuenta en «autores UFT "
+                    "distintos» y no entraría en la red de coautoría. La ambigüedad "
+                    "es real y por eso se declara, pero no afecta a ninguna cifra "
+                    "publicada")
+
         out.append({
-            "id": f"p04-{r['clave']}", "cola": "Varios Scopus ID", "prioridad": 3,
+            # Prioridad 3 mientras toca a la población que el informe describe;
+            # 5 cuando no. No se oculta ni se da por resuelto: se ordena. Diez de
+            # los veinte casos son coautores externos, y mezclarlos con los diez
+            # que sí son UFT hacía la cola el doble de larga sin ningún efecto
+            # sobre el informe.
+            "id": f"p04-{r['clave']}", "cola": "Varios Scopus ID",
+            "prioridad": 3 if uft else 5,
             "titulo": r["clave"],
-            "contexto": ("Un mismo nombre completo con varios identificadores de Scopus: "
-                         "perfil fragmentado en la fuente, u homonimia. IDs: "
-                         + r["detalle"].replace("|", " · ")),
+            "contexto": ctx,
             "firmas": [f] if f else [], "cruces": None,
         })
 

@@ -3,6 +3,9 @@
 
 import * as c from './core.js';
 import * as v from './vista.js';
+import * as X from './explorador.js';
+import * as VX from './vista_explorador.js';
+import * as anim from './animar.js';
 
 /* ============================================================== portada */
 
@@ -11,20 +14,122 @@ import * as v from './vista.js';
    veinte SVG. Si el marcado está, sólo se enganchan los comportamientos. */
 const yaPintado = el => el && el.dataset.prerender === '1';
 
-async function portada() {
-  const cont = document.getElementById('kpis');
-  if (!yaPintado(cont)) {
-    const { kpis } = await c.cargar('kpis.json');
-    const series = await c.cargar('series.json');
+/* La portada es un EXPLORADOR: el lector elige un recorte y las cifras y los
+   gráficos se recalculan sobre él, aquí, sin volver al servidor.
+
+   El HTML llega pre-renderizado con el recorte VACÍO —el informe completo—, así
+   que sin JavaScript se ve el informe entero. Esta función no reescribe nada
+   hasta que alguien toca un filtro: engancha el comportamiento y se aparta. */
+async function portada() { return montarExplorador(null); }
+
+/* Las secciones son el mismo explorador con OTROS cortes. Se comparte la
+   función entera en vez de duplicarla: filtros, estado, URL y navegación son
+   idénticos, y lo único que cambia es qué se dibuja con el recorte. */
+async function seccion() {
+  const clave = document.getElementById('contenido')?.dataset.seccion;
+  return montarExplorador(clave || null);
+}
+
+async function montarExplorador(claveSeccion) {
+  const cabecera = document.getElementById('titular');
+  const zonas = {
+    estado: document.getElementById('estado-recorte'),
+    controles: document.getElementById('controles'),
+    cifras: document.getElementById('cifras'),
+    cortes: document.getElementById('cortes'),
+  };
+  if (!zonas.cifras) return;
+
+  const { publicaciones } = await c.cargar('publications.json');
+
+  if (!yaPintado(zonas.cifras)) {
     const meta = await c.cargar('meta.json');
-    const cabecera = document.getElementById('titular');
-    if (cabecera) cabecera.innerHTML = v.hero(meta, kpis);
-    const resto = v.kpisRestantes(kpis);
-    cont.dataset.n = String(resto.length);
-    cont.innerHTML = v.kpis(resto);
-    document.getElementById('panorama').innerHTML = v.panorama(series);
-    document.getElementById('lectura').innerHTML = v.lectura(kpis);
+    if (cabecera) {
+      cabecera.innerHTML = claveSeccion
+        ? VX.cabeceraSeccion(claveSeccion, document.title.split('·')[0].trim())
+        : VX.cabecera(meta);
+    }
+    const lectura = document.getElementById('lectura');
+    if (lectura) lectura.innerHTML = v.lectura((await c.cargar('kpis.json')).kpis);
+    const cierre = document.getElementById('cierre');
+    if (cierre) cierre.innerHTML = v.cierrePortada();
+
+    // Los indicadores DIFERIDOS siguen apareciendo. Que un indicador esté
+    // verificado y no se publique es información del informe: un hueco se
+    // leería como que el fenómeno no existe. No responden al recorte —no se
+    // calculan— y por eso van sobre su propio suelo, separados de lo que sí.
+    const dif = document.getElementById('diferidos');
+    if (dif && claveSeccion) {
+      const catalogo = await c.cargar('catalogo.json');
+      dif.innerHTML = VX.diferidos(catalogo, claveSeccion);
+    }
   }
+
+  let sel = X.leerURL();
+
+  function pintar({ nuevaEntrada = false } = {}) {
+    const partes = claveSeccion
+      ? VX.seccion(publicaciones, sel, claveSeccion)
+      : VX.explorador(publicaciones, sel);
+    // Se comparan los valores ANTES de reemplazar el marcado: la señal de
+    // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
+    const antes = new Map([...zonas.cifras.querySelectorAll('[data-valor]')]
+      .map(e => [e.dataset.valor, e.textContent]));
+
+    zonas.estado.innerHTML = partes.estado;
+    zonas.controles.innerHTML = partes.controles;
+    zonas.cifras.innerHTML = partes.cifras;
+    // Los cortes se repintan DENTRO de la transición: hay que medir la
+    // geometría antes y después del cambio, y el orden sólo se garantiza si el
+    // repintado ocurre en medio.
+    anim.transicion(zonas.cortes, () => { zonas.cortes.innerHTML = partes.cortes; });
+
+    zonas.cifras.querySelectorAll('[data-valor]').forEach(e => {
+      if (antes.size && antes.get(e.dataset.valor) !== e.textContent) e.classList.add('cambia');
+    });
+    X.escribirURL(sel, !nuevaEntrada);
+    if (claveSeccion) scrollSpy(document.getElementById('contenido'));
+  }
+
+  // Un solo escucha delegado para los chips y para el botón de limpiar: los
+  // controles se repintan enteros a cada cambio, así que enganchar escuchas a
+  // cada botón los dejaría colgando del marcado anterior.
+  document.addEventListener('click', e => {
+    const chip = e.target.closest('.chip[data-dim]');
+    if (chip) {
+      const { dim, valor } = chip.dataset;
+      const actual = sel[dim] || [];
+      sel = { ...sel, [dim]: actual.includes(valor)
+        ? actual.filter(x => x !== valor) : [...actual, valor] };
+      pintar({ nuevaEntrada: true });
+      // El foco se pierde al reemplazar el marcado; se devuelve al mismo
+      // control para que se pueda seguir filtrando con el teclado.
+      const vuelta = zonas.controles.querySelector(
+        `.chip[data-dim="${CSS.escape(dim)}"][data-valor="${CSS.escape(valor)}"]`);
+      if (vuelta) vuelta.focus();
+      return;
+    }
+    if (e.target.closest('#limpiar-recorte')) {
+      sel = {};
+      pintar({ nuevaEntrada: true });
+      zonas.estado.querySelector('.recorte-n')?.scrollIntoView({ block: 'nearest' });
+    }
+  });
+
+  // El conmutador Gráfico ⇄ Tabla se engancha al CONTENEDOR, no a cada corte:
+  // los cortes se reemplazan enteros a cada recorte y los escuchas colgados de
+  // ellos morirían con el marcado anterior.
+  conmutadorVistas(zonas.cortes);
+  anim.entradaAlVer(zonas.cortes);
+  // El scroll-spy se re-engancha tras cada recorte: los cortes se reemplazan
+  // y el observador anterior apuntaba a nodos que ya no están en el documento.
+  if (claveSeccion) scrollSpy(document.getElementById('contenido'));
+
+  // El recorte vive en la URL, así que el botón de volver del navegador tiene
+  // que deshacer un filtro. Sin esto, volver saca al lector del sitio.
+  addEventListener('popstate', () => { sel = X.leerURL(); pintar(); });
+
+  if (!yaPintado(zonas.cifras) || X.hayRecorte(sel)) pintar();
 }
 
 /* ============================================================== módulos */
@@ -38,7 +143,10 @@ async function modulos() {
     // por el mismo motivo: es la clave de la sección y ya está en la URL.
     const clave = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
     const { ejes } = await c.cargar('ejes.json');
-    cont.innerHTML = v.paginaModulos(codigos, series, ejes[clave]);
+    // El catálogo se pide para que un indicador declarado en la página pero no
+    // publicado se dibuje como diferido en vez de desaparecer.
+    const catalogo = await c.cargar('catalogo.json');
+    cont.innerHTML = v.paginaModulos(codigos, series, ejes[clave], catalogo);
   }
   conmutadorVistas(cont);
   scrollSpy(cont);
@@ -50,7 +158,10 @@ function conmutadorVistas(raiz) {
   raiz.addEventListener('click', e => {
     const btn = e.target.closest('.vistas button');
     if (!btn) return;
-    const modulo = btn.closest('.modulo');
+    // `.corte` es el módulo del explorador. Sin esto el conmutador no
+    // encontraba su contenedor y las secciones perdían la vista de tabla, que
+    // es la vía equivalente al gráfico y no un extra.
+    const modulo = btn.closest('.modulo, .corte');
     modulo.querySelectorAll('.vistas button').forEach(b =>
       b.setAttribute('aria-pressed', String(b === btn)));
     modulo.querySelectorAll(':scope > .vista').forEach(p =>
@@ -97,109 +208,40 @@ const POR_PAGINA = 50;
 
 async function publicaciones() {
   const { publicaciones: pubs } = await c.cargar('publications.json');
-  const facetas = await c.cargar('facets.json');
-  const estado = leerURL();
+  const zonas = {
+    estado: document.getElementById('estado-recorte'),
+    controles: document.getElementById('controles'),
+  };
+  let sel = X.leerURL();
   let pagina = 1;
 
-  const FILTROS = [
-    ['anio', 'Año', facetas.anio],
-    ['tipo', 'Tipo documental', facetas.tipo],
-    ['qs_area', 'Área QS', facetas.qs_area],
-    ['unidad', 'Unidad académica', facetas.unidad],
-    ['open_access', 'Acceso abierto', facetas.open_access],
-    ['internacional', 'Colaboración', facetas.internacional],
-  ];
+  function pintar({ nuevaEntrada = false, soloTabla = false } = {}) {
+    const res = X.recorte(pubs, sel);
 
-  function coincide(p, omitir = null) {
-    for (const [clave] of FILTROS) {
-      if (clave === omitir) continue;
-      const sel = estado[clave];
-      if (!sel || !sel.length) continue;
-      let vals;
-      if (clave === 'anio') vals = [String(p.anio)];
-      else if (clave === 'tipo') vals = [p.tipo];
-      else if (clave === 'qs_area') vals = p.qs_area;
-      else if (clave === 'unidad') vals = p.unidades.length ? p.unidades : ['Sin dato declarado'];
-      else if (clave === 'open_access') vals = p.open_access.length ? p.open_access : ['Sin dato declarado'];
-      else if (clave === 'internacional') vals = [p.es_internacional === null
-        ? 'Sin dato declarado' : (p.es_internacional ? 'Internacional' : 'Nacional')];
-      // OR dentro de un filtro, AND entre filtros.
-      if (!vals.some(v => sel.includes(String(v)))) return false;
-    }
-    if (estado.q) {
-      const q = estado.q.toLowerCase();
-      const heno = `${p.titulo} ${p.fuente} ${p.autores_uft.join(' ')}`
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      if (!heno.includes(q.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))) return false;
-    }
-    return true;
-  }
-
-  function pintarFiltros() {
-    document.getElementById('filtros').innerHTML = FILTROS.map(([clave, etiqueta, opciones]) => {
-      // Recuento calculado con los demás filtros activos: una faceta en 0 se
-      // muestra deshabilitada, no se oculta (su ausencia es información).
-      const visibles = publicacionesQue(clave);
-      const items = opciones.map(o => {
-        const n = contarFaceta(visibles, clave, o.valor);
-        const sel = (estado[clave] || []).includes(String(o.valor));
-        return `<label class="opcion ${n === 0 && !sel ? 'desactivada' : ''}">
-          <input type="checkbox" value="${c.escapar(String(o.valor))}" data-filtro="${clave}"
-            ${sel ? 'checked' : ''} ${n === 0 && !sel ? 'disabled' : ''}>
-          ${c.escapar(String(o.valor))} <span class="n">${n}</span></label>`;
-      }).join('');
-      return `<div class="grupo-filtro"><span class="etiqueta">${etiqueta}</span>
-        <div class="opciones">${items}</div></div>`;
-    }).join('') + `
-      <div class="grupo-filtro">
-        <label for="q">Buscar en título, fuente o autor</label>
-        <input type="search" id="q" value="${c.escapar(estado.q || '')}" placeholder="Escriba para filtrar…">
-      </div>
-      <button class="boton" id="limpiar">Limpiar filtros</button>
-      <button class="boton boton-primario" id="exportar">Exportar CSV</button>`;
-  }
-
-  const publicacionesQue = (omitir) => pubs.filter(p => coincide(p, omitir));
-
-  function contarFaceta(lista, clave, valor) {
-    return lista.filter(p => {
-      if (clave === 'anio') return String(p.anio) === String(valor);
-      if (clave === 'tipo') return p.tipo === valor;
-      if (clave === 'qs_area') return p.qs_area.includes(valor);
-      if (clave === 'unidad') return valor === 'Sin dato declarado'
-        ? !p.unidades.length : p.unidades.includes(valor);
-      if (clave === 'open_access') return valor === 'Sin dato declarado'
-        ? !p.open_access.length : p.open_access.includes(valor);
-      if (clave === 'internacional') {
-        if (valor === 'Sin dato declarado') return p.es_internacional === null;
-        return p.es_internacional === (valor === 'Internacional');
+    if (!soloTabla) {
+      zonas.estado.innerHTML = VX.estado(res.length, pubs.length, sel);
+      // El buscador se repinta con el resto, así que hay que devolverle el
+      // foco y el cursor: si no, escribir una letra lo expulsa del campo.
+      const antes = document.getElementById('q');
+      const tenia = document.activeElement === antes;
+      const pos = antes ? antes.selectionStart : null;
+      zonas.controles.innerHTML = VX.controles(pubs, sel, { buscador: true });
+      if (tenia) {
+        const ahora = document.getElementById('q');
+        ahora.focus();
+        if (pos !== null) ahora.setSelectionRange(pos, pos);
       }
-      return false;
-    }).length;
-  }
-
-  function pintar() {
-    const res = pubs.filter(p => coincide(p));
-    const chips = Object.entries(estado).flatMap(([k, v]) =>
-      k === 'q' ? (v ? [[k, v]] : []) : (v || []).map(x => [k, x]))
-      .map(([k, v]) => `<span class="chip">${c.escapar(String(v))}
-        <button data-quitar="${k}" data-valor="${c.escapar(String(v))}" aria-label="Quitar filtro">×</button></span>`).join('');
-    document.getElementById('chips').innerHTML = chips;
+    }
+    X.escribirURL(sel, !nuevaEntrada);
 
     const totalPag = Math.max(1, Math.ceil(res.length / POR_PAGINA));
     pagina = Math.min(pagina, totalPag);
     const pag = res.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
-
-    document.getElementById('resumen').innerHTML =
-      `<strong>${c.nf.format(res.length)}</strong> de ${c.nf.format(pubs.length)} publicaciones` +
-      (res.length !== pubs.length ? ' · filtros aplicados' : '');
-
     const cuerpo = document.getElementById('tabla-cuerpo');
+
     if (!res.length) {
       cuerpo.innerHTML = `<tr><td colspan="6"><div class="vacio">
-        <p>Ningún resultado con estos filtros.</p>
-        <button class="boton" id="limpiar2">Limpiar filtros</button></div></td></tr>`;
-      document.getElementById('limpiar2').onclick = limpiar;
+        <p>Ningún resultado con este recorte.</p></div></td></tr>`;
       document.getElementById('paginacion').innerHTML = '';
       return;
     }
@@ -224,54 +266,37 @@ async function publicaciones() {
       <span>Página ${pagina} de ${totalPag}</span>
       <button class="boton" id="sig" ${pagina === totalPag ? 'disabled' : ''}>Siguiente</button>` : '';
     const ant = document.getElementById('ant'), sig = document.getElementById('sig');
-    if (ant) ant.onclick = () => { pagina--; pintar(); };
-    if (sig) sig.onclick = () => { pagina++; pintar(); };
+    if (ant) ant.onclick = () => { pagina--; pintar({ soloTabla: true }); };
+    if (sig) sig.onclick = () => { pagina++; pintar({ soloTabla: true }); };
   }
 
-  function leerURL() {
-    const p = new URLSearchParams(location.search), e = {};
-    for (const [k, v] of p) e[k] = k === 'q' ? v : v.split('|');
-    return e;
-  }
-  function escribirURL() {
-    const p = new URLSearchParams();
-    for (const [k, v] of Object.entries(estado)) {
-      if (k === 'q' && v) p.set(k, v);
-      else if (Array.isArray(v) && v.length) p.set(k, v.join('|'));
+  // Mismo escucha delegado que el explorador: los controles se repintan
+  // enteros y los escuchas colgados de cada chip morirían con el marcado.
+  document.addEventListener('click', e => {
+    const chip = e.target.closest('.chip[data-dim]');
+    if (chip) {
+      const { dim, valor } = chip.dataset;
+      const actual = sel[dim] || [];
+      sel = { ...sel, [dim]: actual.includes(valor)
+        ? actual.filter(x => x !== valor) : [...actual, valor] };
+      pagina = 1; pintar({ nuevaEntrada: true });
+      document.querySelector(
+        `.chip[data-dim="${CSS.escape(dim)}"][data-valor="${CSS.escape(valor)}"]`)?.focus();
+      return;
     }
-    history.replaceState(null, '', p.toString() ? `?${p}` : location.pathname);
-  }
-  function refrescar() { escribirURL(); pintarFiltros(); pintar(); }
-  function limpiar() { for (const k of Object.keys(estado)) delete estado[k]; pagina = 1; refrescar(); }
-
-  document.getElementById('filtros').addEventListener('change', e => {
-    const cb = e.target.closest('[data-filtro]'); if (!cb) return;
-    const k = cb.dataset.filtro;
-    estado[k] = estado[k] || [];
-    if (cb.checked) estado[k].push(cb.value);
-    else estado[k] = estado[k].filter(v => v !== cb.value);
-    if (!estado[k].length) delete estado[k];
-    pagina = 1; refrescar();
+    if (e.target.closest('#limpiar-recorte')) { sel = {}; pagina = 1; pintar({ nuevaEntrada: true }); }
+    if (e.target.id === 'exportar') exportar(X.recorte(pubs, sel));
   });
-  document.getElementById('filtros').addEventListener('input', c.debounce(e => {
+
+  document.addEventListener('input', c.debounce(e => {
     if (e.target.id !== 'q') return;
-    estado.q = e.target.value || undefined;
-    if (!estado.q) delete estado.q;
-    pagina = 1; escribirURL(); pintar();
+    sel = { ...sel, q: e.target.value || undefined };
+    if (!sel.q) delete sel.q;
+    pagina = 1; pintar();
   }, 250));
-  document.getElementById('filtros').addEventListener('click', e => {
-    if (e.target.id === 'limpiar') limpiar();
-    if (e.target.id === 'exportar') exportar(pubs.filter(p => coincide(p)));
-  });
-  document.getElementById('chips').addEventListener('click', e => {
-    const b = e.target.closest('[data-quitar]'); if (!b) return;
-    const k = b.dataset.quitar;
-    if (k === 'q') delete estado.q;
-    else { estado[k] = (estado[k] || []).filter(v => v !== b.dataset.valor); if (!estado[k].length) delete estado[k]; }
-    refrescar();
-  });
 
-  refrescar();
+  addEventListener('popstate', () => { sel = X.leerURL(); pagina = 1; pintar(); });
+  pintar();
 }
 
 /** La exportación arrastra la procedencia: un CSV sin fecha de corte deja de
@@ -395,7 +420,15 @@ async function autores() {
 async function fichaAutor() {
   const id = new URLSearchParams(location.search).get('id');
   const cont = document.getElementById('ficha');
-  if (!id) { cont.innerHTML = '<div class="vacio">Falta el identificador de autor.</div>'; return; }
+  // Sin identificador la página quedaba en blanco: ni encabezado —la ficha es
+  // la única del sitio sin h1 propio en el archivo, porque lo pone el JS— ni
+  // salida hacia ningún lado. Un callejón sin salida se corrige con una puerta.
+  if (!id) {
+    cont.innerHTML = `<h1>Ficha de autor</h1>
+      <div class="vacio">La dirección no trae identificador de autor, así que no
+      hay ficha que mostrar.<br><a href="autores.html">Ir al directorio de autores →</a></div>`;
+    return;
+  }
 
   let a;
   try { a = await c.cargar(`author/${id}.json`); }
@@ -408,11 +441,11 @@ async function fichaAutor() {
     <div><span>Nombre en fuente</span>${c.escapar(a.nombre_en_fuente)}</div>
     <div><span>Unidad académica</span>${c.escapar(a.unidades_academicas.join(' · '))}</div>
     <div><span>Scopus Author ID</span>${a.scopus_author_ids.length
-      ? a.scopus_author_ids.map(s => `<a href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
+      ? a.scopus_author_ids.map(s => `<a class="enlace-dato" href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
           target="_blank" rel="noopener">${s}</a>`).join(' · ')
       : '<span class="sin-dato-txt">No resuelto</span>'}</div>
     <div><span>ORCID</span>${a.orcid
-      ? `<a href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`
+      ? `<a class="enlace-dato" href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`
         // Qué evidencia respalda este ORCID, en orden de fuerza. El veredicto
         // sale de contrastar la asignación contra el registro del propio
         // titular, así que cuando existe desplaza a la confianza, que sólo
@@ -482,7 +515,7 @@ async function fichaAutor() {
     <section class="modulo">
       <header><h2>Publicaciones (${a.publicaciones.length})</h2></header>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Año</th><th>Título</th><th>Fuente</th><th>Tipo</th><th class="num">Citas</th></tr></thead>
+        <thead><tr><th scope="col">Año</th><th scope="col">Título</th><th scope="col">Fuente</th><th scope="col">Tipo</th><th scope="col" class="num">Citas</th></tr></thead>
         <tbody>${a.publicaciones.map(p => `<tr>
           <td>${c.anio(p.anio)}</td>
           <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>` : c.escapar(p.titulo)}</td>
@@ -530,8 +563,46 @@ async function catalogo() {
   if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'));
 }
 
+/* ══════════════════════════════════════════ teclado dentro de un gráfico */
+
+/* Cada barra era un punto de tabulación. Medido en Áreas temáticas: 41 de los
+   70 puntos de la página eran barras, así que pasar del primer gráfico al
+   enlace siguiente costaba veinte pulsaciones de Tab. Un gráfico no es una
+   lista de veinte controles: es UN control con veinte posiciones.
+
+   Patrón de composición de las prácticas ARIA: el gráfico es un solo punto de
+   tabulación y por dentro se recorre con las flechas. El tabindex «rueda» —la
+   marca enfocada vale 0 y las demás −1—, así que al volver con Tab se entra
+   por donde se salió y no por el principio.
+
+   Con esto el recorrido de la página baja de 70 puntos a 32, y explorar el
+   gráfico se vuelve más rápido en vez de más lento. */
+function tecladoGraficos() {
+  document.addEventListener('keydown', e => {
+    const marca = e.target.closest?.('svg.chart g.marca');
+    if (!marca) return;
+    const marcas = [...marca.closest('svg.chart').querySelectorAll('g.marca')];
+    const i = marcas.indexOf(marca);
+    let j = null;
+    // Las dos orientaciones responden a los cuatro cursores a propósito: el
+    // lector no tiene por qué saber si la serie se dibujó en horizontal o en
+    // vertical para poder recorrerla.
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = Math.min(i + 1, marcas.length - 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = Math.max(i - 1, 0);
+    else if (e.key === 'Home') j = 0;
+    else if (e.key === 'End') j = marcas.length - 1;
+    else return;
+
+    e.preventDefault();
+    if (j === i) return;
+    marca.setAttribute('tabindex', '-1');
+    marcas[j].setAttribute('tabindex', '0');
+    marcas[j].focus();
+  });
+}
+
 /* ============================================================== arranque */
-const PAGINAS = { portada, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
+const PAGINAS = { portada, seccion, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
 
 document.addEventListener('DOMContentLoaded', async () => {
   const pagina = document.body.dataset.pagina;
@@ -541,6 +612,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await c.montarAyuda();
     c.montarTooltip();
     if (PAGINAS[pagina]) await PAGINAS[pagina]();
+    // Delegado en document: vale para los gráficos pre-renderizados y para los
+    // que se repintan después de un filtro, sin volver a enganchar nada.
+    tecladoGraficos();
   } catch (e) {
     c.mostrarError(document.getElementById('contenido') || document.body, e);
   }

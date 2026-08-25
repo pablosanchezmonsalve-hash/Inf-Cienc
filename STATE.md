@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ce1f9eb` · Un enlace que abre la herramienta ya acotada a lo urgente
-Snapshot: 2026-08-24
+Último commit: `fc93da6` · La memoria del proyecto, declarada por lo que es
+Snapshot: 2026-08-25
 
 ---
 
@@ -44,7 +44,7 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **63 formas de firma eran 30 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+Las cifras de autor van en dos bases porque una revisión humana declaró que **85 formas de firma eran 38 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
 Y **4 de las publicadas probablemente no correspondan a personas**: la auditoría las marcó como probables fragmentos de cadena de afiliación que la fuente metió en la lista de autores (regla `E-09`). Dos de las señales son invariantes de la fuente; la tercera es una heurística sobre la forma del nombre, y sola no basta. Siguen contando y con ficha: confirmarlo es una decisión de identidad, y por `D-08` la toma una persona en `make revision`.
 
@@ -64,7 +64,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 4 |
 
-`make revision` reúne estas colas en 141 casos, de los que **89 siguen pendientes**: 52 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 111 casos, de los que **84 siguen pendientes**: 27 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -73,18 +73,18 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | # | Pendiente |
 |---|---|
 | `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
-| `T-03` | Revisión humana de las variantes de nombre encoladas (51 grupos) |
-| `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID |
+| `T-03` | Revisión humana de las variantes de nombre encoladas (28 grupos, 27 pendientes) |
+| `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID, de los que **10 afectan al informe** |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
 | `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
 | `T-13` | Confirmar semántica del percentil de citación con documentación SciVal |
-| `T-14` | Revisión humana de los 17 grupos de firmas que comparten ORCID |
+| `T-14` | Revisión humana de los grupos de firmas que comparten ORCID (**10 casos, 2 pendientes**) |
 | `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 233
+## Decisiones tomadas: 241
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
