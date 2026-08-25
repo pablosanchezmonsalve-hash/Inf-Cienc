@@ -38,8 +38,9 @@ Vigentes desde la Fase 1, ya validadas. No se reabren sin una razón nueva:
   compuerta del build lo verifica.
 - Todo indicador declara su denominador, su fuente y su fecha de corte.
 
-El índice completo está en `docs/DECISIONS.md`: 92 decisiones, una línea cada
-una. Léelo sólo si vas a tocar algo que podría contradecirlas.
+El índice completo está en `docs/DECISIONS.md`, una línea por decisión. Decía
+«92» y van muchas más: la cifra la publica STATE.md, que se regenera. Léelo sólo
+si vas a tocar algo que podría contradecirlas.
 </reglas_heredadas>
 
 <antes_de_dar_algo_por_terminado>
