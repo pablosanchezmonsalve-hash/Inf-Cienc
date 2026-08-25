@@ -69,6 +69,7 @@ COLAS: dict[str, list[str]] = {
     "Firma sin forma de persona": ["no_es_persona", "es_persona"],
     "ORCID sin confirmar": ["orcid_correcto", "orcid_incorrecto"],
     "ORCID no verificable": ["orcid_correcto", "orcid_incorrecto"],
+    "OpenAlex discrepa": ["orcid_correcto", "orcid_incorrecto"],
     "Firma sin ORCID": ["orcid_encontrado", "orcid_no_encontrado"],
 }
 
@@ -83,7 +84,7 @@ FAMILIA_ORCID = {
     "ORCID compartido", "ORCID en conflicto", "Fuentes en desacuerdo",
     "Mismo ORCID por afiliación", "Candidato por afiliación",
     "Candidato por afiliación (ambiguo)", "ORCID sin confirmar",
-    "ORCID no verificable", "Firma sin ORCID",
+    "ORCID no verificable", "Firma sin ORCID", "OpenAlex discrepa",
 }
 
 
