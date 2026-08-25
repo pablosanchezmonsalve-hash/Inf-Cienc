@@ -1,0 +1,66 @@
+{
+  "artboards": [
+    {
+      "file": "Portada.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 794,
+      "h": 1123,
+      "title": "1 · Portada",
+      "print": "fixed"
+    },
+    {
+      "file": "Main.dc.html",
+      "x": 874,
+      "y": 0,
+      "w": 794,
+      "h": 1123,
+      "title": "2 · Eje",
+      "print": "fixed"
+    },
+    {
+      "file": "Tabla.dc.html",
+      "x": 1748,
+      "y": 0,
+      "w": 794,
+      "h": 1123,
+      "title": "3 · Tabla",
+      "print": "fixed"
+    },
+    {
+      "file": "Apendice.dc.html",
+      "x": 2622,
+      "y": 0,
+      "w": 794,
+      "h": 1123,
+      "title": "4 · Apéndice",
+      "print": "fixed"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "bandas",
+      "x": 0,
+      "y": -215,
+      "w": 620,
+      "text": "El informe, en narrativa por bandas.\n\nSe adopta el sistema elegido en el rediseño: Newsreader + Public Sans, papel #fdf8f2, papel-2 #f7efe5, contraste #071e22, énfasis #f4c095, dato teal #1d7874.\n\nLas dos reglas medidas que gobiernan estas cuatro páginas:\n\n1. La banda Peach es TIPOGRÁFICA, nunca de datos: el color del dato cae a 3,21:1 y la marca de ausencia a 2,35:1. Aquí sólo lleva titular, prosa y los denominadores como texto.\n\n2. La ausencia va sobre Ink Black, donde mide 4,71:1. Lo que el informe no sabe ocupa el suelo más fuerte, no una nota al pie: en la portada y en el apéndice."
+    },
+    {
+      "id": "composicion",
+      "x": 660,
+      "y": -215,
+      "w": 560,
+      "text": "Composición, según las reglas del sistema:\n\n· una afirmación por banda;\n· los fondos alternan, nunca se repiten seguidos;\n· contraste y énfasis, una vez por página;\n· una figura por banda;\n· el sello viaja con su figura, nunca agrupado al final.\n\nLa advertencia va ANTES de la figura que califica. En la página de eje, «lo que el volumen no responde» precede a las áreas temáticas.\n\nApertura y cierre se aplican al DOCUMENTO, no a cada hoja: la portada abre, el apéndice cierra en Peach. Las interiores son bandas de trabajo."
+    },
+    {
+      "id": "tabla",
+      "x": 1320,
+      "y": -215,
+      "w": 480,
+      "text": "La página de tabla mantiene la banda como marco y deja la tabla como superficie de consulta, tal como pide la regla «dónde NO manda la banda».\n\nEs el mismo criterio que deja fuera a Publicaciones, Autores, la ficha y el catálogo: quien mira una tabla viene a buscar, no a que le cuenten."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

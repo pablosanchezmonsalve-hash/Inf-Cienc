@@ -1,0 +1,34 @@
+<!-- Cabecera común de las diez páginas (V2-16).
+
+     POR QUÉ EXISTE
+     Estas dieciséis líneas estaban copiadas en cada página. La del catálogo se
+     creó copiando la de metodología, que es exactamente cómo diez copias se
+     vuelven once y una de ellas se queda atrás. Cambiar la hoja de estilo, el
+     favicon o el guion de tema obligaba a acertar diez veces.
+
+     CÓMO SE USA
+     Cada página declara sólo lo suyo:
+
+         <head data-titulo="…" data-descripcion="…"></head>
+
+     y `src/build/06_assemble_site.py` lo expande al ensamblar, sustituyendo
+     {{titulo}} y {{descripcion}}. Una página sin esos atributos, o una
+     expansión que no deje la hoja de estilo dentro, abortan el build: una
+     cabecera que falla en silencio produce un sitio sin CSS que nadie mira
+     hasta que lo ve un lector.
+
+     Este archivo NO viaja a dist/: se borra tras expandir. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{titulo}}</title>
+<meta name="description" content="{{descripcion}}">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/app.css">
+<script>/* Corre antes de pintar, y las dos cosas que hace tienen que ocurrir antes.
+   1. El tema guardado: desde el módulo diferido, la página aparecería un
+      instante con el tema equivocado.
+   2. La clase `js`: marca que hay JavaScript. Las vistas conmutables se
+      contraen a una sola sólo bajo esa clase; sin JS se muestran las dos, que
+      es lo correcto —la tabla es la vía equivalente al gráfico, no un extra—. */
+(function(){var e=document.documentElement;e.className+=' js';
+try{var t=localStorage.getItem('tema');if(t)e.setAttribute('data-tema',t)}catch(x){}})();</script>

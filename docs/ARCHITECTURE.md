@@ -118,6 +118,7 @@ pendiente T-08. Los requisitos que debe cumplir, y que condicionan la elección:
 | ORCID Public API | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | Verificación, ampliación y candidatos |
 | ROR | `src/enrich/ror_institucion.py` | Identidad de la institución y sus nombres registrados. Escrito, **consulta sin ejecutar** |
 | OpenAlex | `src/enrich/orcid_openalex.py` | ORCID donde no había y contraste de la detección por ROR. Escrito, **consulta sin ejecutar**. No es fuente independiente: ingiere Crossref |
+| OpenAlex por institución | `src/enrich/openalex_cobertura.py` | La brecha de cobertura: producción que OpenAlex atribuye a la institución y el universo no tiene. Escrito, **consulta sin ejecutar** |
 
 Scopus y SciVal **no se consultan por API**: se leen de exports manuales
 versionados en `data/raw/`. Confundir las dos cosas cambia lo que se puede

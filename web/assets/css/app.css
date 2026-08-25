@@ -1360,12 +1360,45 @@ svg.chart .trama { pointer-events: none; }
   .cifra-etq { margin-top: var(--e2); }
 }
 
+/* Descargar el informe. Vive en la barra de vigencia porque es donde ya está
+   la procedencia: quien mira de qué fecha son los datos es quien va a querer
+   llevárselos. */
+.descargar {
+  display: inline-flex; align-items: center; gap: var(--e2);
+  font: 650 var(--t-s)/1 var(--f-ui);
+  /* `--marca` NO sirve aquí: en oscuro vale #2a1016, que es un color de
+     SUPERFICIE, no de tinta — sobre el fondo oscuro daba 1,05:1 y el botón era
+     invisible. Lo cazó la batería de contraste, no una revisión visual. La
+     tinta de marca es `--marca-alta`, la misma que usa `a:hover`. */
+  color: var(--marca-alta); background: var(--superficie);
+  border: 1px solid var(--linea-fuerte); border-radius: var(--radio-pastilla);
+  padding: .34em .8em; cursor: pointer; margin-left: auto;
+}
+.descargar svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; }
+.descargar:hover { background: var(--superficie-2); border-color: var(--marca-alta); }
+.descargar:focus-visible { outline: 2px solid var(--marca-alta); outline-offset: 2px; }
+/* El enlace de la guía perdía su empuje a la derecha en cuanto el botón tomó
+   el `margin-left:auto`. Se lo devuelve un hueco fijo, no otro `auto`: dos
+   `auto` en la misma fila reparten el sobrante y descolocan a los dos. */
+.vigencia-guia { margin-left: var(--e4); }
+
 /* Impresión: el informe se imprime y se archiva, así que el papel no puede
    perder ni el dato ni su procedencia. Las dos vistas de cada módulo se
-   imprimen —la figura y la tabla—, porque en papel no hay conmutador. */
+   imprimen —la figura y la tabla—, porque en papel no hay conmutador.
+
+   La página impresa ES el informe exportable: mismo origen que la pantalla, sin
+   una segunda maquetación que pudiera divergir. Lo que cambia es lo que el
+   papel exige y la pantalla no —tamaño de hoja, márgenes, cortes de página y
+   una procedencia que viaje en cada hoja—, porque una hoja suelta de un PDF
+   archivado no tiene barra de vigencia encima. */
+@page {
+  size: A4 portrait;
+  margin: 16mm 14mm 18mm;
+}
+
 @media print {
   .cabecera, .tema, .filtros, .paginacion, .salto-contenido,
-  .rail, .vigencia-guia { display: none; }
+  .rail, .vigencia-guia, .descargar, .ayuda, .tooltip { display: none; }
   body { background: #fff; }
   .disposicion { display: block; }
   .modulo, .kpi, .tabla-envoltura { box-shadow: none; border-color: #999; break-inside: avoid; }
@@ -1373,6 +1406,28 @@ svg.chart .trama { pointer-events: none; }
   .js .vista[data-activa="false"] { display: block; }
   .hero-texto { display: block; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; color: #555; }
+
+  /* La procedencia se queda, y sin el aspecto de barra de interfaz: en papel
+     es la línea de crédito del informe. */
+  .vigencia {
+    border: 0; border-bottom: 1.5px solid #000; background: #fff;
+    padding: 0 0 6pt; margin-bottom: 12pt;
+  }
+  .vigencia .contenedor { padding: 0; }
+
+  /* Cortes. Un titular al pie de una hoja y su figura en la siguiente es el
+     defecto clásico de imprimir una web sin decirle nada al navegador. */
+  h1, h2, h3 { break-after: avoid; }
+  .modulo { break-inside: avoid; }
+  .seccion + .seccion, .modulo + .modulo { break-before: auto; }
+  table { break-inside: auto; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+
+  /* El pie de página lleva el universo y sus tres denominadores: es lo que
+     hace interpretable cualquier cifra de la hoja anterior, y por D-16 no
+     puede quedarse sólo en la pantalla. */
+  .pie { border-top: 1.5px solid #000; padding-top: 6pt; }
 }
 
 /* ------------------------------------------------------- catálogo de indicadores

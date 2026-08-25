@@ -488,6 +488,12 @@ def build_meta() -> dict:
         "fecha_export": scival["fecha_export"],
         "fecha_build": date.today().isoformat(),
         "denominadores": denominadores(),
+        # Lo consume el explorador para decidir cuándo el sello de un corte
+        # pasa a ser advertencia. Antes sólo lo conocía el build, así que el
+        # navegador habría tenido que fijar un umbral propio — y dos umbrales
+        # para una misma regla es la forma de que digan cosas distintas.
+        "cobertura_minima_sin_advertencia":
+            INDICATORS["reglas_transversales"]["cobertura_minima_sin_advertencia"],
         "advertencia_global": (
             "Los indicadores describen la producción indexada en Scopus, con las "
             "métricas normalizadas de SciVal. La cobertura de la base no es "

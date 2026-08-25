@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1d7874; } a:hover { color: #145956; }
+    .ojo { font: 600 10.5px/1 'Public Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+    .sello { font: 400 10px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 794px; height: 1123px; box-sizing: border-box; background: #fdf8f2; color: #071e22; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column;">
+
+  <div style="padding: 26px 56px 0; display: flex; justify-content: space-between; align-items: baseline; font-size: 10.5px; color: #5a6b6b;">
+    <span class="ojo">Informe Cienciométrico · UFT</span>
+    <span class="sello">2023–2025 · corte 2026-07-22</span>
+  </div>
+
+  <div style="background: #fdf8f2; padding: 22px 56px 30px; display: flex; flex-direction: column; gap: 12px;">
+    <p class="ojo" style="margin: 0; color: #1d7874;">Eje 1 · Producción</p>
+    <h2 style="font-family: 'Newsreader', Georgia, serif; font-size: 38px; line-height: 1.08; font-weight: 400; letter-spacing: -.022em; margin: 0; max-width: 20ch;">Qué se publicó, y qué no dice el volumen</h2>
+    <p style="font-size: 16px; line-height: 1.6; color: #33484a; margin: 0; max-width: 62ch;">Cuánto se publicó, en qué años, de qué tipo documental, en qué fuentes y desde qué unidades académicas.</p>
+  </div>
+
+  <div style="background: #fdf8f2; padding: 0 56px 26px;">
+    <div style="display: flex; gap: 13px; align-items: flex-start; padding: 15px 18px; background: #fdefdc; border: 1px solid #c07a2a; border-left: 4px solid #c07a2a; border-radius: 5px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a05f14" stroke-width="2.1" stroke-linecap="round" style="flex: none; margin-top: 2px;"><path d="M12 3 1.5 21h21z"></path><path d="M12 10v4.5M12 17.5v.5"></path></svg>
+      <div>
+        <p style="font: 700 11px/1 'Public Sans', sans-serif; letter-spacing: .09em; text-transform: uppercase; color: #6b3d10; margin: 0 0 8px;">Lo que el volumen no responde</p>
+        <p style="font-size: 13.5px; line-height: 1.6; margin: 0; color: #6b3d10;">Qué tan bueno es lo publicado. El volumen mide actividad indexada, no rendimiento ni calidad: dos unidades con la misma cifra pueden estar en disciplinas que Scopus cubre de forma muy desigual, y compararlas mide entonces la cobertura de la base tanto como la actividad de las personas.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: #f7efe5; padding: 30px 56px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <h3 style="font-family: 'Newsreader', Georgia, serif; font-size: 24px; font-weight: 500; letter-spacing: -.015em; margin: 0;">Áreas temáticas, sin repartir el total</h3>
+      <span class="sello" style="color: #5a6b6b;">T-05</span>
+    </div>
+    <p style="font-size: 15px; line-height: 1.6; color: #33484a; margin: 0; max-width: 64ch;">La producción se concentra en ciencias de la vida y medicina: <strong style="color: #071e22;">537</strong> de 816 publicaciones con área asignada.</p>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <sc-for list="{{areas}}" as="a" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: 210px minmax(0, 1fr) 44px; gap: 14px; align-items: center;">
+          <div style="font-size: 13px;">{{a.nombre}}</div>
+          <div style="height: 16px; background: #eadfd0; border-radius: 2px; overflow: hidden;">
+            <div style="height: 16px; width: {{a.ancho}}; background: #1d7874; border-radius: 2px;"></div>
+          </div>
+          <div style="font-size: 13px; font-weight: 650; text-align: right; font-variant-numeric: tabular-nums;">{{a.n}}</div>
+        </div>
+      </sc-for>
+    </div>
+    <p class="sello" style="margin: 0; color: #5a6b6b;">SciVal · corte 2026-07-22 · sobre 816 publicaciones con área temática</p>
+    <p style="font-size: 13px; line-height: 1.6; color: #33484a; margin: 0; max-width: 66ch;">Las cinco cifras suman más que 816: la clasificación de SciVal no es excluyente y una publicación puede contarse en más de un área. Leerlas como un reparto del total sería un error.</p>
+  </div>
+
+  <div style="background: #fdf8f2; padding: 28px 56px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <h3 style="font-family: 'Newsreader', Georgia, serif; font-size: 24px; font-weight: 500; letter-spacing: -.015em; margin: 0;">Tres bases distintas en un solo eje</h3>
+      <span class="sello" style="color: #5a6b6b;">D-16</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+      <div style="border-top: 2px solid #071e22; padding-top: 10px;">
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 28px; line-height: 1; margin-bottom: 5px;">823</div>
+        <p style="font-size: 12.5px; line-height: 1.5; color: #33484a; margin: 0;">Producción anual y tipo documental, sobre todo el universo.</p>
+      </div>
+      <div style="border-top: 2px solid #071e22; padding-top: 10px;">
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 28px; line-height: 1; margin-bottom: 5px;">816</div>
+        <p style="font-size: 12.5px; line-height: 1.5; color: #33484a; margin: 0;">Ranking de fuentes y áreas temáticas, sólo sobre lo que tiene métricas.</p>
+      </div>
+      <div style="border-top: 2px solid #071e22; padding-top: 10px;">
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 28px; line-height: 1; margin-bottom: 5px;">1.207</div>
+        <p style="font-size: 12.5px; line-height: 1.5; color: #33484a; margin: 0;">Producción por unidad, sobre pares autor × publicación: un trabajo firmado desde dos unidades cuenta en las dos.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 0 56px 26px; display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid #e2d9cd; margin: 0 56px; padding: 12px 0 26px;">
+    <span class="sello" style="color: #5a6b6b;">Cada cifra declara su fuente, su corte y su denominador.</span>
+    <span style="font-family: 'Newsreader', Georgia, serif; font-size: 15px;">2</span>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":794,"height":1123}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const datos = [
+      { nombre: 'Life Sciences & Medicine', n: 537 },
+      { nombre: 'Social Sciences & Management', n: 192 },
+      { nombre: 'Engineering & Technology', n: 102 },
+      { nombre: 'Arts & Humanities', n: 94 },
+      { nombre: 'Natural Sciences', n: 71 },
+    ];
+    return { areas: datos.map((d) => ({ ...d, ancho: Math.round(d.n / 537 * 100) + '%' })) };
+  }
+}
+</script>
+</body>
+</html>

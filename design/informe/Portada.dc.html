@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1d7874; } a:hover { color: #145956; }
+    .ojo { font: 600 10.5px/1 'Public Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+    .sello { font: 400 10px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 794px; height: 1123px; box-sizing: border-box; background: #fdf8f2; color: #071e22; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column;">
+
+  <div style="background: #fdf8f2; padding: 56px 56px 34px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 13px;">
+      <div style="width: 40px; height: 40px; border: 1.5px dashed #c9bcab; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 8.5px; line-height: 1.15; text-align: center; color: #5a6b6b;">LOGO<br>pendiente</div>
+      <p class="ojo" style="margin: 0; color: #1d7874;">Universidad Finis Terrae</p>
+    </div>
+    <h1 style="font-family: 'Newsreader', Georgia, serif; font-size: 58px; line-height: 1.03; font-weight: 400; letter-spacing: -.025em; margin: 0; max-width: 13ch;">Informe Cienciométrico Institucional</h1>
+    <p style="font-size: 16.5px; line-height: 1.6; color: #33484a; margin: 0; max-width: 58ch;">Producción, impacto, colaboración y estructura temática de la actividad científica indexada en Scopus, con las métricas normalizadas de SciVal.</p>
+  </div>
+
+  <div style="background: #f7efe5; padding: 34px 56px; display: flex; flex-direction: column; gap: 18px;">
+    <p class="ojo" style="margin: 0; color: #5a6b6b;">La cifra que enmarca el resto</p>
+    <div style="display: flex; align-items: flex-end; gap: 26px;">
+      <div style="font-family: 'Newsreader', Georgia, serif; font-size: 92px; line-height: .86; font-weight: 400; letter-spacing: -.03em; color: #071e22;">823</div>
+      <p style="font-size: 16px; line-height: 1.55; color: #33484a; margin: 0 0 6px; max-width: 40ch;">publicaciones en la ventana <strong style="color: #071e22;">2023–2025</strong>, con un crecimiento sostenido: 228, 276 y 319.</p>
+    </div>
+    <svg viewBox="0 0 682 96" width="682" height="96" role="img" aria-label="Producción anual: 228 en 2023, 276 en 2024, 319 en 2025">
+      <rect x="0"   y="27" width="200" height="52" fill="#1d7874"></rect>
+      <rect x="216" y="17" width="200" height="62" fill="#1d7874"></rect>
+      <rect x="432" y="5"  width="200" height="74" fill="#1d7874"></rect>
+      <text x="100" y="94" text-anchor="middle" font-size="12" fill="#33484a">2023 · 228</text>
+      <text x="316" y="94" text-anchor="middle" font-size="12" fill="#33484a">2024 · 276</text>
+      <text x="532" y="94" text-anchor="middle" font-size="12" fill="#33484a">2025 · 319</text>
+    </svg>
+    <p class="sello" style="margin: 0; color: #5a6b6b;">Scopus · corte 2026-07-22 · sobre 823 publicaciones (100 % de cobertura)</p>
+  </div>
+
+  <div style="background: #fdf8f2; padding: 30px 56px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 20px;">
+    <sc-for list="{{cifras}}" as="c" hint-placeholder-count="6">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 34px; line-height: 1; font-weight: 400; letter-spacing: -.02em;">{{c.valor}}</div>
+        <div style="font-size: 13px; font-weight: 600;">{{c.etiqueta}}</div>
+        <div class="sello" style="color: #5a6b6b;">{{c.base}}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background: #071e22; color: #eef1ee; padding: 32px 56px; display: flex; flex-direction: column; gap: 13px; flex-grow: 1;">
+    <p class="ojo" style="margin: 0; color: #f4c095;">Lo que este informe no sabe</p>
+    <p style="font-size: 15.5px; line-height: 1.6; margin: 0; color: #eef1ee; max-width: 62ch;">Las <strong style="color: #f4c095;">556</strong> son <strong style="color: #f4c095;">formas de firma</strong>, no necesariamente personas distintas. De las 589 detectadas en la fuente, 63 se fusionaron en 30 personas tras revisión humana; las 526 restantes siguen sin consolidar.</p>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <svg width="200" height="11" style="display:block"><defs><pattern id="tramaP" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#7d8886"></rect><line x1="0" y1="0" x2="0" y2="5" stroke="#071e22" stroke-width="1.7"></line></pattern></defs><rect width="200" height="11" rx="1" fill="url(#tramaP)"></rect></svg>
+      <span style="font-size: 13px; color: #93a3a1;">36,2 % de los pares autor × publicación no permite deducir unidad académica</span>
+    </div>
+    <p style="font-size: 13.5px; line-height: 1.6; margin: 0; color: #93a3a1; max-width: 66ch;">El corpus describe producción <strong style="color: #eef1ee;">indexada en Scopus</strong>, cuya cobertura no es uniforme entre disciplinas: castiga a humanidades, ciencias sociales y a la publicación en español.</p>
+  </div>
+
+  <div style="background: #f4c095; padding: 30px 56px 34px; display: flex; flex-direction: column; gap: 14px;">
+    <sc-if value="{{borrador}}" hint-placeholder-val="{{ true }}">
+      <p style="font: 700 11px/1.5 'Public Sans', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #071e22; margin: 0; border: 1.5px solid #071e22; border-radius: 3px; padding: 7px 12px; align-self: flex-start;">Borrador · identidad visual sin validar</p>
+    </sc-if>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+      <div style="border-top: 2px solid #071e22; padding-top: 8px;"><div style="font: 600 10px/1 'Public Sans'; letter-spacing: .12em; text-transform: uppercase; color: #33484a; margin-bottom: 5px;">Fuentes</div><strong style="font-size: 13.5px;">Scopus · SciVal</strong></div>
+      <div style="border-top: 2px solid #071e22; padding-top: 8px;"><div style="font: 600 10px/1 'Public Sans'; letter-spacing: .12em; text-transform: uppercase; color: #33484a; margin-bottom: 5px;">Ventana</div><strong style="font-size: 13.5px;">2023–2025</strong></div>
+      <div style="border-top: 2px solid #071e22; padding-top: 8px;"><div style="font: 600 10px/1 'Public Sans'; letter-spacing: .12em; text-transform: uppercase; color: #33484a; margin-bottom: 5px;">Citas al</div><strong style="font-size: 13.5px;">2026-07-22</strong></div>
+      <div style="border-top: 2px solid #071e22; padding-top: 8px;"><div style="font: 600 10px/1 'Public Sans'; letter-spacing: .12em; text-transform: uppercase; color: #33484a; margin-bottom: 5px;">Generado</div><strong style="font-size: 13.5px;">2026-08-19</strong></div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"borrador":{"editor":"boolean","default":true,"section":"Identidad"},"$preview":{"width":794,"height":1123}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      borrador: this.props.borrador ?? true,
+      cifras: [
+        { valor: '3.935', etiqueta: 'Citas totales', base: 'sobre 816 · fuente única: SciVal' },
+        { valor: '4,82',  etiqueta: 'Citas por publicación', base: 'sobre 816 publicaciones' },
+        { valor: '0,87',  etiqueta: 'FWCI institucional', base: 'sobre 816 · 1,0 = promedio mundial' },
+        { valor: '51,2 %', etiqueta: 'Colaboración internacional', base: 'sobre 816 publicaciones' },
+        { valor: '556',   etiqueta: 'Autores UFT distintos', base: 'sobre 818 · formas de firma' },
+        { valor: '27',    etiqueta: 'Indicadores publicados', base: 'de 40 evaluados' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

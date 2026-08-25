@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `cfe3137` · El presupuesto de peso pasa de nota en prosa a compuerta medida
-Snapshot: 2026-08-24
+Último commit: `9eca8d5` · Devolver el sello de procedencia a cada indicador
+Snapshot: 2026-08-25
 
 ---
 
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 231
+## Decisiones tomadas: 246
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

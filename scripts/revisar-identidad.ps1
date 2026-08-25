@@ -185,7 +185,12 @@ if (Test-Path $descargas) {
     # El @() no sobra: sin el, un unico resultado llega como escalar y no como
     # array, y `.Count` sobre un escalar no significa lo mismo en Windows
     # PowerShell 5.1 que en 7.
-    $cand = @(Get-ChildItem (Join-Path $descargas "identity_decisions*.csv") `
+    # Se buscan las DOS extensiones. Abierta como archivo local la herramienta
+    # baja un .csv; servida como pagina publicada la entrega la capacidad de
+    # descarga del anfitrion, que cae a .txt cuando el .csv no esta habilitado
+    # en esa vista. El contenido es el mismo y apply_decisions.py lee por ruta.
+    $cand = @(Get-ChildItem (Join-Path $descargas "identity_decisions*.csv"),
+                            (Join-Path $descargas "identity_decisions*.txt") `
               -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending)
 }
 

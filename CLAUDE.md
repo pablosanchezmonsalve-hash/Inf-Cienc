@@ -67,12 +67,20 @@ Debes:
 </author_master_rule>
 
 <memory_and_continuity>
-Este proyecto usa Claude-Mem.
+La memoria de este proyecto es VERSIONADA, no propietaria: `STATE.md` —vista
+generada del repositorio—, `SESSION_NOTES.md` —el porqué de cada decisión, con
+su fecha— y `docs/DECISIONS.md` —el índice de todas—. Se leen, se auditan y
+sobreviven a cambiar de asistente.
+
+Este bloque decía «Este proyecto usa Claude-Mem». Era falso y el propio
+`SESSION_NOTES.md` lo tenía registrado como supuesto descartado: no hay
+binario, plugin ni servidor MCP, comprobado. Corregido el 2026-08-20.
 
 Antes de retomar una sesión:
 1. lee STATE.md — punto de entrada generado, ~120 líneas,
 2. abre sólo el documento que responda tu pregunta concreta (STATE.md trae el mapa),
-3. revisa la memoria relevante del proyecto si existe,
+3. si necesitas el porqué de una decisión, búscala en `docs/DECISIONS.md`, que
+   la indexa y remite a su sesión,
 4. alinea lo recuperado con este archivo.
 
 STATE.md es una VISTA DERIVADA del repositorio, no una fuente de autoridad: no
@@ -89,8 +97,7 @@ Orden de precedencia si hay conflicto:
 3. PROJECT_SPEC.md,
 4. PLAN.md,
 5. SESSION_NOTES.md,
-6. memoria recuperada vía Claude-Mem,
-7. inferencia propia.
+6. inferencia propia.
 
 No reabras decisiones ya tomadas sin una razón clara.
 Si encuentras contradicción, declárala y propone resolución.
