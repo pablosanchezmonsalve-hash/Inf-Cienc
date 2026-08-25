@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex cobertura informe limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex cobertura scopus informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -79,6 +79,14 @@ openalex:
 # En Windows:  py src\enrich\openalex_cobertura.py
 cobertura:
 	python3 src/enrich/openalex_cobertura.py
+
+# Fecha de corte para T-06: consulta la Scopus Search API con la misma cadena
+# AF-ID + PUBYEAR que hoy se exporta a mano, y reporta instante de ejecución,
+# consulta literal y recuento — para pegar a mano en config/sources.yml. NO
+# reemplaza el corpus vigente. Exige SCOPUS_API_KEY en el entorno.
+# En Windows:  py src\enrich\scopus_api.py
+scopus:
+	python3 src/enrich/scopus_api.py
 
 # El informe institucional en PDF, desde el sitio ya construido. Usa la MISMA
 # hoja de impresión que el botón «Descargar informe» de la interfaz: un origen,
