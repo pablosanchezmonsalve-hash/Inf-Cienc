@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `6322378` · El prompt de continuidad citaba 92 decisiones; van 244
+Último commit: `69c3a75` · La ventana, declarada donde no se puede no verla
 Snapshot: 2026-08-25
 
 ---
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 256
+## Decisiones tomadas: 261
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

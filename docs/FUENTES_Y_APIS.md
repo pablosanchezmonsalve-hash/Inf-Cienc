@@ -1,6 +1,6 @@
 # Fuentes y plataformas: lo implementado y lo propuesto
 
-**Actualizado:** 2026-08-19 · **Alcance:** de dónde sale cada dato hoy, y qué
+**Actualizado:** 2026-08-25 · **Alcance:** de dónde sale cada dato hoy, y qué
 plataformas podrían aportar lo que hoy falta.
 
 Este documento responde a dos preguntas que se confunden con facilidad:
@@ -226,20 +226,43 @@ No es una integración nueva: es usar más del conector que ya existe.
   `config/sources.yml` y sus propios denominadores; jamás agregado al universo
   principal sin decisión explícita.
 
-### 3.7 API de Scopus (Elsevier) — sustituir el export manual
+### 3.7 API de Scopus (Elsevier) — **implementado el 2026-08-25; falta ejecutar la consulta**
 
-- **Qué preguntaría:** lo mismo que hoy se exporta a mano, pero con fecha de
-  corte declarada por la propia consulta.
-- **Qué desbloquearía:** `V2-05` y la ambigüedad `A-05` —el export de Scopus no
-  declara fecha de corte— dejarían de existir. La actualización pasaría de ser
-  un procedimiento manual a un objetivo del `Makefile`.
-- **Hay que confirmar (bloqueante):** clave de API institucional, si la
-  suscripción de la universidad la habilita, si exige consulta desde IP
-  institucional o *token* de institución, y qué límites de consulta impone. Nada
-  de esto está confirmado hoy.
+`src/enrich/scopus_api.py` (T-06).
+
+- **Qué pregunta:** la misma cadena que hoy se exporta a mano —`AF-ID(...) AND
+  PUBYEAR > ... AND PUBYEAR < ...`, tomada de `config/institution.yml`—, pero
+  capturando el instante exacto de ejecución en vez de depender de que alguien
+  transcriba el "Data last updated" de la interfaz web.
+- **Corrección respecto de la versión anterior de esta sección:** no es cierto
+  que la API "tenga" una fecha de corte que el export manual no tiene. La
+  Scopus Search API no expone un campo de actualización propio, a diferencia
+  de SciVal. Lo que sí resuelve es la trazabilidad: consulta literal e
+  instante de ejecución quedan capturados por código, no copiados a mano — que
+  es exactamente lo que `docs/UPDATING_REQUEST.md` §3 pide como mínimo
+  aceptable cuando la fuente no declara su propio corte.
+- **Qué NO hace:** no reemplaza `scopus_export` ni el universo publicado (823,
+  `D-16`). Si el recuento que devuelve difiere del vigente, lo declara como
+  hallazgo — nunca lo aplica solo. Promover un nuevo export a fuente primaria
+  sigue siendo una decisión humana posterior.
+- **Confirmado por el usuario, sesión 2026-08-25:** tiene API Key, todas las
+  APIs de la suscripción están aprobadas, sin restricción de IP institucional.
+- **Sigue sin confirmar:** el límite de consulta (quota). El conector no lo
+  asume: lee y reporta las cabeceras `X-RateLimit-*` de la propia respuesta en
+  cada corrida, así que la primera ejecución responde la pregunta en vez de
+  que el código adivine un número de la documentación general de Elsevier.
 - **Restricción legal declarada:** el alcance de publicación de métricas de
   Elsevier sigue **sin verificación jurídica** (`V2_BACKLOG.md` §4). Recuperar
   más dato por API no cambia esa restricción; la hace más urgente.
+- **El contrato de la API no está verificado desde este repositorio.** Igual
+  que ROR y OpenAlex, este entorno probablemente no alcanza
+  `api.elsevier.com`; ejecutar desde la máquina del usuario.
+
+```
+python3 src/enrich/scopus_api.py --test     lógica, sin red
+python3 src/enrich/scopus_api.py            la consulta (exige SCOPUS_API_KEY)
+py src\enrich\scopus_api.py                 lo mismo, en Windows
+```
 
 ### 3.8 API de SciVal (Elsevier) — cerrar `X-01`
 

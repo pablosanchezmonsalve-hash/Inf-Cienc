@@ -2774,3 +2774,84 @@ límite de peticiones, y si migrar la ventana actual o extenderla a 2026.
 
 Sin cambios: terminar `make openalex` y `make cobertura`, y decidir sobre la API
 de Elsevier.
+
+---
+
+## Cierre · T-06 tiene conector, y una pregunta que no era la que parecía
+
+El usuario pidió avanzar T-06 ("reexportar Scopus con la fecha de corte").
+Antes de escribir nada, tres de las cuatro preguntas que quedaron pendientes en
+el cierre anterior se resolvieron en la conversación: API Key confirmada,
+todas las APIs de la suscripción aprobadas, sin restricción de IP. La cuarta
+—si extender la ventana a 2026— **sigue sin decidirse**, y el límite de
+consulta (quota) tampoco se conocía. Ninguna de las dos se asumió.
+
+### El hallazgo que reencuadra T-06
+
+`docs/UPDATING_REQUEST.md` y la sección 3.7 de `FUENTES_Y_APIS.md` (antes de
+esta sesión) daban por sentado que la API "tiene" una fecha de corte que el
+export manual no tiene. **Es impreciso.** La Scopus Search API no expone un
+campo de actualización propio —a diferencia de SciVal, que sí lo declara—.
+Lo que la API aporta de verdad es trazabilidad: consulta literal e instante
+de ejecución capturados por código en vez de transcritos a mano, que es
+exactamente el mínimo que `docs/UPDATING_REQUEST.md` §3 ya aceptaba ("si la
+exportación no la incluye, basta con anotarla aparte junto con la consulta
+usada"). Sin este ajuste, el script habría prometido un dato que la fuente no
+entrega.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-249 | El conector declara el **instante de ejecución**, no una "fecha de corte de Scopus" que la API no expone | Prometer un campo que la fuente no tiene sería inventar un dato, prohibido por `CLAUDE.md` |
+| D-250 | El límite de consulta no se asume: se lee de las cabeceras `X-RateLimit-*` de cada respuesta y se reporta | El usuario no lo conocía y la documentación general de Elsevier no sustituye una medición propia |
+| D-251 | Si el recuento de la API difiere del universo publicado (823), se declara como hallazgo y no se aplica al corpus | Una base bibliográfica crece hacia atrás; una diferencia puede ser indexación nueva, no un error. Aplicarla sola confundiría hallazgo con corrección (mismo principio que `D-08`) |
+| D-252 | El conector usa la ventana que hoy declara `config/institution.yml` (2023-2025), no una ventana extendida | Extender a 2026 es la cuarta pregunta del cierre anterior, todavía sin decidir. Bundlearla aquí la habría convertido en un hecho sin que nadie la decidiera |
+| D-253 | Credenciales solo por variable de entorno (`SCOPUS_API_KEY`, `SCOPUS_INSTTOKEN`); nunca en el repositorio ni pedidas por chat | Mismo patrón que `docs/ORCID_API_GUIDE.md`; una API key es un secreto, no un dato de proyecto |
+
+### Archivos creados o modificados
+
+```
+src/enrich/scopus_api.py       nuevo · conector Scopus Search API, --test sin red
+config/sources.yml             nueva entrada scopus_api, ejecutada: false
+docs/FUENTES_Y_APIS.md         §3.7 pasa de propuesta a implementada; fecha de
+                                 actualización del documento
+Makefile                       nuevo objetivo `scopus` (py src\enrich\scopus_api.py en Windows)
+PLAN.md                        T-06: de "petición redactada" a "conector implementado"
+```
+
+### Verificación
+
+`python3 src/enrich/scopus_api.py --test` — 7 casos, todos OK: construcción de
+la consulta contra el valor exacto documentado en `UPDATING_REQUEST.md`
+(`AF-ID(60105368) AND PUBYEAR > 2022 AND PUBYEAR < 2026`), extracción del
+recuento, detección de tres formas de respuesta inválida sin adivinar, y
+lectura de cabeceras de límite con y sin las cabeceras presentes. Sin red:
+este entorno probablemente no alcanza `api.elsevier.com`, igual que le pasó a
+`ror_institucion.py` con `api.ror.org`, así que la consulta real queda para
+que el usuario la corra en su máquina con `SCOPUS_API_KEY`.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «La API de Scopus declara una fecha de corte que el export manual no tiene» | **Falso.** No tiene ese campo. Lo que aporta es instante de ejecución y consulta capturados por código, no una fecha declarada por la fuente |
+| «Con la API Key ya se puede escribir el conector sin más preguntas» | **Parcial.** Alcanzó para las tres primeras; el límite de consulta seguía sin confirmarse y no se asumió — se lee de la respuesta |
+| «T-06 y la decisión de extender la ventana a 2026 son la misma pregunta» | **Falso.** T-06 es trazabilidad de una consulta; la ventana es alcance del corpus. El conector usa 2023-2025 sin decidir la segunda |
+
+### Ambigüedades abiertas
+
+- **Límite de consulta**: se sabrá en la primera corrida real, no antes.
+- **Ventana 2023-2025 vs. extender a 2026**: sigue abierta, sin tocar por esta sesión.
+- `T-02`, `T-13`: como en el cierre anterior.
+- `T-03`, `T-04`, `T-14`, `T-15`: esperando `make revision` (84 pendientes).
+- `T-10`: depende de `T-03`.
+
+### Próximo paso recomendado
+
+Que el usuario ejecute `make scopus` (o `py src\enrich\scopus_api.py` en
+Windows) con `SCOPUS_API_KEY` definida. El script imprime el bloque listo para
+pegar en `config/sources.yml` y declara como hallazgo, no como corrección
+automática, si el recuento difiere de 823. Con eso vuelto, T-06 se cierra a
+mano con la evidencia delante — igual que `T-02` está esperando el envío de
+`internal/validacion_unidades.md`.
