@@ -2545,3 +2545,85 @@ propietaria.
 
 Sin cambios: las 13 verificaciones urgentes, y los tres conectores escritos sin
 ejecutar.
+
+---
+
+## Cierre · La fusión con el explorador, y el sello que había desaparecido
+
+Dos trabajos encadenados: reconciliar esta rama con un `main` que había avanzado
+25 commits, y arreglar lo que esa reconciliación dejó al descubierto.
+
+### La fusión
+
+`main` traía el rediseño en bandas aplicado al sitio, el motor único de
+filtrado, las cuatro secciones explorables y el presupuesto de peso como
+compuerta. Ocho archivos en conflicto; sólo cuatro eran trabajo de verdad.
+
+**Las cuatro páginas de sección.** `V2-16` les había sustituido el `<head>` por
+el marcador `data-titulo`/`data-descripcion`, y `main` les cambió el cuerpo y el
+`data-pagina` de «modulos» a «seccion». Se resolvieron tomando la versión de
+`main` **entera** y sustituyendo su `<head>` por el marcador — seguro porque se
+comprobó antes de tocar nada que `main` no modificó el `<head>` en ninguna de
+las diez páginas: es byte a byte la plantilla.
+
+**Lo derivado no se fusiona, se deriva.** `STATE.md`, `docs/DECISIONS.md` y
+`revision_identidad.html` se regeneraron después de resolver. `SESSION_NOTES.md`
+conserva los dos bloques: es un diario de sólo añadir.
+
+### El hallazgo: la procedencia había desaparecido de los indicadores
+
+CI falló con «dist/impacto.html no trae los sellos de procedencia». Antes de
+tocar nada se construyó `origin/main` puro en un worktree aparte: **cero sellos
+en todas las páginas**. El fallo era anterior a esta rama.
+
+No es que la procedencia se hubiera perdido entera. El explorador conservó el
+denominador por cifra —cita `D-16` al construirlas— pero movió fuente y fecha
+de corte a **una sola vez por página**, en la barra de vigencia. Medido sobre
+`dist/impacto.html`: 3 denominadores por cifra, **una** aparición de la fecha de
+corte, **cero** sellos. Con JavaScript y sin él.
+
+Y quedó código vivo que nadie llamaba: `vista.js:173` seguía invocando
+`c.sello(...)` desde `modulo()`, que las páginas de sección ya no usan.
+
+**La compuerta de `deploy.yml` fue la única de las seis verificaciones que lo
+notó.** Contraste, estructura, flujos, responsive, higiene y peso pasan en verde
+con los sellos ausentes. Una comprobación de cadena literal escrita a mano
+—justo el patrón que este repositorio desconfía— hizo aquí exactamente su
+trabajo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-234 | El sello vuelve **a cada indicador**, no sólo a la barra de página | El N no es global —823 en producción, 816 en impacto— y para una página que se imprime y se archiva, una hoja suelta no lleva la barra de vigencia encima |
+| D-235 | `fuente` y `corte` vienen de `series.json`; `N` y cobertura se **recalculan sobre el recorte** | Son cosas distintas: las dos primeras son propiedades de la fuente y no cambian al filtrar. Repetir el N del total mientras alguien mira un recorte es el error que la propia cabecera de `vista_explorador.js` describía |
+| D-236 | Un campo sin extractor **no afirma cobertura**: se calla | Ver el fallo de abajo. Un sello que miente es peor que ningún sello |
+| D-237 | `cobertura_minima_sin_advertencia` viaja a `meta.json` | El explorador lo necesita para decidir cuándo un sello pasa a ser advertencia, y antes sólo lo conocía el build. Dos umbrales para una misma regla acaban diciendo cosas distintas |
+| D-238 | El mapa de procedencias lo arma **una función** que comparten pre-render y navegador | El sello escrito en el build y el que se repinta al filtrar no pueden divergir |
+
+### Un fallo mío, encontrado antes de empujar
+
+La primera versión contaba la cobertura con el extractor del campo y, **cuando
+no había extractor, devolvía el total**. Los tres cortes numéricos —citas, FWCI
+y percentil— se dibujan sin extractor, así que `I-01` publicaba «100,0 % · 823
+con dato» cuando las citas sólo existen en **816**.
+
+Lo encontré mirando la salida, no una prueba: el sello decía 100 % en un
+indicador cuyo denominador este proyecto lleva meses declarando como 816.
+
+Corregido: los tres numéricos cuentan cuántas publicaciones traen ese número, y
+un campo desconocido no afirma nada. La cobertura ahora varía como debe — 100 %,
+99,1 %, 97,2 %, 92,6 % y 37,7 % en unidad académica, que dispara la advertencia.
+
+### Ambigüedad que queda abierta
+
+El sello de `P-07` declara **310 de 823 publicaciones**; el build calculaba ese
+indicador sobre **1.207 pares autor × publicación** (63,8 %). Son dos cortes del
+mismo indicador y cada superficie declara el suyo, que es lo correcto — pero
+quien compare las dos cifras sin leer la base las verá contradictorias. Sin
+resolver.
+
+### Próximo paso recomendado
+
+Fusionar el PR #37, que quedó en verde. Después, sin cambios: las 13
+verificaciones urgentes y los tres conectores escritos sin ejecutar.
