@@ -104,6 +104,9 @@ jobs:
       - name: Verificar la lógica de contraste con OpenAlex
         run: python3 src/enrich/orcid_openalex.py --test
 
+      - name: Verificar la lógica de la brecha de cobertura
+        run: python3 src/enrich/openalex_cobertura.py --test
+
       # Lo que decide qué firmas se fusionan como una persona y cuáles dejan de
       # contarse por no serlo. Es la lógica con más consecuencias sobre lo
       # publicado que existe fuera del pipeline, y hasta ahora no la ejercía

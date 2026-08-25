@@ -61,6 +61,9 @@ async function main() {
 
   const meta = await leerJSON('meta.json');
   const series = await leerJSON('series.json');
+  // El mismo mapa que arma el navegador, con la misma función: el sello
+  // pre-renderizado y el que se repinta al filtrar no pueden divergir.
+  const proc = vx.procedencias(series, meta);
   const { kpis } = await leerJSON('kpis.json');
   const { ejes } = await leerJSON('ejes.json');
   const { publicaciones } = await leerJSON('publications.json');
@@ -98,7 +101,7 @@ async function main() {
       // las cifras y los gráficos del conjunto entero, y sólo pierde la
       // capacidad de recortarlo. Los `details` de los filtros se abren y se
       // leen igual sin guion.
-      const vacio = vx.explorador(publicaciones, {});
+      const vacio = vx.explorador(publicaciones, {}, proc);
       html = rellenar(html, 'titular', vx.cabecera(meta), a);
       html = rellenar(html, 'estado-recorte', vacio.estado, a);
       html = rellenar(html, 'controles', vacio.controles, a);
@@ -113,7 +116,7 @@ async function main() {
       const a = [];
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
       const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
-      const sec = vx.seccion(publicaciones, {}, clave);
+      const sec = vx.seccion(publicaciones, {}, clave, proc);
       html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);
       html = rellenar(html, 'controles', sec.controles, a);

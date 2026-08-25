@@ -2429,3 +2429,201 @@ Resolver `T-03` con `make revision`, apoyándose en `make red`: la vista marca
 los nodos que comparten apellido y la matriz muestra si comparten vecinos.
 Resueltas esas variantes, publicar `C-05` es cambiar `publicar: false` a `true`
 — el grafo, las tres formas y la navegación por teclado ya están construidos.
+## Cierre · V2-16 y V2-26: la cabecera repetida, y la brecha que por fin se puede medir
+
+Dos pendientes que no dependían de nadie más.
+
+### V2-16 · Diez copias de dieciséis líneas
+
+El `<head>` estaba copiado en las diez páginas: idéntico salvo el título y la
+descripción. Su propia entrada del backlog decía cuándo tocaba arreglarlo —«con
+una más, plantilla»— y la página del catálogo ya se había creado copiando la de
+metodología, que es exactamente cómo diez copias se vuelven once y una se queda
+atrás.
+
+Ahora cada página declara sólo lo suyo:
+
+```html
+<head data-titulo="Producción — Informe Cienciométrico"
+      data-descripcion="Volumen de publicaciones por año, tipo documental…"></head>
+```
+
+y `06_assemble_site.py` expande `web/_cabecera.html` al ensamblar. **140 líneas
+duplicadas pasaron a 20.**
+
+Con tres comprobaciones que abortan el build, y ninguna es decorativa: una
+página sin marcador se quedaría sin hoja de estilo y sin el guion de tema; una
+expansión rota produciría un sitio **sin CSS que pasaría todas las demás
+comprobaciones**, porque el HTML seguiría siendo válido, sólo ilegible; y la
+plantilla viajando a `dist/` sería una página huérfana. La primera se probó en
+negativo: quitando el marcador de `tematica.html`, el build aborta nombrándola.
+
+### V2-26 · La pregunta que el proyecto no podía responder
+
+`LIMITATIONS.md` declara que el corpus describe producción **indexada en
+Scopus** y que esa base castiga a humanidades, ciencias sociales y a la
+publicación en español. Es una advertencia honesta y era **sólo cualitativa**:
+nadie podía decir de qué tamaño es la brecha.
+
+No se podía porque todo lo que el pipeline mira sale del universo, y el universo
+ya está filtrado por la institución. `V2-19` tropezó con eso ayer: su contraste
+sólo corre en una dirección. Esta consulta va al revés —le pregunta a OpenAlex
+**quién publica desde esta institución**— y compara esa lista contra el universo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-224 | La cabecera común vive en `web/_cabecera.html` y se expande en el ensamblado, no en el navegador | Hacerlo en cliente costaría una petición y un repintado en la ruta crítica, justo lo que el pre-renderizado vino a evitar |
+| D-225 | Una expansión que deje la página sin hoja de estilo **aborta el build** | Es el único fallo de esta clase que pasaría inadvertido: el HTML seguiría siendo válido y todas las comprobaciones seguirían en verde |
+| D-226 | La brecha de cobertura es una **cola de revisión**, nunca un ajuste del corpus | `D-206`. Scopus y OpenAlex indexan con criterios distintos; sumarlos produce una cifra que nadie puede reconciliar |
+| D-227 | Una obra **sin DOI** no se afirma como faltante | Sin DOI no se puede saber si es la misma que el universo ya tiene por otro identificador. Contarla sería inventar brecha |
+| D-228 | La consulta exige el **ROR**, no el nombre | Buscar por nombre es matching por cadena suelta —regla `I-05`— y aquí traería la producción de cualquier homónimo |
+| D-229 | Los DOI se normalizan antes de comparar | Scopus exporta `10.x/y` y OpenAlex `https://doi.org/10.X/Y`. Comparar en crudo daría el 100 % de brecha: un resultado espectacular y falso. Está en la autoprueba |
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| `--test` de `openalex_cobertura.py`, 9 casos | Normalización de DOI, cursor, contrato desconocido, las tres clases de hallazgo, y el caso de la brecha inflada. Corre en CI |
+| Ensayo con una respuesta guardada, contra el universo real | 6 obras: 3 ya dentro —con el DOI en MAYÚSCULAS a propósito, para probar la normalización—, 1 con DOI ausente, 1 sin DOI, 1 fuera de ventana. Cada una con su motivo |
+| Guarda del ROR ausente | Se detiene y explica por qué no busca por nombre |
+| `make sitio` + batería completa tras V2-16 | Sin fallos. `dist/produccion.html` reconstruido byte a byte con su cabecera |
+
+### Próximo paso recomendado
+
+Sigue siendo suyo: `make ror` desbloquea `make openalex` **y** `make cobertura`,
+que son las dos consultas que hoy no pueden correr.
+
+---
+
+## Cierre · Claude-Mem no existe, y la constitución existía dos veces
+
+El encargo era «aplica Claude-Mem al proyecto». No se puede: **no está en este
+entorno**, comprobado por cuatro vías —sin binario, sin paquete npm global, sin
+servidor MCP y sin plugin ni skill—. La única capacidad de memoria disponible
+importa exportaciones de otro asistente, que es otra cosa.
+
+Y no era un hallazgo nuevo: `SESSION_NOTES.md` ya lo tenía en su tabla de
+supuestos descartados desde una sesión anterior. Lo que había era una
+**contradicción**: `CLAUDE.md` —el archivo de mayor precedencia después de una
+decisión del usuario— afirmaba «Este proyecto usa Claude-Mem» mientras el propio
+repositorio documentaba lo contrario.
+
+### Lo que apareció al buscarlo, y era peor
+
+**`CLAUDE (1).md` estaba versionado en la raíz: una segunda constitución, y
+divergente.** Una copia de descarga que se commiteó. No era idéntica: describía
+el arranque de sesión **anterior** —«revisa la memoria, luego PLAN.md, luego
+SESSION_NOTES»—, que es exactamente el comportamiento que la versión vigente
+sustituyó por «lee STATE.md primero», porque leer todo por adelantado son ~3.700
+líneas y consume el contexto que hace falta para trabajar. Le faltaban además
+los dos párrafos que declaran que `STATE.md` es una vista derivada y no fuente
+de autoridad.
+
+El archivo de mayor autoridad del proyecto existía en dos versiones, y la
+equivocada ordenaba justo lo que la vigente vino a corregir.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-230 | La memoria del proyecto se declara por lo que **es**: `STATE.md`, `SESSION_NOTES.md` y `docs/DECISIONS.md`, versionadas | Afirmar una capacidad ausente hace que cada sesión empiece buscando algo que no está. Y lo versionado es mejor para lo que aquí importa: se audita, se replica y sobrevive a cambiar de asistente |
+| D-231 | Se elimina `CLAUDE (1).md` | Dos constituciones divergentes son peor que ninguna: la precedencia deja de significar nada si no se sabe cuál manda |
+| D-232 | La memoria sale del orden de precedencia; queda en seis niveles | El sexto remitía a una memoria inexistente |
+| D-233 | Los cinco `PROMPT_*.md` viven sólo en `prompts/` | Estaban duplicados en la raíz. Idénticos —desorden, no ambigüedad—, pero la raíz es donde se busca la constitución y conviene que sólo esté ella |
+
+### Lo que sigue abierto
+
+`make estado` **no corre solo al cerrar**. Hoy encontré `STATE.md` apuntando a
+un commit anterior a seis: el punto de entrada de cada sesión, seis commits
+viejo. Automatizarlo —un hook de cierre, o un paso más en `make sitio`— es el
+trabajo con más rendimiento para la continuidad, más que cualquier memoria
+propietaria.
+
+### Próximo paso recomendado
+
+Sin cambios: las 13 verificaciones urgentes, y los tres conectores escritos sin
+ejecutar.
+
+---
+
+## Cierre · La fusión con el explorador, y el sello que había desaparecido
+
+Dos trabajos encadenados: reconciliar esta rama con un `main` que había avanzado
+25 commits, y arreglar lo que esa reconciliación dejó al descubierto.
+
+### La fusión
+
+`main` traía el rediseño en bandas aplicado al sitio, el motor único de
+filtrado, las cuatro secciones explorables y el presupuesto de peso como
+compuerta. Ocho archivos en conflicto; sólo cuatro eran trabajo de verdad.
+
+**Las cuatro páginas de sección.** `V2-16` les había sustituido el `<head>` por
+el marcador `data-titulo`/`data-descripcion`, y `main` les cambió el cuerpo y el
+`data-pagina` de «modulos» a «seccion». Se resolvieron tomando la versión de
+`main` **entera** y sustituyendo su `<head>` por el marcador — seguro porque se
+comprobó antes de tocar nada que `main` no modificó el `<head>` en ninguna de
+las diez páginas: es byte a byte la plantilla.
+
+**Lo derivado no se fusiona, se deriva.** `STATE.md`, `docs/DECISIONS.md` y
+`revision_identidad.html` se regeneraron después de resolver. `SESSION_NOTES.md`
+conserva los dos bloques: es un diario de sólo añadir.
+
+### El hallazgo: la procedencia había desaparecido de los indicadores
+
+CI falló con «dist/impacto.html no trae los sellos de procedencia». Antes de
+tocar nada se construyó `origin/main` puro en un worktree aparte: **cero sellos
+en todas las páginas**. El fallo era anterior a esta rama.
+
+No es que la procedencia se hubiera perdido entera. El explorador conservó el
+denominador por cifra —cita `D-16` al construirlas— pero movió fuente y fecha
+de corte a **una sola vez por página**, en la barra de vigencia. Medido sobre
+`dist/impacto.html`: 3 denominadores por cifra, **una** aparición de la fecha de
+corte, **cero** sellos. Con JavaScript y sin él.
+
+Y quedó código vivo que nadie llamaba: `vista.js:173` seguía invocando
+`c.sello(...)` desde `modulo()`, que las páginas de sección ya no usan.
+
+**La compuerta de `deploy.yml` fue la única de las seis verificaciones que lo
+notó.** Contraste, estructura, flujos, responsive, higiene y peso pasan en verde
+con los sellos ausentes. Una comprobación de cadena literal escrita a mano
+—justo el patrón que este repositorio desconfía— hizo aquí exactamente su
+trabajo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-234 | El sello vuelve **a cada indicador**, no sólo a la barra de página | El N no es global —823 en producción, 816 en impacto— y para una página que se imprime y se archiva, una hoja suelta no lleva la barra de vigencia encima |
+| D-235 | `fuente` y `corte` vienen de `series.json`; `N` y cobertura se **recalculan sobre el recorte** | Son cosas distintas: las dos primeras son propiedades de la fuente y no cambian al filtrar. Repetir el N del total mientras alguien mira un recorte es el error que la propia cabecera de `vista_explorador.js` describía |
+| D-236 | Un campo sin extractor **no afirma cobertura**: se calla | Ver el fallo de abajo. Un sello que miente es peor que ningún sello |
+| D-237 | `cobertura_minima_sin_advertencia` viaja a `meta.json` | El explorador lo necesita para decidir cuándo un sello pasa a ser advertencia, y antes sólo lo conocía el build. Dos umbrales para una misma regla acaban diciendo cosas distintas |
+| D-238 | El mapa de procedencias lo arma **una función** que comparten pre-render y navegador | El sello escrito en el build y el que se repinta al filtrar no pueden divergir |
+
+### Un fallo mío, encontrado antes de empujar
+
+La primera versión contaba la cobertura con el extractor del campo y, **cuando
+no había extractor, devolvía el total**. Los tres cortes numéricos —citas, FWCI
+y percentil— se dibujan sin extractor, así que `I-01` publicaba «100,0 % · 823
+con dato» cuando las citas sólo existen en **816**.
+
+Lo encontré mirando la salida, no una prueba: el sello decía 100 % en un
+indicador cuyo denominador este proyecto lleva meses declarando como 816.
+
+Corregido: los tres numéricos cuentan cuántas publicaciones traen ese número, y
+un campo desconocido no afirma nada. La cobertura ahora varía como debe — 100 %,
+99,1 %, 97,2 %, 92,6 % y 37,7 % en unidad académica, que dispara la advertencia.
+
+### Ambigüedad que queda abierta
+
+El sello de `P-07` declara **310 de 823 publicaciones**; el build calculaba ese
+indicador sobre **1.207 pares autor × publicación** (63,8 %). Son dos cortes del
+mismo indicador y cada superficie declara el suyo, que es lo correcto — pero
+quien compare las dos cifras sin leer la base las verá contradictorias. Sin
+resolver.
+
+### Próximo paso recomendado
+
+Fusionar el PR #37, que quedó en verde. Después, sin cambios: las 13
+verificaciones urgentes y los tres conectores escritos sin ejecutar.

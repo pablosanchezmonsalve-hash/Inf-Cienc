@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1d7874; } a:hover { color: #145956; }
+    .ojo { font: 600 10.5px/1 'Public Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+    .sello { font: 400 10px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    th { text-align: left; font: 600 10px/1 'Public Sans', sans-serif; letter-spacing: .11em;
+         text-transform: uppercase; color: #5a6b6b; padding: 0 12px 10px 0; }
+    td { font-size: 14px; padding: 9px 12px 9px 0; border-top: 1px solid #e2d9cd; }
+  </style>
+</helmet>
+
+<div style="width: 794px; height: 1123px; box-sizing: border-box; background: #fdf8f2; color: #071e22; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column;">
+
+  <div style="padding: 26px 56px 0; display: flex; justify-content: space-between; align-items: baseline; font-size: 10.5px; color: #5a6b6b;">
+    <span class="ojo">Informe Cienciométrico · UFT</span>
+    <span class="sello">2023–2025 · corte 2026-07-22</span>
+  </div>
+
+  <div style="background: #fdf8f2; padding: 22px 56px 28px; display: flex; flex-direction: column; gap: 12px;">
+    <p class="ojo" style="margin: 0; color: #1d7874;">Eje 1 · Producción · detalle</p>
+    <h2 style="font-family: 'Newsreader', Georgia, serif; font-size: 38px; line-height: 1.08; font-weight: 400; letter-spacing: -.022em; margin: 0;">De qué está hecha la producción</h2>
+    <p style="font-size: 16px; line-height: 1.6; color: #33484a; margin: 0; max-width: 62ch;">Un corpus con mucha <em>Review</em> y poco <em>Article</em> no describe la misma actividad que uno inverso, aunque el total coincida. Siete de cada diez publicaciones son artículos.</p>
+  </div>
+
+  <div style="background: #f7efe5; padding: 28px 56px; flex-grow: 1; display: flex; flex-direction: column; gap: 16px;">
+    <div style="background: #fdf8f2; border: 1px solid #e2d9cd; border-radius: 5px; padding: 20px 24px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead><tr>
+          <th style="width: 232px;">Tipo documental</th>
+          <th style="text-align: right; width: 96px;">Publicaciones</th>
+          <th style="text-align: right; width: 84px;">% del total</th>
+          <th>Distribución</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{filas}}" as="f" hint-placeholder-count="8">
+            <tr>
+              <td>{{f.tipo}}</td>
+              <td style="text-align: right; font-weight: 650; font-variant-numeric: tabular-nums;">{{f.n}}</td>
+              <td style="text-align: right; color: #33484a; font-variant-numeric: tabular-nums;">{{f.pct}}</td>
+              <td>
+                <div style="height: 11px; background: #eadfd0; border-radius: 2px; overflow: hidden;">
+                  <div style="height: 11px; width: {{f.ancho}}; background: #1d7874; border-radius: 2px;"></div>
+                </div>
+              </td>
+            </tr>
+          </sc-for>
+          <tr>
+            <td style="font-weight: 700; border-top: 2px solid #071e22;">Total</td>
+            <td style="text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; border-top: 2px solid #071e22;">823</td>
+            <td style="text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; border-top: 2px solid #071e22;">100 %</td>
+            <td style="border-top: 2px solid #071e22;"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sello" style="margin: 0; color: #5a6b6b;">P-03 · Scopus · corte 2026-07-22 · sobre 823 publicaciones (100 % de cobertura)</p>
+
+    <div style="display: flex; gap: 13px; align-items: flex-start; padding: 15px 18px; background: #fdefdc; border: 1px solid #c07a2a; border-left: 4px solid #c07a2a; border-radius: 5px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a05f14" stroke-width="2.1" stroke-linecap="round" style="flex: none; margin-top: 2px;"><path d="M12 3 1.5 21h21z"></path><path d="M12 10v4.5M12 17.5v.5"></path></svg>
+      <p style="font-size: 13.5px; line-height: 1.6; margin: 0; color: #6b3d10;"><strong>El tipo lo asigna la fuente, no este proyecto.</strong> Un mismo trabajo puede estar tipificado de forma distinta en Scopus y en SciVal; aquí manda Scopus, que es la fuente del universo. Las categorías con menos de diez casos no admiten lectura de tendencia.</p>
+    </div>
+  </div>
+
+  <div style="padding: 12px 0 26px; margin: 0 56px; border-top: 1px solid #e2d9cd; display: flex; justify-content: space-between; align-items: baseline;">
+    <span class="sello" style="color: #5a6b6b;">Los datos completos se exportan en CSV desde la vista de publicaciones.</span>
+    <span style="font-family: 'Newsreader', Georgia, serif; font-size: 15px;">3</span>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":794,"height":1123}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const datos = [
+      { tipo: 'Article', n: 595 }, { tipo: 'Review', n: 133 },
+      { tipo: 'Book chapter', n: 24 }, { tipo: 'Letter', n: 24 },
+      { tipo: 'Conference paper', n: 18 }, { tipo: 'Editorial', n: 8 },
+      { tipo: 'Note', n: 7 }, { tipo: 'Erratum', n: 7 },
+    ];
+    return {
+      filas: datos.map((d) => ({
+        ...d,
+        pct: (d.n / 823 * 100).toFixed(1).replace('.', ',') + ' %',
+        ancho: Math.round(d.n / 595 * 100) + '%',
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>
