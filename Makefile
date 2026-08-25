@@ -84,7 +84,9 @@ cobertura:
 # AF-ID + PUBYEAR que hoy se exporta a mano, y reporta instante de ejecución,
 # consulta literal y recuento — para pegar a mano en config/sources.yml. NO
 # reemplaza el corpus vigente. Exige SCOPUS_API_KEY en el entorno.
-# En Windows:  py src\enrich\scopus_api.py
+# En Windows es más simple: scripts/consultar-scopus.ps1 (clic derecho ->
+# «Ejecutar con PowerShell») prueba la lógica, pide la API Key oculta y
+# consulta. A mano:  py src\enrich\scopus_api.py
 scopus:
 	python3 src/enrich/scopus_api.py
 

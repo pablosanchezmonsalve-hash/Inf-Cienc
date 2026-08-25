@@ -100,6 +100,7 @@ red las bloquea. Van desde aquí.
 py src\enrich\ror_institucion.py      # V2-20 · ya ejecutado
 py src\enrich\orcid_openalex.py       # V2-19 · unos minutos, 804 DOI
 py src\enrich\openalex_cobertura.py   # V2-26 · exige el ror_id
+py src\enrich\scopus_api.py           # T-06 · exige SCOPUS_API_KEY
 ```
 
 Los tres **cachean en disco**: reejecutarlos no vuelve a golpear la API. Y los
@@ -115,6 +116,11 @@ a las fichas.
 
 Para la verificación contra el registro de ORCID, que sí exige credenciales, use
 `scripts\verificar-orcid.ps1` — clic derecho, «Ejecutar con PowerShell».
+
+Para la consulta a la API de Scopus (T-06), que también exige credenciales, use
+`scripts\consultar-scopus.ps1` — clic derecho, «Ejecutar con PowerShell». Pide
+la API Key oculta, prueba la lógica sin red primero, y al final imprime el
+bloque para pegar a mano en `config\sources.yml`: el script no lo escribe solo.
 
 ---
 
