@@ -47,6 +47,7 @@ MAPA_LECTURA = [
     ("Qué entidades y claves hay", "docs/DATA_MODEL.md"),
     ("Qué es público y qué interno", "docs/LAYERS.md"),
     ("Cómo se ve la interfaz", "docs/UX_UI.md"),
+    ("Cómo operar el proyecto paso a paso", "docs/OPERACION.md"),
     ("Cómo construir y publicar", "docs/DEPLOYMENT.md"),
     ("Cómo cargar datos nuevos", "docs/UPDATING.md"),
     ("Cómo adaptarlo a otra institución", "docs/REPLICATION.md"),

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4a00186` · V2-20 ejecutado: la institución tiene identificador
+Último commit: `d836086` · Cada cola de los conectores nuevos, con su sitio
 Snapshot: 2026-08-25
 
 ---
@@ -112,6 +112,7 @@ Abrir sólo lo que responde la pregunta que se tiene:
 | Qué entidades y claves hay | `docs/DATA_MODEL.md` |
 | Qué es público y qué interno | `docs/LAYERS.md` |
 | Cómo se ve la interfaz | `docs/UX_UI.md` |
+| Cómo operar el proyecto paso a paso | `docs/OPERACION.md` |
 | Cómo construir y publicar | `docs/DEPLOYMENT.md` |
 | Cómo cargar datos nuevos | `docs/UPDATING.md` |
 | Cómo adaptarlo a otra institución | `docs/REPLICATION.md` |
