@@ -93,6 +93,7 @@ informe: sitio
 revision: auditoria
 	python3 src/review/build_review.py
 	python3 src/review/build_unit_validation.py
+	python3 src/review/build_hallazgos.py
 
 # Vista de la red de coautoría con el grafo REAL, para revisión interna.
 # Depende del grafo, que lo deja el build. No se despliega: lleva nombres de

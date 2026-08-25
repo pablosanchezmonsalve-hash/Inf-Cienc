@@ -85,6 +85,9 @@ def cargar() -> dict:
                      "candidatos de ORCID por afiliación"),
         "desac": leer(INTERNAL / "orcid_desacuerdos.csv",
                       "desacuerdos entre Crossref y el registro de ORCID"),
+        # Lo emite `orcid_openalex.py`, que puede no haberse ejecutado nunca.
+        "oa_desac": leer(INTERNAL / "openalex_desacuerdos.csv",
+                         "desacuerdos entre OpenAlex y la asignación vigente"),
         # Para enseñar de qué publicaciones se habla, con su DOI: verificar un
         # ORCID a mano es abrir el registro del titular y comparar obras, y sin
         # los títulos delante eso obliga a cruzar tres archivos.
@@ -292,6 +295,32 @@ def casos(d: dict, perf: dict) -> list[dict]:
                 "contexto": f"{r['detalle']}. Identificadores: "
                             + str(r["orcid"]).replace("|", " · ")
                             + ". La asignación vigente NO se ha modificado.",
+                "firmas": [f], "cruces": None,
+            })
+
+    # ── OpenAlex atribuye a una firma un ORCID distinto del vigente.
+    #
+    # Va con las de prioridad 1 porque el sitio publica hoy uno de los dos, y
+    # si el que publica es el equivocado le está atribuyendo a alguien la obra
+    # de otra persona. La asignación vigente NO se toca hasta que alguien
+    # decida: el conector sólo encola.
+    if d["oa_desac"] is not None:
+        for _, r in d["oa_desac"].iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            partes = [x.strip() for x in str(r["orcid"]).split("|")]
+            out.append({
+                "id": f"oadesac-{r['nombre_en_fuente']}", "cola": "OpenAlex discrepa",
+                "prioridad": 1,
+                "titulo": f"{r['nombre_en_fuente']}: OpenAlex dice otro ORCID",
+                "contexto": ("El sitio publica hoy "
+                             + (f"«{partes[0]}» y OpenAlex atribuye «{partes[-1]}»"
+                                if len(partes) > 1 else f"«{partes[0]}»")
+                             + ". Uno de los dos no es de esta persona. "
+                             + str(r.get("detalle") or "")
+                             + " Compare las publicaciones de abajo con el registro de "
+                               "cada titular: la que aparezca en uno y no en el otro decide."),
                 "firmas": [f], "cruces": None,
             })
 

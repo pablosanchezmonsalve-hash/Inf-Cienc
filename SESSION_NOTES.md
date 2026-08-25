@@ -2681,3 +2681,58 @@ razón de red: van desde la máquina del usuario.
 
 `make openalex` y `make cobertura` en local. Y las 13 verificaciones urgentes,
 que no dependen de ninguna red.
+
+---
+
+## Cierre · Dónde cae cada cola de los conectores nuevos
+
+Antes de ejecutar `make openalex` y `make cobertura` había un hueco comprobado:
+`build_review.py` lee seis archivos de `internal/` y **ninguno de los tres que
+esos conectores emiten**. Las colas habrían caído en disco sin que nada las
+mostrara.
+
+### La decisión: no todas van al mismo sitio
+
+Las tres son «cosas pendientes», pero no son la misma clase de pregunta, y
+meterlas juntas habría roto lo que sostiene la herramienta de revisión.
+
+**`openalex_desacuerdos` sí es identidad.** «OpenAlex atribuye a esta firma otro
+ORCID» se responde con el vocabulario que ya existe —«el ORCID es correcto» /
+«no es de esta persona»— y **tiene camino de aplicación**: `apply_decisions.py`
+lo escribe en `config/orcid_revisado.yml` y el build lo consume. Entra como cola
+de `make revision`, con prioridad 1, porque el sitio publica hoy uno de los dos
+identificadores y si es el equivocado le está atribuyendo a alguien la obra de
+otra persona.
+
+**`openalex_deteccion` y `openalex_cobertura` NO.** «¿Esta publicación es de la
+institución?» y «¿esta obra debería estar en el universo?» no se responden con
+un veredicto de identidad, y sobre todo **no tienen camino de aplicación**:
+cambiar el universo es una decisión de alcance, no algo que un script aplique.
+
+Meterlas en la herramienta habría obligado a inventar veredictos sin efecto. Un
+botón que no hace nada se pulsa igual, y entonces el registro de decisiones
+afirma que algo se resolvió cuando no cambió nada. Van a un **informe**:
+`internal/hallazgos_corpus.md`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-241 | `openalex_desacuerdos` entra como cola de `make revision`, prioridad 1 | Es identidad, tiene vocabulario y tiene camino de aplicación. Y el sitio publica hoy uno de los dos ORCID |
+| D-242 | `openalex_deteccion` y `openalex_cobertura` van a un informe, **no** a la herramienta | No tienen camino de aplicación. Un veredicto que no hace nada corrompe el registro de decisiones, que es lo que `D-08` protege |
+| D-243 | El informe lista **25 casos por grupo** y declara cuántos quedan | La brecha puede traer miles de filas: una lista de miles no se lee, y una que se corta sin decir cuánto queda miente por omisión |
+| D-244 | La brecha separa **las que tienen DOI y están en ventana** del resto | Sólo de ésas se puede afirmar que el universo no las tiene. Contar las demás inflaría la brecha con casos que no se pueden sostener |
+
+### Verificación
+
+Probado con fixtures que reproducen las columnas exactas que escriben los dos
+conectores: la cola nueva aparece en `make revision` con su caso, y el informe
+resume las dos colas de corpus con su desglose por motivo, año y tipo. Después
+se borraron los fixtures y se comprobó lo contrario: **sin datos, la cola nueva
+desaparece de la herramienta y el informe dice que no hay nada que escribir**,
+en vez de emitir un archivo vacío que parecería un resultado.
+
+### Próximo paso recomendado
+
+Ejecutar `make openalex` y `make cobertura` en la máquina del proyecto. Al
+volver, `make revision` ya tiene dónde poner cada cosa.

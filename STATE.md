@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `db72d0b` · V2-16 y V2-26, el informe exportable, y el sello de procedencia devuel
+Último commit: `4a00186` · V2-20 ejecutado: la institución tiene identificador
 Snapshot: 2026-08-25
 
 ---
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 248
+## Decisiones tomadas: 252
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
