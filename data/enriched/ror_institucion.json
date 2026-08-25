@@ -1,0 +1,26 @@
+{
+  "ror_id": "https://ror.org/0225snd59",
+  "nombre_en_ror": "Finis Terrae University",
+  "nombres": [
+    "Finis",
+    "Finis Terrae University",
+    "UFT",
+    "Universidad Finis Terrae"
+  ],
+  "pais": "Chile",
+  "isni": "0000 0004 5934 6911",
+  "estado": "active",
+  "contraste": {
+    "capturados": [
+      "Finis Terrae University",
+      "Universidad Finis Terrae"
+    ],
+    "no_capturados": [
+      "Finis",
+      "UFT"
+    ]
+  },
+  "consulta": "Universidad Finis Terrae",
+  "fecha_consulta": "2026-08-25",
+  "endpoint": "/tmp/claude-0/-home-user-Inf-Cienc/a6b0437e-1fb3-5560-a466-df0a1d00796c/scratchpad/ror.json"
+}

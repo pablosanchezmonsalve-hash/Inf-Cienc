@@ -17,8 +17,11 @@ institucion:
 
   # Identificadores adicionales. No disponibles en las fuentes actuales.
   # Se declaran vacíos de forma explícita; no se infieren.
-  ror_id: null          # placeholder: no verificado en Fase 1
-  isni: null            # placeholder: no verificado en Fase 1
+  # Verificados en ROR el 2026-08-25 con src/enrich/ror_institucion.py: la
+  # consulta devolvió UNA sola organización que responde al patrón
+  # institucional, activa y en Chile. El ISNI lo declara su propia ficha.
+  ror_id: "0225snd59"                 # https://ror.org/0225snd59
+  isni: "0000 0004 5934 6911"
 
 ventana_temporal:
   # Decisión del usuario, sesión 2026-07-31: cobertura completa de las fuentes.

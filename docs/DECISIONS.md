@@ -252,3 +252,5 @@ Una decisión registrada aquí **no se reabre sin una razón nueva** (`CLAUDE.md
 | `D-236` | Un campo sin extractor **no afirma cobertura**: se calla | Ver el fallo de abajo. Un sello que miente es peor que ningún sello | Rediseño de la interfaz |
 | `D-237` | `cobertura_minima_sin_advertencia` viaja a `meta.json` | El explorador lo necesita para decidir cuándo un sello pasa a ser advertencia, y antes sólo lo conocía el build. Dos umbrales para una misma regla acaban diciendo cosas distintas | Rediseño de la interfaz |
 | `D-238` | El mapa de procedencias lo arma **una función** que comparten pre-render y navegador | El sello escrito en el build y el que se repinta al filtrar no pueden divergir | Rediseño de la interfaz |
+| `D-239` | `ror_id` e `isni` pasan de placeholder a valor verificado | Una sola organización candidata, activa, en Chile, y el ISNI lo declara su propia ficha de ROR | Rediseño de la interfaz |
+| `D-240` | **No se amplía** el patrón de detección con «UFT» ni «Finis» | Medido: 0 cadenas de 1.207 lo necesitarían. Un patrón nuevo sin ganancia medible sólo añade superficie de falso positivo | Rediseño de la interfaz |
