@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `fc93da6` · La memoria del proyecto, declarada por lo que es
+Último commit: `9eca8d5` · Devolver el sello de procedencia a cada indicador
 Snapshot: 2026-08-25
 
 ---
@@ -32,12 +32,12 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **556** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades de autor publicadas | **542** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **240** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con forma de persona | **552** | descontando las marcadas por `E-09`, pendientes de revisión |
-| Entidades con ORCID | **216** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades con forma de persona | **538** | descontando las marcadas por `E-09`, pendientes de revisión |
+| Entidades con ORCID | **209** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **27** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 241
+## Decisiones tomadas: 246
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
