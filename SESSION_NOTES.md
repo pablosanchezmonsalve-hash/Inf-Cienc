@@ -2736,3 +2736,41 @@ en vez de emitir un archivo vacío que parecería un resultado.
 
 Ejecutar `make openalex` y `make cobertura` en la máquina del proyecto. Al
 volver, `make revision` ya tiene dónde poner cada cosa.
+
+---
+
+## Cierre · La ventana, declarada donde no se puede no verla
+
+El informe cubre **2023–2025** y estamos en agosto de 2026: ocho meses de
+producción que no están y que nada advertía. El rango aparecía en la línea de
+identidad de la portada y en la barra de vigencia, pero **un rango no dice lo
+que un lector necesita saber**. Alguien que abra esto en 2026 puede leerlo como
+el estado actual de la producción institucional, y esa lectura no la corrige
+ver «2023–2025» escrito al lado.
+
+Ahora la portada lo dice:
+
+> La ventana de este informe termina en **2025**: lo publicado después **no está
+> aquí**. La fija la carga de datos, no la fecha en que usted lo lee.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-245 | La advertencia va **visible**, no dentro del desplegable «Qué mide este informe y qué no» | Una advertencia detrás de un clic es una advertencia que nadie lee. El desplegable sirve para matizar; esto es una condición de lectura |
+| D-246 | Va en la familia **ámbar** del aviso metodológico | Está fuera de la familia visual del dato a propósito, y sus tokens ya están medidos |
+| D-247 | El año sale de `meta.ventana.fin`, no escrito a mano | Una ventana que se mueva y una advertencia que siga diciendo 2025 sería peor que no advertir |
+| D-248 | Sólo en la portada | Es donde se enmarca el informe. La barra de vigencia ya lleva el rango en las diez páginas, y repetir el párrafo entero en todas lo convertiría en ruido que se deja de ver |
+
+### Lo que esto NO resuelve
+
+Sigue siendo un parche honesto sobre un problema de datos: el corpus está
+desactualizado, y declararlo no lo actualiza. La vía de fondo es la API de
+Scopus y SciVal —el usuario tiene credenciales— y sigue esperando cuatro
+respuestas: desde qué red correría, si la suscripción incluye SciVal, qué
+límite de peticiones, y si migrar la ventana actual o extenderla a 2026.
+
+### Próximo paso recomendado
+
+Sin cambios: terminar `make openalex` y `make cobertura`, y decidir sobre la API
+de Elsevier.
