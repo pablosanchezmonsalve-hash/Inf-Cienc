@@ -154,11 +154,56 @@ export function grafico(pubs_sel, clave, titulo, forma) {
     : c.barrasH(datos, { titulo });
 }
 
-export function cortes(pubs_sel) {
+/* Qué indicador dibuja cada corte de la portada. Los cortes de sección ya
+   traen su `cod`; éstos no lo tenían porque nadie se lo había pedido, y el
+   sello lo necesita para saber de qué fuente hablar. */
+const COD_PORTADA = { anio: 'P-02', qs_area: 'T-05', unidad: 'P-07', tipo: 'P-03' };
+
+/** El mapa de procedencias que consumen los sellos, desde los artefactos.
+
+    Se construye UNA vez y lo comparten el pre-renderizado y el navegador, para
+    que no haya dos formas de decidir de qué fuente viene un indicador. */
+export function procedencias(series, meta) {
+  const umbral = meta && meta.cobertura_minima_sin_advertencia;
+  const m = {};
+  for (const [cod, bloque] of Object.entries(series || {})) {
+    const p = bloque && bloque.procedencia;
+    if (p) m[cod] = { fuente: p.fuente, corte: p.corte, unidad: p.unidad, umbral };
+  }
+  return m;
+}
+
+/** Sello de procedencia de un corte, medido sobre el recorte que se mira.
+
+    QUÉ ES INVARIANTE Y QUÉ NO
+    `fuente` y `corte` son propiedades de la fuente y no cambian al filtrar:
+    vienen de `series.json`, que las calcula el build. `N` y la cobertura SÍ
+    cambian, y por eso se recalculan aquí sobre el subconjunto.
+
+    Repetir el N del total mientras el lector mira un recorte es exactamente el
+    error que la cabecera de este archivo describe: enseñar «una cifra del
+    total mientras el lector mira un recorte, que es la manera de que se lea la
+    que no es».
+
+    Sin procedencia para ese código no se inventa una: se devuelve cadena
+    vacía. Un sello con la fuente adivinada es peor que ningún sello. */
+function selloCorte(sub, campo, cod, proc) {
+  const p = proc && proc[cod];
+  if (!p) return '';
+  const { n, cubiertas, pct } = X.cobertura(sub, campo);
+  return c.sello({
+    fuente: p.fuente, corte: p.corte, unidad: p.unidad || 'publicaciones',
+    n, cubiertas, cobertura: pct,
+    insuficiente: pct !== null && p.umbral != null && pct < p.umbral * 100,
+  });
+}
+
+export function cortes(pubs_sel, proc) {
   return CORTES.map(([clave, titulo, forma]) => `
     <section class="corte" data-corte="${clave}">
       <h3>${c.escapar(titulo)}</h3>
       <div class="grafico">${grafico(pubs_sel, clave, titulo, forma)}</div>
+      ${selloCorte(pubs_sel, clave, COD_PORTADA[clave], proc)}
     </section>`).join('');
 }
 
@@ -166,13 +211,13 @@ export function cortes(pubs_sel) {
 
 /** Todo el cuerpo del explorador. La usa el pre-renderizado con el conjunto
     completo y el navegador con el recorte vigente. */
-export function explorador(pubs, sel) {
+export function explorador(pubs, sel, proc) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel),
     cifras: cifras(X.resumen(sub)),
-    cortes: cortes(sub),
+    cortes: cortes(sub, proc),
   };
 }
 
@@ -278,7 +323,7 @@ function conmutador(id) {
 }
 
 /** Los cortes de una sección, recalculados sobre el recorte vigente. */
-export function cortesSeccion(sub, clave) {
+export function cortesSeccion(sub, clave, proc) {
   const s = SECCIONES[clave];
   if (!s) return '';
   return s.cortes.map(corte => {
@@ -303,6 +348,7 @@ export function cortesSeccion(sub, clave) {
       ${MULTIVALUADO.has(corte.campo)
         ? '<p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>' : ''}
       ${corte.aviso ? `<p class="nota">${c.escapar(corte.aviso)}</p>` : ''}
+      ${selloCorte(sub, corte.campo, corte.cod, proc)}
     </section>`;
   }).join('');
 }
@@ -338,13 +384,13 @@ export function cabeceraSeccion(clave, titulo) {
 }
 
 /** Todo el cuerpo de una sección. */
-export function seccion(pubs, sel, clave) {
+export function seccion(pubs, sel, clave, proc) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
     cifras: cifras(X.resumen(sub)),
-    cortes: cortesSeccion(sub, clave),
+    cortes: cortesSeccion(sub, clave, proc),
   };
 }
 

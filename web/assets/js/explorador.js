@@ -266,6 +266,36 @@ export function porCampo(pubs_sel, clave, { tope = 0 } = {}) {
 }
 
 /** Suma de un campo numérico, agrupada por año. */
+/** Cobertura de un campo dentro del recorte: cuántas publicaciones lo traen.
+
+    NO se deriva sumando las barras del gráfico. En los campos multivaluados
+    —países, instituciones, ASJC— una publicación aporta a varias barras y la
+    suma pasa del total: un sello construido así publicaría coberturas por
+    encima del 100 %. Aquí se cuenta la publicación, no sus valores. */
+/* Los tres cortes numéricos no pasan por un extractor de valores: se dibujan
+   desde `sumaPorAnio`, `medianaPorAnio` y `umbralesPercentil`. Su cobertura es
+   cuántas publicaciones traen ese número — 816 de 823, no 823 —. El corte
+   `percentil` lee `percentil_citacion`, que es como se llama el campo. */
+const NUMERICO = { citas: 'citas', fwci: 'fwci', percentil: 'percentil_citacion' };
+
+export function cobertura(pubs_sel, clave) {
+  const n = pubs_sel.length;
+  const pct = cub => (n ? Math.round(1000 * cub / n) / 10 : null);
+  const campo = NUMERICO[clave];
+  if (campo) {
+    const cub = pubs_sel.filter(p => typeof p[campo] === 'number').length;
+    return { n, cubiertas: cub, pct: pct(cub) };
+  }
+  const saca = EXTRAE[clave] || CAMPOS[clave];
+  // Sin extractor NO se afirma cobertura. Devolver el total publicaría un
+  // 100 % inventado, y un sello que miente es peor que ningún sello.
+  if (!saca) return { n, cubiertas: null, pct: null };
+  let cub = 0;
+  for (const p of pubs_sel) if (saca(p).length) cub++;
+  return { n, cubiertas: cub, pct: pct(cub) };
+}
+
+
 export function sumaPorAnio(pubs_sel, campo) {
   const acc = new Map();
   for (const p of pubs_sel) {

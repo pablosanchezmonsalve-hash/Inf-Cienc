@@ -42,6 +42,12 @@ async function montarExplorador(claveSeccion) {
 
   const { publicaciones } = await c.cargar('publications.json');
 
+  // La procedencia de cada indicador. Se carga SIEMPRE, esté la página
+  // pre-renderizada o no: al repintar un recorte los sellos se rehacen con él,
+  // y sin este mapa saldrían sin fuente ni fecha.
+  const proc = VX.procedencias(await c.cargar('series.json'),
+                               await c.cargar('meta.json'));
+
   if (!yaPintado(zonas.cifras)) {
     const meta = await c.cargar('meta.json');
     if (cabecera) {
@@ -69,8 +75,8 @@ async function montarExplorador(claveSeccion) {
 
   function pintar({ nuevaEntrada = false } = {}) {
     const partes = claveSeccion
-      ? VX.seccion(publicaciones, sel, claveSeccion)
-      : VX.explorador(publicaciones, sel);
+      ? VX.seccion(publicaciones, sel, claveSeccion, proc)
+      : VX.explorador(publicaciones, sel, proc);
     // Se comparan los valores ANTES de reemplazar el marcado: la señal de
     // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
     const antes = new Map([...zonas.cifras.querySelectorAll('[data-valor]')]
