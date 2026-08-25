@@ -274,7 +274,12 @@ export const esSinDato = v => SIN_DATO.test(String(v).trim());
     registro y pasa a ser una advertencia. Lo decide el dato. */
 export function sello(p) {
   if (!p) return '';
-  const cob = p.cobertura === null ? '—' : `${num(p.cobertura, 1)} %`;
+  // Sin recuento de cobertura no se enseña la cláusula: decir «—» insinúa que
+  // el dato existe y no se pudo calcular, y aquí lo que pasa es que nadie ha
+  // afirmado nada. Callar es la lectura correcta.
+  const hayCob = p.cubiertas !== null && p.cubiertas !== undefined;
+  const cob = p.cobertura === null || p.cobertura === undefined
+    ? '—' : `${num(p.cobertura, 1)} %`;
   const clase = p.insuficiente ? 'sello sello-aviso' : 'sello';
   const aviso = p.insuficiente
     ? `<span class="sello-alerta">cobertura baja</span>` : '';
@@ -282,7 +287,7 @@ export function sello(p) {
     <span><b>Fuente</b> ${escapar(p.fuente)}</span>
     <span><b>Corte</b> ${escapar(p.corte)}</span>
     <span><b>N</b> ${nf.format(p.n)} ${escapar(p.unidad || 'publicaciones')}</span>
-    <span><b>Cobertura</b> ${cob} · ${nf.format(p.cubiertas)} con dato</span>
+    ${hayCob ? `<span><b>Cobertura</b> ${cob} · ${nf.format(p.cubiertas)} con dato</span>` : ''}
     ${aviso}</p>`;
 }
 
