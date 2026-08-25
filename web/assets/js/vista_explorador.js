@@ -24,6 +24,9 @@ export function cabecera(meta) {
     <h1>Informe cienciométrico</h1>
     <p class="portada-sub">${c.escapar(meta.institucion || 'Universidad Finis Terrae')}
       · Scopus y SciVal · ${c.escapar(String(v.inicio ?? ''))}–${c.escapar(String(v.fin ?? ''))}</p>
+    <p class="ventana-cierre">La ventana de este informe termina en
+      <b>${c.escapar(String(v.fin ?? ''))}</b>: lo publicado después
+      <b>no está aquí</b>. La fija la carga de datos, no la fecha en que usted lo lee.</p>
   </div>
   <details class="metodo portada-metodo">
     <summary>Qué mide este informe y qué no</summary>
