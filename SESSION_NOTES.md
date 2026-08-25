@@ -2627,3 +2627,57 @@ resolver.
 
 Fusionar el PR #37, que quedó en verde. Después, sin cambios: las 13
 verificaciones urgentes y los tres conectores escritos sin ejecutar.
+
+---
+
+## Cierre · V2-20 ejecutado: la institución tiene identificador
+
+`make ror` no corre en el entorno de desarrollo —el proxy deniega
+`api.ror.org`, confirmado con la corrida real— así que el usuario ejecutó la
+consulta en su máquina y trajo la respuesta. El conector la procesó con
+`--json`, que es justo el camino que se dejó previsto para esto.
+
+**Cerrados dos placeholders que llevaban abiertos desde la Fase 1:**
+
+    ror_id: "0225snd59"
+    isni:   "0000 0004 5934 6911"
+
+El filtro de candidatos hizo su trabajo: de las organizaciones devueltas
+descartó Lincoln, Interglobal, Anáhuac, Maimónides e Icesi —todas empiezan por
+«Universidad»— porque ninguna responde al patrón institucional. Quedó una, en
+Chile y activa.
+
+### El contraste, y por qué NO se amplía el patrón
+
+ROR registra cuatro nombres. El patrón `\bfinis[\s\-]+terrae\b` captura dos y
+se le escapan **«UFT»** y **«Finis»**. Parecía un hueco de detección, así que
+se midió sobre las 1.207 cadenas de afiliación del log:
+
+| | |
+|---|---|
+| Con «UFT» y **sin** «Finis Terrae» | **0** |
+| Con «UFT» **y** «Finis Terrae» | 3 — ya detectadas |
+| Con «Finis» y sin «Finis Terrae» | 2, y son cadenas **truncadas** por el export; ya están en el log |
+
+**El hueco es teórico, no real.** Añadir `\buft\b` no ganaría ninguna detección
+medible y metería un patrón de tres letras en un corpus donde la regla `I-05`
+existe justamente porque el matching laxo ya produjo 16 falsos positivos
+verificados. Se deja el patrón como está, con la medición escrita.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-239 | `ror_id` e `isni` pasan de placeholder a valor verificado | Una sola organización candidata, activa, en Chile, y el ISNI lo declara su propia ficha de ROR |
+| D-240 | **No se amplía** el patrón de detección con «UFT» ni «Finis» | Medido: 0 cadenas de 1.207 lo necesitarían. Un patrón nuevo sin ganancia medible sólo añade superficie de falso positivo |
+
+### Qué desbloquea
+
+`make openalex` y `make cobertura`, que preguntan por institución y hasta ahora
+se detenían por falta de identificador. Siguen sin ejecutarse por la misma
+razón de red: van desde la máquina del usuario.
+
+### Próximo paso recomendado
+
+`make openalex` y `make cobertura` en local. Y las 13 verificaciones urgentes,
+que no dependen de ninguna red.
