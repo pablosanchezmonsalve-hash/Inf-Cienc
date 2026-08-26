@@ -4025,3 +4025,81 @@ respuestas, `T-02` puede cerrarse por completo: aplicar la fila pausada
 decidir Odontología y Nutrición, y — si corresponde — agregar la jerarquía
 de Ingeniería Civil Industrial. Sólo entonces
 `vocabulario_validado_por_institucion` puede pasar a `true`.
+
+---
+
+## Cierre · T-02: la fila pausada se resuelve — corrección declarada, no fusión de vocabulario
+
+El usuario revisó la fila pausada junto con Claude, tal como pidió («No,
+revisémoslo juntos primero»). Ante la pregunta de si un mismo autor podía
+tener dos afiliaciones, señaló su postura metodológica — no puede — y pidió
+el Scopus Author ID o el ORCID para verificar por su cuenta. Se le entregó
+el Scopus Author ID (59321456000) y los datos de las dos publicaciones del
+par; el usuario aportó después el ORCID que encontró
+(`0009-0009-2334-0562`). Claude intentó una corroboración independiente por
+web: `WebFetch` a `orcid.org`, `pub.orcid.org`, `repositorio.uft.cl`,
+`doi.org` y `www.researchgate.net` devolvió `EGRESS_BLOCKED` en los cinco
+casos (política del proxy de salida, no reintentada); `WebSearch` sí
+respondió, con resultados sintetizados y con fuente. Con esa evidencia más
+la suya propia, el usuario confirmó: **"Es una autora afiliada a la
+institución. Aplica la opción número 1"** — la propuesta original de Claude
+(corrección declarada sobre el texto exacto mal extraído, no una fusión de
+vocabulario).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-300 | Se agrega una 4ª entrada a `correcciones_declaradas` (`config/matching_rules.yml`), clave `"Facultad de Odontología y Ciencias de la Rehabilitación"` → `"Facultad de Educación, Psicología y Familia"` — NO una fusión de vocabulario | Las tres entradas previas de `correcciones_declaradas` arreglan artefactos de concatenación (texto pegado, guion de corte de línea); ésta es distinta — arregla una extracción que tomó la facultad de OTRA institución — pero el mecanismo es el correcto para ambos casos: intercepta antes de que el texto llegue a `vocabulario`, así que "Facultad de Odontología y Ciencias de la Rehabilitación" nunca se registra como si fuera una unidad UFT |
+| D-301 | La fila 21 de `internal/unit_validation_decisions.csv` se marca `correcto: si` (no se deja en `pendiente`, ni se completa como `no` + corrección) | `no` + corrección habría hecho que una futura corrida de `apply_unit_validation.py` tratara el texto detectado como una entrada de vocabulario a fusionar — exactamente el error que la corrección declarada evita; `si` documenta que la fila queda resuelta por otra vía sin arriesgar ese efecto secundario en el CSV |
+
+### Verificación
+
+`yaml.safe_load()` sobre el archivo modificado antes de considerar el
+cambio hecho. Auditoría completa (`src/audit/run_all.py`): 0 fallas
+bloqueantes, `internal/matching_log.csv` regenerado confirma que el par
+(eid `2-s2.0-85203525781`) ahora resuelve a «Facultad de Educación y
+Ciencias Sociales». `data/interim/indicator_feasibility.py` y
+`src/build/build_all.py` completos, compuerta de capas: 0 fallas.
+`src/build/06_assemble_site.py`: 10 páginas, capa interna no incluida.
+`src/verify/higiene.py`: sin fallos. Confirmación manual en
+`data/processed/series.json` (`P-07`): «Facultad de Educación y Ciencias
+Sociales» sube de 54 a 55 pares; «Facultad de Odontología y Ciencias de la
+Rehabilitación» ya no aparece como unidad propia (sólo queda «Facultad de
+Odontología», la unidad UFT real, sin tocar). `apply_unit_validation.py
+--test`: 21/21. `--dry-run` tras el cambio del CSV: 0 filas pendientes, la
+fila ya no aparece ni en cambios ni en avisos.
+
+### Archivos creados o modificados
+
+```
+config/matching_rules.yml                 4ª entrada en correcciones_declaradas
+internal/unit_validation_decisions.csv    fila 21: pendiente -> si, nota reescrita
+internal/matching_log.csv                 regenerado por la auditoría con el par corregido
+data/processed/series.json                 P-07: Educación y Ciencias Sociales 54 -> 55
+dist/                                       reconstruido completo
+```
+
+### Ambigüedades abiertas · pendiente de respuesta del usuario
+
+- **Facultad de Odontología** (sola, sin la coletilla "y Ciencias de la
+  Rehabilitación"): la nota decía "actualmente pertenece a la Facultad de
+  Medicina y Salud" pero el campo de corrección quedó vacío. ¿Se confirma
+  esa fusión?
+- **Escuela de Nutrición y Dietética** (fila de unidad, no de jerarquía):
+  «no» sin corrección ni nota. ¿Qué falta corregir ahí?
+- **School of Civil Engineering / School of Engineering**: el usuario
+  señaló que son ambiguos entre varias escuelas de ingeniería civil
+  (Industrial, Informática y Telecomunicaciones, IA y Realidad Virtual,
+  Biomédica) y no completó cuál. Sin resolver.
+- **Escuela de Ingeniería Civil Industrial** (entrada nueva creada la ronda
+  anterior): no quedó vinculada a ninguna facultad en `jerarquia` — hoy se
+  reporta por sí sola. ¿Se agrega el vínculo a «Facultad de Ingeniería»,
+  igual que las otras escuelas?
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario las cuatro ambigüedades restantes de arriba. Con
+esas respuestas, `T-02` puede cerrarse por completo y
+`vocabulario_validado_por_institucion` puede pasar a `true`.

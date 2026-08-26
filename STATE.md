@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `9a36576` · T-02: herramienta interactiva para validar unidades académicas
+Último commit: `76ed5f6` · T-02: primera ronda de respuestas aplicada, un caso pausado por cruce 
 Snapshot: 2026-08-26
 
 ---
@@ -75,7 +75,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 307
+## Decisiones tomadas: 309
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
