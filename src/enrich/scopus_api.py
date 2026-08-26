@@ -16,11 +16,14 @@ QUÉ NO HACE
       `docs/UPDATING_REQUEST.md` §3 acepta cuando dice «si la exportación no
       la incluye, basta con anotarla aparte junto con la consulta usada».
     - **No reemplaza el corpus vigente.** El universo publicado (823,
-      `D-16`) sigue viniendo del CSV en `data/raw/`. Si el recuento que
-      devuelve la API difiere del universo declarado, eso es un HALLAZGO que
-      se imprime y se guarda — nunca una corrección automática del corpus.
-      Promover un nuevo export a fuente primaria es una decisión aparte,
-      posterior a este script.
+      `D-16`) sigue viniendo del CSV en `data/raw/`. La API sólo pregunta a
+      Scopus, así que el contraste es contra lo que `scopus_export` YA declara
+      en `config/sources.yml` (`n_registros_leido`, hoy 818) — nunca contra el
+      universo unido de 823, que mezcla registros exclusivos de SciVal que una
+      consulta a Scopus no puede devolver por construcción. Si el recuento
+      difiere, eso es un HALLAZGO que se imprime y se guarda — nunca una
+      corrección automática del corpus. Promover un nuevo export a fuente
+      primaria es una decisión aparte, posterior a este script.
     - **No escribe `config/sources.yml`.** Igual que `ror_institucion.py` con
       `config/institution.yml`: la salida se imprime lista para pegar a mano.
     - **No decide si la ventana 2023-2025 se extiende a 2026.** Usa la que hoy
@@ -269,15 +272,21 @@ def main() -> int:
     (CACHE / f"{momento.strftime('%Y%m%dT%H%M%SZ')}.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    universo_declarado = 823  # D-16 — el que gobierna hoy config/sources.yml, no se lee de ahí
+    # La API sólo pregunta a Scopus, así que se compara contra lo que YA declara
+    # scopus_export en sources.yml (n_registros_leido) — no contra el universo
+    # unido (823, D-16), que además mezcla 5 registros exclusivos de SciVal que
+    # una consulta a Scopus nunca podría devolver. Comparar contra 823 habría
+    # sido una alarma falsa por construcción, no un hallazgo real.
+    fuentes = c.load_config("sources.yml")["fuentes"]
+    scopus_declarado = fuentes["scopus_export"]["n_registros_leido"]
     total = resultado["total_resultados"]
 
     salida = {
         "consulta": consulta,
         "fecha_hora_consulta_utc": momento.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "total_resultados": total,
-        "universo_declarado_al_consultar": universo_declarado,
-        "coincide_con_universo_declarado": total == universo_declarado,
+        "n_registros_leido_scopus_export": scopus_declarado,
+        "coincide_con_scopus_export_vigente": total == scopus_declarado,
         "rate_limit": rate_limit,
         "endpoint": ENDPOINT,
     }
@@ -285,15 +294,15 @@ def main() -> int:
     (ENRICHED / "scopus_api_consulta.json").write_text(
         json.dumps(salida, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    print(f"\n  total_resultados      : {total}")
-    print(f"  universo_declarado    : {universo_declarado}  (D-16)")
-    if total != universo_declarado:
-        print("\n  HALLAZGO: el recuento de la API difiere del universo publicado.")
+    print(f"\n  total_resultados          : {total}")
+    print(f"  scopus_export.n_registros_leido : {scopus_declarado}  (config/sources.yml)")
+    if total != scopus_declarado:
+        print("\n  HALLAZGO: el recuento de la API difiere del export de Scopus vigente.")
         print("  Eso NO actualiza el corpus solo. Una base bibliográfica crece hacia")
         print("  atrás (docs/UPDATING_REQUEST.md §2): puede ser indexación nueva desde")
         print("  el export de 2026-07-31, no un error. Revisar antes de decidir nada.")
     else:
-        print("  Coincide con el universo publicado.")
+        print("  Coincide con el export de Scopus vigente (data/raw/).")
 
     print(f"\n  límite de consulta reportado por la API:")
     print(f"    X-RateLimit-Limit    : {rate_limit['limite'] or '(no la envió)'}")
