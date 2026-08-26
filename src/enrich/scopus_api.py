@@ -231,7 +231,8 @@ def main() -> int:
                                   formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--test", action="store_true", help="verifica la lógica sin red")
     ap.add_argument("--count", type=int, default=1,
-                    help="registros a pedir además del total (por defecto 1; "
+                    help="cuántos registros de muestra traer, aparte del conteo "
+                         "total que la API siempre devuelve (por defecto 1; "
                          "este script no trae el corpus completo)")
     args = ap.parse_args()
 
