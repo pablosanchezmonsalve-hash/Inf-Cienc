@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `69c3a75` · La ventana, declarada donde no se puede no verla
+Último commit: `be562b5` · Corrige las 3 fallas reales de CI: ancla rota, contraste WCAG y test d
 Snapshot: 2026-08-26
 
 ---

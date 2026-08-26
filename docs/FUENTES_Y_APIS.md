@@ -345,6 +345,30 @@ py src\enrich\scopus_api.py                 lo mismo, en Windows
 | Wikidata | Reconciliación de identificadores entre registros | Propuesta; no confirmada |
 | Dimensions, Lens.org | Corpus alternativos amplios | Requieren acuerdo; fuera de alcance hoy |
 
+### 3.12 EBSCO Discovery Service — cruce de cobertura, no fuente de métricas
+
+- **Qué es, y qué NO es.** EDS es una capa de búsqueda/descubrimiento sobre
+  las bases de datos que agrega EBSCO — el mismo tipo de producto que un
+  portal de biblioteca usa para buscar en varias fuentes a la vez. **No es**
+  una plataforma de analítica bibliométrica: no expone FWCI, percentil de
+  citación normalizado por campo, ni los indicadores curados que este
+  proyecto ya consume de SciVal.
+- **Qué preguntaría:** publicaciones institucionales indexadas por las bases
+  que agrega EBSCO, como segunda fuente de contraste de cobertura.
+- **Dónde encajaría:** el mismo rol que ya cumple OpenAlex (`§3.1`) —
+  contrastar qué ve una fuente que Scopus no indexó, o viceversa — **nunca
+  fusionado** con el universo publicado ni con sus denominadores (`D-16`,
+  `D-206`). Nunca sustituiría a Scopus/SciVal como fuente de métricas.
+- **Acceso: bloqueado por entitlement, igual que SciVal.** Hace falta ser
+  cliente de EDS y **contactar a un representante de ventas de EBSCO para
+  habilitar el acceso a la API** — no es autogestionable desde un panel de
+  administración. Autenticación por usuario/contraseña contra
+  `developer.ebsco.com`, con `AuthToken` + `SessionToken` por sesión, distinta
+  del esquema de API Key único que usa Elsevier.
+- **Hay que confirmar antes de escribir código:** qué producto EBSCO tiene
+  contratado la UFT exactamente (EDS, bases individuales, o ambos), y si esa
+  suscripción incluye acceso a la API o sólo a la interfaz web.
+
 ---
 
 ## 4. Lo que cualquier conector nuevo tiene que cumplir
