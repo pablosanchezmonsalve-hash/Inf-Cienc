@@ -1,24 +1,26 @@
 """Vista de la red de coautoría con el grafo REAL, para revisión interna.
 
-POR QUÉ ESTO NO VA EN EL SITIO
-    C-05 está diferido. La red heredaría los grupos de variantes de nombre que
-    siguen sin resolver, y una red con una persona partida en dos nodos dibuja
-    una colaboración que no existe: los dos nodos aparecen sin arista entre sí,
-    o sea la figura AFIRMA que dos investigadores no colaboran cuando son la
-    misma persona. En una tabla ese error es una fila duplicada; en un grafo es
-    una afirmación falsa sobre la estructura del trabajo.
+POR QUÉ ESTO NO VA EN EL SITIO (todavía)
+    C-05 está diferido. El bloqueo TÉCNICO original —la red heredaría grupos de
+    variantes de nombre sin resolver, y una persona partida en dos nodos dibuja
+    una colaboración que no existe— se cerró junto con T-03 (2026-08-26, 0
+    pendientes en la cola de variantes de nombre). Lo que queda es una decisión
+    de PUBLICACIÓN (T-10), no un dato roto: si conviene mostrar estructura
+    relacional (quién colabora con quién) que hoy no está en ninguna otra
+    vista pública, y cómo declarar que las comunidades de Louvain son una
+    heurística del algoritmo, no grupos de investigación reales.
 
-    Así que la vista se genera en `internal/`, que no se despliega, y usa
-    exactamente las mismas primitivas que usará el sitio el día que se publique
-    —`red()` de core.js y app.css—. No hay una segunda implementación que
-    pueda divergir: lo que se ve aquí es lo que se verá allá.
+    Así que la vista se sigue generando en `internal/`, que no se despliega, y
+    usa exactamente las mismas primitivas que usará el sitio el día que se
+    publique —`red()` de core.js y app.css—. No hay una segunda implementación
+    que pueda divergir: lo que se ve aquí es lo que se verá allá.
 
-Y POR QUÉ SÍ VALE LA PENA GENERARLA
-    Porque es el instrumento que ayuda a desbloquear T-03. Dos nodos que son la
-    misma persona se delatan en la red: comparten apellido y suelen compartir
-    vecinos, o quedan como dos islas pequeñas donde debería haber una. Leer 27
-    grupos de variantes en un CSV es una cosa; verlos dibujados sobre la red que
-    van a deformar es otra.
+Y POR QUÉ SÍ VALE LA PENA SEGUIR GENERÁNDOLA
+    Porque el heurístico de apellido compartido no era sólo para T-03: sigue
+    siendo una segunda mirada, más amplia y más ruidosa, sobre coincidencias de
+    apellido entre nodos —incluyendo pares que son personas genuinamente
+    distintas (apellidos comunes), no sólo variantes de una misma firma—. Leer
+    esa lista en un CSV es una cosa; verla dibujada sobre la red real es otra.
 
     Por eso la vista marca los CANDIDATOS: pares de nodos cuyo apellido
     normalizado coincide. No decide nada —eso sigue siendo juicio humano— pero
@@ -144,9 +146,10 @@ PAGINA = """<!doctype html>
 </head><body data-tema="claro"><div class="marco">
 
 <div class="aviso-interno"><b>Capa interna · no publicar</b>
-Esta página lleva nombres de personas y sus vínculos. C-05 está diferido: la red
-hereda las variantes de nombre sin resolver, y una persona partida en dos nodos
-dibuja una colaboración que no existe. Se genera para <em>revisar</em>, no para
+Esta página lleva nombres de personas y sus vínculos. C-05 está diferido: la
+decisión de publicación (T-10) sigue pendiente del juicio del responsable del
+proyecto, y las comunidades de Louvain son una heurística del algoritmo, no
+grupos de investigación reales. Se genera para <em>revisar</em>, no para
 difundir.</div>
 
 <h1>Red de coautoría interna</h1>

@@ -109,7 +109,7 @@ indicadores:
          advertencia: "Multivaluado: no sumable al total. SciVal advierte truncamiento en los nombres de afiliación."}
   C-05: {nombre: "Red de coautoría", categoria: colaboracion, publicar: false,
          version: V2, confiabilidad: media,
-         advertencia: "Diferido: heredaría los 27 grupos de variantes de nombre que siguen sin resolver, de los 28 encolados (pendiente T-03). Las diferencias puramente ortográficas ya se consolidaron; lo que queda son juicios de identidad. Una red de coautoría con una persona partida en dos nodos dibuja una colaboración que no existe."}
+         advertencia: "Diferido: T-03 se cerró (2026-08-26, 0 pendientes en la cola de variantes de nombre) y el bloqueo técnico original ya no aplica; el grafo se construye sobre las 538 firmas consolidadas. Lo que queda es la decisión de publicación (T-10), aparte del bloqueo técnico: las comunidades de Louvain son una heurística del algoritmo, no grupos de investigación reales, y la red expone estructura relacional (quién colabora con quién) que hoy no está publicada en ninguna otra vista."}
   C-06: {nombre: "Autores por publicación", categoria: colaboracion, publicar: true,
          denominador: con_metricas, confiabilidad: alta, mostrar_mediana: true,
          advertencia: null}

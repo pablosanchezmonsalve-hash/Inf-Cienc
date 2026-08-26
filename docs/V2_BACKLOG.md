@@ -20,7 +20,7 @@ lugar.
 | # | Pendiente | Desbloquea | Origen |
 |---|---|---|---|
 | **V2-01** | Subir la cobertura de ORCID desde el 38,8 % actual, confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
-| **V2-02** | Resolver los 31 grupos de variantes de nombre que siguen pendientes | `C-05` red de coautoría; recuento real de personas | T-03 |
+| **V2-02** | ~~Resolver los grupos de variantes de nombre que siguen pendientes~~ | `C-05` red de coautoría; recuento real de personas | T-03 (cerrado, 2026-08-26) |
 | **V2-03** | Revisión humana de los 20 identificadores fragmentados | `C-07` liderazgo autoral | T-04 |
 | **V2-04** | Validar institucionalmente el vocabulario de unidades | Retirar la advertencia destacada de `P-07` | T-02 |
 | **V2-05** | Reexportar Scopus con fecha de corte declarada | Cierra la única brecha de trazabilidad que queda | T-06 |
@@ -71,7 +71,7 @@ salvo el renderizador de la red.
 
 | Código | Indicador | Bloqueo |
 |---|---|---|
-| `C-05` | Red de coautoría | V2-02 |
+| `C-05` | Red de coautoría | V2-02 cerrado (2026-08-26); pendiente sólo la decisión de publicación (`T-10`) |
 | `C-07` | Liderazgo autoral | V2-03 |
 | `T-02` | Topics de SciVal | Ninguno; 632 topics son demasiados para vista principal |
 | `T-03` | Prominencia temática | Ninguno; alto riesgo de malinterpretación |
