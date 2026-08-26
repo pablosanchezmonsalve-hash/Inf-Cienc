@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `95416a3` · Corregir referencias obsoletas a T-03 en la documentación de C-05 (red
+Último commit: `5a3d139` · Publicar C-05 (red de coautoría): T-10 cerrado
 Snapshot: 2026-08-26
 
 ---
@@ -75,7 +75,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 297
+## Decisiones tomadas: 299
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
