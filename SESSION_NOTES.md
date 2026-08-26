@@ -3492,3 +3492,109 @@ Sin acción de código pendiente sobre SciVal. Si el usuario gestiona la
 entitlement con Elsevier, retomar con el endpoint ya documentado en
 `V2_BACKLOG.md` §V2-23. Recordar la rotación de la API Key una vez más, sin
 insistir más allá de eso.
+
+---
+
+## Cierre · T-13 cerrado sin acceso a la API: confirmación documental en vez de empírica
+
+El usuario pidió seguir con los pendientes. Sin entitlement de SciVal (cierre
+anterior), `T-13` parecía atado a esa API — pero `T-13` no pedía "consultar
+la API de SciVal", pedía "confirmar la semántica del percentil contra
+documentación oficial de Elsevier". Son cosas distintas: la documentación
+pública de Elsevier no requiere entitlement, sólo requiere encontrarla.
+
+### El camino
+
+1. **El nombre exacto de columna** ya vivía en el propio código del
+   proyecto: `grep` sobre `src/audit/02_reconcile_sources.py` y
+   `src/analysis/indicator_feasibility.py` confirmó
+   `"Outputs in Top Citation Percentiles, per percentile"` como el
+   encabezado real leído del export, no una paráfrasis.
+2. Búsqueda de esa cadena exacta vía `WebSearch`/`WebFetch`. Varios dominios
+   de Elsevier (`service.elsevier.com`, `elsevier.libguides.com`,
+   `manchester-uk.libanswers.com`) devolvieron `EGRESS_BLOCKED` en
+   `WebFetch` — política de red del entorno, no error transitorio. Por
+   `/root/.ccr/README.md`, un 403/407 de política no se reintenta: se buscó
+   la misma información por otra vía en vez de insistir contra el bloqueo.
+3. Un tercero independiente, [cu-library/scival-export-tools](https://github.com/cu-library/scival-export-tools)
+   (herramienta de GitHub que procesa exports reales de SciVal, subcomando
+   "Per Researcher"), confirmó que el nombre de columna es real y se usa en
+   la práctica — no sólo lo que trae el archivo de este proyecto.
+4. `WebSearch` sí devolvió el resumen del SciVal Support Center de Elsevier
+   (`a_id/28193`) para la métrica "Outputs in Top Citation Percentiles":
+   las publicaciones globales de Scopus se ordenan de mayor a menor citación
+   (o FWCI si es field-weighted) y se dividen en 100 percentiles; el campo
+   indica en cuál de los umbrales de top 1 %/5 %/10 %/25 % más citadas cae
+   cada publicación.
+
+### Por qué esto cierra T-13 sin ser razonamiento circular
+
+La semántica «top X %» de Elsevier no deja ambigüedad sobre la dirección:
+top 1 % sólo puede ser la posición más alta, nunca la más baja. Que las 5
+publicaciones más citadas del corpus (evidencia empírica del 2026-08-03)
+caigan en los valores 1-4 y las no citadas en el máximo observado (78) es
+exactamente el patrón que esa semántica predice de forma independiente —
+la documentación no se derivó de los datos propios, así que confirmarla
+contra ellos es una prueba real, no un espejo. Se documentó también la
+salvedad honesta: no se encontró una tabla literal «valor = 1 → top 1 %»
+fila por fila para esta columna de exportación específica (distinta de la
+métrica agregada del mismo nombre, que cuenta publicaciones en vez de
+etiquetar cada una); la confirmación es sobre la metodología del campo, no
+una cita textual del mapeo exacto.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-281 | `T-13` se cierra con evidencia documental pública, sin necesitar la API de SciVal | El pendiente pedía documentación oficial, no una consulta autenticada; la documentación de soporte de Elsevier es pública |
+| D-282 | Se acepta la confirmación de nombre de columna de una herramienta de terceros (`cu-library/scival-export-tools`) como evidencia válida, no como sustituto de la fuente primaria | Es independiente del dataset del proyecto y demuestra que el nombre de columna se usa en exports reales, reduciendo el riesgo de que sea un artefacto propio |
+| D-283 | Se documenta explícitamente la salvedad de que no hay cita textual del mapeo valor→porcentaje línea por línea | Afirmar más certeza de la que existe violaría `CLAUDE.md`; la salvedad queda en `docs/METHODOLOGY.md` §7 bis para quien audite después |
+| D-284 | `X-01` (autocitación) sigue bloqueado por la falta de entitlement de SciVal; `T-13` ya no depende de esa API | Son pendientes distintos que compartían el mismo bloqueo aparente; separarlos evita que uno quede preso del otro innecesariamente |
+
+### Archivos creados o modificados
+
+```
+docs/METHODOLOGY.md      §7 bis reestructurada: "evidencia empírica" + "confirmación documental",
+                          citas a Elsevier (a_id/28193) y a cu-library/scival-export-tools, salvedad honesta
+PLAN.md                  T-13 tachado y cerrado (2026-08-26), con el razonamiento resumido
+docs/V2_BACKLOG.md       tabla de pendientes (línea ~102) T-13 cerrado; fila V2-23 (API SciVal) actualizada:
+                          ya no depende de T-13, sólo de X-01
+docs/FUENTES_Y_APIS.md   §3.8 "Qué desbloquearía" corregido: T-13 retirado de la lista de pendientes
+                          que dependen de la API de SciVal
+```
+
+### Verificación
+
+`grep -n -B2 -A8 "I-05" config/indicators.yml` confirmó que la definición
+del indicador ya tenía `advertencia: null` — no necesitaba una salvedad
+nueva, porque la confiabilidad ya estaba declarada como alta desde antes.
+`grep -rln "T-13\|determinad. empíricamente" --include="*.md" --include="*.yml" .`
+localizó todas las referencias restantes antes de dar el cierre por
+completo: `STATE.md` (se regenera, no se edita a mano), `PLAN.md`,
+`docs/METHODOLOGY.md`, `docs/FUENTES_Y_APIS.md`, `docs/V2_BACKLOG.md` — las
+cinco revisadas y consistentes entre sí.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «T-13 sólo se puede cerrar con acceso a la API de SciVal» | **Falso.** El pendiente pedía documentación oficial, y la documentación de soporte de Elsevier es pública; no necesita entitlement ni autenticación |
+| «Un `EGRESS_BLOCKED` en `WebFetch` es un fallo a reintentar» | Es una política de red explícita del entorno (`/root/.ccr/README.md`), no un error transitorio — se buscó la misma información por `WebSearch` en vez de insistir |
+
+### Ambigüedades abiertas
+
+- La salvedad de `docs/METHODOLOGY.md` §7 bis sigue abierta a propósito: si
+  en algún momento aparece la tabla oficial línea por línea del mapeo
+  valor→porcentaje, reemplaza esa salvedad por una cita directa.
+- Las de siempre, sin cambios: `T-02` (falta enviar la hoja de validación de
+  unidades a la UFT), `T-06` (espera una reexportación nueva de Scopus con
+  fecha de corte propia), `T-10` (decisión de Pablo sobre publicar la red de
+  coautoría), API Key de Scopus sin rotar tras tres exposiciones en el chat.
+
+### Próximo paso recomendado
+
+Pendientes activos tras este cierre: `T-02`, `T-06`, `T-10`, `T-19` (en su
+techo por ahora). De estos, `T-02` y `T-10` son los únicos que no dependen
+de un evento externo (reexportación futura, o candidatos nuevos en el
+registro de ORCID) — son los que tienen sentido preguntarle al usuario cuál
+retomar primero.

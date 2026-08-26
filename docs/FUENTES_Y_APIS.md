@@ -271,9 +271,9 @@ py src\enrich\scopus_api.py                 lo mismo, en Windows
 - **Qué preguntaría:** métricas normalizadas con los parámetros que el export
   no permite fijar, en particular **autocitas**.
 - **Qué desbloquearía:** `X-01` (tasa de autocitación) está bloqueado hoy porque
-  el export no las trae (`V2-06`). También permitiría documentar la semántica
-  del percentil de citación, que hoy está determinada **empíricamente** y no
-  documentalmente (`T-13`).
+  el export no las trae (`V2-06`). `T-13` (semántica del percentil) ya **no**
+  depende de esto: se cerró por documentación pública de Elsevier, sin
+  necesitar la API (`docs/METHODOLOGY.md` §7 bis, 2026-08-26).
 - **Probado el 2026-08-26.** `curl` directo contra
   `GET analytics/scival/publication/metrics?metricTypes=OutputsInTopCitationPercentiles`
   con la API Key de Scopus del usuario (la misma de §3.7, que sí funciona

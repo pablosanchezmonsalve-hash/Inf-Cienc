@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4fce9c3` · Auditoría de la sesión: 2 errores reales corregidos, módulo PS1 compar
+Último commit: `dda939f` · Prueba la API de SciVal por curl directo: sin entitlement, no se const
 Snapshot: 2026-08-26
 
 ---
@@ -65,19 +65,18 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Pendientes abiertos (5)
+## Pendientes abiertos (4)
 
 | # | Pendiente |
 |---|---|
 | `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
 | `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
-| `T-13` | Confirmar semántica del percentil de citación con documentación SciVal |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 288
+## Decisiones tomadas: 292
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
