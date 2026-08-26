@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `5a3d139` · Publicar C-05 (red de coautoría): T-10 cerrado
+Último commit: `6dbc05c` · T-02: refrescar la hoja de validación de unidades; envío queda en mano
 Snapshot: 2026-08-26
 
 ---
@@ -75,7 +75,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 299
+## Decisiones tomadas: 304
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

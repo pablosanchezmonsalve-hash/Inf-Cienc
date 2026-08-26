@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -112,6 +112,14 @@ revision: auditoria
 	python3 src/review/build_review.py
 	python3 src/review/build_unit_validation.py
 	python3 src/review/build_hallazgos.py
+
+# T-02: genera internal/validacion_unidades.html (herramienta interactiva) y
+# .md (lectura). En Windows: scripts/validar-unidades.ps1 hace además el
+# recojo del CSV exportado y la aplicación. A mano, tras exportar el CSV:
+#   python3 src/review/apply_unit_validation.py --dry-run
+#   python3 src/review/apply_unit_validation.py
+validar-unidades: auditoria
+	python3 src/review/build_unit_validation.py
 
 # Vista de la red de coautoría con el grafo REAL, para revisión interna.
 # Depende del grafo, que lo deja el build. C-05 SÍ se publica ahora en el
