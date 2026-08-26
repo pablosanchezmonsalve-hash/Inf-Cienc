@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `eea0123` · Aplica las 84 decisiones de identidad, y corrige un bug real de pérdid
+Último commit: `15016db` · Cierra T-03, T-04, T-14, T-15: sus colas están en 0 pendientes
 Snapshot: 2026-08-26
 
 ---
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 277
+## Decisiones tomadas: 280
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

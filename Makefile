@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex cobertura scopus informe limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -89,6 +89,14 @@ cobertura:
 # consulta. A mano:  py src\enrich\scopus_api.py
 scopus:
 	python3 src/enrich/scopus_api.py
+
+# Candidatos de ORCID por afiliación declarada (T-19): busca en el registro
+# público a quien declara la institución y cruza contra firmas sin ORCID.
+# NO asigna nada solo — deja candidatos en internal/ para make revision.
+# Requiere ORCID_CLIENT_ID y ORCID_CLIENT_SECRET (gratuitos, ver
+# docs/ORCID_API_GUIDE.md). En Windows: scripts/ampliar-orcid-afiliacion.ps1
+orcid-afiliacion:
+	python3 src/enrich/orcid_afiliacion.py
 
 # El informe institucional en PDF, desde el sitio ya construido. Usa la MISMA
 # hoja de impresión que el botón «Descargar informe» de la interfaz: un origen,

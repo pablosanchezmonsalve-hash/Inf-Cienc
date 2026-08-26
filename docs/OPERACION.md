@@ -101,10 +101,13 @@ py src\enrich\ror_institucion.py      # V2-20 · ya ejecutado
 py src\enrich\orcid_openalex.py       # V2-19 · unos minutos, 804 DOI
 py src\enrich\openalex_cobertura.py   # V2-26 · exige el ror_id
 py src\enrich\scopus_api.py           # T-06 · exige SCOPUS_API_KEY
+py src\enrich\orcid_afiliacion.py     # T-19 · exige ORCID_CLIENT_ID/SECRET
 ```
 
-Los tres **cachean en disco**: reejecutarlos no vuelve a golpear la API. Y los
-tres admiten `--test`, que comprueba la lógica sin red y sin credenciales.
+Los cuatro primeros **cachean en disco**: reejecutarlos no vuelve a golpear la
+API. `orcid_afiliacion.py` no cachea — cada corrida vuelve a preguntar, porque
+el registro de ORCID cambia y ese es justo el punto de correrlo de nuevo. Los
+cinco admiten `--test`, que comprueba la lógica sin red y sin credenciales.
 
 Si alguno se detiene diciendo **«el contrato de la API no es el esperado»**, no
 insista: deja la respuesta cruda en `data\cache\…\ultima_respuesta.json`, y con
@@ -119,8 +122,16 @@ Para la verificación contra el registro de ORCID, que sí exige credenciales, u
 
 Para la consulta a la API de Scopus (T-06), que también exige credenciales, use
 `scripts\consultar-scopus.ps1` — clic derecho, «Ejecutar con PowerShell». Pide
-la API Key oculta, prueba la lógica sin red primero, y al final imprime el
-bloque para pegar a mano en `config\sources.yml`: el script no lo escribe solo.
+la API Key en texto visible, prueba la lógica sin red primero, y al final
+imprime el bloque para pegar a mano en `config\sources.yml`: el script no lo
+escribe solo.
+
+Para ampliar la cobertura de ORCID por afiliación (T-19), use
+`scripts\ampliar-orcid-afiliacion.ps1` — clic derecho, «Ejecutar con
+PowerShell». Mismas credenciales que `verificar-orcid.ps1`. Deja candidatos
+en `internal\orcid_candidatos_afiliacion.csv`; **no asigna nada solo** — para
+decidir sobre ellos, corra después `scripts\revisar-identidad.ps1`, que los
+recoge en la cola «Candidato por afiliación».
 
 ---
 

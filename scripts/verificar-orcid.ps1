@@ -135,9 +135,17 @@ if (Test-Path "data\interim\publications_universe.csv") {
 }
 
 # ── 6. Credenciales ──────────────────────────────────────────────────────────
+# Se piden en TEXTO VISIBLE, no oculto ("-AsSecureString"). No es descuido: en
+# consultar-scopus.ps1 se probo oculto primero y pegar (Ctrl+V) dentro de un
+# prompt enmascarado fallo en la consola de un usuario real -- capturo 1
+# caracter basura en vez del texto pegado, sin ningun aviso de error (D-257,
+# SESSION_NOTES.md). Visible pero correcto es mejor que oculto y roto. Nadie
+# mas ve esta ventana, y una respuesta a Read-Host no queda en el historial
+# de comandos de todas formas.
 Titulo "Paso 3 de 4 - Credenciales de ORCID"
 Write-Host "  Se obtienen gratis en https://orcid.org -> Developer tools."
-Write-Host "  El secret se pide oculto: no se guarda ni queda en el historial."
+Write-Host "  Se piden en texto visible (pegar oculto falla en algunas consolas"
+Write-Host "  de Windows). No se guardan en ningun archivo ni en el historial."
 Write-Host ""
 
 if ($env:ORCID_CLIENT_ID) {
@@ -146,12 +154,16 @@ if ($env:ORCID_CLIENT_ID) {
     $env:ORCID_CLIENT_ID = (Read-Host "  Client ID (APP-...)").Trim()
 }
 if (-not $env:ORCID_CLIENT_SECRET) {
-    $sec = Read-Host "  Client Secret" -AsSecureString
-    $env:ORCID_CLIENT_SECRET = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-        [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
+    $env:ORCID_CLIENT_SECRET = (Read-Host "  Client Secret").Trim()
 }
 if (-not $env:ORCID_CLIENT_ID -or -not $env:ORCID_CLIENT_SECRET) {
     Malo "Faltan credenciales"; Read-Host "`n  Enter"; exit 1
+}
+if ($env:ORCID_CLIENT_ID.Length -lt 10 -or $env:ORCID_CLIENT_SECRET.Length -lt 10) {
+    Malo "Una credencial capturada es demasiado corta (Client ID: $($env:ORCID_CLIENT_ID.Length) car., Secret: $($env:ORCID_CLIENT_SECRET.Length) car.)"
+    Write-Host "  Probablemente el pegado fallo. Vuelva a ejecutar el script e intente" -ForegroundColor Yellow
+    Write-Host "  escribiendola directamente, o pegue con clic derecho en vez de Ctrl+V." -ForegroundColor Yellow
+    Read-Host "`n  Enter para cerrar"; exit 1
 }
 Ok "Credenciales cargadas en esta sesion"
 
