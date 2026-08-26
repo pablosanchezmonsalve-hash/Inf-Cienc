@@ -118,10 +118,17 @@ def extraer_rate_limit(headers) -> dict:
 
 def consultar(consulta: str, api_key: str, insttoken: str | None,
               count: int = 1, reintentos: int = 3) -> tuple[dict, dict]:
-    """Ejecuta la consulta. Reintenta sólo en 429, respetando `Retry-After`."""
+    """Ejecuta la consulta. Reintenta sólo en 429, respetando `Retry-After`.
+
+    Manda un User-Agent descriptivo a propósito: el que pone Python por
+    defecto ("Python-urllib/3.x") lo bloquean sin cuerpo algunos WAF delante
+    de APIs de Elsevier, y eso se ve como un 400 sin explicación — no como el
+    error de contrato que sí trae cuerpo.
+    """
     params = urllib.parse.urlencode({"query": consulta, "count": count})
     url = f"{ENDPOINT}?{params}"
-    headers = {"Accept": "application/json", "X-ELS-APIKey": api_key}
+    headers = {"Accept": "application/json", "X-ELS-APIKey": api_key,
+               "User-Agent": "InformeCienciometricoUFT/1.0 (+https://github.com/)"}
     if insttoken:
         headers["X-ELS-Insttoken"] = insttoken
 
@@ -138,8 +145,23 @@ def consultar(consulta: str, api_key: str, insttoken: str | None,
                       f"({intento}/{reintentos})...")
                 time.sleep(espera)
                 continue
-            cuerpo = e.read().decode("utf-8", errors="replace")
-            sys.exit(f"\n  Scopus respondió {e.code}:\n  {cuerpo[:500]}")
+            cuerpo = e.read().decode("utf-8", errors="replace").strip()
+            diagnostico = (cuerpo[:500] if cuerpo else
+                           "(sin cuerpo — típico de un WAF/proxy rechazando la petición "
+                           "antes de llegar a la aplicación de Elsevier, no de un error "
+                           "de la propia API)")
+            content_type = e.headers.get("Content-Type", "(no declarado)")
+            servidor = e.headers.get("Server", "(no declarado)")
+            sys.exit(f"\n  Scopus respondió {e.code}:\n"
+                      f"  Content-Type: {content_type}   Server: {servidor}\n"
+                      f"  cuerpo: {diagnostico}\n\n"
+                      "  Causas más probables de un 400, en orden:\n"
+                      "    1. La API Key se pegó con un espacio o salto de línea de más\n"
+                      "       (revise que el prompt oculto no haya capturado nada extra).\n"
+                      "    2. Un proxy/antivirus corporativo está interceptando la\n"
+                      "       conexión HTTPS y respondiendo él mismo, no Elsevier.\n"
+                      "    3. La suscripción no tiene el Search API habilitado pese a\n"
+                      "       'todas las APIs aprobadas' en el portal — confírmelo ahí.")
         except (urllib.error.URLError, TimeoutError) as e:
             sys.exit(f"\n  No se pudo consultar la API de Scopus: {e}\n\n"
                       "  Si esto corre desde un entorno con política de red\n"

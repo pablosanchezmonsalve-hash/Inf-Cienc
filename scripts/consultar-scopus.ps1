@@ -1,4 +1,4 @@
-# Consulta a la API de Scopus para T-06 — asistente para Windows.
+﻿# Consulta a la API de Scopus para T-06 — asistente para Windows.
 #
 # POR QUÉ EXISTE
 #   Igual que scripts\verificar-orcid.ps1: encadenar los pasos a mano falla de

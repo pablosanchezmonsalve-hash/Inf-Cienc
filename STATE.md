@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `69c3a75` · La ventana, declarada donde no se puede no verla
-Snapshot: 2026-08-25
+Último commit: `27d448a` · Asistente de PowerShell para la consulta a Scopus (T-06)
+Snapshot: 2026-08-26
 
 ---
 
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 261
+## Decisiones tomadas: 264
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
