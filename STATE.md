@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `17b8674` · openalex_cobertura.py: identifica quÃ© autor y quÃ© instituciÃ³n decla
+Último commit: `a4dfaa4` · V2-26: herramienta interactiva para revisar la brecha de cobertura Ope
 Snapshot: 2026-08-26
 
 ---
@@ -36,7 +36,7 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **322** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **280** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades con ORCID | **204** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **28** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
