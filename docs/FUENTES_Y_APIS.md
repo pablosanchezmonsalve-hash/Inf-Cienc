@@ -88,8 +88,9 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 |---|---|
 | Crossref | 174 |
 | Registro de ORCID (`doi-self`) | 48 |
-| Revisión humana sobre candidatos por afiliación | 18 |
-| **Total** | **240 formas de firma · 216 de 556 entidades publicadas** |
+| OpenAlex (`doi-self`, vía autorías) | 80 |
+| Revisión humana sobre candidatos por afiliación | 20 |
+| **Total** | **322 formas de firma · 280 de 538 entidades publicadas** |
 
 El detalle metodológico y el argumento de por qué el 100 % no es alcanzable
 están en `docs/ORCID_COVERAGE.md`.
@@ -102,7 +103,7 @@ Ordenadas por lo que desbloquean frente a lo que cuestan. **Ninguna está
 probada desde este repositorio.** La columna «Hay que confirmar» no es una
 formalidad: es lo que separa una propuesta de una promesa.
 
-### 3.1 OpenAlex — **implementado el 2026-08-19; falta ejecutar la consulta**
+### 3.1 OpenAlex — **ejecutado el 2026-08-26**
 
 `src/enrich/orcid_openalex.py`.
 
@@ -141,6 +142,22 @@ formalidad: es lo que separa una propuesta de una promesa.
 - **Riesgo metodológico que sigue vigente:** su cobertura NO es la de Scopus.
   Mezclar recuentos produciría cifras que nadie puede reconciliar. Entra como
   fuente de contraste, nunca fusionada (`D-206`).
+- **Resultado de la consulta (2026-08-26):** 804 de 823 publicaciones tienen
+  DOI y se consultaron. **80 asignaciones de ORCID nuevas** (cobertura de
+  242 → 322 formas de firma). **68 publicaciones** que este proyecto atribuye
+  a la UFT y OpenAlex no —cola en `internal/openalex_deteccion.csv`, sin
+  resolver automáticamente—. **6 desacuerdos** de ORCID encolados en
+  `internal/openalex_desacuerdos.csv` (`D-08`). `openalex_cobertura.py`
+  (`V2-26`) corrió también: OpenAlex atribuye 1.112 obras a la UFT por ROR,
+  698 ya en el universo, **414 no** (385 con DOI ausente, 29 sin DOI en
+  OpenAlex) — cola en `internal/openalex_cobertura.csv`, nunca un ajuste
+  del corpus.
+- **Hallazgo de entorno, no de datos:** ambos scripts revientan al final en
+  Windows por un `UnicodeEncodeError` — la consola usa `cp1252`, que no
+  tiene «→» ni «─». El trabajo (escritura de archivos) ya había terminado
+  cuando revienta el `print`, así que no perdía datos, pero sí ensuciaba la
+  salida. Corregido reconfigurando `stdout` a UTF-8 al importar, sólo en
+  Windows (`sys.platform == "win32"`).
 
 ### 3.2 ROR — **implementado el 2026-08-19; falta ejecutar la consulta**
 

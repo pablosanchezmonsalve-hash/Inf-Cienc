@@ -69,6 +69,11 @@ from pathlib import Path
 
 import pandas as pd
 
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto, que no tiene "→" ni "─":
+    # revienta el print final después de que todo el trabajo ya se guardó.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "audit"))
 import common as c  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))

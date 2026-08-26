@@ -4342,3 +4342,74 @@ sin confirmar.
 Nada de código pendiente en ninguna de las dos vías: SciVal espera
 activación comercial de Elsevier; EBSCO espera que el usuario confirme con
 su representante de ventas qué acceso tiene y active la API si aplica.
+
+## Cierre · OpenAlex ejecutado por primera vez: V2-19 y V2-26 cerrados
+
+El usuario pidió trabajar con OpenAlex (`V2-19`, `V2-26`), la única
+propuesta de la lista sin bloqueo de licencia: es una API pública, sin
+clave. Ambos conectores ya estaban escritos desde el 2026-08-19 pero nunca
+se habían corrido contra la red real (el entorno de desarrollo remoto no
+alcanza `api.openalex.org`); esta máquina sí.
+
+`orcid_openalex.py` reventó al final con `UnicodeEncodeError` en la primera
+corrida: la consola de Windows usa `cp1252`, sin «→» ni «─». El archivo ya
+se había escrito antes de imprimir esa línea —verificado comparando
+`git status` contra el traceback—, así que no se perdió nada, pero
+`openalex_cobertura.py` habría reventado igual al usarse. Corregido
+reconfigurando `stdout` a UTF-8 al importar, sólo en `sys.platform ==
+"win32"` (no toca el comportamiento en CI, que ya corre en UTF-8).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-311 | Los dos scripts ganan la reconfiguración de `stdout` a UTF-8, guardada tras `sys.platform == "win32"` | El trabajo real (escritura de CSV) ya había terminado cuando reventaba el print; el fix es puramente de presentación, pero sin él cualquier corrida local en Windows termina en traceback y esconde el resumen final |
+| D-312 | Las 68 publicaciones sin atribución OpenAlex y los 6 desacuerdos de ORCID quedan en `internal/` sin resolver | Mismo principio que siempre (`D-08`): una discrepancia se encola para revisión humana, nunca se decide sola |
+| D-313 | Las 414 obras que OpenAlex atribuye a la UFT y el universo no tiene NO se promueven a producción confirmada | `D-206`: Scopus y OpenAlex indexan con criterios distintos. Es una cola de candidatos —desambiguación posiblemente errónea, tipo documental excluido, o fecha fuera de ventana—, nunca un ajuste automático del corpus |
+
+### Qué se aplicó
+
+`src/enrich/orcid_openalex.py` y `openalex_cobertura.py`: fix de encoding en
+Windows. `data/enriched/authors_orcid.csv`: 80 asignaciones nuevas (242 →
+322 formas de firma; 216 → 280 de 538 entidades publicadas). Cuatro colas
+nuevas en `internal/`: `openalex_log.csv` (log completo de la corrida),
+`openalex_deteccion.csv` (68 publicaciones sin atribución OpenAlex),
+`openalex_desacuerdos.csv` (6 desacuerdos de ORCID), `openalex_cobertura.csv`
+(414 obras atribuidas por OpenAlex fuera del universo). `docs/V2_BACKLOG.md`:
+V2-19 y V2-26 cerrados con resultado real. `docs/FUENTES_Y_APIS.md` §3.1 y
+§2.3 actualizados con las cifras de la corrida.
+
+### Verificación
+
+Auditoría completa (29/30, 0 bloqueantes). `build_all.py` y
+`06_assemble_site.py` sin fallas, compuerta pública/interna en 0.
+`node src/verify/run_all.mjs dist` → 0 fallos en las 6 categorías, corrido
+ANTES de commitear (no después, como en el cierre anterior).
+
+### Archivos creados o modificados
+
+```
+src/enrich/orcid_openalex.py        fix de encoding Windows (stdout UTF-8)
+src/enrich/openalex_cobertura.py    fix de encoding Windows (stdout UTF-8)
+data/enriched/authors_orcid.csv     242 -> 322 asignaciones (80 nuevas de OpenAlex)
+internal/openalex_log.csv           nuevo · log completo de la corrida de enriquecimiento
+internal/openalex_deteccion.csv     nuevo · 68 publicaciones sin atribución OpenAlex, cola de revisión
+internal/openalex_desacuerdos.csv   nuevo · 6 desacuerdos de ORCID, cola de revisión
+internal/openalex_cobertura.csv     nuevo · 414 obras atribuidas por OpenAlex fuera del universo
+docs/V2_BACKLOG.md                  V2-19 y V2-26 cerrados con resultado real
+docs/FUENTES_Y_APIS.md              §3.1 y §2.3 actualizados
+```
+
+### Ambigüedades abiertas
+
+Las cuatro colas nuevas en `internal/` quedan sin revisión humana — nadie
+las ha mirado todavía. `docs/ORCID_COVERAGE.md` sigue con las cifras
+previas a esta corrida (556 entidades / 38,8 %); no se reescribió su prosa
+metodológica completa por alcance, sólo `FUENTES_Y_APIS.md` y
+`V2_BACKLOG.md`, que son los que declaran el resultado crudo.
+
+### Próximo paso recomendado
+
+Revisar las cuatro colas nuevas de `internal/` con `scripts/revisar-identidad.ps1`
+u otra herramienta equivalente, y decidir si `docs/ORCID_COVERAGE.md` merece
+una actualización completa de sus cifras y su argumento del techo del 100 %.
