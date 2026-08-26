@@ -1,0 +1,13 @@
+{
+  "consulta": "AF-ID(60105368) AND PUBYEAR > 2022 AND PUBYEAR < 2026",
+  "fecha_hora_consulta_utc": "2026-08-26T02:40:28Z",
+  "total_resultados": 818,
+  "n_registros_leido_scopus_export": 818,
+  "coincide_con_scopus_export_vigente": true,
+  "rate_limit": {
+    "limite": "20000",
+    "restante": "19997",
+    "restablece": "1788254488"
+  },
+  "endpoint": "https://api.elsevier.com/content/search/scopus"
+}
