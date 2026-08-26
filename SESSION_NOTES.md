@@ -3047,3 +3047,106 @@ Confirmar con el usuario que rotó la API Key expuesta en el chat. Después,
 sin pendiente inmediato de T-06 — queda documentado y a la espera de una
 reexportación real. Retomar `T-02`–`T-15` vía `make revision` sigue siendo
 el trabajo de mayor rendimiento disponible.
+
+---
+
+## Cierre · `make revision`: 84 decisiones aplicadas, y un casi-desastre de sobrescritura evitado a tiempo
+
+El usuario revisó los 84 casos pendientes en `internal/revision_identidad.html`
+por su cuenta (no vía `scripts\revisar-identidad.ps1`, cuyo flujo no se probó
+en esta sesión) y subió el CSV exportado directamente al chat.
+
+### Lo que casi se rompe
+
+`apply_decisions.py` **regenera `config/identidades_consolidadas.yml` entero**
+desde `internal/identity_decisions.csv` en cada corrida — no lo actualiza
+incrementalmente. El archivo comiteado tenía **38 grupos** (la consolidación
+histórica de «85 formas → 38 personas» que documenta `D-08`). Sobrescribir
+`internal/identity_decisions.csv` con el CSV que subió el usuario y aplicar
+sin más redujo eso a **16 grupos**: población de autores subiendo de 538 a
+568 en el build, en la dirección contraria a lo que consolidar debería hacer.
+
+**La causa:** `internal/revision_identidad.html` sólo pinta la cola VIVA de
+ambigüedades (las que la auditoría sigue detectando). Un caso ya resuelto dos
+semanas atrás, cuya consolidación hace que la ambigüedad que lo originó ya no
+vuelva a aparecer, **desaparece del formulario** — no porque se haya revocado,
+sino porque ya no hay nada que preguntar. `build_review.py` ya avisaba de
+esto exactamente («25 decisión(es) del CSV sin caso vivo que las reciba»),
+pero el aviso se leyó como informativo y no como lo que era: una advertencia
+de que exportar y sobrescribir perdería esas 25-30 filas.
+
+Se detectó ANTES de comitear, comparando `git diff --stat` de
+`config/identidades_consolidadas.yml` contra lo que ya estaba en `HEAD` — el
+recuento de grupos (38→16) fue la señal. Se revirtió con `git checkout --`
+sobre los cuatro artefactos generados y sobre el CSV, sin haber tocado el
+remoto en ningún momento.
+
+### La corrección
+
+Fusión por `caso_id`: unión del CSV viejo (respaldado en
+`internal/.respaldos/` antes de sobrescribir, como ya hacía el flujo con
+`scripts\verificar-orcid.ps1` para credenciales) y el nuevo, con el nuevo
+ganando en los 80 casos que aparecen en ambos. Verificado que **ninguna** de
+esas 80 coincidencias era una contradicción real: las 53 diferencias de
+veredicto eran todas `pendiente → decidido`, nunca `misma → distintas` ni al
+revés. Resultado: 141 filas (111 nuevas + 30 huérfanas preservadas), 37
+grupos consolidados (84 formas de firma) — cercano a los 38 originales, con
+la diferencia esperable de las decisiones genuinamente nuevas de hoy.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-263 | `internal/identity_decisions.csv` se FUSIONA por `caso_id`, nunca se reemplaza, al incorporar un CSV exportado de la herramienta | La herramienta sólo exporta la cola viva; un reemplazo directo pierde toda decisión cuyo caso ya no genera ambigüedad activa. Esto no estaba documentado en ningún lado y debería estarlo |
+| D-264 | El respaldo va ANTES de sobrescribir cualquier CSV de decisiones, sin excepción, incluso en una sesión de un solo turno | Fue lo que hizo posible detectar y revertir esto sin pérdida: sin el respaldo en `internal/.respaldos/`, las 30 filas huérfanas habrían desaparecido sin rastro |
+| D-265 | Antes de comitear un `apply_decisions.py`, se compara el recuento de grupos/personas contra `HEAD` | Es la señal más barata y más legible de una regresión de consolidación: un número que debería bajar y sube (o baja demasiado) es más fiable que leer 141 filas de CSV a ojo |
+| D-266 | `scripts/revisar-identidad.ps1` deja de hacer `Copy-Item -Force` sobre el CSV vigente; llama a `merge_decisions.py` | Tenía EXACTAMENTE el mismo bug que se acaba de encontrar y revertir a mano — es el camino que `docs/OPERACION.md` recomienda como «la vía cómoda», así que corregirlo ahí importaba tanto como la fusión de esta sesión, no menos |
+| D-267 | La fusión vive en `src/review/merge_decisions.py`, con `--test` propio, no como lógica suelta dentro del `.ps1` | PowerShell no es donde se valida lógica en este proyecto — los cuatro conectores y `apply_decisions.py` ya la ponen en Python con autoprueba; el `.ps1` sólo orquesta |
+
+### Archivos creados o modificados
+
+```
+internal/identity_decisions.csv          fusionado (141 filas), no reemplazado
+internal/.respaldos/identity_decisions_20260826T043050_pre_pablo.csv   nuevo · respaldo previo
+config/identidades_consolidadas.yml      37 grupos (era 38; +6 nuevos, -7 al reagruparse con hoy)
+config/firmas_e09_resueltas.yml          4 descartadas (Metabolism, Movement Sciences (NUTRIM),
+                                           School of Psychology, and Senior Lecturer)
+config/orcid_revisado.yml                13 confirmadas · 8 retiradas · 6 sin registro
+data/enriched/authors_orcid.csv          +2 asignaciones
+docs/BUILD_VERIFICATION.md               regenerado (538 fichas, era 542)
+STATE.md                                 regenerado
+src/review/merge_decisions.py            nuevo · fusión por caso_id, con --test
+scripts/revisar-identidad.ps1            Copy-Item -Force reemplazado por merge_decisions.py;
+                                           su autoprueba se suma al Paso 1
+```
+
+### Verificación
+
+`apply_decisions.py --test`: 28 casos OK antes de tocar nada real.
+`apply_decisions.py --dry-run` corrido DOS VECES: una contra el CSV
+reemplazado (mostró el problema first-hand: 16 grupos) y otra contra el
+fusionado (37 grupos, 0 contradicciones, 0 errores). Pipeline completo
+(`run_all.py` → `indicator_feasibility.py` → `build_all.py`) reconstruido
+tras la fusión: 29/30 reglas, 0 bloqueantes, 0 fallas de barrera
+pública/interna. Población de autores 538 — coherente con una consolidación
+adicional sobre 542, en la dirección correcta.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Un CSV exportado por la herramienta de revisión es un reemplazo seguro del anterior» | **Falso.** Es un reemplazo seguro sólo de la cola VIVA. La consolidación histórica vive en filas cuyo caso ya no está vivo, y hay que fusionarlas a mano |
+| «Si `apply_decisions.py --dry-run` no da error, el resultado es correcto» | **Verdad a medias, y peligrosa.** El script valida CONTRADICCIONES dentro del CSV que se le da, no pérdida de información respecto de un CSV anterior que ya no ve. Detectarlo exigió comparar contra `git diff`, no confiar solo en la salida del programa |
+
+### Ambigüedades abiertas
+
+- Igual que antes: rotación de la API Key, ventana 2023-2025 vs. 2026, `T-13` (percentil SciVal), `T-10` (red de coautoría, sigue esperando `T-03` completo).
+- Quedan **5 pendientes** de las 141 filas fusionadas (casos genuinamente sin decidir, no perdidos).
+- `scripts/verificar-orcid.ps1` sigue con el prompt oculto (`-AsSecureString`) que ya falló en `consultar-scopus.ps1`. No se tocó: es hallazgo transferible, no lo que se pidió esta sesión.
+
+### Próximo paso recomendado
+
+Ya corregido `scripts\revisar-identidad.ps1` (confirmado: tenía el mismo bug,
+`Copy-Item -Force`, y ahora usa `merge_decisions.py --test`-eado). Subir todo
+lo de esta sesión. Sin pendiente inmediato de identidad — la próxima ronda de
+`make revision` puede usar el asistente con confianza.

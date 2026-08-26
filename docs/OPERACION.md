@@ -136,8 +136,17 @@ reserva a una persona.
 
 Comprueba el intérprete, genera la página, la abre en el navegador y, cuando
 usted vuelve con el CSV exportado, lo recoge de la carpeta de descargas,
-respalda el anterior, le enseña **en seco** qué aplicaría y sólo entonces aplica
-y reconstruye.
+respalda el vigente, lo **fusiona** (`merge_decisions.py`, no lo sobrescribe),
+le enseña **en seco** qué aplicaría y sólo entonces aplica y reconstruye.
+
+**Por qué fusiona y no reemplaza.** La página sólo pinta la cola VIVA de
+ambigüedades: un caso decidido en una ronda anterior, cuya consolidación hace
+que esa ambigüedad ya no vuelva a detectarse, desaparece del formulario — no
+porque se haya revocado. Reemplazar `internal\identity_decisions.csv` con la
+exportación nueva pierde esas filas en silencio, y como `apply_decisions.py`
+regenera `config\identidades_consolidadas.yml` entero en cada corrida, eso
+retrocede la consolidación histórica sin ningún aviso. Pasó de verdad el
+2026-08-26 (`D-263`, `SESSION_NOTES.md`): 38 grupos comiteados quedaron en 16.
 
 **A mano**, si prefiere:
 
@@ -147,9 +156,10 @@ py src\review\build_hallazgos.py     # informe de hallazgos sobre el corpus
 ```
 
 Abra `internal\revision_identidad.html`, decida, pulse **Exportar decisiones**,
-guarde el archivo como `internal\identity_decisions.csv` y aplique:
+y fusione el archivo descargado con el vigente (NO lo guarde encima):
 
 ```powershell
+py src\review\merge_decisions.py "C:\ruta\a\identity_decisions.csv"   # fusiona por caso_id
 py src\review\apply_decisions.py --dry-run   # qué haría, sin escribir
 py src\review\apply_decisions.py             # aplicar de verdad
 ```

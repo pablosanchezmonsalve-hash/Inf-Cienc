@@ -118,6 +118,11 @@ if ($LASTEXITCODE -ne 0) {
     Malo "La autoprueba fallo. No siga: lo que aplique podria no ser lo que decida."
     Read-Host "`n  Enter para cerrar"; exit 1
 }
+& $py src\review\merge_decisions.py --test | Select-Object -Last 3
+if ($LASTEXITCODE -ne 0) {
+    Malo "La autoprueba de la fusion fallo. No siga."
+    Read-Host "`n  Enter para cerrar"; exit 1
+}
 Ok "Autoprueba correcta"
 
 # ── 5. Datos de la auditoría ─────────────────────────────────────────────────
@@ -199,19 +204,27 @@ if ($cand.Count -gt 0) {
     Write-Host "  Encontrado en Descargas:"
     Write-Host "    $($nuevo.Name)  ($($nuevo.LastWriteTime))"
     Write-Host ""
-    $r = Read-Host "  Copiarlo a internal\identity_decisions.csv? (s/n)"
+    $r = Read-Host "  Fusionarlo con internal\identity_decisions.csv? (s/n)"
     if ($r -match '^[sSyY]') {
-        # Respaldo antes de sustituir. La exportacion reescribe el archivo
-        # ENTERO: si algo saliera mal, lo anterior no debe perderse.
+        # Respaldo antes de sustituir. NO se copia el archivo nuevo encima del
+        # vigente: la pagina de revision solo pinta la cola VIVA, asi que un
+        # caso decidido en una ronda anterior cuya ambiguedad ya no se vuelve
+        # a detectar desaparece del formulario -- no porque se haya revocado,
+        # sino porque ya no hay nada que preguntar. Copiar encima perderia esa
+        # decision en silencio. Paso el 2026-08-26: 38 grupos consolidados
+        # quedaron en 16 con un Copy-Item directo (D-263, SESSION_NOTES.md).
+        # merge_decisions.py une por caso_id: el nuevo gana donde coincide, lo
+        # que solo esta en el vigente se conserva.
         if (Test-Path $destino) {
             $dirResp = Join-Path $raiz "internal\.respaldos"
             New-Item -ItemType Directory -Force -Path $dirResp | Out-Null
             $sello = Get-Date -Format "yyyyMMdd-HHmmss"
             Copy-Item $destino (Join-Path $dirResp "identity_decisions-$sello.csv")
-            Ok "Respaldo del anterior en internal\.respaldos\"
+            Ok "Respaldo del vigente en internal\.respaldos\"
         }
-        Copy-Item $nuevo.FullName $destino -Force
-        Ok "Archivo colocado en internal\identity_decisions.csv"
+        & $py src\review\merge_decisions.py $nuevo.FullName
+        if ($LASTEXITCODE -ne 0) { Malo "Fallo la fusion"; Read-Host "`n  Enter"; exit 1 }
+        Ok "Fusionado en internal\identity_decisions.csv"
     }
 } else {
     Aviso "No encuentro ningun identity_decisions*.csv en Descargas"

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `8377f91` · T-06: registra la confirmación de cobertura por API, sin cerrar el pen
+Último commit: `1821b98` · Redacta el fragmento de API Key que quedó en SESSION_NOTES.md
 Snapshot: 2026-08-26
 
 ---
@@ -32,21 +32,18 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **542** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades de autor publicadas | **538** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
-| Firmas con ORCID | **240** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con forma de persona | **538** | descontando las marcadas por `E-09`, pendientes de revisión |
-| Entidades con ORCID | **209** | tras consolidación humana · **la que sirve el sitio** |
+| Firmas con ORCID | **242** | sin consolidar · `data/enriched/authors_orcid.csv` |
+| Entidades con ORCID | **204** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **27** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **85 formas de firma eran 38 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
-
-Y **4 de las publicadas probablemente no correspondan a personas**: la auditoría las marcó como probables fragmentos de cadena de afiliación que la fuente metió en la lista de autores (regla `E-09`). Dos de las señales son invariantes de la fuente; la tercera es una heurística sobre la forma del nombre, y sola no basta. Siguen contando y con ficha: confirmarlo es una decisión de identidad, y por `D-08` la toma una persona en `make revision`.
+Las cifras de autor van en dos bases porque una revisión humana declaró que **84 formas de firma eran 37 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
 ---
 
@@ -84,7 +81,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 270
+## Decisiones tomadas: 275
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
