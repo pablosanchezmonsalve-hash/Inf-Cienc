@@ -4200,3 +4200,58 @@ dist/                                     reconstruido completo
 
 Cerrar `T-02` formalmente en `PLAN.md` (si el archivo lo rastrea como
 pendiente abierto) y seguir con el resto de los `T` pendientes.
+
+## Cierre · T-19: cron mensual en el workflow de GitHub Actions; T-06 confirmado sin ruta de automatización
+
+El usuario pidió avanzar `T-06` y `T-19`. Ambos ya estaban en su techo del día
+(commits `5c9a292`, `37d893c`, `8377f91`, ya en el historial de esta rama).
+Preguntó después si pueden generarse actualizaciones automáticas en vez de
+reimportar a mano.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-306 | `T-06` no gana automatización: consultar la API de Scopus con más frecuencia no produce la fecha de corte que el pendiente pide | La propia documentación de `scopus_api.py` declara que la Scopus Search API no expone un campo «actualizado al» — sólo captura instante de consulta + cadena de búsqueda. La fecha de corte sólo existe en la cabecera de un export manual desde la interfaz web (`docs/UPDATING_REQUEST.md`); automatizar la consulta repetiría el mismo hallazgo sin acercarse al cierre |
+| D-307 | `.github/workflows/ampliar-orcid.yml` gana un disparador `schedule` mensual (`cron: '0 6 1 * *'`), además del `workflow_dispatch` que ya tenía | El registro de ORCID sí cambia con el tiempo (a diferencia de la API de Scopus); una corrida mensual automática cubre `T-19` sin gastar cuota de más ni depender de que alguien se acuerde de lanzarlo a mano |
+| D-308 | Los tres pasos condicionados a `inputs.verificar`, `inputs.afiliacion` e `inputs.commitear` cambian a `github.event_name != 'workflow_dispatch' || inputs.X` | El contexto `inputs` sólo existe en disparos `workflow_dispatch`; en un disparo `schedule` llega vacío, y esos tres `if:` se habrían evaluado como falsos — la corrida mensual habría consultado ORCID pero nunca verificado, buscado candidatos por afiliación ni comiteado el resultado. Se encontró antes de que corriera en producción, no después |
+
+### Qué se aplicó
+
+`.github/workflows/ampliar-orcid.yml`: trigger `schedule` mensual agregado;
+comentario «CÓMO SE LANZA» actualizado; los tres `if:` de pasos condicionales
+corregidos para no depender de `inputs` fuera de un disparo manual.
+`docs/OPERACION.md`: nota sobre el disparo automático en la sección de T-19.
+`PLAN.md`: fila de `T-19` anota la automatización agregada hoy. `T-06` no
+cambia: sigue igual en su techo, ahora con la razón de por qué más
+automatización no lo mueve documentada aquí.
+
+### Verificación
+
+YAML parseado con `pyyaml` (`py -3 -c "import yaml; yaml.safe_load(...)"`):
+válido, dos triggers (`workflow_dispatch`, `schedule`), cron
+`[{'cron': '0 6 1 * *'}]`. No se pudo correr el workflow real en GitHub
+Actions desde esta sesión — el cambio queda sin commitear/pushear a la
+espera de que el usuario lo confirme.
+
+### Archivos creados o modificados
+
+```
+.github/workflows/ampliar-orcid.yml   trigger schedule mensual + fix de los 3 if: dependientes de inputs
+docs/OPERACION.md                     nota sobre el disparo automático mensual (T-19)
+PLAN.md                               T-19: anota la automatización; T-06 sin cambio de estado
+SESSION_NOTES.md                      este cierre
+```
+
+### Ambigüedades abiertas
+
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo (T-19 ahora con
+  corrida automática mensual además del techo del método).
+
+### Próximo paso recomendado
+
+Confirmar con el usuario si comitea y pushea el cambio del workflow (acción
+visible en GitHub, no autoaplicada sin permiso). Si se aprueba, verificar la
+primera corrida programada el 1 del mes próximo, o lanzarla a mano una vez
+desde Actions para confirmar que el fix de los `if:` funciona antes de
+esperar al cron.
