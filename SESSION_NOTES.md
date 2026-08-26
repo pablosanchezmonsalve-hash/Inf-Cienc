@@ -3194,3 +3194,61 @@ Preguntarle al usuario cuál de los 5 pendientes reales quiere atacar:
 `T-06` (esperando una reexportación real de Scopus), `T-10` (decidir si
 publicar la red de coautoría, ya desbloqueada), `T-13` (falta respaldo
 documental de Elsevier) o `T-19` (ampliar cobertura ORCID por afiliación).
+
+---
+
+## Cierre · T-19: el mismo pendiente, un bug ya conocido, corregido antes de que muerda dos veces
+
+El usuario eligió `T-19`. `src/enrich/orcid_afiliacion.py` ya existía y pasa
+`--test`; lo que faltaba era un camino para Windows. Usa las mismas
+credenciales (`ORCID_CLIENT_ID`/`ORCID_CLIENT_SECRET`) que
+`scripts\verificar-orcid.ps1` — y ese script todavía tenía el prompt oculto
+(`-AsSecureString`) que ya falló en vivo esta sesión con `consultar-scopus.ps1`
+(D-257). Construir un asistente nuevo con el patrón corregido mientras el
+existente seguía con el patrón roto habría sido dejar la misma trampa activa
+para la próxima vez que alguien la use.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-270 | `scripts/ampliar-orcid-afiliacion.ps1`, nuevo, sigue el patrón de `consultar-scopus.ps1`: credenciales en texto visible, con validación de longitud mínima | Mismo bug de pegado ya diagnosticado (D-257); construir tooling nueva con el patrón roto habría sido repetir un error ya identificado |
+| D-271 | `scripts/verificar-orcid.ps1` deja el prompt oculto por el mismo motivo, aunque no era lo pedido esta sesión | Comparte credenciales con la herramienta nueva de T-19: dejarlo roto mientras se corrige todo lo demás alrededor no tenía sentido, y ya estaba señalado como «hallazgo transferible» sin corregir desde `D-259` |
+| D-272 | `orcid_afiliacion.py` no cachea en disco, a diferencia de los otros cuatro conectores | El registro de ORCID cambia con el tiempo y ese es el punto de volver a correrlo; cachear escondería justamente lo que T-19 busca encontrar. Se documentó la asimetría en `docs/OPERACION.md` en vez de dejarla implícita |
+
+### Archivos creados o modificados
+
+```
+scripts/ampliar-orcid-afiliacion.ps1   nuevo · asistente de Windows para T-19
+scripts/verificar-orcid.ps1            credenciales en texto visible (mismo fix que D-257)
+Makefile                               nuevo objetivo `orcid-afiliacion`
+docs/OPERACION.md                      Paso 5: orcid_afiliacion.py añadido; corregido
+                                         «los tres» → «los cuatro/cinco» (arrastraba un error
+                                         desde que se añadió scopus_api.py sin actualizar el conteo)
+```
+
+### Verificación
+
+`orcid_afiliacion.py --test`: 9 casos, todos OK (verificado antes de construir
+el asistente). El asistente en sí no se pudo probar de punta a punta: exige
+una consola de Windows interactiva y credenciales de ORCID que no están en
+este entorno — mismo límite que ya aplica a todos los `.ps1` de este
+proyecto.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «`docs/OPERACION.md` decía "los tres" y era correcto» | **Falso.** Ya eran cuatro conectores documentados ahí (se añadió `scopus_api.py` en una sesión anterior sin actualizar el conteo). Corregido al pasar por el mismo párrafo |
+
+### Ambigüedades abiertas
+
+- Si el usuario tiene ya credenciales de ORCID (`ORCID_CLIENT_ID`/`SECRET`) — no se le preguntó todavía; las necesita para correr `ampliar-orcid-afiliacion.ps1`.
+- Las de siempre: rotación de la API Key de Scopus, ventana 2023-2025 vs. 2026, `T-02`, `T-06`, `T-10`, `T-13`.
+
+### Próximo paso recomendado
+
+Que el usuario confirme si tiene credenciales de ORCID y corra
+`scripts\ampliar-orcid-afiliacion.ps1` en su máquina. El resultado (candidatos
+nuevos, si los hay) se revisa después con `scripts\revisar-identidad.ps1`,
+que ya fusiona correctamente (`D-266`).
