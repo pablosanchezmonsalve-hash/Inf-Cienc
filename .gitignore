@@ -30,6 +30,10 @@ __pycache__/
 .venv/
 .DS_Store
 
+# Playwright y sus dependencias (src/verify/run_all.mjs): se instalan con
+# `npm install --no-save playwright` — CI lo hace en cada corrida, efímero.
+node_modules/
+
 # Respaldos del asistente de revisión antes de sustituir el CSV de decisiones.
 # El archivo bueno sí se versiona; sus copias de seguridad no.
 internal/.respaldos/

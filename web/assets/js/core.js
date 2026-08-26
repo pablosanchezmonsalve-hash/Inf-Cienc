@@ -739,7 +739,8 @@ function svgRedNodos(D, activa, foco) {
     return `<g class="nodo-red" data-red-nodo="${e.i}" role="button" ${tipRed(e)}
         transform="translate(${e.x.toFixed(1)},${e.y.toFixed(1)})" opacity="${op}">
       ${anillo}<circle class="marca-nodo" r="${radioNodoRed(e)}" fill="${rellenoNodoRed(e)}"
-        stroke="${esF ? 'var(--accion-viva)' : 'var(--superficie)'}" stroke-width="${esF ? 2.6 : .9}"/>
+        stroke="${esF ? 'var(--accion-viva)' : (sinUnidadRed(e) ? 'var(--tinta-3)' : 'var(--superficie)')}"
+        stroke-width="${esF ? 2.6 : (sinUnidadRed(e) ? 1.1 : .9)}"/>
     </g>`;
   }).join('');
   const cuadros = D.ais.map(e => {
@@ -841,7 +842,7 @@ function svgRedArcos(D, activa) {
     if (prev !== null && e.com !== prev) marcas.push(`<line x1="${x - paso / 2}" y1="${base - 4}" x2="${x - paso / 2}" y2="${base + 40}" stroke="var(--linea-fuerte)" stroke-width="1.2"/>`);
     prev = e.com;
     if (e.puente) marcas.push(`<circle cx="${x}" cy="${base}" r="${(radioNodoRed(e) + 2.4).toFixed(2)}" fill="none" stroke="var(--tinta)" stroke-width="1.1" opacity="${act ? .75 : .12}"/>`);
-    marcas.push(`<circle cx="${x}" cy="${base}" r="${radioNodoRed(e)}" fill="${rellenoNodoRed(e)}" stroke="var(--superficie)" stroke-width=".9" opacity="${act ? 1 : .16}"/>`);
+    marcas.push(`<circle cx="${x}" cy="${base}" r="${radioNodoRed(e)}" fill="${rellenoNodoRed(e)}" stroke="${sinUnidadRed(e) ? 'var(--tinta-3)' : 'var(--superficie)'}" stroke-width="${sinUnidadRed(e) ? 1.1 : .9}" opacity="${act ? 1 : .16}"/>`);
     etq.push(`<text class="etiqueta-firma${sinUnidadRed(e) ? ' sin-unidad' : ''}" x="${x}" y="${base + 12}"
       transform="rotate(90 ${x} ${base + 12})" text-anchor="start" opacity="${act ? 1 : .3}">${escapar(e.id)}</text>`);
   });

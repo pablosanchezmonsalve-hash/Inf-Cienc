@@ -103,11 +103,15 @@ ok(await pg.locator('.recorte-chip').count() === 0, '«Ver todo» limpia el reco
 // URL y siga valiendo, que el buscador no expulse el foco al repintar, y que
 // los enlaces antiguos con `internacional=` no se hayan roto al unificar.
 console.log('  Filtros de publicaciones');
-await pg.goto(`http://127.0.0.1:${P}/publicaciones.html?anio=2024&unidad=Facultad+de+Medicina`,
+// «Facultad de Medicina» se fusionó en «Facultad de Medicina y Salud» al
+// cerrar T-02 (2026-08-26, consolidación de vocabulario de unidades
+// académicas); el nombre viejo ya no matchea nada y el recuento subió de
+// 113 a 122 al incorporar las publicaciones que antes eran de Odontología.
+await pg.goto(`http://127.0.0.1:${P}/publicaciones.html?anio=2024&unidad=Facultad+de+Medicina+y+Salud`,
   { waitUntil: 'networkidle' });
 await pg.waitForTimeout(700);
 const heredado = await pg.textContent('.recorte-n');
-ok(heredado.trim() === '113', `el recorte de la portada llega intacto (${heredado.trim()})`);
+ok(heredado.trim() === '122', `el recorte de la portada llega intacto (${heredado.trim()})`);
 ok(await pg.locator('.chip-on').count() === 2, 'los controles reflejan el recorte heredado');
 const filas = await pg.locator('#tabla-cuerpo tr').count();
 ok(filas > 0, `la tabla trae filas (${filas})`);

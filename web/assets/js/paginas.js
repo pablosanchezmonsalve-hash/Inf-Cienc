@@ -577,25 +577,13 @@ async function fichaAutor() {
 
 /* =========================================================== metodología */
 async function metodologia() {
+  const glosarioEl = document.getElementById('glosario');
+  const procedenciaEl = document.getElementById('procedencia');
+  if (yaPintado(glosarioEl) && yaPintado(procedenciaEl)) return;
   const { entradas } = await c.cargar('glossary.json');
   const meta = await c.cargar('meta.json');
-  document.getElementById('glosario').innerHTML = entradas.map(e => `
-    <section class="modulo" id="${e.slug}">
-      <h2>${c.escapar(e.termino)}</h2>
-      <p>${c.escapar(e.corto)}</p>
-      ${e.extendido ? `<p class="nota">${c.escapar(e.extendido)}</p>` : ''}
-    </section>`).join('');
-  document.getElementById('procedencia').innerHTML = `
-    <ul>
-      <li>Fuentes: ${meta.fuentes.join(', ')}</li>
-      <li>Ventana temporal: ${meta.ventana.inicio}–${meta.ventana.fin}</li>
-      <li>Citas actualizadas al: <strong>${meta.fecha_corte_citas}</strong></li>
-      <li>Export de origen: ${meta.fecha_export}</li>
-      <li>Publicaciones: ${c.nf.format(meta.denominadores.universo_total)} ·
-          con métricas: ${c.nf.format(meta.denominadores.con_metricas)} ·
-          con autoría detallada: ${c.nf.format(meta.denominadores.con_autoria_detallada)}</li>
-      <li>Build: ${meta.fecha_build}</li>
-    </ul>`;
+  glosarioEl.innerHTML = v.glosario(entradas);
+  procedenciaEl.innerHTML = v.procedencia(meta);
 }
 
 async function catalogo() {
