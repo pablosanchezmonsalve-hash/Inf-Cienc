@@ -4298,3 +4298,47 @@ dirección.
 Enviar la pregunta combinada (entitlement estándar + Partner API) al gestor
 de cuenta Elsevier o a la biblioteca UFT. Hasta tener respuesta, no hay
 ruta de código que avanzar en la integración de SciVal.
+
+## Cierre · Reprueba de SciVal con acceso admin (mismo resultado), y EBSCO registrado como propuesta
+
+Con credenciales de administrador de Elsevier, el usuario repitió la prueba
+de `analytics/scival/publication/metrics` por `curl` directo: sigue
+`403 ENTITLEMENTS_ERROR`. Confirma que el acceso admin a la cuenta no
+habilita por sí solo la entitlement de SciVal API — es una activación
+comercial separada, no autogestionable. No se documentó de nuevo por
+instrucción del usuario: el resultado es idéntico al ya registrado y no
+aporta información nueva.
+
+**Incidente de seguridad:** la API Key quedó escrita en texto plano en el
+chat al pegar el comando `curl`. Se le recomendó al usuario rotarla —mismo
+tipo de incidente que ya ocurrió antes en este proyecto (`1821b98`).
+
+Después, el usuario mencionó tener acceso admin de EBSCO y preguntó si
+serviría para EBSCO como fuente nueva (no para destrabar SciVal — son
+proveedores distintos). Investigado por web: EDS (EBSCO Discovery Service)
+es una capa de búsqueda/descubrimiento, no una plataforma bibliométrica —
+no tiene FWCI ni percentil de citación. Su API también está bloqueada por
+entitlement (hay que contactar a ventas de EBSCO), con un esquema de
+autenticación distinto (usuario/contraseña → AuthToken + SessionToken vía
+`developer.ebsco.com`). Registrado como propuesta en `docs/FUENTES_Y_APIS.md`
+§3.12, en el mismo rol que OpenAlex: cruce de cobertura, nunca fusionado
+con el universo publicado.
+
+### Archivos creados o modificados
+
+```
+docs/FUENTES_Y_APIS.md   §3.12 nueva: EBSCO Discovery Service, propuesta sin confirmar
+SESSION_NOTES.md         este cierre
+```
+
+### Ambigüedades abiertas
+
+Qué producto EBSCO tiene contratado exactamente la UFT (EDS completo,
+bases individuales, o ambos) y si esa suscripción incluye acceso API —
+sin confirmar.
+
+### Próximo paso recomendado
+
+Nada de código pendiente en ninguna de las dos vías: SciVal espera
+activación comercial de Elsevier; EBSCO espera que el usuario confirme con
+su representante de ventas qué acceso tiene y active la API si aplica.
