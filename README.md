@@ -1,4 +1,4 @@
-# Plataforma web para informes cienciométricos institucionales
+# Plataforma web para informes bibliométricos institucionales
 
 Plataforma abierta y replicable para visualizar producción, impacto,
 colaboración y estructura temática de la actividad científica institucional.

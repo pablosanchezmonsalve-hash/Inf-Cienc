@@ -48,7 +48,7 @@ Profundidad máxima 3 niveles. Breadcrumbs desde el nivel 2.
 | Elemento | Contenido | Propósito |
 |---|---|---|
 | Identidad | Logo y nombre institucional (desde `config/institution.yml`) | Atribución |
-| Título | «Informe Cienciométrico Institucional» | Contexto |
+| Título | «Informe Bibliométrico Institucional» | Contexto |
 | **Barra de vigencia** | «Datos: Scopus/SciVal · Ventana 2023–2025 · Corte 22-07-2026» | **Persistente en todas las páginas** |
 
 La barra de vigencia es una decisión deliberada: es la única forma de que una

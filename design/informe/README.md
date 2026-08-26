@@ -28,7 +28,7 @@ lo que el diseño supuso.
 ## Sistema visual: narrativa por bandas
 
 Adopta el sistema del rediseño del sitio (lienzo «Rediseño Informe
-Cienciométrico»), no la paleta anterior. Tipografía **Newsreader** para titulares
+Bibliométrico»), no la paleta anterior. Tipografía **Newsreader** para titulares
 y cifras, **Public Sans** para interfaz y prosa.
 
 | Token | Valor | Qué admite |

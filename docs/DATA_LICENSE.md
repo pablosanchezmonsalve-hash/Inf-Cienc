@@ -61,7 +61,7 @@ objetivo de una plataforma «abierta y replicable» de `PROJECT_SPEC.md`.
 
 Cita sugerida:
 
-> Universidad Finis Terrae (2026). *Informe Cienciométrico Institucional*.
+> Universidad Finis Terrae (2026). *Informe Bibliométrico Institucional*.
 > Datos derivados de Scopus y SciVal (Elsevier), corte al 22 de julio de 2026.
 
 Toda exportación desde el sitio incluye esta procedencia en la cabecera del

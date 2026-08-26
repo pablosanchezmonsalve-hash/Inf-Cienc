@@ -2,7 +2,7 @@
 # Especificación maestra del proyecto
 
 <context>
-Este proyecto busca construir una plataforma web interactiva para informes cienciométricos institucionales, iniciando con la Universidad Finis Terrae y con datos provenientes de Scopus y SciVal.
+Este proyecto busca construir una plataforma web interactiva para informes bibliométricos institucionales, iniciando con la Universidad Finis Terrae y con datos provenientes de Scopus y SciVal.
 
 Referencia de inspiración:
 https://dataciencia.anid.gob.cl/institution/1709
