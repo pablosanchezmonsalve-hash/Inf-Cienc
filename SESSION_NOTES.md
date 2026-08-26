@@ -4413,3 +4413,94 @@ metodológica completa por alcance, sólo `FUENTES_Y_APIS.md` y
 Revisar las cuatro colas nuevas de `internal/` con `scripts/revisar-identidad.ps1`
 u otra herramienta equivalente, y decidir si `docs/ORCID_COVERAGE.md` merece
 una actualización completa de sus cifras y su argumento del techo del 100 %.
+
+## Cierre · Herramienta de revisión para la brecha de cobertura OpenAlex
+
+El usuario planteó una hipótesis: si Scopus/SciVal son productos Elsevier,
+es razonable que subestimen la producción real de la UFT, y OpenAlex podría
+estar viendo lo que ese entorno no ve. Antes de aceptarla como hecho, se
+desglosaron los 414 hallazgos de `V2-26`: 310 son `article` (no sólo
+diferencia de tipo documental), pero el 71,5 % no tiene ninguna cita y el
+40 % es de 2025 — consistente tanto con producción real muy reciente como
+con falsos positivos de desambiguación de OpenAlex. Conclusión: la
+hipótesis está bien respaldada, pero no verificada — exactamente la
+distinción que `CLAUDE.md` exige.
+
+El usuario pidió trabajar con los registros. Antes de revisar nada,
+`openalex_cobertura.py` ganó `autores_de_la_institucion()`: identifica qué
+autor y qué institución declarada (tal como la escribe OpenAlex) disparó
+cada hallazgo — sin esto, revisar exigía abrir cada DOI a mano. Reutiliza
+el caché en disco de la corrida anterior, sin volver a consultar la red.
+Encontró un patrón de paso: «Franco Fernando Yanine» / «Fernando Yanine»
+en el top-20 por citación son casi con certeza la misma persona — una
+variante de nombre en autores que **no están en el universo Scopus en
+absoluto**, un caso que ninguna herramienta existente cubre.
+
+Se construyó `internal/revision_cobertura_openalex.html` (mismo patrón que
+`build_unit_validation.py`/`build_review.py`): 414 casos ordenados por
+citación, con autor, institución declarada, DOI, año, tipo y tres
+veredictos (UFT real / error de OpenAlex / tipo excluido a propósito).
+`apply_openalex_review.py` aplica lo exportado a la columna `resolucion`
+de `openalex_cobertura.csv`. Verificado con Playwright real (no sólo
+`--test`): 414 ítems renderizan, marcar un veredicto actualiza el
+contador, la búsqueda filtra, 0 errores JS.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-314 | `apply_openalex_review.py` sólo actualiza `internal/openalex_cobertura.csv`; nunca escribe en `data/interim/publications_universe.csv` ni en ningún artefacto publicable | `D-206`: Scopus y OpenAlex indexan con criterios distintos. Confirmar que una obra es «producción real UFT» no la convierte en parte del corpus — ampliar el universo es una decisión de alcance aparte, explícita, posterior. Este tooling deja constancia de la revisión, no ejecuta la decisión de alcance |
+| D-315 | El asistente de PowerShell (`revisar-cobertura-openalex.ps1`) NO reconstruye el sitio al final, a diferencia de `validar-unidades.ps1` | Nada del build depende de esta revisión —a diferencia de la validación de unidades, que si cierra alimenta `config/matching_rules.yml`—, así que agregar el paso sería trabajo sin efecto |
+| D-316 | Tres veredictos (uft / error / tipo), no dos | «No está en Scopus» tiene una tercera lectura real y frecuente: un tipo documental (preprint, editorial) que este proyecto excluye a propósito, que no es lo mismo que «Scopus lo perdió» ni que «OpenAlex se equivocó» |
+
+### Qué se aplicó
+
+`src/enrich/openalex_cobertura.py`: nueva función `autores_de_la_institucion()`,
+columnas `autor_uft`/`institucion_declarada` en la salida, con deduplicación
+de nombres repetidos. `src/review/build_openalex_review.py` (nuevo):
+genera la herramienta interactiva. `src/review/apply_openalex_review.py`
+(nuevo): aplica las decisiones exportadas. `scripts/revisar-cobertura-openalex.ps1`
+(nuevo): asistente de Windows, mismo patrón que `revisar-identidad.ps1`.
+`Makefile`: objetivo `revisar-cobertura-openalex`. `docs/OPERACION.md`:
+instrucciones de uso.
+
+### Verificación
+
+`--test` en ambos scripts nuevos (3 casos en el conector, 6 en el aplicador,
+incluida idempotencia de reaplicar las mismas decisiones). Smoke test con
+Playwright real contra el HTML generado: 414 ítems, marcar veredicto
+actualiza el contador y el estado `aria-pressed`, búsqueda filtra
+correctamente, 0 errores de consola. No se ejecutó el flujo completo de
+exportar→aplicar con datos reales — el usuario todavía no ha revisado
+ningún caso.
+
+### Archivos creados o modificados
+
+```
+src/enrich/openalex_cobertura.py              autores_de_la_institucion(); columnas autor_uft/institucion_declarada
+internal/openalex_cobertura.csv               regenerado con las dos columnas nuevas (desde caché, sin red)
+src/review/build_openalex_review.py           nuevo · genera la herramienta interactiva
+src/review/apply_openalex_review.py           nuevo · aplica las decisiones exportadas
+internal/revision_cobertura_openalex.html     nuevo · 414 casos, generado
+scripts/revisar-cobertura-openalex.ps1        nuevo · asistente de Windows
+Makefile                                      objetivo revisar-cobertura-openalex
+docs/OPERACION.md                             instrucciones de uso
+SESSION_NOTES.md                              este cierre
+```
+
+### Ambigüedades abiertas
+
+Los 414 casos siguen sin revisar — la herramienta está lista, pero nadie ha
+marcado ningún veredicto todavía. El patrón de variante de nombre
+("Franco Fernando Yanine" / "Fernando Yanine") tampoco tiene un lugar
+donde declararse: no es una decisión de identidad del corpus interno
+(`identity_decisions.csv`, que trabaja sobre firmas YA en el universo),
+porque estos autores no están en Scopus en absoluto.
+
+### Próximo paso recomendado
+
+Abrir `internal/revision_cobertura_openalex.html` (o correr
+`scripts/revisar-cobertura-openalex.ps1`) y empezar por el top de
+citación, que ya se revisó informalmente en el chat de esta sesión: los
+primeros ~20 casos ya tienen una lectura hecha, sólo falta marcarla en la
+herramienta y exportar.

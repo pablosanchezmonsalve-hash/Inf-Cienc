@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades revisar-cobertura-openalex kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -120,6 +120,17 @@ revision: auditoria
 #   python3 src/review/apply_unit_validation.py
 validar-unidades: auditoria
 	python3 src/review/build_unit_validation.py
+
+# V2-26: genera internal/revision_cobertura_openalex.html — herramienta
+# interactiva para decidir, caso por caso, si cada una de las obras que
+# OpenAlex atribuye a la UFT y el universo no tiene es producción real fuera
+# de Scopus, un error de atribución, o un tipo documental excluido a
+# propósito. NO modifica el universo publicado (D-206): sólo deja constancia
+# de la revisión en internal/openalex_cobertura.csv. Tras exportar el CSV:
+#   python3 src/review/apply_openalex_review.py --dry-run
+#   python3 src/review/apply_openalex_review.py
+revisar-cobertura-openalex:
+	python3 src/review/build_openalex_review.py
 
 # Vista de la red de coautoría con el grafo REAL, para revisión interna.
 # Depende del grafo, que lo deja el build. C-05 SÍ se publica ahora en el
