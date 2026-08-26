@@ -18,12 +18,23 @@ fuentes:
       - abstract
       - referencias
       - financiamiento
-    fecha_corte: null            # NO declarada por el export. Ambigüedad A-05.
+    fecha_corte: null            # Sigue sin declararla el export en sí (Ambigüedad
+                                  # A-05). No se aplica retroactivamente al CSV
+                                  # vigente (docs/UPDATING_REQUEST.md §5) — esto es
+                                  # para LA PRÓXIMA carga, que sí debe traerla.
     fecha_export: "2026-07-31"
     ventana_declarada: "2023-2025"
     filtros_aplicados: "ninguno declarado"
     n_registros_declarado: null
     n_registros_leido: 818
+    verificacion_api:            # T-06 — NO es la fecha de corte del export: es la
+                                  # confirmación, por API, de que el conteo del CSV
+                                  # de 2026-07-31 seguía vigente en esta fecha.
+                                  # Ver src/enrich/scopus_api.py, data/enriched/scopus_api_consulta.json.
+      fecha_consulta: "2026-08-26"
+      consulta: "AF-ID(60105368) AND PUBYEAR > 2022 AND PUBYEAR < 2026"
+      total_resultados: 818
+      coincide_con_n_registros_leido: true
 
   scival_export:
     nombre: "SciVal — export nativo"

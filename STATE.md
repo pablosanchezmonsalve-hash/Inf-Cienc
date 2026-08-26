@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4fd12e9` · Corrige la base de comparación del conector de Scopus: 818, no 823
+Último commit: `7f1f183` · Corrige la captura de la API Key: pegado en prompt oculto la truncaba 
 Snapshot: 2026-08-26
 
 ---
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 267
+## Decisiones tomadas: 270
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
