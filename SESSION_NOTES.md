@@ -3312,3 +3312,104 @@ T-19 queda en su techo actual para este método (afiliación declarada);
 reintentar más adelante cuando el registro de ORCID tenga gente nueva.
 Preguntar al usuario cuál de los pendientes restantes (`T-02`, `T-06`,
 `T-10`, `T-13`) quiere atacar, o si prefiere cerrar la sesión aquí.
+
+---
+
+## Cierre · Auditoría de la sesión: dos errores reales encontrados, ~200 líneas de duplicación eliminadas
+
+El usuario pidió una auditoría completa del trabajo de la sesión: errores,
+mejoras, reducción de extensión, y evaluación de APIs. Revisión ejecutada
+directamente (sin sub-agente, para no depender de presupuesto de API que ya
+había fallado una vez esta sesión), con verificación real —no sólo lectura—
+usando un intérprete de PowerShell descargado para la ocasión.
+
+### Errores encontrados y corregidos
+
+1. **`consultar-scopus.ps1` con dos mensajes obsoletos**: el comentario de
+   cabecera seguía diciendo «pide la API Key de forma oculta» después de
+   que el cuerpo del script cambiara a texto visible (D-257); y el mensaje
+   final seguía diciendo «coincide con el universo publicado (823)» después
+   de que `scopus_api.py` cambiara la base de comparación a 818
+   (commit `4fd12e9`, esta misma sesión). Ninguno afectaba la lógica, pero
+   ambos habrían confundido a quien los leyera.
+2. **Asimetría de robustez**: el `insttoken` opcional de `consultar-scopus.ps1`
+   no tenía la misma validación de longitud mínima que la API Key —un
+   pegado fallido ahí habría mandado un insttoken de 1 carácter a la API
+   sin ningún aviso.
+
+### Mejora ejecutada: módulo compartido para los cuatro asistentes de PowerShell
+
+Los cuatro `.ps1` repetían textualmente las mismas ~80 líneas (detección de
+Python evitando el atajo de la Microsoft Store, instalación de dependencias,
+las cuatro funciones de mensaje). Nuevo `scripts/_comun.ps1`, con
+`Titulo`/`Ok`/`Aviso`/`Malo`, `Entrar-Raiz`, `Buscar-Python`,
+`Asegurar-Dependencias` y `Pedir-Credencial` (esta última generaliza la
+validación de longitud mínima que ya existía repetida para API Key,
+Client ID/Secret e insttoken). Cada script pasa a dot-sourcing (`. "$PSScriptRoot\_comun.ps1"`)
+en vez de redefinir todo.
+
+**Medido**: los 4 scripts sumaban ~825 líneas con duplicación; ahora suman
+517 + 144 del módulo compartido = 661 — una reducción neta de ~200 líneas
+(~24 %), y una corrección futura de la detección de Python ya sólo exige
+tocar un archivo, no cuatro (que es exactamente el modo en que el error del
+"823" sobrevivió sin corregirse: se arregló en un lugar y no en el otro que
+decía lo mismo).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-275 | Los asistentes de PowerShell comparten lógica vía `scripts/_comun.ps1` con dot-sourcing, no copia-y-pega | La duplicación ya causó un bug real esta sesión (mensaje "823" corregido en un lugar, no en el otro). Un módulo compartido lo hace estructuralmente imposible la próxima vez |
+| D-276 | Las funciones compartidas devuelven valores con `return`, nunca usan `$script:` para comunicarse con quien las llama | `$script:` dentro de una función definida en un archivo dot-sourced resuelve contra el archivo donde se DEFINIÓ la función, no contra quien la llama — es ambiguo entre versiones de PowerShell y no vale la pena arriesgarlo |
+| D-277 | La revisión de seguridad y esta auditoría se hicieron sin sub-agente cuando el sub-agente previo falló por límite de cuenta | Reintentar el mismo tipo de llamada que ya falló por presupuesto no es una estrategia; hacer el trabajo directamente sí lo es |
+
+### Archivos creados o modificados
+
+```
+scripts/_comun.ps1                     nuevo · funciones compartidas
+scripts/consultar-scopus.ps1           usa el módulo; corregidos los 2 mensajes obsoletos;
+                                         insttoken ahora valida longitud
+scripts/ampliar-orcid-afiliacion.ps1   usa el módulo
+scripts/verificar-orcid.ps1            usa el módulo
+scripts/revisar-identidad.ps1          usa el módulo
+src/enrich/scopus_api.py               texto de ayuda de --count aclarado
+```
+
+### Verificación
+
+No se pudo ejecutar PowerShell en ninguna sesión anterior de este proyecto
+(el contenedor no lo traía). Se descargó el binario oficial de PowerShell
+7.4.6 para Linux sólo para esta verificación. Confirmado con el parser real
+del lenguaje (`[System.Management.Automation.Language.Parser]::ParseFile`)
+que los 5 archivos no tienen errores de sintaxis. Más importante: se
+ejecutaron los 4 scripts de punta a punta hasta el paso de credenciales
+(con un Python real en el PATH, con pandas/PyYAML instalados) y los cuatro
+llegaron correctamente a "Dependencias listas" y a la autoprueba —
+confirmando que el mecanismo de dot-sourcing y paso de valores por `return`
+funciona de verdad entre archivos, no sólo que compila. `Pedir-Credencial`
+se probó aislada con un caso válido y uno corto: el corto se detiene con el
+mensaje correcto y código de salida 1, como el original.
+
+La invocación real de Python dentro de cada script (`& $py src\enrich\...`)
+falló en este contenedor Linux porque Python no interpreta rutas con `\`
+como separador — comportamiento correcto y sin cambios en Windows real (ya
+confirmado en vivo por el usuario varias veces esta sesión con las mismas
+líneas), y no es código que este commit haya tocado.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Sin PowerShell instalado, esta clase de refactorización no se puede verificar, sólo leer con cuidado» | **Falso.** El binario de PowerShell para Linux se descarga en segundos y permite parsear y ejecutar de verdad, no sólo inspeccionar visualmente |
+
+### Ambigüedades abiertas · pendiente de información del usuario
+
+- **SciVal API**: el usuario dijo antes que tenía «todas las APIs aprobadas» al hablar de Scopus y SciVal juntos. Si eso incluye SciVal específicamente (no sólo Scopus), se podría construir un conector análogo a `scopus_api.py` para desbloquear `T-13` (semántica del percentil) y `X-01` (autocitación, `V2_BACKLOG.md`). No se construye sin confirmar primero: `docs/FUENTES_Y_APIS.md` §3.8 ya declara esto como bloqueante sin confirmar, y adivinar el contrato de una API nueva viola `CLAUDE.md`.
+- El resto de las integraciones propuestas en `FUENTES_Y_APIS.md` §3 (Unpaywall, SciELO, Altmetric, DataCite, OpenAIRE, Semantic Scholar, Europe PMC, Wikidata) siguen exactamente como estaban: evaluadas, ninguna confirmada, nada nuevo que integrar sin más información del usuario.
+
+### Próximo paso recomendado
+
+Preguntar al usuario si su acceso API incluye SciVal específicamente. Si sí,
+construir el conector análogo a `scopus_api.py` desbloquea dos pendientes de
+una vez (`T-13`, `X-01`). Si no, no hay más integración de API accionable
+hoy sin nueva información.

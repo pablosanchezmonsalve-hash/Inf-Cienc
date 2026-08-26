@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `9d8aa57` · Asistente de Windows para T-19, y corrige el mismo bug de pegado en ve
+Último commit: `99fec4a` · Regenera la vista de red de coautoría con la consolidación de hoy
 Snapshot: 2026-08-26
 
 ---
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 282
+## Decisiones tomadas: 285
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
