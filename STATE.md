@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `bd5ae52` · T-02: corrección declarada para afiliación cruzada (Odontología USS/UF
+Último commit: `b2ef304` · Documenta el hallazgo de partnerapi.scival.com, sin probarlo
 Snapshot: 2026-08-26
 
 ---
@@ -32,18 +32,14 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **538** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **242** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **204** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **28** | `config/indicators.yml`, `publicar: true` |
-| Reglas de validación | **30** | `data/interim/validation_report.csv` |
-| Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **84 formas de firma eran 37 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+> **Falta la base consolidada.** No existe `data/processed/authors.json`: las cifras de autor de arriba son sólo la base cruda, que no es la que publica el sitio. Correr `make artefactos` antes que `make estado`.
 
 ---
 
@@ -74,7 +70,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 313
+## Decisiones tomadas: 318
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
