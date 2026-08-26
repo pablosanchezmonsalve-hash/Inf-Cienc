@@ -12,12 +12,87 @@
 # sin_registro  alguien buscó en el registro y no encontró a esta
 #               persona. No es lo mismo que «nadie ha mirado».
 #
-# Aplicado: 2026-08-20
+# Aplicado: 2026-08-26
 
-fecha_de_aplicacion: 2026-08-20
+fecha_de_aplicacion: 2026-08-26
 
-confirmadas: []
+confirmadas:
+  - firma: Beytia Osses I.
+    orcid: 0009-0008-4178-5429
+    nota: ''
+  - firma: Cartaya M.A.
+    orcid: 0000-0001-8098-9960
+    nota: ''
+  - firma: Cárdenas Larenas J.P.
+    orcid: 0009-0001-5706-8570
+    nota: ''
+  - firma: De la Fuente M.
+    orcid: 0000-0003-0577-7604
+    nota: ''
+  - firma: Díaz F.
+    orcid: 0000-0003-4763-074X
+    nota: ''
+  - firma: Figueroa F.C.
+    orcid: 0000-0002-1280-9742
+    nota: ''
+  - firma: Gaete M.
+    orcid: 0000-0003-1846-2417
+    nota: ''
+  - firma: Lucero-Mora J.
+    orcid: 0000-0002-8554-7181
+    nota: ''
+  - firma: Mancilla R.
+    orcid: 0000-0002-2143-6386
+    nota: ''
+  - firma: Moraga Concha J.
+    orcid: 0009-0007-5923-0205
+    nota: ''
+  - firma: Moyano C.
+    orcid: 0000-0002-6357-3469
+    nota: ''
+  - firma: Murray N.P.
+    orcid: 0000-0001-8154-8550
+    nota: ''
+  - firma: Rojas D.
+    orcid: 0000-0002-1675-2958
+    nota: ''
 
-retiradas: []
+retiradas:
+  - firma: Bencina Matus F.
+    orcid: 0000-0002-7490-514X
+    nota: ''
+  - firma: Buchuk P.
+    orcid: 0009-0009-8078-2738
+    nota: ''
+  - firma: Gálvez M.
+    orcid: 0000-0002-8638-5268
+    nota: ''
+  - firma: Molina M.
+    orcid: 0000-0002-7091-2633
+    nota: ''
+  - firma: Moyano Davila C.
+    orcid: 0000-0002-6357-3469
+    nota: ''
+  - firma: Moyano Dávila C.
+    orcid: 0000-0002-6357-3469
+    nota: ''
+  - firma: Valencia I.
+    orcid: 0000-0002-2695-8044
+    nota: ''
+  - firma: Vasquez F.
+    orcid: 0000-0003-1769-3969
+    nota: ''
 
-sin_registro: []
+sin_registro:
+  - firma: Dreyse J.
+    nota: ''
+  - firma: Gonzalez-Valderrama A.
+    nota: ''
+  - firma: Jorquera J.
+    nota: ''
+  - firma: Pedreros C.
+    nota: ''
+  - firma: Reccius A.
+    nota: ''
+  - firma: Salas-Guzmán N.
+    nota: ''

@@ -21,8 +21,8 @@
 # Se elige así y no por longitud porque el desempate alfabético
 # publicaba la variante sin tilde teniendo la variante con tilde.
 #
-# Decisiones leídas: 110 · grupos consolidados: 38
-# Fecha de la revisión: 2026-08-20
+# Decisiones leídas: 141 · grupos consolidados: 37
+# Fecha de la revisión: 2026-08-26
 
 grupos:
   - canonica: 'Arenas-Massa Á.'
@@ -35,6 +35,11 @@ grupos:
     variantes:
       - 'Avilès Dorlhiac R.'   # 1 publicaciones
       - 'Avilés-Dorlhiac R.'   # 1 publicaciones
+  - canonica: 'Ballesteros P. P.'
+    origen: humana
+    variantes:
+      - 'Ballesteros P.'   # 1 publicaciones
+      - 'Ballesteros P. P.'   # 1 publicaciones
   - canonica: 'Cancino-López J.'
     origen: humana
     variantes:
@@ -62,16 +67,6 @@ grupos:
     variantes:
       - 'Crisóstomo Flores P.'   # 1 publicaciones
       - 'Crisóstomo-Flores P.'   # 1 publicaciones
-  - canonica: 'De la Fuente López M.'
-    origen: ortografica
-    variantes:
-      - 'De la Fuente López M.'   # 2 publicaciones
-      - 'De la fuente López M.'   # 1 publicaciones
-  - canonica: 'De la Fuente M.'
-    origen: mixta
-    variantes:
-      - 'De la Fuente M.'   # 2 publicaciones
-      - 'de la Fuente M.'   # 1 publicaciones
   - canonica: 'Domínguez A.'
     origen: humana
     variantes:
@@ -87,11 +82,6 @@ grupos:
     variantes:
       - 'Galleguillos R.'   # 3 publicaciones
       - 'Galleguillos R.B.'   # 1 publicaciones
-  - canonica: 'García J.'
-    origen: ortografica
-    variantes:
-      - 'Garcia J.'   # 1 publicaciones
-      - 'García J.'   # 1 publicaciones
   - canonica: 'Giglio Jiménez A.'
     origen: humana
     variantes:
@@ -109,6 +99,12 @@ grupos:
       - 'Gonzalez- Valderrama A.'   # 1 publicaciones
       - 'Gonzalez-Valderrama A.'   # 6 publicaciones
       - 'González-Valderrama A.'   # 2 publicaciones
+  - canonica: 'Gubbins V.'
+    origen: humana
+    variantes:
+      - 'Foxley V.G.'   # 1 publicaciones
+      - 'Gubbins V.'   # 4 publicaciones
+      - 'Gubbins-Foxley V.'   # 1 publicaciones
   - canonica: 'Gómez Barbieri G.'
     origen: humana
     variantes:
@@ -147,16 +143,16 @@ grupos:
       - 'Lopez-Arana S.'   # 2 publicaciones
       - 'López Arana S.'   # 1 publicaciones
       - 'López-Arana S.'   # 10 publicaciones
+  - canonica: 'Martinez-Mardones M.B.'
+    origen: humana
+    variantes:
+      - 'Martinez-Mardones M.'   # 1 publicaciones
+      - 'Martinez-Mardones M.B.'   # 1 publicaciones
   - canonica: 'Martínez M.'
     origen: ortografica
     variantes:
       - 'Martinez M.'   # 1 publicaciones
       - 'Martínez M.'   # 1 publicaciones
-  - canonica: 'Martínez-Mardones M.B.'
-    origen: ortografica
-    variantes:
-      - 'Martinez-Mardones M.B.'   # 1 publicaciones
-      - 'Martínez-Mardones M.B.'   # 1 publicaciones
   - canonica: 'Massa A.A.'
     origen: humana
     variantes:
@@ -170,20 +166,25 @@ grupos:
   - canonica: 'Moyano Dávila C.'
     origen: humana
     variantes:
+      - 'Moyano C.'   # 1 publicaciones
       - 'Moyano Davila C.'   # 1 publicaciones
       - 'Moyano Dávila C.'   # 3 publicaciones
   - canonica: 'Núñez-Lisboa M.'
-    origen: mixta
+    origen: humana
     variantes:
-      - 'Nuñez-Lisboa M.'   # 1 publicaciones
-      - 'Nùñez-Lisboa M.'   # 1 publicaciones
       - 'Núnez-Lisboa M.'   # 1 publicaciones
       - 'Núñez-Lisboa M.'   # 1 publicaciones
+  - canonica: 'Núñez-Lisboa M.N.'
+    origen: humana
+    variantes:
+      - 'Nuñez-Lisboa M.'   # 1 publicaciones
+      - 'Núñez-Lisboa M.N.'   # 1 publicaciones
   - canonica: 'Orellana-Donoso M.'
     origen: humana
     variantes:
       - 'Orellana Donoso M.'   # 4 publicaciones
       - 'Orellana-Donoso M.'   # 34 publicaciones
+      - 'Orellana-Donoso M.I.'   # 1 publicaciones
   - canonica: 'Pino-Zúñiga J.'
     origen: humana
     variantes:
@@ -214,11 +215,6 @@ grupos:
     variantes:
       - 'Tabilo Prieto I.'   # 1 publicaciones
       - 'Tabilo-Prieto I.'   # 1 publicaciones
-  - canonica: 'Vásquez F.'
-    origen: ortografica
-    variantes:
-      - 'Vasquez F.'   # 4 publicaciones
-      - 'Vásquez F.'   # 3 publicaciones
   - canonica: 'Álvarez-Valdés C.'
     origen: humana
     variantes:
