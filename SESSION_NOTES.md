@@ -2930,7 +2930,7 @@ resultó decisiva: aisló cada capa una por una.
    entorno no viajó entre ventanas de PowerShell — eso es esperado, no un bug;
    confirmó que había que probar todo en una sola sesión.
 3. **El usuario pegó su clave real donde iba la etiqueta del prompt** (`Read-Host
-   "e6b398...` en vez de `Read-Host "API Key de Scopus"`), exponiéndola en el
+   "[CLAVE]" ` en vez de `Read-Host "API Key de Scopus"`), exponiéndola en el
    chat dos veces. Se le pidió rotarla en el portal de Elsevier de inmediato.
 4. **Con la sintaxis corregida y la clave nueva: `Longitud capturada: 1`.**
    El prompt oculto (`-AsSecureString`) capturó un solo carácter basura en vez

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `7f1f183` · Corrige la captura de la API Key: pegado en prompt oculto la truncaba 
+Último commit: `8377f91` · T-06: registra la confirmación de cobertura por API, sin cerrar el pen
 Snapshot: 2026-08-26
 
 ---
