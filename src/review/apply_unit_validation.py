@@ -63,6 +63,19 @@ def bloque_vocabulario(texto: str, nombre: str) -> re.Match | None:
     return re.search(patron, texto, re.MULTILINE)
 
 
+def entrada_por_variante(texto: str, valor: str) -> tuple[str, re.Match] | None:
+    """Busca en QUÉ entrada de vocabulario `valor` ya vive como variante
+    (no como clave). Sin esto, corregir hacia un nombre que hoy sólo existe
+    como variante de OTRA entrada crearía una clave nueva con ese mismo texto
+    — el mismo nombre quedaría registrado dos veces, como variante de una
+    entrada y como clave de otra, y el matching pasaría a ser ambiguo. """
+    for m in re.finditer(r'^    "([^"]+)":\n((?:      - .*\n)+)', texto, re.MULTILINE):
+        canonico, variantes = m.group(1), m.group(2)
+        if f'- "{valor}"' in variantes:
+            return canonico, m
+    return None
+
+
 def bloque_jerarquia(texto: str, escuela: str) -> re.Match | None:
     """Encuentra el bloque de una escuela en `jerarquia:`."""
     patron = (r'^(    )"' + re.escape(escuela) + r'":\n'
@@ -126,6 +139,32 @@ def aplicar_unidad(texto: str, nombre: str, correcto: str, correccion: str,
 
     m_destino = bloque_vocabulario(texto, destino)
     m_origen = bloque_vocabulario(texto, nombre)
+
+    # El nombre corregido puede no ser una CLAVE propia y aun así ya estar
+    # reconocido — como variante de OTRA entrada. Corregir hacia ella es
+    # justo el caso de School of Medicine UFT-CLC -> "Escuela de Medicina":
+    # ese texto ya vive como variante de Facultad de Medicina, y crear una
+    # clave nueva con el mismo nombre lo duplicaría.
+    #
+    # Si la variante encontrada resulta ser del PROPIO `nombre` que se está
+    # corrigiendo, esto NO es ese caso: es un renombrado con el nombre nuevo
+    # ya listado como una de las variantes históricas de la misma entrada
+    # (pasó con «Facultad de Comunicaciones y Humanidades» -> «Facultad de
+    # Humanidades y Comunicaciones», que ya convivían como variantes entre
+    # sí). Ese caso lo resuelve el renombrado de más abajo (`m_origen`), no
+    # esta rama — si no, el renombrado nunca ocurriría.
+    if not m_destino:
+        por_variante = entrada_por_variante(texto, destino)
+        if por_variante and por_variante[0] != nombre:
+            canonico_real, m_var = por_variante
+            variantes = m_var.group(2)
+            if f'- "{nombre}"' in variantes:
+                cambios.append(f"unidad «{nombre}»: ya estaba registrada como variante de «{canonico_real}»")
+                return texto, True
+            nuevo = variantes + f'      - "{nombre}"\n'
+            cambios.append(f"unidad «{nombre}»: «{destino}» ya es variante de «{canonico_real}» — "
+                            f"«{nombre}» se agrega ahí también, no como clave nueva")
+            return texto[:m_var.start(2)] + nuevo + texto[m_var.end(2):], True
 
     if m_destino:
         # El nombre correcto YA es una entrada: sólo falta que reconozca esta
@@ -259,9 +298,39 @@ def autotest() -> int:
     ok('facultad: "Facultad de Ingeniería y Tecnología"' in t3,
        "la referencia de jerarquía al nombre viejo debería actualizarse al renombrar")
 
-    # 10. Todo el resultado sigue siendo YAML válido en cada paso ya probado
-    #     arriba (ya se parseó con yaml.safe_load en 2, 3, 6, 7, 8, 9 sin
-    #     lanzar) — comprobación adicional sobre el texto completo sin tocar.
+    # 10. Unidad "no" cuyo destino ya existe, pero SÓLO como variante de otra
+    #     entrada (no como clave): debe agregarse ahí, no crear una entrada
+    #     nueva duplicando ese texto como clave. Es el caso real
+    #     "School of Medicine UFT-CLC" -> "Escuela de Medicina", que ya es
+    #     variante de "Facultad de Medicina".
+    t2, quedo = aplicar_unidad(t, "School of Medicine UFT-CLC", "no", "Faculty of Engineering", [], [])
+    vocab = yaml.safe_load(t2)["unidad_academica"]["vocabulario"]
+    ok("Faculty of Engineering" not in vocab, "no debería crear una clave con un texto que ya es variante")
+    ok("School of Medicine UFT-CLC" in vocab["Facultad de Ingeniería"],
+       "debería agregarse como variante de la entrada dueña de 'Faculty of Engineering'")
+    ok(len(vocab) == 2, "no debería crecer el número de claves")
+
+    # 11. Corregir hacia un nombre que ya es variante de la MISMA entrada que
+    #     se está corrigiendo (no de otra): debe renombrar, no tratarlo como
+    #     "ya registrado en otra parte" y no hacer nada. Caso real:
+    #     "Facultad de Comunicaciones y Humanidades" ->
+    #     "Facultad de Humanidades y Comunicaciones", que ya convivían como
+    #     variantes entre sí en la misma entrada.
+    t_ch = FIXTURE.replace(
+        '"Facultad de Ingeniería":\n      - "Facultad de Ingeniería"\n      - "Faculty of Engineering"\n',
+        '"Facultad de Comunicaciones y Humanidades":\n'
+        '      - "Facultad de Comunicaciones y Humanidades"\n'
+        '      - "Facultad de Humanidades y Comunicaciones"\n')
+    t2, quedo = aplicar_unidad(t_ch, "Facultad de Comunicaciones y Humanidades", "no",
+                                "Facultad de Humanidades y Comunicaciones", [], [])
+    vocab = yaml.safe_load(t2)["unidad_academica"]["vocabulario"]
+    ok("Facultad de Humanidades y Comunicaciones" in vocab, "debería renombrarse de verdad, no quedarse igual")
+    ok("Facultad de Comunicaciones y Humanidades" not in vocab,
+       "la clave vieja no debería sobrevivir tras el renombrado")
+
+    # 12. Todo el resultado sigue siendo YAML válido en cada paso ya probado
+    #     arriba (ya se parseó con yaml.safe_load en 2, 3, 6, 7, 8, 9, 10, 11
+    #     sin lanzar) — comprobación adicional sobre el texto completo sin tocar.
     try:
         yaml.safe_load(FIXTURE)
     except yaml.YAMLError:
@@ -270,7 +339,7 @@ def autotest() -> int:
     for f in fallos:
         print(f"  FALLA  {f}")
     print(f"  {'OK' if not fallos else 'FALLOS'} · apply_unit_validation: "
-          f"{10 - len(fallos)}/10 comprobaciones")
+          f"{21 - len(fallos)}/21 comprobaciones")
     return 1 if fallos else 0
 
 
@@ -317,9 +386,13 @@ def main() -> int:
         todas_unidades_ok = todas_unidades_ok and ok
 
     # El vocabulario se declara validado sólo cuando TODO lo que la hoja
-    # preguntó tiene respuesta. Marcarlo con preguntas sin contestar sería
-    # publicar una confianza que nadie dio.
-    if todas_jerarquias_ok and todas_unidades_ok and not len(pendientes):
+    # preguntó quedó resuelto: no sólo "sin filas en pendiente", también sin
+    # ningún "no" que se quedó sin corrección utilizable (ver los avisos de
+    # arriba) — eso también es una pregunta sin responder, aunque el CSV la
+    # marque como contestada. Marcar el vocabulario validado con cualquiera
+    # de las dos sin resolver sería publicar una confianza que nadie dio.
+    todo_resuelto = todas_jerarquias_ok and todas_unidades_ok and not len(pendientes)
+    if todo_resuelto:
         if 'vocabulario_validado_por_institucion: false' in texto:
             texto = texto.replace(
                 'vocabulario_validado_por_institucion: false',
@@ -327,8 +400,14 @@ def main() -> int:
                 f'# confirmado por revisión humana, {fecha}')
             cambios.append("vocabulario_validado_por_institucion: false → true")
     else:
+        motivos = []
+        if len(pendientes):
+            motivos.append(f"{len(pendientes)} fila(s) en el CSV siguen en «pendiente»")
+        if not (todas_jerarquias_ok and todas_unidades_ok):
+            motivos.append("hay fila(s) marcadas «no» sin una corrección utilizable "
+                            "(ver los avisos de arriba)")
         avisos.append("vocabulario_validado_por_institucion sigue en false: "
-                       f"quedan {len(pendientes)} fila(s) sin responder")
+                       + "; ".join(motivos))
 
     print()
     if cambios:

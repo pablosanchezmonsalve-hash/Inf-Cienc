@@ -3890,3 +3890,138 @@ Ninguna acción de código pendiente. Cuando el usuario responda la hoja
 (`internal/validacion_unidades.html`, o `scripts\validar-unidades.ps1` en
 Windows), aplicar con `apply_unit_validation.py`, reconstruir el sitio, y
 cerrar `T-02` formalmente en `PLAN.md`.
+
+---
+
+## Cierre · T-02: primera ronda de respuestas aplicada, un caso pausado por cruce institucional
+
+El usuario subió `internal/unit_validation_decisions.csv` (25 filas: 21
+unidades + 4 jerarquías) exportado de la herramienta. Antes de aplicar en
+seco, la revisión con `--dry-run` encontró DOS fallas reales en
+`apply_unit_validation.py` (escrito la sesión anterior, nunca probado
+contra respuestas reales) y UNA que no era del código: un dato mal
+extraído que el CSV, sin querer, habría confirmado.
+
+### Los dos defectos del script, encontrados por el propio dry-run
+
+1. **Colisión de variante.** La fila `School of Medicine UFT-CLC` →
+   `Escuela de Medicina` habría creado una clave de vocabulario NUEVA
+   llamada «Escuela de Medicina» — pero ese texto ya vivía como VARIANTE
+   dentro de la entrada «Facultad de Medicina». El resultado habría dejado
+   el mismo nombre registrado dos veces, con matching ambiguo entre las dos
+   entradas. Se agregó `entrada_por_variante()`: antes de crear una clave
+   nueva, busca si el nombre corregido ya vive como variante de OTRA
+   entrada, y si es así, agrega ahí en vez de duplicar.
+2. **El propio arreglo escondía un segundo bug.** «Facultad de
+   Comunicaciones y Humanidades» → «Facultad de Humanidades y
+   Comunicaciones» es un renombrado real, pero el nombre nuevo YA estaba
+   listado como variante — de la MISMA entrada que se está corrigiendo. La
+   primera versión del arreglo #1 trataba eso igual que el caso de una
+   entrada ajena y no hacía el renombrado. Se corrigió comparando la
+   entrada encontrada contra `nombre`: sólo se desvía a "agregar en otra
+   entrada" cuando la entrada encontrada NO es la que se está corrigiendo.
+   El autotest subió de 10 a 21 comprobaciones para cubrir ambos casos por
+   separado — el segundo bug es la clase de error que sólo aparece
+   probando el arreglo del primero contra un caso real, y por eso no lo
+   había atrapado el autotest original.
+
+### El caso que no era un bug de código
+
+La fila `Facultad de Odontología y Ciencias de la Rehabilitación` → `no` →
+`Facultad de Medicina y Salud` parecía una corrección más. La afiliación
+completa detrás de esa fila es: *"Universidad San Sebastián, Facultad de
+Odontología y Ciencias de la Rehabilitación, Carrera de Fonoaudiología,
+Santiago, Chile, Universidad Finis Terrae, Facultad de Educación,
+Psicología y Familia, Santiago, Chile"* (autor Allende-Valenzuela T.,
+`internal/matching_log.csv`). Es una cadena con DOS instituciones: la
+unidad "Facultad de Odontología y Ciencias de la Rehabilitación" pertenece
+a la Universidad San Sebastián, no a la UFT — el extractor se quedó con el
+fragmento equivocado. La unidad UFT real de ese par es "Facultad de
+Educación, Psicología y Familia" (ya renombrada a "Facultad de Educación y
+Ciencias Sociales" en esta misma ronda).
+
+Aplicar la respuesta tal como venía habría fusionado un dato mal extraído
+dentro de "Facultad de Medicina y Salud" — dos errores en vez de uno, y
+esta vez permanente en `config/matching_rules.yml`. No es un error del
+usuario: la herramienta le mostró la cadena completa como evidencia, pero
+enmarcada como "¿es correcto el nombre de esta unidad?", no como "¿pertenece
+esta afiliación completa a la UFT?" — la pregunta que hacía falta hacer no
+era la que se hizo. Se pausó esa fila (`correcto: pendiente`, con nota) y
+se excluyó de esta aplicación; el resto (24 de 25 filas) se aplicó.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-297 | La corrección de «Facultad de Odontología y Ciencias de la Rehabilitación» NO se aplica esta ronda | El texto detectado pertenece a otra institución (Universidad San Sebastián) mezclada en la misma cadena de afiliación; fusionarlo en «Facultad de Medicina y Salud» habría publicado un dato con una causa raíz distinta a la que la corrección resolvía |
+| D-298 | El resto de las 24 respuestas (11 cambios reales + 8 avisos de "sin corrección utilizable" + 5 sin cambio por ser idénticas) se aplica sin esperar la fila pausada | Retener 24 respuestas claras por una fila ambigua habría sido bloquear trabajo listo por un caso que necesita una conversación aparte |
+| D-299 | `apply_unit_validation.py` gana `entrada_por_variante()`, con el autotest ampliado a 21 comprobaciones | Los dos defectos sólo se manifestaban con datos reales de producción, no con el fixture sintético original; ampliar el fixture para cubrir ambos casos deja el próximo lote (la fila pausada, cuando se resuelva, u otra ronda futura) protegido contra la misma clase de error |
+
+### Qué se aplicó
+
+`config/matching_rules.yml`: 4 jerarquías confirmadas (`inferida` →
+`confirmada`, 3 con facultad corregida a «Facultad de Medicina y Salud», 1 a
+«Facultad de Educación y Ciencias Sociales»); 4 unidades renombradas
+(Medicina → Medicina y Salud, Educación/Psicología/Familia → Educación y
+Ciencias Sociales, Comunicaciones y Humanidades → orden invertido,
+Arquitectura y Diseño → +Estudios Creativos); 3 variantes agregadas a
+entradas existentes; 1 entrada nueva (Escuela de Ingeniería Civil
+Industrial). `vocabulario_validado_por_institucion` sigue en `false`: aún
+quedan la fila pausada y varias unidades marcadas «no» sin corrección
+utilizable (ver abajo).
+
+### Verificación
+
+`--test`: 21/21. `--dry-run` corrido DOS veces contra el CSV real antes de
+aplicar (una por cada defecto encontrado y corregido). Tras aplicar:
+`yaml.safe_load()` sobre el resultado, auditoría completa
+(`src/audit/run_all.py`, 0 fallas bloqueantes), build completo
+(`build_all.py`, compuerta de capas: 0 fallas), higiene del sitio sin
+fallos, y confirmación manual de que `series.json` (`P-07`) agrega la
+producción bajo los nombres nuevos correctamente (Facultad de Medicina y
+Salud: 577 pares) y que la fila pausada sigue apareciendo sin fusionar
+(Facultad de Odontología y Ciencias de la Rehabilitación: 1, sin tocar).
+
+### Archivos creados o modificados
+
+```
+src/review/apply_unit_validation.py   entrada_por_variante(); autotest 10 → 21 comprobaciones
+config/matching_rules.yml             4 jerarquías confirmadas, 4 unidades renombradas, 4 variantes/entradas nuevas
+internal/unit_validation_decisions.csv   subido por el usuario; 1 fila pausada a mano antes de aplicar
+internal/matching_log.csv             regenerado por la auditoría con los nombres corregidos
+internal/ambiguities_authors.csv      regenerado; una ambigüedad I-06 falsa se resolvió sola al unificar nombres
+internal/validacion_unidades.md/.html  regeneradas: 18 unidades restantes, 0 jerarquías inferidas
+internal/.respaldos/matching_rules_20260826T175621.yml   respaldo automático antes de escribir
+```
+
+### Ambigüedades abiertas · pendiente de respuesta del usuario
+
+- **La fila pausada**: ¿la unidad real de ese par es «Facultad de
+  Educación y Ciencias Sociales» (lo que dice la propia cadena de
+  afiliación), o hay algo que Claude no está viendo? Propuesta: agregar una
+  entrada a `correcciones_declaradas` para ese texto exacto, no una fusión
+  de vocabulario.
+- **Facultad de Odontología** (sola, sin la coletilla "y Ciencias de la
+  Rehabilitación"): la nota decía "actualmente pertenece a la Facultad de
+  Medicina y Salud" pero el campo de corrección quedó vacío. ¿Se confirma
+  esa fusión?
+- **Escuela de Nutrición y Dietética** (fila de unidad, no de jerarquía):
+  «no» sin corrección ni nota. ¿Qué falta corregir ahí?
+- **School of Civil Engineering / School of Engineering**: el usuario
+  señaló que son ambiguos entre varias escuelas de ingeniería civil
+  (Industrial, Informática y Telecomunicaciones, IA y Realidad Virtual,
+  Biomédica) y no completó cuál. Sin resolver.
+- **Escuela de Ingeniería Civil Industrial** (entrada nueva creada esta
+  ronda): no quedó vinculada a ninguna facultad en `jerarquia` — hoy se
+  reporta por sí sola. ¿Se agrega el vínculo a «Facultad de Ingeniería»,
+  igual que las otras escuelas?
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario las cinco ambigüedades de arriba. Con esas
+respuestas, `T-02` puede cerrarse por completo: aplicar la fila pausada
+(probablemente como corrección declarada, no como fusión de vocabulario),
+decidir Odontología y Nutrición, y — si corresponde — agregar la jerarquía
+de Ingeniería Civil Industrial. Sólo entonces
+`vocabulario_validado_por_institucion` puede pasar a `true`.

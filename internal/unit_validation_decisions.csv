@@ -1,0 +1,31 @@
+# Validación de unidades académicas — revisión humana
+# Generado por internal/validacion_unidades.html
+# Exportado: 2026-08-26
+# correcto: si = el nombre/jerarquía tal como aparece es correcto ·
+#           no = corregir con el valor de la columna "correccion"
+id,tipo,nombre,correcto,correccion,nota
+u-Facultad de Medicina,unidad,Facultad de Medicina,no,Facultad de Medicina y Salud,"Facultad de Medicina y Salud. Incluye a las carreras de: Kinesiología, Nutrición y Dietética, Enfermería, Medicina y Odontología"
+"u-Facultad de Educación, Psicología y Familia",unidad,"Facultad de Educación, Psicología y Familia",no,Facultad de Educación y Ciencias Sociales,"Facultad de Educación y Ciencias Sociales. Incluye a las carreras de: Administración Pública, Educación Parvularia, Educación Básica, Psicología, Sociología, Ciencia Política, Programa de Formación Pedagógica en Educación Media para Licenciados y Profesionales"
+u-Facultad de Ingeniería,unidad,Facultad de Ingeniería,no,Facultad de Ingeniería,"Facultad de Ingeniería. Incluye carreras de: Ingeniería Civil Industrial, Ingeniería Civil en Informática y Telecomunicaciones, Ingeniería Civil en Inteligencia Artificial y Realidad Virtual, Ingeniería Civil Biomédica"
+u-Facultad de Odontología,unidad,Facultad de Odontología,no,,Actualmente pertenece a la Facultad de Medicina y Salud
+u-Facultad de Economía y Negocios,unidad,Facultad de Economía y Negocios,no,Facultad de Economía y Negocios,"Incluye a las carreras de: Ingeniería Comercial, Contador Auditor, Ingeniería en Información y Control de Gestión, Artes Culinarias"
+u-Escuela de Nutrición y Dietética,unidad,Escuela de Nutrición y Dietética,no,,
+u-Escuela de Kinesiología,unidad,Escuela de Kinesiología,no,Escuela de Kinesiología,Perteneciente a la Facultad de Medicina y Salud
+u-Facultad de Derecho,unidad,Facultad de Derecho,si,Facultad de Derecho,
+u-Facultad de Artes,unidad,Facultad de Artes,no,Facultad de Artes,"Incluye carreras de: Escuela de Teatro, Escuela de Artes Visuales"
+u-Facultad de Comunicaciones y Humanidades,unidad,Facultad de Comunicaciones y Humanidades,no,Facultad de Humanidades y Comunicaciones,"Incluye escuelas de: Periodismo y Comunicación, Licenciatura en Historia, Licenciatura en Literatura"
+u-Facultad de Arquitectura y Diseño,unidad,Facultad de Arquitectura y Diseño,no,"Facultad de Arquitectura, Diseño y Estudios Creativos","Incluye carreras de: Arquitectura, Diseño, Diseño de Moda & Management, Publicidad, Doble Título Publicidad + Diseño"
+u-Escuela de Enfermería,unidad,Escuela de Enfermería,si,,Perteneciente a la Facultad de Medicina y Salud
+u-Escuela de Ciencias de la Familia,unidad,Escuela de Ciencias de la Familia,si,,Correspondiente a la Facultad de Educación y Ciencias Sociales
+u-School of Medicine UFT-CLC,unidad,School of Medicine UFT-CLC,no,Escuela de Medicina,Correspondiente a la Facultad de Medicina y Salud
+u-Facultad de Odontología y Ciencias de la Rehabilitación,unidad,Facultad de Odontología y Ciencias de la Rehabilitación,pendiente,Facultad de Medicina y Salud,"Si bien, la Universidad Finis Terrae cuenta con la carrera de Odontología. La Facultad ha sido incorporada junto con otras carreras para formar la Facultad de Medicina y Salud [pausado por Claude: revisar cruce institucional antes de aplicar]"
+u-School of Nutrition and Dietetic,unidad,School of Nutrition and Dietetic,si,,Escuela de Nutrición y Dietética
+u-Facultad de Educación y Ciencias Sociales,unidad,Facultad de Educación y Ciencias Sociales,si,,
+u-School of Civil Engineering,unidad,School of Civil Engineering,no,,"Es necesario precisar a qué Escuela de Ingeniería Civil se refiere, teniendo en consideración que existe la Escuela de Ingeniería Civil Industrial, Ingeniería Civil en Informática y Telecomunicaciones y la Ingeniería Civil en Inteligencia Artificial y Realidad Virtual, como también Ingeniería Civil Biomédica"
+u-Facultad de Economía y Negocios en la Univ,unidad,Facultad de Economía y Negocios en la Univ,no,Facultad de Economía y Negocios,
+u-School of Industrial Engineering,unidad,School of Industrial Engineering,no,Escuela de Ingeniería Civil Industrial,
+u-School of Engineering,unidad,School of Engineering,no,,"Es necesario precisar a qué Escuela de Ingeniería Civil se refiere, teniendo en consideración que existe la Escuela de Ingeniería Civil Industrial, Ingeniería Civil en Informática y Telecomunicaciones y la Ingeniería Civil en Inteligencia Artificial y Realidad Virtual, como también Ingeniería Civil Biomédica"
+j-Escuela de Kinesiología,jerarquia,Escuela de Kinesiología,no,Facultad de Medicina y Salud,
+j-Escuela de Nutrición y Dietética,jerarquia,Escuela de Nutrición y Dietética,no,Facultad de Medicina y Salud,
+j-Escuela de Enfermería,jerarquia,Escuela de Enfermería,no,Facultad de Medicina y Salud,
+j-Escuela de Ciencias de la Familia,jerarquia,Escuela de Ciencias de la Familia,no,Facultad de Educación y Ciencias Sociales,
