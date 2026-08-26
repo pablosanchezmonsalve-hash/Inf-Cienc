@@ -98,7 +98,7 @@ para los datos derivados.
 | # | Pendiente | Fase objetivo | Origen |
 |---|---|---|---|
 | ~~T-01~~ | ~~Enriquecer ORCID desde Crossref por DOI (cobertura 97,7 %)~~ | — | **Cerrado (2026-08-01)**: 174 de 589 firmas, 0 errores de red |
-| T-02 | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad | 2 | **Desbloqueado**: hoja lista en `internal/validacion_unidades.md` (`make revision`). Falta enviarla |
+| ~~T-02~~ | ~~Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad~~ | — | **Cerrado (2026-08-26)**: `vocabulario_validado_por_institucion: true` en `config/matching_rules.yml`. 25 respuestas del responsable del proyecto aplicadas (herramienta interactiva + CSV), más 1 corrección de extracción declarada (afiliación cruzada) y 2 jerarquías confirmadas a mano |
 | ~~T-03~~ | ~~Revisión humana de las variantes de nombre encoladas (28 grupos, 27 pendientes)~~ | — | **Cerrado (2026-08-26)**: 0 pendientes en la cola «Variantes de nombre» tras aplicar las decisiones del usuario, fusionadas con las de la ronda anterior (`D-263`). Desbloquea `T-10` |
 | ~~T-04~~ | ~~Revisión humana de los 20 nombres con múltiples Scopus ID, de los que 10 afectan al informe~~ | — | **Cerrado (2026-08-26)**: 0 pendientes en la cola «Varios Scopus ID» |
 | ~~T-05~~ | ~~Decidir tratamiento del duplicado probable Article/Letter~~ | — | **Cerrado (2026-08-03)**: verificado por el usuario contra ambos DOI. Son dos documentos distintos con el mismo título; universo intacto en 823 |

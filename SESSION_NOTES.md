@@ -4103,3 +4103,100 @@ dist/                                       reconstruido completo
 Preguntarle al usuario las cuatro ambigüedades restantes de arriba. Con
 esas respuestas, `T-02` puede cerrarse por completo y
 `vocabulario_validado_por_institucion` puede pasar a `true`.
+
+---
+
+## Cierre · T-02 completo: las cuatro ambigüedades resueltas, `vocabulario_validado_por_institucion: true`
+
+El usuario respondió las cuatro ambigüedades pendientes en un solo mensaje:
+(1) confirma la fusión de «Facultad de Odontología» en «Facultad de
+Medicina y Salud»; (2) «Escuela de Nutrición y Dietética» se llama
+efectivamente así — el nombre no necesita corrección, sólo la jerarquía
+(ya confirmada en la ronda anterior); (3) «School of Civil Engineering» /
+«School of Engineering» son ambiguos entre varias escuelas de ingeniería
+civil y no hay forma de precisar cuál — sólo se sabe que pertenecen a la
+Facultad de Ingeniería; (4) confirma el vínculo de jerarquía de «Escuela de
+Ingeniería Civil Industrial» a «Facultad de Ingeniería».
+
+Antes de tocar `config/matching_rules.yml`, se probó la fusión de
+Odontología contra el script real (no contra el fixture sintético primero)
+para ver qué haría, siguiendo la misma disciplina que ya había atrapado dos
+bugs en la ronda anterior. Atrapó un tercero.
+
+### El tercer defecto de `apply_unit_validation.py`
+
+«Facultad de Odontología» → «Facultad de Medicina y Salud» es un caso que
+ninguno de los dos bugs anteriores cubría: AMBOS nombres ya eran entradas
+propias de vocabulario, cada una con sus propias variantes (Odontología
+traía «Faculty of Dentistry», «Escuela de Odontología», «School of
+Dentistry»). El código existente sólo sabía agregar `nombre` como una
+variante suelta del destino — dejaba la entrada vieja de Odontología
+intacta, con sus propias variantes huérfanas. El resultado habría quedado
+con «Facultad de Odontología» registrada DOS VECES (clave propia Y
+variante ajena), y «Faculty of Dentistry» / «Escuela de Odontología» /
+«School of Dentistry» habrían seguido resolviendo a la entrada vieja en
+vez de a la fusionada — contradiciendo la propia fusión que se estaba
+aplicando. Verificado ejecutando `aplicar_unidad()` directamente contra el
+archivo real antes de escribir nada.
+
+Se corrigió `aplicar_unidad()`: cuando el nombre a corregir ES TAMBIÉN una
+entrada propia (no sólo el destino), se trasladan TODAS sus variantes al
+destino y se borra la entrada vieja completa, en vez de agregar sólo el
+nombre suelto. Se agregó un caso de prueba nuevo al fixture (variantes
+sintéticas de Odontología fusionándose en una entrada existente) — el
+autotest subió de 21 a 24 comprobaciones.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-302 | `aplicar_unidad()` gana una rama para fusionar DOS entradas de vocabulario ya existentes (trasladando todas las variantes de la vieja, borrando la entrada vieja), en vez de sólo agregar el nombre corregido como variante suelta | El caso real (Odontología → Medicina y Salud) habría dejado el texto registrado dos veces y sus otras variantes sin fusionar — un defecto que sólo se manifestó al probar contra el archivo real, como los dos anteriores |
+| D-303 | «School of Civil Engineering» y «School of Engineering» se registran como variantes de «Facultad de Ingeniería» (nivel de facultad), no de ninguna escuela específica | El usuario confirmó que no hay forma de precisar a cuál de las cuatro escuelas de ingeniería civil corresponden — atribuir al nivel de facultad es el dato más fino que la evidencia sostiene, no una invención (`CLAUDE.md`: no inventar datos ni relaciones) |
+| D-304 | «Escuela de Ingeniería Civil Industrial» → «Facultad de Ingeniería» se agrega directo a `jerarquia`, a mano, sin pasar por el CSV | Es una entrada nueva de la ronda anterior que nunca tuvo fila en la hoja de validación (el generador sólo crea filas para jerarquías `inferida` existentes al momento de generarla); el usuario la confirmó directamente en el chat |
+| D-305 | Con las 25 filas del CSV respondidas y ambas jerarquías nuevas confirmadas, `vocabulario_validado_por_institucion` pasa de `false` a `true` | Es la primera vez que el vocabulario completo de unidades académicas queda validado por el responsable institucional — condición que el propio archivo declara como requisito para publicar comparaciones entre unidades |
+
+### Qué se aplicó
+
+`config/matching_rules.yml`: jerarquía nueva («Escuela de Ingeniería Civil
+Industrial» → «Facultad de Ingeniería», `confirmada`, agregada a mano);
+vocabulario — «Facultad de Odontología» fusionada en «Facultad de Medicina
+y Salud» (4 variantes trasladadas, entrada vieja eliminada), «School of
+Civil Engineering» y «School of Engineering» agregadas como variantes de
+«Facultad de Ingeniería»; `vocabulario_validado_por_institucion: false` →
+`true`. `src/review/apply_unit_validation.py`: nueva rama de fusión en
+`aplicar_unidad()`, autotest 21 → 24 comprobaciones.
+
+### Verificación
+
+`--test`: 24/24. `--dry-run` corrido contra el CSV real antes de aplicar;
+además, la rama de fusión se probó por separado contra el archivo real
+(`aplicar_unidad()` invocada directamente) ANTES de escribir el fixture de
+prueba, para confirmar el bug antes de darlo por corregido. Tras aplicar:
+`yaml.safe_load()` sobre el resultado; auditoría completa (0 fallas
+bloqueantes); `build_all.py` completo (compuerta de capas: 0 fallas);
+`06_assemble_site.py` (10 páginas, capa interna no incluida); higiene sin
+fallos; confirmación manual en `series.json` (`P-07`): «Facultad de
+Odontología» ya no aparece como fila propia, «Facultad de Medicina y
+Salud» sube a 610 pares, «Facultad de Ingeniería» queda en 53.
+
+### Archivos creados o modificados
+
+```
+src/review/apply_unit_validation.py       rama de fusión en aplicar_unidad(); autotest 21 -> 24
+config/matching_rules.yml                 1 jerarquía nueva, 1 fusión de vocabulario, 2 variantes nuevas, flag validado: true
+internal/unit_validation_decisions.csv    4 filas resueltas (Odontología, Nutrición, School of Civil/Engineering)
+internal/matching_log.csv                 regenerado con los nombres fusionados
+data/processed/series.json                P-07: Odontología fusionada, Medicina y Salud 55 -> 610, Ingeniería 53
+dist/                                     reconstruido completo
+```
+
+### Ambigüedades abiertas
+
+- Ninguna de `T-02`. El vocabulario de unidades académicas queda
+  completamente validado por el responsable institucional.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Cerrar `T-02` formalmente en `PLAN.md` (si el archivo lo rastrea como
+pendiente abierto) y seguir con el resto de los `T` pendientes.

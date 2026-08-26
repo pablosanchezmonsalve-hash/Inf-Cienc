@@ -161,13 +161,18 @@ unidad_academica:
     "Escuela de Ciencias de la Familia":
       facultad: "Facultad de Educación y Ciencias Sociales"
       estado: confirmada        # corregido por revisión humana, 2026-08-26
+    "Escuela de Ingeniería Civil Industrial":
+      facultad: "Facultad de Ingeniería"
+      estado: confirmada        # confirmado por revisión humana, 2026-08-26 —
+                                 # entrada nueva (T-02), sin fila en el CSV por
+                                 # no existir como "inferida" al generar la hoja
 
   # Vocabulario controlado (regla I-07).
   # ESTATUS: INFERIDO DE LOS DATOS, NO OFICIAL.
   # No existe catálogo oficial UFT disponible para este proyecto. Los nombres se
   # dedujeron de cómo aparecen escritos en las afiliaciones y requieren
   # validación institucional antes de publicar comparaciones entre unidades.
-  vocabulario_validado_por_institucion: false
+  vocabulario_validado_por_institucion: true    # confirmado por revisión humana, 2026-08-26
   vocabulario:
     "Escuela de Ingeniería Civil Industrial":
       - "Escuela de Ingeniería Civil Industrial"
@@ -178,6 +183,10 @@ unidad_academica:
       - "Escuela de Medicina"
       - "School of Medicine"
       - "School of Medicine UFT-CLC"
+      - "Facultad de Odontología"
+      - "Faculty of Dentistry"
+      - "Escuela de Odontología"
+      - "School of Dentistry"
     "Escuela de Kinesiología":
       - "Escuela de Kinesiología"
       - "School of Kinesiology"
@@ -187,11 +196,8 @@ unidad_academica:
     "Facultad de Ingeniería":
       - "Facultad de Ingeniería"
       - "Faculty of Engineering"
-    "Facultad de Odontología":
-      - "Facultad de Odontología"
-      - "Faculty of Dentistry"
-      - "Escuela de Odontología"
-      - "School of Dentistry"
+      - "School of Civil Engineering"
+      - "School of Engineering"
     "Facultad de Educación y Ciencias Sociales":
       - "Facultad de Educación"
       - "Faculty of Education"
