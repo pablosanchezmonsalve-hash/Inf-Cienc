@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision kit verificar rendimiento verificar-orcid ror openalex cobertura informe limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -80,6 +80,24 @@ openalex:
 cobertura:
 	python3 src/enrich/openalex_cobertura.py
 
+# Fecha de corte para T-06: consulta la Scopus Search API con la misma cadena
+# AF-ID + PUBYEAR que hoy se exporta a mano, y reporta instante de ejecución,
+# consulta literal y recuento — para pegar a mano en config/sources.yml. NO
+# reemplaza el corpus vigente. Exige SCOPUS_API_KEY en el entorno.
+# En Windows es más simple: scripts/consultar-scopus.ps1 (clic derecho ->
+# «Ejecutar con PowerShell») prueba la lógica, pide la API Key oculta y
+# consulta. A mano:  py src\enrich\scopus_api.py
+scopus:
+	python3 src/enrich/scopus_api.py
+
+# Candidatos de ORCID por afiliación declarada (T-19): busca en el registro
+# público a quien declara la institución y cruza contra firmas sin ORCID.
+# NO asigna nada solo — deja candidatos en internal/ para make revision.
+# Requiere ORCID_CLIENT_ID y ORCID_CLIENT_SECRET (gratuitos, ver
+# docs/ORCID_API_GUIDE.md). En Windows: scripts/ampliar-orcid-afiliacion.ps1
+orcid-afiliacion:
+	python3 src/enrich/orcid_afiliacion.py
+
 # El informe institucional en PDF, desde el sitio ya construido. Usa la MISMA
 # hoja de impresión que el botón «Descargar informe» de la interfaz: un origen,
 # dos consumidores. Exige Playwright y Chromium, como `make verificar`.
@@ -95,10 +113,19 @@ revision: auditoria
 	python3 src/review/build_unit_validation.py
 	python3 src/review/build_hallazgos.py
 
+# T-02: genera internal/validacion_unidades.html (herramienta interactiva) y
+# .md (lectura). En Windows: scripts/validar-unidades.ps1 hace además el
+# recojo del CSV exportado y la aplicación. A mano, tras exportar el CSV:
+#   python3 src/review/apply_unit_validation.py --dry-run
+#   python3 src/review/apply_unit_validation.py
+validar-unidades: auditoria
+	python3 src/review/build_unit_validation.py
+
 # Vista de la red de coautoría con el grafo REAL, para revisión interna.
-# Depende del grafo, que lo deja el build. No se despliega: lleva nombres de
-# personas y C-05 sigue diferido.
-red: 
+# Depende del grafo, que lo deja el build. C-05 SÍ se publica ahora en el
+# sitio (colaboracion.html, recorte en vivo); esta vista sigue siendo la
+# herramienta de revisión de internal/, no lo que ve el público.
+red:
 	python3 src/build/grafo_coautoria.py
 	python3 src/review/vista_red.py
 

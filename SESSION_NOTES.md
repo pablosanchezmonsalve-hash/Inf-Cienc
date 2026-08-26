@@ -2774,3 +2774,1527 @@ límite de peticiones, y si migrar la ventana actual o extenderla a 2026.
 
 Sin cambios: terminar `make openalex` y `make cobertura`, y decidir sobre la API
 de Elsevier.
+
+---
+
+## Cierre · T-06 tiene conector, y una pregunta que no era la que parecía
+
+El usuario pidió avanzar T-06 ("reexportar Scopus con la fecha de corte").
+Antes de escribir nada, tres de las cuatro preguntas que quedaron pendientes en
+el cierre anterior se resolvieron en la conversación: API Key confirmada,
+todas las APIs de la suscripción aprobadas, sin restricción de IP. La cuarta
+—si extender la ventana a 2026— **sigue sin decidirse**, y el límite de
+consulta (quota) tampoco se conocía. Ninguna de las dos se asumió.
+
+### El hallazgo que reencuadra T-06
+
+`docs/UPDATING_REQUEST.md` y la sección 3.7 de `FUENTES_Y_APIS.md` (antes de
+esta sesión) daban por sentado que la API "tiene" una fecha de corte que el
+export manual no tiene. **Es impreciso.** La Scopus Search API no expone un
+campo de actualización propio —a diferencia de SciVal, que sí lo declara—.
+Lo que la API aporta de verdad es trazabilidad: consulta literal e instante
+de ejecución capturados por código en vez de transcritos a mano, que es
+exactamente el mínimo que `docs/UPDATING_REQUEST.md` §3 ya aceptaba ("si la
+exportación no la incluye, basta con anotarla aparte junto con la consulta
+usada"). Sin este ajuste, el script habría prometido un dato que la fuente no
+entrega.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-249 | El conector declara el **instante de ejecución**, no una "fecha de corte de Scopus" que la API no expone | Prometer un campo que la fuente no tiene sería inventar un dato, prohibido por `CLAUDE.md` |
+| D-250 | El límite de consulta no se asume: se lee de las cabeceras `X-RateLimit-*` de cada respuesta y se reporta | El usuario no lo conocía y la documentación general de Elsevier no sustituye una medición propia |
+| D-251 | Si el recuento de la API difiere del universo publicado (823), se declara como hallazgo y no se aplica al corpus | Una base bibliográfica crece hacia atrás; una diferencia puede ser indexación nueva, no un error. Aplicarla sola confundiría hallazgo con corrección (mismo principio que `D-08`) |
+| D-252 | El conector usa la ventana que hoy declara `config/institution.yml` (2023-2025), no una ventana extendida | Extender a 2026 es la cuarta pregunta del cierre anterior, todavía sin decidir. Bundlearla aquí la habría convertido en un hecho sin que nadie la decidiera |
+| D-253 | Credenciales solo por variable de entorno (`SCOPUS_API_KEY`, `SCOPUS_INSTTOKEN`); nunca en el repositorio ni pedidas por chat | Mismo patrón que `docs/ORCID_API_GUIDE.md`; una API key es un secreto, no un dato de proyecto |
+
+### Archivos creados o modificados
+
+```
+src/enrich/scopus_api.py       nuevo · conector Scopus Search API, --test sin red
+config/sources.yml             nueva entrada scopus_api, ejecutada: false
+docs/FUENTES_Y_APIS.md         §3.7 pasa de propuesta a implementada; fecha de
+                                 actualización del documento
+Makefile                       nuevo objetivo `scopus` (py src\enrich\scopus_api.py en Windows)
+PLAN.md                        T-06: de "petición redactada" a "conector implementado"
+```
+
+### Verificación
+
+`python3 src/enrich/scopus_api.py --test` — 7 casos, todos OK: construcción de
+la consulta contra el valor exacto documentado en `UPDATING_REQUEST.md`
+(`AF-ID(60105368) AND PUBYEAR > 2022 AND PUBYEAR < 2026`), extracción del
+recuento, detección de tres formas de respuesta inválida sin adivinar, y
+lectura de cabeceras de límite con y sin las cabeceras presentes. Sin red:
+este entorno probablemente no alcanza `api.elsevier.com`, igual que le pasó a
+`ror_institucion.py` con `api.ror.org`, así que la consulta real queda para
+que el usuario la corra en su máquina con `SCOPUS_API_KEY`.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «La API de Scopus declara una fecha de corte que el export manual no tiene» | **Falso.** No tiene ese campo. Lo que aporta es instante de ejecución y consulta capturados por código, no una fecha declarada por la fuente |
+| «Con la API Key ya se puede escribir el conector sin más preguntas» | **Parcial.** Alcanzó para las tres primeras; el límite de consulta seguía sin confirmarse y no se asumió — se lee de la respuesta |
+| «T-06 y la decisión de extender la ventana a 2026 son la misma pregunta» | **Falso.** T-06 es trazabilidad de una consulta; la ventana es alcance del corpus. El conector usa 2023-2025 sin decidir la segunda |
+
+### Ambigüedades abiertas
+
+- **Límite de consulta**: se sabrá en la primera corrida real, no antes.
+- **Ventana 2023-2025 vs. extender a 2026**: sigue abierta, sin tocar por esta sesión.
+- `T-02`, `T-13`: como en el cierre anterior.
+- `T-03`, `T-04`, `T-14`, `T-15`: esperando `make revision` (84 pendientes).
+- `T-10`: depende de `T-03`.
+
+### Próximo paso recomendado
+
+Que el usuario ejecute `make scopus` (o `py src\enrich\scopus_api.py` en
+Windows) con `SCOPUS_API_KEY` definida. El script imprime el bloque listo para
+pegar en `config/sources.yml` y declara como hallazgo, no como corrección
+automática, si el recuento difiere de 823. Con eso vuelto, T-06 se cierra a
+mano con la evidencia delante — igual que `T-02` está esperando el envío de
+`internal/validacion_unidades.md`.
+
+---
+
+## Cierre · El asistente de PowerShell, y dos fallos que sólo se ven corriendo
+
+El usuario corrió `scripts\consultar-scopus.ps1` de verdad en su máquina.
+Antes, ni siquiera llegó a clonar el repositorio (`git pull` desde
+`C:\Users\Pablo`, fuera de cualquier carpeta de proyecto): la primera vez en
+ese equipo, así que el paso a paso empezó por `git clone --branch
+claude/state-review-next-steps-wzzq0h`. Con el repositorio ya local, el script
+llegó hasta la consulta real y Scopus respondió **400 sin cuerpo**.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-254 | El conector manda un `User-Agent` descriptivo, no el que pone Python por defecto | `Python-urllib/3.x` lo bloquean sin cuerpo algunos WAF delante de APIs de Elsevier (Akamai es común ahí); eso se ve exactamente como el 400 vacío que reportó el usuario, indistinguible de un error real de la API sin este cambio |
+| D-255 | El error de la API ahora imprime `Content-Type`, `Server` y un diagnóstico explícito cuando el cuerpo llega vacío, con las tres causas más probables en orden | Un `sys.exit` con un cuerpo vacío no dice nada; la próxima corrida del usuario tiene que traer evidencia suficiente para diagnosticar sin una segunda vuelta |
+| D-256 | `scripts/consultar-scopus.ps1` lleva BOM UTF-8, igual que los otros dos `.ps1` del proyecto | Sin BOM, PowerShell 5.1 (la consola por defecto en Windows) lee el archivo con la página de códigos del sistema en vez de UTF-8, y las tildes salen como `Â¿`, `Ã©`. Los otros dos scripts ya lo tenían; éste se escribió sin él por descuido |
+
+### Archivos creados o modificados
+
+```
+src/enrich/scopus_api.py   consultar(): User-Agent explícito, diagnóstico de error ampliado
+scripts/consultar-scopus.ps1   BOM UTF-8 añadido (mismo contenido)
+```
+
+### Verificación
+
+`--test` sigue con los 7 casos OK tras el cambio (no toca la lógica de
+construcción de consulta ni de extracción de respuesta, sólo la llamada de red
+y el mensaje de error). El fallo real —400 con cuerpo vacío— no se pudo
+reproducir desde ningún entorno de este proyecto: ni este contenedor ni la
+máquina donde se escribió el conector alcanzan `api.elsevier.com` (mismo
+límite ya declarado para ROR y OpenAlex). El diagnóstico es la mejor hipótesis
+disponible sin poder observar la petición real, no una causa confirmada.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Si `e.read()` no lanza excepción, el cuerpo trae el error de Scopus» | **Falso en este caso.** El cuerpo llegó vacío — consistente con un WAF rechazando la petición antes de la aplicación, no con un error documentado de la API |
+| «Los tres scripts de `scripts/` se generaron con el mismo procedimiento» | **Falso.** Los dos anteriores tienen BOM UTF-8; el nuevo no lo tenía. No se había comprobado la codificación de bytes de un `.ps1` nuevo hasta que el usuario vio las tildes rotas |
+
+### Ambigüedades abiertas
+
+- **Si el `User-Agent` era la causa real del 400**, sigue sin confirmarse: es la explicación más probable dado un 400 sin cuerpo contra una API de Elsevier, no una certeza. Si persiste tras este cambio, el nuevo mensaje de error trae `Content-Type` y `Server` para descartar un proxy corporativo.
+- El resto, igual que el cierre anterior: límite de consulta, ventana 2023-2025 vs. 2026, `T-02`–`T-15` pendientes de `make revision`.
+
+### Próximo paso recomendado
+
+Que el usuario vuelva a correr `scripts\consultar-scopus.ps1` con estos
+cambios. Si el 400 persiste, el mensaje ahora trae `Content-Type` y `Server`
+de la respuesta — pedir que copie eso completo en vez de sólo el código de
+estado, porque distingue un rechazo de proxy/antivirus de un rechazo real de
+Elsevier.
+
+---
+
+## Cierre · No era la red: era pegar en un prompt oculto
+
+El usuario siguió depurando en su máquina, con `curl.exe -v` directo —
+herramienta que este proyecto no tenía instrumentada para diagnóstico y que
+resultó decisiva: aisló cada capa una por una.
+
+### La secuencia de hallazgos
+
+1. **`curl` con la clave escrita a mano en el comando: 200 OK, total 818.**
+   Coincide exacto con `scopus_export.n_registros_leido`. Esto solo probó que
+   la API, la consulta y la red funcionan — no que el script funcione.
+2. **`curl` con la clave en `$env:SCOPUS_API_KEY` tras un `Read-Host` en OTRA
+   ventana: 401, sin cabecera `X-ELS-APIKey` en la petición.** La variable de
+   entorno no viajó entre ventanas de PowerShell — eso es esperado, no un bug;
+   confirmó que había que probar todo en una sola sesión.
+3. **El usuario pegó su clave real donde iba la etiqueta del prompt** (`Read-Host
+   "[CLAVE]" ` en vez de `Read-Host "API Key de Scopus"`), exponiéndola en el
+   chat dos veces. Se le pidió rotarla en el portal de Elsevier de inmediato.
+4. **Con la sintaxis corregida y la clave nueva: `Longitud capturada: 1`.**
+   El prompt oculto (`-AsSecureString`) capturó un solo carácter basura en vez
+   de los 32 de la clave pegada. **Esto era la causa real desde el principio**,
+   no el `User-Agent` (D-254) ni la red: pegar dentro de un `Read-Host
+   -AsSecureString` falla silenciosamente en algunas consolas de Windows.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-257 | `scripts/consultar-scopus.ps1` pide la API Key en texto VISIBLE, no oculto | Oculto pero roto es peor que visible y funcional. Nadie más ve la ventana del usuario, y una respuesta a `Read-Host` no queda en el historial de comandos de todas formas |
+| D-258 | El script valida que la clave capturada tenga al menos 20 caracteres antes de consultar | Una clave de Elsevier tiene 32; un prompt que capturó 1 carácter por un pegado fallido debe detenerse ahí, no gastar una consulta contra la API con una clave que se sabe incompleta |
+| D-259 | La API Key que el usuario expuso en el chat se trata como comprometida; se le pidió rotarla en dev.elsevier.com | Aunque la conversación es privada, quedó registrada fuera del control del usuario. `CLAUDE.md` no cubre credenciales de terceros explícitamente, pero el mismo principio de `<data_governance>` — no tratar lo interno como publicable por descuido — aplica a secretos |
+
+### Archivos creados o modificados
+
+```
+scripts/consultar-scopus.ps1   API Key/insttoken en texto visible, valida longitud >= 20
+```
+
+### Verificación
+
+No hay autoprueba para esta parte: es interacción de PowerShell con la
+consola de Windows, que no se puede probar desde Linux ni desde una consola
+sin TTY interactivo. La verificación real es que el usuario vuelva a correr
+el script y el `curl` manual con clave visible confirme una captura de 32
+caracteres.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El `User-Agent` por defecto de Python causaba el 400» (D-254) | **No confirmado, y ahora improbable.** La cadena completa de fallos apunta a que ninguna consulta real llegó con una clave completa hasta ahora; el 400 original probablemente tenía la misma causa que el de esta vuelta: una clave truncada, no el User-Agent. D-254 se mantiene como buena práctica defensiva, no se revierte, pero deja de presentarse como la explicación encontrada |
+| «Si el problema persiste tras cambiar el User-Agent, es la red» | **Descartado por la secuencia de curls.** La red, la consulta y la API funcionan perfecto; la única variable que fallaba era la captura de la clave en el prompt oculto |
+| «Pegar en un prompt de PowerShell siempre captura el texto completo» | **Falso**, al menos en la consola de este usuario: un `Read-Host -AsSecureString` con pegado (Ctrl+V) capturó 1 carácter en vez de 32, sin ningún error visible |
+
+### Ambigüedades abiertas
+
+- **Si el `User-Agent` (D-254) hacía falta o no**, sigue sin poder probarse por separado: para cuando se corrija la captura de la clave, ya está también en el conector. No se revierte porque no hace daño, pero no se puede reclamar como la causa que se creía.
+- El mismo patrón (`-AsSecureString` + pegado) está en `scripts/verificar-orcid.ps1` y `revisar-identidad.ps1`, sin corregir — no se tocó porque no fue lo que se pidió, pero es un hallazgo transferible si el usuario reporta el mismo síntoma ahí.
+- El resto, igual que los cierres anteriores: límite de consulta ya resuelto (20.000/semana, confirmado por las cabeceras del `curl`), ventana 2023-2025 vs. 2026, `T-02`–`T-15` pendientes de `make revision`.
+
+### Próximo paso recomendado
+
+Que el usuario corra `scripts\consultar-scopus.ps1` de nuevo, de punta a
+punta, con su clave rotada. Con la captura de clave arreglada y ya probado
+que la consulta real da 818 (coincide con `scopus_export`), debería
+funcionar en un solo intento. Si funciona, el bloque que imprime al final va
+a `config/sources.yml` a mano, y T-06 queda cerrado con evidencia delante.
+
+---
+
+## Cierre · El script corrió de punta a punta — y un error metodológico que casi se cuela
+
+El usuario corrió `scripts\consultar-scopus.ps1` completo, sin volver a
+pedirle nada raro: capturó la clave en texto visible (32 caracteres),
+consultó, y confirmó `total_resultados: 818`, coincide con
+`scopus_export.n_registros_leido`. `data/enriched/scopus_api_consulta.json`
+quedó en su máquina.
+
+### El error, encontrado antes de subirlo
+
+Al pegar el bloque que imprime el script en `config/sources.yml`, la primera
+edición puso `fecha_corte: "2026-08-26"` en la entrada `scopus_export` — la
+MISMA entrada que declara el CSV descargado el 2026-07-31. Eso contradice
+directamente `docs/UPDATING_REQUEST.md` §5, que es explícito: la carga
+vigente **debe seguir sin fecha de corte**, a propósito, y lo que este
+mecanismo aporta es **para la próxima carga**, no aplicable
+retroactivamente. Ponerle una fecha de corte a un export que no la declaró
+habría sido inventar trazabilidad que la fuente no dio — exactamente lo que
+`CLAUDE.md` prohíbe. Se corrigió antes de comitear: `fecha_corte` queda
+`null`, como estaba, y el hallazgo entra en un campo nuevo y separado,
+`verificacion_api`, con su propia semántica declarada (confirmación de
+cobertura en una fecha, no fecha de corte del export).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-260 | `scopus_export.fecha_corte` sigue `null`; la confirmación de la API entra en `verificacion_api`, un campo aparte | Fusionarlos habría declarado una fecha de corte que el export nunca tuvo. `docs/UPDATING_REQUEST.md` §5 ya fija esta frontera; el error fue no releerla antes de escribir |
+| D-261 | T-06 **no se cierra** con esta corrida | Cierra cuando exista una reexportación NUEVA con fecha de corte propia. Lo de hoy es evidencia de que la cobertura no cambió desde el 31 de julio — valiosa, pero no es lo que T-06 pide |
+| D-262 | La edición de `config/sources.yml` la hizo el asistente, no el usuario a mano | Son tres campos en un archivo sensible a la indentación (YAML), con los valores exactos ya confirmados en la terminal del usuario — el riesgo de un error de tipeo en Notepad superaba el de que el asistente transcribiera mal un dato que ya tenía completo y verificado |
+
+### Archivos creados o modificados
+
+```
+config/sources.yml   scopus_export.verificacion_api (nuevo); fecha_corte se mantiene null
+PLAN.md               T-06: de "falta ejecutar" a "conector probado, T-06 sigue abierto"
+```
+
+### Verificación
+
+`python3 src/audit/run_all.py` completo tras el cambio: 29/30 reglas pasan,
+0 bloqueantes (mismo resultado que antes de tocar `sources.yml`).
+`docs/VALIDATION_REPORT.md` sin diff contra la versión ya comiteada — el
+campo nuevo no afecta ninguna regla de auditoría. YAML validado con
+`yaml.safe_load` antes de comitear.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El bloque que imprime el script se puede pegar tal cual» | **Falso en este caso.** El bloque impreso (pensado para una reexportación NUEVA) no distingue esa situación de "verificar la vigente" — pegarlo literalmente en `scopus_export` habría fusionado dos hechos distintos. El script sigue correcto: es responsabilidad de quien pega, no un bug del conector |
+
+### Ambigüedades abiertas
+
+- Igual que el cierre anterior — límite de consulta resuelto (20.000/semana), rotación de la API Key expuesta pendiente de confirmar que el usuario la hizo, ventana 2023-2025 vs. 2026, `T-02`–`T-15` pendientes de `make revision`.
+- **Nueva**: si vale la pena que `docs/UPDATING_REQUEST.md` mencione explícitamente que ahora existe un conector (`scopus_api.py`) para la próxima reexportación, en vez de asumir sólo el procedimiento manual. No se tocó esta sesión.
+
+### Próximo paso recomendado
+
+Confirmar con el usuario que rotó la API Key expuesta en el chat. Después,
+sin pendiente inmediato de T-06 — queda documentado y a la espera de una
+reexportación real. Retomar `T-02`–`T-15` vía `make revision` sigue siendo
+el trabajo de mayor rendimiento disponible.
+
+---
+
+## Cierre · `make revision`: 84 decisiones aplicadas, y un casi-desastre de sobrescritura evitado a tiempo
+
+El usuario revisó los 84 casos pendientes en `internal/revision_identidad.html`
+por su cuenta (no vía `scripts\revisar-identidad.ps1`, cuyo flujo no se probó
+en esta sesión) y subió el CSV exportado directamente al chat.
+
+### Lo que casi se rompe
+
+`apply_decisions.py` **regenera `config/identidades_consolidadas.yml` entero**
+desde `internal/identity_decisions.csv` en cada corrida — no lo actualiza
+incrementalmente. El archivo comiteado tenía **38 grupos** (la consolidación
+histórica de «85 formas → 38 personas» que documenta `D-08`). Sobrescribir
+`internal/identity_decisions.csv` con el CSV que subió el usuario y aplicar
+sin más redujo eso a **16 grupos**: población de autores subiendo de 538 a
+568 en el build, en la dirección contraria a lo que consolidar debería hacer.
+
+**La causa:** `internal/revision_identidad.html` sólo pinta la cola VIVA de
+ambigüedades (las que la auditoría sigue detectando). Un caso ya resuelto dos
+semanas atrás, cuya consolidación hace que la ambigüedad que lo originó ya no
+vuelva a aparecer, **desaparece del formulario** — no porque se haya revocado,
+sino porque ya no hay nada que preguntar. `build_review.py` ya avisaba de
+esto exactamente («25 decisión(es) del CSV sin caso vivo que las reciba»),
+pero el aviso se leyó como informativo y no como lo que era: una advertencia
+de que exportar y sobrescribir perdería esas 25-30 filas.
+
+Se detectó ANTES de comitear, comparando `git diff --stat` de
+`config/identidades_consolidadas.yml` contra lo que ya estaba en `HEAD` — el
+recuento de grupos (38→16) fue la señal. Se revirtió con `git checkout --`
+sobre los cuatro artefactos generados y sobre el CSV, sin haber tocado el
+remoto en ningún momento.
+
+### La corrección
+
+Fusión por `caso_id`: unión del CSV viejo (respaldado en
+`internal/.respaldos/` antes de sobrescribir, como ya hacía el flujo con
+`scripts\verificar-orcid.ps1` para credenciales) y el nuevo, con el nuevo
+ganando en los 80 casos que aparecen en ambos. Verificado que **ninguna** de
+esas 80 coincidencias era una contradicción real: las 53 diferencias de
+veredicto eran todas `pendiente → decidido`, nunca `misma → distintas` ni al
+revés. Resultado: 141 filas (111 nuevas + 30 huérfanas preservadas), 37
+grupos consolidados (84 formas de firma) — cercano a los 38 originales, con
+la diferencia esperable de las decisiones genuinamente nuevas de hoy.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-263 | `internal/identity_decisions.csv` se FUSIONA por `caso_id`, nunca se reemplaza, al incorporar un CSV exportado de la herramienta | La herramienta sólo exporta la cola viva; un reemplazo directo pierde toda decisión cuyo caso ya no genera ambigüedad activa. Esto no estaba documentado en ningún lado y debería estarlo |
+| D-264 | El respaldo va ANTES de sobrescribir cualquier CSV de decisiones, sin excepción, incluso en una sesión de un solo turno | Fue lo que hizo posible detectar y revertir esto sin pérdida: sin el respaldo en `internal/.respaldos/`, las 30 filas huérfanas habrían desaparecido sin rastro |
+| D-265 | Antes de comitear un `apply_decisions.py`, se compara el recuento de grupos/personas contra `HEAD` | Es la señal más barata y más legible de una regresión de consolidación: un número que debería bajar y sube (o baja demasiado) es más fiable que leer 141 filas de CSV a ojo |
+| D-266 | `scripts/revisar-identidad.ps1` deja de hacer `Copy-Item -Force` sobre el CSV vigente; llama a `merge_decisions.py` | Tenía EXACTAMENTE el mismo bug que se acaba de encontrar y revertir a mano — es el camino que `docs/OPERACION.md` recomienda como «la vía cómoda», así que corregirlo ahí importaba tanto como la fusión de esta sesión, no menos |
+| D-267 | La fusión vive en `src/review/merge_decisions.py`, con `--test` propio, no como lógica suelta dentro del `.ps1` | PowerShell no es donde se valida lógica en este proyecto — los cuatro conectores y `apply_decisions.py` ya la ponen en Python con autoprueba; el `.ps1` sólo orquesta |
+
+### Archivos creados o modificados
+
+```
+internal/identity_decisions.csv          fusionado (141 filas), no reemplazado
+internal/.respaldos/identity_decisions_20260826T043050_pre_pablo.csv   nuevo · respaldo previo
+config/identidades_consolidadas.yml      37 grupos (era 38; +6 nuevos, -7 al reagruparse con hoy)
+config/firmas_e09_resueltas.yml          4 descartadas (Metabolism, Movement Sciences (NUTRIM),
+                                           School of Psychology, and Senior Lecturer)
+config/orcid_revisado.yml                13 confirmadas · 8 retiradas · 6 sin registro
+data/enriched/authors_orcid.csv          +2 asignaciones
+docs/BUILD_VERIFICATION.md               regenerado (538 fichas, era 542)
+STATE.md                                 regenerado
+src/review/merge_decisions.py            nuevo · fusión por caso_id, con --test
+scripts/revisar-identidad.ps1            Copy-Item -Force reemplazado por merge_decisions.py;
+                                           su autoprueba se suma al Paso 1
+```
+
+### Verificación
+
+`apply_decisions.py --test`: 28 casos OK antes de tocar nada real.
+`apply_decisions.py --dry-run` corrido DOS VECES: una contra el CSV
+reemplazado (mostró el problema first-hand: 16 grupos) y otra contra el
+fusionado (37 grupos, 0 contradicciones, 0 errores). Pipeline completo
+(`run_all.py` → `indicator_feasibility.py` → `build_all.py`) reconstruido
+tras la fusión: 29/30 reglas, 0 bloqueantes, 0 fallas de barrera
+pública/interna. Población de autores 538 — coherente con una consolidación
+adicional sobre 542, en la dirección correcta.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Un CSV exportado por la herramienta de revisión es un reemplazo seguro del anterior» | **Falso.** Es un reemplazo seguro sólo de la cola VIVA. La consolidación histórica vive en filas cuyo caso ya no está vivo, y hay que fusionarlas a mano |
+| «Si `apply_decisions.py --dry-run` no da error, el resultado es correcto» | **Verdad a medias, y peligrosa.** El script valida CONTRADICCIONES dentro del CSV que se le da, no pérdida de información respecto de un CSV anterior que ya no ve. Detectarlo exigió comparar contra `git diff`, no confiar solo en la salida del programa |
+
+### Ambigüedades abiertas
+
+- Igual que antes: rotación de la API Key, ventana 2023-2025 vs. 2026, `T-13` (percentil SciVal), `T-10` (red de coautoría, sigue esperando `T-03` completo).
+- Quedan **5 pendientes** de las 141 filas fusionadas (casos genuinamente sin decidir, no perdidos).
+- `scripts/verificar-orcid.ps1` sigue con el prompt oculto (`-AsSecureString`) que ya falló en `consultar-scopus.ps1`. No se tocó: es hallazgo transferible, no lo que se pidió esta sesión.
+
+### Próximo paso recomendado
+
+Ya corregido `scripts\revisar-identidad.ps1` (confirmado: tenía el mismo bug,
+`Copy-Item -Force`, y ahora usa `merge_decisions.py --test`-eado). Subir todo
+lo de esta sesión. Sin pendiente inmediato de identidad — la próxima ronda de
+`make revision` puede usar el asistente con confianza.
+
+---
+
+## Cierre · Cuatro pendientes cerrados por consecuencia, y una referencia que nadie recordaba
+
+El usuario pidió seguir con «las 13 verificaciones urgentes» mencionadas al
+abrir la sesión. `build_review.py` recién regenerado mostraba **0 pendientes
+de 111 casos** — la cola completa, no sólo lo que el usuario decidió hoy. Se
+le preguntó qué eran esas 13; respondió que no lo sabe. No se inventó una
+referencia: se cerró la pregunta con lo que sí se puede verificar.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-268 | `T-03`, `T-04`, `T-14`, `T-15` se cierran en `PLAN.md` | Sus colas respectivas («Variantes de nombre», «Varios Scopus ID», «ORCID compartido», «ORCID en conflicto») están en 0 pendientes tras la fusión y aplicación de hoy. Cerrarlos es consecuencia de un hecho verificable (`build_review.py`), no una decisión nueva |
+| D-269 | `T-10` se declara desbloqueado, no cerrado | Dependía de `T-03`, que ya cerró. Pero `T-10` en sí —publicar la red de coautoría— sigue siendo una decisión de alcance aparte, no automática |
+
+### Archivos creados o modificados
+
+```
+PLAN.md    T-03, T-04, T-14, T-15 cerrados; T-10 actualizado (desbloqueado, no cerrado)
+STATE.md   regenerado — pendientes abiertos: 9 → 5
+```
+
+### Verificación
+
+`build_review.py` recién corrido: 0 pendientes en las cuatro colas
+correspondientes, de 111 casos totales. `python3 src/state/snapshot.py`
+confirma la baja de 9 a 5 pendientes abiertos.
+
+### Ambigüedades abiertas
+
+- Qué eran las «13 verificaciones urgentes» sigue sin saberse. No bloquea nada: la cola real está en 0.
+- Las de siempre: rotación de API Key, ventana 2023-2025 vs. 2026, `T-02`, `T-06`, `T-13`, `T-19`.
+- Si vale la pena decidir ahora sobre `T-10` (publicar la red de coautoría) ya que su bloqueo se levantó.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario cuál de los 5 pendientes reales quiere atacar:
+`T-02` (enviar la hoja de unidades académicas — no es trabajo de código),
+`T-06` (esperando una reexportación real de Scopus), `T-10` (decidir si
+publicar la red de coautoría, ya desbloqueada), `T-13` (falta respaldo
+documental de Elsevier) o `T-19` (ampliar cobertura ORCID por afiliación).
+
+---
+
+## Cierre · T-19: el mismo pendiente, un bug ya conocido, corregido antes de que muerda dos veces
+
+El usuario eligió `T-19`. `src/enrich/orcid_afiliacion.py` ya existía y pasa
+`--test`; lo que faltaba era un camino para Windows. Usa las mismas
+credenciales (`ORCID_CLIENT_ID`/`ORCID_CLIENT_SECRET`) que
+`scripts\verificar-orcid.ps1` — y ese script todavía tenía el prompt oculto
+(`-AsSecureString`) que ya falló en vivo esta sesión con `consultar-scopus.ps1`
+(D-257). Construir un asistente nuevo con el patrón corregido mientras el
+existente seguía con el patrón roto habría sido dejar la misma trampa activa
+para la próxima vez que alguien la use.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-270 | `scripts/ampliar-orcid-afiliacion.ps1`, nuevo, sigue el patrón de `consultar-scopus.ps1`: credenciales en texto visible, con validación de longitud mínima | Mismo bug de pegado ya diagnosticado (D-257); construir tooling nueva con el patrón roto habría sido repetir un error ya identificado |
+| D-271 | `scripts/verificar-orcid.ps1` deja el prompt oculto por el mismo motivo, aunque no era lo pedido esta sesión | Comparte credenciales con la herramienta nueva de T-19: dejarlo roto mientras se corrige todo lo demás alrededor no tenía sentido, y ya estaba señalado como «hallazgo transferible» sin corregir desde `D-259` |
+| D-272 | `orcid_afiliacion.py` no cachea en disco, a diferencia de los otros cuatro conectores | El registro de ORCID cambia con el tiempo y ese es el punto de volver a correrlo; cachear escondería justamente lo que T-19 busca encontrar. Se documentó la asimetría en `docs/OPERACION.md` en vez de dejarla implícita |
+
+### Archivos creados o modificados
+
+```
+scripts/ampliar-orcid-afiliacion.ps1   nuevo · asistente de Windows para T-19
+scripts/verificar-orcid.ps1            credenciales en texto visible (mismo fix que D-257)
+Makefile                               nuevo objetivo `orcid-afiliacion`
+docs/OPERACION.md                      Paso 5: orcid_afiliacion.py añadido; corregido
+                                         «los tres» → «los cuatro/cinco» (arrastraba un error
+                                         desde que se añadió scopus_api.py sin actualizar el conteo)
+```
+
+### Verificación
+
+`orcid_afiliacion.py --test`: 9 casos, todos OK (verificado antes de construir
+el asistente). El asistente en sí no se pudo probar de punta a punta: exige
+una consola de Windows interactiva y credenciales de ORCID que no están en
+este entorno — mismo límite que ya aplica a todos los `.ps1` de este
+proyecto.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «`docs/OPERACION.md` decía "los tres" y era correcto» | **Falso.** Ya eran cuatro conectores documentados ahí (se añadió `scopus_api.py` en una sesión anterior sin actualizar el conteo). Corregido al pasar por el mismo párrafo |
+
+### Ambigüedades abiertas
+
+- Si el usuario tiene ya credenciales de ORCID (`ORCID_CLIENT_ID`/`SECRET`) — no se le preguntó todavía; las necesita para correr `ampliar-orcid-afiliacion.ps1`.
+- Las de siempre: rotación de la API Key de Scopus, ventana 2023-2025 vs. 2026, `T-02`, `T-06`, `T-10`, `T-13`.
+
+### Próximo paso recomendado
+
+Que el usuario confirme si tiene credenciales de ORCID y corra
+`scripts\ampliar-orcid-afiliacion.ps1` en su máquina. El resultado (candidatos
+nuevos, si los hay) se revisa después con `scripts\revisar-identidad.ps1`,
+que ya fusiona correctamente (`D-266`).
+
+---
+
+## Cierre · T-19 corrido, un stash con el bug ya conocido descartado, y 0 candidatos que sí tienen explicación
+
+El usuario tenía credenciales de ORCID y corrió
+`scripts\ampliar-orcid-afiliacion.ps1` sin fricción — funcionó a la primera.
+Antes de llegar ahí, `git pull` en su máquina chocó con cambios locales sin
+comitear en los mismos archivos que esta sesión ya había corregido
+(`config/identidades_consolidadas.yml` y compañía). El usuario confirmó no
+haber corrido nada. Se investigó con `git stash show --stat` y
+`git show "stash@{0}:..."`: el stash contenía **16 grupos** de consolidación
+— el mismo estado dañado ya diagnosticado y revertido antes en esta sesión
+(`D-263`), no trabajo nuevo del usuario. Se descartó con `git stash drop`
+después de confirmarlo, no antes. Sigue sin explicación firme de cómo llegó
+ahí sin que el usuario ejecutara nada — candidato más probable: alguna
+sincronización o herramienta local tocó el archivo, no algo que el usuario
+hiciera a propósito.
+
+Ya con el repositorio sincronizado, la consulta real de T-19 dio **0
+candidatos nuevos** de 347 firmas cruzadas contra 630 titulares. Antes de
+aceptarlo como resultado válido se verificó que no fuera consecuencia de
+un error de aplicación: de los 18 candidatos que este método ya había
+encontrado en rondas anteriores, 16 estaban decididos desde el 2026-08-05 y
+ya estaban en `data/enriched/authors_orcid.csv` desde antes de esta sesión
+— por eso `apply_decisions.py` sólo contó «2 asignaciones nuevas» al
+aplicar el CSV de hoy, no 18: los otros 16 no eran nuevos, sólo se leían de
+nuevo. Confirmado con `grep` directo sobre `authors_orcid.csv`: las cinco
+firmas verificadas al azar están, con la fuente correcta. El 0 de hoy es un
+resultado real: agotadas las coincidencias de nombre+inicial entre las
+firmas restantes sin ORCID y el registro público.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-273 | Un stash con contenido sospechoso se inspecciona (`git stash show --stat`, `git show stash@{0}:archivo`) ANTES de descartarlo, nunca después | Es lo que permitió confirmar que no había trabajo del usuario que perder, en vez de asumirlo |
+| D-274 | Un resultado de «0» en un conector no se reporta sin verificar que no sea consecuencia de una aplicación incompleta | La diferencia entre «0 candidatos porque ya no quedan» y «0 candidatos porque algo falló aplicando lo anterior» sólo se distingue verificando el archivo de salida real, no leyendo el resumen impreso por el script |
+
+### Verificación
+
+`git show "stash@{0}:config/identidades_consolidadas.yml" \| grep -c canonica` → 16, confirmando el estado dañado antes de dropear. `grep` de 5 firmas «Candidato por afiliación» contra `authors_orcid.csv`: las 5 presentes con fuente «Revisión humana (candidato por afiliación confirmado)». Fechas de las 18 decisiones cruzadas contra el CSV original: 16 con fecha 2026-08-05, 2 con fecha 2026-08-26 — coincide exacto con «asignaciones nuevas: 2» del `apply_decisions.py` de hoy.
+
+### Archivos creados o modificados
+
+```
+PLAN.md   T-19 actualizado: corrida del 2026-08-26, 0 candidatos nuevos, con la explicación
+```
+
+### Ambigüedades abiertas
+
+- Sigue sin saberse cómo llegaron cambios locales sin comitear a la máquina del usuario sin que corriera nada. No bloqueó nada esta vez porque se detectó y descartó a tiempo.
+- Las de siempre: rotación de la API Key de Scopus, ventana 2023-2025 vs. 2026, `T-02`, `T-06`, `T-10`, `T-13`.
+
+### Próximo paso recomendado
+
+T-19 queda en su techo actual para este método (afiliación declarada);
+reintentar más adelante cuando el registro de ORCID tenga gente nueva.
+Preguntar al usuario cuál de los pendientes restantes (`T-02`, `T-06`,
+`T-10`, `T-13`) quiere atacar, o si prefiere cerrar la sesión aquí.
+
+---
+
+## Cierre · Auditoría de la sesión: dos errores reales encontrados, ~200 líneas de duplicación eliminadas
+
+El usuario pidió una auditoría completa del trabajo de la sesión: errores,
+mejoras, reducción de extensión, y evaluación de APIs. Revisión ejecutada
+directamente (sin sub-agente, para no depender de presupuesto de API que ya
+había fallado una vez esta sesión), con verificación real —no sólo lectura—
+usando un intérprete de PowerShell descargado para la ocasión.
+
+### Errores encontrados y corregidos
+
+1. **`consultar-scopus.ps1` con dos mensajes obsoletos**: el comentario de
+   cabecera seguía diciendo «pide la API Key de forma oculta» después de
+   que el cuerpo del script cambiara a texto visible (D-257); y el mensaje
+   final seguía diciendo «coincide con el universo publicado (823)» después
+   de que `scopus_api.py` cambiara la base de comparación a 818
+   (commit `4fd12e9`, esta misma sesión). Ninguno afectaba la lógica, pero
+   ambos habrían confundido a quien los leyera.
+2. **Asimetría de robustez**: el `insttoken` opcional de `consultar-scopus.ps1`
+   no tenía la misma validación de longitud mínima que la API Key —un
+   pegado fallido ahí habría mandado un insttoken de 1 carácter a la API
+   sin ningún aviso.
+
+### Mejora ejecutada: módulo compartido para los cuatro asistentes de PowerShell
+
+Los cuatro `.ps1` repetían textualmente las mismas ~80 líneas (detección de
+Python evitando el atajo de la Microsoft Store, instalación de dependencias,
+las cuatro funciones de mensaje). Nuevo `scripts/_comun.ps1`, con
+`Titulo`/`Ok`/`Aviso`/`Malo`, `Entrar-Raiz`, `Buscar-Python`,
+`Asegurar-Dependencias` y `Pedir-Credencial` (esta última generaliza la
+validación de longitud mínima que ya existía repetida para API Key,
+Client ID/Secret e insttoken). Cada script pasa a dot-sourcing (`. "$PSScriptRoot\_comun.ps1"`)
+en vez de redefinir todo.
+
+**Medido**: los 4 scripts sumaban ~825 líneas con duplicación; ahora suman
+517 + 144 del módulo compartido = 661 — una reducción neta de ~200 líneas
+(~24 %), y una corrección futura de la detección de Python ya sólo exige
+tocar un archivo, no cuatro (que es exactamente el modo en que el error del
+"823" sobrevivió sin corregirse: se arregló en un lugar y no en el otro que
+decía lo mismo).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-275 | Los asistentes de PowerShell comparten lógica vía `scripts/_comun.ps1` con dot-sourcing, no copia-y-pega | La duplicación ya causó un bug real esta sesión (mensaje "823" corregido en un lugar, no en el otro). Un módulo compartido lo hace estructuralmente imposible la próxima vez |
+| D-276 | Las funciones compartidas devuelven valores con `return`, nunca usan `$script:` para comunicarse con quien las llama | `$script:` dentro de una función definida en un archivo dot-sourced resuelve contra el archivo donde se DEFINIÓ la función, no contra quien la llama — es ambiguo entre versiones de PowerShell y no vale la pena arriesgarlo |
+| D-277 | La revisión de seguridad y esta auditoría se hicieron sin sub-agente cuando el sub-agente previo falló por límite de cuenta | Reintentar el mismo tipo de llamada que ya falló por presupuesto no es una estrategia; hacer el trabajo directamente sí lo es |
+
+### Archivos creados o modificados
+
+```
+scripts/_comun.ps1                     nuevo · funciones compartidas
+scripts/consultar-scopus.ps1           usa el módulo; corregidos los 2 mensajes obsoletos;
+                                         insttoken ahora valida longitud
+scripts/ampliar-orcid-afiliacion.ps1   usa el módulo
+scripts/verificar-orcid.ps1            usa el módulo
+scripts/revisar-identidad.ps1          usa el módulo
+src/enrich/scopus_api.py               texto de ayuda de --count aclarado
+```
+
+### Verificación
+
+No se pudo ejecutar PowerShell en ninguna sesión anterior de este proyecto
+(el contenedor no lo traía). Se descargó el binario oficial de PowerShell
+7.4.6 para Linux sólo para esta verificación. Confirmado con el parser real
+del lenguaje (`[System.Management.Automation.Language.Parser]::ParseFile`)
+que los 5 archivos no tienen errores de sintaxis. Más importante: se
+ejecutaron los 4 scripts de punta a punta hasta el paso de credenciales
+(con un Python real en el PATH, con pandas/PyYAML instalados) y los cuatro
+llegaron correctamente a "Dependencias listas" y a la autoprueba —
+confirmando que el mecanismo de dot-sourcing y paso de valores por `return`
+funciona de verdad entre archivos, no sólo que compila. `Pedir-Credencial`
+se probó aislada con un caso válido y uno corto: el corto se detiene con el
+mensaje correcto y código de salida 1, como el original.
+
+La invocación real de Python dentro de cada script (`& $py src\enrich\...`)
+falló en este contenedor Linux porque Python no interpreta rutas con `\`
+como separador — comportamiento correcto y sin cambios en Windows real (ya
+confirmado en vivo por el usuario varias veces esta sesión con las mismas
+líneas), y no es código que este commit haya tocado.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Sin PowerShell instalado, esta clase de refactorización no se puede verificar, sólo leer con cuidado» | **Falso.** El binario de PowerShell para Linux se descarga en segundos y permite parsear y ejecutar de verdad, no sólo inspeccionar visualmente |
+
+### Ambigüedades abiertas · pendiente de información del usuario
+
+- **SciVal API**: el usuario dijo antes que tenía «todas las APIs aprobadas» al hablar de Scopus y SciVal juntos. Si eso incluye SciVal específicamente (no sólo Scopus), se podría construir un conector análogo a `scopus_api.py` para desbloquear `T-13` (semántica del percentil) y `X-01` (autocitación, `V2_BACKLOG.md`). No se construye sin confirmar primero: `docs/FUENTES_Y_APIS.md` §3.8 ya declara esto como bloqueante sin confirmar, y adivinar el contrato de una API nueva viola `CLAUDE.md`.
+- El resto de las integraciones propuestas en `FUENTES_Y_APIS.md` §3 (Unpaywall, SciELO, Altmetric, DataCite, OpenAIRE, Semantic Scholar, Europe PMC, Wikidata) siguen exactamente como estaban: evaluadas, ninguna confirmada, nada nuevo que integrar sin más información del usuario.
+
+### Próximo paso recomendado
+
+Preguntar al usuario si su acceso API incluye SciVal específicamente. Si sí,
+construir el conector análogo a `scopus_api.py` desbloquea dos pendientes de
+una vez (`T-13`, `X-01`). Si no, no hay más integración de API accionable
+hoy sin nueva información.
+
+---
+
+## Cierre · SciVal API probada por curl directo: sin entitlement, no se construye el conector
+
+El usuario dijo tener «todas las APIs aprobadas», lo que sugería acceso a
+SciVal además de Scopus. A diferencia de la Scopus Search API —muy
+documentada, alta confianza al escribir el conector sin poder probarlo—, la
+API de SciVal es un producto de Elsevier mucho menos público, y la
+confianza en su endpoint exacto no alcanzaba para escribir código de red
+sin más: hacerlo habría sido exactamente el tipo de suposición que
+`CLAUDE.md` prohíbe. Se le preguntó al usuario por el endpoint documentado
+en su portal; no supo encontrarlo. En vez de mandarlo a una búsqueda sin
+garantía de éxito, se probó empíricamente con `curl` —la misma táctica que
+ya había funcionado para diagnosticar Scopus— contra la ruta más probable
+según el conocimiento disponible.
+
+### El resultado, y por qué es información real y no un callejón sin salida
+
+`GET analytics/scival/publication/metrics?metricTypes=OutputsInTopCitationPercentiles`
+respondió **403 `ENTITLEMENTS_ERROR`**, no 404. La distinción es la señal:
+un 404 diría "esa ruta no existe"; un 403 de entitlements dice "esa ruta
+existe, la reconozco, y esta clave no está autorizada". Confirma dos cosas
+a la vez: que la ruta probada es plausible como punto de partida futuro, y
+que el supuesto "todas las APIs aprobadas" del usuario cubre los productos
+de Scopus pero no se extiende a SciVal, que Elsevier licencia aparte —
+exactamente lo que `V2_BACKLOG.md` §V2-23 ya declaraba como bloqueante
+antes de esta sesión.
+
+**No se escribió `src/enrich/scival_api.py`.** Sin poder confirmar el
+contrato completo (headers adicionales, forma exacta de la respuesta,
+parámetros válidos) contra una entitlement real, construir el conector
+habría sido escribir código no verificable — ni siquiera con el patrón
+defensivo de `ror_institucion.py`, porque ahí al menos la lógica de
+extracción se podía probar con fixtures fieles a una API bien documentada.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-278 | No se construye el conector de SciVal sin entitlement confirmada, aunque el endpoint probado parezca válido | Un 403 de entitlements no es lo mismo que un contrato verificado: sólo dice que la ruta existe, no cómo luce una respuesta exitosa. Escribir el parseo sin eso sería adivinar la forma del JSON |
+| D-279 | El endpoint probado (`analytics/scival/publication/metrics`) se deja documentado en `V2_BACKLOG.md` y `FUENTES_Y_APIS.md` como punto de partida | Si la entitlement se concede más adelante, no hay que redescubrir la ruta desde cero |
+| D-280 | Se corrigió la afirmación «todas las APIs de la suscripción aprobadas» en `FUENTES_Y_APIS.md` §3.7 para aclarar que aplica a Scopus, no a SciVal | Quedaba escrita como un hecho general sin el matiz que esta prueba reveló; dejarla así habría sido una afirmación más amplia de lo que se verificó |
+
+### Archivos creados o modificados
+
+```
+docs/V2_BACKLOG.md       V2-23 actualizado con el resultado del curl (403 ENTITLEMENTS_ERROR)
+docs/FUENTES_Y_APIS.md   §3.7 corregida (matiz Scopus vs SciVal); §3.8 con el resultado probado;
+                          fecha de actualización del documento
+```
+
+### Verificación
+
+`curl -v` directo del usuario contra `api.elsevier.com` con su API Key real
+de Scopus, ruta y parámetros propuestos por Claude. Respuesta HTTP completa
+revisada: código 403, `X-ELS-Status: ENTITLEMENTS_ERROR`, sin
+`X-RateLimit-*` relevante para este caso. No se pudo verificar más allá de
+esto sin la entitlement.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Todas las APIs de la suscripción aprobadas» incluye SciVal | **Falso, probado directamente.** Cubre Scopus; SciVal es una licencia aparte que Elsevier no concedió a esta clave |
+| «Si el usuario no encuentra el endpoint en el portal, hay que seguir buscando ahí» | **Innecesario.** Una prueba empírica directa con `curl` fue más rápida y más concluyente que una búsqueda de navegación en un portal que ninguno de los dos podía ver con certeza |
+
+### Ambigüedades abiertas
+
+- Otra vez: el usuario pegó su API Key real (`e6b398...`) en el chat, la misma de antes — sigue sin rotarla pese a haberlo pedido dos veces ya. No se puede forzar; sólo recordarlo.
+- Si vale la pena que el usuario gestione la entitlement de SciVal con Elsevier/la biblioteca de la UFT — queda como su decisión, no de esta sesión.
+- Las de siempre: ventana 2023-2025 vs. 2026, `T-02`, `T-06`, `T-10`.
+
+### Próximo paso recomendado
+
+Sin acción de código pendiente sobre SciVal. Si el usuario gestiona la
+entitlement con Elsevier, retomar con el endpoint ya documentado en
+`V2_BACKLOG.md` §V2-23. Recordar la rotación de la API Key una vez más, sin
+insistir más allá de eso.
+
+---
+
+## Cierre · T-13 cerrado sin acceso a la API: confirmación documental en vez de empírica
+
+El usuario pidió seguir con los pendientes. Sin entitlement de SciVal (cierre
+anterior), `T-13` parecía atado a esa API — pero `T-13` no pedía "consultar
+la API de SciVal", pedía "confirmar la semántica del percentil contra
+documentación oficial de Elsevier". Son cosas distintas: la documentación
+pública de Elsevier no requiere entitlement, sólo requiere encontrarla.
+
+### El camino
+
+1. **El nombre exacto de columna** ya vivía en el propio código del
+   proyecto: `grep` sobre `src/audit/02_reconcile_sources.py` y
+   `src/analysis/indicator_feasibility.py` confirmó
+   `"Outputs in Top Citation Percentiles, per percentile"` como el
+   encabezado real leído del export, no una paráfrasis.
+2. Búsqueda de esa cadena exacta vía `WebSearch`/`WebFetch`. Varios dominios
+   de Elsevier (`service.elsevier.com`, `elsevier.libguides.com`,
+   `manchester-uk.libanswers.com`) devolvieron `EGRESS_BLOCKED` en
+   `WebFetch` — política de red del entorno, no error transitorio. Por
+   `/root/.ccr/README.md`, un 403/407 de política no se reintenta: se buscó
+   la misma información por otra vía en vez de insistir contra el bloqueo.
+3. Un tercero independiente, [cu-library/scival-export-tools](https://github.com/cu-library/scival-export-tools)
+   (herramienta de GitHub que procesa exports reales de SciVal, subcomando
+   "Per Researcher"), confirmó que el nombre de columna es real y se usa en
+   la práctica — no sólo lo que trae el archivo de este proyecto.
+4. `WebSearch` sí devolvió el resumen del SciVal Support Center de Elsevier
+   (`a_id/28193`) para la métrica "Outputs in Top Citation Percentiles":
+   las publicaciones globales de Scopus se ordenan de mayor a menor citación
+   (o FWCI si es field-weighted) y se dividen en 100 percentiles; el campo
+   indica en cuál de los umbrales de top 1 %/5 %/10 %/25 % más citadas cae
+   cada publicación.
+
+### Por qué esto cierra T-13 sin ser razonamiento circular
+
+La semántica «top X %» de Elsevier no deja ambigüedad sobre la dirección:
+top 1 % sólo puede ser la posición más alta, nunca la más baja. Que las 5
+publicaciones más citadas del corpus (evidencia empírica del 2026-08-03)
+caigan en los valores 1-4 y las no citadas en el máximo observado (78) es
+exactamente el patrón que esa semántica predice de forma independiente —
+la documentación no se derivó de los datos propios, así que confirmarla
+contra ellos es una prueba real, no un espejo. Se documentó también la
+salvedad honesta: no se encontró una tabla literal «valor = 1 → top 1 %»
+fila por fila para esta columna de exportación específica (distinta de la
+métrica agregada del mismo nombre, que cuenta publicaciones en vez de
+etiquetar cada una); la confirmación es sobre la metodología del campo, no
+una cita textual del mapeo exacto.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-281 | `T-13` se cierra con evidencia documental pública, sin necesitar la API de SciVal | El pendiente pedía documentación oficial, no una consulta autenticada; la documentación de soporte de Elsevier es pública |
+| D-282 | Se acepta la confirmación de nombre de columna de una herramienta de terceros (`cu-library/scival-export-tools`) como evidencia válida, no como sustituto de la fuente primaria | Es independiente del dataset del proyecto y demuestra que el nombre de columna se usa en exports reales, reduciendo el riesgo de que sea un artefacto propio |
+| D-283 | Se documenta explícitamente la salvedad de que no hay cita textual del mapeo valor→porcentaje línea por línea | Afirmar más certeza de la que existe violaría `CLAUDE.md`; la salvedad queda en `docs/METHODOLOGY.md` §7 bis para quien audite después |
+| D-284 | `X-01` (autocitación) sigue bloqueado por la falta de entitlement de SciVal; `T-13` ya no depende de esa API | Son pendientes distintos que compartían el mismo bloqueo aparente; separarlos evita que uno quede preso del otro innecesariamente |
+
+### Archivos creados o modificados
+
+```
+docs/METHODOLOGY.md      §7 bis reestructurada: "evidencia empírica" + "confirmación documental",
+                          citas a Elsevier (a_id/28193) y a cu-library/scival-export-tools, salvedad honesta
+PLAN.md                  T-13 tachado y cerrado (2026-08-26), con el razonamiento resumido
+docs/V2_BACKLOG.md       tabla de pendientes (línea ~102) T-13 cerrado; fila V2-23 (API SciVal) actualizada:
+                          ya no depende de T-13, sólo de X-01
+docs/FUENTES_Y_APIS.md   §3.8 "Qué desbloquearía" corregido: T-13 retirado de la lista de pendientes
+                          que dependen de la API de SciVal
+```
+
+### Verificación
+
+`grep -n -B2 -A8 "I-05" config/indicators.yml` confirmó que la definición
+del indicador ya tenía `advertencia: null` — no necesitaba una salvedad
+nueva, porque la confiabilidad ya estaba declarada como alta desde antes.
+`grep -rln "T-13\|determinad. empíricamente" --include="*.md" --include="*.yml" .`
+localizó todas las referencias restantes antes de dar el cierre por
+completo: `STATE.md` (se regenera, no se edita a mano), `PLAN.md`,
+`docs/METHODOLOGY.md`, `docs/FUENTES_Y_APIS.md`, `docs/V2_BACKLOG.md` — las
+cinco revisadas y consistentes entre sí.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «T-13 sólo se puede cerrar con acceso a la API de SciVal» | **Falso.** El pendiente pedía documentación oficial, y la documentación de soporte de Elsevier es pública; no necesita entitlement ni autenticación |
+| «Un `EGRESS_BLOCKED` en `WebFetch` es un fallo a reintentar» | Es una política de red explícita del entorno (`/root/.ccr/README.md`), no un error transitorio — se buscó la misma información por `WebSearch` en vez de insistir |
+
+### Ambigüedades abiertas
+
+- La salvedad de `docs/METHODOLOGY.md` §7 bis sigue abierta a propósito: si
+  en algún momento aparece la tabla oficial línea por línea del mapeo
+  valor→porcentaje, reemplaza esa salvedad por una cita directa.
+- Las de siempre, sin cambios: `T-02` (falta enviar la hoja de validación de
+  unidades a la UFT), `T-06` (espera una reexportación nueva de Scopus con
+  fecha de corte propia), `T-10` (decisión de Pablo sobre publicar la red de
+  coautoría), API Key de Scopus sin rotar tras tres exposiciones en el chat.
+
+### Próximo paso recomendado
+
+Pendientes activos tras este cierre: `T-02`, `T-06`, `T-10`, `T-19` (en su
+techo por ahora). De estos, `T-02` y `T-10` son los únicos que no dependen
+de un evento externo (reexportación futura, o candidatos nuevos en el
+registro de ORCID) — son los que tienen sentido preguntarle al usuario cuál
+retomar primero.
+
+---
+
+## Cierre · T-10: C-05 (red de coautoría) publicada, reactiva a los filtros
+
+El usuario pidió revisar la red antes de decidir. Se le mandó una captura del
+visor interno (`internal/red_coautoria.html`, regenerado con la consolidación
+del día) y las cifras actuales (538 personas, 616 aristas, 267 componentes,
+41 la mayor, 293 comunidades Louvain, 196 sin coautoría). Al revisar, salió
+un hallazgo que **no** dependía de una decisión del usuario: el bloqueo
+técnico original de `C-05` —heredaría variantes de nombre sin resolver— ya
+no existía, porque `T-03` cerró en el cierre anterior de esta misma sesión.
+Se corrigieron tres referencias que seguían dando por abierto un pendiente ya
+cerrado (`config/indicators.yml`, `docs/V2_BACKLOG.md`,
+`src/review/vista_red.py`) — commit `95416a3`, antes de tocar la decisión de
+fondo.
+
+Después, pedido explícito: **"Ok. Publícalo."** Antes de escribir código se
+preguntó dos veces, porque cada respuesta cambiaba el trabajo de forma real:
+
+1. **¿Con comunidades Louvain visibles, o sólo componentes?** El usuario
+   eligió comunidades visibles — la opción que exige declarar con más cuidado
+   que una comunidad detectada no es un grupo de investigación real.
+2. **¿Reactivo a los filtros de la página (año, unidad…), o estático?**
+   Aquí el hallazgo fue de arquitectura: el resto de `colaboracion.html`
+   recalcula sus indicadores EN VIVO en el navegador a partir de
+   `publications.json`, así que hacer C-05 reactivo exigía reimplementar en
+   JavaScript la construcción del grafo y Louvain — el mismo algoritmo que
+   hasta hoy sólo vivía, probado, en `grafo_coautoria.py`. Se explicó el
+   riesgo (una segunda implementación que puede divergir de la que ya se
+   auditó) y la alternativa (módulo estático, sin ese riesgo). El usuario
+   eligió **reactivo**, sabiendo el costo.
+
+### Cómo se resolvió el riesgo de divergencia, en vez de aceptarlo sin más
+
+Se escribió `web/assets/js/grafo.js`: un puerto función por función de
+`construir()`, `componentes()` y `comunidades()` de `grafo_coautoria.py`,
+mismo orden de iteración y mismo criterio de desempate en Louvain. No se
+declaró "fiel" de palabra: se verificó. Un script Node cargó el mismo
+`publications.json`/`authors.json` que vería el navegador, corrió el puerto
+JS sobre el corpus completo sin filtrar, y comparó nodo por nodo, arista por
+arista, partición por partición contra `data/interim/coauthorship_graph.json`
+(la salida canónica de Python). Coincidencia exacta: mismos 538 nodos, 616
+aristas con el mismo peso y peso fraccional, misma partición de componentes,
+misma partición de comunidades. Ahí, y sólo ahí, se consideró seguro dejar
+que el JS recalculara en producción.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-285 | `C-05` se publica con comunidades Louvain visibles, declaradas explícitamente como heurística del algoritmo y no como veredicto sobre grupos de investigación reales | Elección del usuario tras ver el riesgo de malinterpretación explicado; la alternativa (sólo componentes) eliminaba el riesgo pero también la información |
+| D-286 | `C-05` se publica reactivo a los filtros de `colaboracion.html`, igual que el resto de los indicadores de esa página | Elección del usuario, sabiendo que exigía reimplementar la construcción del grafo y Louvain en JavaScript — la alternativa (estático) era más simple pero rompía la consistencia de UX con el resto de la sección |
+| D-287 | El puerto JS (`grafo.js`) no se declara fiel de palabra: se verifica programáticamente contra la salida canónica de Python sobre el corpus completo (nodos, aristas, pesos, ambas particiones) antes de dejarlo correr en producción | Es la única forma de cerrar honestamente el riesgo de divergencia que motivó la pregunta al usuario — una afirmación sin verificar habría sido exactamente el tipo de promesa sin evidencia que `CLAUDE.md` prohíbe |
+| D-288 | `01_publications.py` excluye las firmas E-09 encoladas de `autores_uft`, cerrando una brecha que existía desde antes de esta sesión (sólo `grafo_coautoria.py`, capa interna, las excluía) | Publicar C-05 hace que un fragmento de afiliación colado como autor deje de ser un error cosmético en una tabla y pase a dibujar colaboraciones falsas en un grafo público; la ventana para que esto ocurra en una futura ronda de revisión se cierra ahora, aunque hoy sea un no-op |
+| D-289 | La ficha de autor deja de decir "diferido a V2" en Coautoría y muestra la lista real de coautores internos de esa persona | La afirmación anterior se volvió falsa en cuanto `C-05` se publicó; dejarla habría sido una contradicción activa entre dos páginas del mismo sitio |
+
+### Qué se construyó
+
+- **`web/assets/js/grafo.js`** (nuevo): el puerto verificado arriba.
+- **`web/assets/js/vista_explorador.js`**: `corteRed()` — el módulo de C-05
+  dentro del explorador reactivo. Construye el grafo del recorte vigente,
+  recorta el DIBUJO a componentes de 5+ personas (mismo criterio que
+  `internal/red_coautoria.html`, para no repetir el error ya resuelto ahí de
+  un anillo con cientos de grupos ilegible), pero la tabla de aristas y las
+  cifras de arriba cubren a todos. Cuatro vistas —Nodos, Matriz, Arcos,
+  Tabla— reutilizando el conmutador genérico `.vistas button[data-vista]`
+  que ya engancha `paginas.js`: no hizo falta escucha nueva. Maneja el caso
+  de un recorte tan angosto que ninguna componente llegue a 5 (sin
+  `Math.min`/`Math.max` sobre arreglos vacíos rotos en silencio).
+- **`web/assets/js/core.js`**: comentario de cabecera de `red()` actualizado
+  (decía "C-05 NO se publica").
+- **`config/indicators.yml`**: `C-05.publicar: true`, advertencia reescrita
+  para el estado publicado (antes describía el diferimiento).
+- **`src/build/02_indicators.py`**: exporta `C-05` a `series.json`
+  reutilizando `grafo_coautoria.construir/componentes/comunidades`
+  directamente (mismo código, no una tercera cuenta) para el resumen y el
+  sello de procedencia (`n=538`, `cubiertas=342`, `unidad="personas"` —
+  necesitaba una sobrescritura explícita, igual que ya hacía `P-07`, porque
+  C-05 no tiene `denominador` en publicaciones).
+- **`src/build/01_publications.py`**: `autores_uft` ahora excluye las firmas
+  E-09 encoladas (fragmentos de cadena de afiliación) antes de que lleguen al
+  público — antes sólo `grafo_coautoria.py` (capa interna) las excluía. Hoy
+  es un no-op (0 encoladas), pero sin esto una futura ronda de revisión
+  podría dejar un fragmento firmando como coautor en el sitio en vivo.
+- **`src/build/prerender.mjs`**: pasa el mismo mapa persona→unidad al
+  prerenderizado que arma `paginas.js` en el navegador, para que no diverjan.
+- **`web/assets/js/paginas.js`** (ficha de autor): la sección "Coautoría",
+  que decía "diferido a V2" desde julio, ahora lista la coautoría interna
+  real de esa persona —cruzando sus EID contra `autores_uft` de cada
+  publicación—, con enlace a la ficha de cada coautor.
+- **`docs/GLOSSARY.md`**: entrada nueva, "Componente y comunidad (red de
+  coautoría)", con el ejemplo de dos triángulos unidos por un vínculo débil
+  —una componente, dos comunidades— para que un lector sin trasfondo técnico
+  entienda la distinción sin tener que leer código.
+
+### Verificación
+
+Suite de paridad JS-vs-Python (arriba) · `python3 src/build/build_all.py`
+completo (auditoría, factibilidad, 4 builds, compuerta de capas: 0 fallas) ·
+`python3 src/verify/higiene.py`: sin fallos, y confirma que `data-indicadores`
+de `colaboracion.html` referencia un `C-05` que existe en `series.json` y en
+el HTML prerenderizado · navegador real (Playwright + Chromium headless):
+las cuatro vistas cambian correctamente, filtrar por año 2024 recalcula el
+grafo completo (grupos y cifras nuevas, no las del corpus total), el tooltip
+muestra nombre + unidad + grado, sin errores de consola, tema oscuro
+correcto.
+
+### Archivos creados o modificados
+
+```
+web/assets/js/grafo.js              nuevo · puerto verificado de grafo_coautoria.py
+web/assets/js/vista_explorador.js   corteRed(), tablaRed(), C-05 en SECCIONES.colaboracion
+web/assets/js/paginas.js            unidadPorPersona cargado una vez; ficha de autor con coautoría real
+web/assets/js/core.js               comentario de cabecera de red() actualizado
+config/indicators.yml               C-05 publicar: true
+src/build/01_publications.py        autores_uft excluye E-09 encoladas
+src/build/02_indicators.py          C-05 en series.json (resumen + procedencia)
+src/build/prerender.mjs             mismo mapa unidadPorPersona que el navegador
+src/build/build_all.py              comentario de cabecera actualizado
+src/build/grafo_coautoria.py        docstring y campo "capa" actualizados
+src/build/common_build.py           FUENTE_POR_INDICADOR incluye C-05
+src/review/vista_red.py             docstring y aviso: ya no es "antes de publicar", es la herramienta de revisión
+src/analysis/indicator_feasibility.py  registro de C-05 corregido (decía "Diferido hasta T-03")
+Makefile                            comentario de `make red` actualizado
+docs/GLOSSARY.md                    nueva entrada "Componente y comunidad"
+docs/AUTHOR_PROFILE.md              sección Coautoría actualizada
+docs/ORCID_GUIDE.md                 referencia a C-05 actualizada
+docs/INDICATORS.md                  fila C-05 y nota de "Excluidos de V1"
+docs/V2_BACKLOG.md                  C-05 sale de "Indicadores diferidos"
+PLAN.md                             T-10 cerrado
+```
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «"Publícalo" es un simple `publicar: true`» | **Falso.** La arquitectura del explorador (recalcular en vivo desde `publications.json`) obligaba a elegir entre reimplementar Louvain en JS o quedarse estático — una decisión de ingeniería real, no una formalidad |
+| «Reimplementar un algoritmo en un segundo lenguaje es aceptar divergencia» | Se pudo VERIFICAR la fidelidad exacta contra el Python canónico en vez de sólo declararla — el riesgo señalado se cerró con evidencia, no con cuidado narrativo |
+
+### Ambigüedades abiertas
+
+- El tamaño de `colaboracion.html` subió a ~403 KB (36,6 KB comprimido): las
+  cuatro vistas de C-05 se prerenderizan todas a la vez, para que la página
+  funcione sin JavaScript. Aceptable por ahora (T-18 ya estableció que el
+  peso comprimido es la cifra que importa), pero si crece más vale la pena
+  revisar.
+- Las de siempre, sin cambios: `T-02`, `T-06`, API Key de Scopus sin rotar.
+
+### Próximo paso recomendado
+
+`T-10` cerrado. Pendientes activos: `T-02` (enviar la hoja de validación de
+unidades a la UFT), `T-06` (espera una reexportación real de Scopus), `T-19`
+(en su techo). Regenerar `STATE.md`/`docs/DECISIONS.md`, confirmar
+`git status`, commit y push.
+
+---
+
+## Cierre · T-02: hoja de validación refrescada, envío queda en manos del usuario
+
+El usuario pidió seguir con `T-02`. `internal/validacion_unidades.md` estaba
+fechado el 2026-08-19 —antes de la consolidación de identidad de esta
+sesión—, así que se regeneró con `src/review/build_unit_validation.py` para
+confirmar que las cifras seguían vigentes antes de darlo por listo. Sin
+cambios sustantivos: 21 unidades detectadas, 4 jerarquías escuela→facultad
+(3 inferidas), cobertura 63,8 % — sólo cambió la fecha del encabezado y el
+orden interno de tres unidades con 1 par cada una (empate, sin significado).
+
+Se le preguntó al usuario qué necesitaba para el paso de envío —redactar un
+correo, dejar el documento listo, o nada porque él ya se encarga—. Eligió
+gestionar el envío por su cuenta ("Realizaré el trabajo manual"): no
+correspondía inventarle un destinatario ni redactar en su nombre una
+comunicación institucional sin que él lo pidiera.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-290 | No se redacta ni se envía ninguna comunicación a la UFT sin pedido explícito del usuario | Enviar una solicitud institucional es una acción externa y consecuente que sólo le corresponde decidir a él; adivinar un destinatario dentro de la UFT habría sido inventar un dato que `CLAUDE.md` prohíbe |
+| D-291 | La hoja de validación se regenera antes de considerarla "lista para enviar", aunque el contenido no cambie | Una hoja fechada antes de la consolidación de identidad de hoy podía estar describiendo datos ya superados; confirmar que no cambió es parte de declarar el documento vigente, no un paso opcional |
+
+### Archivos creados o modificados
+
+```
+internal/validacion_unidades.md   regenerado: fecha 2026-08-26, cifras confirmadas sin cambios
+```
+
+### Verificación
+
+`python3 src/review/build_unit_validation.py` y `git diff` del resultado:
+sólo la fecha del encabezado y un empate de orden entre tres unidades de 1
+par cambiaron: unidades detectadas (21), jerarquías (4, 3 inferidas) y
+cobertura (63,8 %) idénticas a la versión del 2026-08-19.
+
+### Ambigüedades abiertas
+
+- El envío efectivo a la UFT queda fuera de esta sesión: lo gestiona el
+  usuario por su cuenta, sin fecha declarada.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo, API Key de Scopus
+  sin rotar.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente sobre `T-02`. Cuando el usuario tenga
+respuesta de la UFT, las correcciones entran en `config/matching_rules.yml`
+según ya documenta la propia hoja. Mientras tanto, quedan `T-06` y `T-19`
+como los únicos pendientes activos, ambos a la espera de un evento externo.
+
+---
+
+## Cierre · T-02: herramienta interactiva de validación de unidades
+
+El usuario aclaró el pedido anterior: no quería que se redactara un correo,
+sino que él mismo hará la identificación con su propio conocimiento
+institucional, y pidió "establecer un medio" para hacerlo. Un documento
+Markdown con casillas `☐ sí ☐ no` para marcar a mano no es un medio — es
+una lectura. Se construyó el mismo patrón que ya existe para la revisión de
+identidad de autor (`build_review.py` → `revision_identidad.html` → CSV →
+`apply_decisions.py`), aplicado a T-02 en vez de inventar uno nuevo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-292 | Se reutiliza el patrón HTML interactivo + CSV exportado + script de aplicación ya establecido para la revisión de identidad, en vez de diseñar un mecanismo nuevo para T-02 | Dos herramientas de revisión con dos interacciones distintas para el mismo tipo de tarea (marcar sí/no con evidencia delante) habría sido inconsistencia sin motivo — el patrón ya está probado, incluida la entrega dual del CSV (archivo local vs. capacidad `downloads` del anfitrión) |
+| D-293 | `config/matching_rules.yml` se edita con reemplazos de texto anclados a un patrón exacto, nunca con `yaml.dump()` | El archivo tiene más comentarios de justificación que líneas de dato; volcarlo de nuevo los borraría todos. Mismo criterio que ya usa `apply_decisions.py` para sus propios archivos de salida |
+| D-294 | El resultado de cada edición se valida con `yaml.safe_load()` ANTES de escribirse, nunca después | Un YAML roto detectado después de sobrescribir ya rompió el build; validar antes permite abortar sin haber tocado el archivo |
+| D-295 | `vocabulario_validado_por_institucion` sólo pasa a `true` cuando TODAS las filas del CSV tienen respuesta, nunca con una validación parcial | Declarar el vocabulario validado con preguntas todavía sin contestar sería publicar una confianza que nadie dio — el mismo principio que ya rige el resto del proyecto sobre no afirmar más certeza de la que existe |
+| D-296 | Al corregir el nombre de una unidad, el nombre detectado se conserva SIEMPRE como variante reconocida — nunca se borra | La afiliación cruda seguirá llegando escrita igual en cualquier reexportación futura; borrar el reconocimiento haría que esa unidad volviera a aparecer sin resolver |
+
+### Qué se construyó
+
+- **`src/review/build_unit_validation.py`**: además del `.md` que ya
+  generaba, ahora también escribe `internal/validacion_unidades.html` — 21
+  unidades + 4 jerarquías, cada una con su evidencia (afiliación real) y
+  botones Sí/No, corrección de texto libre cuando corresponde, contador de
+  avance, exportación a CSV. Si ya existe un CSV de una corrida anterior
+  (`internal/unit_validation_decisions.csv`), sus respuestas se precargan —
+  se puede responder por partes sin perder lo ya marcado.
+- **`src/review/apply_unit_validation.py`** (nuevo): lee el CSV exportado y
+  edita `config/matching_rules.yml` con tres operaciones posibles por
+  unidad — confirmar (no toca nada), agregar como variante de una entrada
+  que ya existe, o renombrar una entrada propia conservando sus variantes y
+  actualizando cualquier referencia cruzada en la jerarquía — y dos por
+  jerarquía: confirmar (`inferida` → `confirmada`) o corregir la facultad.
+  `--test` corre 10 comprobaciones sobre un YAML sintético (sin tocar el
+  archivo real); `--dry-run` muestra los cambios sin escribirlos. Deja
+  respaldo en `internal/.respaldos/` antes de escribir.
+- **`scripts/validar-unidades.ps1`** (nuevo): asistente para Windows, mismo
+  patrón en cinco pasos que `revisar-identidad.ps1` — autoprueba, preparar
+  datos, generar la página, recoger el CSV de Descargas, aplicar en seco y
+  luego de verdad, reconstruir el sitio.
+- **`Makefile`**: nuevo objetivo `validar-unidades`.
+
+### Verificación
+
+`apply_unit_validation.py --test`: 10/10. Además, tres corridas manuales
+contra una COPIA de `config/matching_rules.yml` (nunca el archivo real)
+cubriendo los tres casos de unidad (confirmar, variante de entrada
+existente, renombrar entrada propia con referencia cruzada en jerarquía) y
+los dos de jerarquía, más el caso de validación parcial (el flag global
+debe quedar en `false` si falta una fila por responder) — en los tres casos
+el `diff` contra el original fue exactamente el cambio esperado y nada más,
+y el resultado siguió siendo YAML válido. Herramienta HTML probada en
+navegador real (Playwright/Chromium): marcar sí/no, mostrar/ocultar el
+campo de corrección, contador de avance, y exportación de CSV con las
+columnas y valores correctos — sin errores de consola. Sintaxis de
+`validar-unidades.ps1` verificada con el parser de PowerShell.
+
+### Archivos creados o modificados
+
+```
+src/review/build_unit_validation.py    genera también internal/validacion_unidades.html
+src/review/apply_unit_validation.py    nuevo · aplica el CSV a config/matching_rules.yml
+scripts/validar-unidades.ps1           nuevo · asistente Windows en 5 pasos
+Makefile                               nuevo objetivo validar-unidades
+internal/validacion_unidades.html      generado
+```
+
+### Ambigüedades abiertas
+
+- Ninguna corrección real se aplicó todavía: el usuario hará la
+  identificación con su propio conocimiento institucional cuando tenga
+  tiempo. La herramienta queda lista y probada, no usada.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Cuando el usuario responda la hoja
+(`internal/validacion_unidades.html`, o `scripts\validar-unidades.ps1` en
+Windows), aplicar con `apply_unit_validation.py`, reconstruir el sitio, y
+cerrar `T-02` formalmente en `PLAN.md`.
+
+---
+
+## Cierre · T-02: primera ronda de respuestas aplicada, un caso pausado por cruce institucional
+
+El usuario subió `internal/unit_validation_decisions.csv` (25 filas: 21
+unidades + 4 jerarquías) exportado de la herramienta. Antes de aplicar en
+seco, la revisión con `--dry-run` encontró DOS fallas reales en
+`apply_unit_validation.py` (escrito la sesión anterior, nunca probado
+contra respuestas reales) y UNA que no era del código: un dato mal
+extraído que el CSV, sin querer, habría confirmado.
+
+### Los dos defectos del script, encontrados por el propio dry-run
+
+1. **Colisión de variante.** La fila `School of Medicine UFT-CLC` →
+   `Escuela de Medicina` habría creado una clave de vocabulario NUEVA
+   llamada «Escuela de Medicina» — pero ese texto ya vivía como VARIANTE
+   dentro de la entrada «Facultad de Medicina». El resultado habría dejado
+   el mismo nombre registrado dos veces, con matching ambiguo entre las dos
+   entradas. Se agregó `entrada_por_variante()`: antes de crear una clave
+   nueva, busca si el nombre corregido ya vive como variante de OTRA
+   entrada, y si es así, agrega ahí en vez de duplicar.
+2. **El propio arreglo escondía un segundo bug.** «Facultad de
+   Comunicaciones y Humanidades» → «Facultad de Humanidades y
+   Comunicaciones» es un renombrado real, pero el nombre nuevo YA estaba
+   listado como variante — de la MISMA entrada que se está corrigiendo. La
+   primera versión del arreglo #1 trataba eso igual que el caso de una
+   entrada ajena y no hacía el renombrado. Se corrigió comparando la
+   entrada encontrada contra `nombre`: sólo se desvía a "agregar en otra
+   entrada" cuando la entrada encontrada NO es la que se está corrigiendo.
+   El autotest subió de 10 a 21 comprobaciones para cubrir ambos casos por
+   separado — el segundo bug es la clase de error que sólo aparece
+   probando el arreglo del primero contra un caso real, y por eso no lo
+   había atrapado el autotest original.
+
+### El caso que no era un bug de código
+
+La fila `Facultad de Odontología y Ciencias de la Rehabilitación` → `no` →
+`Facultad de Medicina y Salud` parecía una corrección más. La afiliación
+completa detrás de esa fila es: *"Universidad San Sebastián, Facultad de
+Odontología y Ciencias de la Rehabilitación, Carrera de Fonoaudiología,
+Santiago, Chile, Universidad Finis Terrae, Facultad de Educación,
+Psicología y Familia, Santiago, Chile"* (autor Allende-Valenzuela T.,
+`internal/matching_log.csv`). Es una cadena con DOS instituciones: la
+unidad "Facultad de Odontología y Ciencias de la Rehabilitación" pertenece
+a la Universidad San Sebastián, no a la UFT — el extractor se quedó con el
+fragmento equivocado. La unidad UFT real de ese par es "Facultad de
+Educación, Psicología y Familia" (ya renombrada a "Facultad de Educación y
+Ciencias Sociales" en esta misma ronda).
+
+Aplicar la respuesta tal como venía habría fusionado un dato mal extraído
+dentro de "Facultad de Medicina y Salud" — dos errores en vez de uno, y
+esta vez permanente en `config/matching_rules.yml`. No es un error del
+usuario: la herramienta le mostró la cadena completa como evidencia, pero
+enmarcada como "¿es correcto el nombre de esta unidad?", no como "¿pertenece
+esta afiliación completa a la UFT?" — la pregunta que hacía falta hacer no
+era la que se hizo. Se pausó esa fila (`correcto: pendiente`, con nota) y
+se excluyó de esta aplicación; el resto (24 de 25 filas) se aplicó.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-297 | La corrección de «Facultad de Odontología y Ciencias de la Rehabilitación» NO se aplica esta ronda | El texto detectado pertenece a otra institución (Universidad San Sebastián) mezclada en la misma cadena de afiliación; fusionarlo en «Facultad de Medicina y Salud» habría publicado un dato con una causa raíz distinta a la que la corrección resolvía |
+| D-298 | El resto de las 24 respuestas (11 cambios reales + 8 avisos de "sin corrección utilizable" + 5 sin cambio por ser idénticas) se aplica sin esperar la fila pausada | Retener 24 respuestas claras por una fila ambigua habría sido bloquear trabajo listo por un caso que necesita una conversación aparte |
+| D-299 | `apply_unit_validation.py` gana `entrada_por_variante()`, con el autotest ampliado a 21 comprobaciones | Los dos defectos sólo se manifestaban con datos reales de producción, no con el fixture sintético original; ampliar el fixture para cubrir ambos casos deja el próximo lote (la fila pausada, cuando se resuelva, u otra ronda futura) protegido contra la misma clase de error |
+
+### Qué se aplicó
+
+`config/matching_rules.yml`: 4 jerarquías confirmadas (`inferida` →
+`confirmada`, 3 con facultad corregida a «Facultad de Medicina y Salud», 1 a
+«Facultad de Educación y Ciencias Sociales»); 4 unidades renombradas
+(Medicina → Medicina y Salud, Educación/Psicología/Familia → Educación y
+Ciencias Sociales, Comunicaciones y Humanidades → orden invertido,
+Arquitectura y Diseño → +Estudios Creativos); 3 variantes agregadas a
+entradas existentes; 1 entrada nueva (Escuela de Ingeniería Civil
+Industrial). `vocabulario_validado_por_institucion` sigue en `false`: aún
+quedan la fila pausada y varias unidades marcadas «no» sin corrección
+utilizable (ver abajo).
+
+### Verificación
+
+`--test`: 21/21. `--dry-run` corrido DOS veces contra el CSV real antes de
+aplicar (una por cada defecto encontrado y corregido). Tras aplicar:
+`yaml.safe_load()` sobre el resultado, auditoría completa
+(`src/audit/run_all.py`, 0 fallas bloqueantes), build completo
+(`build_all.py`, compuerta de capas: 0 fallas), higiene del sitio sin
+fallos, y confirmación manual de que `series.json` (`P-07`) agrega la
+producción bajo los nombres nuevos correctamente (Facultad de Medicina y
+Salud: 577 pares) y que la fila pausada sigue apareciendo sin fusionar
+(Facultad de Odontología y Ciencias de la Rehabilitación: 1, sin tocar).
+
+### Archivos creados o modificados
+
+```
+src/review/apply_unit_validation.py   entrada_por_variante(); autotest 10 → 21 comprobaciones
+config/matching_rules.yml             4 jerarquías confirmadas, 4 unidades renombradas, 4 variantes/entradas nuevas
+internal/unit_validation_decisions.csv   subido por el usuario; 1 fila pausada a mano antes de aplicar
+internal/matching_log.csv             regenerado por la auditoría con los nombres corregidos
+internal/ambiguities_authors.csv      regenerado; una ambigüedad I-06 falsa se resolvió sola al unificar nombres
+internal/validacion_unidades.md/.html  regeneradas: 18 unidades restantes, 0 jerarquías inferidas
+internal/.respaldos/matching_rules_20260826T175621.yml   respaldo automático antes de escribir
+```
+
+### Ambigüedades abiertas · pendiente de respuesta del usuario
+
+- **La fila pausada**: ¿la unidad real de ese par es «Facultad de
+  Educación y Ciencias Sociales» (lo que dice la propia cadena de
+  afiliación), o hay algo que Claude no está viendo? Propuesta: agregar una
+  entrada a `correcciones_declaradas` para ese texto exacto, no una fusión
+  de vocabulario.
+- **Facultad de Odontología** (sola, sin la coletilla "y Ciencias de la
+  Rehabilitación"): la nota decía "actualmente pertenece a la Facultad de
+  Medicina y Salud" pero el campo de corrección quedó vacío. ¿Se confirma
+  esa fusión?
+- **Escuela de Nutrición y Dietética** (fila de unidad, no de jerarquía):
+  «no» sin corrección ni nota. ¿Qué falta corregir ahí?
+- **School of Civil Engineering / School of Engineering**: el usuario
+  señaló que son ambiguos entre varias escuelas de ingeniería civil
+  (Industrial, Informática y Telecomunicaciones, IA y Realidad Virtual,
+  Biomédica) y no completó cuál. Sin resolver.
+- **Escuela de Ingeniería Civil Industrial** (entrada nueva creada esta
+  ronda): no quedó vinculada a ninguna facultad en `jerarquia` — hoy se
+  reporta por sí sola. ¿Se agrega el vínculo a «Facultad de Ingeniería»,
+  igual que las otras escuelas?
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario las cinco ambigüedades de arriba. Con esas
+respuestas, `T-02` puede cerrarse por completo: aplicar la fila pausada
+(probablemente como corrección declarada, no como fusión de vocabulario),
+decidir Odontología y Nutrición, y — si corresponde — agregar la jerarquía
+de Ingeniería Civil Industrial. Sólo entonces
+`vocabulario_validado_por_institucion` puede pasar a `true`.
+
+---
+
+## Cierre · T-02: la fila pausada se resuelve — corrección declarada, no fusión de vocabulario
+
+El usuario revisó la fila pausada junto con Claude, tal como pidió («No,
+revisémoslo juntos primero»). Ante la pregunta de si un mismo autor podía
+tener dos afiliaciones, señaló su postura metodológica — no puede — y pidió
+el Scopus Author ID o el ORCID para verificar por su cuenta. Se le entregó
+el Scopus Author ID (59321456000) y los datos de las dos publicaciones del
+par; el usuario aportó después el ORCID que encontró
+(`0009-0009-2334-0562`). Claude intentó una corroboración independiente por
+web: `WebFetch` a `orcid.org`, `pub.orcid.org`, `repositorio.uft.cl`,
+`doi.org` y `www.researchgate.net` devolvió `EGRESS_BLOCKED` en los cinco
+casos (política del proxy de salida, no reintentada); `WebSearch` sí
+respondió, con resultados sintetizados y con fuente. Con esa evidencia más
+la suya propia, el usuario confirmó: **"Es una autora afiliada a la
+institución. Aplica la opción número 1"** — la propuesta original de Claude
+(corrección declarada sobre el texto exacto mal extraído, no una fusión de
+vocabulario).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-300 | Se agrega una 4ª entrada a `correcciones_declaradas` (`config/matching_rules.yml`), clave `"Facultad de Odontología y Ciencias de la Rehabilitación"` → `"Facultad de Educación, Psicología y Familia"` — NO una fusión de vocabulario | Las tres entradas previas de `correcciones_declaradas` arreglan artefactos de concatenación (texto pegado, guion de corte de línea); ésta es distinta — arregla una extracción que tomó la facultad de OTRA institución — pero el mecanismo es el correcto para ambos casos: intercepta antes de que el texto llegue a `vocabulario`, así que "Facultad de Odontología y Ciencias de la Rehabilitación" nunca se registra como si fuera una unidad UFT |
+| D-301 | La fila 21 de `internal/unit_validation_decisions.csv` se marca `correcto: si` (no se deja en `pendiente`, ni se completa como `no` + corrección) | `no` + corrección habría hecho que una futura corrida de `apply_unit_validation.py` tratara el texto detectado como una entrada de vocabulario a fusionar — exactamente el error que la corrección declarada evita; `si` documenta que la fila queda resuelta por otra vía sin arriesgar ese efecto secundario en el CSV |
+
+### Verificación
+
+`yaml.safe_load()` sobre el archivo modificado antes de considerar el
+cambio hecho. Auditoría completa (`src/audit/run_all.py`): 0 fallas
+bloqueantes, `internal/matching_log.csv` regenerado confirma que el par
+(eid `2-s2.0-85203525781`) ahora resuelve a «Facultad de Educación y
+Ciencias Sociales». `data/interim/indicator_feasibility.py` y
+`src/build/build_all.py` completos, compuerta de capas: 0 fallas.
+`src/build/06_assemble_site.py`: 10 páginas, capa interna no incluida.
+`src/verify/higiene.py`: sin fallos. Confirmación manual en
+`data/processed/series.json` (`P-07`): «Facultad de Educación y Ciencias
+Sociales» sube de 54 a 55 pares; «Facultad de Odontología y Ciencias de la
+Rehabilitación» ya no aparece como unidad propia (sólo queda «Facultad de
+Odontología», la unidad UFT real, sin tocar). `apply_unit_validation.py
+--test`: 21/21. `--dry-run` tras el cambio del CSV: 0 filas pendientes, la
+fila ya no aparece ni en cambios ni en avisos.
+
+### Archivos creados o modificados
+
+```
+config/matching_rules.yml                 4ª entrada en correcciones_declaradas
+internal/unit_validation_decisions.csv    fila 21: pendiente -> si, nota reescrita
+internal/matching_log.csv                 regenerado por la auditoría con el par corregido
+data/processed/series.json                 P-07: Educación y Ciencias Sociales 54 -> 55
+dist/                                       reconstruido completo
+```
+
+### Ambigüedades abiertas · pendiente de respuesta del usuario
+
+- **Facultad de Odontología** (sola, sin la coletilla "y Ciencias de la
+  Rehabilitación"): la nota decía "actualmente pertenece a la Facultad de
+  Medicina y Salud" pero el campo de corrección quedó vacío. ¿Se confirma
+  esa fusión?
+- **Escuela de Nutrición y Dietética** (fila de unidad, no de jerarquía):
+  «no» sin corrección ni nota. ¿Qué falta corregir ahí?
+- **School of Civil Engineering / School of Engineering**: el usuario
+  señaló que son ambiguos entre varias escuelas de ingeniería civil
+  (Industrial, Informática y Telecomunicaciones, IA y Realidad Virtual,
+  Biomédica) y no completó cuál. Sin resolver.
+- **Escuela de Ingeniería Civil Industrial** (entrada nueva creada la ronda
+  anterior): no quedó vinculada a ninguna facultad en `jerarquia` — hoy se
+  reporta por sí sola. ¿Se agrega el vínculo a «Facultad de Ingeniería»,
+  igual que las otras escuelas?
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario las cuatro ambigüedades restantes de arriba. Con
+esas respuestas, `T-02` puede cerrarse por completo y
+`vocabulario_validado_por_institucion` puede pasar a `true`.
+
+---
+
+## Cierre · T-02 completo: las cuatro ambigüedades resueltas, `vocabulario_validado_por_institucion: true`
+
+El usuario respondió las cuatro ambigüedades pendientes en un solo mensaje:
+(1) confirma la fusión de «Facultad de Odontología» en «Facultad de
+Medicina y Salud»; (2) «Escuela de Nutrición y Dietética» se llama
+efectivamente así — el nombre no necesita corrección, sólo la jerarquía
+(ya confirmada en la ronda anterior); (3) «School of Civil Engineering» /
+«School of Engineering» son ambiguos entre varias escuelas de ingeniería
+civil y no hay forma de precisar cuál — sólo se sabe que pertenecen a la
+Facultad de Ingeniería; (4) confirma el vínculo de jerarquía de «Escuela de
+Ingeniería Civil Industrial» a «Facultad de Ingeniería».
+
+Antes de tocar `config/matching_rules.yml`, se probó la fusión de
+Odontología contra el script real (no contra el fixture sintético primero)
+para ver qué haría, siguiendo la misma disciplina que ya había atrapado dos
+bugs en la ronda anterior. Atrapó un tercero.
+
+### El tercer defecto de `apply_unit_validation.py`
+
+«Facultad de Odontología» → «Facultad de Medicina y Salud» es un caso que
+ninguno de los dos bugs anteriores cubría: AMBOS nombres ya eran entradas
+propias de vocabulario, cada una con sus propias variantes (Odontología
+traía «Faculty of Dentistry», «Escuela de Odontología», «School of
+Dentistry»). El código existente sólo sabía agregar `nombre` como una
+variante suelta del destino — dejaba la entrada vieja de Odontología
+intacta, con sus propias variantes huérfanas. El resultado habría quedado
+con «Facultad de Odontología» registrada DOS VECES (clave propia Y
+variante ajena), y «Faculty of Dentistry» / «Escuela de Odontología» /
+«School of Dentistry» habrían seguido resolviendo a la entrada vieja en
+vez de a la fusionada — contradiciendo la propia fusión que se estaba
+aplicando. Verificado ejecutando `aplicar_unidad()` directamente contra el
+archivo real antes de escribir nada.
+
+Se corrigió `aplicar_unidad()`: cuando el nombre a corregir ES TAMBIÉN una
+entrada propia (no sólo el destino), se trasladan TODAS sus variantes al
+destino y se borra la entrada vieja completa, en vez de agregar sólo el
+nombre suelto. Se agregó un caso de prueba nuevo al fixture (variantes
+sintéticas de Odontología fusionándose en una entrada existente) — el
+autotest subió de 21 a 24 comprobaciones.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-302 | `aplicar_unidad()` gana una rama para fusionar DOS entradas de vocabulario ya existentes (trasladando todas las variantes de la vieja, borrando la entrada vieja), en vez de sólo agregar el nombre corregido como variante suelta | El caso real (Odontología → Medicina y Salud) habría dejado el texto registrado dos veces y sus otras variantes sin fusionar — un defecto que sólo se manifestó al probar contra el archivo real, como los dos anteriores |
+| D-303 | «School of Civil Engineering» y «School of Engineering» se registran como variantes de «Facultad de Ingeniería» (nivel de facultad), no de ninguna escuela específica | El usuario confirmó que no hay forma de precisar a cuál de las cuatro escuelas de ingeniería civil corresponden — atribuir al nivel de facultad es el dato más fino que la evidencia sostiene, no una invención (`CLAUDE.md`: no inventar datos ni relaciones) |
+| D-304 | «Escuela de Ingeniería Civil Industrial» → «Facultad de Ingeniería» se agrega directo a `jerarquia`, a mano, sin pasar por el CSV | Es una entrada nueva de la ronda anterior que nunca tuvo fila en la hoja de validación (el generador sólo crea filas para jerarquías `inferida` existentes al momento de generarla); el usuario la confirmó directamente en el chat |
+| D-305 | Con las 25 filas del CSV respondidas y ambas jerarquías nuevas confirmadas, `vocabulario_validado_por_institucion` pasa de `false` a `true` | Es la primera vez que el vocabulario completo de unidades académicas queda validado por el responsable institucional — condición que el propio archivo declara como requisito para publicar comparaciones entre unidades |
+
+### Qué se aplicó
+
+`config/matching_rules.yml`: jerarquía nueva («Escuela de Ingeniería Civil
+Industrial» → «Facultad de Ingeniería», `confirmada`, agregada a mano);
+vocabulario — «Facultad de Odontología» fusionada en «Facultad de Medicina
+y Salud» (4 variantes trasladadas, entrada vieja eliminada), «School of
+Civil Engineering» y «School of Engineering» agregadas como variantes de
+«Facultad de Ingeniería»; `vocabulario_validado_por_institucion: false` →
+`true`. `src/review/apply_unit_validation.py`: nueva rama de fusión en
+`aplicar_unidad()`, autotest 21 → 24 comprobaciones.
+
+### Verificación
+
+`--test`: 24/24. `--dry-run` corrido contra el CSV real antes de aplicar;
+además, la rama de fusión se probó por separado contra el archivo real
+(`aplicar_unidad()` invocada directamente) ANTES de escribir el fixture de
+prueba, para confirmar el bug antes de darlo por corregido. Tras aplicar:
+`yaml.safe_load()` sobre el resultado; auditoría completa (0 fallas
+bloqueantes); `build_all.py` completo (compuerta de capas: 0 fallas);
+`06_assemble_site.py` (10 páginas, capa interna no incluida); higiene sin
+fallos; confirmación manual en `series.json` (`P-07`): «Facultad de
+Odontología» ya no aparece como fila propia, «Facultad de Medicina y
+Salud» sube a 610 pares, «Facultad de Ingeniería» queda en 53.
+
+### Archivos creados o modificados
+
+```
+src/review/apply_unit_validation.py       rama de fusión en aplicar_unidad(); autotest 21 -> 24
+config/matching_rules.yml                 1 jerarquía nueva, 1 fusión de vocabulario, 2 variantes nuevas, flag validado: true
+internal/unit_validation_decisions.csv    4 filas resueltas (Odontología, Nutrición, School of Civil/Engineering)
+internal/matching_log.csv                 regenerado con los nombres fusionados
+data/processed/series.json                P-07: Odontología fusionada, Medicina y Salud 55 -> 610, Ingeniería 53
+dist/                                     reconstruido completo
+```
+
+### Ambigüedades abiertas
+
+- Ninguna de `T-02`. El vocabulario de unidades académicas queda
+  completamente validado por el responsable institucional.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Cerrar `T-02` formalmente en `PLAN.md` (si el archivo lo rastrea como
+pendiente abierto) y seguir con el resto de los `T` pendientes.
+
+## Cierre · T-19: cron mensual en el workflow de GitHub Actions; T-06 confirmado sin ruta de automatización
+
+El usuario pidió avanzar `T-06` y `T-19`. Ambos ya estaban en su techo del día
+(commits `5c9a292`, `37d893c`, `8377f91`, ya en el historial de esta rama).
+Preguntó después si pueden generarse actualizaciones automáticas en vez de
+reimportar a mano.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-306 | `T-06` no gana automatización: consultar la API de Scopus con más frecuencia no produce la fecha de corte que el pendiente pide | La propia documentación de `scopus_api.py` declara que la Scopus Search API no expone un campo «actualizado al» — sólo captura instante de consulta + cadena de búsqueda. La fecha de corte sólo existe en la cabecera de un export manual desde la interfaz web (`docs/UPDATING_REQUEST.md`); automatizar la consulta repetiría el mismo hallazgo sin acercarse al cierre |
+| D-307 | `.github/workflows/ampliar-orcid.yml` gana un disparador `schedule` mensual (`cron: '0 6 1 * *'`), además del `workflow_dispatch` que ya tenía | El registro de ORCID sí cambia con el tiempo (a diferencia de la API de Scopus); una corrida mensual automática cubre `T-19` sin gastar cuota de más ni depender de que alguien se acuerde de lanzarlo a mano |
+| D-308 | Los tres pasos condicionados a `inputs.verificar`, `inputs.afiliacion` e `inputs.commitear` cambian a `github.event_name != 'workflow_dispatch' || inputs.X` | El contexto `inputs` sólo existe en disparos `workflow_dispatch`; en un disparo `schedule` llega vacío, y esos tres `if:` se habrían evaluado como falsos — la corrida mensual habría consultado ORCID pero nunca verificado, buscado candidatos por afiliación ni comiteado el resultado. Se encontró antes de que corriera en producción, no después |
+
+### Qué se aplicó
+
+`.github/workflows/ampliar-orcid.yml`: trigger `schedule` mensual agregado;
+comentario «CÓMO SE LANZA» actualizado; los tres `if:` de pasos condicionales
+corregidos para no depender de `inputs` fuera de un disparo manual.
+`docs/OPERACION.md`: nota sobre el disparo automático en la sección de T-19.
+`PLAN.md`: fila de `T-19` anota la automatización agregada hoy. `T-06` no
+cambia: sigue igual en su techo, ahora con la razón de por qué más
+automatización no lo mueve documentada aquí.
+
+### Verificación
+
+YAML parseado con `pyyaml` (`py -3 -c "import yaml; yaml.safe_load(...)"`):
+válido, dos triggers (`workflow_dispatch`, `schedule`), cron
+`[{'cron': '0 6 1 * *'}]`. No se pudo correr el workflow real en GitHub
+Actions desde esta sesión — el cambio queda sin commitear/pushear a la
+espera de que el usuario lo confirme.
+
+### Archivos creados o modificados
+
+```
+.github/workflows/ampliar-orcid.yml   trigger schedule mensual + fix de los 3 if: dependientes de inputs
+docs/OPERACION.md                     nota sobre el disparo automático mensual (T-19)
+PLAN.md                               T-19: anota la automatización; T-06 sin cambio de estado
+SESSION_NOTES.md                      este cierre
+```
+
+### Ambigüedades abiertas
+
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo (T-19 ahora con
+  corrida automática mensual además del techo del método).
+
+### Próximo paso recomendado
+
+Confirmar con el usuario si comitea y pushea el cambio del workflow (acción
+visible en GitHub, no autoaplicada sin permiso). Si se aprueba, verificar la
+primera corrida programada el 1 del mes próximo, o lanzarla a mano una vez
+desde Actions para confirmar que el fix de los `if:` funciona antes de
+esperar al cron.
+
+## Cierre · SciVal Partner API: hallazgo del usuario, registrado sin probarlo
+
+El usuario preguntó por la integración de la API de SciVal —tema abierto
+tras `dda939f` (403 `ENTITLEMENTS_ERROR` contra `api.elsevier.com`)— y trajo
+un enlace propio: `https://partnerapi.scival.com/`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-309 | `partnerapi.scival.com` se documenta en `docs/FUENTES_Y_APIS.md` §3.8 como hallazgo sin confirmar, no como ruta de acceso disponible | La página consultada solo describe autenticación (firma HMAC-SHA256, credenciales «modelo Pure»), sin proceso de registro ni elegibilidad. Pure es el CRIS propio de Elsevier — la forma de las credenciales sugiere API de integración para partners/proveedores de software, distinta del autoservicio institucional que ya se probó y rebotó. `CLAUDE.md` prohíbe suponer disponibilidad de API sin confirmar, así que no se intentó construir nada contra ella |
+| D-310 | La pregunta sobre esta API se agrega al mismo pedido pendiente de la entitlement estándar de SciVal (gestor de cuenta Elsevier / biblioteca UFT), en vez de abrir un pendiente `T-xx` nuevo | Es la misma persona, la misma gestión, y todavía no hay nada que ejecutar en el repositorio — abrir un pendiente de código para una pregunta de licenciamiento habría sido prematuro |
+
+### Qué se aplicó
+
+`docs/FUENTES_Y_APIS.md` §3.8: nuevo párrafo documentando el hallazgo, con
+la pregunta redactada para el gestor de cuenta Elsevier. Ningún código
+nuevo — no hay credenciales que probar todavía.
+
+### Verificación
+
+Ninguna aplicable: es un hallazgo de documentación, no una consulta a red
+ni un cambio de comportamiento del pipeline.
+
+### Archivos creados o modificados
+
+```
+docs/FUENTES_Y_APIS.md   §3.8: hallazgo de partnerapi.scival.com + pregunta para el gestor de cuenta
+SESSION_NOTES.md         este cierre
+```
+
+### Ambigüedades abiertas
+
+Si la UFT tiene o puede obtener acceso a `partnerapi.scival.com` — sin
+respuesta del gestor de cuenta Elsevier, sigue sin confirmar en cualquier
+dirección.
+
+### Próximo paso recomendado
+
+Enviar la pregunta combinada (entitlement estándar + Partner API) al gestor
+de cuenta Elsevier o a la biblioteca UFT. Hasta tener respuesta, no hay
+ruta de código que avanzar en la integración de SciVal.

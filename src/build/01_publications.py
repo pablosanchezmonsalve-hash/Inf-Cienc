@@ -18,7 +18,15 @@ def main() -> None:
 
     uni = b.load_universe()
     authorship = b.load_authorship()
-    autores_por_eid = (authorship.groupby("eid")["nombre_en_fuente"]
+    # Las firmas E-09 encoladas (fragmentos de cadena de afiliación, no
+    # personas) no tienen ficha propia y no deben aparecer como coautor en
+    # ninguna vista pública — ni en esta tabla ni, sobre todo, en un futuro
+    # grafo de coautoría (C-05), donde un fragmento con seis firmantes UFT
+    # dibujaría seis colaboraciones que no existen. `DESCARTADAS` ya excluye
+    # las CONFIRMADAS en `load_authorship()`; esto cierra la misma puerta
+    # para las que siguen pendientes de revisión.
+    sin_e09 = authorship[~authorship["nombre_en_fuente"].isin(b.firmas_e09_encoladas())]
+    autores_por_eid = (sin_e09.groupby("eid")["nombre_en_fuente"]
                        .apply(lambda s: sorted(set(s))).to_dict())
     unidades_por_eid = (authorship.dropna(subset=["unidad_academica"])
                         .groupby("eid")["unidad_academica"]

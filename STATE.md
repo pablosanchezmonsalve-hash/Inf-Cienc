@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `6322378` · El prompt de continuidad citaba 92 decisiones; van 244
-Snapshot: 2026-08-25
+Último commit: `69c3a75` · La ventana, declarada donde no se puede no verla
+Snapshot: 2026-08-26
 
 ---
 
@@ -32,21 +32,18 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **542** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades de autor publicadas | **538** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
-| Firmas con ORCID | **240** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con forma de persona | **538** | descontando las marcadas por `E-09`, pendientes de revisión |
-| Entidades con ORCID | **209** | tras consolidación humana · **la que sirve el sitio** |
+| Firmas con ORCID | **242** | sin consolidar · `data/enriched/authors_orcid.csv` |
+| Entidades con ORCID | **204** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
-| Indicadores publicados | **27** | `config/indicators.yml`, `publicar: true` |
+| Indicadores publicados | **28** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **85 formas de firma eran 38 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
-
-Y **4 de las publicadas probablemente no correspondan a personas**: la auditoría las marcó como probables fragmentos de cadena de afiliación que la fuente metió en la lista de autores (regla `E-09`). Dos de las señales son invariantes de la fuente; la tercera es una heurística sobre la forma del nombre, y sola no basta. Siguen contando y con ficha: confirmarlo es una decisión de identidad, y por `D-08` la toma una persona en `make revision`.
+Las cifras de autor van en dos bases porque una revisión humana declaró que **84 formas de firma eran 37 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
 ---
 
@@ -56,7 +53,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 417 |
+| `internal/ambiguities_authors.csv` | 415 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/identity_candidates.csv` | 17 |
 | `internal/orcid_candidatos_afiliacion.csv` | 20 |
@@ -64,27 +61,20 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 4 |
 
-`make revision` reúne estas colas en 111 casos, de los que **84 siguen pendientes**: 27 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 111 casos, de los que **0 siguen pendientes**: 111 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
-## Pendientes abiertos (9)
+## Pendientes abiertos (2)
 
 | # | Pendiente |
 |---|---|
-| `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
-| `T-03` | Revisión humana de las variantes de nombre encoladas (28 grupos, 27 pendientes) |
-| `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID, de los que **10 afectan al informe** |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
-| `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
-| `T-13` | Confirmar semántica del percentil de citación con documentación SciVal |
-| `T-14` | Revisión humana de los grupos de firmas que comparten ORCID (**10 casos, 2 pendientes**) |
-| `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 256
+## Decisiones tomadas: 318
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

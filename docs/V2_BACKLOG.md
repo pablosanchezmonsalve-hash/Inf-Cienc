@@ -20,7 +20,7 @@ lugar.
 | # | Pendiente | Desbloquea | Origen |
 |---|---|---|---|
 | **V2-01** | Subir la cobertura de ORCID desde el 38,8 % actual, confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
-| **V2-02** | Resolver los 31 grupos de variantes de nombre que siguen pendientes | `C-05` red de coautoría; recuento real de personas | T-03 |
+| **V2-02** | ~~Resolver los grupos de variantes de nombre que siguen pendientes~~ | `C-05` red de coautoría; recuento real de personas | T-03 (cerrado, 2026-08-26) |
 | **V2-03** | Revisión humana de los 20 identificadores fragmentados | `C-07` liderazgo autoral | T-04 |
 | **V2-04** | Validar institucionalmente el vocabulario de unidades | Retirar la advertencia destacada de `P-07` | T-02 |
 | **V2-05** | Reexportar Scopus con fecha de corte declarada | Cierra la única brecha de trazabilidad que queda | T-06 |
@@ -66,12 +66,14 @@ antes volvía a preguntar los 52 casos resueltos en cada corrida.
 ## 2. Indicadores diferidos
 
 Ya evaluados en Fase 2 y verificados como calculables. Están en
-`config/indicators.yml` con `publicar: false`: activarlos no requiere código,
-salvo el renderizador de la red.
+`config/indicators.yml` con `publicar: false`.
+
+`C-05` (red de coautoría) salió de esta tabla el 2026-08-26: se publicó
+(`T-10`), con comunidades Louvain visibles y declaradas como heurística. Ver
+`PLAN.md` y `docs/GLOSSARY.md`.
 
 | Código | Indicador | Bloqueo |
 |---|---|---|
-| `C-05` | Red de coautoría | V2-02 |
 | `C-07` | Liderazgo autoral | V2-03 |
 | `T-02` | Topics de SciVal | Ninguno; 632 topics son demasiados para vista principal |
 | `T-03` | Prominencia temática | Ninguno; alto riesgo de malinterpretación |
@@ -99,7 +101,7 @@ salvo el renderizador de la red.
 | # | Decisión | Estado |
 |---|---|---|
 | **T-11** | Alcance de publicación de fichas de autor | **Supuesto vigente:** se publican las **556 entidades** —las 589 formas de firma de la fuente, con 63 ya fusionadas en 30 personas—, ranking por defecto n ≥ 5 (`config/publication.yml`). Sin confirmar |
-| **T-13** | Confirmar la semántica del percentil de citación con documentación de SciVal | Determinada empíricamente (correlación −0,66), no documentalmente |
+| ~~T-13~~ | ~~Confirmar la semántica del percentil de citación con documentación de SciVal~~ | **Cerrado (2026-08-26)**: empírica (correlación −0,66) y ahora también documental — `docs/METHODOLOGY.md` §7 bis |
 | — | Licencia de datos derivados (CC BY 4.0) | Propuesta en `DATA_LICENSE.md`, sin validar |
 | — | Alcance de publicación de métricas de Elsevier | Sin verificación jurídica |
 | — | Branding institucional definitivo | `color_primario` y `logo_path` son placeholders |
@@ -158,7 +160,7 @@ y `CLAUDE.md` prohíbe suponer disponibilidad de APIs o credenciales.
 | ~~**V2-20**~~ | ROR · **conector escrito (2026-08-19)**, `src/enrich/ror_institucion.py` | Cierra `ror_id` e `isni`, y contrasta el patrón de detección institucional contra los nombres que ROR registra | **Falta ejecutar la consulta.** El entorno de desarrollo no alcanza `api.ror.org`; se corre desde la máquina del proyecto y se pega el resultado en `config/institution.yml`. La lógica está verificada con 12 casos en CI |
 | **V2-21** | SciELO | Mide la brecha de cobertura que hoy sólo se advierte en prosa: humanidades, ciencias sociales y publicación en español | Qué interfaz de consulta ofrece hoy y con qué estabilidad. Entraría como corpus paralelo declarado, nunca sumado al universo |
 | **V2-22** | API de Scopus | `V2-05` y la ambigüedad `A-05`: fecha de corte declarada por la propia consulta, y actualización como objetivo del `Makefile` | Clave institucional, si la suscripción la habilita, y si exige IP institucional. **Bloqueante** |
-| **V2-23** | API de SciVal | `X-01` autocitas (`V2-06`) y `T-13`, la semántica del percentil, hoy determinada empíricamente | Que la suscripción incluya acceso programático a SciVal, que suele ser producto aparte. **Bloqueante** |
+| **V2-23** | API de SciVal | `X-01` autocitas (`V2-06`). `T-13` ya **no** depende de esto: se cerró por documentación (`docs/METHODOLOGY.md` §7 bis, 2026-08-26) | **Probado el 2026-08-26**: `GET analytics/scival/publication/metrics` con la API Key de Scopus del usuario responde `403 ENTITLEMENTS_ERROR — Not entitled to the resource specified`. No es un 404 (ruta inexistente): el gateway de Elsevier reconoce el recurso y niega el acceso, lo que sugiere que la ruta es válida y el bloqueo es puramente de licencia. La suscripción de Scopus **no** incluye acceso programático a SciVal, confirmando el supuesto original. **Sigue bloqueante para X-01**: pedir la entitlement al gestor de cuenta de Elsevier de la UFT o a la biblioteca; si se concede, `analytics/scival/publication/metrics?metricTypes=OutputsInTopCitationPercentiles` es el punto de partida ya probado |
 | **V2-24** | Unpaywall | Contraste de acceso abierto, que hoy se publica desde SciVal sin segunda fuente | Condiciones de uso |
 | **V2-25** | Altmetric | Un eje de atención que hoy no existe; la mención en política pública tiene valor real para un informe institucional | Condiciones de acceso para una web pública institucional. Riesgo alto de leerse como impacto: entraría con panel conceptual propio o no entraría |
 

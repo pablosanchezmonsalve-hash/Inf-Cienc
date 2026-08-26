@@ -40,6 +40,6 @@ universo_publicaciones:
 
 presentacion:
   # Branding mínimo. Se consume en Fase 3; aquí solo se declara.
-  titulo_plataforma: "Informe Cienciométrico Institucional"
+  titulo_plataforma: "Informe Bibliométrico Institucional"
   color_primario: "#00205B"     # placeholder: pendiente de validación institucional
   logo_path: null               # placeholder: no provisto

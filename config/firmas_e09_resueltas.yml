@@ -33,8 +33,12 @@
 #   UFT quedan sin autoría UFT nombrada. Eso se declara; no se rellena
 #   con nada.
 #
-# Descartadas: 0 · confirmadas como persona: 0
-# Fecha de la revisión: 2026-08-20
+# Descartadas: 4 · confirmadas como persona: 0
+# Fecha de la revisión: 2026-08-26
 
 descartadas:
+  - firma: Metabolism
+  - firma: Movement Sciences (NUTRIM)
+  - firma: School of Psychology
+  - firma: and Senior Lecturer
 confirmadas:

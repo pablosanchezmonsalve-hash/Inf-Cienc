@@ -21,10 +21,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 STEPS = ["01_publications", "02_indicators", "03_authors", "04_glossary"]
 
 # El grafo de coautoría (C-05) va DESPUÉS de 03_authors, que es quien deja la
-# consolidación de identidades aplicada, y ANTES de la compuerta 05. Escribe en
-# data/interim/, que no se copia a dist/: C-05 sigue diferido y el grafo lleva
-# nombres de personas y sus vínculos. Cuando T-03 se resuelva y el indicador
-# pase a publicarse, lo que cambia es el destino del artefacto, no el cálculo.
+# consolidación de identidades aplicada, y ANTES de la compuerta 05.
+#
+# C-05 se publicó el 2026-08-26 (T-10), pero este artefacto —el JSON completo
+# con nombres y vínculos, en data/interim/, que NO se copia a dist/— sigue
+# siendo capa interna: es la herramienta de revisión (`make red`), no lo que
+# ve el sitio. Lo que SÍ llega al público es distinto y vive en 02_indicators
+# (resumen agregado en series.json) y en el recorte que recalcula
+# `web/assets/js/grafo.js` en vivo, en el navegador, con las mismas funciones
+# —mismo criterio, dos superficies—.
 DERIVADOS = ["grafo_coautoria"]
 
 

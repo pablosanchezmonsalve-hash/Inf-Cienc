@@ -1,8 +1,8 @@
 # CLAUDE.md
-# Proyecto: Plataforma web para informes cienciométricos UFT
+# Proyecto: Plataforma web para informes bibliométricos UFT
 
 <project_identity>
-Nombre del proyecto: Plataforma web interactiva para informes cienciométricos institucionales
+Nombre del proyecto: Plataforma web interactiva para informes bibliométricos institucionales
 Institución inicial: Universidad Finis Terrae
 Fuentes iniciales: Scopus y SciVal
 Objetivo general: construir una plataforma web abierta, replicable y metodológicamente sólida para visualizar producción, impacto, colaboración y estructura temática de la actividad científica institucional.
