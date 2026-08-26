@@ -167,9 +167,45 @@ def aplicar_unidad(texto: str, nombre: str, correcto: str, correccion: str,
             return texto[:m_var.start(2)] + nuevo + texto[m_var.end(2):], True
 
     if m_destino:
+        variantes = m_destino.group(2)
+
+        if m_origen:
+            # El nombre a corregir es TAMBIÉN una entrada propia, con sus
+            # propias variantes (caso real: "Facultad de Odontología" ->
+            # "Facultad de Medicina y Salud", donde Odontología ya traía
+            # "Faculty of Dentistry", "Escuela de Odontología", etc.).
+            # Agregar sólo `nombre` como variante suelta y dejar su entrada
+            # vieja intacta duplicaría el texto (clave propia Y variante
+            # ajena) y sus otras variantes seguirían resolviendo a la
+            # entrada vieja, no a la fusionada. Hay que trasladar TODAS las
+            # variantes de la entrada vieja y borrarla entera.
+            lineas_origen = m_origen.group(2).splitlines(keepends=True)
+            faltantes = [l for l in lineas_origen if l.strip() not in variantes]
+            linea_nombre = f'      - "{nombre}"\n'
+            if linea_nombre not in variantes and linea_nombre not in faltantes:
+                faltantes.append(linea_nombre)
+            variantes_nuevas = variantes + "".join(faltantes)
+
+            ediciones = [
+                (m_destino.start(2), m_destino.end(2), variantes_nuevas),
+                (m_origen.start(), m_origen.end(), ""),
+            ]
+            for inicio, fin, reemplazo in sorted(ediciones, key=lambda e: -e[0]):
+                texto = texto[:inicio] + reemplazo + texto[fin:]
+
+            cambios.append(f"unidad «{nombre}»: su entrada de vocabulario se fusiona en «{destino}» "
+                            f"({len(lineas_origen)} variante(s) trasladada(s), entrada vieja eliminada)")
+
+            patron_ref = r'facultad: "' + re.escape(nombre) + r'"'
+            n_refs = len(re.findall(patron_ref, texto))
+            if n_refs:
+                texto = re.sub(patron_ref, f'facultad: "{destino}"', texto)
+                cambios.append(f"  · {n_refs} referencia(s) de jerarquía actualizada(s) a «{destino}»")
+
+            return texto, True
+
         # El nombre correcto YA es una entrada: sólo falta que reconozca esta
         # forma como variante, si todavía no la tiene.
-        variantes = m_destino.group(2)
         if f'- "{nombre}"' in variantes:
             cambios.append(f"unidad «{nombre}»: ya estaba registrada como variante de «{destino}»")
             return texto, True
@@ -336,10 +372,32 @@ def autotest() -> int:
     except yaml.YAMLError:
         fallos.append("el fixture base ya no es YAML válido")
 
+    # 13. Unidad "no" cuyo nombre a corregir es TAMBIÉN una entrada propia,
+    #     con SUS PROPIAS variantes — no un renombrado simple ni una
+    #     variante suelta: hay que fusionar todas esas variantes en el
+    #     destino y borrar la entrada vieja entera. Caso real: "Facultad de
+    #     Odontología" -> "Facultad de Medicina y Salud", donde Odontología
+    #     ya traía "Faculty of Dentistry" y "Escuela de Odontología" como
+    #     variantes propias.
+    t_od = FIXTURE.replace(
+        '"Facultad de Economía y Negocios":\n      - "Facultad de Economía y Negocios"\n',
+        '"Facultad de Odontología":\n'
+        '      - "Facultad de Odontología"\n'
+        '      - "Faculty of Dentistry"\n'
+        '      - "Escuela de Odontología"\n')
+    t2, quedo = aplicar_unidad(t_od, "Facultad de Odontología", "no", "Facultad de Ingeniería", [], [])
+    vocab = yaml.safe_load(t2)["unidad_academica"]["vocabulario"]
+    ok("Facultad de Odontología" not in vocab, "la entrada vieja no debería sobrevivir a la fusión")
+    ok(set(vocab["Facultad de Ingeniería"]) == {
+        "Facultad de Ingeniería", "Faculty of Engineering",
+        "Facultad de Odontología", "Faculty of Dentistry", "Escuela de Odontología",
+    }, "todas las variantes de la entrada fusionada deberían trasladarse, sin perder ninguna")
+    ok(quedo, "debería quedar resuelta")
+
     for f in fallos:
         print(f"  FALLA  {f}")
     print(f"  {'OK' if not fallos else 'FALLOS'} · apply_unit_validation: "
-          f"{21 - len(fallos)}/21 comprobaciones")
+          f"{24 - len(fallos)}/24 comprobaciones")
     return 1 if fallos else 0
 
 

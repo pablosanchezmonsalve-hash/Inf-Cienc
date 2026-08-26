@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `76ed5f6` · T-02: primera ronda de respuestas aplicada, un caso pausado por cruce 
+Último commit: `bd5ae52` · T-02: corrección declarada para afiliación cruzada (Odontología USS/UF
 Snapshot: 2026-08-26
 
 ---
@@ -53,7 +53,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 416 |
+| `internal/ambiguities_authors.csv` | 415 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/identity_candidates.csv` | 17 |
 | `internal/orcid_candidatos_afiliacion.csv` | 20 |
@@ -65,17 +65,16 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Pendientes abiertos (3)
+## Pendientes abiertos (2)
 
 | # | Pendiente |
 |---|---|
-| `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 309
+## Decisiones tomadas: 313
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
