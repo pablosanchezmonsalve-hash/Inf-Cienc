@@ -126,6 +126,20 @@ unidad_academica:
     # MedicineUniver-sidad Finis Terrae-Clínica Las Condes". Tres fragmentos
     # pegados y un guion de corte de línea dentro de "Universidad".
     "Faculty of MedicineUniver-sidad": "Facultad de Medicina"
+    # 1 par. Distinto de los tres anteriores: no es un artefacto de
+    # concatenación, es doble afiliación real mal resuelta. Afiliación
+    # completa: "Universidad San Sebastián, Facultad de Odontología y
+    # Ciencias de la Rehabilitación, Carrera de Fonoaudiología, Santiago,
+    # Chile, Universidad Finis Terrae, Facultad de Educación, Psicología y
+    # Familia, Santiago, Chile" (Allende-Valenzuela T., Scopus Author ID
+    # 59321456000, ORCID 0009-0009-2334-0562, eid 2-s2.0-85203525781). El
+    # extractor tomó la facultad de la OTRA universidad (USS) en vez de la de
+    # la UFT, que viene después en la misma cadena. Confirmado por el
+    # responsable del proyecto (T-02, 2026-08-26) tras verificar que la
+    # autora está afiliada a la institución: es la misma persona con
+    # nombramiento en ambas universidades, y la unidad UFT es Educación,
+    # Psicología y Familia, no Odontología.
+    "Facultad de Odontología y Ciencias de la Rehabilitación": "Facultad de Educación, Psicología y Familia"
 
   # Jerarquía escuela -> facultad.
   # Permite agregar la producción a nivel de facultad sin perder el detalle de
