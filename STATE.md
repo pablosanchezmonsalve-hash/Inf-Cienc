@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `27d448a` · Asistente de PowerShell para la consulta a Scopus (T-06)
+Último commit: `4fd12e9` · Corrige la base de comparación del conector de Scopus: 818, no 823
 Snapshot: 2026-08-26
 
 ---
@@ -84,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 264
+## Decisiones tomadas: 267
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

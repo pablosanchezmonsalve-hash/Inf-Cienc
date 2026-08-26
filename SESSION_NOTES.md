@@ -2911,3 +2911,73 @@ cambios. Si el 400 persiste, el mensaje ahora trae `Content-Type` y `Server`
 de la respuesta — pedir que copie eso completo en vez de sólo el código de
 estado, porque distingue un rechazo de proxy/antivirus de un rechazo real de
 Elsevier.
+
+---
+
+## Cierre · No era la red: era pegar en un prompt oculto
+
+El usuario siguió depurando en su máquina, con `curl.exe -v` directo —
+herramienta que este proyecto no tenía instrumentada para diagnóstico y que
+resultó decisiva: aisló cada capa una por una.
+
+### La secuencia de hallazgos
+
+1. **`curl` con la clave escrita a mano en el comando: 200 OK, total 818.**
+   Coincide exacto con `scopus_export.n_registros_leido`. Esto solo probó que
+   la API, la consulta y la red funcionan — no que el script funcione.
+2. **`curl` con la clave en `$env:SCOPUS_API_KEY` tras un `Read-Host` en OTRA
+   ventana: 401, sin cabecera `X-ELS-APIKey` en la petición.** La variable de
+   entorno no viajó entre ventanas de PowerShell — eso es esperado, no un bug;
+   confirmó que había que probar todo en una sola sesión.
+3. **El usuario pegó su clave real donde iba la etiqueta del prompt** (`Read-Host
+   "e6b398...` en vez de `Read-Host "API Key de Scopus"`), exponiéndola en el
+   chat dos veces. Se le pidió rotarla en el portal de Elsevier de inmediato.
+4. **Con la sintaxis corregida y la clave nueva: `Longitud capturada: 1`.**
+   El prompt oculto (`-AsSecureString`) capturó un solo carácter basura en vez
+   de los 32 de la clave pegada. **Esto era la causa real desde el principio**,
+   no el `User-Agent` (D-254) ni la red: pegar dentro de un `Read-Host
+   -AsSecureString` falla silenciosamente en algunas consolas de Windows.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-257 | `scripts/consultar-scopus.ps1` pide la API Key en texto VISIBLE, no oculto | Oculto pero roto es peor que visible y funcional. Nadie más ve la ventana del usuario, y una respuesta a `Read-Host` no queda en el historial de comandos de todas formas |
+| D-258 | El script valida que la clave capturada tenga al menos 20 caracteres antes de consultar | Una clave de Elsevier tiene 32; un prompt que capturó 1 carácter por un pegado fallido debe detenerse ahí, no gastar una consulta contra la API con una clave que se sabe incompleta |
+| D-259 | La API Key que el usuario expuso en el chat se trata como comprometida; se le pidió rotarla en dev.elsevier.com | Aunque la conversación es privada, quedó registrada fuera del control del usuario. `CLAUDE.md` no cubre credenciales de terceros explícitamente, pero el mismo principio de `<data_governance>` — no tratar lo interno como publicable por descuido — aplica a secretos |
+
+### Archivos creados o modificados
+
+```
+scripts/consultar-scopus.ps1   API Key/insttoken en texto visible, valida longitud >= 20
+```
+
+### Verificación
+
+No hay autoprueba para esta parte: es interacción de PowerShell con la
+consola de Windows, que no se puede probar desde Linux ni desde una consola
+sin TTY interactivo. La verificación real es que el usuario vuelva a correr
+el script y el `curl` manual con clave visible confirme una captura de 32
+caracteres.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El `User-Agent` por defecto de Python causaba el 400» (D-254) | **No confirmado, y ahora improbable.** La cadena completa de fallos apunta a que ninguna consulta real llegó con una clave completa hasta ahora; el 400 original probablemente tenía la misma causa que el de esta vuelta: una clave truncada, no el User-Agent. D-254 se mantiene como buena práctica defensiva, no se revierte, pero deja de presentarse como la explicación encontrada |
+| «Si el problema persiste tras cambiar el User-Agent, es la red» | **Descartado por la secuencia de curls.** La red, la consulta y la API funcionan perfecto; la única variable que fallaba era la captura de la clave en el prompt oculto |
+| «Pegar en un prompt de PowerShell siempre captura el texto completo» | **Falso**, al menos en la consola de este usuario: un `Read-Host -AsSecureString` con pegado (Ctrl+V) capturó 1 carácter en vez de 32, sin ningún error visible |
+
+### Ambigüedades abiertas
+
+- **Si el `User-Agent` (D-254) hacía falta o no**, sigue sin poder probarse por separado: para cuando se corrija la captura de la clave, ya está también en el conector. No se revierte porque no hace daño, pero no se puede reclamar como la causa que se creía.
+- El mismo patrón (`-AsSecureString` + pegado) está en `scripts/verificar-orcid.ps1` y `revisar-identidad.ps1`, sin corregir — no se tocó porque no fue lo que se pidió, pero es un hallazgo transferible si el usuario reporta el mismo síntoma ahí.
+- El resto, igual que los cierres anteriores: límite de consulta ya resuelto (20.000/semana, confirmado por las cabeceras del `curl`), ventana 2023-2025 vs. 2026, `T-02`–`T-15` pendientes de `make revision`.
+
+### Próximo paso recomendado
+
+Que el usuario corra `scripts\consultar-scopus.ps1` de nuevo, de punta a
+punta, con su clave rotada. Con la captura de clave arreglada y ya probado
+que la consulta real da 818 (coincide con `scopus_export`), debería
+funcionar en un solo intento. Si funciona, el bloque que imprime al final va
+a `config/sources.yml` a mano, y T-06 queda cerrado con evidencia delante.
