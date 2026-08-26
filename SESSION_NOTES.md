@@ -3753,3 +3753,55 @@ PLAN.md                             T-10 cerrado
 unidades a la UFT), `T-06` (espera una reexportación real de Scopus), `T-19`
 (en su techo). Regenerar `STATE.md`/`docs/DECISIONS.md`, confirmar
 `git status`, commit y push.
+
+---
+
+## Cierre · T-02: hoja de validación refrescada, envío queda en manos del usuario
+
+El usuario pidió seguir con `T-02`. `internal/validacion_unidades.md` estaba
+fechado el 2026-08-19 —antes de la consolidación de identidad de esta
+sesión—, así que se regeneró con `src/review/build_unit_validation.py` para
+confirmar que las cifras seguían vigentes antes de darlo por listo. Sin
+cambios sustantivos: 21 unidades detectadas, 4 jerarquías escuela→facultad
+(3 inferidas), cobertura 63,8 % — sólo cambió la fecha del encabezado y el
+orden interno de tres unidades con 1 par cada una (empate, sin significado).
+
+Se le preguntó al usuario qué necesitaba para el paso de envío —redactar un
+correo, dejar el documento listo, o nada porque él ya se encarga—. Eligió
+gestionar el envío por su cuenta ("Realizaré el trabajo manual"): no
+correspondía inventarle un destinatario ni redactar en su nombre una
+comunicación institucional sin que él lo pidiera.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-290 | No se redacta ni se envía ninguna comunicación a la UFT sin pedido explícito del usuario | Enviar una solicitud institucional es una acción externa y consecuente que sólo le corresponde decidir a él; adivinar un destinatario dentro de la UFT habría sido inventar un dato que `CLAUDE.md` prohíbe |
+| D-291 | La hoja de validación se regenera antes de considerarla "lista para enviar", aunque el contenido no cambie | Una hoja fechada antes de la consolidación de identidad de hoy podía estar describiendo datos ya superados; confirmar que no cambió es parte de declarar el documento vigente, no un paso opcional |
+
+### Archivos creados o modificados
+
+```
+internal/validacion_unidades.md   regenerado: fecha 2026-08-26, cifras confirmadas sin cambios
+```
+
+### Verificación
+
+`python3 src/review/build_unit_validation.py` y `git diff` del resultado:
+sólo la fecha del encabezado y un empate de orden entre tres unidades de 1
+par cambiaron: unidades detectadas (21), jerarquías (4, 3 inferidas) y
+cobertura (63,8 %) idénticas a la versión del 2026-08-19.
+
+### Ambigüedades abiertas
+
+- El envío efectivo a la UFT queda fuera de esta sesión: lo gestiona el
+  usuario por su cuenta, sin fecha declarada.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo, API Key de Scopus
+  sin rotar.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente sobre `T-02`. Cuando el usuario tenga
+respuesta de la UFT, las correcciones entran en `config/matching_rules.yml`
+según ya documenta la propia hoja. Mientras tanto, quedan `T-06` y `T-19`
+como los únicos pendientes activos, ambos a la espera de un evento externo.
