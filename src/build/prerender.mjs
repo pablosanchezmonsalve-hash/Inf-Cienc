@@ -68,6 +68,11 @@ async function main() {
   const { ejes } = await leerJSON('ejes.json');
   const { publicaciones } = await leerJSON('publications.json');
   const catalogo = await leerJSON('catalogo.json');
+  // Sólo lo usa C-05 (red de coautoría); el mismo mapa que arma el navegador
+  // en paginas.js, para que el prerenderizado no divergan en qué unidad
+  // muestra cada nodo.
+  const unidadPorPersona = new Map(
+    (await leerJSON('authors.json')).autores.map(a => [a.nombre, (a.unidades || [])[0]]));
 
   const archivos = (await readdir(dist)).filter(f => f.endsWith('.html'));
   const faltantes = [];
@@ -116,7 +121,7 @@ async function main() {
       const a = [];
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
       const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
-      const sec = vx.seccion(publicaciones, {}, clave, proc);
+      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona);
       html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);
       html = rellenar(html, 'controles', sec.controles, a);

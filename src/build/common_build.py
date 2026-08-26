@@ -431,7 +431,7 @@ FUENTE_POR_INDICADOR = {
     "I-01": "SciVal", "I-02": "SciVal", "I-03": "SciVal",
     "I-04": "SciVal", "I-05": "SciVal",
     "R-01": "SciVal",
-    "C-01": "Scopus", "C-03": "Scopus", "C-04": "Scopus", "C-06": "Scopus",
+    "C-01": "Scopus", "C-03": "Scopus", "C-04": "Scopus", "C-06": "Scopus", "C-05": "Scopus",
     "T-01": "Scopus", "T-04": "SciVal", "T-05": "SciVal",
     # ORCID no está en ninguna de las dos fuentes: se recupera aparte. El
     # catálogo publica esta columna, así que dejarlo caer en el genérico

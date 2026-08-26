@@ -3598,3 +3598,158 @@ techo por ahora). De estos, `T-02` y `T-10` son los únicos que no dependen
 de un evento externo (reexportación futura, o candidatos nuevos en el
 registro de ORCID) — son los que tienen sentido preguntarle al usuario cuál
 retomar primero.
+
+---
+
+## Cierre · T-10: C-05 (red de coautoría) publicada, reactiva a los filtros
+
+El usuario pidió revisar la red antes de decidir. Se le mandó una captura del
+visor interno (`internal/red_coautoria.html`, regenerado con la consolidación
+del día) y las cifras actuales (538 personas, 616 aristas, 267 componentes,
+41 la mayor, 293 comunidades Louvain, 196 sin coautoría). Al revisar, salió
+un hallazgo que **no** dependía de una decisión del usuario: el bloqueo
+técnico original de `C-05` —heredaría variantes de nombre sin resolver— ya
+no existía, porque `T-03` cerró en el cierre anterior de esta misma sesión.
+Se corrigieron tres referencias que seguían dando por abierto un pendiente ya
+cerrado (`config/indicators.yml`, `docs/V2_BACKLOG.md`,
+`src/review/vista_red.py`) — commit `95416a3`, antes de tocar la decisión de
+fondo.
+
+Después, pedido explícito: **"Ok. Publícalo."** Antes de escribir código se
+preguntó dos veces, porque cada respuesta cambiaba el trabajo de forma real:
+
+1. **¿Con comunidades Louvain visibles, o sólo componentes?** El usuario
+   eligió comunidades visibles — la opción que exige declarar con más cuidado
+   que una comunidad detectada no es un grupo de investigación real.
+2. **¿Reactivo a los filtros de la página (año, unidad…), o estático?**
+   Aquí el hallazgo fue de arquitectura: el resto de `colaboracion.html`
+   recalcula sus indicadores EN VIVO en el navegador a partir de
+   `publications.json`, así que hacer C-05 reactivo exigía reimplementar en
+   JavaScript la construcción del grafo y Louvain — el mismo algoritmo que
+   hasta hoy sólo vivía, probado, en `grafo_coautoria.py`. Se explicó el
+   riesgo (una segunda implementación que puede divergir de la que ya se
+   auditó) y la alternativa (módulo estático, sin ese riesgo). El usuario
+   eligió **reactivo**, sabiendo el costo.
+
+### Cómo se resolvió el riesgo de divergencia, en vez de aceptarlo sin más
+
+Se escribió `web/assets/js/grafo.js`: un puerto función por función de
+`construir()`, `componentes()` y `comunidades()` de `grafo_coautoria.py`,
+mismo orden de iteración y mismo criterio de desempate en Louvain. No se
+declaró "fiel" de palabra: se verificó. Un script Node cargó el mismo
+`publications.json`/`authors.json` que vería el navegador, corrió el puerto
+JS sobre el corpus completo sin filtrar, y comparó nodo por nodo, arista por
+arista, partición por partición contra `data/interim/coauthorship_graph.json`
+(la salida canónica de Python). Coincidencia exacta: mismos 538 nodos, 616
+aristas con el mismo peso y peso fraccional, misma partición de componentes,
+misma partición de comunidades. Ahí, y sólo ahí, se consideró seguro dejar
+que el JS recalculara en producción.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-285 | `C-05` se publica con comunidades Louvain visibles, declaradas explícitamente como heurística del algoritmo y no como veredicto sobre grupos de investigación reales | Elección del usuario tras ver el riesgo de malinterpretación explicado; la alternativa (sólo componentes) eliminaba el riesgo pero también la información |
+| D-286 | `C-05` se publica reactivo a los filtros de `colaboracion.html`, igual que el resto de los indicadores de esa página | Elección del usuario, sabiendo que exigía reimplementar la construcción del grafo y Louvain en JavaScript — la alternativa (estático) era más simple pero rompía la consistencia de UX con el resto de la sección |
+| D-287 | El puerto JS (`grafo.js`) no se declara fiel de palabra: se verifica programáticamente contra la salida canónica de Python sobre el corpus completo (nodos, aristas, pesos, ambas particiones) antes de dejarlo correr en producción | Es la única forma de cerrar honestamente el riesgo de divergencia que motivó la pregunta al usuario — una afirmación sin verificar habría sido exactamente el tipo de promesa sin evidencia que `CLAUDE.md` prohíbe |
+| D-288 | `01_publications.py` excluye las firmas E-09 encoladas de `autores_uft`, cerrando una brecha que existía desde antes de esta sesión (sólo `grafo_coautoria.py`, capa interna, las excluía) | Publicar C-05 hace que un fragmento de afiliación colado como autor deje de ser un error cosmético en una tabla y pase a dibujar colaboraciones falsas en un grafo público; la ventana para que esto ocurra en una futura ronda de revisión se cierra ahora, aunque hoy sea un no-op |
+| D-289 | La ficha de autor deja de decir "diferido a V2" en Coautoría y muestra la lista real de coautores internos de esa persona | La afirmación anterior se volvió falsa en cuanto `C-05` se publicó; dejarla habría sido una contradicción activa entre dos páginas del mismo sitio |
+
+### Qué se construyó
+
+- **`web/assets/js/grafo.js`** (nuevo): el puerto verificado arriba.
+- **`web/assets/js/vista_explorador.js`**: `corteRed()` — el módulo de C-05
+  dentro del explorador reactivo. Construye el grafo del recorte vigente,
+  recorta el DIBUJO a componentes de 5+ personas (mismo criterio que
+  `internal/red_coautoria.html`, para no repetir el error ya resuelto ahí de
+  un anillo con cientos de grupos ilegible), pero la tabla de aristas y las
+  cifras de arriba cubren a todos. Cuatro vistas —Nodos, Matriz, Arcos,
+  Tabla— reutilizando el conmutador genérico `.vistas button[data-vista]`
+  que ya engancha `paginas.js`: no hizo falta escucha nueva. Maneja el caso
+  de un recorte tan angosto que ninguna componente llegue a 5 (sin
+  `Math.min`/`Math.max` sobre arreglos vacíos rotos en silencio).
+- **`web/assets/js/core.js`**: comentario de cabecera de `red()` actualizado
+  (decía "C-05 NO se publica").
+- **`config/indicators.yml`**: `C-05.publicar: true`, advertencia reescrita
+  para el estado publicado (antes describía el diferimiento).
+- **`src/build/02_indicators.py`**: exporta `C-05` a `series.json`
+  reutilizando `grafo_coautoria.construir/componentes/comunidades`
+  directamente (mismo código, no una tercera cuenta) para el resumen y el
+  sello de procedencia (`n=538`, `cubiertas=342`, `unidad="personas"` —
+  necesitaba una sobrescritura explícita, igual que ya hacía `P-07`, porque
+  C-05 no tiene `denominador` en publicaciones).
+- **`src/build/01_publications.py`**: `autores_uft` ahora excluye las firmas
+  E-09 encoladas (fragmentos de cadena de afiliación) antes de que lleguen al
+  público — antes sólo `grafo_coautoria.py` (capa interna) las excluía. Hoy
+  es un no-op (0 encoladas), pero sin esto una futura ronda de revisión
+  podría dejar un fragmento firmando como coautor en el sitio en vivo.
+- **`src/build/prerender.mjs`**: pasa el mismo mapa persona→unidad al
+  prerenderizado que arma `paginas.js` en el navegador, para que no diverjan.
+- **`web/assets/js/paginas.js`** (ficha de autor): la sección "Coautoría",
+  que decía "diferido a V2" desde julio, ahora lista la coautoría interna
+  real de esa persona —cruzando sus EID contra `autores_uft` de cada
+  publicación—, con enlace a la ficha de cada coautor.
+- **`docs/GLOSSARY.md`**: entrada nueva, "Componente y comunidad (red de
+  coautoría)", con el ejemplo de dos triángulos unidos por un vínculo débil
+  —una componente, dos comunidades— para que un lector sin trasfondo técnico
+  entienda la distinción sin tener que leer código.
+
+### Verificación
+
+Suite de paridad JS-vs-Python (arriba) · `python3 src/build/build_all.py`
+completo (auditoría, factibilidad, 4 builds, compuerta de capas: 0 fallas) ·
+`python3 src/verify/higiene.py`: sin fallos, y confirma que `data-indicadores`
+de `colaboracion.html` referencia un `C-05` que existe en `series.json` y en
+el HTML prerenderizado · navegador real (Playwright + Chromium headless):
+las cuatro vistas cambian correctamente, filtrar por año 2024 recalcula el
+grafo completo (grupos y cifras nuevas, no las del corpus total), el tooltip
+muestra nombre + unidad + grado, sin errores de consola, tema oscuro
+correcto.
+
+### Archivos creados o modificados
+
+```
+web/assets/js/grafo.js              nuevo · puerto verificado de grafo_coautoria.py
+web/assets/js/vista_explorador.js   corteRed(), tablaRed(), C-05 en SECCIONES.colaboracion
+web/assets/js/paginas.js            unidadPorPersona cargado una vez; ficha de autor con coautoría real
+web/assets/js/core.js               comentario de cabecera de red() actualizado
+config/indicators.yml               C-05 publicar: true
+src/build/01_publications.py        autores_uft excluye E-09 encoladas
+src/build/02_indicators.py          C-05 en series.json (resumen + procedencia)
+src/build/prerender.mjs             mismo mapa unidadPorPersona que el navegador
+src/build/build_all.py              comentario de cabecera actualizado
+src/build/grafo_coautoria.py        docstring y campo "capa" actualizados
+src/build/common_build.py           FUENTE_POR_INDICADOR incluye C-05
+src/review/vista_red.py             docstring y aviso: ya no es "antes de publicar", es la herramienta de revisión
+src/analysis/indicator_feasibility.py  registro de C-05 corregido (decía "Diferido hasta T-03")
+Makefile                            comentario de `make red` actualizado
+docs/GLOSSARY.md                    nueva entrada "Componente y comunidad"
+docs/AUTHOR_PROFILE.md              sección Coautoría actualizada
+docs/ORCID_GUIDE.md                 referencia a C-05 actualizada
+docs/INDICATORS.md                  fila C-05 y nota de "Excluidos de V1"
+docs/V2_BACKLOG.md                  C-05 sale de "Indicadores diferidos"
+PLAN.md                             T-10 cerrado
+```
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «"Publícalo" es un simple `publicar: true`» | **Falso.** La arquitectura del explorador (recalcular en vivo desde `publications.json`) obligaba a elegir entre reimplementar Louvain en JS o quedarse estático — una decisión de ingeniería real, no una formalidad |
+| «Reimplementar un algoritmo en un segundo lenguaje es aceptar divergencia» | Se pudo VERIFICAR la fidelidad exacta contra el Python canónico en vez de sólo declararla — el riesgo señalado se cerró con evidencia, no con cuidado narrativo |
+
+### Ambigüedades abiertas
+
+- El tamaño de `colaboracion.html` subió a ~403 KB (36,6 KB comprimido): las
+  cuatro vistas de C-05 se prerenderizan todas a la vez, para que la página
+  funcione sin JavaScript. Aceptable por ahora (T-18 ya estableció que el
+  peso comprimido es la cifra que importa), pero si crece más vale la pena
+  revisar.
+- Las de siempre, sin cambios: `T-02`, `T-06`, API Key de Scopus sin rotar.
+
+### Próximo paso recomendado
+
+`T-10` cerrado. Pendientes activos: `T-02` (enviar la hoja de validación de
+unidades a la UFT), `T-06` (espera una reexportación real de Scopus), `T-19`
+(en su techo). Regenerar `STATE.md`/`docs/DECISIONS.md`, confirmar
+`git status`, commit y push.

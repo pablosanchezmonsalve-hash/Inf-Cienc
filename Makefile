@@ -114,9 +114,10 @@ revision: auditoria
 	python3 src/review/build_hallazgos.py
 
 # Vista de la red de coautoría con el grafo REAL, para revisión interna.
-# Depende del grafo, que lo deja el build. No se despliega: lleva nombres de
-# personas y C-05 sigue diferido.
-red: 
+# Depende del grafo, que lo deja el build. C-05 SÍ se publica ahora en el
+# sitio (colaboracion.html, recorte en vivo); esta vista sigue siendo la
+# herramienta de revisión de internal/, no lo que ve el público.
+red:
 	python3 src/build/grafo_coautoria.py
 	python3 src/review/vista_red.py
 

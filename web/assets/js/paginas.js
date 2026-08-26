@@ -48,6 +48,13 @@ async function montarExplorador(claveSeccion) {
   const proc = VX.procedencias(await c.cargar('series.json'),
                                await c.cargar('meta.json'));
 
+  // Persona → unidad académica, sólo para C-05 (red de coautoría): una
+  // publicación no trae la unidad por autor individual, así que el corte de
+  // colaboración necesita esta tabla aparte. Se carga siempre —barato, un
+  // Map de 538 entradas— para que funcione igual con o sin pre-renderizado.
+  const unidadPorPersona = new Map(
+    (await c.cargar('authors.json')).autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+
   if (!yaPintado(zonas.cifras)) {
     const meta = await c.cargar('meta.json');
     if (cabecera) {
@@ -75,7 +82,7 @@ async function montarExplorador(claveSeccion) {
 
   function pintar({ nuevaEntrada = false } = {}) {
     const partes = claveSeccion
-      ? VX.seccion(publicaciones, sel, claveSeccion, proc)
+      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona)
       : VX.explorador(publicaciones, sel, proc);
     // Se comparan los valores ANTES de reemplazar el marcado: la señal de
     // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
@@ -440,6 +447,23 @@ async function fichaAutor() {
   try { a = await c.cargar(`author/${id}.json`); }
   catch (e) { c.mostrarError(cont, e); return; }
 
+  // Coautoría interna de ESTA persona (C-05): quién más firma sus mismas
+  // publicaciones. No hace falta el grafo entero para una ficha individual,
+  // sólo cruzar sus propios EID contra `autores_uft` de cada publicación.
+  const { publicaciones: todasPubs } = await c.cargar('publications.json');
+  const idPorNombre = new Map((await c.cargar('authors.json')).autores.map(x => [x.nombre, x.id]));
+  const misEid = new Set(a.publicaciones.map(p => p.eid));
+  const pesoCoautor = new Map();
+  for (const p of todasPubs) {
+    if (!misEid.has(p.eid)) continue;
+    for (const persona of (p.autores_uft || [])) {
+      if (persona === a.nombre_en_fuente) continue;
+      pesoCoautor.set(persona, (pesoCoautor.get(persona) || 0) + 1);
+    }
+  }
+  const coautores = [...pesoCoautor.entries()]
+    .sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]));
+
   const i = a.indicadores;
   document.title = `${a.nombre_en_fuente} — Ficha de autor`;
 
@@ -532,10 +556,22 @@ async function fichaAutor() {
     </section>
 
     <section class="modulo">
-      <header><h2>Coautoría</h2><span class="codigo">C-05</span></header>
-      <p class="nota">La red de coautoría se difiere a una versión posterior: heredaría
-      las variantes de nombre aún sin consolidar y mostraría a una misma persona como
-      varios nodos distintos.</p>
+      <header><h2>Coautoría interna (${coautores.length})</h2><span class="codigo">C-05</span></header>
+      ${coautores.length ? `<div class="tabla-envoltura"><table>
+        <thead><tr><th scope="col">Persona</th><th scope="col" class="num">Publicaciones compartidas</th></tr></thead>
+        <tbody>${coautores.map(([nombre, n]) => {
+          const otroId = idPorNombre.get(nombre);
+          return `<tr><td>${otroId
+            ? `<a href="autor.html?id=${encodeURIComponent(otroId)}">${c.escapar(nombre)}</a>`
+            : c.escapar(nombre)}</td><td class="num">${n}</td></tr>`;
+        }).join('')}</tbody></table></div>`
+        : `<p class="vacio">Ninguna coautoría con otro autor UFT en esta ventana: sus
+           publicaciones no comparten firma con otra persona detectada como afiliada a
+           la institución. No significa que trabaje en solitario — puede coautorar con
+           gente fuera de la UFT, que este corte no ve.</p>`}
+      <p class="nota">Sólo cuenta coautoría <strong>interna</strong>: otra firma UFT en la
+        misma publicación, dentro de esta ventana. <a href="colaboracion.html#C-05">Ver la
+        red completa →</a></p>
     </section>`;
 }
 

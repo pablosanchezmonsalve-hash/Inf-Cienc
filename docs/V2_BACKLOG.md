@@ -66,12 +66,14 @@ antes volvía a preguntar los 52 casos resueltos en cada corrida.
 ## 2. Indicadores diferidos
 
 Ya evaluados en Fase 2 y verificados como calculables. Están en
-`config/indicators.yml` con `publicar: false`: activarlos no requiere código,
-salvo el renderizador de la red.
+`config/indicators.yml` con `publicar: false`.
+
+`C-05` (red de coautoría) salió de esta tabla el 2026-08-26: se publicó
+(`T-10`), con comunidades Louvain visibles y declaradas como heurística. Ver
+`PLAN.md` y `docs/GLOSSARY.md`.
 
 | Código | Indicador | Bloqueo |
 |---|---|---|
-| `C-05` | Red de coautoría | V2-02 cerrado (2026-08-26); pendiente sólo la decisión de publicación (`T-10`) |
 | `C-07` | Liderazgo autoral | V2-03 |
 | `T-02` | Topics de SciVal | Ninguno; 632 topics son demasiados para vista principal |
 | `T-03` | Prominencia temática | Ninguno; alto riesgo de malinterpretación |

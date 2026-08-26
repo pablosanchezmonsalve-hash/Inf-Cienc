@@ -18,6 +18,7 @@ from collections import Counter
 import pandas as pd
 
 import common_build as b
+import grafo_coautoria as GC
 
 
 def main() -> None:
@@ -141,6 +142,22 @@ def main() -> None:
 
     unidades_raw = authorship["unidad_academica"].fillna("No determinada")
     unidad = Counter(unidades_raw)
+
+    # C-05 — red de coautoría. Reutiliza las mismas funciones de
+    # grafo_coautoria.py (no una segunda cuenta): éste es el número que la
+    # capa interna ya audita en data/interim/coauthorship_graph.json, y
+    # series.json declara aquí el resumen público sobre el corpus completo,
+    # sin filtrar — el recorte en vivo lo recalcula vista_explorador.js con
+    # el mismo criterio (grafo.js, puerto verificado contra este mismo Python).
+    fragmentos_e09 = b.firmas_e09_encoladas()
+    unidades_persona = (authorship.dropna(subset=["unidad_academica"])
+                        .groupby("nombre_en_fuente")["unidad_academica"].first().to_dict())
+    g_c05 = GC.construir(zip(authorship["nombre_en_fuente"], authorship["eid"]),
+                          excluir=fragmentos_e09, unidades=unidades_persona)
+    comp_c05 = GC.componentes(g_c05["nodos"], g_c05["aristas"])
+    coms_c05 = GC.comunidades(g_c05["nodos"], g_c05["aristas"])
+    tam_c05 = GC._tamanos(comp_c05)
+    conectadas_c05 = sum(1 for n in g_c05["nodos"] if tam_c05[comp_c05[n]] > 1)
     # Agregación a nivel de facultad: las escuelas suman a su facultad según la
     # jerarquía declarada en config. Kinesiología y Nutrición cuentan dentro de
     # Facultad de Medicina, no como unidades separadas.
@@ -193,6 +210,18 @@ def main() -> None:
         "C-06": {"nombre": b.indicador("C-06")["nombre"], "datos": equipo,
                  "media": round(statistics.mean(n_aut), 1),
                  "mediana": statistics.median(n_aut), "nota": b.nota("C-06")},
+        "C-05": {"nombre": b.indicador("C-05")["nombre"],
+                 "resumen": {
+                     "personas": len(g_c05["nodos"]),
+                     "personas_con_coautoria": conectadas_c05,
+                     "personas_aisladas": len(g_c05["nodos"]) - conectadas_c05,
+                     "aristas": len(g_c05["aristas"]),
+                     "publicaciones_con_dos_o_mas_personas": g_c05["publicaciones_con_dos_o_mas"],
+                     "componentes": len(set(comp_c05.values())),
+                     "componente_mayor": max(tam_c05.values()) if tam_c05 else 0,
+                     "comunidades_louvain": len(set(coms_c05.values())),
+                 },
+                 "nota": b.nota("C-05")},
         "T-05": {"nombre": b.indicador("T-05")["nombre"], "datos": multi_top("qs_area", 10), "nota": b.nota("T-05")},
         "T-01": {"nombre": b.indicador("T-01")["nombre"], "datos": multi_top("asjc", 20), "nota": b.nota("T-01")},
         "T-04": {"nombre": b.indicador("T-04")["nombre"],
@@ -228,6 +257,13 @@ def main() -> None:
         cubiertas=sum(v for k, v in unidad.items() if k != "No determinada"),
         n=sum(unidad.values()),
         unidad="pares autor × publicación")
+
+    # C-05 tampoco se calcula sobre publicaciones: su denominador es personas,
+    # no filas del universo, así que necesita el mismo tipo de sobrescritura
+    # explícita que P-07 (el N genérico del indicador daría 0, sin denominador
+    # declarado en config/indicators.yml a propósito — ver la nota ahí).
+    series["C-05"]["procedencia"] = b.procedencia(
+        "C-05", cubiertas=conectadas_c05, n=len(g_c05["nodos"]), unidad="personas")
 
     b.write_json(series, "series.json")
     b.write_json(b.build_meta(), "meta.json")

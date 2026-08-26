@@ -18,11 +18,15 @@ QUÉ CONSTRUYE
     fuera un grupo de investigación existente convierte una hipótesis en un
     hecho, que es justo lo que este proyecto no hace.
 
-POR QUÉ NO SE PUBLICA TODAVÍA
-    C-05 está diferido (publicar: false). El artefacto se escribe en
-    data/interim/, que NO se copia a dist/. El grafo lleva nombres de personas
-    y sus vínculos; publicarlo antes de resolver T-03 dibujaría colaboraciones
-    entre nodos que son la misma persona partida en dos.
+POR QUÉ ESTE ARTEFACTO SIGUE SIENDO INTERNO, AUNQUE C-05 YA SE PUBLICÓ
+    C-05 se publicó el 2026-08-26 (T-10, config/indicators.yml). Pero el JSON
+    que este módulo escribe en data/interim/ —el grafo completo, sin filtrar,
+    de una sola vez— sigue sin copiarse a dist/: es el artefacto de revisión
+    (`make red`), no lo que ve el público. Lo que SÍ llega a dist/ es distinto:
+    un resumen agregado en series.json (02_indicators.py, mismas funciones de
+    aquí) y el recorte que recalcula en vivo, en el navegador,
+    `web/assets/js/grafo.js` — un puerto de este mismo archivo, verificado
+    línea a línea para que las dos superficies no puedan divergir.
 
 QUÉ SE EXCLUYE, Y POR QUÉ IMPORTA MÁS AQUÍ QUE EN OTROS INDICADORES
     Las firmas marcadas por E-09 —«School of Psychology», «and Senior
@@ -231,7 +235,7 @@ def main() -> int:
 
     salida = {
         "generado_por": "src/build/grafo_coautoria.py",
-        "capa": "interna · C-05 está diferido y este artefacto no se copia a dist/",
+        "capa": "interna · artefacto de revisión, no se copia a dist/ (C-05 se publica desde series.json y grafo.js)",
         "excluidas_e09": sorted(fragmentos),
         "resumen": {
             "personas": len(g["nodos"]),
