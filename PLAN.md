@@ -116,7 +116,7 @@ para los datos derivados.
 | ~~T-17~~ | ~~Corregir las cadenas de unidad académica concatenadas sin separador~~ | — | **Cerrado (2026-08-03)**: reparación de codificación + 3 correcciones declaradas en config. 26 → 22 unidades distintas |
 | ~~T-18~~ | ~~Trocear o paginar `publications.json`~~ | — | **Cerrado sin cambios (2026-08-03)**: 699 KB comprimen a 146 KB. La página entera transfiere 181 KB. La cifra que lo motivó era sin comprimir |
 
-| T-19 | Ampliar cobertura de ORCID buscando por afiliación en el registro | V2 | La verificación no busca ORCID nuevos. El techo citado aquí era 29,5 %, de antes de la ampliación desde el registro y de la revisión humana: hoy la cobertura es 216 de 556 entidades (38,8 %). Corregida la cifra el 2026-08-18; el pendiente sigue abierto |
+| T-19 | Ampliar cobertura de ORCID buscando por afiliación en el registro | V2 | **Corrido de nuevo el 2026-08-26** con `scripts\ampliar-orcid-afiliacion.ps1`: 630 titulares que declaran la institución, 347 firmas sin ORCID cruzadas, **0 candidatos nuevos**. No es un fallo: los 18 candidatos que este método había encontrado en rondas previas ya están todos confirmados y excluidos de la búsqueda (16 desde el 2026-08-05, 2 más el 2026-08-26). Lo que queda sin ORCID no comparte nombre+inicial con ningún titular que declare la institución — el techo de este método específico está alcanzado por ahora. Reintentar tiene sentido más adelante, cuando el registro de ORCID tenga más gente nueva |
 
 ---
 

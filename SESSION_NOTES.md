@@ -3252,3 +3252,63 @@ Que el usuario confirme si tiene credenciales de ORCID y corra
 `scripts\ampliar-orcid-afiliacion.ps1` en su máquina. El resultado (candidatos
 nuevos, si los hay) se revisa después con `scripts\revisar-identidad.ps1`,
 que ya fusiona correctamente (`D-266`).
+
+---
+
+## Cierre · T-19 corrido, un stash con el bug ya conocido descartado, y 0 candidatos que sí tienen explicación
+
+El usuario tenía credenciales de ORCID y corrió
+`scripts\ampliar-orcid-afiliacion.ps1` sin fricción — funcionó a la primera.
+Antes de llegar ahí, `git pull` en su máquina chocó con cambios locales sin
+comitear en los mismos archivos que esta sesión ya había corregido
+(`config/identidades_consolidadas.yml` y compañía). El usuario confirmó no
+haber corrido nada. Se investigó con `git stash show --stat` y
+`git show "stash@{0}:..."`: el stash contenía **16 grupos** de consolidación
+— el mismo estado dañado ya diagnosticado y revertido antes en esta sesión
+(`D-263`), no trabajo nuevo del usuario. Se descartó con `git stash drop`
+después de confirmarlo, no antes. Sigue sin explicación firme de cómo llegó
+ahí sin que el usuario ejecutara nada — candidato más probable: alguna
+sincronización o herramienta local tocó el archivo, no algo que el usuario
+hiciera a propósito.
+
+Ya con el repositorio sincronizado, la consulta real de T-19 dio **0
+candidatos nuevos** de 347 firmas cruzadas contra 630 titulares. Antes de
+aceptarlo como resultado válido se verificó que no fuera consecuencia de
+un error de aplicación: de los 18 candidatos que este método ya había
+encontrado en rondas anteriores, 16 estaban decididos desde el 2026-08-05 y
+ya estaban en `data/enriched/authors_orcid.csv` desde antes de esta sesión
+— por eso `apply_decisions.py` sólo contó «2 asignaciones nuevas» al
+aplicar el CSV de hoy, no 18: los otros 16 no eran nuevos, sólo se leían de
+nuevo. Confirmado con `grep` directo sobre `authors_orcid.csv`: las cinco
+firmas verificadas al azar están, con la fuente correcta. El 0 de hoy es un
+resultado real: agotadas las coincidencias de nombre+inicial entre las
+firmas restantes sin ORCID y el registro público.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-273 | Un stash con contenido sospechoso se inspecciona (`git stash show --stat`, `git show stash@{0}:archivo`) ANTES de descartarlo, nunca después | Es lo que permitió confirmar que no había trabajo del usuario que perder, en vez de asumirlo |
+| D-274 | Un resultado de «0» en un conector no se reporta sin verificar que no sea consecuencia de una aplicación incompleta | La diferencia entre «0 candidatos porque ya no quedan» y «0 candidatos porque algo falló aplicando lo anterior» sólo se distingue verificando el archivo de salida real, no leyendo el resumen impreso por el script |
+
+### Verificación
+
+`git show "stash@{0}:config/identidades_consolidadas.yml" \| grep -c canonica` → 16, confirmando el estado dañado antes de dropear. `grep` de 5 firmas «Candidato por afiliación» contra `authors_orcid.csv`: las 5 presentes con fuente «Revisión humana (candidato por afiliación confirmado)». Fechas de las 18 decisiones cruzadas contra el CSV original: 16 con fecha 2026-08-05, 2 con fecha 2026-08-26 — coincide exacto con «asignaciones nuevas: 2» del `apply_decisions.py` de hoy.
+
+### Archivos creados o modificados
+
+```
+PLAN.md   T-19 actualizado: corrida del 2026-08-26, 0 candidatos nuevos, con la explicación
+```
+
+### Ambigüedades abiertas
+
+- Sigue sin saberse cómo llegaron cambios locales sin comitear a la máquina del usuario sin que corriera nada. No bloqueó nada esta vez porque se detectó y descartó a tiempo.
+- Las de siempre: rotación de la API Key de Scopus, ventana 2023-2025 vs. 2026, `T-02`, `T-06`, `T-10`, `T-13`.
+
+### Próximo paso recomendado
+
+T-19 queda en su techo actual para este método (afiliación declarada);
+reintentar más adelante cuando el registro de ORCID tenga gente nueva.
+Preguntar al usuario cuál de los pendientes restantes (`T-02`, `T-06`,
+`T-10`, `T-13`) quiere atacar, o si prefiere cerrar la sesión aquí.
