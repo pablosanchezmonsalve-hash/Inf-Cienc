@@ -4255,3 +4255,46 @@ visible en GitHub, no autoaplicada sin permiso). Si se aprueba, verificar la
 primera corrida programada el 1 del mes próximo, o lanzarla a mano una vez
 desde Actions para confirmar que el fix de los `if:` funciona antes de
 esperar al cron.
+
+## Cierre · SciVal Partner API: hallazgo del usuario, registrado sin probarlo
+
+El usuario preguntó por la integración de la API de SciVal —tema abierto
+tras `dda939f` (403 `ENTITLEMENTS_ERROR` contra `api.elsevier.com`)— y trajo
+un enlace propio: `https://partnerapi.scival.com/`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-309 | `partnerapi.scival.com` se documenta en `docs/FUENTES_Y_APIS.md` §3.8 como hallazgo sin confirmar, no como ruta de acceso disponible | La página consultada solo describe autenticación (firma HMAC-SHA256, credenciales «modelo Pure»), sin proceso de registro ni elegibilidad. Pure es el CRIS propio de Elsevier — la forma de las credenciales sugiere API de integración para partners/proveedores de software, distinta del autoservicio institucional que ya se probó y rebotó. `CLAUDE.md` prohíbe suponer disponibilidad de API sin confirmar, así que no se intentó construir nada contra ella |
+| D-310 | La pregunta sobre esta API se agrega al mismo pedido pendiente de la entitlement estándar de SciVal (gestor de cuenta Elsevier / biblioteca UFT), en vez de abrir un pendiente `T-xx` nuevo | Es la misma persona, la misma gestión, y todavía no hay nada que ejecutar en el repositorio — abrir un pendiente de código para una pregunta de licenciamiento habría sido prematuro |
+
+### Qué se aplicó
+
+`docs/FUENTES_Y_APIS.md` §3.8: nuevo párrafo documentando el hallazgo, con
+la pregunta redactada para el gestor de cuenta Elsevier. Ningún código
+nuevo — no hay credenciales que probar todavía.
+
+### Verificación
+
+Ninguna aplicable: es un hallazgo de documentación, no una consulta a red
+ni un cambio de comportamiento del pipeline.
+
+### Archivos creados o modificados
+
+```
+docs/FUENTES_Y_APIS.md   §3.8: hallazgo de partnerapi.scival.com + pregunta para el gestor de cuenta
+SESSION_NOTES.md         este cierre
+```
+
+### Ambigüedades abiertas
+
+Si la UFT tiene o puede obtener acceso a `partnerapi.scival.com` — sin
+respuesta del gestor de cuenta Elsevier, sigue sin confirmar en cualquier
+dirección.
+
+### Próximo paso recomendado
+
+Enviar la pregunta combinada (entitlement estándar + Partner API) al gestor
+de cuenta Elsevier o a la biblioteca UFT. Hasta tener respuesta, no hay
+ruta de código que avanzar en la integración de SciVal.

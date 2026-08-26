@@ -286,6 +286,26 @@ py src\enrich\scopus_api.py                 lo mismo, en Windows
 - **Sigue bloqueante:** pedir la entitlement de SciVal API al gestor de
   cuenta Elsevier de la UFT o a la biblioteca. Si se concede, el endpoint de
   arriba es el punto de partida ya probado — no hay que redescubrirlo.
+- **`partnerapi.scival.com` NO es el mismo producto** (hallazgo del usuario,
+  2026-08-26). Es un gateway distinto de `api.elsevier.com`: autenticación
+  por firma HMAC-SHA256 sobre cada petición, no la API Key simple de arriba.
+  La documentación pública menciona credenciales «cliente/clave privada
+  (modelo Pure)» — Pure es el CRIS propio de Elsevier — lo que sugiere una
+  API de integración para **partners/proveedores de software** que conectan
+  SciVal en nombre de una institución, no un canal de autoservicio para que
+  la institución consulte sus propios datos directamente. No se encontró
+  documentación de proceso de registro, elegibilidad ni contacto en la
+  página consultada: **sin confirmar, no se asume que la UFT pueda o no
+  usarla** (`CLAUDE.md`, no suponer disponibilidad de APIs sin confirmar).
+  Antes de invertir tiempo evaluándola, la pregunta para el gestor de cuenta
+  Elsevier (junto con la de la entitlement estándar, arriba) es:
+
+  > Además de la entitlement de SciVal API en el Developer Portal, he visto
+  > que existe `partnerapi.scival.com`, con autenticación por firma HMAC y
+  > un modelo de credenciales que menciona "Pure". ¿Es una vía de acceso
+  > disponible para la UFT como institución, o es exclusiva de proveedores
+  > de software con un acuerdo de partner separado con Elsevier? Si está
+  > disponible, ¿qué se necesita para solicitarla?
 
 ### 3.9 Altmetric — atención, que no es impacto
 
