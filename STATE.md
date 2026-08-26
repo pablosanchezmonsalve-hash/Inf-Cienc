@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `6dbc05c` · T-02: refrescar la hoja de validación de unidades; envío queda en mano
+Último commit: `9a36576` · T-02: herramienta interactiva para validar unidades académicas
 Snapshot: 2026-08-26
 
 ---
@@ -53,7 +53,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 417 |
+| `internal/ambiguities_authors.csv` | 416 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/identity_candidates.csv` | 17 |
 | `internal/orcid_candidatos_afiliacion.csv` | 20 |
@@ -75,7 +75,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 304
+## Decisiones tomadas: 307
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
