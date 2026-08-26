@@ -136,6 +136,16 @@ async function main() {
       const a = [];
       html = rellenar(html, 'catalogo', v.catalogo(await leerJSON('catalogo.json')), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    } else if (tipo === 'metodologia') {
+      // El glosario es el destino de todo enlace `#slug` a una definición,
+      // desde el tooltip de ayuda contextual o desde otra página (p. ej.
+      // «Cómo se lee esta red →» en colaboracion.html). Sin pre-renderizar,
+      // esos enlaces aterrizaban en un contenedor vacío: el ancla no existía.
+      const a = [];
+      const { entradas } = await leerJSON('glossary.json');
+      html = rellenar(html, 'glosario', v.glosario(entradas), a);
+      html = rellenar(html, 'procedencia', v.procedencia(meta), a);
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'modulos') {
       const codigos = (html.match(/id="modulos"[^>]*data-indicadores="([^"]+)"/) || [])[1]
         ?.split(',').map(s => s.trim()) || [];
