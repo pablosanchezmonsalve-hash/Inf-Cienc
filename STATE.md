@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `be562b5` · Corrige las 3 fallas reales de CI: ancla rota, contraste WCAG y test d
+Último commit: `eec7474` · Registra EBSCO Discovery Service como propuesta de cruce de cobertura
 Snapshot: 2026-08-26
 
 ---
@@ -35,8 +35,8 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Entidades de autor publicadas | **538** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
-| Firmas con ORCID | **242** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **204** | tras consolidación humana · **la que sirve el sitio** |
+| Firmas con ORCID | **322** | sin consolidar · `data/enriched/authors_orcid.csv` |
+| Entidades con ORCID | **280** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **28** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
@@ -56,6 +56,9 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/ambiguities_authors.csv` | 415 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/identity_candidates.csv` | 17 |
+| `internal/openalex_cobertura.csv` | 414 |
+| `internal/openalex_desacuerdos.csv` | 6 |
+| `internal/openalex_deteccion.csv` | 68 |
 | `internal/orcid_candidatos_afiliacion.csv` | 20 |
 | `internal/orcid_conflicts.csv` | 1 |
 | `internal/orcid_desacuerdos.csv` | 2 |
@@ -74,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 318
+## Decisiones tomadas: 321
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
