@@ -3150,3 +3150,47 @@ Ya corregido `scripts\revisar-identidad.ps1` (confirmado: tenía el mismo bug,
 `Copy-Item -Force`, y ahora usa `merge_decisions.py --test`-eado). Subir todo
 lo de esta sesión. Sin pendiente inmediato de identidad — la próxima ronda de
 `make revision` puede usar el asistente con confianza.
+
+---
+
+## Cierre · Cuatro pendientes cerrados por consecuencia, y una referencia que nadie recordaba
+
+El usuario pidió seguir con «las 13 verificaciones urgentes» mencionadas al
+abrir la sesión. `build_review.py` recién regenerado mostraba **0 pendientes
+de 111 casos** — la cola completa, no sólo lo que el usuario decidió hoy. Se
+le preguntó qué eran esas 13; respondió que no lo sabe. No se inventó una
+referencia: se cerró la pregunta con lo que sí se puede verificar.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-268 | `T-03`, `T-04`, `T-14`, `T-15` se cierran en `PLAN.md` | Sus colas respectivas («Variantes de nombre», «Varios Scopus ID», «ORCID compartido», «ORCID en conflicto») están en 0 pendientes tras la fusión y aplicación de hoy. Cerrarlos es consecuencia de un hecho verificable (`build_review.py`), no una decisión nueva |
+| D-269 | `T-10` se declara desbloqueado, no cerrado | Dependía de `T-03`, que ya cerró. Pero `T-10` en sí —publicar la red de coautoría— sigue siendo una decisión de alcance aparte, no automática |
+
+### Archivos creados o modificados
+
+```
+PLAN.md    T-03, T-04, T-14, T-15 cerrados; T-10 actualizado (desbloqueado, no cerrado)
+STATE.md   regenerado — pendientes abiertos: 9 → 5
+```
+
+### Verificación
+
+`build_review.py` recién corrido: 0 pendientes en las cuatro colas
+correspondientes, de 111 casos totales. `python3 src/state/snapshot.py`
+confirma la baja de 9 a 5 pendientes abiertos.
+
+### Ambigüedades abiertas
+
+- Qué eran las «13 verificaciones urgentes» sigue sin saberse. No bloquea nada: la cola real está en 0.
+- Las de siempre: rotación de API Key, ventana 2023-2025 vs. 2026, `T-02`, `T-06`, `T-13`, `T-19`.
+- Si vale la pena decidir ahora sobre `T-10` (publicar la red de coautoría) ya que su bloqueo se levantó.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario cuál de los 5 pendientes reales quiere atacar:
+`T-02` (enviar la hoja de unidades académicas — no es trabajo de código),
+`T-06` (esperando una reexportación real de Scopus), `T-10` (decidir si
+publicar la red de coautoría, ya desbloqueada), `T-13` (falta respaldo
+documental de Elsevier) o `T-19` (ampliar cobertura ORCID por afiliación).

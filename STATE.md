@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `1821b98` · Redacta el fragmento de API Key que quedó en SESSION_NOTES.md
+Último commit: `eea0123` · Aplica las 84 decisiones de identidad, y corrige un bug real de pérdid
 Snapshot: 2026-08-26
 
 ---
@@ -61,27 +61,23 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 4 |
 
-`make revision` reúne estas colas en 111 casos, de los que **84 siguen pendientes**: 27 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 111 casos, de los que **0 siguen pendientes**: 111 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
-## Pendientes abiertos (9)
+## Pendientes abiertos (5)
 
 | # | Pendiente |
 |---|---|
 | `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
-| `T-03` | Revisión humana de las variantes de nombre encoladas (28 grupos, 27 pendientes) |
-| `T-04` | Revisión humana de los 20 nombres con múltiples Scopus ID, de los que **10 afectan al informe** |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
 | `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
 | `T-13` | Confirmar semántica del percentil de citación con documentación SciVal |
-| `T-14` | Revisión humana de los grupos de firmas que comparten ORCID (**10 casos, 2 pendientes**) |
-| `T-15` | Resolver el conflicto de `Castro-Sepúlveda M.`, con dos ORCID |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 275
+## Decisiones tomadas: 277
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
