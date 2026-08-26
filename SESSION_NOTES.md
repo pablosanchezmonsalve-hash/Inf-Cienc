@@ -3413,3 +3413,82 @@ Preguntar al usuario si su acceso API incluye SciVal específicamente. Si sí,
 construir el conector análogo a `scopus_api.py` desbloquea dos pendientes de
 una vez (`T-13`, `X-01`). Si no, no hay más integración de API accionable
 hoy sin nueva información.
+
+---
+
+## Cierre · SciVal API probada por curl directo: sin entitlement, no se construye el conector
+
+El usuario dijo tener «todas las APIs aprobadas», lo que sugería acceso a
+SciVal además de Scopus. A diferencia de la Scopus Search API —muy
+documentada, alta confianza al escribir el conector sin poder probarlo—, la
+API de SciVal es un producto de Elsevier mucho menos público, y la
+confianza en su endpoint exacto no alcanzaba para escribir código de red
+sin más: hacerlo habría sido exactamente el tipo de suposición que
+`CLAUDE.md` prohíbe. Se le preguntó al usuario por el endpoint documentado
+en su portal; no supo encontrarlo. En vez de mandarlo a una búsqueda sin
+garantía de éxito, se probó empíricamente con `curl` —la misma táctica que
+ya había funcionado para diagnosticar Scopus— contra la ruta más probable
+según el conocimiento disponible.
+
+### El resultado, y por qué es información real y no un callejón sin salida
+
+`GET analytics/scival/publication/metrics?metricTypes=OutputsInTopCitationPercentiles`
+respondió **403 `ENTITLEMENTS_ERROR`**, no 404. La distinción es la señal:
+un 404 diría "esa ruta no existe"; un 403 de entitlements dice "esa ruta
+existe, la reconozco, y esta clave no está autorizada". Confirma dos cosas
+a la vez: que la ruta probada es plausible como punto de partida futuro, y
+que el supuesto "todas las APIs aprobadas" del usuario cubre los productos
+de Scopus pero no se extiende a SciVal, que Elsevier licencia aparte —
+exactamente lo que `V2_BACKLOG.md` §V2-23 ya declaraba como bloqueante
+antes de esta sesión.
+
+**No se escribió `src/enrich/scival_api.py`.** Sin poder confirmar el
+contrato completo (headers adicionales, forma exacta de la respuesta,
+parámetros válidos) contra una entitlement real, construir el conector
+habría sido escribir código no verificable — ni siquiera con el patrón
+defensivo de `ror_institucion.py`, porque ahí al menos la lógica de
+extracción se podía probar con fixtures fieles a una API bien documentada.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-278 | No se construye el conector de SciVal sin entitlement confirmada, aunque el endpoint probado parezca válido | Un 403 de entitlements no es lo mismo que un contrato verificado: sólo dice que la ruta existe, no cómo luce una respuesta exitosa. Escribir el parseo sin eso sería adivinar la forma del JSON |
+| D-279 | El endpoint probado (`analytics/scival/publication/metrics`) se deja documentado en `V2_BACKLOG.md` y `FUENTES_Y_APIS.md` como punto de partida | Si la entitlement se concede más adelante, no hay que redescubrir la ruta desde cero |
+| D-280 | Se corrigió la afirmación «todas las APIs de la suscripción aprobadas» en `FUENTES_Y_APIS.md` §3.7 para aclarar que aplica a Scopus, no a SciVal | Quedaba escrita como un hecho general sin el matiz que esta prueba reveló; dejarla así habría sido una afirmación más amplia de lo que se verificó |
+
+### Archivos creados o modificados
+
+```
+docs/V2_BACKLOG.md       V2-23 actualizado con el resultado del curl (403 ENTITLEMENTS_ERROR)
+docs/FUENTES_Y_APIS.md   §3.7 corregida (matiz Scopus vs SciVal); §3.8 con el resultado probado;
+                          fecha de actualización del documento
+```
+
+### Verificación
+
+`curl -v` directo del usuario contra `api.elsevier.com` con su API Key real
+de Scopus, ruta y parámetros propuestos por Claude. Respuesta HTTP completa
+revisada: código 403, `X-ELS-Status: ENTITLEMENTS_ERROR`, sin
+`X-RateLimit-*` relevante para este caso. No se pudo verificar más allá de
+esto sin la entitlement.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Todas las APIs de la suscripción aprobadas» incluye SciVal | **Falso, probado directamente.** Cubre Scopus; SciVal es una licencia aparte que Elsevier no concedió a esta clave |
+| «Si el usuario no encuentra el endpoint en el portal, hay que seguir buscando ahí» | **Innecesario.** Una prueba empírica directa con `curl` fue más rápida y más concluyente que una búsqueda de navegación en un portal que ninguno de los dos podía ver con certeza |
+
+### Ambigüedades abiertas
+
+- Otra vez: el usuario pegó su API Key real (`e6b398...`) en el chat, la misma de antes — sigue sin rotarla pese a haberlo pedido dos veces ya. No se puede forzar; sólo recordarlo.
+- Si vale la pena que el usuario gestione la entitlement de SciVal con Elsevier/la biblioteca de la UFT — queda como su decisión, no de esta sesión.
+- Las de siempre: ventana 2023-2025 vs. 2026, `T-02`, `T-06`, `T-10`.
+
+### Próximo paso recomendado
+
+Sin acción de código pendiente sobre SciVal. Si el usuario gestiona la
+entitlement con Elsevier, retomar con el endpoint ya documentado en
+`V2_BACKLOG.md` §V2-23. Recordar la rotación de la API Key una vez más, sin
+insistir más allá de eso.

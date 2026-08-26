@@ -1,6 +1,6 @@
 # Fuentes y plataformas: lo implementado y lo propuesto
 
-**Actualizado:** 2026-08-25 · **Alcance:** de dónde sale cada dato hoy, y qué
+**Actualizado:** 2026-08-26 · **Alcance:** de dónde sale cada dato hoy, y qué
 plataformas podrían aportar lo que hoy falta.
 
 Este documento responde a dos preguntas que se confunden con facilidad:
@@ -245,8 +245,10 @@ No es una integración nueva: es usar más del conector que ya existe.
   `D-16`). Si el recuento que devuelve difiere del vigente, lo declara como
   hallazgo — nunca lo aplica solo. Promover un nuevo export a fuente primaria
   sigue siendo una decisión humana posterior.
-- **Confirmado por el usuario, sesión 2026-08-25:** tiene API Key, todas las
-  APIs de la suscripción están aprobadas, sin restricción de IP institucional.
+- **Confirmado por el usuario, sesión 2026-08-25:** tiene API Key, sin
+  restricción de IP institucional. «Todas las APIs de la suscripción
+  aprobadas» resultó cierto para los productos de Scopus, pero no se
+  extiende a SciVal — probado por separado, ver §3.8.
 - **Sigue sin confirmar:** el límite de consulta (quota). El conector no lo
   asume: lee y reporta las cabeceras `X-RateLimit-*` de la propia respuesta en
   cada corrida, así que la primera ejecución responde la pregunta en vez de
@@ -264,7 +266,7 @@ python3 src/enrich/scopus_api.py            la consulta (exige SCOPUS_API_KEY)
 py src\enrich\scopus_api.py                 lo mismo, en Windows
 ```
 
-### 3.8 API de SciVal (Elsevier) — cerrar `X-01`
+### 3.8 API de SciVal (Elsevier) — cerrar `X-01`, **probada y sin entitlement**
 
 - **Qué preguntaría:** métricas normalizadas con los parámetros que el export
   no permite fijar, en particular **autocitas**.
@@ -272,9 +274,18 @@ py src\enrich\scopus_api.py                 lo mismo, en Windows
   el export no las trae (`V2-06`). También permitiría documentar la semántica
   del percentil de citación, que hoy está determinada **empíricamente** y no
   documentalmente (`T-13`).
-- **Hay que confirmar (bloqueante):** las mismas credenciales que 3.7, y además
-  que la suscripción incluya acceso programático a SciVal, que suele ser un
-  producto aparte.
+- **Probado el 2026-08-26.** `curl` directo contra
+  `GET analytics/scival/publication/metrics?metricTypes=OutputsInTopCitationPercentiles`
+  con la API Key de Scopus del usuario (la misma de §3.7, que sí funciona
+  para Scopus) respondió `403 ENTITLEMENTS_ERROR — Not entitled to the
+  resource specified`. La distinción con un 404 importa: el gateway
+  reconoció el recurso y lo rechazó por licencia, no porque la ruta no
+  exista. Esto corrige la nota de §3.7 de que «todas las APIs de la
+  suscripción están aprobadas» — aparentemente eso cubre los productos de
+  Scopus, no SciVal, que Elsevier vende y licencia por separado.
+- **Sigue bloqueante:** pedir la entitlement de SciVal API al gestor de
+  cuenta Elsevier de la UFT o a la biblioteca. Si se concede, el endpoint de
+  arriba es el punto de partida ya probado — no hay que redescubrirlo.
 
 ### 3.9 Altmetric — atención, que no es impacto
 
