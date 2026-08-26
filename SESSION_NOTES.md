@@ -3805,3 +3805,88 @@ Ninguna acción de código pendiente sobre `T-02`. Cuando el usuario tenga
 respuesta de la UFT, las correcciones entran en `config/matching_rules.yml`
 según ya documenta la propia hoja. Mientras tanto, quedan `T-06` y `T-19`
 como los únicos pendientes activos, ambos a la espera de un evento externo.
+
+---
+
+## Cierre · T-02: herramienta interactiva de validación de unidades
+
+El usuario aclaró el pedido anterior: no quería que se redactara un correo,
+sino que él mismo hará la identificación con su propio conocimiento
+institucional, y pidió "establecer un medio" para hacerlo. Un documento
+Markdown con casillas `☐ sí ☐ no` para marcar a mano no es un medio — es
+una lectura. Se construyó el mismo patrón que ya existe para la revisión de
+identidad de autor (`build_review.py` → `revision_identidad.html` → CSV →
+`apply_decisions.py`), aplicado a T-02 en vez de inventar uno nuevo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-292 | Se reutiliza el patrón HTML interactivo + CSV exportado + script de aplicación ya establecido para la revisión de identidad, en vez de diseñar un mecanismo nuevo para T-02 | Dos herramientas de revisión con dos interacciones distintas para el mismo tipo de tarea (marcar sí/no con evidencia delante) habría sido inconsistencia sin motivo — el patrón ya está probado, incluida la entrega dual del CSV (archivo local vs. capacidad `downloads` del anfitrión) |
+| D-293 | `config/matching_rules.yml` se edita con reemplazos de texto anclados a un patrón exacto, nunca con `yaml.dump()` | El archivo tiene más comentarios de justificación que líneas de dato; volcarlo de nuevo los borraría todos. Mismo criterio que ya usa `apply_decisions.py` para sus propios archivos de salida |
+| D-294 | El resultado de cada edición se valida con `yaml.safe_load()` ANTES de escribirse, nunca después | Un YAML roto detectado después de sobrescribir ya rompió el build; validar antes permite abortar sin haber tocado el archivo |
+| D-295 | `vocabulario_validado_por_institucion` sólo pasa a `true` cuando TODAS las filas del CSV tienen respuesta, nunca con una validación parcial | Declarar el vocabulario validado con preguntas todavía sin contestar sería publicar una confianza que nadie dio — el mismo principio que ya rige el resto del proyecto sobre no afirmar más certeza de la que existe |
+| D-296 | Al corregir el nombre de una unidad, el nombre detectado se conserva SIEMPRE como variante reconocida — nunca se borra | La afiliación cruda seguirá llegando escrita igual en cualquier reexportación futura; borrar el reconocimiento haría que esa unidad volviera a aparecer sin resolver |
+
+### Qué se construyó
+
+- **`src/review/build_unit_validation.py`**: además del `.md` que ya
+  generaba, ahora también escribe `internal/validacion_unidades.html` — 21
+  unidades + 4 jerarquías, cada una con su evidencia (afiliación real) y
+  botones Sí/No, corrección de texto libre cuando corresponde, contador de
+  avance, exportación a CSV. Si ya existe un CSV de una corrida anterior
+  (`internal/unit_validation_decisions.csv`), sus respuestas se precargan —
+  se puede responder por partes sin perder lo ya marcado.
+- **`src/review/apply_unit_validation.py`** (nuevo): lee el CSV exportado y
+  edita `config/matching_rules.yml` con tres operaciones posibles por
+  unidad — confirmar (no toca nada), agregar como variante de una entrada
+  que ya existe, o renombrar una entrada propia conservando sus variantes y
+  actualizando cualquier referencia cruzada en la jerarquía — y dos por
+  jerarquía: confirmar (`inferida` → `confirmada`) o corregir la facultad.
+  `--test` corre 10 comprobaciones sobre un YAML sintético (sin tocar el
+  archivo real); `--dry-run` muestra los cambios sin escribirlos. Deja
+  respaldo en `internal/.respaldos/` antes de escribir.
+- **`scripts/validar-unidades.ps1`** (nuevo): asistente para Windows, mismo
+  patrón en cinco pasos que `revisar-identidad.ps1` — autoprueba, preparar
+  datos, generar la página, recoger el CSV de Descargas, aplicar en seco y
+  luego de verdad, reconstruir el sitio.
+- **`Makefile`**: nuevo objetivo `validar-unidades`.
+
+### Verificación
+
+`apply_unit_validation.py --test`: 10/10. Además, tres corridas manuales
+contra una COPIA de `config/matching_rules.yml` (nunca el archivo real)
+cubriendo los tres casos de unidad (confirmar, variante de entrada
+existente, renombrar entrada propia con referencia cruzada en jerarquía) y
+los dos de jerarquía, más el caso de validación parcial (el flag global
+debe quedar en `false` si falta una fila por responder) — en los tres casos
+el `diff` contra el original fue exactamente el cambio esperado y nada más,
+y el resultado siguió siendo YAML válido. Herramienta HTML probada en
+navegador real (Playwright/Chromium): marcar sí/no, mostrar/ocultar el
+campo de corrección, contador de avance, y exportación de CSV con las
+columnas y valores correctos — sin errores de consola. Sintaxis de
+`validar-unidades.ps1` verificada con el parser de PowerShell.
+
+### Archivos creados o modificados
+
+```
+src/review/build_unit_validation.py    genera también internal/validacion_unidades.html
+src/review/apply_unit_validation.py    nuevo · aplica el CSV a config/matching_rules.yml
+scripts/validar-unidades.ps1           nuevo · asistente Windows en 5 pasos
+Makefile                               nuevo objetivo validar-unidades
+internal/validacion_unidades.html      generado
+```
+
+### Ambigüedades abiertas
+
+- Ninguna corrección real se aplicó todavía: el usuario hará la
+  identificación con su propio conocimiento institucional cuando tenga
+  tiempo. La herramienta queda lista y probada, no usada.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Cuando el usuario responda la hoja
+(`internal/validacion_unidades.html`, o `scripts\validar-unidades.ps1` en
+Windows), aplicar con `apply_unit_validation.py`, reconstruir el sitio, y
+cerrar `T-02` formalmente en `PLAN.md`.
