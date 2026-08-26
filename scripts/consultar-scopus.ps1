@@ -110,28 +110,36 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # ── 5. Credenciales ──────────────────────────────────────────────────────────
+# Se pide en TEXTO VISIBLE, no oculto ("-AsSecureString"). No es descuido: se
+# probó oculto primero y pegar (Ctrl+V) dentro de un prompt enmascarado falla
+# en algunas consolas de Windows -- captura 1 caracter basura en vez del texto
+# pegado, sin ningun aviso de error. Visible pero correcto es mejor que oculto
+# y roto. Nadie mas ve esta ventana, y no queda en el historial de comandos
+# (solo los comandos quedan ahi, no lo que se escribe como respuesta a
+# Read-Host).
 Titulo "Paso 2 de 3 - API Key de Scopus"
-Write-Host "  Se pide oculta: no se guarda ni queda en el historial."
+Write-Host "  Se pide en texto visible (pegar oculto falla en algunas consolas"
+Write-Host "  de Windows). No se guarda en ningun archivo ni en el historial."
 Write-Host ""
 
-if ($env:SCOPUS_API_KEY) {
-    Ok "SCOPUS_API_KEY ya definida en el entorno"
-} else {
-    $clave = Read-Host "  API Key de Scopus" -AsSecureString
-    $env:SCOPUS_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-        [Runtime.InteropServices.Marshal]::SecureStringToBSTR($clave))
+if (-not $env:SCOPUS_API_KEY) {
+    $env:SCOPUS_API_KEY = (Read-Host "  API Key de Scopus").Trim()
 }
 if (-not $env:SCOPUS_API_KEY) {
     Malo "Falta la API Key"; Read-Host "`n  Enter"; exit 1
 }
-Ok "API Key cargada en esta sesion"
+if ($env:SCOPUS_API_KEY.Length -lt 20) {
+    Malo "La API Key capturada tiene $($env:SCOPUS_API_KEY.Length) caracteres; una clave de Elsevier tiene 32."
+    Write-Host "  Probablemente el pegado fallo. Vuelva a ejecutar el script e intente" -ForegroundColor Yellow
+    Write-Host "  escribiendola directamente, o pegue con clic derecho en vez de Ctrl+V." -ForegroundColor Yellow
+    Read-Host "`n  Enter para cerrar"; exit 1
+}
+Ok "API Key cargada en esta sesion ($($env:SCOPUS_API_KEY.Length) caracteres)"
 
 if (-not $env:SCOPUS_INSTTOKEN) {
     $r = Read-Host "  ¿Tiene tambien un Institutional Token (insttoken)? (s/n)"
     if ($r -match '^[sSyY]') {
-        $tok = Read-Host "  Insttoken" -AsSecureString
-        $env:SCOPUS_INSTTOKEN = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-            [Runtime.InteropServices.Marshal]::SecureStringToBSTR($tok))
+        $env:SCOPUS_INSTTOKEN = (Read-Host "  Insttoken").Trim()
     }
 }
 
