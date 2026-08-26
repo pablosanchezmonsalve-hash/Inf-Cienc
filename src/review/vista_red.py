@@ -1,24 +1,24 @@
 """Vista de la red de coautoría con el grafo REAL, para revisión interna.
 
-POR QUÉ ESTO NO VA EN EL SITIO
-    C-05 está diferido. La red heredaría los grupos de variantes de nombre que
-    siguen sin resolver, y una red con una persona partida en dos nodos dibuja
-    una colaboración que no existe: los dos nodos aparecen sin arista entre sí,
-    o sea la figura AFIRMA que dos investigadores no colaboran cuando son la
-    misma persona. En una tabla ese error es una fila duplicada; en un grafo es
-    una afirmación falsa sobre la estructura del trabajo.
+QUÉ ES ESTO AHORA QUE C-05 SE PUBLICÓ (T-10, 2026-08-26)
+    Esta página en `internal/` sigue existiendo, pero ya no es «la vista de
+    C-05 antes de decidir publicarla» — esa decisión ya se tomó, y el público
+    la ve en `colaboracion.html`, recalculada en vivo sobre el recorte de
+    filtros vigente (`web/assets/js/grafo.js` + `vista_explorador.js`).
 
-    Así que la vista se genera en `internal/`, que no se despliega, y usa
-    exactamente las mismas primitivas que usará el sitio el día que se publique
-    —`red()` de core.js y app.css—. No hay una segunda implementación que
-    pueda divergir: lo que se ve aquí es lo que se verá allá.
+    Lo que esta página sigue aportando que la pública no tiene: el grafo
+    COMPLETO sin filtrar, de una sola vez, con nombres de persona visibles sin
+    depender de que alguien pase el mouse — más cómodo para revisar de un
+    vistazo que para consumir como informe. Usa exactamente las mismas
+    primitivas que el sitio —`red()` de core.js y app.css—, así que lo que se
+    ve aquí es fiel a lo que vería el público con ese mismo recorte.
 
-Y POR QUÉ SÍ VALE LA PENA GENERARLA
-    Porque es el instrumento que ayuda a desbloquear T-03. Dos nodos que son la
-    misma persona se delatan en la red: comparten apellido y suelen compartir
-    vecinos, o quedan como dos islas pequeñas donde debería haber una. Leer 27
-    grupos de variantes en un CSV es una cosa; verlos dibujados sobre la red que
-    van a deformar es otra.
+Y POR QUÉ SÍ VALE LA PENA SEGUIR GENERÁNDOLA
+    Porque el heurístico de apellido compartido no era sólo para T-03: sigue
+    siendo una segunda mirada, más amplia y más ruidosa, sobre coincidencias de
+    apellido entre nodos —incluyendo pares que son personas genuinamente
+    distintas (apellidos comunes), no sólo variantes de una misma firma—. Leer
+    esa lista en un CSV es una cosa; verla dibujada sobre la red real es otra.
 
     Por eso la vista marca los CANDIDATOS: pares de nodos cuyo apellido
     normalizado coincide. No decide nada —eso sigue siendo juicio humano— pero
@@ -143,11 +143,13 @@ PAGINA = """<!doctype html>
 </style>
 </head><body data-tema="claro"><div class="marco">
 
-<div class="aviso-interno"><b>Capa interna · no publicar</b>
-Esta página lleva nombres de personas y sus vínculos. C-05 está diferido: la red
-hereda las variantes de nombre sin resolver, y una persona partida en dos nodos
-dibuja una colaboración que no existe. Se genera para <em>revisar</em>, no para
-difundir.</div>
+<div class="aviso-interno"><b>Herramienta de revisión · no es la vista pública</b>
+C-05 ya se publicó (T-10, 2026-08-26) en <code>colaboracion.html</code>, recorte
+en vivo incluido: estos mismos nombres y vínculos ya son públicos ahí. Esta
+página sigue en <code>internal/</code> porque muestra el grafo COMPLETO sin
+filtrar de una vez, y porque marca candidatos a la misma persona para la
+revisión de identidad — dos usos que la vista pública no cubre, no un secreto
+que la vista pública no tenga.</div>
 
 <h1>Red de coautoría interna</h1>
 <p class="nota">Grafo real, con las mismas primitivas que usará el sitio cuando

@@ -14,7 +14,17 @@ name: Ampliar la cobertura de ORCID
 #     ORCID_CLIENT_SECRET  el secret que entrega ORCID
 #
 # CÓMO SE LANZA
-#   Pestaña Actions → «Ampliar la cobertura de ORCID» → Run workflow.
+#   A mano: pestaña Actions → «Ampliar la cobertura de ORCID» → Run workflow.
+#   Solo: el día 1 de cada mes a las 06:00 UTC (T-19 — el registro de ORCID
+#   cambia despacio; una corrida mensual basta y no gasta cuota de más).
+#
+# INPUTS EN LA CORRIDA PROGRAMADA
+#   `inputs.*` sólo existe cuando el disparo es `workflow_dispatch`; en
+#   `schedule` llega vacío. Los `if:` de abajo lo resuelven con
+#   `github.event_name != 'workflow_dispatch' || inputs.X`: fuera de un
+#   disparo manual, el paso corre siempre (los mismos valores por defecto
+#   que declaran los inputs); en un disparo manual, manda lo que la persona
+#   haya marcado.
 
 on:
   workflow_dispatch:
@@ -40,6 +50,8 @@ on:
         type: boolean
         required: false
         default: true
+  schedule:
+    - cron: '0 6 1 * *'
 
 permissions:
   contents: write
@@ -111,7 +123,7 @@ jobs:
       # contra el registro igual que a las de Crossref, y como orcid_api.py
       # fusiona en vez de sobrescribir, no pierde lo ya verificado.
       - name: Verificar las asignaciones, incluidas las nuevas
-        if: ${{ inputs.verificar }}
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.verificar }}
         env:
           ORCID_CLIENT_ID: ${{ secrets.ORCID_CLIENT_ID }}
           ORCID_CLIENT_SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
@@ -122,7 +134,7 @@ jobs:
       # sin publicación compartida no basta para atribuir un identificador a
       # una persona concreta.
       - name: Buscar candidatos por afiliación declarada
-        if: ${{ inputs.afiliacion }}
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.afiliacion }}
         env:
           ORCID_CLIENT_ID: ${{ secrets.ORCID_CLIENT_ID }}
           ORCID_CLIENT_SECRET: ${{ secrets.ORCID_CLIENT_SECRET }}
@@ -151,7 +163,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Guardar el resultado en el repositorio
-        if: ${{ inputs.commitear }}
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.commitear }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

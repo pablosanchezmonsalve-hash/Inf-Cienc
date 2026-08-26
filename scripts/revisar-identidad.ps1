@@ -19,97 +19,18 @@
 #   o, desde una consola:  .\scripts\revisar-identidad.ps1
 
 $ErrorActionPreference = 'Stop'
-
-function Titulo($t) {
-    Write-Host ""
-    Write-Host ("=" * 70) -ForegroundColor DarkCyan
-    Write-Host "  $t" -ForegroundColor Cyan
-    Write-Host ("=" * 70) -ForegroundColor DarkCyan
-}
-function Ok($t)    { Write-Host "  [OK]    $t" -ForegroundColor Green }
-function Aviso($t) { Write-Host "  [!]     $t" -ForegroundColor Yellow }
-function Malo($t)  { Write-Host "  [ERROR] $t" -ForegroundColor Red }
+. "$PSScriptRoot\_comun.ps1"
 
 Titulo "Revision de identidad de autor"
 
 # ── 1. Situarse en la raíz del proyecto ──────────────────────────────────────
-# El script vive en scripts/, así que la raíz es su carpeta padre. Funciona
-# aunque se lance con doble clic desde cualquier sitio.
-$raiz = Split-Path -Parent $PSScriptRoot
-Set-Location $raiz
-Write-Host "  Proyecto: $raiz"
+$raiz = Entrar-Raiz "src\review\build_review.py"
 
-if (-not (Test-Path "src\review\build_review.py")) {
-    Malo "No encuentro src\review\build_review.py"
-    Write-Host "  Este script debe estar dentro de la carpeta del proyecto, en scripts\."
-    Read-Host "`n  Enter para cerrar"; exit 1
-}
-Ok "Carpeta del proyecto correcta"
+# ── 2. Python y dependencias ──────────────────────────────────────────────────
+$py = Buscar-Python
+Asegurar-Dependencias $py
 
-# ── 2. Python ────────────────────────────────────────────────────────────────
-# Que el comando EXISTA no significa que funcione. Windows instala unos alias de
-# ejecucion para `python` y `python3` que no son Python: son un atajo a la
-# Microsoft Store y responden a --version con un mensaje de error (decision D-88).
-function Probar-Python($cmd) {
-    try {
-        $v = & $cmd --version 2>&1 | Out-String
-    } catch { return $null }
-    if ($LASTEXITCODE -ne 0) { return $null }
-    if ($v -notmatch 'Python\s+3\.\d+') { return $null }   # descarta el atajo de la Store
-    return $v.Trim()
-}
-
-$py = $null; $ver = $null
-foreach ($cmd in @('py', 'python', 'python3')) {
-    if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) { continue }
-    $v = Probar-Python $cmd
-    if ($v) { $py = $cmd; $ver = $v; break }
-}
-
-if (-not $py) {
-    $candidatos = @(
-        "$env:LOCALAPPDATA\Programs\Python\Python3*\python.exe"
-        "$env:ProgramFiles\Python3*\python.exe"
-        "${env:ProgramFiles(x86)}\Python3*\python.exe"
-        "C:\Python3*\python.exe"
-    )
-    foreach ($patron in $candidatos) {
-        foreach ($ruta in (Get-ChildItem $patron -ErrorAction SilentlyContinue |
-                           Sort-Object FullName -Descending)) {
-            $v = Probar-Python $ruta.FullName
-            if ($v) { $py = $ruta.FullName; $ver = $v; break }
-        }
-        if ($py) { break }
-    }
-    if ($py) { Aviso "Python no esta en el PATH; se usara la ruta completa" }
-}
-
-if (-not $py) {
-    Malo "No encuentro Python instalado"
-    Write-Host ""
-    Write-Host "  Lo que responde en su equipo es el atajo de Windows a la" -ForegroundColor Yellow
-    Write-Host "  Microsoft Store, que NO es Python. Por eso falla." -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "  Instalelo asi:" -ForegroundColor Cyan
-    Write-Host "    1. Abra https://www.python.org/downloads/"
-    Write-Host "    2. Descargue la version para Windows y ejecutela."
-    Write-Host "    3. IMPORTANTE: en la PRIMERA pantalla marque"
-    Write-Host "       'Add python.exe to PATH' antes de pulsar Install." -ForegroundColor Cyan
-    Write-Host "    4. Cierre esta ventana, abra una nueva, y vuelva a ejecutar."
-    Read-Host "`n  Enter para cerrar"; exit 1
-}
-Ok "Python encontrado: $ver"
-
-# ── 3. Dependencias ──────────────────────────────────────────────────────────
-& $py -c "import pandas, yaml" 2>$null
-if ($LASTEXITCODE -ne 0) {
-    Aviso "Faltan dependencias. Instalando..."
-    & $py -m pip install -r requirements.txt --quiet
-    if ($LASTEXITCODE -ne 0) { Malo "Fallo la instalacion"; Read-Host "`n  Enter"; exit 1 }
-}
-Ok "Dependencias listas"
-
-# ── 4. Autoprueba sin red ────────────────────────────────────────────────────
+# ── 3. Autoprueba sin red ────────────────────────────────────────────────────
 # Antes de tocar nada: si la logica de aplicacion esta rota, mejor saberlo ahora
 # que despues de una hora decidiendo.
 Titulo "Paso 1 de 5 - Probar la logica (sin internet)"
@@ -118,9 +39,14 @@ if ($LASTEXITCODE -ne 0) {
     Malo "La autoprueba fallo. No siga: lo que aplique podria no ser lo que decida."
     Read-Host "`n  Enter para cerrar"; exit 1
 }
+& $py src\review\merge_decisions.py --test | Select-Object -Last 3
+if ($LASTEXITCODE -ne 0) {
+    Malo "La autoprueba de la fusion fallo. No siga."
+    Read-Host "`n  Enter para cerrar"; exit 1
+}
 Ok "Autoprueba correcta"
 
-# ── 5. Datos de la auditoría ─────────────────────────────────────────────────
+# ── 4. Datos de la auditoría ─────────────────────────────────────────────────
 # Las colas se calculan sobre los datos de la auditoria. Volver a correrla NO
 # borra sus decisiones: internal\identity_decisions.csv es su exportacion y
 # ningun script de la auditoria lo toca.
@@ -135,7 +61,7 @@ if ((Test-Path "data\interim\authors_master_draft.csv") -and
     Ok "Auditoria completada"
 }
 
-# ── 6. Generar la página de revisión ─────────────────────────────────────────
+# ── 5. Generar la página de revisión ─────────────────────────────────────────
 Titulo "Paso 3 de 5 - Generar la pagina de revision"
 & $py src\review\build_review.py
 if ($LASTEXITCODE -ne 0) { Malo "Fallo la generacion"; Read-Host "`n  Enter"; exit 1 }
@@ -173,7 +99,7 @@ if ($r -notmatch '^[sSyY]') {
     Read-Host "`n  Enter para cerrar"; exit 0
 }
 
-# ── 7. Recoger el CSV descargado ─────────────────────────────────────────────
+# ── 6. Recoger el CSV descargado ─────────────────────────────────────────────
 # El paso que mas falla: el navegador lo deja en Descargas y hay que moverlo a
 # internal\ con el nombre exacto. Se busca el mas reciente y se copia.
 Titulo "Paso 4 de 5 - Recoger el archivo exportado"
@@ -199,19 +125,27 @@ if ($cand.Count -gt 0) {
     Write-Host "  Encontrado en Descargas:"
     Write-Host "    $($nuevo.Name)  ($($nuevo.LastWriteTime))"
     Write-Host ""
-    $r = Read-Host "  Copiarlo a internal\identity_decisions.csv? (s/n)"
+    $r = Read-Host "  Fusionarlo con internal\identity_decisions.csv? (s/n)"
     if ($r -match '^[sSyY]') {
-        # Respaldo antes de sustituir. La exportacion reescribe el archivo
-        # ENTERO: si algo saliera mal, lo anterior no debe perderse.
+        # Respaldo antes de sustituir. NO se copia el archivo nuevo encima del
+        # vigente: la pagina de revision solo pinta la cola VIVA, asi que un
+        # caso decidido en una ronda anterior cuya ambiguedad ya no se vuelve
+        # a detectar desaparece del formulario -- no porque se haya revocado,
+        # sino porque ya no hay nada que preguntar. Copiar encima perderia esa
+        # decision en silencio. Paso el 2026-08-26: 38 grupos consolidados
+        # quedaron en 16 con un Copy-Item directo (D-263, SESSION_NOTES.md).
+        # merge_decisions.py une por caso_id: el nuevo gana donde coincide, lo
+        # que solo esta en el vigente se conserva.
         if (Test-Path $destino) {
             $dirResp = Join-Path $raiz "internal\.respaldos"
             New-Item -ItemType Directory -Force -Path $dirResp | Out-Null
             $sello = Get-Date -Format "yyyyMMdd-HHmmss"
             Copy-Item $destino (Join-Path $dirResp "identity_decisions-$sello.csv")
-            Ok "Respaldo del anterior en internal\.respaldos\"
+            Ok "Respaldo del vigente en internal\.respaldos\"
         }
-        Copy-Item $nuevo.FullName $destino -Force
-        Ok "Archivo colocado en internal\identity_decisions.csv"
+        & $py src\review\merge_decisions.py $nuevo.FullName
+        if ($LASTEXITCODE -ne 0) { Malo "Fallo la fusion"; Read-Host "`n  Enter"; exit 1 }
+        Ok "Fusionado en internal\identity_decisions.csv"
     }
 } else {
     Aviso "No encuentro ningun identity_decisions*.csv en Descargas"
@@ -225,7 +159,7 @@ if (-not (Test-Path $destino)) {
     Read-Host "`n  Enter para cerrar"; exit 1
 }
 
-# ── 8. Aplicar ───────────────────────────────────────────────────────────────
+# ── 7. Aplicar ───────────────────────────────────────────────────────────────
 # Primero en seco. Aplicar sin ver antes que se va a aplicar es lo que convierte
 # una errata en un dato publicado.
 Titulo "Paso 5 de 5 - Aplicar las decisiones"
@@ -250,7 +184,7 @@ if ($r -notmatch '^[sSyY]') {
 & $py src\review\apply_decisions.py
 if ($LASTEXITCODE -ne 0) { Malo "Fallo la aplicacion"; Read-Host "`n  Enter"; exit 1 }
 
-# ── 9. Reconstruir lo que depende de esas decisiones ─────────────────────────
+# ── 8. Reconstruir lo que depende de esas decisiones ─────────────────────────
 Titulo "Reconstruyendo el sitio"
 Write-Host "  Las decisiones no llegan al sitio solas: hay que reconstruirlo."
 Write-Host ""

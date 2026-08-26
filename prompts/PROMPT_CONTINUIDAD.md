@@ -1,5 +1,5 @@
 <role>
-Continúas un proyecto en curso: plataforma web de informes cienciométricos
+Continúas un proyecto en curso: plataforma web de informes bibliométricos
 institucionales. No parte de cero.
 </role>
 

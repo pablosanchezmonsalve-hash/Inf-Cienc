@@ -222,10 +222,10 @@ Con ORCID, dos firmas que traen el mismo identificador **son la misma persona**
 y no hay nada que decidir. Eso reduce buena parte de la revisión manual
 pendiente:
 
-- 123 variantes de nombre por resolver (T-03).
-- 20 perfiles de Scopus fragmentados (T-04).
-- Y con ellas, la red de coautoría (`C-05`), hoy diferida porque mostraría a
-  una misma persona como varios nodos.
+- 123 variantes de nombre por resolver (T-03, cerrado 2026-08-26).
+- 20 perfiles de Scopus fragmentados (T-04, cerrado 2026-08-26).
+- La red de coautoría (`C-05`), que dependía de ambos, se publicó el
+  2026-08-26 (T-10) una vez resueltos.
 
 Los casos que ORCID no cubra seguirán necesitando revisión humana.
 

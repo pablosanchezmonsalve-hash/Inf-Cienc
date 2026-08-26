@@ -247,13 +247,14 @@ def main() -> None:
     # describe una red es cuántas publicaciones tienen DOS o más personas UFT,
     # porque las demás no producen ninguna arista.
     red = _tamano_red(log)
-    record("C-05", "Red de coautoría autor-autor", "colaboracion", "parcial",
+    record("C-05", "Red de coautoría autor-autor", "colaboracion", "sí",
            f"{red['aristas']} pares de coautoría entre {red['nodos']} personas, "
            f"derivados de las {red['pubs_multi']} publicaciones con 2+ personas UFT "
            f"(de {red['pubs']}); {red['pares']} pares persona x publicación",
            "media", "V2",
-           "Técnicamente derivable, pero hereda las variantes de nombre sin "
-           "resolver: la red tendría nodos duplicados. Diferido hasta T-03.")
+           "Publicado el 2026-08-26 (T-10), tras cerrarse T-03: ya no hereda "
+           "variantes de nombre sin resolver. Componente y comunidad Louvain "
+           "se declaran por separado — ver docs/GLOSSARY.md.")
 
     nau = numeric(scival, "Number of Authors")
     record("C-06", "Autores por publicación", "colaboracion", "sí",

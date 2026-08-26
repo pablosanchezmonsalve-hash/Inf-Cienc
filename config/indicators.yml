@@ -107,9 +107,9 @@ indicadores:
   C-04: {nombre: "Instituciones colaboradoras", categoria: colaboracion, publicar: true,
          denominador: con_metricas, confiabilidad: alta, multivaluado: true,
          advertencia: "Multivaluado: no sumable al total. SciVal advierte truncamiento en los nombres de afiliación."}
-  C-05: {nombre: "Red de coautoría", categoria: colaboracion, publicar: false,
+  C-05: {nombre: "Red de coautoría", categoria: colaboracion, publicar: true,
          version: V2, confiabilidad: media,
-         advertencia: "Diferido: heredaría los 27 grupos de variantes de nombre que siguen sin resolver, de los 28 encolados (pendiente T-03). Las diferencias puramente ortográficas ya se consolidaron; lo que queda son juicios de identidad. Una red de coautoría con una persona partida en dos nodos dibuja una colaboración que no existe."}
+         advertencia: "Dos particiones que no son lo mismo: la componente (hay camino de coautoría entre dos personas) es un hecho objetivo del grafo; la comunidad (Louvain) es una heurística del algoritmo que maximiza densidad interna, no un veredicto sobre qué grupos de investigación existen — nunca se presenta como tal. Publicado el 2026-08-26 (T-10), tras cerrarse T-03 (0 pendientes en variantes de nombre): el grafo se construye sobre las firmas ya consolidadas."}
   C-06: {nombre: "Autores por publicación", categoria: colaboracion, publicar: true,
          denominador: con_metricas, confiabilidad: alta, mostrar_mediana: true,
          advertencia: null}

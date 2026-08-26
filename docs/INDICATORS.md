@@ -53,7 +53,7 @@ trabajo).
 | `C-03` | Países colaboradores | Ranking de países | `explode(Country/Region)` | `Country/Region` | **sí** 100 % | alta | ✅ | Multivaluado: **no sumable** |
 | `C-04` | Instituciones colaboradoras | Ranking de instituciones | `explode(Institution IDs)` | `Institution IDs` | **sí** 100 % | alta | ✅ | SciVal advierte truncamiento en nombres: usar IDs |
 | `C-06` | Autores por publicación | Tamaño de equipo | `Number of Authors` | idem | **sí** media 7,0 · mediana 5 | alta | ✅ | Asimétrica: **preferir mediana** |
-| `C-05` | Red de coautoría | Grafo autor–autor | derivado de `Autoria` | tabla maestra | **parcial** | media | V2 | Heredaría 123 nodos duplicados. Diferido hasta T-03 |
+| `C-05` | Red de coautoría | Grafo autor–autor | derivado de `Autoria` | tabla maestra | **sí** | media | V2 | **Publicado el 2026-08-26 (T-10)**, tras cerrarse T-03: ya no hereda nodos duplicados. Se muestra la componente (hecho objetivo) y la comunidad Louvain (heurística), declaradas por separado — ver `docs/GLOSSARY.md` |
 | `C-07` | Liderazgo autoral | Primer/último/correspondencia | cruce por Scopus Author ID | roles SciVal | **parcial** 91,4 % | media | V2 | Depende de resolver los 20 perfiles fragmentados (T-04) |
 
 ### 1.4 Conceptuales y temáticos
@@ -119,6 +119,9 @@ exigidos por `PROJECT_SPEC.md` y llevan advertencia visible.
 **Excluidos de V1:** `P-08`, `I-06`, `R-02`, `R-03`, `C-05`, `C-07`, `T-02`,
 `T-03` (8 indicadores redundantes o dependientes de pendientes abiertos) y
 `AU-04`, `X-01` a `X-04` (5 no calculables o fuera de alcance).
+`C-05` se publicó después, el 2026-08-26 (`T-10`), cuando se cerró el
+pendiente que lo bloqueaba (`T-03`); esta lista describe la decisión de
+Fase 2 tal como se tomó, no el estado actual del sitio.
 
 ### Recuento
 

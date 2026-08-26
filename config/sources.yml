@@ -18,12 +18,23 @@ fuentes:
       - abstract
       - referencias
       - financiamiento
-    fecha_corte: null            # NO declarada por el export. Ambigüedad A-05.
+    fecha_corte: null            # Sigue sin declararla el export en sí (Ambigüedad
+                                  # A-05). No se aplica retroactivamente al CSV
+                                  # vigente (docs/UPDATING_REQUEST.md §5) — esto es
+                                  # para LA PRÓXIMA carga, que sí debe traerla.
     fecha_export: "2026-07-31"
     ventana_declarada: "2023-2025"
     filtros_aplicados: "ninguno declarado"
     n_registros_declarado: null
     n_registros_leido: 818
+    verificacion_api:            # T-06 — NO es la fecha de corte del export: es la
+                                  # confirmación, por API, de que el conteo del CSV
+                                  # de 2026-07-31 seguía vigente en esta fecha.
+                                  # Ver src/enrich/scopus_api.py, data/enriched/scopus_api_consulta.json.
+      fecha_consulta: "2026-08-26"
+      consulta: "AF-ID(60105368) AND PUBYEAR > 2022 AND PUBYEAR < 2026"
+      total_resultados: 818
+      coincide_con_n_registros_leido: true
 
   scival_export:
     nombre: "SciVal — export nativo"
@@ -194,6 +205,28 @@ fuentes:
       la institución y un vocabulario público contra el que contrastar el
       patrón de detección institucional. El contrato de la API no está
       verificado desde este repositorio.
+
+  scopus_api:
+    nombre: "Scopus — Search API (Elsevier)"
+    tipo: "api"
+    endpoint: "https://api.elsevier.com/content/search/scopus"
+    autenticacion: "API Key (X-ELS-APIKey); Insttoken opcional según suscripción"
+    conector: "src/enrich/scopus_api.py"
+    rol: "verificación de corte para T-06"
+    aporta:
+      - fecha_y_consulta_exacta_de_una_reexportacion
+      - contraste_del_recuento_frente_al_universo_declarado
+    salida: "data/enriched/scopus_api_consulta.json"
+    fecha_corte: null
+    ejecutada: false             # el conector existe, la consulta no se ha corrido
+    nota: >-
+      NO reemplaza scopus_export ni el universo publicado (823, D-16): la
+      Scopus Search API no declara una fecha "actualizado al" propia, así que
+      lo que este conector aporta es el instante exacto de ejecución y la
+      cadena de consulta literal, no una fecha de corte que la fuente
+      declare. Si el recuento difiere del universo vigente, se reporta como
+      hallazgo, nunca se aplica automáticamente. Promover un nuevo export a
+      fuente primaria es una decisión aparte y posterior.
 
   openalex_api:
     nombre: "OpenAlex — Works API"

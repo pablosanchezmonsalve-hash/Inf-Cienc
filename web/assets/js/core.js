@@ -554,15 +554,16 @@ export function anillo(datos, { titulo = '' } = {}) {
    por esSinDato(), la misma prueba que usan las barras). El gris no lo decide
    C-05: lo decide la misma función que en el resto del sitio (D-09).
 
-   ESTADO: la primitiva está integrada pero C-05 NO se publica. `indicators.yml`
-   lo difiere porque la red heredaría los grupos de variantes de nombre sin
-   resolver (T-03), y una firma partida en dos nodos dibuja una colaboración
-   que no existe. Falta además construir el grafo en el pipeline: estas
-   funciones dibujan, no calculan.
+   ESTADO: C-05 se publicó el 2026-08-26 (T-10), en `colaboracion.html`. Estas
+   funciones sólo dibujan, no calculan: el grafo lo construye
+   `web/assets/js/grafo.js` en el navegador (recorte en vivo, puerto
+   verificado línea a línea contra `src/build/grafo_coautoria.py`) o el mismo
+   `grafo.js` bajo Node en el prerenderizado — nunca esta primitiva.
 
    ENTRADA de disponerRed(): nodos con `com` YA asignado. La detección de
-   comunidades es del build, no del renderizador — igual que el resto de los
-   indicadores llega calculado en series.json. */
+   comunidades es de quien arma el grafo (grafo.js o grafo_coautoria.py), no
+   del renderizador — igual que el resto de los indicadores llega calculado
+   antes de dibujarse. */
 
 /** true si la unidad de la firma es ausencia de dato, no una unidad real.
     Se prueba sobre `unidad ?? 'No determinada'` porque el contrato admite que
