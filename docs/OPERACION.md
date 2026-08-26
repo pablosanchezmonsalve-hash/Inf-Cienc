@@ -139,6 +139,14 @@ cambia despacio y una corrida mensual basta. Usa
 `ORCID_CLIENT_ID`/`ORCID_CLIENT_SECRET` desde los Secrets del repositorio, no
 desde el equipo local, y comitea el resultado sola si hay cambios.
 
+Para revisar la brecha de cobertura que deja `openalex_cobertura.py`
+(`V2-26`) — 414 obras que OpenAlex atribuye a la UFT y el universo no
+tiene —, use `scripts\revisar-cobertura-openalex.ps1`. Mismo patrón que
+`revisar-identidad.ps1`: genera la página, la abre, recoge el CSV
+exportado y lo aplica. **No agrega nada al universo publicado**: sólo dejar
+constancia, por obra, de si es producción real fuera de Scopus, un error de
+atribución de OpenAlex, o un tipo documental excluido a propósito (`D-206`).
+
 ---
 
 ## Paso 6 — La revisión de identidad

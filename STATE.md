@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `eec7474` · Registra EBSCO Discovery Service como propuesta de cruce de cobertura
+Último commit: `17b8674` · openalex_cobertura.py: identifica quÃ© autor y quÃ© instituciÃ³n decla
 Snapshot: 2026-08-26
 
 ---
@@ -64,7 +64,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 4 |
 
-`make revision` reúne estas colas en 111 casos, de los que **0 siguen pendientes**: 111 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 113 casos, de los que **6 siguen pendientes**: 107 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 321
+## Decisiones tomadas: 324
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
