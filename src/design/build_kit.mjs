@@ -568,7 +568,7 @@ añadir('graficos/codificacion.html', ficha({
 
 /* ──────────────────────────────────────────────────────────── escritura */
 
-const LEEME = `# Sistema de diseño — Informe Cienciométrico Institucional
+const LEEME = `# Sistema de diseño — Informe Bibliométrico Institucional
 
 **Generado**, no escrito a mano. Se reconstruye con \`make kit\`.
 

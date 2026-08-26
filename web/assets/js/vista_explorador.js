@@ -22,7 +22,7 @@ import * as G from './grafo.js';
 export function cabecera(meta) {
   const v = meta.ventana || {};
   return `<div class="portada-id">
-    <h1>Informe cienciométrico</h1>
+    <h1>Informe bibliométrico</h1>
     <p class="portada-sub">${c.escapar(meta.institucion || 'Universidad Finis Terrae')}
       · Scopus y SciVal · ${c.escapar(String(v.inicio ?? ''))}–${c.escapar(String(v.fin ?? ''))}</p>
     <p class="ventana-cierre">La ventana de este informe termina en

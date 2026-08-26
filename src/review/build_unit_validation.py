@@ -351,7 +351,7 @@ def main() -> int:
         "",
         "## Qué se pide",
         "",
-        "El informe cienciométrico agrupa la producción por unidad académica. "
+        "El informe bibliométrico agrupa la producción por unidad académica. "
         "Esos nombres **no vienen de un catálogo oficial**: están deducidos de "
         "cómo aparecen escritos en las afiliaciones de Scopus, porque no había "
         "un catálogo disponible al construir la plataforma.",
