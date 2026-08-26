@@ -92,15 +92,18 @@ confundan con el desempeño del trabajo individual. El percentil de
 SJR/CiteScore es la vía defendible para hablar de «cuartil»; nunca como
 indicador de calidad del artículo.
 
-## 7 bis. Semántica del percentil de citación, determinada empíricamente
+## 7 bis. Semántica del percentil de citación — determinada empíricamente y confirmada documentalmente (`T-13` cerrado, 2026-08-26)
 
-El campo `percentil_citacion` **no venía con su dirección declarada** en el
-export: no había forma documental de saber si 1 es la mejor posición o la peor.
-Todo el indicador `I-05` («publicaciones en el top 10 %») depende de acertar,
-y equivocarse lo invierte por completo.
+El campo `percentil_citacion` viene de la columna **"Outputs in Top Citation
+Percentiles, per percentile"** del export de SciVal (`src/audit/02_reconcile_sources.py`).
+**No venía con su dirección declarada en el export en sí**: no había forma de
+saber, sólo mirando el archivo, si 1 es la mejor posición o la peor. Todo el
+indicador `I-05` («publicaciones en el top 10 %») depende de acertar, y
+equivocarse lo invierte por completo.
 
-Se determinó midiendo sobre los propios datos (n = 816). La evidencia es
-monótona en los dos extremos:
+### La evidencia empírica (original, 2026-08-03)
+
+Medida sobre los propios datos (n = 816). Monótona en los dos extremos:
 
 | Publicaciones | Citas | Percentil observado |
 |---|---|---|
@@ -110,14 +113,46 @@ monótona en los dos extremos:
 Correlaciones: **−0,66** con el recuento de citas y **−0,58** con el FWCI. El
 rango observado es 1–78.
 
-**Conclusión: el valor menor es la mejor posición.** El campo expresa «top X %»,
-y por eso `I-05` cuenta las publicaciones con percentil ≤ 10.
+### La confirmación documental (2026-08-26)
 
-Queda una salvedad honesta: esto es evidencia empírica, no documentación de
-Elsevier. La ordenación es tan limpia que la conclusión no admite mucha duda,
-pero mientras no se confirme contra la documentación oficial de SciVal se
-declara como determinada por medición (pendiente `T-13`). La medición es
-reproducible: la ejecuta `src/analysis/indicator_feasibility.py`.
+`T-13` pedía contrastar esto contra documentación oficial de Elsevier, no sólo
+contra los datos propios. Dos hallazgos, buscados por separado para no
+confundirlos:
+
+1. **El nombre de columna es real**, confirmado por una herramienta de
+   terceros que procesa exports de SciVal de verdad
+   ([cu-library/scival-export-tools](https://github.com/cu-library/scival-export-tools),
+   subcomando "Per Researcher"), no sólo por lo que trae el archivo del
+   proyecto.
+2. **La metodología del percentil, documentada por Elsevier**: para la
+   métrica «Outputs in Top Citation Percentiles», las publicaciones globales
+   de Scopus se ordenan de mayor a menor citación (o FWCI, si está
+   field-weighted) y se dividen en 100 percentiles; el campo indica en cuál
+   de los umbrales de **top 1 %, 5 %, 10 % o 25 % más citadas** cae cada
+   publicación (Elsevier, [SciVal Support Center — "Outputs in Top Citation
+   Percentiles"](https://service.elsevier.com/app/answers/detail/a_id/28193/supporthub/scival/p/10961/)).
+
+   **Por qué esto no es circular con la evidencia empírica**: la semántica
+   «top X %» de Elsevier no deja ambigüedad posible sobre la dirección —
+   «estar en el top 1 %» sólo puede significar la posición más alta, nunca la
+   más baja. Que el campo se llame igual que esta métrica, y que las 5
+   publicaciones más citadas del corpus caigan justo en los valores más bajos
+   (1–4) mientras las no citadas caen en el máximo observado (78), es
+   exactamente el patrón que esa semántica predice — no una coincidencia que
+   necesitara la métrica para explicarse.
+
+   **Salvedad que sigue abierta**: no se encontró una tabla oficial que diga
+   literalmente «valor = 1 → top 1 %» fila por fila para esta columna
+   específica de exportación (distinta de la métrica agregada del mismo
+   nombre, que cuenta publicaciones en vez de etiquetar cada una). La
+   confirmación es sobre la metodología del campo, no una cita textual del
+   mapeo exacto valor-a-porcentaje.
+
+**Conclusión: el valor menor es la mejor posición.** El campo expresa «top X %»,
+y por eso `I-05` cuenta las publicaciones con percentil ≤ 10. Ya no se declara
+como determinada sólo por medición: la medición y la documentación oficial
+apuntan en la misma dirección. La medición es reproducible: la ejecuta
+`src/analysis/indicator_feasibility.py`.
 
 ## 8. Visibilidad no es impacto
 
