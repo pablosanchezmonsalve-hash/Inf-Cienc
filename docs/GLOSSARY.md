@@ -81,6 +81,31 @@ extranjero y otra con quince cuentan igual.
 
 ---
 
+## Componente y comunidad (red de coautoría)
+
+**Corto:** En la red de coautoría, la componente es un hecho objetivo del
+grafo; la comunidad es una heurística de un algoritmo (Louvain), no un
+veredicto sobre qué grupos de investigación existen.
+
+**Extendido:** Dos personas están en la misma **componente** si existe un
+camino de coautorías entre ellas, sin importar cuántos pasos tenga. No tiene
+parámetros ni azar: o hay camino, o no lo hay.
+
+La **comunidad** la asigna el algoritmo Louvain, que agrupa nodos maximizando
+la densidad de vínculos dentro de cada grupo frente a fuera de él. Es
+reproducible en esta implementación —misma entrada, misma partición siempre—,
+pero sigue siendo una heurística: otro algoritmo, u otro orden de cálculo,
+podría trazar los grupos de otra forma.
+
+Dos triángulos de personas unidos por un solo vínculo débil son SIEMPRE una
+componente (hay camino de un extremo al otro), pero Louvain casi siempre los
+separa en dos comunidades, porque cada triángulo es mucho más denso por dentro
+que el puente que los conecta. Presentar una comunidad detectada como si fuera
+un grupo de investigación real convierte una hipótesis del algoritmo en un
+hecho.
+
+---
+
 ## ASJC — All Science Journal Classification
 
 **Corto:** Clasificación temática de la **revista**, no del artículo. Una

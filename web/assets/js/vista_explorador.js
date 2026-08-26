@@ -7,6 +7,7 @@
 
 import * as c from './core.js';
 import * as X from './explorador.js';
+import * as G from './grafo.js';
 
 /* ────────────────────────────────────────────────────────────── cabecera */
 
@@ -261,6 +262,7 @@ export const SECCIONES = {
       { cod: 'C-03', campo: 'paises',         titulo: 'Países colaboradores',     forma: 'barrasH', tope: 15 },
       { cod: 'C-04', campo: 'instituciones',  titulo: 'Instituciones colaboradoras', forma: 'barrasH', tope: 15 },
       { cod: 'C-06', campo: 'autores_tramo',  titulo: 'Autores por publicación',  forma: 'distribucion' },
+      { cod: 'C-05', campo: 'coautoria',      titulo: 'Red de coautoría',         forma: 'red' },
     ],
   },
   tematica: {
@@ -325,11 +327,131 @@ function conmutador(id) {
   </div>`;
 }
 
-/** Los cortes de una sección, recalculados sobre el recorte vigente. */
-export function cortesSeccion(sub, clave, proc) {
+/* ─────────────────────────────────────────────────── C-05, red de coautoría
+
+   No pasa por `dibujar()`/`conmutador()`: la red no es un gráfico con una
+   tabla equivalente, son TRES lecturas del mismo grafo (nodos, matriz,
+   arcos) más una tabla de aristas como cuarta vía accesible. Reutiliza el
+   mismo conmutador genérico de `.vistas button[data-vista]` que ya engancha
+   `conmutadorVistas()` en paginas.js — no hace falta escucha nueva. */
+
+/** El id del patrón de trama (D-09, ausencia de unidad) se pone en conflicto
+    si dos SVG de esta misma sección lo declaran igual: el navegador resuelve
+    `url(#id)` contra el documento entero, no por SVG. Los tres SVG de este
+    corte —nodos, matriz, arcos— conviven en el DOM a la vez (se alternan con
+    CSS, no con innerHTML), así que cada uno necesita su propio id. */
+function svgConTramaUnica(svg, sufijo) {
+  return svg.replace(/tramaSinDatoRed/g, `tramaSinDatoRed-${sufijo}`);
+}
+
+/** Tabla de aristas: la vía accesible para quien no puede leer el SVG. Cada
+    fila es una coautoría real, con las dos formas de pesarla —igual que
+    declara `docs/METHODOLOGY.md`, el recuento y el peso fraccional no
+    responden la misma pregunta y no se elige uno por el lector. */
+function tablaRed(aristas) {
+  const filas = aristas.slice()
+    .sort((e1, e2) => e2.peso - e1.peso || e1.a.localeCompare(e1.b) || e1.b.localeCompare(e2.b))
+    .map(e => `<tr><td>${c.escapar(e.a)}</td><td>${c.escapar(e.b)}</td>
+      <td class="num">${e.peso}</td><td class="num">${e.peso_fraccional.toFixed(2)}</td></tr>`).join('');
+  return `<div class="tabla-envoltura tabla-datos"><table>
+    <thead><tr><th scope="col">Persona</th><th scope="col">Coautor</th>
+      <th scope="col" class="num">Publicaciones compartidas</th>
+      <th scope="col" class="num">Peso fraccional</th></tr></thead>
+    <tbody>${filas}</tbody></table></div>`;
+}
+
+/** El módulo completo de C-05. `unidadPorPersona`: Map nombre → unidad
+    académica, de `authors.json` (no hay forma de derivarla de `sub` sola:
+    una publicación no lleva la unidad por autor individual, sólo el conjunto
+    de unidades de TODOS sus firmantes). */
+function corteRed(sub, corte, unidadPorPersona, proc) {
+  const id = corte.cod;
+  const autoria = [];
+  for (const p of sub) for (const persona of (p.autores_uft || [])) autoria.push([persona, p.eid]);
+
+  const g = G.construirGrafo(autoria, new Set(), unidadPorPersona || new Map());
+  if (!g.nodos.length) {
+    return `<section class="corte" id="${id}" data-corte="${corte.campo}" tabindex="-1">
+      <header class="corte-cab"><h3>${c.escapar(corte.titulo)}</h3></header>
+      <p class="vacio">Ninguna publicación con autoría UFT detallada en este recorte.</p>
+    </section>`;
+  }
+  const comp = G.componentes(g.nodos, g.aristas);
+  const coms = G.comunidades(g.nodos, g.aristas);
+  const nComp = new Set(comp.values()).size;
+  const nComs = new Set(coms.values()).size;
+  const nodosConArista = new Set();
+  for (const e of g.aristas) { nodosConArista.add(e.a); nodosConArista.add(e.b); }
+  const conectadas = nodosConArista.size;
+
+  // El DIBUJO se recorta a las componentes de 5 personas o más — el mismo
+  // criterio y el mismo motivo que `internal/red_coautoria.html`
+  // (src/review/vista_red.py): con cientos de componentes de una pareja o un
+  // trío, el anillo de grupos se vuelve ilegible. Se recorta el dibujo, no el
+  // análisis — las cifras de arriba y la tabla de abajo cubren a TODAS.
+  const MINIMO = 5;
+  const tamComp = new Map();
+  for (const c2 of comp.values()) tamComp.set(c2, (tamComp.get(c2) || 0) + 1);
+  const visibles = g.nodos.filter(n => tamComp.get(comp.get(n)) >= MINIMO);
+  const idxVis = new Map(visibles.map((n, i) => [n, i]));
+  const nodos = visibles.map((n, i) => ({
+    i, id: n, valor: n, n: g.publicacionesPorPersona.get(n) || 0,
+    unidad: g.unidades.get(n), com: coms.get(n),
+  }));
+  const aristasIdx = g.aristas
+    .filter(e => idxVis.has(e.a) && idxVis.has(e.b))
+    .map(e => ({ a: idxVis.get(e.a), b: idxVis.get(e.b), n: e.peso }));
+
+  // Un recorte angosto puede no dejar NINGUNA componente de 5+: el dibujo se
+  // queda sin nada que mostrar, pero la tabla de aristas sigue cubriendo todo
+  // lo que el recorte sí tiene. Un hueco sin avisar se leería como que no hay
+  // coautoría en absoluto, que sería falso si `conectadas` es mayor que 0.
+  const sinDibujo = !nodos.length;
+  const D = sinDibujo ? null : c.disponerRed(nodos, aristasIdx);
+  const vacioDibujo = `<p class="vacio">Ninguna componente de 5 personas o más en este
+    recorte. La tabla, abajo, cubre las ${c.nf.format(conectadas)} personas con
+    coautoría interna que sí tiene.</p>`;
+
+  return `<section class="corte corte-red" id="${id}" data-corte="${corte.campo}" tabindex="-1">
+    <header class="corte-cab">
+      <h3>${c.escapar(corte.titulo)}</h3>
+      <div class="vistas" role="group" aria-label="Forma de la red">
+        <button type="button" data-vista="nodos" aria-pressed="${!sinDibujo}" aria-controls="${id}-nodos">Nodos</button>
+        <button type="button" data-vista="matriz" aria-pressed="false" aria-controls="${id}-matriz">Matriz</button>
+        <button type="button" data-vista="arcos" aria-pressed="false" aria-controls="${id}-arcos">Arcos</button>
+        <button type="button" data-vista="tabla" aria-pressed="${sinDibujo}" aria-controls="${id}-tabla">Tabla</button>
+      </div>
+    </header>
+    <p class="nota-destacada"><b>Dos particiones que no son lo mismo</b>
+      La posición agrupa por <b>comunidad</b>, detectada por un algoritmo (Louvain) que
+      maximiza densidad interna — una heurística razonable, no un veredicto sobre qué
+      grupos de investigación existen. La <b>componente</b> —si hay un camino de
+      coautoría entre dos personas— sí es un hecho objetivo del grafo, sin parámetros
+      ni azar. <a href="metodologia.html#componente-y-comunidad-red-de-coautoria">Cómo se lee esta red →</a></p>
+    <div class="vista" id="${id}-nodos" data-vista="nodos" data-activa="${!sinDibujo}">
+      ${sinDibujo ? vacioDibujo : svgConTramaUnica(c.red(D, 'nodos'), id + '-nodos')}</div>
+    <div class="vista" id="${id}-matriz" data-vista="matriz" data-activa="false">
+      ${sinDibujo ? vacioDibujo : svgConTramaUnica(c.red(D, 'matriz'), id + '-matriz')}</div>
+    <div class="vista" id="${id}-arcos" data-vista="arcos" data-activa="false">
+      ${sinDibujo ? vacioDibujo : svgConTramaUnica(c.red(D, 'arcos'), id + '-arcos')}</div>
+    <div class="vista" id="${id}-tabla" data-vista="tabla" data-activa="${sinDibujo}">${tablaRed(g.aristas)}</div>
+    <p class="nota"><strong>${c.nf.format(g.nodos.length)}</strong> personas en el recorte ·
+      <strong>${c.nf.format(conectadas)}</strong> con al menos una coautoría interna ·
+      <strong>${c.nf.format(nComp)}</strong> componentes · <strong>${c.nf.format(nComs)}</strong>
+      comunidades Louvain. Sólo se dibujan las componentes de 5 personas o más; la tabla
+      cubre a todas.</p>
+    ${selloCorte(sub, corte.campo, corte.cod, proc)}
+  </section>`;
+}
+
+/** Los cortes de una sección, recalculados sobre el recorte vigente.
+    `unidadPorPersona` sólo lo usa C-05 (red de coautoría); el resto de los
+    cortes lo ignora. */
+export function cortesSeccion(sub, clave, proc, unidadPorPersona) {
   const s = SECCIONES[clave];
   if (!s) return '';
   return s.cortes.map(corte => {
+    if (corte.forma === 'red') return corteRed(sub, corte, unidadPorPersona, proc);
     const r = dibujar(sub, corte);
     const id = corte.cod || corte.campo;
     // El id es el CÓDIGO del indicador y no el campo: así la compuerta de
@@ -386,14 +508,15 @@ export function cabeceraSeccion(clave, titulo) {
   </details>` : ''}`;
 }
 
-/** Todo el cuerpo de una sección. */
-export function seccion(pubs, sel, clave, proc) {
+/** Todo el cuerpo de una sección. `unidadPorPersona` (Map, opcional) sólo lo
+    necesita C-05; las demás secciones lo reciben y no lo usan. */
+export function seccion(pubs, sel, clave, proc, unidadPorPersona) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
     cifras: cifras(X.resumen(sub)),
-    cortes: cortesSeccion(sub, clave, proc),
+    cortes: cortesSeccion(sub, clave, proc, unidadPorPersona),
   };
 }
 

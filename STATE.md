@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `dda939f` · Prueba la API de SciVal por curl directo: sin entitlement, no se const
+Último commit: `95416a3` · Corregir referencias obsoletas a T-03 en la documentación de C-05 (red
 Snapshot: 2026-08-26
 
 ---
@@ -38,7 +38,7 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Firmas con ORCID | **242** | sin consolidar · `data/enriched/authors_orcid.csv` |
 | Entidades con ORCID | **204** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
-| Indicadores publicados | **27** | `config/indicators.yml`, `publicar: true` |
+| Indicadores publicados | **28** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
@@ -65,18 +65,17 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Pendientes abiertos (4)
+## Pendientes abiertos (3)
 
 | # | Pendiente |
 |---|---|
 | `T-02` | Validar institucionalmente el vocabulario de unidades académicas y la jerarquía escuela→facultad |
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
-| `T-10` | Red de coautoría autor–autor derivada de `Autoria` |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 292
+## Decisiones tomadas: 297
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

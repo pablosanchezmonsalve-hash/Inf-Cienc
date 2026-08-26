@@ -42,9 +42,11 @@ Las 7 publicaciones sin métricas muestran «sin métricas» en vez de 0.
 
 ### Coautoría
 
-Sección **diferida a V2** (`C-05`). La red de coautoría heredaría las 123
-variantes de nombre sin resolver y mostraría a la misma persona como varios
-nodos. Se declara la razón en la ficha en vez de omitirla en silencio.
+Publicado el 2026-08-26 (`T-10`). Lista, con quién de la UFT coautoró cada
+publicación de esta persona dentro de la ventana, con el recuento de
+publicaciones compartidas y enlace a la ficha de cada coautor. Sólo cuenta
+coautoría interna (otra firma UFT en la misma publicación) — no es un
+desglose de la red completa, que vive en `colaboracion.html` (`C-05`).
 
 ---
 
