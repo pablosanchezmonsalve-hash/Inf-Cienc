@@ -133,6 +133,12 @@ en `internal\orcid_candidatos_afiliacion.csv`; **no asigna nada solo** — para
 decidir sobre ellos, corra después `scripts\revisar-identidad.ps1`, que los
 recoge en la cola «Candidato por afiliación».
 
+Además del disparo manual, `.github/workflows/ampliar-orcid.yml` corre solo
+el día 1 de cada mes (`schedule`, `cron: '0 6 1 * *'`): el registro de ORCID
+cambia despacio y una corrida mensual basta. Usa
+`ORCID_CLIENT_ID`/`ORCID_CLIENT_SECRET` desde los Secrets del repositorio, no
+desde el equipo local, y comitea el resultado sola si hay cambios.
+
 ---
 
 ## Paso 6 — La revisión de identidad
