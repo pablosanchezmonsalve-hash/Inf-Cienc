@@ -2855,3 +2855,59 @@ pegar en `config/sources.yml` y declara como hallazgo, no como corrección
 automática, si el recuento difiere de 823. Con eso vuelto, T-06 se cierra a
 mano con la evidencia delante — igual que `T-02` está esperando el envío de
 `internal/validacion_unidades.md`.
+
+---
+
+## Cierre · El asistente de PowerShell, y dos fallos que sólo se ven corriendo
+
+El usuario corrió `scripts\consultar-scopus.ps1` de verdad en su máquina.
+Antes, ni siquiera llegó a clonar el repositorio (`git pull` desde
+`C:\Users\Pablo`, fuera de cualquier carpeta de proyecto): la primera vez en
+ese equipo, así que el paso a paso empezó por `git clone --branch
+claude/state-review-next-steps-wzzq0h`. Con el repositorio ya local, el script
+llegó hasta la consulta real y Scopus respondió **400 sin cuerpo**.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-254 | El conector manda un `User-Agent` descriptivo, no el que pone Python por defecto | `Python-urllib/3.x` lo bloquean sin cuerpo algunos WAF delante de APIs de Elsevier (Akamai es común ahí); eso se ve exactamente como el 400 vacío que reportó el usuario, indistinguible de un error real de la API sin este cambio |
+| D-255 | El error de la API ahora imprime `Content-Type`, `Server` y un diagnóstico explícito cuando el cuerpo llega vacío, con las tres causas más probables en orden | Un `sys.exit` con un cuerpo vacío no dice nada; la próxima corrida del usuario tiene que traer evidencia suficiente para diagnosticar sin una segunda vuelta |
+| D-256 | `scripts/consultar-scopus.ps1` lleva BOM UTF-8, igual que los otros dos `.ps1` del proyecto | Sin BOM, PowerShell 5.1 (la consola por defecto en Windows) lee el archivo con la página de códigos del sistema en vez de UTF-8, y las tildes salen como `Â¿`, `Ã©`. Los otros dos scripts ya lo tenían; éste se escribió sin él por descuido |
+
+### Archivos creados o modificados
+
+```
+src/enrich/scopus_api.py   consultar(): User-Agent explícito, diagnóstico de error ampliado
+scripts/consultar-scopus.ps1   BOM UTF-8 añadido (mismo contenido)
+```
+
+### Verificación
+
+`--test` sigue con los 7 casos OK tras el cambio (no toca la lógica de
+construcción de consulta ni de extracción de respuesta, sólo la llamada de red
+y el mensaje de error). El fallo real —400 con cuerpo vacío— no se pudo
+reproducir desde ningún entorno de este proyecto: ni este contenedor ni la
+máquina donde se escribió el conector alcanzan `api.elsevier.com` (mismo
+límite ya declarado para ROR y OpenAlex). El diagnóstico es la mejor hipótesis
+disponible sin poder observar la petición real, no una causa confirmada.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «Si `e.read()` no lanza excepción, el cuerpo trae el error de Scopus» | **Falso en este caso.** El cuerpo llegó vacío — consistente con un WAF rechazando la petición antes de la aplicación, no con un error documentado de la API |
+| «Los tres scripts de `scripts/` se generaron con el mismo procedimiento» | **Falso.** Los dos anteriores tienen BOM UTF-8; el nuevo no lo tenía. No se había comprobado la codificación de bytes de un `.ps1` nuevo hasta que el usuario vio las tildes rotas |
+
+### Ambigüedades abiertas
+
+- **Si el `User-Agent` era la causa real del 400**, sigue sin confirmarse: es la explicación más probable dado un 400 sin cuerpo contra una API de Elsevier, no una certeza. Si persiste tras este cambio, el nuevo mensaje de error trae `Content-Type` y `Server` para descartar un proxy corporativo.
+- El resto, igual que el cierre anterior: límite de consulta, ventana 2023-2025 vs. 2026, `T-02`–`T-15` pendientes de `make revision`.
+
+### Próximo paso recomendado
+
+Que el usuario vuelva a correr `scripts\consultar-scopus.ps1` con estos
+cambios. Si el 400 persiste, el mensaje ahora trae `Content-Type` y `Server`
+de la respuesta — pedir que copie eso completo en vez de sólo el código de
+estado, porque distingue un rechazo de proxy/antivirus de un rechazo real de
+Elsevier.
