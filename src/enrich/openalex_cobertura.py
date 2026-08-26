@@ -99,7 +99,29 @@ def normalizar_doi(doi: str | None) -> str:
     return d
 
 
-def extraer_obras(payload: dict) -> tuple[list[dict], str | None]:
+def autores_de_la_institucion(w: dict, ror: str) -> tuple[str, str]:
+    """Quién, entre los autores de la obra, es el que trae la institución que
+    hizo matchear el filtro — y con qué nombre la declara OpenAlex.
+
+    Sin esto, revisar a mano cuál de los N autores de una obra es el vínculo
+    UFT exigiría abrir cada DOI uno por uno. El filtro de la consulta ya lo
+    sabe (`institutions.ror:…`); sólo hacía falta no descartarlo al extraer.
+    """
+    nombres, declaradas = [], []
+    for a in w.get("authorships") or []:
+        for inst in a.get("institutions") or []:
+            if (inst.get("ror") or "").rstrip("/").endswith(ror):
+                autor = (a.get("author") or {}).get("display_name")
+                if autor and autor not in nombres:
+                    nombres.append(autor)
+                declarada = inst.get("display_name")
+                if declarada and declarada not in declaradas:
+                    declaradas.append(declarada)
+                break
+    return "; ".join(nombres), "; ".join(declaradas)
+
+
+def extraer_obras(payload: dict, ror: str = "") -> tuple[list[dict], str | None]:
     """Normaliza una página de resultados y devuelve el cursor siguiente."""
     if not isinstance(payload, dict) or "results" not in payload:
         raise ContratoDesconocido("la respuesta no trae 'results'")
@@ -107,6 +129,7 @@ def extraer_obras(payload: dict) -> tuple[list[dict], str | None]:
     for w in payload.get("results") or []:
         if not isinstance(w, dict):
             continue
+        autor_uft, institucion_declarada = autores_de_la_institucion(w, ror) if ror else ("", "")
         obras.append({
             "openalex_id": w.get("id"),
             "doi": normalizar_doi(w.get("doi")),
@@ -114,6 +137,8 @@ def extraer_obras(payload: dict) -> tuple[list[dict], str | None]:
             "anio": w.get("publication_year"),
             "tipo": w.get("type"),
             "citas_openalex": w.get("cited_by_count"),
+            "autor_uft": autor_uft,
+            "institucion_declarada": institucion_declarada,
         })
     cursor = ((payload.get("meta") or {}).get("next_cursor"))
     return obras, cursor
@@ -167,15 +192,26 @@ def consultar(ror: str, cursor: str, mailto: str, pausa: float = 0.2) -> dict:
 
 # ────────────────────────────────────────────────────────────────── autotest
 
+RORTEST = "0225snd59"
+
 PAGINA = {
     "meta": {"count": 3, "next_cursor": "SIGUIENTE"},
     "results": [
         {"id": "https://openalex.org/W1", "doi": "https://doi.org/10.1/AAA",
          "title": "Ya en el universo", "publication_year": 2024,
-         "type": "article", "cited_by_count": 5},
+         "type": "article", "cited_by_count": 5,
+         "authorships": [{"author": {"display_name": "Autora Uno"},
+                           "institutions": [{"display_name": "Universidad Finis Terrae",
+                                              "ror": f"https://ror.org/{RORTEST}"}]}]},
         {"id": "https://openalex.org/W2", "doi": "https://doi.org/10.2/bbb",
          "title": "Falta, con DOI", "publication_year": 2024,
-         "type": "article", "cited_by_count": 0},
+         "type": "article", "cited_by_count": 0,
+         "authorships": [{"author": {"display_name": "Autor Dos"},
+                           "institutions": [{"display_name": "Otra Universidad",
+                                              "ror": "https://ror.org/otra"}]},
+                          {"author": {"display_name": "Autora Tres"},
+                           "institutions": [{"display_name": "Universidad Finis Terrae",
+                                              "ror": f"https://ror.org/{RORTEST}"}]}]},
         {"id": "https://openalex.org/W3", "doi": None,
          "title": "Sin DOI", "publication_year": 2025, "type": "book-chapter"},
     ],
@@ -193,8 +229,14 @@ def autotest() -> int:
          and normalizar_doi("10.1/aaa") == "10.1/aaa", None)
     caso("un DOI ausente no revienta", normalizar_doi(None) == "", None)
 
-    obras, cursor = extraer_obras(PAGINA)
+    obras, cursor = extraer_obras(PAGINA, RORTEST)
     caso("extrae la página y su cursor", len(obras) == 3 and cursor == "SIGUIENTE", cursor)
+    caso("identifica al autor con la institución que hizo matchear el filtro",
+         obras[0]["autor_uft"] == "Autora Uno"
+         and obras[0]["institucion_declarada"] == "Universidad Finis Terrae", obras[0])
+    caso("entre varios autores, sólo trae al que declara la institución",
+         obras[1]["autor_uft"] == "Autora Tres", obras[1])
+    caso("sin autorías no revienta, queda vacío", obras[2]["autor_uft"] == "", obras[2])
 
     try:
         extraer_obras({"meta": {}})
@@ -266,7 +308,7 @@ def main() -> int:
 
     obras: list[dict] = []
     if args.json:
-        pagina, _ = extraer_obras(json.loads(Path(args.json).read_text(encoding="utf-8")))
+        pagina, _ = extraer_obras(json.loads(Path(args.json).read_text(encoding="utf-8")), ror)
         obras = pagina
         total = len(obras)
     else:
@@ -281,7 +323,7 @@ def main() -> int:
                 sys.exit(f"\n  No se pudo consultar OpenAlex: {e}\n"
                          "  Si su red lo bloquea, guarde una respuesta a mano y use --json.")
             try:
-                pagina, cursor = extraer_obras(data)
+                pagina, cursor = extraer_obras(data, ror)
             except ContratoDesconocido as e:
                 CACHE.mkdir(parents=True, exist_ok=True)
                 crudo = CACHE / "ultima_respuesta.json"
