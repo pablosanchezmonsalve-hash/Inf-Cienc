@@ -2981,3 +2981,69 @@ punta, con su clave rotada. Con la captura de clave arreglada y ya probado
 que la consulta real da 818 (coincide con `scopus_export`), debería
 funcionar en un solo intento. Si funciona, el bloque que imprime al final va
 a `config/sources.yml` a mano, y T-06 queda cerrado con evidencia delante.
+
+---
+
+## Cierre · El script corrió de punta a punta — y un error metodológico que casi se cuela
+
+El usuario corrió `scripts\consultar-scopus.ps1` completo, sin volver a
+pedirle nada raro: capturó la clave en texto visible (32 caracteres),
+consultó, y confirmó `total_resultados: 818`, coincide con
+`scopus_export.n_registros_leido`. `data/enriched/scopus_api_consulta.json`
+quedó en su máquina.
+
+### El error, encontrado antes de subirlo
+
+Al pegar el bloque que imprime el script en `config/sources.yml`, la primera
+edición puso `fecha_corte: "2026-08-26"` en la entrada `scopus_export` — la
+MISMA entrada que declara el CSV descargado el 2026-07-31. Eso contradice
+directamente `docs/UPDATING_REQUEST.md` §5, que es explícito: la carga
+vigente **debe seguir sin fecha de corte**, a propósito, y lo que este
+mecanismo aporta es **para la próxima carga**, no aplicable
+retroactivamente. Ponerle una fecha de corte a un export que no la declaró
+habría sido inventar trazabilidad que la fuente no dio — exactamente lo que
+`CLAUDE.md` prohíbe. Se corrigió antes de comitear: `fecha_corte` queda
+`null`, como estaba, y el hallazgo entra en un campo nuevo y separado,
+`verificacion_api`, con su propia semántica declarada (confirmación de
+cobertura en una fecha, no fecha de corte del export).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-260 | `scopus_export.fecha_corte` sigue `null`; la confirmación de la API entra en `verificacion_api`, un campo aparte | Fusionarlos habría declarado una fecha de corte que el export nunca tuvo. `docs/UPDATING_REQUEST.md` §5 ya fija esta frontera; el error fue no releerla antes de escribir |
+| D-261 | T-06 **no se cierra** con esta corrida | Cierra cuando exista una reexportación NUEVA con fecha de corte propia. Lo de hoy es evidencia de que la cobertura no cambió desde el 31 de julio — valiosa, pero no es lo que T-06 pide |
+| D-262 | La edición de `config/sources.yml` la hizo el asistente, no el usuario a mano | Son tres campos en un archivo sensible a la indentación (YAML), con los valores exactos ya confirmados en la terminal del usuario — el riesgo de un error de tipeo en Notepad superaba el de que el asistente transcribiera mal un dato que ya tenía completo y verificado |
+
+### Archivos creados o modificados
+
+```
+config/sources.yml   scopus_export.verificacion_api (nuevo); fecha_corte se mantiene null
+PLAN.md               T-06: de "falta ejecutar" a "conector probado, T-06 sigue abierto"
+```
+
+### Verificación
+
+`python3 src/audit/run_all.py` completo tras el cambio: 29/30 reglas pasan,
+0 bloqueantes (mismo resultado que antes de tocar `sources.yml`).
+`docs/VALIDATION_REPORT.md` sin diff contra la versión ya comiteada — el
+campo nuevo no afecta ninguna regla de auditoría. YAML validado con
+`yaml.safe_load` antes de comitear.
+
+### Supuestos descartados durante la sesión
+
+| Supuesto | Qué pasó |
+|---|---|
+| «El bloque que imprime el script se puede pegar tal cual» | **Falso en este caso.** El bloque impreso (pensado para una reexportación NUEVA) no distingue esa situación de "verificar la vigente" — pegarlo literalmente en `scopus_export` habría fusionado dos hechos distintos. El script sigue correcto: es responsabilidad de quien pega, no un bug del conector |
+
+### Ambigüedades abiertas
+
+- Igual que el cierre anterior — límite de consulta resuelto (20.000/semana), rotación de la API Key expuesta pendiente de confirmar que el usuario la hizo, ventana 2023-2025 vs. 2026, `T-02`–`T-15` pendientes de `make revision`.
+- **Nueva**: si vale la pena que `docs/UPDATING_REQUEST.md` mencione explícitamente que ahora existe un conector (`scopus_api.py`) para la próxima reexportación, en vez de asumir sólo el procedimiento manual. No se tocó esta sesión.
+
+### Próximo paso recomendado
+
+Confirmar con el usuario que rotó la API Key expuesta en el chat. Después,
+sin pendiente inmediato de T-06 — queda documentado y a la espera de una
+reexportación real. Retomar `T-02`–`T-15` vía `make revision` sigue siendo
+el trabajo de mayor rendimiento disponible.
