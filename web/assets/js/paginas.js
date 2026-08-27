@@ -231,6 +231,11 @@ async function publicaciones() {
   };
   let sel = X.leerURL();
   let pagina = 1;
+  // Selección por casilla, independiente del recorte de filtros: sobrevive a
+  // cambiar de página o de filtro, porque elegir publicaciones de a una para
+  // exportarlas es justo el caso en que el lector NO quiere perder lo ya
+  // marcado por tocar un chip sin querer. Sólo se limpia a mano.
+  const seleccion = new Set();
 
   function pintar({ nuevaEntrada = false, soloTabla = false } = {}) {
     const res = X.recorte(pubs, sel);
@@ -257,12 +262,15 @@ async function publicaciones() {
     const cuerpo = document.getElementById('tabla-cuerpo');
 
     if (!res.length) {
-      cuerpo.innerHTML = `<tr><td colspan="6"><div class="vacio">
+      cuerpo.innerHTML = `<tr><td colspan="7"><div class="vacio">
         <p>Ningún resultado con este recorte.</p></div></td></tr>`;
       document.getElementById('paginacion').innerHTML = '';
+      pintarSeleccion();
       return;
     }
     cuerpo.innerHTML = pag.map(p => `<tr>
+      <td class="col-marca"><label class="solo-lectores" for="marca-${c.escapar(p.eid)}">Seleccionar «${c.escapar(p.titulo)}»</label>
+        <input type="checkbox" class="chk-fila" id="marca-${c.escapar(p.eid)}" data-eid="${c.escapar(p.eid)}" ${seleccion.has(p.eid) ? 'checked' : ''}></td>
       <td>${c.anio(p.anio)}</td>
       <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>`
         : c.escapar(p.titulo)}
@@ -285,6 +293,22 @@ async function publicaciones() {
     const ant = document.getElementById('ant'), sig = document.getElementById('sig');
     if (ant) ant.onclick = () => { pagina--; pintar({ soloTabla: true }); };
     if (sig) sig.onclick = () => { pagina++; pintar({ soloTabla: true }); };
+    pintarSeleccion(pag);
+  }
+
+  /** Sincroniza la casilla «marcar todo» (indeterminada si sólo parte de la
+      página está marcada) y el contador + estado del botón de exportar. */
+  function pintarSeleccion(pag) {
+    const todo = document.getElementById('marcar-todo');
+    if (todo && pag) {
+      const marcadas = pag.filter(p => seleccion.has(p.eid)).length;
+      todo.checked = pag.length > 0 && marcadas === pag.length;
+      todo.indeterminate = marcadas > 0 && marcadas < pag.length;
+    }
+    const n = seleccion.size;
+    document.getElementById('estado-seleccion').textContent =
+      n ? `${n} seleccionada${n === 1 ? '' : 's'}` : '';
+    document.getElementById('exportar-seleccion').disabled = n === 0;
   }
 
   // Mismo escucha delegado que el explorador: los controles se repintan
@@ -303,6 +327,9 @@ async function publicaciones() {
     }
     if (e.target.closest('#limpiar-recorte')) { sel = {}; pagina = 1; pintar({ nuevaEntrada: true }); }
     if (e.target.id === 'exportar') exportar(X.recorte(pubs, sel));
+    if (e.target.id === 'exportar-seleccion') {
+      exportar(pubs.filter(p => seleccion.has(p.eid)), { esSeleccion: true });
+    }
   });
 
   document.addEventListener('input', c.debounce(e => {
@@ -312,27 +339,51 @@ async function publicaciones() {
     pagina = 1; pintar();
   }, 250));
 
+  // 'change', no 'click': una casilla también cambia con teclado (barra
+  // espaciadora), y delegar en 'click' se la habría perdido.
+  document.addEventListener('change', e => {
+    if (e.target.id === 'marcar-todo') {
+      const res = X.recorte(pubs, sel);
+      const pag = res.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+      pag.forEach(p => e.target.checked ? seleccion.add(p.eid) : seleccion.delete(p.eid));
+      pintar({ soloTabla: true });
+      return;
+    }
+    const chk = e.target.closest('.chk-fila');
+    if (chk) {
+      chk.checked ? seleccion.add(chk.dataset.eid) : seleccion.delete(chk.dataset.eid);
+      pintarSeleccion(X.recorte(pubs, sel).slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA));
+    }
+  });
+
   addEventListener('popstate', () => { sel = X.leerURL(); pagina = 1; pintar(); });
   pintar();
 }
 
 /** La exportación arrastra la procedencia: un CSV sin fecha de corte deja de
-    ser interpretable en cuanto sale del sitio. */
-async function exportar(filas) {
+    ser interpretable en cuanto sale del sitio. `esSeleccion` distingue en la
+    propia cabecera si son las publicaciones marcadas a mano o todo el
+    recorte de filtros — quien reabra el CSV meses después necesita saber
+    cuál de las dos cosas está mirando, no sólo cuántas filas tiene. */
+async function exportar(filas, { esSeleccion = false } = {}) {
   const meta = await c.cargar('meta.json');
   const cab = [
     `# ${meta.institucion} — ${meta.titulo_plataforma}`,
     `# Fuentes: ${meta.fuentes.join(', ')} | Ventana: ${meta.ventana.inicio}-${meta.ventana.fin}`,
     `# Citas actualizadas al ${meta.fecha_corte_citas} | Exportado desde el build ${meta.fecha_build}`,
     `# ${meta.advertencia_global}`,
-    `# Subconjunto exportado: ${filas.length} de ${meta.denominadores.universo_total} publicaciones`,
+    esSeleccion
+      ? `# Selección manual: ${filas.length} ${filas.length === 1 ? 'publicación marcada' : 'publicaciones marcadas'} una por una, de ${meta.denominadores.universo_total} en total.`
+      : `# Subconjunto exportado: ${filas.length} de ${meta.denominadores.universo_total} publicaciones`,
   ].join('\n');
   const cols = ['eid', 'anio', 'titulo', 'fuente', 'tipo', 'doi', 'citas', 'fwci', 'percentil_citacion', 'n_paises'];
   const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const csv = [cab, cols.join(','), ...filas.map(f => cols.map(k => esc(f[k])).join(','))].join('\n');
   const url = URL.createObjectURL(new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8' }));
   const a = document.createElement('a');
-  a.href = url; a.download = `publicaciones-${meta.fecha_build}.csv`; a.click();
+  a.href = url;
+  a.download = `publicaciones${esSeleccion ? '-seleccion' : ''}-${meta.fecha_build}.csv`;
+  a.click();
   URL.revokeObjectURL(url);
 }
 
