@@ -1729,6 +1729,13 @@ svg.chart .trama { pointer-events: none; }
   border-radius: var(--radio-s); background: var(--plano); color: var(--tinta);
 }
 
-.acciones-tabla { display: flex; gap: var(--e3); margin-bottom: var(--e4); }
+.acciones-tabla { display: flex; align-items: center; gap: var(--e3); margin-bottom: var(--e4); }
+.acciones-tabla #estado-seleccion { margin-right: auto; font-weight: 650; color: var(--tinta-2); }
+
+/* Columna de casillas de selección en Publicaciones: ancho fijo, angosto,
+   sin el padding lateral que las demás celdas llevan por defecto —si no, el
+   checkbox queda descentrado respecto de su propia columna. */
+.col-marca { width: 2.4rem; text-align: center; padding-inline: .4rem !important; }
+.col-marca input[type="checkbox"] { width: 1.1rem; height: 1.1rem; margin: 0; cursor: pointer; }
 
 .enlace-lista { font-weight: 650; font-size: var(--t-s); white-space: nowrap; }

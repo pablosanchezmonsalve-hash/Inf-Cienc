@@ -28,10 +28,15 @@
 
     <div class="explorador-resultado">
       <div class="acciones-tabla">
-        <button class="boton boton-primario" id="exportar">Exportar CSV</button>
+        <span id="estado-seleccion" class="nota" aria-live="polite"></span>
+        <button class="boton" id="exportar-seleccion" disabled>Exportar selección</button>
+        <button class="boton boton-primario" id="exportar">Exportar CSV (todo el recorte)</button>
       </div>
       <div class="tabla-envoltura"><table>
-    <thead><tr><th scope="col">Año</th><th scope="col">Título y autores UFT</th><th scope="col">Fuente</th>
+    <thead><tr>
+      <th scope="col" class="col-marca"><label class="solo-lectores" for="marcar-todo">Seleccionar todas las publicaciones de esta página</label>
+        <input type="checkbox" id="marcar-todo"></th>
+      <th scope="col">Año</th><th scope="col">Título y autores UFT</th><th scope="col">Fuente</th>
       <th scope="col">Tipo</th><th scope="col" class="num">Citas</th><th scope="col" class="num">FWCI</th></tr></thead>
     <tbody id="tabla-cuerpo"></tbody></table></div>
   

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ddbdb7d` · Merge remote-tracking branch 'origin/main' into claude/state-review-ne
+Último commit: `1dc2e3b` · Merge remote-tracking branch 'origin/claude/state-review-next-steps-wz
 Snapshot: 2026-08-27
 
 ---
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 347
+## Decisiones tomadas: 350
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

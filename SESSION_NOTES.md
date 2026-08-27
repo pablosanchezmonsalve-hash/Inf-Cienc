@@ -5282,3 +5282,120 @@ web/assets/js/vista_explorador.js  aviso cruzado en el corte P-07 (unidad)
 ### Próximo paso recomendado
 
 Seguir con los puntos 5 y 6 del pedido original, que siguen abiertos.
+
+---
+
+## Cierre · Puntos 5 y 6 del pedido original: panel de huecos de autor, selección múltiple en Publicaciones
+
+### Punto 5 — Por qué hay fichas sin identidad consolidada, y panel para revisar ORCID/unidad/identidad
+
+Investigado antes de construir nada. `authors.json` ya trae la respuesta
+campo a campo:
+
+- **538 fichas publicadas**, de 589 formas de firma detectadas: 84 se
+  fusionaron en 37 personas (34 por revisión humana, 3 por variante
+  ortográfica), 4 se descartaron por no ser personas. Las 501 restantes
+  —la mayoría de las 538 fichas— siguen sin consolidar porque nadie las
+  ha revisado todavía, no porque algo esté roto (`D-08`: el pipeline
+  nunca fusiona por heurística).
+- **`identidad_no_consolidada: true`** (20 de 538) es una bandera MÁS
+  específica y más seria que «no consolidada a secas»: marca firmas con
+  MÁS DE UN Scopus Author ID sin una consolidación humana que lo explique
+  — la duda concreta de que dos personas distintas compartan una misma
+  forma de firma (`03_authors.py`, línea ~349). Verificado contra
+  `build_review.py`: esos 20 casos ya están en la cola «Varios Scopus ID»,
+  con 0 pendientes — la bandera puede seguir en `true` después de una
+  revisión humana que concluyó «son personas distintas», que es
+  exactamente el resultado correcto a mantener visible, no un pendiente
+  sin mirar.
+- **258/538 (48 %) sin ORCID.** **217/538 (40 %) con unidad académica
+  «No determinada»** — la afiliación cruda no encajó en ningún patrón de
+  extracción.
+
+Se construyó `src/review/build_author_gaps.py` ->
+`internal/revision_huecos_autores.html`: tabla filtrable (sin ORCID /
+unidad no determinada / identidad sin consolidar), ordenable por columna,
+buscable por nombre, con la afiliación cruda como evidencia en los casos
+sin unidad (de `matching_log.csv`) y enlace directo a la ficha pública de
+cada autor. A diferencia de `revision_identidad.html` o
+`revision_cobertura_openalex.html`, esta herramienta NO tiene un
+veredicto sí/no que aplicar: «sin ORCID» y «unidad no determinada» son
+hechos del dato, no ambigüedades — el botón «Exportar vista filtrada»
+sólo deja constancia de qué se miró, no alimenta ningún script de
+aplicación. Para «identidad sin consolidar» sí existe una cola de
+decisión real, y el panel remite ahí en vez de duplicarla.
+
+Un hallazgo curioso que la propia evidencia dejó a la vista, sin
+perseguirlo más: la ficha de «Pedreros C.» trae la cadena cruda «Critical
+Care Department, Finis Terrae University **Faculty of Medicine**,
+Santiago...» — dice «Faculty of Medicine» literalmente y aun así quedó
+«No determinada». Es exactamente el tipo de caso que este panel existe
+para que el usuario encuentre — no se investigó la causa raíz ni se
+corrigió, porque no era parte de lo pedido.
+
+### Punto 6 — Selección múltiple en Publicaciones
+
+Casilla por fila + «marcar todo en esta página» + contador + botón
+«Exportar selección» (junto al «Exportar CSV» ya existente, que sigue
+exportando el recorte completo de filtros — ninguna funcionalidad
+existente se quitó). La selección es un `Set` de `eid` que **sobrevive a
+cambiar de página y de filtro**: elegir publicaciones de a una para
+exportarlas es justo el caso en que perder lo marcado por pasar de
+página sería peor que no tener la función. El CSV exportado declara en
+su propia cabecera si es una selección manual o el recorte completo —
+mismo criterio que ya regía la cabecera de procedencia.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-330 | El panel de huecos de autor no exporta veredictos ni tiene script de aplicación | A diferencia de las ambigüedades P-03/P-04/OpenAlex, «sin ORCID» y «unidad no determinada» no son preguntas con un sí/no que decidir — son hechos del dato que hay que investigar por fuera de la herramienta |
+| D-331 | «Exportar selección» se agrega AL LADO de «Exportar CSV», no lo reemplaza | Son dos necesidades distintas — todo el recorte filtrado vs. una lista elegida a mano — y el usuario no pidió quitar la primera |
+| D-332 | La selección de publicaciones persiste al cambiar de página o de filtro, y sólo se limpia si el usuario deselecciona a mano | Perder la selección por un clic accidental en un chip de filtro sería el tipo de sorpresa que vuelve inútil a la función |
+
+### Verificación
+
+`internal/revision_huecos_autores.html`: probado con Playwright contra el
+archivo local (sin servidor) — 0 errores de consola, filtro «unidad no
+determinada» reduce correctamente a 217/538. Selección múltiple en
+Publicaciones: probado con Playwright contra el sitio construido —
+selección persiste entre páginas (verificado marcando en página 1,
+navegando a página 2 y de vuelta), «marcar todo» selecciona exactamente
+las 50 filas de la página visible, la descarga real produce un CSV con
+sólo las filas marcadas y la cabecera correcta. Auditoría completa,
+`build_all.py` (compuerta pública/interna: 0 fallas), `06_assemble_site.py`
+(10 páginas), y `node src/verify/run_all.mjs` completo — los seis
+bloques (contraste WCAG, estructura, flujos, responsive, higiene, peso)
+sin fallos, corridos DESPUÉS de todos los cambios.
+
+### Archivos creados o modificados
+
+```
+src/review/build_author_gaps.py      nuevo — genera el panel de huecos de autor
+Makefile                             target huecos-autores: artefactos
+web/publicaciones.html               columna de casillas, botón "Exportar selección"
+web/assets/js/paginas.js             seleccion (Set persistente), pintarSeleccion(),
+                                      exportar() con parámetro esSeleccion
+web/assets/css/app.css               .col-marca, #estado-seleccion
+```
+
+### Ambigüedades abiertas
+
+- Los 501 casos «formas de firma sin consolidar» (distintos de los 20
+  «identidad_no_consolidada») no tienen ambigüedad que resolver por sí
+  solos: son firmas ÚNICAS sin variante detectada, o variantes que nadie
+  ha mirado todavía. Si el usuario quiere acelerar esa consolidación,
+  es un pedido aparte — el panel de hoy no lo cubre.
+- El caso «Pedreros C.» / «Faculty of Medicine, Finis Terrae University»
+  no detectado: queda como hallazgo declarado en el propio panel, sin
+  investigar la causa raíz de la extracción.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Los siete puntos del pedido original quedan atendidos: 3 corregidos y
+verificados con captura (unidad académica, red de coautoría, etiquetas
+recortadas), 1 explicado sin ser bug (acceso abierto), 1 declarado por
+decisión del usuario sin unificar (divergencia de criterio del treemap),
+y 2 nuevas herramientas construidas y verificadas (huecos de autor,
+selección múltiple). Ninguna acción de código pendiente y urgente.
