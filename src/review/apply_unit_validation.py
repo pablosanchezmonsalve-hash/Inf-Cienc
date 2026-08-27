@@ -42,6 +42,11 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
+    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 
 ROOT = Path(__file__).resolve().parents[2]
 CSV = ROOT / "internal" / "unit_validation_decisions.csv"

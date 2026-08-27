@@ -43,6 +43,11 @@ import math
 import pathlib
 import re
 import sys
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
+    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 
 RAIZ = pathlib.Path(__file__).resolve().parents[2]
 HOJA = RAIZ / "web" / "assets" / "css" / "app.css"

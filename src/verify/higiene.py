@@ -6,6 +6,11 @@ Uso:  python3 src/verify/higiene.py [dist]
 """
 import re, pathlib, json, sys
 
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta el print de fallos
+    # ("✗") si alguno aparece. Mismo patrón que src/enrich/orcid_openalex.py.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 DIST = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else 'dist')
 css = (DIST / 'assets/css/app.css').read_text(encoding='utf-8')
 js = '\n'.join(p.read_text(encoding='utf-8') for p in sorted((DIST / 'assets/js').glob('*.js')))

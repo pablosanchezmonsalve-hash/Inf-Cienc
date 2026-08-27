@@ -18,6 +18,11 @@ import subprocess
 import sys
 
 import common_build as b
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
+    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 
 DIST = b.ROOT / "dist"
 WEB = b.ROOT / "web"
@@ -99,7 +104,8 @@ def prerenderizar() -> None:
     guion = b.ROOT / "src" / "build" / "prerender.mjs"
     try:
         r = subprocess.run(["node", str(guion), str(DIST)],
-                           capture_output=True, text=True, check=False)
+                           capture_output=True, encoding="utf-8", errors="replace",
+                           check=False)
     except FileNotFoundError:
         print("  pre-renderizado  : OMITIDO — no hay Node en el entorno.")
         print("                     El sitio requerirá JavaScript para mostrar contenido.")

@@ -52,6 +52,11 @@ import sys
 from collections import defaultdict, deque
 from itertools import combinations
 from pathlib import Path
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
+    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 
 # common_build se importa DENTRO de main() a propósito. Las funciones de este
 # módulo son puras —reciben pares y devuelven estructuras— y el análisis de
