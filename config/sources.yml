@@ -168,6 +168,27 @@ fuentes:
       apellido e inicial es una hipótesis: cada asignación viaja con su
       confianza y los conflictos se encolan sin resolver (D-08).
 
+  crossref_cobertura_api:
+    nombre: "Crossref — REST API (evidencia de cobertura OpenAlex, V2-26 bis)"
+    tipo: "api"
+    endpoint: "https://api.crossref.org/works/{doi}"
+    autenticacion: "ninguna (mailto para el polite pool)"
+    conector: "src/enrich/openalex_cobertura_crossref.py"
+    rol: "enriquecimiento"
+    aporta:
+      - afiliacion_declarada_por_la_publicacion_al_depositar
+      - tipo_documental_segun_crossref
+    salida: "internal/openalex_cobertura_crossref.csv"
+    fecha_corte: null            # cada consulta lleva la suya
+    nota: >-
+      Mismo endpoint que crossref_api, pero otra pregunta: no busca el ORCID
+      de un autor, trae la afiliación que la publicación declaró en su
+      momento para decidir los 414 casos de internal/openalex_cobertura.csv
+      (V2-26). Es evidencia adicional para la revisión humana, no una
+      segunda opinión que decida por nadie (D-08) ni un ajuste del corpus
+      (D-206). Empareja por apellido contra los autores que Crossref lista;
+      no siempre encuentra una coincidencia única.
+
   orcid_api:
     nombre: "ORCID — Public API v3.0"
     tipo: "api"

@@ -36,7 +36,7 @@ exports, y sin identificador persistente no hay identidad de autor estable.
 |---|---|---|---|---|
 | Scopus | Export CSV manual | — | `src/audit/common.py` (lectura) | `data/interim/` |
 | SciVal | Export XLSX manual | — | `src/audit/common.py` (lectura) | `data/interim/` |
-| Crossref | REST, `api.crossref.org/works/{doi}` | Ninguna (`mailto` para el *polite pool*) | `src/enrich/orcid_crossref.py` | `data/enriched/authors_orcid.csv` |
+| Crossref | REST, `api.crossref.org/works/{doi}` | Ninguna (`mailto` para el *polite pool*) | `src/enrich/orcid_crossref.py`, `src/enrich/openalex_cobertura_crossref.py` | `data/enriched/authors_orcid.csv`, `internal/openalex_cobertura_crossref.csv` |
 | ORCID | Public API v3.0, `pub.orcid.org` | Token `client_credentials`, alcance `/read-public`, gratuito | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | `data/enriched/orcid_verificacion.csv`, `internal/orcid_*.csv` |
 
 ### 2.1 Crossref — de dónde salió el primer ORCID
@@ -55,6 +55,25 @@ las firmas UFT detectadas en esa misma publicación por apellido e inicial.
 - **Cortesía y caché:** una pausa de 0,12 s entre consultas y caché en disco,
   de modo que reejecutar no vuelve a golpear la API.
 - **Aportó:** 174 asignaciones.
+
+### 2.1 bis Crossref — evidencia para la brecha de cobertura OpenAlex (V2-26 bis)
+
+`src/enrich/openalex_cobertura_crossref.py` pregunta al mismo endpoint algo
+distinto: no busca un ORCID, trae la afiliación que la propia publicación
+declaró al depositar, para los 414 casos de `internal/openalex_cobertura.csv`
+(V2-26) donde OpenAlex atribuye la obra a la UFT y el universo no la tiene.
+
+- **Qué resuelve:** hasta esta corrida, la única evidencia para decidir esos
+  414 casos era la propia desambiguación de OpenAlex — una fuente opinando
+  sobre sí misma. Crossref aporta una lectura independiente.
+- **Qué NO hace:** no decide nada (`D-08`), no toca `openalex_cobertura.csv`
+  ni su columna `resolucion`, y no promueve ningún caso al universo publicado
+  (`D-206`). Empareja por apellido contra los autores que Crossref lista; no
+  siempre encuentra una coincidencia única.
+- **Corrida el 2026-08-27** contra los 385 casos con DOI: 0 errores de red,
+  59 con afiliación recuperada.
+- **Salida:** `internal/openalex_cobertura_crossref.csv` — capa interna, no
+  entra en `dist/`.
 
 ### 2.2 ORCID — tres preguntas distintas al mismo registro
 
