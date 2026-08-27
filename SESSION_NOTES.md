@@ -4790,3 +4790,17 @@ está aplicado, verificado con el instrumento real (no una estimación) y
 documentado. No quedan ambigüedades abiertas de esta tarea. Si el usuario
 quiere seguir extendiendo (otras páginas, otro tipo de gráfico), es
 trabajo nuevo, no continuación de un pendiente.
+
+### Adenda — extensión a las 10 páginas antes de la hora pedida
+
+El pedido original decía "la plataforma", y hasta este punto el Bento
+Grid sólo vivía en `produccion.html`. Con el tiempo que quedaba antes de
+la hora que el usuario fijó, se extendió lo de menor riesgo y mayor
+alcance: `--radio` general 8px→12px y sombra + elevación en `.ficha`
+(las tarjetas KPI, componente compartido por las diez páginas) — cambio
+puramente cosmético, sin tocar contraste ni layout, así que no arriesgaba
+las verificaciones ya en verde. Reverificado completo otra vez
+(`validar_paleta.py`, build, `run_all.mjs`): 0 fallos. Confirmado a ojo
+en Chrome, `index.html`, luz y oscuro. No se tocó ninguna otra propiedad
+ni se extendió el treemap/mapa de calor a más páginas —eso sí sería
+trabajo nuevo, no esta extensión de bajo riesgo.
