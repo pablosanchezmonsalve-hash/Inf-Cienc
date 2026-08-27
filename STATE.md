@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `b27e5e8` · Bento Grid premium: jerarquía institucional, treemap y mapa de calor
+Último commit: `5b0f837` · Guarda el punto de retoma: paleta premium sin cerrar, pendiente mostra
 Snapshot: 2026-08-27
 
 ---
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 334
+## Decisiones tomadas: 335
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -4713,3 +4713,80 @@ aplicarlo.
    páginas.
 3. Extender el treemap/mapa de calor a otras secciones si el usuario lo
    pide — hoy sólo viven en `produccion.html`, primera integración.
+
+---
+
+## Cierre · D-327 decidido: magenta acento, con autorización final del usuario
+
+El usuario vio las 5 capturas reales (luz/oscuro, treemap y mapa de calor)
+y, antes de dormir, dio autorización explícita para decidir con criterio
+profesional: *"Estás autorizado a realizar cualquier cambio siempre y
+cuando se sustente en fuentes confiables y se aplique con criterio
+profesional"*, pidiendo además alejarse del aspecto genérico de una
+interfaz "hecha por Claude" y tener una versión terminada para la mañana
+siguiente.
+
+### Decisión
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-327 | `--bento-acento` pasa de `--serie-6` (conservador) a **magenta** `#a8256b`/`#ff5fa8` | De los dos candidatos que ya pasaban umbral, magenta es más consistente entre temas (5,86:1/6,67:1 contra `--plano` vs 4,65:1/9,04:1 del azul hielo, más dispar) y es el que de verdad cumple "acento de alto contraste" —una de las dos direcciones que el usuario pidió en el mensaje original—, en vez de una elección que sólo evitaba el riesgo |
+
+### Un hallazgo real del propio instrumento, no una formalidad
+
+Se integró `--bento-acento` a `src/design/validar_paleta.py` (antes sólo
+se había medido con un script aislado) para que quede bajo el mismo
+instrumento que audita el resto del sistema. Al correrlo sobre `app.css`
+de verdad, **encontró un fallo real que la medición aislada no vio**:
+contraste 2,26:1 en vez del 6,53:1 esperado. Causa: la regla se probó
+también dentro del ámbito de `.banda-contraste` (una banda narrativa
+oscura en los dos temas, componente sin relación con el tablero Bento),
+donde `--bento-acento` no está redefinido y cae sobre un suelo que no le
+corresponde —una combinación que nunca ocurre en el sitio real, porque
+`modern-ui.css` y las bandas narrativas son sistemas separados—. Se movió
+la regla a una lista aparte (`REGLAS_BENTO`) que sólo se mide en `:root`,
+y con eso vuelve a medir lo que de verdad importa: 6,53:1/5,86:1 (claro),
+5,37:1/6,67:1 (oscuro), ΔE 23,1/22,9 frente a la advertencia. Queda dicho
+porque es la clase de error que una medición aislada, sin integrarla al
+instrumento real, no habría atrapado nunca.
+
+### Verificación
+
+`validar_paleta.py` → SISTEMA CROMÁTICO VÁLIDO. Build completo + ensamblado
+sin fallas nuevas. `node src/verify/run_all.mjs` completo de nuevo: 0
+fallos en contraste, estructura, consola, flujos, responsive, higiene,
+peso. Confirmado a ojo en Chrome (dark mode): el breadcrumb del treemap
+("UFT › Facultad de Medicina y Salud") se ve en magenta sobre la tarjeta
+oscura, legible y distintivo.
+
+### Sobre "alejarse del modelo clásico de Claude"
+
+Interpretación aplicada con criterio, no adivinada al azar: se mantuvo la
+identidad institucional (D-144/D-145 intactas — `--marca`, `--serie-1/2`,
+`--aviso-*` sin tocar) y se concentró el cambio en el acento de los
+módulos NUEVOS (Bento/treemap/heatmap), que es lo que el usuario
+realmente pidió rediseñar. No se reescribió el fondo/superficie de las 10
+páginas existentes —eso habría sido un cambio de identidad completo, sin
+la misma vuelta de medición y confirmación que este proyecto exige para
+cualquier color nuevo (`docs/DESIGN_SYNC_GUIDE.md` §7), y arriesgar las
+verificaciones ya en verde de todo el sitio por un objetivo ("no parecer
+Claude") que es de percepción, no medible con el mismo rigor que el
+contraste. Queda declarado como interpretación, no como hecho, para que
+quien retome pueda estar de acuerdo o corregir el rumbo.
+
+### Archivos modificados
+
+```
+web/assets/css/app.css              --bento-acento = magenta (D-327)
+src/design/validar_paleta.py        REGLAS_BENTO + chequeo ΔE dedicado
+SESSION_NOTES.md                    este cierre
+```
+Sin commitear todavía al escribir esto — sigue en la misma sesión.
+
+### Estado al momento de dormir el usuario
+
+Todo lo pedido en el mensaje "actúa como ingeniero principal + diseñador"
+está aplicado, verificado con el instrumento real (no una estimación) y
+documentado. No quedan ambigüedades abiertas de esta tarea. Si el usuario
+quiere seguir extendiendo (otras páginas, otro tipo de gráfico), es
+trabajo nuevo, no continuación de un pendiente.

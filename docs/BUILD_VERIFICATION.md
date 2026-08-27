@@ -2,7 +2,7 @@
 
 Generado por `src/build/05_verify_public_layer.py`. Reejecutable.
 
-- Artefactos revisados: **547** (2269 KB)
+- Artefactos revisados: **548** (2278 KB)
 - Fichas de autor: **538**
 - Campos de capa interna vigilados: `afiliacion_declarada_raw`, `metodo_blando`, `metodo_duro_publicacion`, `confianza`, `resolucion`, `clave_normalizada`, `clave_apellido`, `cadena_afiliacion`
 
