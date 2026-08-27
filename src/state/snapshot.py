@@ -33,9 +33,10 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+
 if sys.platform == "win32":
     # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
-    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
+    # con caracteres como "→"/"✗"/"⚠". Mismo patrón que src/enrich/orcid_openalex.py.
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
@@ -124,7 +125,11 @@ def leer(path: str) -> str:
 
 def git(*args: str) -> str:
     try:
-        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True,
+        # -c i18n.logOutputEncoding=UTF-8: si alguien configurara otra
+        # codificación de log a nivel de usuario, sin esto errors="replace"
+        # metería U+FFFD en STATE.md en silencio en vez de fallar.
+        return subprocess.run(["git", "-c", "i18n.logOutputEncoding=UTF-8", *args],
+                              cwd=ROOT, capture_output=True,
                               encoding="utf-8", errors="replace", timeout=10).stdout.strip()
     except Exception:
         return ""
