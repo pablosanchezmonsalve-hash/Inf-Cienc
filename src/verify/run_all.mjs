@@ -70,6 +70,11 @@ const PASOS = [
 const correr = (cmd, args) => new Promise((res) => {
   const p = spawn(cmd, args, { env: { ...process.env, PUERTO: String(PUERTO), DIST } });
   let salida = '';
+  // Sin esto, un corte de chunk (64 KB) a mitad de una secuencia multibyte
+  // -por ejemplo, la salida de higiene.py- puede meter un carácter de
+  // reemplazo en vez de decodificar UTF-8 correctamente.
+  p.stdout.setEncoding('utf8');
+  p.stderr.setEncoding('utf8');
   p.stdout.on('data', (d) => { salida += d; });
   p.stderr.on('data', (d) => { salida += d; });
   p.on('close', (codigo) => res({ codigo, salida }));

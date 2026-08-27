@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades revisar-cobertura-openalex kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades revisar-cobertura-openalex cobertura-crossref kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -121,12 +121,22 @@ revision: auditoria
 validar-unidades: auditoria
 	python3 src/review/build_unit_validation.py
 
+# V2-26 bis: consulta Crossref por DOI y trae, para el autor que OpenAlex
+# marcó como UFT, la afiliación que la propia publicación declaró — evidencia
+# independiente de la desambiguación de OpenAlex, no una segunda opinión que
+# se fusione con la primera (D-08). Escribe
+# internal/openalex_cobertura_crossref.csv; build_openalex_review.py la
+# incorpora sola si el archivo existe. Requiere `make cobertura` antes.
+cobertura-crossref:
+	python3 src/enrich/openalex_cobertura_crossref.py
+
 # V2-26: genera internal/revision_cobertura_openalex.html — herramienta
 # interactiva para decidir, caso por caso, si cada una de las obras que
 # OpenAlex atribuye a la UFT y el universo no tiene es producción real fuera
 # de Scopus, un error de atribución, o un tipo documental excluido a
 # propósito. NO modifica el universo publicado (D-206): sólo deja constancia
-# de la revisión en internal/openalex_cobertura.csv. Tras exportar el CSV:
+# de la revisión en internal/openalex_cobertura.csv. Incorpora evidencia de
+# Crossref si `make cobertura-crossref` ya se corrió. Tras exportar el CSV:
 #   python3 src/review/apply_openalex_review.py --dry-run
 #   python3 src/review/apply_openalex_review.py
 revisar-cobertura-openalex:

@@ -24,6 +24,16 @@
 #   función que produce algo lo devuelve con `return`, y quien llama lo
 #   recibe con `$x = Nombre-Funcion`.
 
+# PowerShell decodifica la salida de un comando nativo (& $py ...) con
+# [Console]::OutputEncoding, no con la codificación de Python. Python 3.7+
+# escribe stdout en UTF-8 en Windows por defecto, así que sin esta línea
+# cualquier "→"/"✗"/"⚠" que un script imprima llega aquí re-interpretado con
+# la página de códigos del sistema (CP850/1252 en un Windows en español) y
+# sale como mojibake -mismo defecto que este proyecto corrigió del lado de
+# Python (docs/DECISIONS.md), pero del lado de PowerShell. Se fija una sola
+# vez aquí en vez de en los seis asistentes.
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 function Titulo($t) {
     Write-Host ""
     Write-Host ("=" * 70) -ForegroundColor DarkCyan

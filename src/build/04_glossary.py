@@ -13,6 +13,12 @@ Salidas:
 from __future__ import annotations
 
 import re
+import sys
+
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
+    # con caracteres como "→"/"✗"/"⚠". Mismo patrón que src/enrich/orcid_openalex.py.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 import common_build as b
 

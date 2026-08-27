@@ -44,6 +44,12 @@ import pathlib
 import re
 import sys
 
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
+    # con caracteres como "→"/"✗"/"⚠". Mismo patrón que src/enrich/orcid_openalex.py.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+
 RAIZ = pathlib.Path(__file__).resolve().parents[2]
 HOJA = RAIZ / "web" / "assets" / "css" / "app.css"
 
@@ -196,6 +202,17 @@ REGLAS = [
     ("--boton-tinta",         "--accion",       4.5, "tinta del botón primario"),
 ]
 
+# --bento-acento NO va en REGLAS: esa lista se mide también dentro de
+# `.banda-contraste` (más abajo), que es oscura en los dos temas y no
+# redefine este token —comprobado, cae a 2,26:1 ahí—. El acento del tablero
+# nunca aparece dentro de una banda narrativa (son componentes separados:
+# `modern-ui.css` vs `web/assets/css/app.css` §bandas), así que probarlo en
+# ese ámbito mide una combinación que no existe en el sitio.
+REGLAS_BENTO = [
+    ("--bento-acento", "--superficie", 4.5, "enlace/acento del tablero (D-327)"),
+    ("--bento-acento", "--plano",      4.5, "acento sobre el fondo de página"),
+]
+
 # El segundo suelo de banda lleva figuras, así que tiene que sostener la tinta
 # fina, el color del dato y —sobre todo— la marca de ausencia. Ese último piso
 # es el que fija cuánto puede oscurecerse el papel: es la regla que impide
@@ -244,6 +261,7 @@ def main() -> None:
     for tema in ("claro", "oscuro"):
         print(f"\n  {tema.upper()}")
         fallos += medir(T, REGLAS, tema)
+        fallos += medir(T, REGLAS_BENTO, tema)
         # Blanco sobre la marca: es donde va el título de la cabecera.
         r = contraste("#ffffff", val("--marca", tema))
         ok = r >= 4.5
@@ -270,6 +288,17 @@ def main() -> None:
     print("\n  SEPARACIÓN DATO ↔ ADVERTENCIA (OKLab ΔE)")
     for tema in ("claro", "oscuro"):
         d = delta_e(val("--serie-1", tema), val("--aviso-borde", tema))
+        ok = d >= PISO_DE
+        fallos += 0 if ok else 1
+        print(f"    {'OK  ' if ok else 'FALLA'} ΔE {d:5.1f} (piso {PISO_DE:.0f})  {tema}")
+
+    # ---- 2 bis. --bento-acento (D-327) frente a la misma advertencia. No es
+    # un dato categórico como --serie-1, pero es el acento que el tablero usa
+    # para llamar la atención, y confundirlo con la advertencia sería el
+    # mismo error que esta regla ya existe para prevenir.
+    print("\n  SEPARACIÓN --bento-acento ↔ ADVERTENCIA (OKLab ΔE)")
+    for tema in ("claro", "oscuro"):
+        d = delta_e(val("--bento-acento", tema), val("--aviso-borde", tema))
         ok = d >= PISO_DE
         fallos += 0 if ok else 1
         print(f"    {'OK  ' if ok else 'FALLA'} ΔE {d:5.1f} (piso {PISO_DE:.0f})  {tema}")

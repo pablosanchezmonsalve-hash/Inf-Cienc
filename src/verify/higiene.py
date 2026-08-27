@@ -6,9 +6,21 @@ Uso:  python3 src/verify/higiene.py [dist]
 """
 import re, pathlib, json, sys
 
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta el print de fallos
+    # ("✗") si alguno aparece. Mismo patrón que src/enrich/orcid_openalex.py.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 DIST = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else 'dist')
-css = (DIST / 'assets/css/app.css').read_text(encoding='utf-8')
-js = '\n'.join(p.read_text(encoding='utf-8') for p in sorted((DIST / 'assets/js').glob('*.js')))
+# Todo *.css bajo assets/css/, no solo app.css: modern-ui.css es estructural
+# y no declara color propio (docs/DESIGN_SYNC_GUIDE.md §0), pero SÍ consume
+# tokens de app.css, y una hoja que el chequeo no lee es una hoja que este
+# instrumento no puede confirmar que use bien lo que declara la otra.
+css = '\n'.join(p.read_text(encoding='utf-8') for p in sorted((DIST / 'assets/css').glob('*.css')))
+# rglob, no glob: web/assets/js/visualizations/*.js quedaba fuera con el
+# patrón no recursivo, así que higiene.py llevaba dando por buenos
+# treemap.js y heatmap.js sin haberlos mirado nunca.
+js = '\n'.join(p.read_text(encoding='utf-8') for p in sorted((DIST / 'assets/js').rglob('*.js')))
 html = '\n'.join(p.read_text(encoding='utf-8') for p in sorted(DIST.glob('*.html')))
 marcado = html + '\n' + js
 
