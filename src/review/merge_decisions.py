@@ -44,6 +44,12 @@ from pathlib import Path
 
 import pandas as pd
 
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto, que no tiene "→": revienta
+    # el print de cambios de veredicto antes de escribir la fusión (mismo bug
+    # que src/enrich/orcid_openalex.py).
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import decisiones as D  # noqa: E402
 

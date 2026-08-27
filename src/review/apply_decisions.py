@@ -42,6 +42,12 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto, que no tiene "→": revienta
+    # el print de cobertura antes de escribir las decisiones (mismo bug que
+    # src/enrich/orcid_openalex.py).
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 import decisiones as D
 import equivalencia_ortografica as EQ
 
