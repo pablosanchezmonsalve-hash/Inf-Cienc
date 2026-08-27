@@ -204,10 +204,16 @@ def main() -> None:
     check("V-06", "alta", "Autores con n<5 marcables como no interpretables",
           True, f"{int((master['n_publicaciones'] < 5).sum())}/{len(master)} autores con n<5")
 
+    # `scopus_export.fecha_corte` es `None` a propósito (T-06: es un export
+    # manual sin fecha de corte propia declarada por la fuente). El repr de
+    # Python de ese `None` no es un texto publicable — lo fue mientras este
+    # reporte sólo vivía en docs/, y dejó de serlo en cuanto V2-27 empezó a
+    # publicar esta misma tabla en el sitio.
+    _corte_scopus = c.SOURCES["scopus_export"]["fecha_corte"] or "sin declarar (T-06)"
     check("V-07", "bloqueante", "Fecha de corte declarada para la fuente de métricas",
           bool(c.SOURCES["scival_export"]["fecha_corte"]),
           f"scival={c.SOURCES['scival_export']['fecha_corte']} "
-          f"scopus={c.SOURCES['scopus_export']['fecha_corte']}")
+          f"scopus={_corte_scopus}")
 
     # La cobertura de unidad académica tiene dos denominadores legítimos y no
     # deben confundirse: 65,0 % sobre cadenas de afiliación ponderadas por

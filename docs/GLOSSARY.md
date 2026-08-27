@@ -217,8 +217,8 @@ indicadores provisionales.
 los casos; el resto figura como «No determinada».
 
 **Extendido:** No existe como campo en las fuentes: se extrae de la cadena de
-afiliación. El vocabulario de unidades es **inferido de los datos y no ha sido
-validado institucionalmente**.
+afiliación. El vocabulario de unidades fue validado institucionalmente por el
+responsable del proyecto (T-02, 2026-08-26).
 
 La comparación entre unidades está además afectada por la cobertura desigual de
 Scopus entre disciplinas: medicina aparece sobrerrepresentada frente a

@@ -5,8 +5,8 @@ QUÉ ES
     `P-07` ya publica en `series.json` de forma plana. No recalcula nada
     nuevo sobre producción: `n_publicaciones` es el mismo pares-autor×publicación
     que `02_indicators.py` ya declaró, con el mismo denominador y la misma
-    advertencia (63,8 % de cobertura, vocabulario no validado
-    institucionalmente). Cambia la FORMA del dato, no el dato.
+    advertencia (63,8 % de cobertura; el vocabulario ya está validado
+    institucionalmente, T-02). Cambia la FORMA del dato, no el dato.
 
 QUÉ AÑADE, Y CON QUÉ CUIDADO
     Citas totales por unidad, sumadas sobre las mismas parejas autor×publicación

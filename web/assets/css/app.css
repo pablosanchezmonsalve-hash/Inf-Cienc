@@ -1495,6 +1495,18 @@ svg.chart .trama { pointer-events: none; }
 }
 .tabla-catalogo tr.cat-motivo strong { color: var(--tinta); }
 
+/* Auditoría de datos, en metodologia.html (V2-27). */
+.val-resumen { font-size: var(--t-m); margin: 0 0 var(--e3); }
+.tabla-validacion { font-size: var(--t-s); }
+.tabla-validacion .mono { font-family: var(--f-mono); font-size: .92em; white-space: nowrap; }
+.tabla-validacion td, .tabla-validacion th { vertical-align: top; }
+/* Una tabla de 30 filas uniforme esconde justo la fila que importa leer: la
+   única que falla. Ámbar, no rojo — el rojo aquí es del DATO, no de una
+   advertencia metodológica (ver la nota sobre contraste dato/advertencia
+   más arriba en este archivo). */
+.val-falla { background: var(--aviso-fondo); }
+.val-falla td { color: var(--aviso-tinta); }
+
 /* ------------------------------------------------------ panel conceptual de sección
    Abre cada sección y ocupa el ancho completo: en la rejilla de dos columnas
    iría a parar a la del índice, y el aviso de qué NO responde una sección no es

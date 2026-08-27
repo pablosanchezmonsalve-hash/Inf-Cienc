@@ -5399,3 +5399,156 @@ recortadas), 1 explicado sin ser bug (acceso abierto), 1 declarado por
 decisión del usuario sin unificar (divergencia de criterio del treemap),
 y 2 nuevas herramientas construidas y verificadas (huecos de autor,
 selección múltiple). Ninguna acción de código pendiente y urgente.
+
+## Cierre · Auditoría total del trabajo de la sesión: 7 textos obsoletos corregidos, una fuga de `None` real capturada por la propia compuerta, auditoría de datos publicada en metodologia.html
+
+Pedido explícito: «Audita el total de tu trabajo. Dame la certeza de que
+el trabajo está bien hecho. Luego quiero que sea visible en el sitio
+HTML». Dos partes distintas — auditar, y publicar el resultado de esa
+auditoría — atendidas en ese orden.
+
+### Parte A — Auditoría
+
+`git grep -i` de cada texto que este proyecto fue corrigiendo sesión tras
+sesión, ejecutado contra el estado ACTUAL del árbol (no contra lo que la
+memoria de sesión recordaba haber cambiado), sobre todo el frase «vocabulario
+no validado institucionalmente» — la afirmación que T-02 dejó falsa el día
+que se cerró. Apareció en **siete lugares**, tres ya corregidos en un paso
+anterior de esta misma sesión y cuatro que habían quedado atrás:
+
+1. `config/indicators.yml` — corregido antes de esta auditoría.
+2. `src/analysis/indicator_feasibility.py` — corregido antes de esta auditoría.
+3. `docs/DATA_MODEL.md` — corregido antes de esta auditoría.
+4. `web/metodologia.html` — prosa visible al público, el peor de los siete:
+   un lector del sitio veía la advertencia falsa directamente. Corregido a
+   «...fue validado institucionalmente por el responsable del proyecto
+   (T-02)...».
+5. `docs/GLOSSARY.md`, entrada «Unidad académica» — se propaga a cada
+   tooltip de ayuda contextual que cita esa entrada, sitio entero. Además
+   traía un `**negrita**` de Markdown roto que nunca se iba a renderizar
+   como tal en el HTML servido; se corrigió junto con el texto.
+6. `src/build/07_hierarchy.py` — comentario de docstring, sin efecto en
+   ningún dato publicado, pero un futuro lector del código se habría
+   guiado por una premisa falsa.
+7. `src/audit/common.py`, `canonical_academic_unit()` — mismo caso que el
+   anterior.
+
+Se revisaron también los dos lugares donde el texto aparece y NO se tocó,
+con la razón declarada en cada caso: `design/informe/Apendice.dc.html` es
+una maqueta de diseño con datos deliberadamente congelados por decisión
+anterior (fuera de alcance); `internal/validacion_unidades.md` describe un
+flujo ya completado en tiempo pasado/futuro — no es un error factual, es
+narración de proceso, y se confirmó correcto tras leerlo completo.
+
+Al construir la Parte B (más abajo) la propia compuerta pública/interna
+(`05_verify_public_layer.py`) encontró, sin que se estuviera buscando, una
+fuga real que ningún grep de texto iba a atrapar: `validacion.json`
+recién hecho público contenía `"scival=2026-07-22 scopus=None"` — el
+`repr()` literal de Python de un valor `None`, en `src/audit/05_validation_rules.py`
+(regla V-07), interpolado directo en un f-string cuando `SOURCES['scopus_export']['fecha_corte']`
+es `None` (deliberadamente, por T-06: Scopus no tiene fecha de corte propia
+declarada). Ese dato llevaba fallando así desde que existe la regla V-07;
+nunca se vio porque el `.json` con las reglas nunca había sido público
+hasta esta sesión. Corregido sustituyendo el valor antes del f-string:
+`scopus=sin declarar (T-06)`. Es la prueba de que la compuerta funciona
+como se diseñó — atrapó una fuga real el primer build después de exponer
+datos nuevos, no una hipotética.
+
+**Certeza entregada, con evidencia:**
+- `build_all.py` completo: compuerta pública/interna con **0 fallas**.
+- `05_validation_rules.py`: **30 reglas evaluadas · 29 pasan · 1 falla
+  (E-06, severidad alta, no bloqueante) · 0 bloqueantes fallando**.
+- `node src/verify/run_all.mjs`, los seis bloques, corridos DESPUÉS de
+  todos los cambios de esta sesión: contraste, estructura, flujos,
+  responsive, higiene, peso — **0 fallos en los seis**.
+- Confirmado con Playwright que `metodologia.html` renderiza la sección
+  «Auditoría de datos» de forma IDÉNTICA con JavaScript activado y
+  desactivado (`data-prerender="1"` en ambos casos, mismo resumen, mismas
+  30 filas, misma fila E-06 marcada) — el pre-renderizado y el repintado
+  cliente no divergen.
+
+### Parte B — Publicar la auditoría en el sitio
+
+Hasta ahora las 30 reglas de consistencia sólo vivían en
+`docs/VALIDATION_REPORT.md` (documentación de repositorio) y en
+`data/interim/validation_report.csv` (capa interna). Un lector del sitio
+público no tenía forma de saber que ese chequeo existe, ni de ver su
+resultado.
+
+Se creó `src/build/08_validation_status.py`: lee
+`data/interim/validation_report.csv` y escribe
+`data/processed/validacion.json` — capa PÚBLICA. Es una decisión de
+gobernanza de datos deliberada, no un descuido: las 30 reglas y sus
+resultados son hechos publicables sobre la consistencia del pipeline
+("¿el build se validó a sí mismo antes de publicar?"), no notas de
+depuración interna — el CSV de origen sí sigue siendo interno porque trae
+columnas de trazabilidad que esa distinción exige mantener aparte. Se
+agregó a `STEPS` en `build_all.py`, después de `07_hierarchy`.
+
+Nueva sección en `metodologia.html`, «Auditoría de datos», con prosa que
+explica qué son las 30 reglas y qué significa que una sea bloqueante,
+seguida de un resumen (`30 reglas evaluadas · 29 pasan · 1 falla · 0
+bloqueantes fallando`) y una tabla `<details>` desplegable con las 30
+reglas una por una — regla, severidad, descripción, resultado, valor
+observado. Construida con `export function validacion(v)` en `vista.js`,
+la misma función que consume tanto `paginas.js` (repintado en cliente)
+como `prerender.mjs` (HTML ya en el `dist`) — sin una segunda
+implementación del marcado, mismo patrón que el resto del sitio.
+
+La fila que falla (E-06) se resalta en ámbar (`--aviso-fondo`/
+`--aviso-tinta`), no en rojo: es la convención ya establecida en este
+`app.css` de que el rojo es del DATO y el ámbar es de la ADVERTENCIA
+metodológica. El primer intento de esta clase CSS usó `var(--no)`, un
+token que no existe en este archivo — confundido con el namespace CSS
+propio de las herramientas internas de revisión, que sí lo define. Se
+detectó antes de construir nada (grep de `--no:`/`--si:` en `app.css`, sin
+resultados) y se corrigió a los tokens correctos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-333 | «Auditoría de datos» se publica como sección propia, con las 30 reglas y sus resultados reales — no un resumen editorializado | Las reglas y sus resultados son hechos sobre la consistencia del pipeline, publicables por definición; resumirlas habría escondido justo el detalle (qué regla, con qué evidencia) que le da valor a mostrarlas |
+| D-334 | El CSV interno (`validation_report.csv`) permanece en la capa interna aunque su contenido pase a ser público vía `validacion.json` | El JSON público es una proyección deliberada, no el archivo interno expuesto tal cual — mantiene la separación de capas aunque el dato de fondo sea el mismo |
+| D-335 | La fuga de `None` en V-07 se corrigió en la fuente (`05_validation_rules.py`), no ocultando el campo en la vista pública | Esconder el síntoma en `vista.js` habría dejado el mismo `repr()` esperando a filtrarse por cualquier otro consumidor futuro del mismo JSON |
+
+### Verificación
+
+`build_all.py` (compuerta: 0 fallas), `06_assemble_site.py` (10 páginas,
+capa interna no incluida — verificado), `node src/verify/run_all.mjs`
+completo (los seis bloques, 0 fallos), y verificación dirigida con
+Playwright de `metodologia.html` con `javaScriptEnabled: true` y `false`
+por separado — mismo resumen, mismas 30 filas, misma fila E-06 marcada en
+ambos casos. Captura de pantalla tomada de la sección desplegada,
+confirmando visualmente el resaltado ámbar de la única falla y que V-07
+ya no muestra un `None` de Python.
+
+### Archivos creados o modificados
+
+```
+src/build/08_validation_status.py    nuevo — CSV interno -> validacion.json público
+src/build/build_all.py               08_validation_status agregado a STEPS
+src/audit/05_validation_rules.py     V-07: ya no interpola None crudo en el observado
+web/assets/js/vista.js               export function validacion(v)
+web/metodologia.html                 sección "Auditoría de datos"; texto T-02 corregido
+web/assets/js/paginas.js             metodologia() puebla #validacion
+src/build/prerender.mjs              rellenar 'validacion' con v.validacion(...)
+web/assets/css/app.css               .val-resumen, .tabla-validacion, .val-falla
+docs/GLOSSARY.md                     entrada "Unidad académica": texto T-02 + negrita rota
+src/build/07_hierarchy.py            comentario de docstring corregido
+src/audit/common.py                  comentario de docstring corregido
+docs/VALIDATION_REPORT.md            regenerado — refleja el fix de V-07
+docs/BUILD_VERIFICATION.md           regenerado
+```
+
+### Ambigüedades abiertas
+
+Ninguna nueva. Las de siempre, sin cambios: `T-06`, `T-19` en su techo,
+los 501 casos de firma sin consolidar del cierre anterior.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. La auditoría de datos es ahora un
+componente vivo del sitio: crecerá o se reducirá solo, en cada build, sin
+que nadie tenga que acordarse de actualizar un número a mano — el mismo
+principio que ya regía la cobertura de ORCID en esta misma página.

@@ -32,7 +32,7 @@ Generado por `src/audit/05_validation_rules.py`. Reejecutable.
 | `V-01` | bloqueante | Suma por año igual al total del universo | **PASA** | 823/823 |
 | `V-03` | bloqueante | Suma de publicaciones por autor mayor al total (conteo completo) | **PASA** | suma_por_autor=1205 universo=823 |
 | `V-06` | alta | Autores con n<5 marcables como no interpretables | **PASA** | 538/589 autores con n<5 |
-| `V-07` | bloqueante | Fecha de corte declarada para la fuente de métricas | **PASA** | scival=2026-07-22 scopus=None |
+| `V-07` | bloqueante | Fecha de corte declarada para la fuente de métricas | **PASA** | scival=2026-07-22 scopus=sin declarar (T-06) |
 | `V-10` | alta | Campos bajo el umbral de cobertura (80 %) identificados | **PASA** | ODS 37,9 % · Open Access 72,2 % · unidad académica 63.8 % (pares autor x publicación) |
 
 **Reglas evaluadas:** 30 · **Pasan:** 29 · **Fallan:** 1 (bloqueantes: 0)
