@@ -4,7 +4,7 @@ Plataforma abierta y replicable para visualizar producción, impacto,
 colaboración y estructura temática de la actividad científica institucional.
 
 **Institución inicial:** Universidad Finis Terrae
-**Fuentes:** Scopus y SciVal
+**Fuentes primarias:** Scopus y SciVal · **enriquecimiento:** Crossref, ORCID, OpenAlex
 **Estado:** V1 completa — entregable técnico funcional
 
 ---
