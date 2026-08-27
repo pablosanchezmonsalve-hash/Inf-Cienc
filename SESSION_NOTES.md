@@ -4613,3 +4613,103 @@ como se espera en un par de los 59 casos con afiliación, antes de empezar
 la revisión de los 414. Si se quiere cerrar el hueco de bitácora del todo,
 alguien tendría que releer la sesión del 20 de agosto en adelante y decidir
 dónde insertar el `## Sesión 2026-08-26` que faltó ese día.
+
+---
+
+## Sesión 2026-08-27 (cont.) — Bento Grid, treemap y mapa de calor (EN CURSO)
+
+**Encabezado propio a propósito**: es un tema distinto (rediseño de
+interfaz) del de la entrada anterior (higiene de codificación) — la misma
+lección de la entrada anterior, aplicada de inmediato en vez de esperar a
+que se repita el hueco.
+
+**Pedido del usuario**: actuar como ingeniero principal + diseñador UI
+sénior, en bucle autónomo, para llevar la plataforma a una interfaz
+"premium" (Bento Grid, treemap, mapa de calor de temáticas), sin romper
+`make sitio` ni la arquitectura de cero dependencias externas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-322 | Se le planteó al usuario, ANTES de tocar color, que "adoptar de forma autónoma" una paleta nueva chocaba con `D-144`/`D-145` (la paleta la fija el usuario; hay un incidente registrado de un cambio sin consultar que se perdió) | Autorizó una paleta nueva CON la condición de verla medida antes de aplicarla — condición que sigue pendiente de cerrarse, ver Ambigüedades |
+| D-323 | El treemap colorea las facultades por PROFUNDIDAD (rampa ordinal `--ord-1..4`, ya validada) más gris de "sin dato", no por categoría con `--serie-1..6` | Medido: `--serie-3` vs `--serie-6` da ΔE 2,5 bajo deuteranopía — el propio comentario del token en `app.css` ya avisaba que las cuatro reservadas nunca se habían validado juntas. Con 10 facultades, ningún subconjunto de las seis alcanza separación segura |
+| D-324 | Mapa de calor de temáticas ASJC×año en vez de un diagrama de Sankey | Este proyecto no tiene un flujo real que dibujar —un tema es un atributo de una publicación, no un tránsito—; forzar un Sankey habría sido inventar la forma del dato (`CLAUDE.md`) |
+| D-325 | `hierarchy.json` (nuevo) NO agrega FWCI ni percentil de citación por unidad, sólo cuenta y suma citas (operación aditiva) | Mismo argumento que `D-18`: el FWCI de una facultad no es el promedio de sus publicaciones |
+| D-326 | `--bento-acento` reutiliza el par YA declarado en `--serie-6` (reservado, sin validar) en vez de un séptimo tono nuevo | Medido SOLO (no junto a otras series): contraste 5,66:1/7,55:1, ΔE 24,5/30,3 vs `--aviso-borde` — mismo orden que `D-144` |
+
+### Qué se aplicó
+
+`src/build/07_hierarchy.py` (nuevo, wireado en `build_all.py`) →
+`data/processed/hierarchy.json`. `web/assets/js/visualizations/treemap.js`
+y `heatmap.js` (nuevos): funciones puras de layout/agregación + montaje.
+`web/assets/css/modern-ui.css` (nuevo): Bento Grid, sin color propio.
+`app.css`: tokens `--bento-*`. `web/produccion.html` +
+`web/_cabecera.html`: integración. `src/verify/higiene.py`: corregido de
+paso (no leía `modern-ui.css`, `glob` no recursivo se perdía
+`visualizations/*.js`). `package.json`/`package-lock.json` (nuevos):
+`playwright` como devDependency, antes no declarado en ningún lado.
+
+### Verificación
+
+`squarify()` probado con Node fuera del navegador: 8/8 (conservación de
+área, sin solapes, casos borde). Agregación del mapa de calor probada
+contra las 823 publicaciones reales. Pipeline completo (auditoría, build
+con el paso 07, ensamblado) sin fallas nuevas. Playwright instalado en
+esta sesión (no estaba) y `node src/verify/run_all.mjs` completo: 0
+fallos en contraste, estructura, consola, flujos, responsive, higiene,
+peso — las 10 páginas × 2 temas. Confirmado a mano en Chrome real:
+drill-down del treemap funciona, cifras coinciden con `hierarchy.json`,
+0 errores de consola.
+
+### Archivos creados o modificados
+
+```
+src/build/07_hierarchy.py                nuevo
+src/build/build_all.py                   agrega 07_hierarchy a STEPS
+web/assets/js/visualizations/treemap.js  nuevo
+web/assets/js/visualizations/heatmap.js  nuevo
+web/assets/css/modern-ui.css             nuevo
+web/assets/css/app.css                   tokens --bento-*
+web/produccion.html                      panel Bento nuevo
+web/_cabecera.html                       enlaza modern-ui.css
+src/verify/higiene.py                    lee modern-ui.css + JS recursivo
+package.json / package-lock.json         nuevos, playwright devDependency
+SESSION_NOTES.md                         este cierre parcial
+```
+Commit `b27e5e8`, pusheado a `origin/main`.
+
+### Ambigüedades abiertas — ESTE ES EL PUNTO DE RETOMA
+
+**La condición del usuario ("verla medida antes de aplicarla") sigue sin
+cerrarse del todo.** Se midieron 4 candidatos de paleta "de ruptura" con
+`validar_paleta.py` (mismo instrumento, no una estimación) y se le
+mostraron los números en el chat, pero:
+
+- Dos pasan umbral limpio: **magenta acento** (`#a8256b`/`#ff5fa8`,
+  contraste 5,86:1/6,67:1, ΔE 23,1/22,9) y **azul hielo nórdico**
+  (`#3b6ea5`/`#8fb8e0`, contraste 4,65:1/9,04:1, ΔE 25,5/20,3).
+- Dos fallan: cian eléctrico (3,27:1 en claro, bajo el piso de lectura) y
+  verde salvia (ΔE 17,8/13,5 frente a `--aviso-borde`, bajo el piso de 20
+  que este proyecto exige).
+- **Ninguno de los cuatro se aplicó.** Lo único en producción hoy es
+  `--bento-acento` = `--serie-6` (la opción conservadora, D-326).
+
+El usuario pidió justo antes de este cierre "necesito ver" (mensaje
+cortado) — pendiente entregarle capturas reales del treemap/mapa de calor
+en el navegador (light y dark) y, si elige un candidato de ruptura,
+aplicarlo.
+
+### Próximo paso recomendado
+
+1. Capturas de pantalla reales (Chrome, `python3 -m http.server -d dist
+   8000`, `produccion.html`, los dos temas) — es lo que el usuario pidió
+   ver.
+2. Si el usuario elige un candidato de paleta: escribir `--bento-acento`
+   con esos valores en `app.css`, correr `validar_paleta.py` para
+   confirmar que sigue midiendo bien integrado (no sólo aislado como se
+   midió aquí), regenerar el sitio, y una pasada de `run_all.mjs` para
+   confirmar que el contraste automático también lo aprueba en las 10
+   páginas.
+3. Extender el treemap/mapa de calor a otras secciones si el usuario lo
+   pide — hoy sólo viven en `produccion.html`, primera integración.
