@@ -142,6 +142,16 @@ cobertura-crossref:
 revisar-cobertura-openalex:
 	python3 src/review/build_openalex_review.py
 
+# Genera internal/revision_huecos_autores.html: qué fichas de autor publicadas
+# carecen de ORCID, de unidad académica determinada, o tienen identidad sin
+# consolidar (varios Scopus ID sobre la misma firma) — con la afiliación cruda
+# como evidencia para los casos sin unidad. Sólo deja ver y filtrar: no decide
+# ni aplica nada (a diferencia de validar-unidades o revisar-cobertura-openalex,
+# aquí no hay un veredicto sí/no que resolver con un botón). Requiere
+# `make artefactos` antes (lee data/processed/authors.json).
+huecos-autores: artefactos
+	python3 src/review/build_author_gaps.py
+
 # Vista de la red de coautoría con el grafo REAL, para revisión interna.
 # Depende del grafo, que lo deja el build. C-05 SÍ se publica ahora en el
 # sitio (colaboracion.html, recorte en vivo); esta vista sigue siendo la
