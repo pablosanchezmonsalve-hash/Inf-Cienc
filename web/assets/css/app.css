@@ -248,7 +248,11 @@
 
   /* ---- Trazo. Radios contenidos y sombra mínima: la separación la hace el
           filete, no la elevación. Una interfaz analítica no flota. ---- */
-  --radio: 8px;
+  /* 8px -> 12px (D-327, mismo criterio "premium" que --bento-radio):
+     puramente cosmético, no toca layout ni contraste, así que se sube en
+     el token compartido en vez de sólo en los paneles nuevos -las diez
+     páginas quedan con el mismo lenguaje visual, no dos estilos a la vez. */
+  --radio: 12px;
   --radio-s: 5px;
   --radio-pastilla: 999px;
   --sombra-1: light-dark(0 1px 2px rgba(28, 16, 19, .05), 0 1px 2px rgba(0, 0, 0, .45));
@@ -1556,6 +1560,21 @@ svg.chart .trama { pointer-events: none; }
   background: var(--superficie);
   /* La cifra no puede saltar de sitio al recalcularse. */
   display: flex; flex-direction: column; gap: var(--e1);
+  /* Mismo tratamiento "premium" que .bento-card (D-327): las fichas KPI
+     son el componente más repetido del sitio -las diez páginas lo usan-,
+     así que es donde el cambio de look se nota más y cuesta menos: sólo
+     sombra + elevación al hover, ninguna propiedad que afecte layout o
+     contraste. */
+  box-shadow: var(--bento-sombra);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.ficha:hover, .ficha:focus-within {
+  box-shadow: var(--bento-sombra-alta);
+  transform: translateY(-2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ficha { transition: none; }
+  .ficha:hover, .ficha:focus-within { transform: none; }
 }
 .ficha-valor {
   font: 800 var(--t-cifra)/.95 var(--f-cifra);

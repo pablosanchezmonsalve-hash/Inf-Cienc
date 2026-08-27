@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `5b0f837` · Guarda el punto de retoma: paleta premium sin cerrar, pendiente mostra
+Último commit: `902da91` · D-327: cierra la decisión de paleta con autorización final del usuario
 Snapshot: 2026-08-27
 
 ---
