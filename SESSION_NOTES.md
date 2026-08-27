@@ -4504,3 +4504,112 @@ Abrir `internal/revision_cobertura_openalex.html` (o correr
 citación, que ya se revisó informalmente en el chat de esta sesión: los
 primeros ~20 casos ya tienen una lectura hecha, sólo falta marcarla en la
 herramienta y exportar.
+
+---
+
+## Sesión 2026-08-26/27 — Higiene de codificación Windows y evidencia Crossref para V2-26
+
+**Por qué se abre sesión aparte:** los cierres anteriores (OpenAlex, T-19,
+la herramienta de cobertura) quedaron anidados bajo el encabezado de la
+sesión del 20 de agosto («Rediseño de la interfaz») porque nadie abrió uno
+nuevo ese día. `docs/DECISIONS.md` heredó la etiqueta: le atribuye a
+«Rediseño de la interfaz» decisiones que no tienen nada que ver con la
+interfaz. Esta entrada no corrige esa cola retroactivamente —es
+arqueología de sesiones pasadas, tarea aparte—, pero al menos el trabajo
+de hoy queda bajo su propio título.
+
+**Punto de partida:** un crash de codificación en Windows
+(`apply_decisions.py`/`merge_decisions.py`, `→` sobre consola cp1252) ya
+corregido en la sesión anterior. El usuario pidió llevar esa corrección a
+fondo («dele durísimo»), y luego evidencia adicional para acelerar la
+revisión de los 414 casos de `V2-26` sin decidirlos por nadie.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-317 | El criterio real del guard de codificación win32 es «todo entry point que imprime datos que no controla» (stdout de un subproceso, contenido de un CSV, nombres que trae una API externa), no una lista literal de caracteres sospechosos | Un scan carácter-por-carácter contra `cp1252` mostró que 18 de los 31 scripts corregidos no tenían ningún carácter fuera de rango *antes* del cambio: se protegen por lo que podrían imprimir, no por lo que imprimen hoy. Quedaba sin escribir en ningún lado |
+| D-318 | `subprocess.run(...)` usa `encoding="utf-8", errors="replace"` explícito, nunca `text=True` a secas | `text=True` decodifica con `locale.getpreferredencoding()` (cp1252 en Windows) y **no** respeta `PYTHONIOENCODING`. Con `node` y `git` emitiendo UTF-8, eso producía mojibake silencioso —no un crash— en `06_assemble_site.py` y `snapshot.py`. Único patrón en todo el repo: 2 call sites, ambos corregidos |
+| D-319 | La evidencia de Crossref en la revisión de cobertura OpenAlex se muestra en un recuadro aparte, nunca se fusiona con el veredicto de OpenAlex | `D-08`: es una segunda fuente para leer, no un segundo voto que promedie con el primero. Si algún día decidieran cosas distintas, fusionarlas ocultaría el desacuerdo en vez de mostrarlo |
+| D-320 | El guard de codificación de una biblioteca pura (`equivalencia_ortografica.py`, importada por otros tres scripts) vive dentro de `if __name__ == "__main__":`, no a nivel de módulo | Mutar `sys.stdout` como efecto secundario de un `import` es invisible para quien importa y rompe bajo `pythonw.exe` o cualquier captura que sustituya stdout (`redirect_stdout`): el módulo se vuelve inimportable, no sólo silencioso. Hallazgo de la revisión independiente, no propio |
+| D-321 | Verificar un guard de codificación exige correr con `PYTHONIOENCODING` retirado | El harness de desarrollo la fija (`utf-8:surrogateescape`); la consola real de un usuario de Windows no. «Corrí el pipeline completo sin errores» con esa variable puesta no demuestra que el guard funcione ni que hiciera falta — sólo que el harness ya lo resolvía por su cuenta |
+
+### Qué se aplicó
+
+Tres commits. **`7d0e02a`**: el guard `sys.stdout.reconfigure(encoding="utf-8",
+errors="replace")` tras `if sys.platform == "win32":` se generalizó de 2 a 31
+scripts (todo punto de entrada directo bajo `src/`), más el fix de
+`subprocess.run` en `06_assemble_site.py`/`snapshot.py` (D-318).
+**`9557ca6`**: `src/enrich/openalex_cobertura_crossref.py` (nuevo) consulta
+Crossref por DOI para los 414 casos de `openalex_cobertura.csv`, reutilizando
+el patrón de caché y *polite pool* de `orcid_crossref.py` (V2-01); emparejamiento
+por apellido con tres niveles de certeza (`unico`/`ambiguo`/`sin_match`, nunca
+elige entre ambiguos). `build_openalex_review.py` incorpora el resultado sola,
+en un recuadro `.xref` (D-319), si el CSV existe. Nuevo objetivo de Makefile
+`cobertura-crossref`. **`88da8db`**: aplica los 10 hallazgos (5 MEDIUM, 5 LOW)
+de una revisión independiente sobre `7d0e02a` — guard añadido a
+`src/audit/run_all.py` (único `__main__` que había quedado sin él, correcto
+hoy sólo por accidente de orden de import); `[Console]::OutputEncoding` fijado
+una vez en `scripts/_comun.ps1` (la ruta real del usuario Windows seguía
+mojibake-able, aun con el guard de Python bien puesto — PowerShell decodifica
+con su propia codificación); comentario del guard corregido en 32 archivos
+(citaba `—` y `·`, que sí están en cp1252); reordenamiento del guard antes de
+los imports locales en 11 archivos y `import sys` agrupado con la stdlib;
+`equivalencia_ortografica.py` corregido (D-320); `run_all.mjs` con
+`setEncoding('utf8')` explícito en la captura del subproceso de `higiene.py`;
+`i18n.logOutputEncoding=UTF-8` fijado en la llamada a `git` de `snapshot.py`.
+
+### Verificación
+
+`py_compile` sobre los 34 archivos Python tocados, `node --check` sobre
+`run_all.mjs`, 11 suites `--test` al 100 % (incluidas las nuevas 6/6 de
+`openalex_cobertura_crossref.py`), y el pipeline completo real de punta a
+punta tres veces (una por commit): auditoría, factibilidad, build, sitio,
+las tres herramientas de revisión, red de coautoría, estado — mismos
+resultados en las tres corridas (29/30 reglas, 0 bloqueantes, 414 casos
+OpenAlex, 59 con evidencia Crossref). El conector Crossref se corrió contra
+los 385 casos con DOI reales: 0 errores de red.
+
+Lo que **no** se hizo, y queda como hueco: no hay verificación con
+Playwright real del HTML de revisión con el recuadro `.xref` nuevo —sólo
+inspección del marcado generado por regex—, a diferencia de la sesión
+anterior que sí abrió el HTML con un navegador real antes de darlo por
+bueno. Tampoco se relanzó la revisión independiente sobre `9557ca6` ni
+sobre `88da8db`: sólo existe para `7d0e02a`.
+
+### Archivos creados o modificados
+
+```
+src/enrich/openalex_cobertura_crossref.py     nuevo · evidencia Crossref por DOI (V2-26 bis)
+internal/openalex_cobertura_crossref.csv      nuevo · 385 casos consultados, 59 con afiliación
+src/review/build_openalex_review.py           incorpora el recuadro .xref si el CSV existe
+internal/revision_cobertura_openalex.html     regenerado con la evidencia incrustada
+Makefile                                      objetivo cobertura-crossref
+scripts/_comun.ps1                            [Console]::OutputEncoding = UTF8
+src/verify/run_all.mjs                        setEncoding('utf8') en el subproceso de higiene.py
+31 scripts bajo src/ (commit 7d0e02a)         guard win32 generalizado
+11 de esos 31 (commit 88da8db)                guard reordenado, comentario corregido, import sys agrupado
+src/audit/run_all.py                          guard propio añadido
+src/state/snapshot.py                         encoding="utf-8" explícito + i18n.logOutputEncoding
+SESSION_NOTES.md                              este cierre
+```
+
+### Ambigüedades abiertas
+
+Sigue sin cambiar: los 414 casos de `V2-26` continúan sin revisión humana
+(la ambigüedad ya estaba abierta desde el cierre anterior). Nueva: el
+recuadro de evidencia Crossref no se verificó en un navegador real, sólo
+por inspección de marcado — no se sabe con certeza que se vea bien en los
+59 casos que sí traen afiliación hasta que alguien lo abra. La cola
+histórica de `SESSION_NOTES.md` mal anidada bajo «Rediseño de la interfaz»
+(desde algún punto de la sesión del 20 de agosto hasta el cierre anterior
+a este) sigue sin corregirse.
+
+### Próximo paso recomendado
+
+Abrir `internal/revision_cobertura_openalex.html` en un navegador real y
+confirmar visualmente que el recuadro verde de evidencia Crossref se ve
+como se espera en un par de los 59 casos con afiliación, antes de empezar
+la revisión de los 414. Si se quiere cerrar el hueco de bitácora del todo,
+alguien tendría que releer la sesión del 20 de agosto en adelante y decidir
+dónde insertar el `## Sesión 2026-08-26` que faltó ese día.

@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `17b8674` · openalex_cobertura.py: identifica quÃ© autor y quÃ© instituciÃ³n decla
-Snapshot: 2026-08-26
+Último commit: `88da8db` · Aplica los hallazgos de la revisión independiente del guard win32 (7d0
+Snapshot: 2026-08-27
 
 ---
 
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 324
+## Decisiones tomadas: 329
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
