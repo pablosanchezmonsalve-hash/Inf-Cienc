@@ -56,7 +56,7 @@ indicadores:
   P-07: {nombre: "Producción por unidad académica", categoria: descriptivo,
          publicar: true, denominador: con_autoria_detallada, confiabilidad: baja,
          advertencia_destacada: true,
-         advertencia: "Cobertura 63,8 % y vocabulario no validado institucionalmente. La cobertura desigual de Scopus entre disciplinas distorsiona la comparación entre unidades."}
+         advertencia: "Cobertura 63,8 % de los pares autor × publicación. La cobertura desigual de Scopus entre disciplinas distorsiona la comparación entre unidades."}
   P-08: {nombre: "Distribución por idioma", categoria: descriptivo, publicar: false,
          version: V2, denominador: con_autoria_detallada, confiabilidad: alta, advertencia: null}
   # Multivaluado y por partida doble: una misma publicación puede ser Gold en la
