@@ -132,9 +132,9 @@ def main() -> None:
     record("P-07", "Producción por unidad académica", "descriptivo", "parcial",
            f"{unidad_ok}/{len(log)} pares ({100 * unidad_ok / len(log):.1f} %)",
            "baja", "V1 con advertencia",
-           "Cobertura 63,8 % y vocabulario no validado institucionalmente. "
-           "Además el sesgo de cobertura de Scopus distorsiona la comparación "
-           "entre unidades. Requiere advertencia visible obligatoria.")
+           "Cobertura 63,8 % de los pares autor × publicación. Además el sesgo "
+           "de cobertura de Scopus distorsiona la comparación entre unidades. "
+           "Requiere advertencia visible obligatoria.")
 
     idioma = c.read_scopus()["Language of Original Document"]
     record("P-08", "Distribución por idioma", "descriptivo", "sí",

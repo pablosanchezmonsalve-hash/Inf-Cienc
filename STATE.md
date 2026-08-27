@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `aeb9eec` · Regenera STATE.md: referencia el HEAD real y corrige el mojibake del s
+Último commit: `4ba1a7d` · V2-21: investiga la interfaz real de SciELO, sin escribir conector
 Snapshot: 2026-08-27
 
 ---
@@ -36,7 +36,7 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **322** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **204** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades con ORCID | **280** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **28** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 327
+## Decisiones tomadas: 330
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

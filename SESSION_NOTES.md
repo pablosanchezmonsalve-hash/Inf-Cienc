@@ -4590,3 +4590,95 @@ Ninguna acción de código pendiente. Si se decide avanzar con SciELO, el
 primer paso es ejecutar `GET /collection/identifiers/` desde una máquina con
 red hacia `articlemeta.scielo.org` para confirmar el código de Chile, y
 decidir el alcance de colecciones antes de escribir el conector.
+
+---
+
+## Cierre · Auditoría general del proyecto: pipeline verde, un hallazgo real corregido
+
+El usuario pidió una auditoría rigurosa del estado y avance del proyecto. Se
+corrió el pipeline completo desde cero (no se reusó nada de memoria):
+`src/audit/run_all.py` (29/30, 0 bloqueantes — la única falla, `E-06`, es
+preexistente y declarada), `indicator_feasibility.py`, `build_all.py`
+(compuerta pública/interna: 0 fallas), `06_assemble_site.py` (10 páginas),
+`src/verify/higiene.py` y `node src/verify/run_all.mjs` completo (contraste
+WCAG, estructura, flujos interactivos, responsive, higiene y peso — los seis
+bloques sin fallos).
+
+También se corrieron los tres generadores de colas de revisión humana
+(`build_review.py`, `build_openalex_review.py`, `build_hallazgos.py`) para
+tener cifras de HOY, no las últimas guardadas: 113 casos de identidad
+consolidados por `make revision`, **6 pendientes** (todos en «OpenAlex
+discrepa»); 414 casos de brecha de cobertura OpenAlex, **0 revisados
+todavía** (cola nueva, recién generada por `V2-26`). Los artefactos internos
+que estos generadores regeneran (`internal/revision_identidad.html`,
+`internal/pendientes_consolidacion.*`, `internal/revision_cobertura_openalex.html`,
+`internal/hallazgos_corpus.md`, `docs/BUILD_VERIFICATION.md`) se descartaron
+tras leerlos: el único cambio real era la fecha de corrida y, en el caso de
+la revisión de cobertura OpenAlex, un reordenamiento no determinista de las
+414 filas (mismo contenido, mismo total) — anotado como hallazgo menor de
+higiene, no corregido en esta sesión.
+
+### El hallazgo real: la advertencia de P-07 seguía citando un vocabulario ya validado
+
+`T-02` cerró el 2026-08-26 con `vocabulario_validado_por_institucion: true`.
+`V2_BACKLOG.md` decía explícitamente que ese cierre debía «retirar la
+advertencia destacada de P-07» — y no se hizo en su momento. La auditoría lo
+encontró en **tres lugares independientes**, cada uno con su propia copia de
+la misma frase («vocabulario no validado institucionalmente»), no
+templados desde una fuente única:
+
+1. `config/indicators.yml` (`P-07.advertencia`) — el campo que alimenta la
+   advertencia destacada sobre el propio gráfico.
+2. `src/analysis/indicator_feasibility.py` (línea de `record("P-07", …)`) —
+   alimenta `data/interim/indicator_feasibility.csv`, que es lo que
+   efectivamente se lee en `dist/indicadores.html` (verificado con `grep`
+   contra el HTML construido, antes y después del arreglo).
+3. `docs/DATA_MODEL.md` (fila `UnidadAcademica`) — documentación de
+   referencia, no publicada, pero es la que describe el modelo de datos.
+
+Las tres se corrigieron para citar la validación cerrada en vez de negarla,
+conservando la advertencia de cobertura (63,8 %) y de sesgo disciplinar de
+Scopus, que siguen siendo ciertas y no dependen de `T-02`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-320 | Se corrige la advertencia de P-07 en las tres fuentes que la repiten, en vez de sólo en la que se vio primero | Un hallazgo de auditoría que se corrige a medias deja la misma afirmación falsa viva en otro lugar; verificar contra `dist/` (no contra el código fuente solo) es lo que reveló que `config/indicators.yml` no era la fuente real de lo publicado |
+| D-321 | No se toca `design/informe/Apendice.dc.html`, que tiene la misma frase y cifras de consolidación más viejas todavía (63→30, hoy 84→37) | Es una maqueta de diseño con cifras congeladas a propósito (`design/informe/README.md`: «no son maqueta» en el sentido de que salieron de datos reales, pero SÍ son una foto fija, no un dato vivo); refrescarla es una tarea de diseño con su propio criterio de banda/paleta, no una corrección de una línea — queda declarada, no corregida |
+| D-322 | Los artefactos internos regenerados por los tres `build_*_review.py` durante la auditoría se descartan (`git checkout --`) en vez de comitearse | No reflejan ninguna decisión nueva, sólo la fecha de corrida y un orden no determinista; comitearlos sería ruido en el historial sin información |
+
+### Verificación
+
+Auditoría completa, `build_all.py`, `06_assemble_site.py`, `higiene.py` y
+`node src/verify/run_all.mjs` (los seis bloques) corridos DESPUÉS del
+arreglo, todos sin fallas. `grep -rl "vocabulario no validado" dist/` da
+vacío tras reconstruir; el texto nuevo se confirmó presente en
+`dist/indicadores.html`.
+
+### Archivos creados o modificados
+
+```
+config/indicators.yml                  P-07.advertencia: ya no niega la validación cerrada en T-02
+src/analysis/indicator_feasibility.py  misma corrección, en la fuente real de indicadores.html
+docs/DATA_MODEL.md                     fila UnidadAcademica actualizada
+```
+
+### Ambigüedades abiertas
+
+- `design/informe/Apendice.dc.html` (y posiblemente `Main.dc.html`/
+  `Tabla.dc.html`) tienen cifras de ejemplo más viejas que las actuales
+  (consolidación de identidad, cobertura ORCID). Es una maqueta de diseño,
+  no dato vivo — declarado, no una tarea urgente, pero alguien debería
+  decidir cuándo refrescarla antes de usarla para generar el PDF real.
+- El reordenamiento no determinista de `internal/revision_cobertura_openalex.html`
+  en cada corrida de `build_openalex_review.py`: no es un bug de datos (las
+  414 filas son las mismas), pero vale la pena revisar de dónde sale — hace
+  que cada regeneración produzca un diff enorme sin cambio real, lo que
+  dificulta usar `git diff` para detectar cambios genuinos.
+- Las de siempre: `T-06` en su techo, `T-19` corriendo por cron mensual.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente y urgente. El informe completo de estado
+se entregó directamente al usuario en el chat, no como documento nuevo.
