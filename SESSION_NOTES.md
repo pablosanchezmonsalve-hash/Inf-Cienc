@@ -4504,3 +4504,89 @@ Abrir `internal/revision_cobertura_openalex.html` (o correr
 citación, que ya se revisó informalmente en el chat de esta sesión: los
 primeros ~20 casos ya tienen una lectura hecha, sólo falta marcarla en la
 herramienta y exportar.
+
+---
+
+## Cierre · V2-21: investigación de SciELO, sin escribir código
+
+Tras cerrar `T-02` y sincronizar esta rama con `main` (que había avanzado en
+paralelo con `T-19`, el hallazgo de `partnerapi.scival.com`, y `V2-19`/`V2-26`
+de OpenAlex — verificado por ancestría de commits, no por fecha, antes de dar
+por sentado que había divergencia real), se preguntó al usuario con qué
+pendiente de `V2_BACKLOG.md` seguir. Eligió **V2-21: investigar SciELO** —
+sólo investigación, no código.
+
+### Qué se investigó
+
+`docs/FUENTES_Y_APIS.md` §3.6 decía, sin verificar, que SciELO ofrecía «al
+menos una vía OAI-PMH». Era la interfaz equivocada. Con `WebSearch` (los
+dominios de documentación — `scielo.readthedocs.io`,
+`articlemeta.scielo.org` — dieron `EGRESS_BLOCKED`, igual que `api.ror.org`
+en `V2-20`) y lectura directa del código fuente en
+`github.com/scieloorg/articles_meta` y `github.com/scieloorg/xylose` (GitHub
+sí es alcanzable), se confirmó:
+
+- SciELO publica una API REST propia, **ArticleMeta**, sin autenticación,
+  base `http://articlemeta.scielo.org/api/v1/`, versionada.
+- Sus endpoints filtran por **ISSN de revista, colección (país/red) y rango
+  de fechas** — nunca por institución o afiliación de autor. SciELO indexa
+  por revista, no por autor.
+- El dato de afiliación (institución, ciudad, país, por autor) **sí** existe,
+  pero sólo dentro del registro de **cada artículo individual**
+  (`GET /article/?code=<PID>`), leído del campo legado `v70`. No hay un
+  `filter=institution:…` como el que hace posible el contraste con OpenAlex
+  en una sola consulta (`§3.1`).
+- Consecuencia arquitectónica: sin filtro de institución, cosechar SciELO
+  exige enumerar identificadores por colección y fecha y después **pedir
+  cada artículo uno por uno** para leer su afiliación — un patrón de dos
+  pasos más caro que el de OpenAlex, no más barato.
+- Quedó sin confirmar el código de colección de Chile (los ejemplos públicos
+  usan `scl`, que corresponde a la colección original/Brasil, no a Chile por
+  ISO 3166-1 — no se puede asumir `chl` sin consultar
+  `/collection/identifiers/` directamente) y si limitarse a esa colección
+  alcanzaría, dado que un autor UFT puede publicar en una revista alojada en
+  otra colección.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-317 | Se corrige `docs/FUENTES_Y_APIS.md` §3.6: la vía real es la API REST ArticleMeta, no OAI-PMH como decía la versión anterior sin verificar | `CLAUDE.md` prohíbe suponer disponibilidad de APIs sin confirmar; la sección anterior no citaba ninguna fuente para la afirmación OAI-PMH |
+| D-318 | No se escribe conector para SciELO en esta sesión | Sin filtro de institución en la API, construirlo exige antes una decisión de alcance (qué colección(es) barrer, qué ventana de fechas) que le corresponde a quien lo vaya a ejecutar — escribir código sin esa decisión sería adivinar el alcance, que `CLAUDE.md` también prohíbe |
+| D-319 | `V2_BACKLOG.md` §7 registra V2-21 como «investigado», no como «implementado» ni «cerrado» | Es investigación pura sin artefacto ejecutable; usar el mismo lenguaje que V2-19/V2-20 (que sí tienen código) sería sobrerrepresentar el avance |
+
+### Verificación
+
+Ninguna de código: no se escribió ningún script. La verificación fue de las
+propias afirmaciones — se leyó el `.rst` fuente de tres endpoints distintos
+de la documentación (`article.rst`, `article_identifiers.rst`, el índice del
+toctree) y el módulo `xylose/scielodocument.py` que parsea las respuestas,
+en vez de aceptar el resumen sintético de la primera búsqueda (que afirmaba
+«free, no-auth programmatic access» sin especificar filtros — cierto pero
+incompleto: la ausencia del filtro de institución es lo que de verdad importa
+para esta decisión, y no aparecía en ese resumen).
+
+### Archivos creados o modificados
+
+```
+docs/FUENTES_Y_APIS.md   §3.6 reescrita con la interfaz real y sus límites
+docs/V2_BACKLOG.md       §7, fila V2-21 actualizada a «investigado»
+```
+
+### Ambigüedades abiertas
+
+- Código de colección de Chile en ArticleMeta: sin confirmar desde este
+  entorno (bloqueado). Requiere ejecutarse desde una máquina con salida a
+  `articlemeta.scielo.org`.
+- Si SciELO entra en V2, falta decidir el alcance: ¿sólo colección Chile, o
+  también otras colecciones donde un autor UFT podría publicar? Es una
+  decisión de cobertura vs. costo, no algo que esta investigación resuelva.
+- Las de siempre, sin cambios: `T-06` en su techo (bloqueado por reexportación
+  manual), `T-19` corriendo por cron mensual.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Si se decide avanzar con SciELO, el
+primer paso es ejecutar `GET /collection/identifiers/` desde una máquina con
+red hacia `articlemeta.scielo.org` para confirmar el código de Chile, y
+decidir el alcance de colecciones antes de escribir el conector.
