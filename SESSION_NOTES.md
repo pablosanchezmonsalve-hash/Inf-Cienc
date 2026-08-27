@@ -4791,6 +4791,37 @@ documentado. No quedan ambigüedades abiertas de esta tarea. Si el usuario
 quiere seguir extendiendo (otras páginas, otro tipo de gráfico), es
 trabajo nuevo, no continuación de un pendiente.
 
+### Adenda 2 — bug real encontrado confirmando contra el sitio publicado
+
+El usuario pidió "confirma absolutamente toda la información y déjalo
+vigente en el sitio web". Se verificó contra la URL pública real
+(GitHub Pages, `.github/workflows/deploy.yml` publica en cada push a
+`main`) con estilos COMPUTADOS de verdad (`getComputedStyle`), no sólo
+mirando si el HTML cargaba.
+
+**Encontró un bug real**: `box-shadow` de `.ficha`/`.bento-card` computaba
+`none` en el sitio publicado, en los dos temas. Causa: `light-dark()`
+sólo es válido como `<color>` en la especificación CSS —`--bento-sombra`
+lo envolvía alrededor del valor de sombra COMPLETO (offset + blur +
+color). Una custom property no valida su contenido hasta que se
+sustituye, así que `getPropertyValue()` devolvía el texto sin quejarse;
+al sustituirlo dentro de `box-shadow` el valor completo quedaba inválido
+y computaba al valor inicial de la propiedad, "none" — sin ningún error
+en consola, y sin que `run_all.mjs` lo detectara (no comprueba
+`box-shadow` computado, sólo contraste de color).
+
+Corregido envolviendo sólo el color en `light-dark()`. Verificado con
+CSSOM real (no sólo visual) contra una pestaña nueva del sitio publicado,
+tras esperar el despliegue con sondeo cada 15s (~180s): `box-shadow`
+computa un valor real en los dos temas, `--bento-acento` sigue siendo el
+magenta decidido, treemap (10 celdas) y mapa de calor (24 celdas)
+presentes, sin errores de consola.
+
+Queda como aprendizaje para `docs/DEPLOYMENT.md` o para quien mida
+contraste en este proyecto: `light-dark()` NUNCA envuelve una lista de
+valores (sombra, `grid-template`, lo que sea) — sólo un `<color>` suelto,
+por muy tentador que sea usarlo como atajo genérico "según el tema".
+
 ### Adenda — extensión a las 10 páginas antes de la hora pedida
 
 El pedido original decía "la plataforma", y hasta este punto el Bento
