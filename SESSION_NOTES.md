@@ -5163,3 +5163,122 @@ config/matching_rules.yml          "School of Nutrition and Dietetic" como varia
 Preguntarle al usuario qué es el Treemap que menciona. Seguir con los
 puntos 5 (herramienta de revisión de autores) y 6 (exportación selectiva
 de publicaciones).
+
+---
+
+## Cierre · El Treemap identificado: divergencia numérica real entre dos paneles de la misma página, declarada por decisión del usuario
+
+El usuario aclaró: el Treemap está en `produccion.html`, apartado
+«Jerarquía y temáticas», gráfico «Producción por facultad y escuela».
+
+### Por qué no aparecía en la búsqueda anterior
+
+Mientras esta rama trabajaba T-02/auditoría/OpenAlex, **otra sesión en
+paralelo avanzó `main`** con un rediseño completo: «Bento Grid premium:
+jerarquía institucional, treemap y mapa de calor» (`07_hierarchy.py`,
+`web/assets/js/visualizations/treemap.js` y `heatmap.js`,
+`web/assets/css/modern-ui.css`, más una serie de commits de paleta/sombra
+premium y correcciones de codificación Windows). Esta vez `main` y esta
+rama SÍ habían divergido de verdad (a diferencia de la sincronización
+anterior, donde esta rama resultó ser un subconjunto estricto): 11
+commits sólo en `main`, 5 sólo aquí. Se fusionó con `git merge
+origin/main`: 5 conflictos, todos en archivos de bookkeeping regenerables
+(`SESSION_NOTES.md`, `STATE.md`, `docs/DECISIONS.md`,
+`docs/BUILD_VERIFICATION.md`, `internal/revision_cobertura_openalex.html`)
+— ninguno en código. `SESSION_NOTES.md` se fusionó a mano reconstruyendo
+el orden cronológico real (verificado con `git show <rev>:archivo | head`
+contra la base común, no adivinado): las dos mitades comparten un prefijo
+byte-idéntico de 4506 líneas, así que se pudo concatenar base + cola de
+`main` (commiteada primero, 09:39) + cola de esta rama (16:23) sin perder
+ni una palabra de ninguna de las dos sesiones.
+
+### Lo que se encontró al mirar el Treemap de verdad
+
+Dos problemas, uno menor y uno serio:
+
+1. **Celdas chicas sin etiqueta visible** (Artes, Derecho, Humanidades,
+   Arquitectura). Verificado que SÍ tienen tooltip funcional
+   (`hover()` con Playwright confirmó: «Facultad de Arquitectura, Diseño y
+   Estudios Creativos: 3 pub. · 2 citas»), así que no están rotas — es la
+   limitación conocida de cualquier treemap con valores muy desiguales
+   (611 contra 3). No se tocó: no hay evidencia de que sea un bug, sólo
+   una debilidad visual a primera vista.
+
+2. **Divergencia numérica real**: el treemap muestra Facultad de Medicina
+   y Salud = 611; el gráfico «Unidad académica» (corregido esta misma
+   sesión, más arriba en la misma página) muestra 414. Investigado hasta
+   la causa raíz en `07_hierarchy.py`: el treemap cuenta **pares
+   autor×publicación** (mismo criterio, documentado, que `series.json`/P-07
+   desde el inicio del proyecto — si dos autores UFT de la misma unidad
+   firman el mismo artículo, cuenta dos veces). El gráfico de barras que
+   se arregló hoy cuenta **publicaciones distintas por unidad** — un
+   criterio que YA traía `publications.json` desde antes de esta sesión
+   (deduplicado por `set()` en `01_publications.py`), no algo que el
+   arreglo de hoy haya introducido. La divergencia es preexistente y
+   arquitectónica; el arreglo de hoy sólo la hizo VISIBLE al agregar
+   ambos paneles al nivel de facultad por primera vez.
+
+### Decisión del usuario
+
+Se le presentaron tres opciones (adoptar pares en el gráfico de barras,
+adoptar publicaciones distintas en el treemap, o declarar la diferencia
+sin unificar). Eligió **declarar, no unificar todavía**.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-328 | Se agrega un aviso cruzado en AMBOS paneles («Unidad académica» y el treemap) explicando el criterio propio y remitiendo al otro panel, sin cambiar ningún número | Es la instrucción explícita del usuario: declarar la diferencia, no resolverla. Un aviso unilateral (sólo en un panel) habría dejado al lector del otro panel sin la misma información |
+| D-329 | El aviso NO se resuelve unificando los criterios de conteo | Sería una decisión metodológica (qué cuenta como "producción de una facultad") que le corresponde al responsable del proyecto, no algo que corresponda inferir o decidir unilateralmente |
+
+### El hallazgo propio: un nombre de archivo interno se filtró al HTML público
+
+Al escribir el primer borrador del aviso cruzado, un comentario de código
+dentro del `<script>` de `produccion.html` mencionaba
+`matching_log.csv` (nombre de un artefacto de capa interna). Como el
+comentario vive dentro de un bloque `<script>` que SÍ se sirve al
+navegador (a diferencia de un comentario en Python, que nunca sale de
+`src/`), `node src/verify/run_all.mjs` lo atrapó de inmediato: «FALLA
+higiene · término interno "matching_log" presente en: produccion.html».
+Corregido reescribiendo el comentario sin el nombre del archivo. Es
+exactamente la clase de fuga que `src/verify/flujos.mjs`/higiene existen
+para atrapar, y la atrapó — verificado con `grep -rl matching_log dist/`
+vacío tras el arreglo.
+
+### Verificación
+
+`node src/verify/run_all.mjs` completo DOS VECES: la primera reveló la
+fuga de `matching_log`, la segunda —tras corregirla— confirmó los seis
+bloques (contraste, estructura, flujos, responsive, higiene, peso) sin
+fallos. Confirmado con `page.evaluate()` que ambas notas aparecen en el
+HTML servido, con el texto esperado, cada una remitiendo a la otra.
+
+### Archivos creados o modificados
+
+```
+[fusión de main, ver commit de merge para la lista completa —
+ 07_hierarchy.py, treemap.js, heatmap.js, modern-ui.css, y más,
+ ninguno escrito por esta sesión]
+web/produccion.html                aviso cruzado en la nota del treemap
+web/assets/js/vista_explorador.js  aviso cruzado en el corte P-07 (unidad)
+```
+
+### Ambigüedades abiertas
+
+- La divergencia de criterio (pares vs. publicaciones distintas) sigue
+  sin resolver, a propósito. Si en algún momento se decide unificar, hay
+  que decidir primero cuál es el criterio correcto para «producción de
+  una facultad» — no es una corrección de bug, es una decisión de
+  alcance.
+- El Treemap y el mapa de calor son «montaje independiente... no
+  reacciona a sus filtros todavía» (comentario propio de `produccion.html`,
+  de la sesión que los escribió) — no responden a los filtros del
+  explorador reactivo. Sin evaluar si eso es intencional a largo plazo o
+  un pendiente de esa sesión.
+- Puntos 5 y 6 del pedido original (autores sin identidad consolidada +
+  herramienta de revisión; casillas de selección múltiple en
+  Publicaciones): siguen sin empezar.
+
+### Próximo paso recomendado
+
+Seguir con los puntos 5 y 6 del pedido original, que siguen abiertos.
