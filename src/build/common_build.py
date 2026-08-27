@@ -499,6 +499,15 @@ def build_meta() -> dict:
             "métricas normalizadas de SciVal. La cobertura de la base no es "
             "uniforme entre disciplinas."
         ),
+        # Escuela -> facultad, la misma jerarquía que agrega P-07 en el build
+        # (`facultad_de()`, más arriba). El explorador la necesita para no
+        # mostrar escuelas sueltas junto a facultades en el mismo gráfico: sin
+        # esto, cada corte reactivo tendría que traer su propio criterio, y
+        # dos criterios para la misma jerarquía es la forma de que un día
+        # digan cosas distintas. Sólo el nombre de la facultad — el campo
+        # `estado` (confirmada/inferida) es trazabilidad interna, no dato
+        # publicable.
+        "jerarquia": {k: v["facultad"] for k, v in _JERARQUIA.items()},
     }
 
 

@@ -193,6 +193,10 @@ unidad_academica:
     "Escuela de Nutrición y Dietética":
       - "Escuela de Nutrición y Dietética"
       - "School of Nutrition and Dietetics"
+      # 1 par (Vásquez F., eid 2-s2.0-105001380214). Afiliación real: "School
+      # of Nutrition and Dietetic, Finis Terrae University..." — sin la "s"
+      # final. No es una variante nuestra: así lo escribió la fuente.
+      - "School of Nutrition and Dietetic"
     "Facultad de Ingeniería":
       - "Facultad de Ingeniería"
       - "Faculty of Engineering"
