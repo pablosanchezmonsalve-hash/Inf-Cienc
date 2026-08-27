@@ -606,6 +606,42 @@ export function procedencia(meta) {
     </ul>`;
 }
 
+/** Estado de la auditoría de datos (V2-27): la misma tabla de 30 reglas que
+    `docs/VALIDATION_REPORT.md`, publicada donde el sitio se ve. Antes vivía
+    sólo en el repositorio — un informe que se declara riguroso y no deja
+    ver su propia auditoría le pide al lector que confíe sin poder
+    comprobar. El resumen va siempre visible; la tabla completa entra en
+    `<details>` para no imponerse sobre el resto de la página. */
+export function validacion(v) {
+  const filas = v.reglas.map(r => `<tr class="${r.resultado === 'FALLA' ? 'val-falla' : ''}">
+      <td class="mono">${c.escapar(r.regla)}</td>
+      <td>${c.escapar(r.severidad)}</td>
+      <td>${c.escapar(r.descripcion)}</td>
+      <td>${r.resultado === 'FALLA' ? '<strong>FALLA</strong>' : 'Pasa'}</td>
+      <td>${c.escapar(r.observado)}</td>
+    </tr>`).join('');
+
+  return `
+    <p class="val-resumen">
+      <strong>${c.nf.format(v.reglas_evaluadas)}</strong> reglas evaluadas ·
+      <strong>${c.nf.format(v.pasan)}</strong> pasan ·
+      <strong>${c.nf.format(v.fallan)}</strong> falla${v.fallan === 1 ? '' : 'n'} ·
+      <strong>${c.nf.format(v.bloqueantes_fallando)}</strong> bloqueante${v.bloqueantes_fallando === 1 ? '' : 's'} fallando.
+      Es la compuerta que el propio build no deja pasar si alguna regla bloqueante falla.
+    </p>
+    <details class="metodo">
+      <summary>Ver las ${c.nf.format(v.reglas_evaluadas)} reglas, una por una</summary>
+      <div class="metodo-cuerpo">
+        <div class="tabla-envoltura"><table class="tabla-validacion">
+          <thead><tr><th scope="col">Regla</th><th scope="col">Severidad</th>
+            <th scope="col">Descripción</th><th scope="col">Resultado</th>
+            <th scope="col">Observado</th></tr></thead>
+          <tbody>${filas}</tbody>
+        </table></div>
+      </div>
+    </details>`;
+}
+
 /** El glosario completo de metodologia.html, una sección por término con
     `id="{slug}"`. Es el destino de todo enlace `#slug` que apunte a una
     definición —desde el tooltip de ayuda contextual o desde otra página,

@@ -378,7 +378,8 @@ def facultad_de(unidad: str) -> str:
 def canonical_academic_unit(raw_unit: str | None) -> str:
     """Mapea una variante al vocabulario controlado (regla I-07).
 
-    El vocabulario está marcado como inferido y no validado institucionalmente.
+    El vocabulario fue inferido de los datos y luego validado
+    institucionalmente por el responsable del proyecto (T-02, 2026-08-26).
     Las variantes fuera de él se conservan tal cual, no se fuerzan a una
     categoría existente.
     """

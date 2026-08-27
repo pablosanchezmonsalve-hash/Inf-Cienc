@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `1dc2e3b` · Merge remote-tracking branch 'origin/claude/state-review-next-steps-wz
+Último commit: `6830db5` · Merge remote-tracking branch 'origin/main' into claude/state-review-ne
 Snapshot: 2026-08-27
 
 ---
@@ -62,7 +62,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_candidatos_afiliacion.csv` | 20 |
 | `internal/orcid_conflicts.csv` | 1 |
 | `internal/orcid_desacuerdos.csv` | 2 |
-| `internal/orcid_hallazgos.csv` | 4 |
+| `internal/orcid_hallazgos.csv` | 56 |
 
 `make revision` reúne estas colas en 113 casos, de los que **6 siguen pendientes**: 107 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 350
+## Decisiones tomadas: 353
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

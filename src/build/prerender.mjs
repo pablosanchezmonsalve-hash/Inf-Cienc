@@ -149,6 +149,15 @@ async function main() {
       const { entradas } = await leerJSON('glossary.json');
       html = rellenar(html, 'glosario', v.glosario(entradas), a);
       html = rellenar(html, 'procedencia', v.procedencia(meta), a);
+      html = rellenar(html, 'validacion', v.validacion(await leerJSON('validacion.json')), a);
+      // Misma razón que unidadPorPersona más abajo: esta cifra crece sola
+      // (T-19 corre por cron), y sin pre-renderizarla un lector sin
+      // JavaScript vería el hueco vacío que "hoy hay X de Y" deja al medio
+      // de la frase — peor que la cifra vieja que este mismo cambio corrigió.
+      const { autores: autoresOrcid } = await leerJSON('authors.json');
+      const conOrcid = autoresOrcid.filter(a2 => a2.orcid).length;
+      html = rellenar(html, 'orcid-cobertura',
+        `${c.nf.format(conOrcid)} de ${c.nf.format(autoresOrcid.length)} formas de firma con ORCID`, a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'modulos') {
       const codigos = (html.match(/id="modulos"[^>]*data-indicadores="([^"]+)"/) || [])[1]

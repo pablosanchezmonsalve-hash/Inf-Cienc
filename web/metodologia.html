@@ -28,6 +28,15 @@
     <h3>Procedencia de los datos</h3>
     <div id="procedencia"></div>
   </section>
+  <section class="modulo" id="validacion-datos">
+    <h3>Auditoría de datos</h3>
+    <p>Antes de construir cualquier indicador, el pipeline corre 30 reglas de
+    consistencia sobre el corpus — identificadores únicos, sumas que cuadran,
+    fechas de corte declaradas, ningún patrón de detección institucional
+    prohibido en uso. Si una regla bloqueante falla, el build se detiene: no
+    se publica un sitio sobre datos que no pasaron su propia auditoría.</p>
+    <div id="validacion"></div>
+  </section>
   <section class="modulo" id="fuentes">
     <h3>De dónde se consulta cada dato</h3>
     <p>No todas las fuentes entran igual. Dos se leen de archivos exportados a
@@ -95,14 +104,16 @@
       cuartiles de revista— proceden de <strong>SciVal</strong>: cada módulo
       declara en su sello cuál de las dos fuentes lo sostiene.</li>
       <li>La unidad académica se infiere de la afiliación declarada y está
-      disponible en el 63,8 % de los casos. El vocabulario de unidades no ha sido
-      validado institucionalmente.</li>
+      disponible en el 63,8 % de los casos (pares autor × publicación). El
+      vocabulario de unidades fue validado institucionalmente por el
+      responsable del proyecto (T-02); la cobertura desigual de Scopus entre
+      disciplinas sigue distorsionando la comparación entre unidades.</li>
       <li>Cada ficha de autor corresponde a <strong>una forma de firma</strong>,
       no necesariamente a una persona distinta.</li>
-      <li><strong>ORCID no viene de Scopus ni de SciVal.</strong> Se recupera de
+      <li id="li-orcid"><strong>ORCID no viene de Scopus ni de SciVal.</strong> Se recupera de
       Crossref y del registro público de ORCID, y cada asignación se contrasta
-      contra el registro de su titular: hoy hay 216 de 556 formas de firma con
-      ORCID, cada una etiquetada con la evidencia que la respalda. Ver
+      contra el registro de su titular: hoy hay <span id="orcid-cobertura"></span>,
+      cada una etiquetada con la evidencia que la respalda. Ver
       <em>Cobertura de ORCID</em> en la documentación del proyecto.</li>
       <li>Las publicaciones más recientes tienen una ventana de citación corta:
       sus indicadores de impacto son provisionales.</li>
