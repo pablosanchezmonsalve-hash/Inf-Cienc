@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `a4dfaa4` · V2-26: herramienta interactiva para revisar la brecha de cobertura Ope
-Snapshot: 2026-08-26
+Último commit: `aeb9eec` · Regenera STATE.md: referencia el HEAD real y corrige el mojibake del s
+Snapshot: 2026-08-27
 
 ---
 
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 324
+## Decisiones tomadas: 327
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

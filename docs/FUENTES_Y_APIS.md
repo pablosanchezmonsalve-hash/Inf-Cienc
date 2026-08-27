@@ -225,7 +225,7 @@ No es una integración nueva: es usar más del conector que ya existe.
   indicador que se publica y que nadie ha verificado contra una segunda fuente.
 - **Hay que confirmar:** condiciones de uso y si exige `mailto` como Crossref.
 
-### 3.6 SciELO — la brecha de cobertura que este proyecto declara
+### 3.6 SciELO — investigado el 2026-08-26 (V2-21); la interfaz real no admite consulta por institución
 
 - **Qué preguntaría:** producción de la institución indexada en SciELO y no en
   Scopus.
@@ -235,13 +235,62 @@ No es una integración nueva: es usar más del conector que ya existe.
   disciplinas: castiga a humanidades, ciencias sociales y a la publicación en
   español. SciELO es exactamente donde está esa producción. Medir el tamaño de
   la brecha convertiría una advertencia cualitativa en una cifra.
-- **Hay que confirmar (y es sustancial):** qué interfaz ofrece hoy SciELO para
-  consulta programática y con qué estabilidad. Hay al menos una vía OAI-PMH,
-  pero **no está verificada desde este repositorio** y no debe darse por hecha.
+
+**Corrección sobre la versión anterior de esta sección.** Decía que había «al
+menos una vía OAI-PMH», sin verificar. Es la interfaz equivocada: SciELO
+publica una **API REST propia**, ArticleMeta
+(`docs.scielo.org`/`scielo.readthedocs.io`, código en
+[`github.com/scieloorg/articles_meta`](https://github.com/scieloorg/articles_meta)),
+sin autenticación, base `http://articlemeta.scielo.org/api/v1/`. Confirmado
+leyendo el código y la documentación fuente en GitHub — `scielo.readthedocs.io`
+y `articlemeta.scielo.org` mismos están bloqueados por la política de red de
+este entorno, igual que `api.ror.org` en `V2-20`.
+
+- **La API existe, pero no busca por institución.** Los endpoints
+  documentados (`/article/`, `/article/identifiers/`, y sus equivalentes para
+  `collection`/`journal`/`issue`) sólo filtran por **ISSN de revista**,
+  **colección** (código de tres letras por país/red) y **rango de fechas**
+  (`from`/`until`, paginado con `limit`/`offset`, máximo 1000 por página). No
+  existe un parámetro equivalente al `filter=institutions.ror:…` que hace
+  posible el contraste con OpenAlex (`§3.1`). SciELO indexa por **revista**,
+  no por afiliación de autor.
+- **El dato SÍ está, pero sólo por artículo individual.** El endpoint de
+  artículo (`GET /api/v1/article/?code=<PID>`) devuelve, por cada autor, su
+  afiliación completa (institución, ciudad, país; campo `v70` del formato
+  legado, expuesto por la librería
+  [`xylose`](https://github.com/scieloorg/xylose) como `affiliations` /
+  `normalized_affiliations`) — la misma clase de dato que
+  `deteccion_institucional.metodo_blando` ya sabe reconocer. Pero **no hay
+  forma de pedir "los artículos cuya afiliación contenga Finis Terrae"**: hay
+  que enumerar identificadores por colección y rango de fechas, y **volver a
+  pedir cada artículo uno por uno** para leer su afiliación. Es un patrón de
+  cosecha de dos pasos, más caro que el de OpenAlex (que resuelve la
+  institución en una sola consulta) y del mismo orden que construir el propio
+  `metodo_blando` sobre un export ajeno.
+- **Sin confirmar, y no es menor:** el código de colección de Chile. Los
+  ejemplos públicos que aparecieron en la búsqueda usan `scl` (que en la
+  práctica documentada de SciELO corresponde a la colección original/Brasil,
+  no a un código ISO 3166-1), así que **no se puede asumir "chl" ni ningún
+  otro candidato sin consultar `GET /api/v1/collection/identifiers/`
+  directamente** — bloqueado desde aquí, requiere ejecutarse desde una máquina
+  con salida a `articlemeta.scielo.org`, igual que `V2-20` con `api.ror.org`.
+  Tampoco está resuelto si limitarse a la colección de Chile bastaría: un
+  autor UFT puede publicar en una revista alojada en otra colección (Brasil,
+  España, red regional), y la API filtra por colección de la **revista**, no
+  por afiliación del autor — el propio filtro que faltaría.
 - **Riesgo metodológico:** dos corpus con criterios de indexación distintos no
   se suman. Entraría como **corpus paralelo declarado**, con su propia ficha en
   `config/sources.yml` y sus propios denominadores; jamás agregado al universo
-  principal sin decisión explícita.
+  principal sin decisión explícita (mismo principio que `D-206` ya aplica a
+  OpenAlex).
+- **Conclusión de esta investigación:** la interfaz existe, es estable (API
+  versionada, sin autenticación) y el dato de afiliación está disponible por
+  artículo — pero construir el conector es más trabajo que `V2-19`/`V2-26`
+  (OpenAlex), no menos: sin filtro de institución, cosechar la producción
+  potencialmente relevante exige primero decidir qué colección(es) barrer y
+  luego una llamada HTTP por artículo candidato. No se escribió código: es
+  una decisión de alcance (cuántas colecciones, qué ventana de fechas) que le
+  corresponde a quien la vaya a ejecutar, no a esta investigación.
 
 ### 3.7 API de Scopus (Elsevier) — **implementado el 2026-08-25; falta ejecutar la consulta**
 
