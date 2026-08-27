@@ -125,6 +125,43 @@ export function porDimension(sel_pubs, clave, { tope = 0, ordenar = true } = {})
   return tope ? filas.slice(0, tope) : filas;
 }
 
+/** Unidad académica agregada a FACULTAD, según la jerarquía del build
+    (`meta.jerarquia`, escuela -> facultad). `p.unidades` trae el nivel más
+    fino que la afiliación permitió detectar —a veces escuela, a veces ya
+    facultad—, porque el filtro necesita esa granularidad. El gráfico
+    principal no: mezclar «Facultad de Medicina y Salud» con «Escuela de
+    Kinesiología» en la misma lista de barras hace ilegible cuál es la
+    unidad de comparación. `porEscuela()`, más abajo, es la vista aparte
+    para quien sí quiere el detalle de escuela. */
+export function porFacultad(sel_pubs, jerarquia) {
+  const j = jerarquia || {};
+  const cuenta = new Map();
+  for (const p of sel_pubs) {
+    const unidades = p.unidades.length ? p.unidades : ['Sin dato declarado'];
+    for (const u of unidades) {
+      const f = j[u] || u;
+      cuenta.set(f, (cuenta.get(f) || 0) + 1);
+    }
+  }
+  return [...cuenta].map(([valor, n]) => ({ valor, n }))
+    .sort((a, b) => b.n - a.n || a.valor.localeCompare(b.valor));
+}
+
+/** Sólo las unidades que la jerarquía reconoce como escuela —nunca
+    facultades sueltas, «No determinada» ni «Sin dato declarado», que no
+    tienen lectura como escuela. */
+export function porEscuela(sel_pubs, jerarquia) {
+  const j = jerarquia || {};
+  const cuenta = new Map();
+  for (const p of sel_pubs) {
+    for (const u of p.unidades) {
+      if (j[u]) cuenta.set(u, (cuenta.get(u) || 0) + 1);
+    }
+  }
+  return [...cuenta].map(([valor, n]) => ({ valor, n }))
+    .sort((a, b) => b.n - a.n || a.valor.localeCompare(b.valor));
+}
+
 /** Recuentos por faceta para pintar los propios controles del filtro.
 
     Se calculan con las DEMÁS dimensiones aplicadas pero no la propia: si una

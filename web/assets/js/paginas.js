@@ -45,8 +45,12 @@ async function montarExplorador(claveSeccion) {
   // La procedencia de cada indicador. Se carga SIEMPRE, esté la página
   // pre-renderizada o no: al repintar un recorte los sellos se rehacen con él,
   // y sin este mapa saldrían sin fuente ni fecha.
-  const proc = VX.procedencias(await c.cargar('series.json'),
-                               await c.cargar('meta.json'));
+  const metaBase = await c.cargar('meta.json');
+  const proc = VX.procedencias(await c.cargar('series.json'), metaBase);
+  // Escuela -> facultad (P-07): mismo criterio que agrega el build, para que
+  // el gráfico reactivo no mezcle facultades y escuelas sueltas en una
+  // misma lista de barras (ver `porFacultad()` en explorador.js).
+  const jerarquia = metaBase.jerarquia || {};
 
   // Persona → unidad académica, sólo para C-05 (red de coautoría): una
   // publicación no trae la unidad por autor individual, así que el corte de
@@ -82,8 +86,8 @@ async function montarExplorador(claveSeccion) {
 
   function pintar({ nuevaEntrada = false } = {}) {
     const partes = claveSeccion
-      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona)
-      : VX.explorador(publicaciones, sel, proc);
+      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona, jerarquia)
+      : VX.explorador(publicaciones, sel, proc, jerarquia);
     // Se comparan los valores ANTES de reemplazar el marcado: la señal de
     // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
     const antes = new Map([...zonas.cifras.querySelectorAll('[data-valor]')]

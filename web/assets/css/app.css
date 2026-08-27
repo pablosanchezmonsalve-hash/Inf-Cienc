@@ -1590,6 +1590,13 @@ svg.chart .trama { pointer-events: none; }
 }
 .corte > h3 { font: 700 var(--t-l)/1.25 var(--f-ui); margin: 0 0 var(--e3); }
 
+/* La red de coautoría dibuja con `svg.chart.red-svg { min-width:680px }» —
+   necesario para que nodos y etiquetas no se aplasten. Compartiendo una de
+   las dos columnas de `.cortes` (mínimo 20rem = 320px) ese mínimo se sale
+   de la tarjeta: `.grafico` scrollea horizontal, pero el grafo se ve cortado
+   a primera vista en vez de completo. Ocupa la fila entera. */
+.corte-red { grid-column: 1 / -1; }
+
 /* ---- la nota metodológica, plegada ---- */
 /* «Menos información y más datos»: el contexto no se borra —sigue siendo la
    diferencia entre leer bien una cifra y leerla mal— pero deja de competir

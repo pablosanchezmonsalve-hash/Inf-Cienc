@@ -147,8 +147,12 @@ export const CORTES = [
   ['tipo',        'Tipos documentales',    'barrasH'],
 ];
 
-export function grafico(pubs_sel, clave, titulo, forma) {
-  const datos = X.porDimension(pubs_sel, clave, { tope: forma === 'barrasH' ? 10 : 0 });
+export function grafico(pubs_sel, clave, titulo, forma, jerarquia) {
+  // Mismo criterio que en `dibujar()`: 'unidad' se agrega a facultad, nunca
+  // se mezcla con escuelas sueltas.
+  const datos = clave === 'unidad'
+    ? X.porFacultad(pubs_sel, jerarquia)
+    : X.porDimension(pubs_sel, clave, { tope: forma === 'barrasH' ? 10 : 0 });
   if (!datos.length) {
     return `<p class="vacio">Ninguna publicación en este recorte.</p>`;
   }
@@ -202,11 +206,11 @@ function selloCorte(sub, campo, cod, proc) {
   });
 }
 
-export function cortes(pubs_sel, proc) {
+export function cortes(pubs_sel, proc, jerarquia) {
   return CORTES.map(([clave, titulo, forma]) => `
     <section class="corte" data-corte="${clave}">
       <h3>${c.escapar(titulo)}</h3>
-      <div class="grafico">${grafico(pubs_sel, clave, titulo, forma)}</div>
+      <div class="grafico">${grafico(pubs_sel, clave, titulo, forma, jerarquia)}</div>
       ${selloCorte(pubs_sel, clave, COD_PORTADA[clave], proc)}
     </section>`).join('');
 }
@@ -214,14 +218,16 @@ export function cortes(pubs_sel, proc) {
 /* ─────────────────────────────────────────────────────── página completa */
 
 /** Todo el cuerpo del explorador. La usa el pre-renderizado con el conjunto
-    completo y el navegador con el recorte vigente. */
-export function explorador(pubs, sel, proc) {
+    completo y el navegador con el recorte vigente. `jerarquia` (opcional,
+    de meta.json) agrega 'unidad' a facultad — sin ella se ve tal como la
+    afiliación la nombró, escuela o facultad indistinto. */
+export function explorador(pubs, sel, proc, jerarquia) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel),
     cifras: cifras(X.resumen(sub)),
-    cortes: cortes(sub, proc),
+    cortes: cortes(sub, proc, jerarquia),
   };
 }
 
@@ -240,6 +246,11 @@ export const SECCIONES = {
       { cod: 'P-03', campo: 'tipo',   titulo: 'Tipo documental',              forma: 'barrasH' },
       { cod: 'P-05', campo: 'fuente', titulo: 'Fuentes con más publicaciones', forma: 'barrasH', tope: 15 },
       { cod: 'P-07', campo: 'unidad', titulo: 'Unidad académica',             forma: 'barrasH' },
+      // Sin `cod` propio a propósito: no es un indicador nuevo, es la misma
+      // P-07 vista a nivel de escuela. Con `cod: 'P-07'` el id chocaría con
+      // el corte de arriba (dos secciones con el mismo id="P-07" en la
+      // página) y el ancla del índice lateral aterrizaría en el equivocado.
+      { campo: 'escuela', titulo: 'Escuelas dentro de cada facultad',        forma: 'barrasH' },
     ],
   },
   impacto: {
@@ -279,13 +290,27 @@ export const SECCIONES = {
 /* Los campos multivaluados: una publicación aparece en varias barras y la suma
    de las barras supera el número de publicaciones. Se marca con trama, que es
    el código visual que el sitio ya enseña. */
-const MULTIVALUADO = new Set(['paises', 'instituciones', 'asjc', 'ods', 'qs_area', 'unidad', 'open_access']);
+const MULTIVALUADO = new Set(['paises', 'instituciones', 'asjc', 'ods', 'qs_area', 'unidad', 'escuela', 'open_access']);
 
 /* Devuelve el gráfico Y sus datos. La TABLA equivalente no es un extra: es la
    vía alternativa al gráfico para quien no puede leerlo, y se construye de los
-   mismos números para que no pueda decir otra cosa. */
-function dibujar(sub, corte) {
+   mismos números para que no pueda decir otra cosa.
+   `jerarquia` (Map/objeto escuela -> facultad, desde meta.json) sólo lo usan
+   los campos 'unidad' y 'escuela'; el resto de los cortes lo ignora. */
+function dibujar(sub, corte, jerarquia) {
   const { campo, titulo, forma, tope } = corte;
+  // 'unidad' y 'escuela' no pasan por `X.porCampo()` con el extractor
+  // genérico: ese extractor da la unidad tal como la afiliación la nombró
+  // -escuela o facultad, lo que haya-, y mezclar ambos niveles en una misma
+  // lista de barras es justo lo que hacía ilegible el gráfico.
+  if (campo === 'unidad') {
+    const datos = X.porFacultad(sub, jerarquia);
+    return datos.length ? { svg: c.barrasH(datos, { titulo, trama: true }), datos } : null;
+  }
+  if (campo === 'escuela') {
+    const datos = X.porEscuela(sub, jerarquia);
+    return datos.length ? { svg: c.barrasH(datos, { titulo, trama: true }), datos } : null;
+  }
   if (forma === 'suma-anio') {
     const d = X.sumaPorAnio(sub, campo);
     return d.length
@@ -445,15 +470,20 @@ function corteRed(sub, corte, unidadPorPersona, proc) {
 }
 
 /** Los cortes de una sección, recalculados sobre el recorte vigente.
-    `unidadPorPersona` sólo lo usa C-05 (red de coautoría); el resto de los
-    cortes lo ignora. */
-export function cortesSeccion(sub, clave, proc, unidadPorPersona) {
+    `unidadPorPersona` sólo lo usa C-05 (red de coautoría); `jerarquia` sólo
+    'unidad' y 'escuela' (P-07). El resto de los cortes los ignora. */
+export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia) {
   const s = SECCIONES[clave];
   if (!s) return '';
   return s.cortes.map(corte => {
     if (corte.forma === 'red') return corteRed(sub, corte, unidadPorPersona, proc);
-    const r = dibujar(sub, corte);
+    const r = dibujar(sub, corte, jerarquia);
     const id = corte.cod || corte.campo;
+    // 'escuela' no tiene indicador propio — es P-07 visto por escuela—, así
+    // que el sello (fuente, corte, cobertura) se pide con el campo y el
+    // código de 'unidad': misma procedencia, mismo denominador.
+    const campoSello = corte.campo === 'escuela' ? 'unidad' : corte.campo;
+    const codSello = corte.campo === 'escuela' ? 'P-07' : corte.cod;
     // El id es el CÓDIGO del indicador y no el campo: así la compuerta de
     // higiene puede comprobar que cada indicador declarado se dibuja de
     // verdad, y los enlaces del catálogo a #C-01 siguen llegando al gráfico.
@@ -473,7 +503,7 @@ export function cortesSeccion(sub, clave, proc, unidadPorPersona) {
       ${MULTIVALUADO.has(corte.campo)
         ? '<p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>' : ''}
       ${corte.aviso ? `<p class="nota">${c.escapar(corte.aviso)}</p>` : ''}
-      ${selloCorte(sub, corte.campo, corte.cod, proc)}
+      ${selloCorte(sub, campoSello, codSello, proc)}
     </section>`;
   }).join('');
 }
@@ -509,14 +539,15 @@ export function cabeceraSeccion(clave, titulo) {
 }
 
 /** Todo el cuerpo de una sección. `unidadPorPersona` (Map, opcional) sólo lo
-    necesita C-05; las demás secciones lo reciben y no lo usan. */
-export function seccion(pubs, sel, clave, proc, unidadPorPersona) {
+    necesita C-05; `jerarquia` (objeto, opcional, de meta.json) sólo P-07.
+    Las demás secciones los reciben y no los usan. */
+export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
     cifras: cifras(X.resumen(sub)),
-    cortes: cortesSeccion(sub, clave, proc, unidadPorPersona),
+    cortes: cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia),
   };
 }
 

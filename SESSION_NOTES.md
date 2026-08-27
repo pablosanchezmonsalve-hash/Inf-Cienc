@@ -4682,3 +4682,153 @@ docs/DATA_MODEL.md                     fila UnidadAcademica actualizada
 
 Ninguna acción de código pendiente y urgente. El informe completo de estado
 se entregó directamente al usuario en el chat, no como documento nuevo.
+
+---
+
+## Cierre parcial · Revisión visual del sitio publicado: 4 hallazgos reales, 3 corregidos y verificados
+
+El usuario revisó el sitio ya publicado (GitHub Pages) y trajo 7
+observaciones concretas. Antes de tocar nada se abrió el sitio con
+Playwright (servidor local sobre `dist/`) para ver exactamente lo que él
+veía, en vez de razonar sobre el código a ciegas.
+
+### 1. Unidad académica mezclaba facultades y escuelas
+
+Confirmado con captura: el panel «Unidad académica» de `produccion.html`
+mostraba facultades, escuelas, «No determinada» y «Sin dato declarado» en
+una sola lista de barras sin jerarquía. Causa raíz: `publications.json`
+guarda `unidades` al nivel MÁS FINO que la afiliación permitió detectar
+—necesario para filtrar por escuela—, pero el gráfico reactivo
+(`explorador.js`/`vista_explorador.js`) contaba ese campo tal cual, sin
+aplicar la jerarquía escuela→facultad que sí usa `02_indicators.py` para
+`series.json`. `vista.js` ya documentaba en su nota de P-07 que «las
+escuelas se agregan a su facultad» — la web decía una cosa y hacía otra.
+
+**Arreglo**: `common_build.build_meta()` publica ahora `jerarquia` (escuela
+→ facultad, sin el campo `estado` que es trazabilidad interna) — se
+incrusta en `meta.json`, que el navegador ya cargaba. Nuevas funciones
+`porFacultad()`/`porEscuela()` en `explorador.js`; `dibujar()` en
+`vista_explorador.js` las usa para los campos `unidad`/`escuela` en vez del
+extractor genérico. Nuevo corte «Escuelas dentro de cada facultad» en
+`SECCIONES.produccion`, SIN `cod` propio (reutiliza la procedencia de P-07
+vía `selloCorte`) para no chocar el `id="P-07"` del corte principal.
+`prerender.mjs` enhebra el mismo mapa para que el HTML pre-renderizado no
+diverja del reactivo.
+
+Verificado: 414 = 382 (Facultad de Medicina y Salud cruda) + 17
+(Kinesiología) + 11 (Nutrición y Dietética) + 3 (Enfermería) + 1 (variante
+recién corregida, ver más abajo) — aritmética exacta contra
+`publications.json`. Nota aparte: esto NO coincide con
+`series.json.P-07.datos` (610), que cuenta sobre PARES autor×publicación
+vía `matching_log.csv`, no sobre publicaciones deduplicadas — una
+divergencia metodológica preexistente entre el P-07 de Python y el
+recorte reactivo que ya existía antes de este arreglo (nunca se mostraba
+610 en pantalla) y que queda fuera de alcance de esta corrección.
+
+### «School of Nutrition and Dietetic» — variante real de la fuente
+
+Aparecía como unidad propia (n=1) en vez de fundirse en «Escuela de
+Nutrición y Dietética». Verificado contra `internal/matching_log.csv`: la
+afiliación cruda dice literalmente «School of Nutrition and Dietetic,
+Finis Terrae University...» — sin la «s» final. No es un artefacto de
+nuestra extracción: así lo escribió la fuente (autor Vásquez F., eid
+2-s2.0-105001380214). Se agregó como variante en
+`config/matching_rules.yml`.
+
+### 2. Acceso abierto: 233 sin dato — no es un bug
+
+Verificado contra `publications.json`: 233 publicaciones tienen el arreglo
+`open_access` vacío (226 de ellas SÍ tienen otras métricas). Es una brecha
+de la fuente (SciVal no declaró estado OA para esas filas), ya documentada
+en `docs/INDICATORS.md` («Ausencia ≠ "no OA"»). Sin cambios de código —se
+le explicó la causa al usuario.
+
+### 3. «Treemap de Producción por Facultad y Escuela» — no existe en el repositorio
+
+Búsqueda exhaustiva (`grep -ri treemap` en todo el repo, código, docs,
+specs de diseño): cero resultados. No hay ningún componente de tipo
+treemap en ningún commit alcanzable desde esta rama. El sitio en vivo
+(`pablosanchezmonsalve-hash.github.io`) está bloqueado por la política de
+red de este entorno (`EGRESS_BLOCKED`), así que no se pudo confirmar qué
+ve el usuario exactamente ahí. Pendiente: preguntarle directamente en vez
+de adivinar qué gráfico quiere decir.
+
+### 4. Red de coautoría no se veía completa
+
+Confirmado con `page.evaluate()` midiendo el DOM real: el SVG de la red
+tiene `viewBox="0 0 1000 618"` y CSS `svg.chart.red-svg { min-width:680px }`
+—necesario para que nodos y etiquetas no se aplasten—, pero la tarjeta que
+lo contiene sólo mide ~390px (grilla de dos columnas de `.cortes`,
+`minmax(20rem, 1fr)`). `.grafico` ya tenía `overflow-x:auto`, así que
+técnicamente era desplazable, pero se veía cortado a primera vista.
+**Arreglo**: `.corte-red { grid-column: 1 / -1; }` — ocupa la fila entera
+en vez de compartir columna. Verificado con captura de pantalla completa:
+la red ahora se ve entera sin necesidad de scroll.
+
+### 7 (parcial). Etiquetas de `barrasH` recortadas por el lado izquierdo
+
+El bug más extendido de los cuatro: TODO gráfico de barras horizontales
+con etiquetas largas lo tenía, más visible en «Unidad académica» por sus
+nombres de facultad largos. Causa raíz en `core.js`: `anchoEtiqueta` se
+calcula asumiendo fuente de 13px (`anchoTexto()`, que coincide con
+`svg.chart text` en `app.css`), pero `recortar()` truncaba asumiendo 11px
+por defecto — subestimaba el ancho real, dejaba más caracteres de los que
+cabían, y el texto (anclado por la derecha, `text-anchor="end"`) se salía
+del `viewBox` por la izquierda. Con la fuente real (13px) más angosta que
+la asumida, el resultado era EXACTAMENTE el «lado equivocado» que un
+comentario del propio archivo ya describía como resuelto (para el ancho de
+columna, no para el recorte). **Arreglo de una línea**: `recortar(d.valor,
+anchoEtiqueta - 14, 13)`. Verificado con captura antes/después.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-323 | `meta.json` publica `jerarquia` (escuela→facultad) para que el explorador reactivo pueda agregar «Unidad académica» igual que `series.json` | Sin esto, cada corte reactivo habría tenido que traer su propio criterio, y `vista.js` ya prometía en su nota de P-07 un comportamiento que la web no cumplía |
+| D-324 | El corte nuevo «Escuelas dentro de cada facultad» NO lleva `cod` propio | No es un indicador nuevo — es P-07 visto por escuela. Darle `cod: 'P-07'` habría duplicado el `id="P-07"` en la página (dos secciones con el mismo id) y roto el ancla del índice lateral |
+| D-325 | No se concilia la divergencia entre `series.json.P-07.datos` (610, por pares autor×publicación) y el recorte reactivo (414, por publicaciones deduplicadas) en esta sesión | Es una divergencia metodológica preexistente entre dos bases de conteo distintas, no algo que este arreglo haya introducido — reconciliarla es una decisión aparte sobre qué denominador debe gobernar la vista, no una corrección de bug |
+| D-326 | El Treemap que el usuario describe no se implementa ni se busca reemplazar por otra cosa hasta preguntarle | No hay ningún rastro en el repositorio; adivinar qué gráfico quiso decir y construir algo distinto arriesgaría entregar lo equivocado |
+
+### Verificación
+
+Cada arreglo se verificó con captura de pantalla real (Playwright,
+servidor local sobre `dist/`) antes/después, no sólo con lectura de
+código. Auditoría completa (0 bloqueantes), `build_all.py` (compuerta
+pública/interna: 0 fallas), `06_assemble_site.py` (10 páginas), y
+`node src/verify/run_all.mjs` completo —contraste WCAG, estructura,
+flujos interactivos, responsive, higiene y peso— los seis bloques sin
+fallos, corridos DESPUÉS de todos los cambios.
+
+### Archivos creados o modificados
+
+```
+web/assets/js/core.js              recortar() con px=13 (antes 11) en barrasH
+web/assets/css/app.css             .corte-red { grid-column: 1 / -1 }
+src/build/common_build.py          build_meta() publica jerarquia
+web/assets/js/explorador.js        porFacultad(), porEscuela()
+web/assets/js/vista_explorador.js  dibujar()/grafico()/cortes()/cortesSeccion()/
+                                    seccion()/explorador() enhebran jerarquia;
+                                    nuevo corte 'escuela' en SECCIONES.produccion
+src/build/prerender.mjs            enhebra jerarquia para el pre-renderizado
+web/assets/js/paginas.js           monta jerarquia desde meta.json
+config/matching_rules.yml          "School of Nutrition and Dietetic" como variante
+```
+
+### Ambigüedades abiertas
+
+- **Treemap**: pendiente de que el usuario aclare a qué gráfico se refiere
+  (no existe en el repositorio).
+- **Puntos 5 y 6** del pedido original (autores sin identidad consolidada
+  + herramienta de revisión manual; casillas de selección múltiple en
+  Publicaciones) — sin empezar aún, quedan para continuar en la misma
+  sesión.
+- La divergencia P-07 Python (610) vs reactivo (414): declarada, no
+  resuelta. Si en algún momento se decide que ambas vistas deben coincidir,
+  hay que decidir primero cuál denominador es el correcto para «Unidad
+  académica» — publicaciones deduplicadas o pares autor×publicación.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario qué es el Treemap que menciona. Seguir con los
+puntos 5 (herramienta de revisión de autores) y 6 (exportación selectiva
+de publicaciones).

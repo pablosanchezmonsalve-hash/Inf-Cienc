@@ -73,6 +73,10 @@ async function main() {
   // muestra cada nodo.
   const unidadPorPersona = new Map(
     (await leerJSON('authors.json')).autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+  // Escuela -> facultad (P-07): mismo mapa que `meta.json` le da al navegador
+  // (`common_build.build_meta()`), para que el pre-renderizado no diverja en
+  // qué unidad agrega el gráfico.
+  const jerarquia = meta.jerarquia || {};
 
   const archivos = (await readdir(dist)).filter(f => f.endsWith('.html'));
   const faltantes = [];
@@ -106,7 +110,7 @@ async function main() {
       // las cifras y los gráficos del conjunto entero, y sólo pierde la
       // capacidad de recortarlo. Los `details` de los filtros se abren y se
       // leen igual sin guion.
-      const vacio = vx.explorador(publicaciones, {}, proc);
+      const vacio = vx.explorador(publicaciones, {}, proc, jerarquia);
       html = rellenar(html, 'titular', vx.cabecera(meta), a);
       html = rellenar(html, 'estado-recorte', vacio.estado, a);
       html = rellenar(html, 'controles', vacio.controles, a);
@@ -121,7 +125,7 @@ async function main() {
       const a = [];
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
       const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
-      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona);
+      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia);
       html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);
       html = rellenar(html, 'controles', sec.controles, a);

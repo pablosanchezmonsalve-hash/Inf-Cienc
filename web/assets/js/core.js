@@ -379,7 +379,14 @@ export function barrasH(datos, {
   const filas = datos.map((d, i) => {
     const y = i * alto;
     const w = Math.max(2, anchoPista * (d.n / max));
-    const etq = recortar(d.valor, anchoEtiqueta - 14);
+    // px=13: mismo tamaño que `anchoEtiqueta` asumió para dimensionar la
+    // columna (svg.chart text, app.css). Con el valor por defecto de
+    // recortar() (11px) el recorte suponía una fuente más angosta que la
+    // real, dejaba de más caracteres de los que caben, y el texto —anclado
+    // por el extremo derecho (text-anchor="end")— se salía del lienzo por
+    // la izquierda: exactamente el "lado equivocado" que el comentario de
+    // más arriba decía resuelto.
+    const etq = recortar(d.valor, anchoEtiqueta - 14, 13);
     const cy = y + alto / 2;
     const nota = d.nota || cuota(d);
 

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4ba1a7d` · V2-21: investiga la interfaz real de SciELO, sin escribir conector
+Último commit: `8b3ee14` · Regenera internal/revision_cobertura_openalex.html con datos de hoy
 Snapshot: 2026-08-27
 
 ---
@@ -53,7 +53,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 415 |
+| `internal/ambiguities_authors.csv` | 414 |
 | `internal/ambiguities_publications.csv` | 14 |
 | `internal/identity_candidates.csv` | 17 |
 | `internal/openalex_cobertura.csv` | 414 |
@@ -77,7 +77,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 330
+## Decisiones tomadas: 334
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
