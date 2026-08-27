@@ -64,8 +64,22 @@
       cargar('publications.json'),
     ]);
 
+    // Este treemap y el gráfico "Unidad académica" de arriba cuentan con
+    // criterios distintos (pares autor×publicación vs. publicaciones
+    // distintas) — declarado a propósito, no conciliado todavía. Sin este
+    // aviso cruzado, alguien que mire ambos paneles vería números
+    // distintos para la misma facultad sin saber por qué.
     const nota = document.getElementById('treemap-nota');
-    if (nota && jerarquia.advertencia) nota.textContent = jerarquia.advertencia;
+    if (nota) {
+      const base = jerarquia.advertencia || '';
+      nota.textContent = (base ? base + ' ' : '') +
+        'Este treemap cuenta pares autor × publicación: una publicación con dos '
+        + 'autores UFT de la misma unidad cuenta dos veces. El gráfico "Unidad '
+        + 'académica", más arriba en esta misma página, cuenta publicaciones '
+        + 'distintas —una sola vez por unidad— y por eso sus totales no '
+        + 'coinciden con los de este treemap. Ambos criterios están '
+        + 'documentados; ninguno es un error.';
+    }
 
     montarTreemap(document.getElementById('treemap-contenedor'), jerarquia.raiz);
     montarHeatmap(document.getElementById('heatmap-contenedor'), publicaciones.publicaciones);
