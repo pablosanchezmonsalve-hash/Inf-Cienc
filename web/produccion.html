@@ -30,10 +30,50 @@
       <div class="cortes" id="cortes" data-indicadores="P-02,P-03,P-05,P-07"></div>
 
       <div id="diferidos"></div>
+
+      <!-- Módulos nuevos (Bento Grid): jerarquía institucional y mapa de
+           temáticas. Montaje independiente del explorador de arriba —no
+           reacciona a sus filtros todavía, es la primera versión— para no
+           tocar la lógica ya verificada de `paginas.js`. -->
+      <h2 class="titulo-seccion">Jerarquía y temáticas</h2>
+      <div class="bento-grid">
+        <div class="bento-card bento-ancha">
+          <h3>Producción por facultad y escuela</h3>
+          <p class="bento-nota" id="treemap-nota"></p>
+          <div id="treemap-contenedor"></div>
+        </div>
+        <div class="bento-card bento-ancha">
+          <h3>Temáticas ASJC más frecuentes por año</h3>
+          <p class="bento-nota">Ocho categorías con más publicaciones en el período. Intensidad = raíz cuadrada del recuento, para que un año con un pico no aplane el resto del mapa.</p>
+          <div id="heatmap-contenedor"></div>
+        </div>
+      </div>
     </div>
   </div>
 </main>
 <footer class="pie" id="pie"></footer>
 <script type="module" src="assets/js/paginas.js"></script>
+<script type="module">
+  import { cargar } from './assets/js/core.js';
+  import { montarTreemap } from './assets/js/visualizations/treemap.js';
+  import { montarHeatmap } from './assets/js/visualizations/heatmap.js';
+
+  async function montarModulosNuevos() {
+    const [jerarquia, publicaciones] = await Promise.all([
+      cargar('hierarchy.json'),
+      cargar('publications.json'),
+    ]);
+
+    const nota = document.getElementById('treemap-nota');
+    if (nota && jerarquia.advertencia) nota.textContent = jerarquia.advertencia;
+
+    montarTreemap(document.getElementById('treemap-contenedor'), jerarquia.raiz);
+    montarHeatmap(document.getElementById('heatmap-contenedor'), publicaciones.publicaciones);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    montarModulosNuevos().catch(e => console.error('Módulos Bento:', e));
+  });
+</script>
 </body>
 </html>

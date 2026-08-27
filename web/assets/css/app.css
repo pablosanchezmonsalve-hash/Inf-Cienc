@@ -186,6 +186,28 @@
      referencia puede tenerlo; su ETIQUETA, que dice el promedio mundial, no. */
   --aviso-tinta-grafico: light-dark(#8a5518, #e0a445);
 
+  /* ---- Bento / módulos premium (candidato, pendiente de confirmación) ----
+          Un acento nuevo para el rediseño de tablero, no una sustitución de
+          la identidad (D-144/D-145: la paleta institucional la fijó el
+          usuario y no se toca sin decisión explícita). Se reutiliza el par
+          YA declarado en --serie-6 en vez de inventar un séptimo tono: medido
+          SOLO (no junto a otras series, que es donde --serie-3..6 fallaban;
+          ver el hallazgo en SESSION_NOTES.md) contraste 5,66:1/7,55:1 contra
+          --plano, ΔE 24,5/30,3 frente a --aviso-borde — cifras en la misma
+          familia que D-144. Nombrado aparte de --serie-6 para poder
+          cambiarlo sin tocar la semántica de "serie categórica". */
+  --bento-acento: light-dark(#1c5fa8, #6fa8e8);
+  --bento-acento-suave: light-dark(#e7eef6, #10202e);
+
+  /* Sombra: NUNCA negro puro sobre --superficie oscura (se ve como un borde
+     sucio, no como profundidad). En oscuro se abre el halo y se sube la
+     opacidad porque una sombra sutil desaparece contra un fondo ya oscuro. */
+  --bento-sombra: light-dark(0 1px 2px rgba(7, 30, 34, .06), 0 1px 2px rgba(0, 0, 0, .4));
+  --bento-sombra-alta: light-dark(
+    0 8px 24px -8px rgba(7, 30, 34, .18),
+    0 8px 28px -6px rgba(0, 0, 0, .55));
+  --bento-radio: 12px;
+
   /* ---- Tipografía ---- */
   --f-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --f-cifra: var(--f-ui);
