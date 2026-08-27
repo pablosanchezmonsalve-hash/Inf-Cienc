@@ -13,20 +13,18 @@ Salidas:
 from __future__ import annotations
 
 import statistics
+import sys
 from collections import Counter
 
 import pandas as pd
 
-import common_build as b
-import sys
-
-import grafo_coautoria as GC
-
 if sys.platform == "win32":
     # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
-    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
+    # con caracteres como "→"/"✗"/"⚠". Mismo patrón que src/enrich/orcid_openalex.py.
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+import common_build as b
+import grafo_coautoria as GC
 
 
 def main() -> None:

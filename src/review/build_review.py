@@ -50,12 +50,13 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-import decisiones as D
-import equivalencia_ortografica as EQ
 if sys.platform == "win32":
     # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
-    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
+    # con caracteres como "→"/"✗"/"⚠". Mismo patrón que src/enrich/orcid_openalex.py.
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+import decisiones as D
+import equivalencia_ortografica as EQ
 
 
 ROOT = Path(__file__).resolve().parents[2]

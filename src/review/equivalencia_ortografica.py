@@ -38,14 +38,9 @@ LA REGLA, ESCRITA UNA SOLA VEZ
 from __future__ import annotations
 
 import re
+import sys
 import unicodedata
 from collections import defaultdict
-import sys
-
-if sys.platform == "win32":
-    # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
-    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
 # Guion ASCII y los del bloque de puntuación general: la fuente usa varios y
@@ -155,4 +150,11 @@ def autotest() -> int:
 
 
 if __name__ == "__main__":
+    if sys.platform == "win32":
+        # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
+        # con caracteres como "→"/"✗"/"⚠". Mismo patrón que src/enrich/orcid_openalex.py.
+        # Sólo aquí, no a nivel de módulo: esto es una biblioteca que otros
+        # scripts importan, y mutar su stdout como efecto secundario de import
+        # rompe bajo pythonw.exe o cualquier captura que sustituya stdout.
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     raise SystemExit(autotest())

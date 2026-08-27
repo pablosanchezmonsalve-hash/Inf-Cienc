@@ -17,9 +17,10 @@ import re
 import sys
 
 import common_build as b
+
 if sys.platform == "win32":
     # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
-    # con caracteres como "→"/"—"/"·". Mismo patrón que src/enrich/orcid_openalex.py.
+    # con caracteres como "→"/"✗"/"⚠". Mismo patrón que src/enrich/orcid_openalex.py.
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 

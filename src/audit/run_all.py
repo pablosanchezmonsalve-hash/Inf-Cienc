@@ -15,6 +15,13 @@ from pathlib import Path
 
 import pandas as pd
 
+if sys.platform == "win32":
+    # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
+    # con caracteres como "→"/"✗"/"⚠". Mismo patrón que src/enrich/orcid_openalex.py.
+    # Es el único __main__ de la auditoría que dependía, por accidente de
+    # orden de import, del guard de 01_inventory.py para no reventar aquí.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 STEPS = [
