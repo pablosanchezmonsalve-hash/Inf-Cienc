@@ -203,11 +203,21 @@
 
   /* Sombra: NUNCA negro puro sobre --superficie oscura (se ve como un borde
      sucio, no como profundidad). En oscuro se abre el halo y se sube la
-     opacidad porque una sombra sutil desaparece contra un fondo ya oscuro. */
-  --bento-sombra: light-dark(0 1px 2px rgba(7, 30, 34, .06), 0 1px 2px rgba(0, 0, 0, .4));
-  --bento-sombra-alta: light-dark(
-    0 8px 24px -8px rgba(7, 30, 34, .18),
-    0 8px 28px -6px rgba(0, 0, 0, .55));
+     opacidad porque una sombra sutil desaparece contra un fondo ya oscuro.
+
+     BUG REAL, encontrado revisando el sitio publicado (no en local):
+     light-dark() sólo es válido como <color>, nunca envolviendo un valor de
+     sombra completo (offset+blur+color). El navegador leía bien el token
+     -getPropertyValue devolvía el texto tal cual, porque una custom property
+     no se valida hasta que se sustituye- pero al sustituirlo en box-shadow
+     el valor completo quedaba inválido y computaba a "none": la sombra
+     nunca se dibujó, en ningún tema, sin ningún error visible. Corregido
+     envolviendo SÓLO el color en light-dark(); la geometría (offset/blur/
+     spread) queda igual en los dos temas -la sombra-alta tenía blur y
+     spread ligeramente distintos por tema, una diferencia demasiado
+     pequeña para justificar duplicar el token entero. */
+  --bento-sombra: 0 1px 2px light-dark(rgba(7, 30, 34, .06), rgba(0, 0, 0, .4));
+  --bento-sombra-alta: 0 8px 24px -8px light-dark(rgba(7, 30, 34, .18), rgba(0, 0, 0, .55));
   --bento-radio: 12px;
 
   /* ---- Tipografía ---- */
