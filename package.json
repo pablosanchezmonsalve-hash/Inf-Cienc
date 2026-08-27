@@ -1,0 +1,12 @@
+{
+  "name": "inf-cienc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plataforma bibliométrica institucional. Sin dependencias en tiempo de ejecución (README.md); playwright es SOLO de desarrollo, para src/verify/run_all.mjs.",
+  "scripts": {
+    "verificar": "node src/verify/run_all.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}

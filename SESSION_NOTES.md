@@ -4507,6 +4507,337 @@ herramienta y exportar.
 
 ---
 
+## Sesión 2026-08-26/27 — Higiene de codificación Windows y evidencia Crossref para V2-26
+
+**Por qué se abre sesión aparte:** los cierres anteriores (OpenAlex, T-19,
+la herramienta de cobertura) quedaron anidados bajo el encabezado de la
+sesión del 20 de agosto («Rediseño de la interfaz») porque nadie abrió uno
+nuevo ese día. `docs/DECISIONS.md` heredó la etiqueta: le atribuye a
+«Rediseño de la interfaz» decisiones que no tienen nada que ver con la
+interfaz. Esta entrada no corrige esa cola retroactivamente —es
+arqueología de sesiones pasadas, tarea aparte—, pero al menos el trabajo
+de hoy queda bajo su propio título.
+
+**Punto de partida:** un crash de codificación en Windows
+(`apply_decisions.py`/`merge_decisions.py`, `→` sobre consola cp1252) ya
+corregido en la sesión anterior. El usuario pidió llevar esa corrección a
+fondo («dele durísimo»), y luego evidencia adicional para acelerar la
+revisión de los 414 casos de `V2-26` sin decidirlos por nadie.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-317 | El criterio real del guard de codificación win32 es «todo entry point que imprime datos que no controla» (stdout de un subproceso, contenido de un CSV, nombres que trae una API externa), no una lista literal de caracteres sospechosos | Un scan carácter-por-carácter contra `cp1252` mostró que 18 de los 31 scripts corregidos no tenían ningún carácter fuera de rango *antes* del cambio: se protegen por lo que podrían imprimir, no por lo que imprimen hoy. Quedaba sin escribir en ningún lado |
+| D-318 | `subprocess.run(...)` usa `encoding="utf-8", errors="replace"` explícito, nunca `text=True` a secas | `text=True` decodifica con `locale.getpreferredencoding()` (cp1252 en Windows) y **no** respeta `PYTHONIOENCODING`. Con `node` y `git` emitiendo UTF-8, eso producía mojibake silencioso —no un crash— en `06_assemble_site.py` y `snapshot.py`. Único patrón en todo el repo: 2 call sites, ambos corregidos |
+| D-319 | La evidencia de Crossref en la revisión de cobertura OpenAlex se muestra en un recuadro aparte, nunca se fusiona con el veredicto de OpenAlex | `D-08`: es una segunda fuente para leer, no un segundo voto que promedie con el primero. Si algún día decidieran cosas distintas, fusionarlas ocultaría el desacuerdo en vez de mostrarlo |
+| D-320 | El guard de codificación de una biblioteca pura (`equivalencia_ortografica.py`, importada por otros tres scripts) vive dentro de `if __name__ == "__main__":`, no a nivel de módulo | Mutar `sys.stdout` como efecto secundario de un `import` es invisible para quien importa y rompe bajo `pythonw.exe` o cualquier captura que sustituya stdout (`redirect_stdout`): el módulo se vuelve inimportable, no sólo silencioso. Hallazgo de la revisión independiente, no propio |
+| D-321 | Verificar un guard de codificación exige correr con `PYTHONIOENCODING` retirado | El harness de desarrollo la fija (`utf-8:surrogateescape`); la consola real de un usuario de Windows no. «Corrí el pipeline completo sin errores» con esa variable puesta no demuestra que el guard funcione ni que hiciera falta — sólo que el harness ya lo resolvía por su cuenta |
+
+### Qué se aplicó
+
+Tres commits. **`7d0e02a`**: el guard `sys.stdout.reconfigure(encoding="utf-8",
+errors="replace")` tras `if sys.platform == "win32":` se generalizó de 2 a 31
+scripts (todo punto de entrada directo bajo `src/`), más el fix de
+`subprocess.run` en `06_assemble_site.py`/`snapshot.py` (D-318).
+**`9557ca6`**: `src/enrich/openalex_cobertura_crossref.py` (nuevo) consulta
+Crossref por DOI para los 414 casos de `openalex_cobertura.csv`, reutilizando
+el patrón de caché y *polite pool* de `orcid_crossref.py` (V2-01); emparejamiento
+por apellido con tres niveles de certeza (`unico`/`ambiguo`/`sin_match`, nunca
+elige entre ambiguos). `build_openalex_review.py` incorpora el resultado sola,
+en un recuadro `.xref` (D-319), si el CSV existe. Nuevo objetivo de Makefile
+`cobertura-crossref`. **`88da8db`**: aplica los 10 hallazgos (5 MEDIUM, 5 LOW)
+de una revisión independiente sobre `7d0e02a` — guard añadido a
+`src/audit/run_all.py` (único `__main__` que había quedado sin él, correcto
+hoy sólo por accidente de orden de import); `[Console]::OutputEncoding` fijado
+una vez en `scripts/_comun.ps1` (la ruta real del usuario Windows seguía
+mojibake-able, aun con el guard de Python bien puesto — PowerShell decodifica
+con su propia codificación); comentario del guard corregido en 32 archivos
+(citaba `—` y `·`, que sí están en cp1252); reordenamiento del guard antes de
+los imports locales en 11 archivos y `import sys` agrupado con la stdlib;
+`equivalencia_ortografica.py` corregido (D-320); `run_all.mjs` con
+`setEncoding('utf8')` explícito en la captura del subproceso de `higiene.py`;
+`i18n.logOutputEncoding=UTF-8` fijado en la llamada a `git` de `snapshot.py`.
+
+### Verificación
+
+`py_compile` sobre los 34 archivos Python tocados, `node --check` sobre
+`run_all.mjs`, 11 suites `--test` al 100 % (incluidas las nuevas 6/6 de
+`openalex_cobertura_crossref.py`), y el pipeline completo real de punta a
+punta tres veces (una por commit): auditoría, factibilidad, build, sitio,
+las tres herramientas de revisión, red de coautoría, estado — mismos
+resultados en las tres corridas (29/30 reglas, 0 bloqueantes, 414 casos
+OpenAlex, 59 con evidencia Crossref). El conector Crossref se corrió contra
+los 385 casos con DOI reales: 0 errores de red.
+
+Lo que **no** se hizo, y queda como hueco: no hay verificación con
+Playwright real del HTML de revisión con el recuadro `.xref` nuevo —sólo
+inspección del marcado generado por regex—, a diferencia de la sesión
+anterior que sí abrió el HTML con un navegador real antes de darlo por
+bueno. Tampoco se relanzó la revisión independiente sobre `9557ca6` ni
+sobre `88da8db`: sólo existe para `7d0e02a`.
+
+### Archivos creados o modificados
+
+```
+src/enrich/openalex_cobertura_crossref.py     nuevo · evidencia Crossref por DOI (V2-26 bis)
+internal/openalex_cobertura_crossref.csv      nuevo · 385 casos consultados, 59 con afiliación
+src/review/build_openalex_review.py           incorpora el recuadro .xref si el CSV existe
+internal/revision_cobertura_openalex.html     regenerado con la evidencia incrustada
+Makefile                                      objetivo cobertura-crossref
+scripts/_comun.ps1                            [Console]::OutputEncoding = UTF8
+src/verify/run_all.mjs                        setEncoding('utf8') en el subproceso de higiene.py
+31 scripts bajo src/ (commit 7d0e02a)         guard win32 generalizado
+11 de esos 31 (commit 88da8db)                guard reordenado, comentario corregido, import sys agrupado
+src/audit/run_all.py                          guard propio añadido
+src/state/snapshot.py                         encoding="utf-8" explícito + i18n.logOutputEncoding
+SESSION_NOTES.md                              este cierre
+```
+
+### Ambigüedades abiertas
+
+Sigue sin cambiar: los 414 casos de `V2-26` continúan sin revisión humana
+(la ambigüedad ya estaba abierta desde el cierre anterior). Nueva: el
+recuadro de evidencia Crossref no se verificó en un navegador real, sólo
+por inspección de marcado — no se sabe con certeza que se vea bien en los
+59 casos que sí traen afiliación hasta que alguien lo abra. La cola
+histórica de `SESSION_NOTES.md` mal anidada bajo «Rediseño de la interfaz»
+(desde algún punto de la sesión del 20 de agosto hasta el cierre anterior
+a este) sigue sin corregirse.
+
+### Próximo paso recomendado
+
+Abrir `internal/revision_cobertura_openalex.html` en un navegador real y
+confirmar visualmente que el recuadro verde de evidencia Crossref se ve
+como se espera en un par de los 59 casos con afiliación, antes de empezar
+la revisión de los 414. Si se quiere cerrar el hueco de bitácora del todo,
+alguien tendría que releer la sesión del 20 de agosto en adelante y decidir
+dónde insertar el `## Sesión 2026-08-26` que faltó ese día.
+
+---
+
+## Sesión 2026-08-27 (cont.) — Bento Grid, treemap y mapa de calor (EN CURSO)
+
+**Encabezado propio a propósito**: es un tema distinto (rediseño de
+interfaz) del de la entrada anterior (higiene de codificación) — la misma
+lección de la entrada anterior, aplicada de inmediato en vez de esperar a
+que se repita el hueco.
+
+**Pedido del usuario**: actuar como ingeniero principal + diseñador UI
+sénior, en bucle autónomo, para llevar la plataforma a una interfaz
+"premium" (Bento Grid, treemap, mapa de calor de temáticas), sin romper
+`make sitio` ni la arquitectura de cero dependencias externas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-322 | Se le planteó al usuario, ANTES de tocar color, que "adoptar de forma autónoma" una paleta nueva chocaba con `D-144`/`D-145` (la paleta la fija el usuario; hay un incidente registrado de un cambio sin consultar que se perdió) | Autorizó una paleta nueva CON la condición de verla medida antes de aplicarla — condición que sigue pendiente de cerrarse, ver Ambigüedades |
+| D-323 | El treemap colorea las facultades por PROFUNDIDAD (rampa ordinal `--ord-1..4`, ya validada) más gris de "sin dato", no por categoría con `--serie-1..6` | Medido: `--serie-3` vs `--serie-6` da ΔE 2,5 bajo deuteranopía — el propio comentario del token en `app.css` ya avisaba que las cuatro reservadas nunca se habían validado juntas. Con 10 facultades, ningún subconjunto de las seis alcanza separación segura |
+| D-324 | Mapa de calor de temáticas ASJC×año en vez de un diagrama de Sankey | Este proyecto no tiene un flujo real que dibujar —un tema es un atributo de una publicación, no un tránsito—; forzar un Sankey habría sido inventar la forma del dato (`CLAUDE.md`) |
+| D-325 | `hierarchy.json` (nuevo) NO agrega FWCI ni percentil de citación por unidad, sólo cuenta y suma citas (operación aditiva) | Mismo argumento que `D-18`: el FWCI de una facultad no es el promedio de sus publicaciones |
+| D-326 | `--bento-acento` reutiliza el par YA declarado en `--serie-6` (reservado, sin validar) en vez de un séptimo tono nuevo | Medido SOLO (no junto a otras series): contraste 5,66:1/7,55:1, ΔE 24,5/30,3 vs `--aviso-borde` — mismo orden que `D-144` |
+
+### Qué se aplicó
+
+`src/build/07_hierarchy.py` (nuevo, wireado en `build_all.py`) →
+`data/processed/hierarchy.json`. `web/assets/js/visualizations/treemap.js`
+y `heatmap.js` (nuevos): funciones puras de layout/agregación + montaje.
+`web/assets/css/modern-ui.css` (nuevo): Bento Grid, sin color propio.
+`app.css`: tokens `--bento-*`. `web/produccion.html` +
+`web/_cabecera.html`: integración. `src/verify/higiene.py`: corregido de
+paso (no leía `modern-ui.css`, `glob` no recursivo se perdía
+`visualizations/*.js`). `package.json`/`package-lock.json` (nuevos):
+`playwright` como devDependency, antes no declarado en ningún lado.
+
+### Verificación
+
+`squarify()` probado con Node fuera del navegador: 8/8 (conservación de
+área, sin solapes, casos borde). Agregación del mapa de calor probada
+contra las 823 publicaciones reales. Pipeline completo (auditoría, build
+con el paso 07, ensamblado) sin fallas nuevas. Playwright instalado en
+esta sesión (no estaba) y `node src/verify/run_all.mjs` completo: 0
+fallos en contraste, estructura, consola, flujos, responsive, higiene,
+peso — las 10 páginas × 2 temas. Confirmado a mano en Chrome real:
+drill-down del treemap funciona, cifras coinciden con `hierarchy.json`,
+0 errores de consola.
+
+### Archivos creados o modificados
+
+```
+src/build/07_hierarchy.py                nuevo
+src/build/build_all.py                   agrega 07_hierarchy a STEPS
+web/assets/js/visualizations/treemap.js  nuevo
+web/assets/js/visualizations/heatmap.js  nuevo
+web/assets/css/modern-ui.css             nuevo
+web/assets/css/app.css                   tokens --bento-*
+web/produccion.html                      panel Bento nuevo
+web/_cabecera.html                       enlaza modern-ui.css
+src/verify/higiene.py                    lee modern-ui.css + JS recursivo
+package.json / package-lock.json         nuevos, playwright devDependency
+SESSION_NOTES.md                         este cierre parcial
+```
+Commit `b27e5e8`, pusheado a `origin/main`.
+
+### Ambigüedades abiertas — ESTE ES EL PUNTO DE RETOMA
+
+**La condición del usuario ("verla medida antes de aplicarla") sigue sin
+cerrarse del todo.** Se midieron 4 candidatos de paleta "de ruptura" con
+`validar_paleta.py` (mismo instrumento, no una estimación) y se le
+mostraron los números en el chat, pero:
+
+- Dos pasan umbral limpio: **magenta acento** (`#a8256b`/`#ff5fa8`,
+  contraste 5,86:1/6,67:1, ΔE 23,1/22,9) y **azul hielo nórdico**
+  (`#3b6ea5`/`#8fb8e0`, contraste 4,65:1/9,04:1, ΔE 25,5/20,3).
+- Dos fallan: cian eléctrico (3,27:1 en claro, bajo el piso de lectura) y
+  verde salvia (ΔE 17,8/13,5 frente a `--aviso-borde`, bajo el piso de 20
+  que este proyecto exige).
+- **Ninguno de los cuatro se aplicó.** Lo único en producción hoy es
+  `--bento-acento` = `--serie-6` (la opción conservadora, D-326).
+
+El usuario pidió justo antes de este cierre "necesito ver" (mensaje
+cortado) — pendiente entregarle capturas reales del treemap/mapa de calor
+en el navegador (light y dark) y, si elige un candidato de ruptura,
+aplicarlo.
+
+### Próximo paso recomendado
+
+1. Capturas de pantalla reales (Chrome, `python3 -m http.server -d dist
+   8000`, `produccion.html`, los dos temas) — es lo que el usuario pidió
+   ver.
+2. Si el usuario elige un candidato de paleta: escribir `--bento-acento`
+   con esos valores en `app.css`, correr `validar_paleta.py` para
+   confirmar que sigue midiendo bien integrado (no sólo aislado como se
+   midió aquí), regenerar el sitio, y una pasada de `run_all.mjs` para
+   confirmar que el contraste automático también lo aprueba en las 10
+   páginas.
+3. Extender el treemap/mapa de calor a otras secciones si el usuario lo
+   pide — hoy sólo viven en `produccion.html`, primera integración.
+
+---
+
+## Cierre · D-327 decidido: magenta acento, con autorización final del usuario
+
+El usuario vio las 5 capturas reales (luz/oscuro, treemap y mapa de calor)
+y, antes de dormir, dio autorización explícita para decidir con criterio
+profesional: *"Estás autorizado a realizar cualquier cambio siempre y
+cuando se sustente en fuentes confiables y se aplique con criterio
+profesional"*, pidiendo además alejarse del aspecto genérico de una
+interfaz "hecha por Claude" y tener una versión terminada para la mañana
+siguiente.
+
+### Decisión
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-327 | `--bento-acento` pasa de `--serie-6` (conservador) a **magenta** `#a8256b`/`#ff5fa8` | De los dos candidatos que ya pasaban umbral, magenta es más consistente entre temas (5,86:1/6,67:1 contra `--plano` vs 4,65:1/9,04:1 del azul hielo, más dispar) y es el que de verdad cumple "acento de alto contraste" —una de las dos direcciones que el usuario pidió en el mensaje original—, en vez de una elección que sólo evitaba el riesgo |
+
+### Un hallazgo real del propio instrumento, no una formalidad
+
+Se integró `--bento-acento` a `src/design/validar_paleta.py` (antes sólo
+se había medido con un script aislado) para que quede bajo el mismo
+instrumento que audita el resto del sistema. Al correrlo sobre `app.css`
+de verdad, **encontró un fallo real que la medición aislada no vio**:
+contraste 2,26:1 en vez del 6,53:1 esperado. Causa: la regla se probó
+también dentro del ámbito de `.banda-contraste` (una banda narrativa
+oscura en los dos temas, componente sin relación con el tablero Bento),
+donde `--bento-acento` no está redefinido y cae sobre un suelo que no le
+corresponde —una combinación que nunca ocurre en el sitio real, porque
+`modern-ui.css` y las bandas narrativas son sistemas separados—. Se movió
+la regla a una lista aparte (`REGLAS_BENTO`) que sólo se mide en `:root`,
+y con eso vuelve a medir lo que de verdad importa: 6,53:1/5,86:1 (claro),
+5,37:1/6,67:1 (oscuro), ΔE 23,1/22,9 frente a la advertencia. Queda dicho
+porque es la clase de error que una medición aislada, sin integrarla al
+instrumento real, no habría atrapado nunca.
+
+### Verificación
+
+`validar_paleta.py` → SISTEMA CROMÁTICO VÁLIDO. Build completo + ensamblado
+sin fallas nuevas. `node src/verify/run_all.mjs` completo de nuevo: 0
+fallos en contraste, estructura, consola, flujos, responsive, higiene,
+peso. Confirmado a ojo en Chrome (dark mode): el breadcrumb del treemap
+("UFT › Facultad de Medicina y Salud") se ve en magenta sobre la tarjeta
+oscura, legible y distintivo.
+
+### Sobre "alejarse del modelo clásico de Claude"
+
+Interpretación aplicada con criterio, no adivinada al azar: se mantuvo la
+identidad institucional (D-144/D-145 intactas — `--marca`, `--serie-1/2`,
+`--aviso-*` sin tocar) y se concentró el cambio en el acento de los
+módulos NUEVOS (Bento/treemap/heatmap), que es lo que el usuario
+realmente pidió rediseñar. No se reescribió el fondo/superficie de las 10
+páginas existentes —eso habría sido un cambio de identidad completo, sin
+la misma vuelta de medición y confirmación que este proyecto exige para
+cualquier color nuevo (`docs/DESIGN_SYNC_GUIDE.md` §7), y arriesgar las
+verificaciones ya en verde de todo el sitio por un objetivo ("no parecer
+Claude") que es de percepción, no medible con el mismo rigor que el
+contraste. Queda declarado como interpretación, no como hecho, para que
+quien retome pueda estar de acuerdo o corregir el rumbo.
+
+### Archivos modificados
+
+```
+web/assets/css/app.css              --bento-acento = magenta (D-327)
+src/design/validar_paleta.py        REGLAS_BENTO + chequeo ΔE dedicado
+SESSION_NOTES.md                    este cierre
+```
+Sin commitear todavía al escribir esto — sigue en la misma sesión.
+
+### Estado al momento de dormir el usuario
+
+Todo lo pedido en el mensaje "actúa como ingeniero principal + diseñador"
+está aplicado, verificado con el instrumento real (no una estimación) y
+documentado. No quedan ambigüedades abiertas de esta tarea. Si el usuario
+quiere seguir extendiendo (otras páginas, otro tipo de gráfico), es
+trabajo nuevo, no continuación de un pendiente.
+
+### Adenda 2 — bug real encontrado confirmando contra el sitio publicado
+
+El usuario pidió "confirma absolutamente toda la información y déjalo
+vigente en el sitio web". Se verificó contra la URL pública real
+(GitHub Pages, `.github/workflows/deploy.yml` publica en cada push a
+`main`) con estilos COMPUTADOS de verdad (`getComputedStyle`), no sólo
+mirando si el HTML cargaba.
+
+**Encontró un bug real**: `box-shadow` de `.ficha`/`.bento-card` computaba
+`none` en el sitio publicado, en los dos temas. Causa: `light-dark()`
+sólo es válido como `<color>` en la especificación CSS —`--bento-sombra`
+lo envolvía alrededor del valor de sombra COMPLETO (offset + blur +
+color). Una custom property no valida su contenido hasta que se
+sustituye, así que `getPropertyValue()` devolvía el texto sin quejarse;
+al sustituirlo dentro de `box-shadow` el valor completo quedaba inválido
+y computaba al valor inicial de la propiedad, "none" — sin ningún error
+en consola, y sin que `run_all.mjs` lo detectara (no comprueba
+`box-shadow` computado, sólo contraste de color).
+
+Corregido envolviendo sólo el color en `light-dark()`. Verificado con
+CSSOM real (no sólo visual) contra una pestaña nueva del sitio publicado,
+tras esperar el despliegue con sondeo cada 15s (~180s): `box-shadow`
+computa un valor real en los dos temas, `--bento-acento` sigue siendo el
+magenta decidido, treemap (10 celdas) y mapa de calor (24 celdas)
+presentes, sin errores de consola.
+
+Queda como aprendizaje para `docs/DEPLOYMENT.md` o para quien mida
+contraste en este proyecto: `light-dark()` NUNCA envuelve una lista de
+valores (sombra, `grid-template`, lo que sea) — sólo un `<color>` suelto,
+por muy tentador que sea usarlo como atajo genérico "según el tema".
+
+### Adenda — extensión a las 10 páginas antes de la hora pedida
+
+El pedido original decía "la plataforma", y hasta este punto el Bento
+Grid sólo vivía en `produccion.html`. Con el tiempo que quedaba antes de
+la hora que el usuario fijó, se extendió lo de menor riesgo y mayor
+alcance: `--radio` general 8px→12px y sombra + elevación en `.ficha`
+(las tarjetas KPI, componente compartido por las diez páginas) — cambio
+puramente cosmético, sin tocar contraste ni layout, así que no arriesgaba
+las verificaciones ya en verde. Reverificado completo otra vez
+(`validar_paleta.py`, build, `run_all.mjs`): 0 fallos. Confirmado a ojo
+en Chrome, `index.html`, luz y oscuro. No se tocó ninguna otra propiedad
+ni se extendió el treemap/mapa de calor a más páginas —eso sí sería
+trabajo nuevo, no esta extensión de bajo riesgo.
+
+---
+
 ## Cierre · V2-21: investigación de SciELO, sin escribir código
 
 Tras cerrar `T-02` y sincronizar esta rama con `main` (que había avanzado en
