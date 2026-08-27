@@ -59,6 +59,7 @@ import common as c  # noqa: E402
 
 FUENTE = ROOT / "internal" / "openalex_cobertura.csv"
 DECISIONES = ROOT / "internal" / "openalex_cobertura_decisiones.csv"
+CROSSREF = ROOT / "internal" / "openalex_cobertura_crossref.csv"
 SALIDA = ROOT / "internal" / "revision_cobertura_openalex.html"
 
 CSS = """
@@ -96,6 +97,12 @@ border-radius:999px;padding:.1rem .5rem;display:inline-block}
 .ctx{font-size:.83rem;color:var(--tinta2);margin:.2rem 0 .8rem}
 .ctx b{color:var(--tinta)}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em}
+.xref{font-size:.83rem;border-left:3px solid var(--linea);padding:.35rem .7rem;
+margin:.5rem 0 .8rem;color:var(--tinta2)}
+.xref.hay-afiliacion{border-left-color:var(--si);background:#f0faf4}
+.xref b{color:var(--tinta)}
+.xref .etq{font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;
+color:var(--tinta3);font-weight:700}
 .dec{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;
 border-top:1px solid var(--linea);padding-top:.7rem}
 .dec button[data-v]{border-width:1.5px}
@@ -236,8 +243,54 @@ def _leer_previas(ruta: Path) -> dict[str, dict]:
             for _, r in df.iterrows() if r.get("veredicto") not in (None, "", "pendiente")}
 
 
+def _leer_crossref(ruta: Path) -> dict[str, dict]:
+    """Evidencia de `openalex_cobertura_crossref.py`, si ya se corrió (V2-26 bis).
+
+    Es evidencia adicional para leer, no una segunda opinión que se combine
+    con la de OpenAlex: se muestra tal cual, sin fusionar veredictos.
+    """
+    if not ruta.exists():
+        return {}
+    df = pd.read_csv(ruta, dtype=str).fillna("")
+    return {r["openalex_id"]: r.to_dict() for _, r in df.iterrows()}
+
+
+def _bloque_crossref(xref: dict | None) -> str:
+    """Caja de evidencia independiente de OpenAlex, o vacío si no se ha corrido
+    `openalex_cobertura_crossref.py` o Crossref no tenía el DOI."""
+    if not xref or xref.get("crossref_encontrado") not in ("True", True):
+        return ""
+    tipo = str(xref.get("crossref_tipo") or "")
+    anio = str(xref.get("crossref_anio") or "")
+    certeza = str(xref.get("crossref_certeza_autor") or "")
+    autor = str(xref.get("crossref_autor") or "")
+    afiliacion = str(xref.get("crossref_afiliacion") or "")
+
+    etiqueta_certeza = {
+        "unico": "autor identificado sin ambigüedad",
+        "ambiguo": "varios autores comparten apellido — no se eligió entre ellos",
+        "sin_match": "ningún autor de Crossref comparte apellido con el declarado",
+    }.get(certeza, certeza)
+
+    if afiliacion:
+        cuerpo = (f'Crossref declara para <b>{htmlmod.escape(autor)}</b>: '
+                  f'<b>{htmlmod.escape(afiliacion)}</b>')
+    elif autor:
+        cuerpo = (f'Crossref identifica a <b>{htmlmod.escape(autor)}</b> '
+                  f'({htmlmod.escape(etiqueta_certeza)}), sin afiliación declarada')
+    else:
+        cuerpo = f'Crossref: {htmlmod.escape(etiqueta_certeza)}'
+
+    return f"""
+      <p class="xref{' hay-afiliacion' if afiliacion else ''}">
+        <span class="etq">Evidencia independiente (Crossref{f', {htmlmod.escape(tipo)}' if tipo else ''}{f', {htmlmod.escape(anio)}' if anio else ''})</span><br>
+        {cuerpo}
+      </p>"""
+
+
 def render_html(filas: pd.DataFrame) -> str:
     previas = _leer_previas(DECISIONES)
+    crossref = _leer_crossref(CROSSREF)
     items: list[dict] = []
     cuerpo = ""
     for _, r in filas.iterrows():
@@ -274,7 +327,7 @@ def render_html(filas: pd.DataFrame) -> str:
         {f' · declara: <b>{htmlmod.escape(institucion)}</b>' if institucion else ''}
         <br>DOI: <span class="mono">{doi_html}</span>
         <br><span class="mono">{htmlmod.escape(motivo)}</span>
-      </p>
+      </p>{_bloque_crossref(crossref.get(oid))}
       <div class="dec">
         <button type="button" data-v="uft" aria-pressed="false">Sí, es UFT</button>
         <button type="button" data-v="error" aria-pressed="false">No, error de OpenAlex</button>
@@ -322,7 +375,10 @@ def render_html(filas: pd.DataFrame) -> str:
     columna <span class="mono">resolucion</span> de
     <span class="mono">internal/openalex_cobertura.csv</span>: deja
     constancia de que alguien miró el caso. Ordenado por citación —los más
-    citados son los más fáciles de verificar primero.
+    citados son los más fáciles de verificar primero. Donde aparece un
+    recuadro verde «Evidencia independiente (Crossref)», es la afiliación que
+    la propia publicación declaró —dato primario, no otra desambiguación de
+    OpenAlex— y suele bastar para decidir sin abrir el DOI.
   </div>
   {cuerpo}
 </main>
@@ -350,12 +406,21 @@ def main() -> int:
     SALIDA.write_text(render_html(df), encoding="utf-8")
 
     pendientes = len(df) - len(_leer_previas(DECISIONES))
+    con_evidencia_crossref = sum(
+        1 for x in _leer_crossref(CROSSREF).values()
+        if x.get("crossref_afiliacion")
+    )
     print("=" * 78)
     print("REVISIÓN DE COBERTURA OPENALEX (V2-26)")
     print("=" * 78)
-    print(f"  obras a revisar : {len(df)}")
-    print(f"  ya revisadas    : {len(df) - pendientes}")
-    print(f"  pendientes      : {pendientes}")
+    print(f"  obras a revisar          : {len(df)}")
+    print(f"  ya revisadas             : {len(df) - pendientes}")
+    print(f"  pendientes               : {pendientes}")
+    if CROSSREF.exists():
+        print(f"  con evidencia Crossref   : {con_evidencia_crossref}")
+    else:
+        print("  evidencia Crossref       : no corrida — "
+              "python3 src/enrich/openalex_cobertura_crossref.py")
     print(f"\n  OK · {SALIDA.relative_to(ROOT)}")
     print("       Abra el .html, marque cada caso, exporte el CSV, y aplíquelo con")
     print("       python3 src/review/apply_openalex_review.py")
