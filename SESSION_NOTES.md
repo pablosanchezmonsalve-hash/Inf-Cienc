@@ -5552,3 +5552,163 @@ Ninguna acción de código pendiente. La auditoría de datos es ahora un
 componente vivo del sitio: crecerá o se reducirá solo, en cada build, sin
 que nadie tenga que acordarse de actualizar un número a mano — el mismo
 principio que ya regía la cobertura de ORCID en esta misma página.
+
+## Cierre · Nueva fuente de evidencia: el repositorio institucional (DSpace), y un riesgo de privacidad real capturado antes de publicarse
+
+### Cómo empezó
+
+Con los 82 casos pendientes de identidad ya visibles en
+`internal/revision_identidad.html` (cierre anterior), el usuario pidió
+aceptar como verificados los de "probabilidad alta" y listar aparte los de
+"probabilidad mediana". Se rechazó la petición tal cual: crucé el campo de
+confianza original (el del algoritmo de emparejamiento por nombre, previo a
+la re-verificación) contra las tres colas de los 82 pendientes y el
+resultado era el opuesto al que se buscaba — 24 de los 52 casos "ORCID sin
+confirmar" (evidencia ACTIVA de que el ORCID no coincide, según el registro
+público) tenían justamente "confianza alta" original. Aceptarlos habría
+confirmado como verificadas exactamente las asignaciones con más evidencia
+de estar mal. Se explicó con los números y no se aplicó nada (`D-08`, y el
+propio texto de la herramienta: "esta página no decide nada por usted").
+
+El usuario entonces preguntó si podía ver un documento oficial —
+"Inventario Repositorio"— con autores/ORCID, en su carpeta local. No es
+visible desde este entorno remoto (contenedor en la nube, sin acceso al
+disco del usuario); se pidió que lo subiera al chat, y lo hizo:
+`Inventario_Repositorio.csv`, un volcado de metadatos DSpace del
+repositorio institucional UFT — 3.271 obras (tesis de pregrado/posgrado,
+artículos, libros, capítulos autoarchivados), 157 columnas.
+
+### El análisis manual, y por qué no bastaba
+
+Un primer cruce por DOI compartido (publicaciones que ya están en el
+universo Scopus/SciVal Y en este inventario) alcanzó a 28 de los 82
+pendientes, con cuatro niveles reales de evidencia: 7 confirmaciones
+directas (mismo nombre en DSpace, mismo ORCID), 9 indirectas (el ORCID
+aparece en el registro, pero depositado por otro coautor), 2
+contradicciones directas (Arroyo A., Shabani R. — mismo nombre, ORCID
+distinto) y 10 sin evidencia real (DSpace no nombra a esa persona en ese
+registro específico).
+
+El usuario aportó un dato institucional que cambió el alcance: "los
+autores afiliados siempre figuran con el ORCID dentro del repositorio
+institucional" — y, al preguntársele si eso aplica sólo a quien deposita el
+archivo o a TODO coautor afiliado, aunque el repositorio no lo nombre
+individualmente, contestó que a todos. Eso significa que la pregunta
+correcta no es "¿esta publicación específica está en DSpace?" sino "¿esta
+persona tiene ALGUNA obra propia en DSpace, sea cual sea?" — su propia
+tesis, un artículo que autoarchivó ella misma. Un cruce por DOI no alcanza
+eso; hace falta buscar por nombre en las 3.271 filas completas.
+
+### El conector nuevo
+
+`src/enrich/dspace_inventario.py` (nuevo, con `--test`, sin salir a red —
+todo local). Reutiliza `clave_firma()`/la misma normalización de nombre que
+`orcid_crossref.py`, para no tener una segunda implementación divergente.
+Dos salidas, mismo patrón dual que ya existía para ORCID (`orcid_crossref` =
+ancla en DOI compartido; `orcid_afiliacion` = sólo por nombre):
+
+- `data/interim/dspace_verificacion.csv` — para las 322 firmas que YA
+  tienen ORCID asignado, cruza sus publicaciones propias contra el
+  inventario por DOI. De 154 firmas con algo que cruzar: **56
+  confirmaciones directas, 69 indirectas, 6 contradicciones directas, 23
+  sin coincidencia**.
+- `internal/dspace_candidatos.csv` — para firmas SIN ningún ORCID, busca
+  por apellido+inicial en TODO el inventario, con el mismo criterio
+  homónimo-seguro que `orcid_afiliacion.py` (declara cuántos candidatos hay,
+  nunca elige entre ellos). **16 firmas alcanzadas, 10 con coincidencia
+  1-a-1**.
+
+Se conectó a `build_review.py`: tres colas nuevas —"Repositorio
+institucional discrepa" (6, prioridad 1, misma urgencia que "OpenAlex
+discrepa" porque contradice una asignación YA PUBLICADA), "Candidato por
+repositorio institucional" (14) y su variante "(ambiguo)" (11)— más
+evidencia añadida al contexto de "ORCID sin confirmar" y "ORCID no
+verificable" cuando existe. La cola de pendientes pasó de 82 a **113**
+(188 → 219 casos totales) — no es un retroceso, es evidencia real que no
+existía antes. `decisiones.py` y `apply_decisions.py` se extendieron para
+que estas colas se puedan aplicar con el mismo flujo de siempre
+(`orcid_correcto`/`orcid_incorrecto` para la de discrepancia,
+`misma`/`distintas` para los candidatos) — con dos casos nuevos en el
+autotest, que sigue en verde completo.
+
+De los 6 "Repositorio institucional discrepa", 4 (Balboa E., Candia-Véjar
+A., Hayes-Ortiz T., Zambrano C.) NO estaban en ninguna cola anterior: su
+verificación contra el registro público de ORCID había pasado, pero DSpace
+—una fuente completamente distinta— dice otra cosa. Son casos nuevos que
+sólo esta fuente podía encontrar.
+
+### El hallazgo de privacidad, capturado antes de publicarse
+
+Antes de confirmar nada, se revisó si el repositorio de GitHub es público
+(`mcp__github__search_repositories`: lo es — `visibility: public`). Con
+eso confirmado, se escaneó el CSV completo por patrones de correo antes de
+copiarlo a `data/raw/` (que sí se versiona, decisión `T-16`): **2.539 de
+las 3.271 filas (78 %) traían un correo @uft.cl** en tres columnas
+`dc.description.provenance[en|en_US|es]` — el log de flujo de trabajo del
+propio DSpace («Submitted by X (correo)… Approved by Y (correo)»), no dato
+bibliométrico. Ninguna otra de las 157 columnas originales tenía correos
+(verificado sobre el archivo completo, no sólo las columnas obvias).
+
+Se quitaron esas tres columnas y se reescribió el archivo en UTF-8 (el
+original venía en cp1252) ANTES de que tocara `data/raw/`; se volvió a
+escanear el resultado y dio cero coincidencias de correo. El archivo sin
+limpiar no se conserva versionado en ningún lugar del proyecto — sólo vive,
+sin tocar, en la ruta de subida temporal de esta conversación. El
+conector nunca llegó a usar esas columnas para nada, así que la limpieza no
+le quitó ninguna capacidad.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-336 | Se rechaza aceptar como "verificados" los casos de confianza original alta, y se explica con evidencia por qué sería contraproducente | La confianza alta es la del algoritmo AL PROPONER la asignación, no una confirmación; 24 de los 52 casos "ORCID sin confirmar" la tenían, y son justo los que el registro público contradijo |
+| D-337 | El repositorio institucional (DSpace) se incorpora como fuente PERMANENTE de evidencia, no sólo para esta revisión puntual | Autorización explícita del usuario; produce evidencia real e independiente (56 confirmaciones directas, 6 contradicciones directas) que ninguna otra fuente había encontrado |
+| D-338 | La regla "todo autor afiliado figura con ORCID en el repositorio" se aplica a TODO coautor, no sólo a quien deposita el ítem | Aclaración explícita del usuario ante la pregunta directa — cambia el diseño del conector de "sólo DOI compartido" a "búsqueda por nombre en todo el inventario" |
+| D-339 | Las tres columnas `dc.description.provenance[*]` se eliminan del archivo ANTES de versionarlo en `data/raw/`, y el original sin limpiar no se conserva | El repositorio de GitHub es público; esas columnas traen el correo institucional de cientos de funcionarios y estudiantes en un log de flujo de trabajo, no en datos bibliométricos — publicarlas habría sido una fuga de datos personales reales que nadie decidió |
+| D-340 | Ninguna de las 113 asignaciones/candidatos que este cierre encontró se aplica automáticamente | Sigue rigiendo `D-08`: la evidencia se muestra, el veredicto lo pone una persona |
+
+### Verificación
+
+`dspace_inventario.py --test`: 10 casos, todos en verde. `apply_decisions.py
+--test`: 36 casos (2 nuevos de esta sesión), todos en verde. Auditoría
+completa (`run_all.py`), `build_all.py` (compuerta: 0 fallas),
+`06_assemble_site.py` (10 páginas, capa interna no incluida — verificado) y
+`node src/verify/run_all.mjs` completo (los seis bloques) corridos DESPUÉS
+de todos los cambios: sin fallos. El escaneo de correos sobre el archivo
+final de `data/raw/` dio cero coincidencias, verificado con un script aparte
+antes de este cierre.
+
+### Archivos creados o modificados
+
+```
+src/enrich/dspace_inventario.py       nuevo — conector, con --test
+data/raw/Inventario_Repositorio_Institucional_UFT.csv
+                                       nuevo — LIMPIO de columnas de provenance, UTF-8
+config/sources.yml                    fuente dspace_repositorio declarada,
+                                       con la limpieza de privacidad documentada
+docs/FUENTES_Y_APIS.md                §2.4 nueva
+Makefile                              revision: corre dspace_inventario.py primero
+.github/workflows/deploy.yml          paso de CI: dspace_inventario.py --test
+src/review/build_review.py            perfiles()/casos() leen dspace_verificacion.csv
+                                       y dspace_candidatos.csv; 3 colas nuevas
+src/review/decisiones.py              COLAS y FAMILIA_ORCID con las 3 colas nuevas
+src/review/apply_decisions.py         asignaciones_confirmadas() acepta
+                                       cand_dspace aparte; 2 casos nuevos en --test
+```
+
+### Ambigüedades abiertas
+
+- Los 113 pendientes (antes 82) siguen esperando revisión humana en
+  `internal/revision_identidad.html` — ninguno se decidió en este cierre.
+  Los 4 nuevos "Repositorio institucional discrepa" sin cola previa
+  (Balboa E., Candia-Véjar A., Hayes-Ortiz T., Zambrano C.) son los más
+  urgentes: contradicen una asignación que el sitio publica hoy.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo, los 294 autores
+  de la propuesta de corpus paralelo (`V2_BACKLOG.md` §8).
+
+### Próximo paso recomendado
+
+El usuario revisa `internal/revision_identidad.html` caso por caso, ahora
+con la evidencia de DSpace incorporada donde exista. Cuando exporte el CSV
+de decisiones, se aplica con `apply_decisions.py`, se reconstruye el sitio,
+se corre la batería de verificación y se despliega — mismo flujo que T-02.

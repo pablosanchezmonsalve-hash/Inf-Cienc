@@ -223,13 +223,17 @@ def canonica(firmas: list[str], frec: dict[str, int] | None = None) -> str:
                                          -len(s), s))[0]
 
 
-def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None) -> pd.DataFrame:
-    """Candidatos por afiliación que la revisión confirmó como la misma persona."""
+def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None,
+                             cand_dspace: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Candidatos por afiliación o por el repositorio institucional que la
+    revisión confirmó como la misma persona."""
     cols = ["nombre_en_fuente", "orcid", "publicaciones_de_respaldo", "confianza", "fuente"]
-    if cand is None:
+    por_firma = {r["nombre_en_fuente"]: r["orcid"] for _, r in cand.iterrows()} if cand is not None else {}
+    por_firma_dsp = ({r["nombre_en_fuente"]: r["orcid"] for _, r in cand_dspace.iterrows()}
+                     if cand_dspace is not None else {})
+    if not por_firma and not por_firma_dsp:
         return pd.DataFrame(columns=cols)
 
-    por_firma = {r["nombre_en_fuente"]: r["orcid"] for _, r in cand.iterrows()}
     filas = []
     for _, r in d[(d.veredicto == "misma") & (d.cola.str.startswith("Candidato por afiliación"))].iterrows():
         for f in firmas_de(r):
@@ -239,6 +243,16 @@ def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None) -> pd.D
                               # La confianza no la da el recuento de
                               # publicaciones —aquí no hay ninguna que respalde—
                               # sino que una persona lo comprobó.
+                              "confianza": "alta", "fuente": FUENTE_REVISION})
+
+    # Mismo criterio para los candidatos por nombre en el repositorio
+    # institucional (DSpace): otra fuente, mismo patrón de confirmación.
+    for _, r in d[(d.veredicto == "misma")
+                 & (d.cola.str.startswith("Candidato por repositorio institucional"))].iterrows():
+        for f in firmas_de(r):
+            if f in por_firma_dsp:
+                filas.append({"nombre_en_fuente": f, "orcid": por_firma_dsp[f],
+                              "publicaciones_de_respaldo": 0,
                               "confianza": "alta", "fuente": FUENTE_REVISION})
 
     # Los casos «Mismo ORCID por afiliación» agrupan varias firmas bajo un
@@ -584,6 +598,20 @@ def autotest() -> int:
     casos.append(("sin candidatos devuelve vacío",
                   len(asignaciones_confirmadas(df([]), None)) == 0, None))
 
+    # 6 bis. Mismo criterio para los candidatos del repositorio institucional
+    # (DSpace): otra fuente, misma lógica de confirmación, sin mezclarse.
+    cand_dsp = pd.DataFrame([{"nombre_en_fuente": "Ríos T.", "orcid": "0000-Z"}])
+    a = asignaciones_confirmadas(df([
+        ("dspacecand-Ríos T.-0000-Z", "Candidato por repositorio institucional",
+         "Ríos T.", "misma"),
+        ("afil-López V.", "Candidato por afiliación", "López V.", "pendiente")]),
+        cand, cand_dsp)
+    casos.append(("candidato de DSpace confirmado se asigna",
+                  list(a.nombre_en_fuente) == ["Ríos T."] and a.orcid.iloc[0] == "0000-Z",
+                  a.to_dict("records")))
+    casos.append(("las dos fuentes de candidatos no se cruzan entre sí",
+                  "López V." not in set(a.nombre_en_fuente), None))
+
     # 8. Una firma que no está entre los candidatos no se inventa.
     a = asignaciones_confirmadas(df([
         ("afil-Fantasma Z.", "Candidato por afiliación", "Fantasma Z.", "misma")]), cand)
@@ -830,7 +858,9 @@ def main() -> int:
 
     cpath = INTERNAL / "orcid_candidatos_afiliacion.csv"
     cand = pd.read_csv(cpath, dtype=str) if cpath.exists() else None
-    nuevas = asignaciones_confirmadas(d, cand)
+    dspath = INTERNAL / "dspace_candidatos.csv"
+    cand_dspace = pd.read_csv(dspath, dtype=str) if dspath.exists() else None
+    nuevas = asignaciones_confirmadas(d, cand, cand_dspace)
 
     opath = ENRICHED / "authors_orcid.csv"
     vig = pd.read_csv(opath, dtype=str)
