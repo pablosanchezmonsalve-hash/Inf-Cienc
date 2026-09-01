@@ -6235,3 +6235,144 @@ pendientes, las dos resoluciones de identidad, los tres bugs corregidos)
 y reenviar `internal/revision_identidad.html` regenerado. Quedar a la
 espera de la siguiente tanda de revisión o de autorización sobre el
 análisis cross-fuente reportado.
+
+## Cierre: se aplica el acuerdo cross-fuente DSpace × autoarchivo, con dos criterios distintos y un hallazgo honesto sobre su efecto real
+
+### Contexto
+
+El usuario autorizó («Autorizo») el análisis pendiente del cierre
+anterior: aplicar las firmas donde el repositorio institucional (DSpace)
+y el inventario de autoarchivo de biblioteca coinciden de forma
+independiente sobre el ORCID de una firma. Antes de aplicar nada, se
+recalculó el análisis desde cero (no se reutilizó ninguna cifra de antes
+del corte de contexto) y se distinguieron dos preguntas distintas que la
+frase original mezclaba:
+
+**Criterio A — confirmar una asignación YA vigente.** 98 firmas tienen
+ORCID asignado y ambas fuentes lo corroboran (`confirma_directa` o
+`confirma_indirecta`, ninguna `contradice_directa`); 18 ya tenían
+decisión registrada, quedaron **80** sin decidir.
+
+**Criterio B — asignar ORCID a una firma que hoy NO tiene ninguno.** De
+los candidatos por nombre sin publicación en común (`dspace_candidatos.csv`
+/ `autoarchivo_candidatos.csv`), **5 cadenas de firma** (`Díaz-Galaz L.`,
+`Letelier Widow G.`, `Salas-Guzmán N.`, `Morales Sepúlveda J.P.` y su
+variante `Morales-Sepulveda J.P.`) tienen un único candidato en cada
+fuente y ambas proponen el MISMO ORCID.
+
+### El bug que casi corrompe el CSV, encontrado antes de escribir nada
+
+El primer intento de leer `identity_decisions.csv` usó
+`pd.read_csv(..., comment='#')` para saltar la cabecera de comentarios.
+Es exactamente el bug que `src/review/decisiones.py::leer()` ya documenta
+en su docstring: `comment='#'` trunca la línea en la primera almohadilla
+ESTÉ DONDE ESTÉ, y varias notas de este mismo proyecto contienen una
+(«evidencia cruzada... Scopus ID: 55159442300 ¿Calza?» no tiene, pero
+otras sí). El síntoma se notó de inmediato: tras escribir el archivo con
+ese lector, el conteo de filas no cuadraba (esperadas 429, escritas 414).
+Se revirtió con `git checkout` antes de aplicar nada más, y se rehízo
+todo el cálculo con `decisiones.leer()` — el lector correcto del propio
+proyecto — confirmando que las cifras (80 y las 10 filas de Criterio B)
+no habían cambiado, pero por verificación, no por suposición.
+
+### Aplicado
+
+- **Criterio A** (80 firmas): una fila nueva por firma, cola «ORCID sin
+  confirmar», veredicto `orcid_correcto`, con nota que cita el veredicto
+  y el número de publicaciones cruzadas de cada fuente.
+- **Criterio B** (5 cadenas, 10 filas): se actualizaron in-situ las filas
+  YA EXISTENTES y pendientes de `identity_decisions.csv` (los casos
+  `dspacecand-`/`aacand-` que `build_review.py` ya había generado para
+  estas firmas) de `pendiente` a `misma`, en vez de crear filas nuevas —
+  son exactamente los casos que la cola de revisión ya tenía abiertos
+  para esta pregunta.
+- `apply_decisions.py --dry-run` antes de aplicar: 0 errores, 0
+  contradicciones. Aplicado en real: 138 ORCID confirmados, 26
+  asignaciones nuevas (candidatos de Criterio B + los ya represados de
+  «Candidato por afiliación» de tandas anteriores), cobertura 322 → 329.
+
+### El hallazgo honesto: el Criterio A no cambia nada visible en el sitio — y eso es correcto, no un defecto
+
+Antes de reportar el resultado, se comprobó el efecto real en
+`data/processed/authors.json` en vez de asumir que «confirmar» sube la
+confianza. No la sube: de las 67 firmas del Criterio A localizables por
+nombre exacto (13 quedaron fusionadas a otra forma canónica), **las 67
+muestran la misma etiqueta que tenían antes** («verificado» o «declarado
+por el titular»), **ninguna** pasó a «comprobado por revisión». La razón
+está declarada en el propio código (`03_authors.py`, cadena de selección
+de veredicto): cuando el titular ya declara en su propio registro de
+ORCID una publicación que coincide con el corpus, esa es evidencia más
+fuerte que el juicio de una persona sobre una fuente externa, y el código
+decide EXPLÍCITAMENTE no dejar que la comprobación humana la reemplace
+("sustituirlo por el juicio de una persona sería cambiar evidencia más
+fuerte por más débil y presentarlo como una mejora"). Las 80 firmas del
+Criterio A ya tenían esa evidencia más fuerte (veredicto `confirmada` por
+coincidencia de DOI contra el propio registro ORCID del titular); el
+cruce con DSpace/autoarchivo llega después y no pisa nada.
+
+Esto significa que el Criterio A **no resuelve ningún caso pendiente**
+(se comprobó: 0 de las 80 firmas coincide con las 9 pendientes actuales
+de «ORCID sin confirmar», ni con ninguna otra cola pendiente) **ni cambia
+la etiqueta pública**. Su valor es distinto y real: deja constancia
+permanente en `config/orcid_revisado.yml` de que una persona, con dos
+fuentes institucionales independientes, revisó y no encontró contradicción
+en estas 80 asignaciones — trazabilidad para una auditoría futura, no una
+mejora visible hoy.
+
+El Criterio B sí tiene efecto visible y sí resuelve pendientes: las 5
+firmas pasan de no tener ORCID a tenerlo (`confirmado por revisión`,
+confianza alta, `FUENTE_REVISION`), y despejan **10 filas** de la cola
+(2 colas × 5 firmas: `Candidato por repositorio institucional` bajó de
+14→11, `Candidato por inventario de autoarchivo` de 7→4, y las dos colas
+«(ambiguo)» de Morales Sepúlveda J.P. quedaron resueltas).
+
+### Estado final
+
+`build_review.py`: 290 casos totales · 162 ya decididos · **128
+pendientes** (bajó de 138; -10 por el Criterio B, el Criterio A no toca
+pendientes como se explicó arriba). `build_all.py` compuerta 0 fallas.
+`node src/verify/run_all.mjs`: 6/6 sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-356 | `identity_decisions.csv` se lee SIEMPRE con `decisiones.leer()`, nunca con `pd.read_csv(comment='#')` a mano | El propio proyecto ya documentó y corrigió este bug (docstring de `leer()`); reintroducirlo en un script ad-hoc truncó silenciosamente 15 filas antes de escribir nada — se detectó por el conteo, no por revisión de contenido |
+| D-357 | Las 80 confirmaciones del Criterio A (acuerdo cross-fuente sobre una asignación YA vigente) se aplican como registro de auditoría, no como mejora de confianza o resolución de pendientes | Verificado contra la salida real: la cadena de veredicto en `03_authors.py` da prioridad, por diseño, a la evidencia de que el propio titular declara la publicación en su registro ORCID; una confirmación cruzada externa no la reemplaza. Afirmar que esto «resuelve casos» o «sube confianza» habría sido una afirmación falsa sobre el propio dato |
+| D-358 | Las 10 filas de Criterio B (5 firmas × 2 fuentes) se aplican actualizando in-situ los casos `pendiente` ya existentes en `identity_decisions.csv`, no creando filas nuevas | Son exactamente las preguntas que la cola de revisión ya tenía abiertas para esas firmas; crear filas paralelas habría duplicado el caso sin necesidad |
+
+### Verificación
+
+`apply_decisions.py --dry-run` (0 errores) antes de aplicar en real;
+`build_all.py` (compuerta 0 fallas, misma falla preexistente no
+bloqueante de siempre); `node src/verify/run_all.mjs` (6/6); y
+verificación manual contra `authors.json` de que el efecto reportado al
+usuario (0 cambios visibles en Criterio A, 5 asignaciones nuevas visibles
+en Criterio B) es el que realmente ocurre, no el que se esperaba antes de
+comprobar.
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv    +80 filas (Criterio A) · 10 filas
+                                    pendiente→misma (Criterio B)
+config/orcid_revisado.yml,
+config/identidades_consolidadas.yml,
+data/enriched/authors_orcid.csv    regenerados por apply_decisions.py
+internal/dspace_candidatos.csv,
+internal/autoarchivo_candidatos.csv regenerados (candidatos resueltos
+                                    ya no aparecen)
+```
+
+### Ambigüedades abiertas
+
+- 128 pendientes en la cola (bajó de 138).
+- Las de siempre: Shabani R., T-06/T-19, el mecanismo de aplicación para
+  `unidad_confirmada` (D-349, sigue sin construir).
+
+### Próximo paso recomendado
+
+Reportar al usuario el resultado con el encuadre correcto: el Criterio A
+fortalece trazabilidad sin cambiar lo visible; el Criterio B resolvió 10
+filas de cola reales. Reenviar `internal/revision_identidad.html`
+regenerado. Esperar la siguiente tanda de revisión del usuario.
