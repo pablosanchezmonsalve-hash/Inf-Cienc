@@ -74,7 +74,7 @@ trabajo).
 | `AU-02` | Citas por autor | Citas atribuidas | `sum(citas) by autor` | `Autoria` + `Citations` | **sí** | media | ✅ | Atribución completa: una publicación aporta sus citas a cada autor UFT |
 | `AU-06` | Evolución temporal del autor | Publicaciones por año | `group by autor, anio` | `Autoria` | **sí** | media | ✅ | 3 puntos: **barras, no línea de tendencia** |
 | `AU-03` | h-index en ventana | h sobre 2023–2025 | h clásico sobre el subconjunto | `Autoria` + `Citations` | **parcial** | **baja** | ⚠️ | **497 de 589 autores tienen h ≤ 1: no discrimina.** Sólo en ficha, siempre etiquetado |
-| `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 222/589 | media | ⚠️ | No está en Scopus ni en SciVal. Cada asignación viaja con su veredicto de verificación; sin ORCID se muestra «no disponible», no se oculta |
+| `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 322/589 firmas · 277/542 entidades | media | ✅ | Ya no es placeholder: se publicó al cerrarse `T-01` (2026-08-01); la revisión de identidad del 2026-09-01 consolidó más grupos y retiró asignaciones erróneas. Cada asignación viaja con su veredicto; sin ORCID se muestra «no disponible», no se oculta |
 | `AU-04` | FWCI por autor | Impacto normalizado del autor | — | — | **no** | no aplicable | ❌ | **Descartado.** El FWCI de un autor no es el promedio de sus publicaciones y SciVal no lo entrega a nivel autor. Calcularlo sería inventar la métrica |
 
 ### 1.6 No calculables — placeholders metodológicos declarados
@@ -128,13 +128,15 @@ Fase 2 tal como se tomó, no el estado actual del sitio.
 | | n |
 |---|---|
 | Indicadores evaluados | **40** |
-| Publicados en V1 | **27** |
-| ├ calculables | 26 |
-| └ placeholder declarado (`AU-05`, ORCID) | 1 |
+| Publicados | **28** |
+| ├ calculables | 28 |
+| └ placeholder declarado | 0 |
 | Diferidos a V2 | 8 |
 | No calculables o fuera de alcance | 5 |
 
-De los 27 publicados, **19 llevan nota metodológica contextual** (tooltip) y
+`AU-05` (ORCID) dejó de ser placeholder al cerrarse `T-01` y se publica, y
+`C-05` (red de coautoría) se publicó con `T-10` (2026-08-26); por eso el total es
+28. De los publicados, **19 llevan nota metodológica contextual** (tooltip) y
 **5 llevan advertencia destacada** — banda visible junto al módulo, no
 ocultable: `P-07`, `I-04`, `A-01`, `T-04`, `AU-03`.
 
