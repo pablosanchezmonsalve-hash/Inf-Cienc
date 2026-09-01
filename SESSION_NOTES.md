@@ -6040,3 +6040,198 @@ docs/FUENTES_Y_APIS.md       §2.5 actualizada: ya no "queda pendiente"
 Esperar a que el usuario revise (puede ser por partes) y exporte
 decisiones. Cuando haya `unidad_confirmada` reales que aplicar, construir
 el script de aplicación correspondiente — recién ahí, no antes.
+
+## Cierre: fusión del export perdido, saga Arroyo A./Castro M., y tres bugs de reasignación de ORCID en una sola corrida
+
+### Contexto
+
+El usuario exportó `identity_decisions_3.csv` (303 filas) desde
+`revision_identidad.html` tras revisar una tanda de casos. Antes de
+aplicarlo, la comprobación de rutina («¿bajó el número de grupos
+consolidados?») encontró algo que no cuadraba: 37 → 12. Eso no es una
+tanda de revisión, es pérdida de datos.
+
+### El bug de exportación del navegador (hallado antes de aplicar nada)
+
+La función `entregar()` de `revision_identidad.html` exporta el array
+`CASOS` embebido en la página — que sólo contiene los casos que **siguen
+vivos** en la corrida que generó ese HTML. Un caso ya resuelto en un ciclo
+anterior (sin caso vivo pendiente) simplemente no está en `CASOS`, así que
+un export fresco desde una versión más vieja de la página no lo trae: no
+lo marca como "sin cambios", lo omite. Si ese export se usara para
+*reemplazar* `identity_decisions.csv` en vez de fusionarlo, esas
+decisiones desaparecerían.
+
+Se comprobó el alcance exacto contra el historial (`git show
+cb2ab6c~1:internal/identity_decisions.csv`): **72 filas** afectadas — 30
+que desaparecían del todo y 42 que volvían a "pendiente" pese a estar
+decididas. Se escribió un script de fusión (no se aplicó el export a
+ciegas) que: toma el export nuevo como base, y para cada fila del CSV
+anterior ausente en el nuevo, la reincorpora tal cual. Resultado: 349
+filas de datos, sin pérdida.
+
+Esto es un bug de la herramienta, no del usuario ni de sus datos — pero
+significa que **todo export parcial futuro debe fusionarse contra el
+historial, nunca reemplazar sin comparar**. Queda anotado para si se
+retoma `revision_identidad.html` más adelante (no se corrigió la causa
+raíz en el JS esta vez: el mitigante — fusionar contra git antes de
+aplicar — es suficiente mientras la revisión se haga en esta modalidad).
+
+### El caso Arroyo A.: contradicción de identidad resuelta con evidencia cruzada, no por conveniencia
+
+`ver-Arroyo A.` (revisión anterior) decía `orcid_correcto` para el ORCID
+hoy publicado. Los dos conectores nuevos —DSpace y autoarchivo—
+discrepaban: `dspacedesac-Arroyo A.` y `aadesac-Arroyo A.` decían
+`orcid_incorrecto` para esa misma firma. Dos fuentes institucionales
+independientes contra una revisión humana anterior: no se desempata por
+mayoría, se investiga.
+
+Se revisó con el usuario, caso por caso:
+- El perfil del ORCID hoy publicado tiene 140 obras y no declara afiliación
+  UFT — no hay nada ahí que lo respalde por sí solo.
+- Cruce por DOI (`internal/matching_log.csv` +
+  `data/interim/publications_universe.csv`): 3 de las 4 publicaciones de
+  Arroyo A. en el corpus coinciden EXACTAMENTE por DOI con lo que DSpace y
+  autoarchivo citan bajo un ORCID distinto — no es coincidencia de nombre,
+  es la misma obra.
+- El usuario encontró de forma independiente, directamente en el sitio de
+  ORCID (fuera del alcance de este entorno: `orcid.org` está bloqueado por
+  egress aquí), el Scopus Author ID `55159442300` en ese perfil alternativo
+  — y ese Scopus ID coincide con el que trae `authors_master_draft.csv`
+  para esta firma.
+
+Con evidencia convergente por dos vías independientes (DOI exacto +
+Scopus ID confirmado por el usuario en la fuente), decisión del usuario:
+«Sí, corrígelo y asígnalo». Aplicado: `ver-Arroyo A.` pasa a
+`orcid_incorrecto` (con nota del porqué) y se agrega
+`arroyoasignado-Arroyo A.` con `orcid_encontrado` →
+`0000-0002-6248-9257`.
+
+### El caso Castro M.: la fusión histórica se mantiene
+
+Una fusión histórica («Castro M.» = «Castro-Sepúlveda M.») parecía
+contradecir una lectura nueva de que «Castro M.» agrupa a dos personas
+distintas (Magdalena y Mauricio). Se mostró el conflicto al usuario, quien
+confirmó: «la fusión histórica era Mauricio, sigue siendo correcta» — sin
+cambios al CSV, la duda quedó resuelta por confirmación directa del
+titular de la decisión original.
+
+### Tres bugs de pipeline, una sola causa raíz
+
+Aplicar la decisión de Arroyo A. — retirar un ORCID Y asignar el correcto
+para la misma firma, en la misma corrida de `apply_decisions.py` — expuso
+tres fallas encadenadas, todas por la misma razón: código que calcula «el
+estado vigente» una vez al principio de la corrida, sin contar con que esa
+misma corrida va a modificar ese estado.
+
+1. `veredictos_orcid()`: `vigente` se leía de `authors_orcid.csv` en disco
+   ANTES de procesar las decisiones, así que `orcid_encontrado` veía la
+   firma «ya asignada» con el valor que la misma corrida estaba retirando,
+   y se negaba a asignar el reemplazo. Corregido con
+   `vigente_para_nuevo` (excluye las firmas retiradas en esta corrida).
+2. El filtro/concat final de `nuevas` contra `vig` en `main()`: descartaba
+   la asignación nueva por estar la firma ya en `vig` (el CSV crudo, que
+   todavía trae la fila vieja). Corregido con `vig_efectiva`/`reemplazadas`.
+3. `src/build/03_authors.py`: el filtro `ORCID_RETIRADO` excluía TODAS las
+   filas de una firma por nombre, no sólo la fila con el ORCID retirado
+   específico — así que la fila nueva y correcta también se descartaba.
+   Corregido comparando el valor retirado, no sólo el nombre.
+
+Cada uno se encontró verificando la salida real
+(`data/enriched/authors_orcid.csv` → `data/processed/authors.json`) tras
+cada paso, no asumiendo que el fix anterior bastaba. El principio "no se
+borra, se anota" (los ORCID retirados quedan en el CSV, filtrados en el
+build) es precisamente lo que hace este escenario sutil: las filas vieja y
+nueva conviven, y hay que reemplazar la vieja sin duplicar ni perder la
+nueva.
+
+Se agregaron dos casos nuevos a `apply_decisions.py --test`: «retirar y
+reemplazar la misma firma en una sola corrida» y «confirmar no abre hueco
+para un reemplazo» — ambos en verde.
+
+**Verificación de la etiqueta final** (no se dio por buena sin trazarla):
+en `03_authors.py`, la cadena que elige la etiqueta pública comprueba
+`fuente_orcid == FUENTE_BUSQUEDA` ANTES que cualquier rama de
+`comprobado_a_mano`/`veredicto`. `apply_decisions.py` marca
+`orcid_encontrado` con `"fuente": FUENTE_BUSQUEDA` (misma constante
+textual). Se confirmó que la ficha de Arroyo A. muestra
+`"orcid_veredicto_etiqueta": "encontrado por revisión"` precisamente por
+esa rama — no es una etiqueta vieja que sobrevivió por casualidad.
+
+### Estado final tras aplicar la tanda completa
+
+`internal/identity_decisions.csv`: 349 filas de datos (303 del export +
+72 restauradas − reconciliación de duplicados + la fila de Arroyo A.).
+Pipeline reconstruido de punta a punta:
+`dspace_inventario.py` → `autoarchivo_uft.py` → `build_review.py` →
+`build_all.py` → `06_assemble_site.py` → `node src/verify/run_all.mjs`.
+
+- `build_review.py`: 301 casos totales · 163 ya decididos · **138
+  pendientes** (33 decisiones del CSV ya no tienen caso vivo — son casos
+  resueltos, no un problema).
+- `build_all.py`: compuerta pública/interna 0 fallas · auditoría 29/30
+  reglas pasan (la única falla, E-06 sobre una columna de Scopus vacía,
+  es preexistente y no bloqueante, ajena a este trabajo).
+- `node src/verify/run_all.mjs`: contraste, estructura, flujos,
+  responsive, higiene, peso — los 6, sin fallos.
+- `apply_decisions.py --test`: 38/38 casos OK.
+
+Se reportó al usuario, pero **no se aplicó**, un análisis exploratorio de
+cuántos casos pendientes se resolverían si se confiara en el acuerdo entre
+las dos fuentes institucionales (DSpace + autoarchivo) para el ORCID de
+una firma — queda a la espera de autorización explícita, igual que el
+resto de los pendientes de esta cola.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-351 | Un export parcial de `revision_identidad.html` se fusiona contra el historial de git antes de aplicarse, nunca reemplaza el CSV directamente | La función `entregar()` sólo exporta casos vivos; un reemplazo directo pierde silenciosamente las decisiones ya resueltas (72 filas en este caso) |
+| D-352 | La contradicción de Arroyo A. se resuelve a favor del ORCID `0000-0002-6248-9257`, retirando el previamente publicado | Evidencia convergente por dos vías independientes: coincidencia exacta de DOI en 3/4 publicaciones contra DSpace/autoarchivo, y Scopus Author ID confirmado por el usuario directamente en el registro ORCID |
+| D-353 | La fusión histórica «Castro M. = Castro-Sepúlveda M. (Mauricio)» se mantiene sin cambios | Confirmación directa del usuario, autor de la decisión original, ante el conflicto mostrado |
+| D-354 | `veredictos_orcid()`, el filtro final de `nuevas`/`vig`, y el filtro `ORCID_RETIRADO` de `03_authors.py` deben calcular «vigente» contando con los retiros de la MISMA corrida, no sólo el estado en disco al inicio | Sin esto, retirar-y-reemplazar el ORCID de una firma en un solo ciclo de revisión (D-08 lo exige explícitamente) falla silenciosamente: la firma queda sin ORCID nuevo asignado |
+| D-355 | El análisis de acuerdo cross-fuente (DSpace × autoarchivo) para ORCID se reporta pero no se aplica sin autorización explícita | Sigue D-08/D-347: ningún hallazgo propio se convierte en aplicación sin que el usuario lo autorice para ese insumo específico |
+
+### Verificación
+
+`apply_decisions.py --test` (38/38), `build_all.py` (compuerta 0 fallas),
+`node src/verify/run_all.mjs` (6/6 sin fallos), y verificación manual de
+la cadena de etiquetado de veredicto ORCID en `03_authors.py` trazada
+línea por línea contra la salida real en `authors.json` — no se dio por
+buena la etiqueta sin confirmar la rama exacta que la produce.
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv   fusión de 72 filas históricas + fila de
+                                   Arroyo A. + corrección de ver-Arroyo A.
+src/review/apply_decisions.py     vigente_para_nuevo / vig_efectiva
+                                   (retirar-y-reemplazar en una corrida) +
+                                   2 casos de prueba nuevos
+src/build/03_authors.py           ORCID_RETIRADO compara valor, no sólo
+                                   nombre de firma
+config/identidades_consolidadas.yml,
+config/orcid_revisado.yml,
+data/enriched/authors_orcid.csv   regenerados por la corrida completa
+```
+
+### Ambigüedades abiertas
+
+- 138 pendientes en la cola de revisión, sin cambios de alcance frente al
+  cierre anterior.
+- El acuerdo cross-fuente DSpace × autoarchivo para ORCID fue analizado y
+  reportado, no aplicado — pendiente de autorización explícita.
+- El bug de exportación parcial en `revision_identidad.html` (`entregar()`
+  sólo exporta `CASOS` vivo) no se corrigió en el JS; se mitigó por fusión
+  manual contra git. Si la herramienta se retoma, vale la pena corregirlo
+  en la fuente.
+- Las de siempre: Shabani R., T-06/T-19, el mecanismo de aplicación para
+  `unidad_confirmada` (D-349, sigue sin construir).
+
+### Próximo paso recomendado
+
+Reportar al usuario el cierre completo de esta tanda (349 filas, 138
+pendientes, las dos resoluciones de identidad, los tres bugs corregidos)
+y reenviar `internal/revision_identidad.html` regenerado. Quedar a la
+espera de la siguiente tanda de revisión o de autorización sobre el
+análisis cross-fuente reportado.

@@ -347,3 +347,4 @@ sinorcid-Dreyse J.,Firma sin ORCID,Dreyse J.,orcid_no_encontrado,,,2026-08-26
 sinorcid-Gonzalez-Valderrama A.,Firma sin ORCID,Gonzalez-Valderrama A.,orcid_no_encontrado,,,2026-08-26
 sinorcid-Jorquera J.,Firma sin ORCID,Jorquera J.,orcid_no_encontrado,,,2026-08-26
 sinorcid-Reccius A.,Firma sin ORCID,Reccius A.,orcid_no_encontrado,,,2026-08-26
+arroyoasignado-Arroyo A.,Firma sin ORCID,Arroyo A.,orcid_encontrado,0000-0002-6248-9257,"Decisión del usuario (2026-09-01), verificada con evidencia cruzada: DSpace y el inventario de autoarchivo de biblioteca coinciden en que 3 de las 4 publicaciones de esta firma (mismos DOI que nuestro corpus, no sólo mismo nombre) son de ""Arroyo, Antonio"", ORCID 0000-0002-6248-9257. El usuario confirmó independientemente en el registro público de ORCID que ese identificador declara Scopus Author ID 55159442300 — distinto del 58862866100 que el pipeline había enganchado por error para esta firma.",2026-09-01
