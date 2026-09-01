@@ -12,37 +12,103 @@
 # sin_registro  alguien buscó en el registro y no encontró a esta
 #               persona. No es lo mismo que «nadie ha mirado».
 #
-# Aplicado: 2026-08-26
+# Aplicado: 2026-09-01
 
-fecha_de_aplicacion: 2026-08-26
+fecha_de_aplicacion: 2026-09-01
 
 confirmadas:
+  - firma: Abara J.F.
+    orcid: 0000-0001-8190-2361
+    nota: ''
+  - firma: Arenas-Massa A.
+    orcid: 0000-0003-3188-0189
+    nota: ''
+  - firma: Arroyo A.
+    orcid: 0000-0003-0157-5175
+    nota: ''
+  - firma: Benites M.
+    orcid: 0000-0001-6366-534X
+    nota: ''
   - firma: Beytia Osses I.
     orcid: 0009-0008-4178-5429
+    nota: ''
+  - firma: Busquets P.
+    orcid: 0000-0002-1041-0543
+    nota: ''
+  - firma: Caffarena P.
+    orcid: 0000-0002-2609-6413
     nota: ''
   - firma: Cartaya M.A.
     orcid: 0000-0001-8098-9960
     nota: ''
+  - firma: Castillo N.
+    orcid: 0000-0002-9377-136X
+    nota: ''
+  - firma: Castro M.
+    orcid: 0000-0002-2270-299X
+    nota: Magdalena Catro y Mauricio Catro son dos personas distintas.
   - firma: Cárdenas Larenas J.P.
     orcid: 0009-0001-5706-8570
     nota: ''
   - firma: De la Fuente M.
     orcid: 0000-0003-0577-7604
     nota: ''
+  - firma: Dominguez A.
+    orcid: 0000-0002-4277-3445
+    nota: ''
+  - firma: Dreyse J.
+    orcid: 0000-0002-8201-5956
+    nota: https://orcid.org/0000-0002-8201-5956
   - firma: Díaz F.
     orcid: 0000-0003-4763-074X
     nota: ''
+  - firma: Escobar-González S.
+    orcid: 0000-0003-2786-1487
+    nota: https://orcid.org/0000-0003-2786-1487
+  - firma: Ferre Contreras A.
+    orcid: 0000-0003-1770-244X
+    nota: https://orcid.org/0000-0003-1770-244X
   - firma: Figueroa F.C.
     orcid: 0000-0002-1280-9742
     nota: ''
+  - firma: Fuente M.D.L.
+    orcid: 0000-0003-0577-7604
+    nota: https://orcid.org/0000-0003-0577-7604
   - firma: Gaete M.
     orcid: 0000-0003-1846-2417
+    nota: ''
+  - firma: Giordanino E.
+    orcid: 0000-0001-7380-4753
+    nota: ''
+  - firma: Giordanino E.F.
+    orcid: 0000-0001-7380-4753
+    nota: ''
+  - firma: Herrero J.
+    orcid: 0009-0001-4210-1016
+    nota: ''
+  - firma: Ishtiaque T.A.
+    orcid: 0000-0002-3041-9748
+    nota: ''
+  - firma: Johansen A.
+    orcid: 0000-0003-0063-3679
+    nota: ''
+  - firma: Landskron G.
+    orcid: 0000-0002-7953-6769
     nota: ''
   - firma: Lucero-Mora J.
     orcid: 0000-0002-8554-7181
     nota: ''
+  - firma: López V.
+    orcid: 0000-0003-1323-7843
+    nota: ''
+  - firma: López-Soto P.
+    orcid: 0000-0003-2559-6464
+    nota: ''
   - firma: Mancilla R.
     orcid: 0000-0002-2143-6386
+    nota: ''
+  - firma: Mendez-Rebolledo G.
+    orcid: 0000-0001-7948-3807
     nota: ''
   - firma: Moraga Concha J.
     orcid: 0009-0007-5923-0205
@@ -52,6 +118,12 @@ confirmadas:
     nota: ''
   - firma: Murray N.P.
     orcid: 0000-0001-8154-8550
+    nota: ''
+  - firma: Ortiz F.
+    orcid: 0000-0001-7665-7488
+    nota: ''
+  - firma: Quezada M.
+    orcid: 0000-0003-1637-1909
     nota: ''
   - firma: Rojas D.
     orcid: 0000-0002-1675-2958
@@ -64,8 +136,26 @@ retiradas:
   - firma: Buchuk P.
     orcid: 0009-0009-8078-2738
     nota: ''
+  - firma: Cancino J.
+    orcid: 0000-0002-1956-7600
+    nota: ''
+  - firma: García F.
+    orcid: 0000-0002-9548-5252
+    nota: ''
+  - firma: González A.
+    orcid: 0000-0002-6139-4299
+    nota: ''
   - firma: Gálvez M.
     orcid: 0000-0002-8638-5268
+    nota: ''
+  - firma: Gómez G.
+    orcid: 0000-0001-5193-2738
+    nota: ''
+  - firma: Gómez G.G.
+    orcid: 0000-0001-5193-2738
+    nota: ''
+  - firma: Huepe-Artigas D.
+    orcid: 0000-0002-1258-5670
     nota: ''
   - firma: Molina M.
     orcid: 0000-0002-7091-2633
