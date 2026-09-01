@@ -110,6 +110,7 @@ informe: sitio
 # la decisión D-85 ya dice qué pasa con eso.
 revision: auditoria
 	python3 src/enrich/dspace_inventario.py
+	python3 src/enrich/autoarchivo_uft.py
 	python3 src/review/build_review.py
 	python3 src/review/build_unit_validation.py
 	python3 src/review/build_hallazgos.py

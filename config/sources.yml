@@ -306,3 +306,36 @@ fuentes:
       sistema, no dato bibliométrico, y este repositorio es PÚBLICO: se quitó
       antes de que el archivo tocara `data/raw/`. El original sin limpiar no
       se conserva versionado en ningún lugar de este proyecto.
+
+  autoarchivo_biblioteca:
+    nombre: "Inventario de autoarchivo — hoja curada por biblioteca UFT"
+    tipo: "archivo"
+    archivo: "data/raw/Inventario_Repositorio_Autoarchivo.xlsx"
+    formato: "xlsx"
+    hoja: "AUTOARCHIVOS"
+    conector: "src/enrich/autoarchivo_uft.py"
+    rol: "verificación y candidatos de ORCID; candidatos EN BRUTO de Facultad/Escuela"
+    aporta:
+      - contraste_de_orcid_ya_asignado_contra_una_obra_propia
+      - candidatos_de_orcid_por_nombre_para_firmas_sin_ninguno
+      - candidatos_de_facultad_o_escuela_para_no_determinada_sin_traducir_al_vocabulario
+    salida: >-
+      data/interim/autoarchivo_verificacion.csv,
+      internal/autoarchivo_candidatos.csv,
+      internal/autoarchivo_unidad_candidatos.csv
+    fecha_export: "2026-09-01"       # fecha en que el usuario entregó el archivo
+    n_registros_leido: 808
+    entregado_por: "responsable del proyecto (sesión 2026-09-01)"
+    nota: >-
+      No sale a red. DISTINTA de `dspace_repositorio`: aquélla es el volcado
+      de metadatos del sistema DSpace, ésta es una hoja que el equipo de
+      biblioteca mantiene a mano al autoarchivar cada obra (2004-2026, más
+      amplia que la ventana 2023-2025 del corpus canónico). Trae, además de
+      ORCID, la Facultad o Escuela que biblioteca le asignó a cada obra — un
+      dato que `dspace_repositorio` no tiene. Ese campo se declara EN BRUTO
+      («Medicina», «CIDOC», etc., sin traducir a `config/matching_rules.yml`):
+      traducirlo a la jerarquía oficial es el mismo trabajo institucional que
+      exigió `T-02`, y este conector no lo hace por su cuenta. Las dos
+      fuentes pueden confirmarse o contradecirse entre sí (`Arroyo A.`
+      aparece contradicho en ambas, con el mismo ORCID alternativo en las
+      dos — evidencia cruzada, no una casualidad).

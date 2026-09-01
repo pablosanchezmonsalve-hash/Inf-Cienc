@@ -5796,3 +5796,112 @@ desplegó a `main` todavía: son cambios de capa interna, no del sitio
 público — `authors_orcid.csv` sí alimenta el sitio, así que la próxima
 publicación a `main` los recogerá). Seguir esperando el veredicto de
 Arroyo A. / Shabani R., y seguir la revisión del resto de la cola.
+
+## Cierre · Segunda fuente institucional: el inventario de autoarchivo de biblioteca, con Facultad/Escuela — y Arroyo A. confirmado por TRES fuentes independientes
+
+### Qué llegó
+
+El usuario compartió un segundo insumo: `Inventario_Repositorio_AUTOARCHIVO_6.xlsx`,
+una hoja que el propio equipo de biblioteca mantiene a mano al autoarchivar
+cada obra —808 filas, 2004-2026—, con DOI, ORCID de quien solicitó la
+subida, y algo que la fuente anterior (el volcado DSpace) no tenía:
+**Facultad o Escuela**. El pedido: usarlo para completar datos "no
+determinados" de autores.
+
+Se verificó primero que no trajera datos personales (mismo chequeo que con
+el inventario anterior): sin correos, sin RUT, la columna «Revisado por»
+sólo trae nombres de pila de personal de biblioteca. Limpio para versionar
+tal cual.
+
+### El conector
+
+`src/enrich/autoarchivo_uft.py` (nuevo, `--test`, sin red), mismo patrón
+dual que `dspace_inventario.py` para ORCID —confirmación directa/indirecta,
+contradicción, candidato por nombre— más un tercer producto que la fuente
+anterior no permitía: candidatos de Facultad/Escuela para «No determinada»,
+**declarados en bruto, sin traducir al vocabulario oficial**. Esa
+traducción («CIDOC» → ¿qué facultad?, «Medicina» → ¿Escuela de Medicina
+dentro de Facultad de Medicina y Salud?) es el mismo trabajo institucional
+que exigió `T-02`, y este conector no lo adivina — se explicitó como
+decisión, no como omisión.
+
+Resultados reales:
+- **ORCID** (150 firmas cruzadas): 71 confirmaciones directas, 32
+  indirectas, **2 contradicciones directas**, 45 sin coincidencia. 9
+  candidatos nuevos por nombre (7 uno-a-uno).
+- **Facultad/Escuela**: 59 de las 294 firmas «No determinada» tienen un
+  candidato en este inventario.
+
+**El hallazgo que importa más:** `Arroyo A.` vuelve a aparecer contradicho
+— y esta vez con el MISMO ORCID alternativo (`...9257`) que ya había
+señalado el inventario DSpace del cierre anterior. Dos fuentes
+institucionales completamente independientes (el volcado de sistema y la
+hoja de biblioteca) coinciden en un ORCID distinto al publicado. Sumado a
+que el registro público de ORCID tampoco lo confirmaba desde el principio,
+son ya **tres fuentes** apuntando en la misma dirección — el usuario sigue
+revisando este caso por su cuenta, no se tocó. Nuevo también:
+`Rojas-Costa G.M.` trae DOS ORCID distintos dentro de esta misma hoja (dos
+obras suyas, dos identificadores) — inconsistencia interna de la propia
+fuente, declarada, no resuelta.
+
+Wireado en `build_review.py`: dos colas nuevas —«Inventario de autoarchivo
+discrepa» (2, prioridad 1) y «Candidato por inventario de autoarchivo» (7,
+más 2 ambiguos)—, y evidencia añadida al contexto de «ORCID sin confirmar»,
+«ORCID no verificable» y «OpenAlex discrepa» donde corresponde.
+`decisiones.py` y `apply_decisions.py` extendidos otra vez (tercera fuente
+de candidatos, sin cruzarse con las otras dos — verificado en el autotest).
+La cola pendiente pasó de 108 (tras aplicar los 5 casos del cierre
+anterior) a **119**.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-344 | El inventario de autoarchivo se trata como fuente DISTINTA de `dspace_repositorio`, con su propia cola y evidencia etiquetada aparte | Son sistemas distintos (volcado DSpace vs. hoja curada a mano por biblioteca) que pueden confirmarse o contradecirse; mezclarlas escondería cuál de las dos dice qué |
+| D-345 | El campo Facultad/Escuela se declara EN BRUTO, sin traducirlo a `config/matching_rules.yml` ni aplicarlo a `unidad_academica` | Traducir «CIDOC» o «Familia» a la jerarquía oficial exige el mismo criterio institucional que `T-02` — no es una operación mecánica que este conector pueda hacer por su cuenta |
+| D-346 | Los candidatos de unidad quedan en un CSV declarado (`internal/autoarchivo_unidad_candidatos.csv`), sin una herramienta interactiva de aplicación todavía | Construir el equivalente de `validacion_unidades.html` para este caso es una decisión de alcance aparte; no se construye sin que el usuario decida que la quiere |
+| D-347 | Ninguna de las 119 asignaciones/candidatos de esta tanda se aplica automáticamente | Sigue `D-08`; a diferencia del cierre anterior, el usuario no reiteró "aplica los que tengas convicción" para este insumo específico |
+
+### Verificación
+
+`autoarchivo_uft.py --test`: 9 casos, verde. `apply_decisions.py --test`:
+37 casos (1 nuevo), verde. Auditoría completa, `build_all.py` (compuerta: 0
+fallas), `06_assemble_site.py`, `node src/verify/run_all.mjs` completo —
+los seis bloques— corridos después de todos los cambios: sin fallos.
+
+### Archivos creados o modificados
+
+```
+src/enrich/autoarchivo_uft.py          nuevo — conector, con --test
+data/raw/Inventario_Repositorio_Autoarchivo.xlsx
+                                        nuevo — sin PII, verificado antes de versionar
+config/sources.yml                     fuente autoarchivo_biblioteca declarada
+docs/FUENTES_Y_APIS.md                 §2.5 nueva
+Makefile                               revision: corre autoarchivo_uft.py también
+.github/workflows/deploy.yml           paso de CI: autoarchivo_uft.py --test
+src/review/build_review.py             perfiles()/casos() leen las 2 salidas nuevas;
+                                        2 colas nuevas + evidencia en las existentes
+src/review/decisiones.py               COLAS y FAMILIA_ORCID con las colas nuevas
+src/review/apply_decisions.py          asignaciones_confirmadas() acepta
+                                        cand_autoarchivo aparte; 1 caso nuevo en --test
+```
+
+### Ambigüedades abiertas
+
+- Los 119 pendientes esperan revisión humana — ninguno se decidió en este
+  cierre, por decisión explícita (D-347).
+- `Rojas-Costa G.M.` trae dos ORCID distintos dentro de la misma fuente:
+  homónimo dentro del inventario de biblioteca, o error de captura — sin
+  investigar más.
+- Las 59 candidatas de Facultad/Escuela quedan declaradas, sin decidir si
+  se construye una herramienta de aplicación (paralela a T-02) para ellas.
+- Las de siempre: `T-06`, `T-19` en su techo, Arroyo A./Shabani R.
+  esperando el usuario.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario si quiere: (a) que se aplique con el mismo criterio
+estricto de convicción de la tanda anterior a las nuevas confirmaciones
+directas de esta fuente, y (b) si construye una herramienta de revisión
+para los 59 candidatos de Facultad/Escuela, dado que su aplicación exige
+traducir al vocabulario oficial — decisión de alcance, no de código.
