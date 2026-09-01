@@ -5552,3 +5552,69 @@ Ninguna acción de código pendiente. La auditoría de datos es ahora un
 componente vivo del sitio: crecerá o se reducirá solo, en cada build, sin
 que nadie tenga que acordarse de actualizar un número a mano — el mismo
 principio que ya regía la cobertura de ORCID en esta misma página.
+
+## Cierre · Revisión humana de identidad exportada hoy, encontrada y aplicada
+
+El usuario pidió revisar si había datos actualizados que afectaran el
+trabajo ya hecho antes de seguir. `git fetch` confirmó que `main` no había
+divergido (0 commits de diferencia en ambos sentidos) — nada nuevo por
+ese lado. Pero en `Descargas` apareció `identity_decisions (2).csv`,
+exportado **hoy** desde `internal/revision_identidad.html`: 188 filas
+contra las 141 ya comiteadas, con 43 casos existentes cambiados de
+veredicto además de 82 casos nuevos (52 seguían pendientes, 30 ya
+decididos). Trabajo de revisión humana real, sin aplicar.
+
+Aplicado siguiendo el flujo ya establecido, sin atajos: `merge_decisions.py`
+(fusiona, no sobrescribe — 141 vigentes + 188 nuevas → 223, con 35 casos
+huérfanos preservados que ya no están en la cola viva pero siguen
+decididos), luego `apply_decisions.py --dry-run` para revisar antes de
+escribir nada, y sólo después `apply_decisions.py` de verdad.
+
+### Resultado de la aplicación
+
+34 grupos de identidad consolidados (77 formas de firma, incluida
+`Henriquez-Olguin C.` / `Henríquez-Olguín C.` — el mismo autor que ya
+había aparecido en el top de citación de la revisión de cobertura
+OpenAlex de esta sesión, ahora del lado del corpus interno). 4 firmas
+descartadas por fragmento. 37 asignaciones de ORCID confirmadas, **14
+retiradas** —asignaciones que la revisión humana encontró incorrectas, no
+sólo confirmaciones—. Cobertura de ORCID: 322 → 308 asignaciones que el
+build usará; baja porque se corrigen errores, no porque se pierda
+cobertura real.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-336 | Se buscó activamente en `Descargas` una exportación de revisión sin aplicar en vez de asumir que "revisar datos actualizados" sólo significaba `git fetch` | El pedido explícito de la sesión anterior fue *"revisa cualquier dato actualizado que pueda afectar el trabajo realizado"* — el trabajo de identidad consolidada afecta directamente `authors.json`/`hierarchy.json`, que son insumo del treemap recién hecho reactivo esta misma sesión |
+| D-337 | Los 14 retiros de ORCID se aplicaron sin pedir confirmación caso por caso | Ya venían de una decisión humana explícita en la exportación (`orcid_incorrecto`), no de una heurística nueva — `apply_decisions.py` sólo traduce un veredicto ya dado a los artefactos que el build consume |
+
+### Verificación
+
+Auditoría completa (0 bloqueantes). `build_all.py` (compuerta: 0 fallas,
+542 fichas de autor, subió de 538 por la reconsolidación). `06_assemble_site.py`
+(10 páginas). `node src/verify/run_all.mjs` completo — 6 bloques, 0 fallos —
+corrido DESPUÉS de aplicar y reconstruir.
+
+### Archivos creados o modificados
+
+```
+internal/identity_decisions.csv        141 -> 223 filas (fusión, no reemplazo)
+config/identidades_consolidadas.yml    34 grupos nuevos/actualizados (77 formas de firma)
+config/firmas_e09_resueltas.yml        4 descartadas
+config/orcid_revisado.yml              37 confirmadas, 14 retiradas, 6 sin registro
+docs/BUILD_VERIFICATION.md             regenerado (542 fichas de autor)
+```
+
+### Ambigüedades abiertas
+
+Las de siempre, sin cambios: `T-06`, `T-19` en su techo. Quedan 100
+decisiones pendientes en `internal/identity_decisions.csv` (de 223) para
+una próxima ronda de revisión.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Si aparece otra exportación de
+`revisar-identidad.ps1`/`revision_identidad.html` en Descargas, el mismo
+flujo (`merge_decisions.py` → `apply_decisions.py --dry-run` →
+`apply_decisions.py` → reconstruir → verificar) se repite igual.
