@@ -21,7 +21,7 @@
 # Se elige así y no por longitud porque el desempate alfabético
 # publicaba la variante sin tilde teniendo la variante con tilde.
 #
-# Decisiones leídas: 149 · grupos consolidados: 37
+# Decisiones leídas: 334 · grupos consolidados: 34
 # Fecha de la revisión: 2026-09-01
 
 grupos:
@@ -93,12 +93,6 @@ grupos:
     variantes:
       - 'Giordanino E.'   # 2 publicaciones
       - 'Giordanino E.F.'   # 1 publicaciones
-  - canonica: 'González-Valderrama A.'
-    origen: ortografica
-    variantes:
-      - 'Gonzalez- Valderrama A.'   # 1 publicaciones
-      - 'Gonzalez-Valderrama A.'   # 6 publicaciones
-      - 'González-Valderrama A.'   # 2 publicaciones
   - canonica: 'Gubbins V.'
     origen: humana
     variantes:
@@ -120,13 +114,6 @@ grupos:
     variantes:
       - 'Hasbun P.'   # 3 publicaciones
       - 'Hasbún P.'   # 2 publicaciones
-  - canonica: 'Henríquez-Olguín C.'
-    origen: ortografica
-    variantes:
-      - 'Henriquez-Olguin C.'   # 6 publicaciones
-      - 'Henriquez-Olguín C.'   # 4 publicaciones
-      - 'Henríquez-Olguin C.'   # 1 publicaciones
-      - 'Henríquez-Olguín C.'   # 5 publicaciones
   - canonica: 'Jiménez A.G.'
     origen: humana
     variantes:
@@ -138,21 +125,15 @@ grupos:
       - 'Lomboy Finsterbusch M.I.'   # 1 publicaciones
       - 'Lomboy M.'   # 1 publicaciones
   - canonica: 'López-Arana S.'
-    origen: mixta
+    origen: humana
     variantes:
       - 'Lopez-Arana S.'   # 2 publicaciones
-      - 'López Arana S.'   # 1 publicaciones
       - 'López-Arana S.'   # 10 publicaciones
   - canonica: 'Martinez-Mardones M.B.'
     origen: humana
     variantes:
       - 'Martinez-Mardones M.'   # 1 publicaciones
       - 'Martinez-Mardones M.B.'   # 1 publicaciones
-  - canonica: 'Martínez M.'
-    origen: ortografica
-    variantes:
-      - 'Martinez M.'   # 1 publicaciones
-      - 'Martínez M.'   # 1 publicaciones
   - canonica: 'Massa A.A.'
     origen: humana
     variantes:

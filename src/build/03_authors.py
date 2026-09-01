@@ -101,7 +101,15 @@ def cargar_orcid() -> dict[str, dict]:
         # Asignaciones que una revisión humana declaró que no son de esta
         # firma. La fila se conserva en el CSV —de ahí viene el dato— y aquí
         # simplemente no se usa.
-        if r["nombre_en_fuente"] in b.ORCID_RETIRADO:
+        #
+        # Compara el VALOR retirado, no sólo el nombre: cuando la misma
+        # revisión retira un ORCID y asigna uno nuevo a la misma firma en la
+        # misma corrida (D-08 exige poder hacer las dos cosas — «no es suyo,
+        # es este otro»), el archivo termina con dos filas para esa firma. Si
+        # el filtro fuera sólo por nombre, la fila nueva y correcta también
+        # se descartaría.
+        if r["nombre_en_fuente"] in b.ORCID_RETIRADO \
+                and r["orcid"] == b.ORCID_RETIRADO[r["nombre_en_fuente"]]:
             continue
         # Las asignaciones están indexadas por la firma tal cual aparece en la
         # fuente; las fichas, por su forma canónica. Sin canonizar aquí, una

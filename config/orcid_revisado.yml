@@ -17,50 +17,116 @@
 fecha_de_aplicacion: 2026-09-01
 
 confirmadas:
+  - firma: Abara J.F.
+    orcid: 0000-0001-8190-2361
+    nota: ''
   - firma: Arenas-Massa A.
     orcid: 0000-0003-3188-0189
-    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el inventario de autoarchivo de biblioteca nombra a «Arenas Massa, Ángela» con este mismo ORCID en una obra propia (10.1016/j.ssaho.2025.102231).'
+    nota: ''
+  - firma: Balboa E.
+    orcid: 0000-0002-8757-436X
+    nota: ''
+  - firma: Benites M.
+    orcid: 0000-0001-6366-534X
+    nota: ''
   - firma: Beytia Osses I.
     orcid: 0009-0008-4178-5429
     nota: ''
+  - firma: Busquets P.
+    orcid: 0000-0002-1041-0543
+    nota: ''
   - firma: Caffarena P.
     orcid: 0000-0002-2609-6413
-    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el repositorio institucional (DSpace) nombra a «Caffarena, Paula» con este mismo ORCID en una obra propia (10.4067/s0719-26812025000200173) — mismo nombre, mismo identificador, fuente independiente del registro público de ORCID que había marcado el caso sin confirmar.'
+    nota: ''
+  - firma: Candia-Véjar A.
+    orcid: 0000-0003-2953-6522
+    nota: ''
   - firma: Cartaya M.A.
     orcid: 0000-0001-8098-9960
     nota: ''
+  - firma: Castillo N.
+    orcid: 0000-0002-9377-136X
+    nota: ''
+  - firma: Castro M.
+    orcid: 0000-0002-2270-299X
+    nota: Magdalena Catro y Mauricio Catro son dos personas distintas.
   - firma: Cárdenas Larenas J.P.
     orcid: 0009-0001-5706-8570
     nota: ''
   - firma: De la Fuente M.
     orcid: 0000-0003-0577-7604
     nota: ''
+  - firma: Dominguez A.
+    orcid: 0000-0002-4277-3445
+    nota: ''
+  - firma: Dreyse J.
+    orcid: 0000-0002-8201-5956
+    nota: https://orcid.org/0000-0002-8201-5956
   - firma: Díaz F.
     orcid: 0000-0003-4763-074X
     nota: ''
+  - firma: Escobar-González S.
+    orcid: 0000-0003-2786-1487
+    nota: https://orcid.org/0000-0003-2786-1487
   - firma: Ferre Contreras A.
     orcid: 0000-0003-1770-244X
-    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Ferre Contreras, Andrés» con este mismo ORCID en una obra propia (10.1097/ccm.0000000000006806).'
+    nota: https://orcid.org/0000-0003-1770-244X
   - firma: Figueroa F.C.
     orcid: 0000-0002-1280-9742
     nota: ''
+  - firma: Fuente M.D.L.
+    orcid: 0000-0003-0577-7604
+    nota: https://orcid.org/0000-0003-0577-7604
   - firma: Gaete M.
     orcid: 0000-0003-1846-2417
     nota: ''
   - firma: Giordanino E.
     orcid: 0000-0001-7380-4753
-    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Giordanino, Elian» con este mismo ORCID en una obra propia (10.1016/j.rmclc.2025.10.002).'
+    nota: ''
+  - firma: Giordanino E.F.
+    orcid: 0000-0001-7380-4753
+    nota: ''
+  - firma: Hayes-Ortiz T.
+    orcid: 0009-0006-8457-5435
+    nota: ''
+  - firma: Herrero J.
+    orcid: 0009-0001-4210-1016
+    nota: ''
+  - firma: Ishtiaque T.A.
+    orcid: 0000-0002-3041-9748
+    nota: ''
+  - firma: Johansen A.
+    orcid: 0000-0003-0063-3679
+    nota: ''
   - firma: Landskron G.
     orcid: 0000-0002-7953-6769
-    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el inventario de autoarchivo de biblioteca nombra a «Landskron, Glauben» con este mismo ORCID en obras propias (10.1016/j.lfs.2024.122851, entre otras).'
+    nota: ''
   - firma: Lucero-Mora J.
     orcid: 0000-0002-8554-7181
     nota: ''
+  - firma: López V.
+    orcid: 0000-0003-1323-7843
+    nota: ''
   - firma: López-Soto P.
     orcid: 0000-0003-2559-6464
-    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «López-Soto, Paulo» con este mismo ORCID en una obra propia (10.1016/j.rmclc.2025.12.005).'
+    nota: ''
+  - firma: Macho R.A.M.
+    orcid: 0000-0001-7592-1136
+    nota: ''
   - firma: Mancilla R.
     orcid: 0000-0002-2143-6386
+    nota: ''
+  - firma: Martinez-Mardones M.
+    orcid: 0000-0003-3296-3330
+    nota: ''
+  - firma: Martinez-Mardones M.B.
+    orcid: 0000-0003-3296-3330
+    nota: ''
+  - firma: Martínez-Mardones M.B.
+    orcid: 0000-0003-3296-3330
+    nota: ''
+  - firma: Mendez-Rebolledo G.
+    orcid: 0000-0001-7948-3807
     nota: ''
   - firma: Moraga Concha J.
     orcid: 0009-0007-5923-0205
@@ -74,22 +140,88 @@ confirmadas:
   - firma: Orellana-Donoso M.I.
     orcid: 0000-0002-1781-062X
     nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el inventario de autoarchivo de biblioteca nombra a «Orellana-Donoso, Mathias» con este mismo ORCID en una obra propia (10.3390/life14101301).'
+  - firma: Ortiz F.
+    orcid: 0000-0001-7665-7488
+    nota: ''
   - firma: Poblete Alday P.
     orcid: 0000-0001-6191-8518
     nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Poblete Alday, Patricia» con este mismo ORCID en una obra propia (10.5209/alhi.93678).'
+  - firma: Prieto I.T.
+    orcid: 0000-0002-7501-5085
+    nota: ''
+  - firma: Quezada M.
+    orcid: 0000-0003-1637-1909
+    nota: ''
   - firma: Rojas D.
     orcid: 0000-0002-1675-2958
     nota: ''
+  - firma: Rojas-Costa G.M.
+    orcid: 0000-0002-6228-2678
+    nota: ''
+  - firma: Salas C.
+    orcid: 0000-0002-9495-9866
+    nota: ''
+  - firma: Salvadó J.A.
+    orcid: 0000-0001-7354-3012
+    nota: ''
+  - firma: Shabani R.
+    orcid: 0000-0001-8781-7862
+    nota: ''
+  - firma: Sánchez M.
+    orcid: 0000-0003-3976-6997
+    nota: ''
+  - firma: Urrutia A.
+    orcid: 0000-0002-1806-1616
+    nota: ''
+  - firma: Varas-Diaz G.
+    orcid: 0000-0002-4621-056X
+    nota: ''
+  - firma: Villarroel N.C.
+    orcid: 0009-0006-5333-8840
+    nota: ''
+  - firma: Zambrano C.
+    orcid: 0000-0002-9538-1816
+    nota: ''
+  - firma: Zañartu T.V.
+    orcid: 0009-0005-2748-7888
+    nota: ''
+  - firma: de la Fuente M.
+    orcid: 0000-0003-0577-7604
+    nota: ''
+  - firma: Águila D.
+    orcid: 0009-0000-6108-5958
+    nota: ''
 
 retiradas:
+  - firma: Arroyo A.
+    orcid: 0000-0003-0157-5175
+    nota: ''
   - firma: Bencina Matus F.
     orcid: 0000-0002-7490-514X
     nota: ''
   - firma: Buchuk P.
     orcid: 0009-0009-8078-2738
     nota: ''
+  - firma: Cancino J.
+    orcid: 0000-0002-1956-7600
+    nota: ''
+  - firma: García F.
+    orcid: 0000-0002-9548-5252
+    nota: ''
+  - firma: González A.
+    orcid: 0000-0002-6139-4299
+    nota: ''
   - firma: Gálvez M.
     orcid: 0000-0002-8638-5268
+    nota: ''
+  - firma: Gómez G.
+    orcid: 0000-0001-5193-2738
+    nota: ''
+  - firma: Gómez G.G.
+    orcid: 0000-0001-5193-2738
+    nota: ''
+  - firma: Huepe-Artigas D.
+    orcid: 0000-0002-1258-5670
     nota: ''
   - firma: Molina M.
     orcid: 0000-0002-7091-2633
@@ -99,6 +231,18 @@ retiradas:
     nota: ''
   - firma: Moyano Dávila C.
     orcid: 0000-0002-6357-3469
+    nota: ''
+  - firma: Ponce D.
+    orcid: 0000-0002-6178-6938
+    nota: ''
+  - firma: Ramirez P.
+    orcid: 0000-0003-0593-7161
+    nota: ''
+  - firma: Ramos T.
+    orcid: 0000-0001-8563-5483
+    nota: ''
+  - firma: Val V.
+    orcid: 0000-0003-3680-3385
     nota: ''
   - firma: Valencia I.
     orcid: 0000-0002-2695-8044
