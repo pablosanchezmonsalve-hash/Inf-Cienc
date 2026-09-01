@@ -32,9 +32,11 @@
       <div id="diferidos"></div>
 
       <!-- Módulos nuevos (Bento Grid): jerarquía institucional y mapa de
-           temáticas. Montaje independiente del explorador de arriba —no
-           reacciona a sus filtros todavía, es la primera versión— para no
-           tocar la lógica ya verificada de `paginas.js`. -->
+           temáticas. El mapa de calor SÍ reacciona al recorte del explorador
+           (montado desde paginas.js, mismo ciclo que el resto de la página).
+           El treemap sigue con montaje independiente: cuenta pares
+           autor×publicación, un criterio que hoy sólo existe calculado en
+           Python (07_hierarchy.py) — ver la nota cruzada de más abajo. -->
       <h2 class="titulo-seccion">Jerarquía y temáticas</h2>
       <div class="bento-grid">
         <div class="bento-card bento-ancha">
@@ -54,15 +56,16 @@
 <footer class="pie" id="pie"></footer>
 <script type="module" src="assets/js/paginas.js"></script>
 <script type="module">
+  // El mapa de calor ya se monta y repinta desde paginas.js (reacciona al
+  // recorte del explorador, igual que el resto de la página). El treemap
+  // sigue aparte: cuenta pares autor×publicación, un criterio que todavía
+  // no existe en JavaScript para recalcularlo sobre un recorte en vivo —
+  // ver la nota cruzada más abajo.
   import { cargar } from './assets/js/core.js';
   import { montarTreemap } from './assets/js/visualizations/treemap.js';
-  import { montarHeatmap } from './assets/js/visualizations/heatmap.js';
 
   async function montarModulosNuevos() {
-    const [jerarquia, publicaciones] = await Promise.all([
-      cargar('hierarchy.json'),
-      cargar('publications.json'),
-    ]);
+    const jerarquia = await cargar('hierarchy.json');
 
     // Este treemap y el gráfico "Unidad académica" de arriba cuentan con
     // criterios distintos (pares autor×publicación vs. publicaciones
@@ -82,11 +85,10 @@
     }
 
     montarTreemap(document.getElementById('treemap-contenedor'), jerarquia.raiz);
-    montarHeatmap(document.getElementById('heatmap-contenedor'), publicaciones.publicaciones);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    montarModulosNuevos().catch(e => console.error('Módulos Bento:', e));
+    montarModulosNuevos().catch(e => console.error('Módulo Treemap:', e));
   });
 </script>
 </body>
