@@ -345,6 +345,14 @@ def main() -> None:
 
     amb_df = pd.DataFrame(amb)
 
+    # Orden determinista antes de volcar: el dict de ambigüedades se ensambla
+    # recorriendo diccionarios y conjuntos cuyo orden depende del hash de las
+    # claves (PYTHONHASHSEED), así que sin esta pasada el archivo sale con las
+    # mismas filas en distinto orden en cada corrida y ensucia el diff.
+    amb_df = amb_df.sort_values(
+        ["tipo", "clave", "nombre_en_fuente"], kind="stable"
+    ).reset_index(drop=True)
+
     c.write_interim(master, "authors_master_draft.csv")
     c.write_interim(gap, "author_population_gap.csv")
     c.write_internal(amb_df, "ambiguities_authors.csv")

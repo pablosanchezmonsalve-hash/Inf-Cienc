@@ -87,16 +87,16 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Con autoría detallada | 818 |
 | Formas de firma de autor | **589** |
 | Pares autor × publicación | **1.207** |
-| Firmas con ORCID recuperado desde Crossref | **174** (29,5 %) |
-| Firmas con ORCID sumando el registro de ORCID | **222** (37,7 %) |
-| Reglas de validación | **29** · 28 pasan · 0 fallas bloqueantes |
+| Firmas con ORCID (sin consolidar) | **322** |
+| Entidades publicadas con ORCID | **277** |
+| Reglas de validación | **30** · 29 pasan · 0 fallas bloqueantes |
 
 ### Indicadores (Fase 2)
 
 | | |
 |---|---|
 | Evaluados contra los datos | **40** |
-| Publicados en V1 | **27** (26 calculables + 1 placeholder) |
+| Publicados | **28** |
 | Diferidos a V2 | 8 |
 | No calculables, declarados | 5 |
 
@@ -104,9 +104,9 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 
 | | |
 |---|---|
-| Páginas | 9 |
-| Fichas de autor | **589**, una por archivo |
-| Peso total de `dist/` | ~2,0 MB |
+| Páginas | 10 |
+| Fichas de autor | **542**, una por archivo |
+| Peso total de `dist/` | ~3,5 MB |
 | Dependencias externas en el navegador | **0** |
 
 Peso por página, medido en navegador. La segunda columna es lo que realmente
@@ -134,7 +134,7 @@ comprimidos— lo cachea el navegador entre páginas.
 | Documento | Contenido |
 |---|---|
 | **`STATE.md`** | **Punto de entrada: estado, cifras y mapa de lectura** |
-| `docs/DECISIONS.md` | Índice de las 92 decisiones, una línea cada una |
+| `docs/DECISIONS.md` | Índice de las 353 decisiones, una línea cada una |
 | `docs/AUDIT_REPORT.md` | Auditoría completa con cifras verificadas |
 | `docs/DATA_MODEL.md` | Modelo lógico, entidades y claves de enlace |
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
@@ -171,9 +171,13 @@ El proyecto separa estrictamente dos capas (`CLAUDE.md`, `<data_governance>`):
   humana. **Nunca llega al sitio**, y la exclusión se verifica en cada build y
   otra vez en el despliegue.
 
-«Interna» significa *fuera del sitio*, no *secreta*: este repositorio es público
-y esos archivos también lo son. Es una decisión declarada, no un descuido — el
-razonamiento y las condiciones que obligarían a revisarla están en
+«Interna» sigue significando *fuera del sitio*: la exclusión de `internal/` de
+`dist/` se verifica en cada build y otra vez en el despliegue. El repositorio es
+**privado**, de modo que `data/raw/` (exports de Elsevier) y `internal/` no son
+descargables por terceros; la decisión de renunciar al repositorio público para
+cerrar la exposición de los exportes se tomó en la auditoría de 2026-09-01. El
+razonamiento sobre por qué unos archivos internos se mantuvieron en el repo, y
+las condiciones que habrían obligado a revisarlo, queda registrado en
 `internal/README.md`.
 
 El criterio: **público lo que describe un resultado, interno lo que describe
