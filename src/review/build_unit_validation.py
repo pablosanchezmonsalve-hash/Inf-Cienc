@@ -57,6 +57,18 @@ sys.path.insert(0, str(ROOT / "src" / "audit"))
 import common as c  # noqa: E402
 
 
+def _json_para_script(obj) -> str:
+    """JSON seguro para incrustar en <script>: json.dumps no escapa '</',
+    así que un título o afiliación con "</script>" cerraría el bloque antes
+    de tiempo y el resto se interpretaría como HTML."""
+    return (
+        json.dumps(obj, ensure_ascii=False)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+    )
+
+
 def es(n: int) -> str:
     """Miles con punto, como se escribe en español."""
     return f"{n:,}".replace(",", ".")
@@ -277,7 +289,7 @@ def render_html(detectadas, etiqueta_sin_dato: str, vocab: dict, jer: dict,
       </div>
     </article>"""
 
-    datos = json.dumps(items, ensure_ascii=False)
+    datos = _json_para_script(items)
     hoy = date.today().isoformat()
 
     return f"""<!doctype html>

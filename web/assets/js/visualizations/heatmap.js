@@ -106,6 +106,13 @@ export function renderHeatmap({ anios, categorias, matriz, maximo }, { ancho, al
 /* ------------------------------------------------------------------ montaje */
 
 export function montarHeatmap(contenedor, publicaciones, opciones = {}) {
+  // Un recorte del explorador vuelve a llamar a esta función sobre el MISMO
+  // contenedor con una lista de publicaciones distinta. Sin desconectar el
+  // observador de la corrida anterior, cada recorte deja un ResizeObserver
+  // vivo de más — un ratón que abre y cierra filtros un rato acumula
+  // decenas de observadores sobre el mismo nodo.
+  contenedor._heatmapObserver?.disconnect();
+
   const agregado = agregarMatriz(publicaciones, opciones);
 
   function dibujar() {
@@ -117,8 +124,10 @@ export function montarHeatmap(contenedor, publicaciones, opciones = {}) {
 
   dibujar();
   let pendiente = null;
-  new ResizeObserver(() => {
+  const observador = new ResizeObserver(() => {
     clearTimeout(pendiente);
     pendiente = setTimeout(dibujar, 120);
-  }).observe(contenedor);
+  });
+  observador.observe(contenedor);
+  contenedor._heatmapObserver = observador;
 }

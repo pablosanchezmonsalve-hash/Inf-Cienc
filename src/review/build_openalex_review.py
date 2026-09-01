@@ -63,6 +63,18 @@ DECISIONES = ROOT / "internal" / "openalex_cobertura_decisiones.csv"
 CROSSREF = ROOT / "internal" / "openalex_cobertura_crossref.csv"
 SALIDA = ROOT / "internal" / "revision_cobertura_openalex.html"
 
+
+def _json_para_script(obj) -> str:
+    """JSON seguro para incrustar en <script>: json.dumps no escapa '</',
+    así que un título o afiliación con "</script>" cerraría el bloque antes
+    de tiempo y el resto se interpretaría como HTML."""
+    return (
+        json.dumps(obj, ensure_ascii=False)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+    )
+
 CSS = """
 :root{--plano:#f1f5f6;--sup:#fff;--sup2:#eaf1f2;--tinta:#10222b;--tinta2:#4a5f68;
 --tinta3:#5a6b71;--linea:#dbe6e8;--marca:#22577A;--accion:#1a6d78;--viva:#38A3A5;
@@ -337,7 +349,7 @@ def render_html(filas: pd.DataFrame) -> str:
       </div>
     </article>"""
 
-    datos = json.dumps(items, ensure_ascii=False)
+    datos = _json_para_script(items)
     hoy = date.today().isoformat()
     n = len(filas)
 
