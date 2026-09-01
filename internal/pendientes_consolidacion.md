@@ -2,7 +2,7 @@
 
 **Generado** el 2026-09-01 por `src/review/build_review.py`. Regenerable.
 
-Quedan **82 casos** de 188. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **113 casos** de 219. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -32,7 +32,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Arenas-Massa A. → 0000-0003-3188-0189: ¿es suyo?](revision_identidad.html#caso-ver-arenas-massa-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.ssaho.2025.102231 · Alvear Vega, Sandra · 0000-0003-3188-0189 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -46,7 +46,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Arroyo A. → 0000-0003-0157-5175: ¿es suyo?](revision_identidad.html#caso-ver-arroyo-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con un ORCID DISTINTO al que tiene asignado aquí (10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -91,7 +91,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Caffarena P. → 0000-0002-2609-6413: ¿es suyo?](revision_identidad.html#caso-ver-caffarena-p)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.4067/s0719-26812025000200173 · Caffarena, Paula · 0000-0002-2609-6413/0000-0003-4666-2491 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -120,7 +120,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Dominguez A. → 0000-0002-4277-3445: ¿es suyo?](revision_identidad.html#caso-ver-dominguez-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1038/s41598-024-80228-1 · Quintanilla, Maria Elena · 0000-0002-7953-6769 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -134,7 +134,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Dreyse J. → 0000-0002-8201-5956: ¿es suyo?](revision_identidad.html#caso-ver-dreyse-j)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1186/s13054-024-05010-1 · Benites, Martín Hernán · 0000-0001-6366-534X/0000-0003-1770-244X/0000-0002-8201-5956 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -168,7 +168,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Ferre Contreras A. → 0000-0003-1770-244X: ¿es suyo?](revision_identidad.html#caso-ver-ferre-contreras-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.1097/ccm.0000000000006806 · Ferre Contreras, Andrés · 0000-0003-1770-244X (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -210,7 +210,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Giordanino E. → 0000-0001-7380-4753: ¿es suyo?](revision_identidad.html#caso-ver-giordanino-e)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.1016/j.rmclc.2025.10.002 · Fernández, Adrián · 0000-0001-7380-4753 (Article); 10.1016/j.rmclc.2025.10.002 · Giordanino, Elian · 0000-0001-7380-4753 (Article); 10.1016/j.rmclc.2025.01.004 · Marrugo, Neguith · 0000-0001-7380-4753 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -299,7 +299,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Ishtiaque T.A. → 0000-0002-3041-9748: ¿es suyo?](revision_identidad.html#caso-ver-ishtiaque-t-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1016/j.procs.2023.01.497 · Shabani, Rouzbeh · 0000-0002-9412-3161 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -313,7 +313,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Johansen A. → 0000-0003-0063-3679: ¿es suyo?](revision_identidad.html#caso-ver-johansen-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1016/j.procs.2023.01.497 · Shabani, Rouzbeh · 0000-0002-9412-3161 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -327,7 +327,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Landskron G. → 0000-0002-7953-6769: ¿es suyo?](revision_identidad.html#caso-ver-landskron-g)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1038/s41598-024-80228-1 · Quintanilla, Maria Elena · 0000-0002-7953-6769 (Article); 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article); 10.1016/j.rgmx.2024.08.004 · von Muhlenbrock, Christian · 0000-0002-7953-6769 (Article); 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -361,7 +361,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [López-Soto P. → 0000-0003-2559-6464: ¿es suyo?](revision_identidad.html#caso-ver-l-pez-soto-p)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.1016/j.rmclc.2025.12.005 · López-Soto, Paulo · 0000-0003-2559-6464 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -460,7 +460,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Orellana-Donoso M.I. → 0000-0002-1781-062X: ¿es suyo?](revision_identidad.html#caso-ver-orellana-donoso-m-i)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.3390/life14101301 · Valenzuela Fuenzalida, Juan José · 0000-0002-1781-062X (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -474,7 +474,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Poblete Alday P. → 0000-0001-6191-8518: ¿es suyo?](revision_identidad.html#caso-ver-poblete-alday-p)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.5209/alhi.93678 · Poblete Alday, Patricia · 0000-0001-6191-8518 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -502,7 +502,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Prieto I.T. → 0000-0002-7501-5085: ¿es suyo?](revision_identidad.html#caso-ver-prieto-i-t)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1332/20467435y2024d000000022 · Tabilo Prieto, Ismael · 0000-0002-7501-5085/0000-0002-6357-3469 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -575,7 +575,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Reccius A. → 0009-0004-3236-3030: ¿es suyo?](revision_identidad.html#caso-ver-reccius-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -595,7 +595,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Reyes M. → 0000-0001-5279-4234: ¿es suyo?](revision_identidad.html#caso-ver-reyes-m)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.32641/andespediatr.v96i2.5607 · Gómez Lund, Oscar · 0000-0003-4763-074X (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -641,7 +641,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Shabani R. → 0000-0001-8781-7862: ¿es suyo?](revision_identidad.html#caso-ver-shabani-r)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con un ORCID DISTINTO al que tiene asignado aquí (10.1016/j.procs.2023.01.497 · Shabani, Rouzbeh · 0000-0002-9412-3161 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -684,7 +684,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Torp O. → 0000-0002-1916-5097: ¿es suyo?](revision_identidad.html#caso-ver-torp-o)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1016/j.procs.2023.01.497 · Shabani, Rouzbeh · 0000-0002-9412-3161 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -769,7 +769,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [de la Fuente M. → 0000-0003-0577-7604: ¿es suyo?](revision_identidad.html#caso-ver-de-la-fuente-m)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -787,7 +787,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Cancino J.: OpenAlex dice otro ORCID](revision_identidad.html#caso-oadesac-cancino-j)
 
-El sitio publica hoy «0000-0002-1956-7600» y OpenAlex atribuye «0000-0002-8273-159X». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide.
+El sitio publica hoy «0000-0002-1956-7600» y OpenAlex atribuye «0000-0002-8273-159X». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1111/apha.14203 · Díaz-Castro, Francisco · 0000-0003-1644-8742/0000-0002-3085-9057/0000-0003-3620-9861/0000-0002-9643-1037/0000-0002-9315-9365/0000-0002-2270-299X (Article); 10.1055/a-1929-0295 · Festa, Raúl Ricardo · 0000-0003-4757-483X/0000-0003-3620-9861 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -806,7 +806,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Castro M.: OpenAlex dice otro ORCID](revision_identidad.html#caso-oadesac-castro-m)
 
-El sitio publica hoy «0000-0002-2270-299X» y OpenAlex atribuye «0000-0002-5482-4676». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide.
+El sitio publica hoy «0000-0002-2270-299X» y OpenAlex atribuye «0000-0002-5482-4676». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.3390/sports12070183 · Arce-Álvarez, Alexis · 0000-0002-2270-299X (Article); 10.1016/j.fas.2023.09.002 · Becerra, Eduardo · sin ORCID (s/d)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -840,7 +840,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Ortiz F.: OpenAlex dice otro ORCID](revision_identidad.html#caso-oadesac-ortiz-f)
 
-El sitio publica hoy «0000-0001-7665-7488» y OpenAlex atribuye «0000-0003-0583-0073». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide.
+El sitio publica hoy «0000-0001-7665-7488» y OpenAlex atribuye «0000-0003-0583-0073». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/foods13010004 · Mansilla-Obando, Katherine · 0000-0003-4273-4259/0000-0002-2516-3549/0009-0009-8078-2738 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -882,11 +882,460 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ---
 
+## Repositorio institucional discrepa — 6 pendiente(s)
+
+### [Arroyo A.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-arroyo-a)
+
+El sitio publica hoy «0000-0003-0157-5175». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0157-5175> |
+| Buscar «Arroyo A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Arroyo%20A.> |
+| Perfil 58862866100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58862866100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Protamine induced vasoplegic syndrome. The importance of ECLS with ECMO and CALS protocol in complex cases; [Síndrome vasopléjico inducido por protamina. La importancia del ECLS con ECMO y protocolo CALS en casos complejos] — <https://doi.org/10.1016/j.rmclc.2025.04.003>
+- 2025 · Challenges in cerebral hemorrhage and liver cirrhosis. bilateral ventricular shunt as a therapeutic alternative; [Desafíos en hemorragia cerebral y cirrosis hepática. derivación ventricular bilateral como alternativa terapéutica] — <https://doi.org/10.1016/j.rmclc.2025.04.004>
+- 2025 · Intracranial hypotension syndrome in neurocritical patient: a case report; [Síndrome de hipotensión intracraneal en paciente neurocrítico: reporte de caso] — <https://doi.org/10.1016/j.rmclc.2025.04.002>
+- 2024 · Efficacy of hemoadsorptive therapy combined with high-volume hemofiltration in the management of refractory septic shock; [Eficacia de la terapia hemoadsortiva combinada con hemofiltración de alto volumen en el manejo del shock séptico refractario] — <https://doi.org/10.1016/j.rmclc.2023.10.003>
+
+### [Balboa E.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-balboa-e)
+
+El sitio publica hoy «0000-0002-8757-436X». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article); 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-8757-436X> |
+| Buscar «Balboa E.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Balboa%20E.> |
+| Perfil 35423451700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=35423451700> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Connexin hemichannels and early atrophic signaling in muscle during sepsis — <https://doi.org/10.3389/fphys.2025.1514769>
+- 2025 · c-Abl/TFEB Pathway Activation as a Common Pathogenic Mechanism in Lysosomal Storage Diseases: Therapeutic Potential of c-Abl Inhibitors — <https://doi.org/10.3390/antiox14050611>
+- 2025 · Correction: Exploring the lutein therapeutic potential in steatotic liver disease: mechanistic insights and future directions(Front. Pharmacol., (2024), 15, (1406784), 10.3389/fphar.2024.1406784) — <https://doi.org/10.3389/fphar.2025.1633575>
+- 2024 · Pannexin-1 expression in tumor cells correlates with colon cancer progression and survival — <https://doi.org/10.1016/j.lfs.2024.122851>
+- 2024 · Exploring the lutein therapeutic potential in steatotic liver disease: mechanistic insights and future directions — <https://doi.org/10.3389/fphar.2024.1406784>
+
+### [Candia-Véjar A.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-candia-v-jar-a)
+
+El sitio publica hoy «0000-0003-2953-6522». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.eswa.2023.119864 · Candia-Véjar, Alfredo · sin ORCID (s/d) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-2953-6522> |
+| Buscar «Candia-Véjar A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Candia-V%C3%A9jar%20A.> |
+| Perfil 12760430500 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=12760430500> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · ML models for severity classification and length-of-stay forecasting in emergency units — <https://doi.org/10.1016/j.eswa.2023.119864>
+- 2023 · A Rolling Horizon scheme for rescheduling in agricultural harvest — <https://doi.org/10.1016/j.compag.2023.108392>
+
+### [Hayes-Ortiz T.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-hayes-ortiz-t)
+
+El sitio publica hoy «0009-0006-8457-5435». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1080/17461391.2023.2193944 · Hayes-Ortiz, Thomas · sin ORCID (s/d) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0006-8457-5435> |
+| Buscar «Hayes-Ortiz T.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Hayes-Ortiz%20T.> |
+| Perfil 58192471400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58192471400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Time reallocation of physical behaviours induced by endurance exercise in physically active individuals — <https://doi.org/10.1080/17461391.2023.2193944>
+- 2024 · Metabolic flexibility to lipid during exercise is not associated with metabolic health outcomes in individuals without obesity — <https://doi.org/10.1038/s41598-024-79092-w>
+
+### [Shabani R.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-shabani-r)
+
+El sitio publica hoy «0000-0001-8781-7862». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.procs.2023.01.497 · Shabani, Rouzbeh · 0000-0002-9412-3161 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-8781-7862> |
+| Buscar «Shabani R.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Shabani%20R.> |
+| Perfil 57485639100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57485639100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Uncertainty management in the design phase of road projects — <https://doi.org/10.1016/j.procs.2023.01.497>
+
+### [Zambrano C.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-zambrano-c)
+
+El sitio publica hoy «0000-0002-9538-1816». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.15381/lengsoc.v22i2.23855 · Zambrano, Carolina · sin ORCID (s/d); 10.33423/jhetp.v23i3.5849 · Zambrano, Carolina · sin ORCID (s/d) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9538-1816> |
+| Buscar «Zambrano C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Zambrano%20C.> |
+| Perfil 54404332000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=54404332000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Preliminary Study of Learning Patterns in Engineering Students — <https://doi.org/10.1109/CHILECON66915.2025.11476576>
+- 2023 · Scale E-portfolio for Higher Education — <https://doi.org/10.33423/jhetp.v23i3.5849>
+- 2023 · A study of lexical availability associated with the areas of learning and motivation for learning; [Um estudo de disponibilidade lexical associada à áreas de aprendizagem e motivação para aprender]; [Un estudio de disponibilidad léxica asociado a las áreas de aprendizaje y motivación por el aprendizaje] — <https://doi.org/10.15381/lengsoc.v22i2.23855>
+- 2024 · Design of a process for learning critical thinking in higher education students, using scientific infographics; [Diseño de un proceso para el aprendizaje del pensamiento crítico en estudiantes de educación superior, usando infografías científicas] — <https://doi.org/10.4067/S0718-50062024000300011>
+
+---
+
+## Candidato por repositorio institucional — 14 pendiente(s)
+
+### [Carrasco G. → 0000-0003-4498-3013?](revision_identidad.html#caso-dspacecand-carrasco-g-0000-0003-4498-3013)
+
+«Carrasco, Gonzalo Purull» aparece en el repositorio institucional (Artículo de revista, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Carrasco G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Carrasco%20G.> |
+| Perfil 57211151423 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57211151423> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Ad Hoc Tools for Urban Renewal: The San Borja Remodeling in Santiago, Chile, 1967–1976 — <https://doi.org/10.16995/AH.9054>
+
+### [Carrasco G. → 0009-0001-5917-5361?](revision_identidad.html#caso-dspacecand-carrasco-g-0009-0001-5917-5361)
+
+«Carrasco, Gonzalo Purull» aparece en el repositorio institucional (Artículo de revista, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Carrasco G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Carrasco%20G.> |
+| Perfil 57211151423 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57211151423> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Ad Hoc Tools for Urban Renewal: The San Borja Remodeling in Santiago, Chile, 1967–1976 — <https://doi.org/10.16995/AH.9054>
+
+### [Donoso M.O. → 0000-0002-9761-2112?](revision_identidad.html#caso-dspacecand-donoso-m-o-0000-0002-9761-2112)
+
+«Donoso, Melanie||Fredes, Fernanda||Crisóstomo-Flores, Paz» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Donoso M.O.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Donoso%20M.O.> |
+| Perfil 58984287300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58984287300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · The Association between Anatomical Variants of Musculoskeletal Structures and Nerve Compressions of the Lower Limb: A Systematic Review and Meta-Analysis — <https://doi.org/10.3390/diagnostics14070695>
+
+### [Donoso M.O. → 0009-0000-6391-9012?](revision_identidad.html#caso-dspacecand-donoso-m-o-0009-0000-6391-9012)
+
+«Donoso, Melanie||Fredes, Fernanda||Crisóstomo-Flores, Paz» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Donoso M.O.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Donoso%20M.O.> |
+| Perfil 58984287300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58984287300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · The Association between Anatomical Variants of Musculoskeletal Structures and Nerve Compressions of the Lower Limb: A Systematic Review and Meta-Analysis — <https://doi.org/10.3390/diagnostics14070695>
+
+### [Donoso M.O. → 0009-0004-5646-5146?](revision_identidad.html#caso-dspacecand-donoso-m-o-0009-0004-5646-5146)
+
+«Donoso, Melanie||Fredes, Fernanda||Crisóstomo-Flores, Paz» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Donoso M.O.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Donoso%20M.O.> |
+| Perfil 58984287300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58984287300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · The Association between Anatomical Variants of Musculoskeletal Structures and Nerve Compressions of the Lower Limb: A Systematic Review and Meta-Analysis — <https://doi.org/10.3390/diagnostics14070695>
+
+### [Díaz-Galaz L. → 0000-0001-7439-4346?](revision_identidad.html#caso-dspacecand-d-az-galaz-l-0000-0001-7439-4346)
+
+«Díaz-Galaz, Lorena» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Díaz-Galaz L.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=D%C3%ADaz-Galaz%20L.> |
+| Perfil 59351091000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59351091000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Development of gestural language in childhood: how is it addressed in the guidelines proposed in documents that control kindergarten education in Chile?; [Desarrollo del lenguaje gestual en la infancia: ¿cómo se aborda en los lineamientos propuestos en documentos que rigen la educación parvularia en Chile?] — <https://doi.org/10.4067/S0718-07052024000100323>
+
+### [González I. → 0000-0002-8326-9800?](revision_identidad.html#caso-dspacecand-gonz-lez-i-0000-0002-8326-9800)
+
+«González, Ignacia» aparece en el repositorio institucional (Article, 2 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «González I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gonz%C3%A1lez%20I.> |
+| Perfil 59590859900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59590859900> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Transcriptional activation of genes associated with the matrisome is a common feature of senescent endothelial cells — <https://doi.org/10.1007/s10522-025-10191-5>
+
+### [Letelier Widow G. → 0000-0002-1625-2216?](revision_identidad.html#caso-dspacecand-letelier-widow-g-0000-0002-1625-2216)
+
+«Letelier Widow, Gonzalo» aparece en el repositorio institucional (Artículo, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Letelier Widow G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Letelier%20Widow%20G.> |
+| Perfil 56976276800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56976276800> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Scholastic roots of the Hobbesian state of nature; [Raíces escolásticas del estado de naturaleza hobbesiano] — <https://doi.org/10.5209/rpub.98780>
+
+### [Marrugo N. → 0000-0001-7380-4753?](revision_identidad.html#caso-dspacecand-marrugo-n-0000-0001-7380-4753)
+
+«Marrugo, Neguith» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Marrugo N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Marrugo%20N.> |
+| Perfil 58243335300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58243335300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Pulmonary hypertension and connective tissue disease, a serious presentation; [Hipertensión pulmonar y enfermedad del tejido conectivo, una grave presentación] — <https://doi.org/10.1016/j.rmclc.2025.01.004>
+
+### [Olive F. → 0009-0000-0892-6746?](revision_identidad.html#caso-dspacecand-olive-f-0009-0000-0892-6746)
+
+«Olive, Fernanda» aparece en el repositorio institucional (Article, 2 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Olive F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Olive%20F.> |
+| Perfil 59732237300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59732237300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Analysis of household-like waste discarded by health institutions in Chile: A descriptive study — <https://doi.org/10.1016/j.joclim.2025.100437>
+
+### [Olive F. → 0009-0005-8141-8912?](revision_identidad.html#caso-dspacecand-olive-f-0009-0005-8141-8912)
+
+«Olive, Fernanda» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Olive F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Olive%20F.> |
+| Perfil 59732237300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59732237300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Analysis of household-like waste discarded by health institutions in Chile: A descriptive study — <https://doi.org/10.1016/j.joclim.2025.100437>
+
+### [Pedreros C. → 0000-0003-1770-244X?](revision_identidad.html#caso-dspacecand-pedreros-c-0000-0003-1770-244x)
+
+«Pedreros, Cesar» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Pedreros C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Pedreros%20C.> |
+| Perfil 16745083000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=16745083000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · When Ethics Meet Socrates in Critical Care — <https://doi.org/10.1097/CCM.0000000000006634>
+- 2023 · Macroagglutination as cause of death: when Virchow's perfect storm strikes; [Le Grand Mort: la tríada, o más bien orgía, de Virchow que acabó en muerte] — <https://doi.org/10.1016/j.rmclc.2023.07.004>
+- 2023 · Probable coinfection of andes hantavirus and legionella in a critically ill patient: First description of a case in the literature and literature review; [Probable coinfección por hantavirus variante Andes y Legionella en un paciente crítico: primera descripción en la literatura de un caso y revisión de la literatura] — <https://doi.org/10.1016/j.rmclc.2023.09.009>
+- 2024 · Efficacy of hemoadsorptive therapy combined with high-volume hemofiltration in the management of refractory septic shock; [Eficacia de la terapia hemoadsortiva combinada con hemofiltración de alto volumen en el manejo del shock séptico refractario] — <https://doi.org/10.1016/j.rmclc.2023.10.003>
+- 2024 · Coma Prevalence in Critical Care Units in Chile: Results of a Cross-Sectional Survey on World Coma Day — <https://doi.org/10.1007/s12028-024-01986-4>
+- 2025 · Should we move beyond the concept of fluid responsiveness? — <https://doi.org/10.1007/s00134-025-07787-3>
+
+### [Rodríguez I. → 0009-0009-8381-9217?](revision_identidad.html#caso-dspacecand-rodr-guez-i-0009-0009-8381-9217)
+
+«Rodríguez, Ivan» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Rodríguez I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Rodr%C3%ADguez%20I.> |
+| Perfil 58063024000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58063024000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Effects of an antioxidants cocktail on glucose metabolism at rest, during exercise, and during a glucose load in healthy young subjects; [Efecto de un cóctel de antioxidantes sobre el metabolismo de la glucosa en reposo, durante el ejercicio y durante una carga de glucosa en sujetos jóvenes sanos] — <https://doi.org/10.4067/s0717-75182023000600593>
+
+### [Salas-Guzmán N. → 0000-0001-8815-5979?](revision_identidad.html#caso-dspacecand-salas-guzm-n-n-0000-0001-8815-5979)
+
+«Salas-Guzmán, Natalia» aparece en el repositorio institucional (s/d, 2 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Salas-Guzmán N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Salas-Guzm%C3%A1n%20N.> |
+| Perfil 57193774407 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57193774407> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Redefining academic trajectories: A comprehensive analysis of the factors and impacts of the gender gap in STEM higher education — <https://doi.org/10.1108/IJSHE-02-2024-0129>
+- 2025 · Gender Stereotypes and Language Processing: Cognitive and Social Insights from a Decade of Research (2012–2023) — <https://doi.org/10.1111/ejed.70063>
+- 2024 · STEM and gender gap: a systematic review in WoS, Scopus, and ERIC databases (2012–2022) — <https://doi.org/10.3389/feduc.2024.1378640>
+- 2024 · Gender disparities in higher education: development and validation of the FACT-GÉN instrument — <https://doi.org/10.3389/feduc.2024.1456085>
+- 2025 · Bridging gaps: the role of gender and team composition in collective intelligence within STEM education — <https://doi.org/10.1080/2331186X.2024.2439655>
+
+---
+
+## Candidato por repositorio institucional (ambiguo) — 11 pendiente(s)
+
+### [Figueroa-Toledo A.M.: 2 firmas reclaman 0000-0002-2270-299X](revision_identidad.html#caso-dspacecand-amb-figueroa-toledo-a-m-0000-0002-2270-299x)
+
+«Figueroa-Toledo, A. M.» (0000-0002-2270-299X) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Figueroa-Toledo A.M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Figueroa-Toledo%20A.M.> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · BMAL1 and CLOCK proteins exhibit differential association with mitochondrial dynamics, protein synthesis pathways and muscle strength in human muscle — <https://doi.org/10.1113/JP285955>
+
+### [Figueroa-Toledo A.M.: 2 firmas reclaman 0000-0002-9643-1037](revision_identidad.html#caso-dspacecand-amb-figueroa-toledo-a-m-0000-0002-9643-1037)
+
+«Figueroa-Toledo, A. M.» (0000-0002-9643-1037) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Figueroa-Toledo A.M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Figueroa-Toledo%20A.M.> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · BMAL1 and CLOCK proteins exhibit differential association with mitochondrial dynamics, protein synthesis pathways and muscle strength in human muscle — <https://doi.org/10.1113/JP285955>
+
+### [Morales Sepúlveda J.P.: 2 firmas reclaman 0000-0002-7304-5256](revision_identidad.html#caso-dspacecand-amb-morales-sep-lveda-j-p-0000-0002-7304-5256)
+
+«Morales Sepúlveda, Juan Pablo» (0000-0002-7304-5256) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Morales Sepúlveda J.P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Morales%20Sep%C3%BAlveda%20J.P.> |
+| Perfil 57194732185 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57194732185> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · The impact of loneliness and social adaptation on depressive symptoms: Behavioral and brain measures evidence from a brain health perspective — <https://doi.org/10.3389/fpsyg.2023.1096178>
+
+### [Morales-Sepulveda J.P.: 2 firmas reclaman 0000-0002-7304-5256](revision_identidad.html#caso-dspacecand-amb-morales-sepulveda-j-p-0000-0002-7304-5256)
+
+«Morales Sepúlveda, Juan Pablo» (0000-0002-7304-5256) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Morales-Sepulveda J.P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Morales-Sepulveda%20J.P.> |
+| Perfil 57194732185 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57194732185> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Cognitive, emotional, and social factors promoting psychosocial adaptation: a study of latent profiles in people living in socially vulnerable contexts — <https://doi.org/10.3389/fpsyg.2024.1321242>
+
+### [Olive F.: 3 firmas reclaman 0000-0002-0533-4531](revision_identidad.html#caso-dspacecand-amb-olive-f-0000-0002-0533-4531)
+
+«Olive, Fernanda» (0000-0002-0533-4531) coincide en apellido e inicial con 3 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Olive F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Olive%20F.> |
+| Perfil 59732237300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59732237300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Analysis of household-like waste discarded by health institutions in Chile: A descriptive study — <https://doi.org/10.1016/j.joclim.2025.100437>
+
+### [Pedreros C.: 3 firmas reclaman 0000-0002-0533-4531](revision_identidad.html#caso-dspacecand-amb-pedreros-c-0000-0002-0533-4531)
+
+«Pedreros, Cesar» (0000-0002-0533-4531) coincide en apellido e inicial con 3 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Pedreros C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Pedreros%20C.> |
+| Perfil 16745083000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=16745083000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · When Ethics Meet Socrates in Critical Care — <https://doi.org/10.1097/CCM.0000000000006634>
+- 2023 · Macroagglutination as cause of death: when Virchow's perfect storm strikes; [Le Grand Mort: la tríada, o más bien orgía, de Virchow que acabó en muerte] — <https://doi.org/10.1016/j.rmclc.2023.07.004>
+- 2023 · Probable coinfection of andes hantavirus and legionella in a critically ill patient: First description of a case in the literature and literature review; [Probable coinfección por hantavirus variante Andes y Legionella en un paciente crítico: primera descripción en la literatura de un caso y revisión de la literatura] — <https://doi.org/10.1016/j.rmclc.2023.09.009>
+- 2024 · Efficacy of hemoadsorptive therapy combined with high-volume hemofiltration in the management of refractory septic shock; [Eficacia de la terapia hemoadsortiva combinada con hemofiltración de alto volumen en el manejo del shock séptico refractario] — <https://doi.org/10.1016/j.rmclc.2023.10.003>
+- 2024 · Coma Prevalence in Critical Care Units in Chile: Results of a Cross-Sectional Survey on World Coma Day — <https://doi.org/10.1007/s12028-024-01986-4>
+- 2025 · Should we move beyond the concept of fluid responsiveness? — <https://doi.org/10.1007/s00134-025-07787-3>
+
+### [Pino-Zuñiga J.: 2 firmas reclaman 0000-0003-3620-9861](revision_identidad.html#caso-dspacecand-amb-pino-zu-iga-j-0000-0003-3620-9861)
+
+«Pino Zúñiga, Johanna» (0000-0003-3620-9861) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Pino-Zuñiga J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Pino-Zu%C3%B1iga%20J.> |
+| Perfil 57209908331 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57209908331> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Early Exercise Boosts Visceral Fat Loss Post‑Bariatric Surgery in the First Month — <https://doi.org/10.1007/s11695-025-07947-w>
+
+### [Pino-Zúñiga J.: 2 firmas reclaman 0000-0003-3620-9861](revision_identidad.html#caso-dspacecand-amb-pino-z-iga-j-0000-0003-3620-9861)
+
+«Pino Zúñiga, Johanna» (0000-0003-3620-9861) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Pino-Zúñiga J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Pino-Z%C3%BA%C3%B1iga%20J.> |
+| Perfil 57209908331 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57209908331> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Early Exercise Through Telerehabilitation After Bariatric Surgery: Is It Feasible? — <https://doi.org/10.1007/s11695-024-07185-6>
+- 2024 · Creatine Supplementation Prior to Strength Exercise Training Is Not Superior in Preventing Muscle Mass Loss Compared with Standard Nutritional Recommendations in Females After Bariatric Surgery: A Pilot Study — <https://doi.org/10.1007/s11695-024-07451-7>
+- 2025 · Creatine Supplementation Prior to Strength Exercise Training is Not Superior in Preventing Muscle Mass Loss Compared with Standard Nutritional Recommendations in Females after Bariatric Surgery: A Pilot Study — <https://doi.org/10.1007/s11695-024-07630-6>
+
+### [Rodríguez I.: 2 firmas reclaman 0000-0002-2270-299X](revision_identidad.html#caso-dspacecand-amb-rodr-guez-i-0000-0002-2270-299x)
+
+«Rodríguez, Ivan» (0000-0002-2270-299X) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Rodríguez I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Rodr%C3%ADguez%20I.> |
+| Perfil 58063024000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58063024000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Effects of an antioxidants cocktail on glucose metabolism at rest, during exercise, and during a glucose load in healthy young subjects; [Efecto de un cóctel de antioxidantes sobre el metabolismo de la glucosa en reposo, durante el ejercicio y durante una carga de glucosa en sujetos jóvenes sanos] — <https://doi.org/10.4067/s0717-75182023000600593>
+
+### [Rodríguez I.: 2 firmas reclaman 0000-0002-9643-1037](revision_identidad.html#caso-dspacecand-amb-rodr-guez-i-0000-0002-9643-1037)
+
+«Rodríguez, Ivan» (0000-0002-9643-1037) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Rodríguez I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Rodr%C3%ADguez%20I.> |
+| Perfil 58063024000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58063024000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Effects of an antioxidants cocktail on glucose metabolism at rest, during exercise, and during a glucose load in healthy young subjects; [Efecto de un cóctel de antioxidantes sobre el metabolismo de la glucosa en reposo, durante el ejercicio y durante una carga de glucosa en sujetos jóvenes sanos] — <https://doi.org/10.4067/s0717-75182023000600593>
+
+### [Vergara K.: 3 firmas reclaman 0000-0002-0533-4531](revision_identidad.html#caso-dspacecand-amb-vergara-k-0000-0002-0533-4531)
+
+«Vergara, Karen» (0000-0002-0533-4531) coincide en apellido e inicial con 3 firmas distintas de este corpus. El nombre no basta para elegir.
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Vergara K.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Vergara%20K.> |
+| Perfil 59754587000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59754587000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Balancing the scales: the challenge of pathologies with opposing treatments; [Jugando con la balanza: el desafío de las patologías con tratamientos opuestos] — <https://doi.org/10.1016/j.rmclc.2025.03.001>
+- 2025 · When Raynaud's phenomenon is accompanied by dreaded digital ulcers: two case reports; [Cuando el fenómeno de Raynaud se acompaña de las temidas úlceras digitales: reporte de dos casos] — <https://doi.org/10.1016/j.rmclc.2025.03.002>
+- 2025 · National epidemiological analysis of lupus in Chile: A registry-based study from 2013 to 2024 — <https://doi.org/10.1177/09612033251390607>
+
+---
+
 ## ORCID no verificable — 24 pendiente(s)
 
 ### [Altamirano M. → 0000-0002-4290-4388: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-altamirano-m)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/su152115482 · Llanos-Herrera, Gonzalo R. · 0000-0002-2516-3549/0000-0003-4273-4259 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -960,7 +1409,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Dávila C.M. → 0000-0002-6357-3469: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-d-vila-c-m)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1332/20467435y2024d000000022 · Tabilo Prieto, Ismael · 0000-0002-7501-5085/0000-0002-6357-3469 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1038,7 +1487,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Jeria-Espinoza V. → 0009-0000-4168-198X: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-jeria-espinoza-v)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.freeradbiomed.2025.09.047 · Henríquez-Olguín, Carlos · 0000-0002-9315-9365/0009-0000-4168-198X (Artículo de revista)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1112,7 +1561,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Ortiz F. → 0000-0001-7665-7488: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-ortiz-f)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/foods13010004 · Mansilla-Obando, Katherine · 0000-0003-4273-4259/0000-0002-2516-3549/0009-0009-8078-2738 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1126,7 +1575,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Ramos A. → 0000-0002-1248-0553: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-ramos-a)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1213,7 +1662,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Vásquez F. → 0000-0003-1769-3969: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-v-squez-f)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/nu17020327 · Bustos-Arriagada, Edson · 0000-0003-4698-1425/0000-0002-8536-3729/0000-0002-4312-1318 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1229,7 +1678,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Zañartu T.V. → 0009-0005-2748-7888: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-za-artu-t-v)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.7764/redad.41.9 · Valenzuela Zañartu, Tomás · 0009-0005-2748-7888 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|

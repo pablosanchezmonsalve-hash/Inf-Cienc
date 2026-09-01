@@ -114,6 +114,36 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 El detalle metodológico y el argumento de por qué el 100 % no es alcanzable
 están en `docs/ORCID_COVERAGE.md`.
 
+### 2.4 Repositorio institucional UFT (DSpace) — **entregado y ejecutado el 2026-09-01**
+
+No es una API: es un export de metadatos DSpace (`data/raw/Inventario_Repositorio_Institucional_UFT.csv`,
+3.271 filas) que el responsable del proyecto entregó directamente —tesis de
+pregrado/posgrado y artículos/libros/capítulos autoarchivados por sus propios
+autores. `src/enrich/dspace_inventario.py` no sale a red: lee ese archivo y lo
+cruza contra el corpus propio.
+
+Dos productos, no uno:
+
+- **Contraste** (`data/interim/dspace_verificacion.csv`) para las 322 firmas
+  que ya tienen ORCID asignado: busca sus publicaciones propias en el
+  inventario por DOI compartido. De 154 firmas con algo que cruzar,
+  **56 confirmaciones directas** (el propio nombre, con el mismo ORCID),
+  **69 confirmaciones indirectas** (el ORCID aparece en la obra, depositada
+  por otro coautor), **6 contradicciones directas** (el propio nombre, con un
+  ORCID DISTINTO al publicado) y 23 sin coincidencia.
+- **Candidatos por nombre** (`internal/dspace_candidatos.csv`) para firmas SIN
+  ningún ORCID: busca por apellido+inicial en TODO el inventario —su propia
+  tesis, un artículo suyo autoarchivado—, no sólo en publicaciones ya
+  compartidas. 16 firmas alcanzadas, 10 con coincidencia 1-a-1.
+
+Ninguno de los dos sube nada a `verificado` por sí solo: alimenta
+`build_review.py` con dos colas nuevas —«Repositorio institucional discrepa» y
+«Candidato por repositorio institucional»— para que una persona decida
+(`D-08`), igual que las demás fuentes de esta sección. La premisa de que un
+autor afiliado a la UFT declara su ORCID en el repositorio institucional la
+declaró el responsable del proyecto en sesión; el conector no la verifica de
+forma independiente, la aplica.
+
 ---
 
 ## 3. Propuestas de nuevas integraciones

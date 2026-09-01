@@ -94,6 +94,12 @@ def cargar() -> dict:
         # Lo emite `orcid_openalex.py`, que puede no haberse ejecutado nunca.
         "oa_desac": leer(INTERNAL / "openalex_desacuerdos.csv",
                          "desacuerdos entre OpenAlex y la asignación vigente"),
+        # Lo emite `dspace_inventario.py`: contraste contra el repositorio
+        # institucional. Igual de opcional que los anteriores.
+        "dspace": leer(INTERIM / "dspace_verificacion.csv",
+                       "contraste con el repositorio institucional"),
+        "dspace_cand": leer(INTERNAL / "dspace_candidatos.csv",
+                            "candidatos por nombre en el repositorio institucional"),
         # Para enseñar de qué publicaciones se habla, con su DOI: verificar un
         # ORCID a mano es abrir el registro del titular y comparar obras, y sin
         # los títulos delante eso obliga a cruzar tres archivos.
@@ -114,8 +120,14 @@ def cargar() -> dict:
 
 
 def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None,
-             verif: pd.DataFrame | None = None, uni: pd.DataFrame | None = None) -> dict:
+             verif: pd.DataFrame | None = None, uni: pd.DataFrame | None = None,
+             dspace: pd.DataFrame | None = None) -> dict:
     """Ficha de evidencia por forma de firma."""
+    # Contraste contra el repositorio institucional, si se corrió el conector.
+    dsp = {}
+    if dspace is not None:
+        dsp = {r["nombre_en_fuente"]: (r["veredicto"], r.get("evidencia"))
+               for _, r in dspace.iterrows()}
     # Veredicto de la verificación contra el registro público, si se ejecutó.
     ver = {}
     if verif is not None:
@@ -146,6 +158,7 @@ def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None
         coaut.discard(n)
         o = orc.get(n, (None, None, None))
         v = ver.get(n)
+        ds = dsp.get(n)
         out[n] = {
             "nombre": n,
             "n_pub": int(r["n_publicaciones"]),
@@ -157,6 +170,8 @@ def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None
             "orcid_veredicto": v[0] if v else None,
             "orcid_dois_coincidentes": v[1] if v else None,
             "orcid_afiliacion_ok": (str(v[2]).lower() == "true") if v else None,
+            "dspace_veredicto": ds[0] if ds else None,
+            "dspace_evidencia": ds[1] if ds else None,
             "eids": sorted(eids), "coautores": sorted(coaut),
             "obras": [(e,) + obras.get(e, (None, None, None)) for e in sorted(eids)],
         }
@@ -188,6 +203,31 @@ def _evidencia_orcid(firmas: list[str], orcid: str) -> str:
     partes = [f"{r['nombre_en_fuente']} ({r['fuente']}, confianza {r['confianza']}, "
               f"{r['publicaciones_de_respaldo']} pub.)" for _, r in filas.iterrows()]
     return "Respaldo de cada asignación: " + " · ".join(partes) + "."
+
+
+def _evidencia_dspace(f: dict) -> str:
+    """Frase con lo que el repositorio institucional (DSpace) dice de esta
+    firma, si `dspace_inventario.py` encontró algo. Vacía si no hay nada: no
+    todas las firmas tienen obra autoarchivada."""
+    v, ev = f.get("dspace_veredicto"), f.get("dspace_evidencia")
+    if not v:
+        return ""
+    frases = {
+        "confirma_directa": "El repositorio institucional (DSpace) la nombra "
+                            "a ella misma con el mismo ORCID",
+        "confirma_indirecta": "El repositorio institucional (DSpace) incluye "
+                              "este mismo ORCID en el registro de una de sus "
+                              "publicaciones, aunque bajo el nombre de otro coautor",
+        "contradice_directa": "El repositorio institucional (DSpace) la nombra "
+                              "a ella misma con un ORCID DISTINTO al que tiene "
+                              "asignado aquí",
+        "sin_coincidencia_en_dspace": "El repositorio institucional (DSpace) "
+                                      "tiene esa misma publicación pero sin este ORCID",
+    }
+    txt = frases.get(v, "")
+    if not txt:
+        return ""
+    return f" {txt} ({ev})." if ev else f" {txt}."
 
 
 def cruces(a: dict, b: dict) -> dict:
@@ -326,7 +366,32 @@ def casos(d: dict, perf: dict) -> list[dict]:
                              + ". Uno de los dos no es de esta persona. "
                              + str(r.get("detalle") or "")
                              + " Compare las publicaciones de abajo con el registro de "
-                               "cada titular: la que aparezca en uno y no en el otro decide."),
+                               "cada titular: la que aparezca en uno y no en el otro decide."
+                             + _evidencia_dspace(f)),
+                "firmas": [f], "cruces": None,
+            })
+
+    # ── Repositorio institucional discrepa. El inventario DSpace nombra a
+    #    esta MISMA persona (mismo apellido+inicial en dc.contributor.author,
+    #    en una obra que ella misma habría depositado) con un ORCID DISTINTO
+    #    al que el sitio publica hoy. Misma lógica que "OpenAlex discrepa":
+    #    dos fuentes independientes en desacuerdo sobre una asignación YA
+    #    PUBLICADA es más urgente que una asignación aún sin hacer.
+    if d["dspace"] is not None:
+        dsc = d["dspace"][d["dspace"].veredicto == "contradice_directa"]
+        for _, r in dsc.iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            out.append({
+                "id": f"dspacedesac-{r['nombre_en_fuente']}",
+                "cola": "Repositorio institucional discrepa", "prioridad": 1,
+                "titulo": f"{r['nombre_en_fuente']}: DSpace dice otro ORCID",
+                "contexto": (f"El sitio publica hoy «{r['orcid_actual']}». El repositorio "
+                            "institucional (DSpace) nombra a esta misma persona en una "
+                            f"obra propia con un ORCID distinto: {r['evidencia']} "
+                            "Compare ambos registros: el que declara las publicaciones "
+                            "reales de esta persona decide."),
                 "firmas": [f], "cruces": None,
             })
 
@@ -404,7 +469,8 @@ def casos(d: dict, perf: dict) -> list[dict]:
                 "titulo": f"{n} → {o}: ¿es suyo?",
                 "contexto": f"{detalle} La ficha pública de esta firma lleva hoy la "
                             "marca «sin confirmar». Abra el registro del titular y "
-                            "compárelo con las publicaciones de abajo.",
+                            "compárelo con las publicaciones de abajo."
+                            + _evidencia_dspace(f),
                 "firmas": [f], "cruces": None,
             })
 
@@ -415,7 +481,8 @@ def casos(d: dict, perf: dict) -> list[dict]:
                 "contexto": "El titular no declara ninguna obra con DOI en su registro, "
                             "de modo que la comprobación automática no puede decir ni "
                             "que sí ni que no. Queda su nombre, su afiliación declarada "
-                            "y el juicio de quien mire.",
+                            "y el juicio de quien mire."
+                            + _evidencia_dspace(f),
                 "firmas": [f], "cruces": None,
             })
 
@@ -430,6 +497,47 @@ def casos(d: dict, perf: dict) -> list[dict]:
                             "antes de aplicarlo.",
                 "firmas": [f], "cruces": None,
             })
+
+    # ── Candidatos por nombre en el repositorio institucional. Misma lógica
+    #    que "Candidato por afiliación": coincide el nombre, no hay
+    #    publicación en común que lo respalde. Se listan por separado porque
+    #    la fuente es otra (DSpace, no el registro de ORCID) y mezclar las dos
+    #    procedencias en una sola cola escondería de dónde viene cada indicio.
+    if d["dspace_cand"] is not None:
+        dc = d["dspace_cand"].copy()
+        dc["ft"] = dc["orcid_reclamado_por_n_firmas"].astype(int)
+        for _, r in dc[dc.ft == 1].iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            out.append({
+                "id": f"dspacecand-{r['nombre_en_fuente']}-{r['orcid']}",
+                "cola": "Candidato por repositorio institucional", "prioridad": 4,
+                "titulo": f"{r['nombre_en_fuente']} → {r['orcid']}?",
+                "contexto": f"«{r['nombre_en_dspace']}» aparece en el repositorio "
+                            f"institucional ({r['tipos_de_obra']}, "
+                            f"{r['obras_del_titular_en_el_inventario']} obra(s) propia(s)) "
+                            "con este ORCID, y coincide en apellido e inicial con esta "
+                            "firma. No hay ninguna publicación del universo Scopus/SciVal "
+                            "compartida con ese registro: por eso es un candidato y no "
+                            "una asignación.",
+                "firmas": [f], "cruces": None,
+            })
+        for orcid, g in dc[dc.ft > 1].groupby("orcid"):
+            for _, r in g.iterrows():
+                f = perf.get(r["nombre_en_fuente"])
+                if not f:
+                    continue
+                out.append({
+                    "id": f"dspacecand-amb-{r['nombre_en_fuente']}-{orcid}",
+                    "cola": "Candidato por repositorio institucional (ambiguo)",
+                    "prioridad": 4,
+                    "titulo": f"{r['nombre_en_fuente']}: {int(r['ft'])} firmas reclaman {orcid}",
+                    "contexto": f"«{r['nombre_en_dspace']}» ({orcid}) coincide en apellido "
+                                f"e inicial con {int(r['ft'])} firmas distintas de este "
+                                "corpus. El nombre no basta para elegir.",
+                    "firmas": [f], "cruces": None,
+                })
 
     if d["amb"] is None:
         return sorted(out, key=lambda c: (c["prioridad"], c["titulo"]))
@@ -1468,7 +1576,7 @@ def main() -> int:
     print("=" * 78)
 
     d = cargar()
-    perf = perfiles(d["master"], d["log"], d["orcid"], d["verif"], d["uni"])
+    perf = perfiles(d["master"], d["log"], d["orcid"], d["verif"], d["uni"], d["dspace"])
     cs = casos(d, perf)
     if not cs:
         print("  No hay casos que revisar. No se escribe nada.")
