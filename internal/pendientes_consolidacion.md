@@ -46,7 +46,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Arroyo A. → 0000-0003-0157-5175: ¿es suyo?](revision_identidad.html#caso-ver-arroyo-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con un ORCID DISTINTO al que tiene asignado aquí (10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con un ORCID DISTINTO al que tiene asignado aquí (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -327,7 +327,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Landskron G. → 0000-0002-7953-6769: ¿es suyo?](revision_identidad.html#caso-ver-landskron-g)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1038/s41598-024-80228-1 · Quintanilla, Maria Elena · 0000-0002-7953-6769 (Article); 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article); 10.1016/j.rgmx.2024.08.004 · von Muhlenbrock, Christian · 0000-0002-7953-6769 (Article); 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1038/s41598-024-80228-1 · Quintanilla, Maria Elena · 0000-0002-7953-6769 (Article); 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article); 10.1016/j.rgmx.2024.08.004 · von Muhlenbrock, Christian · 0000-0002-7953-6769 (Article); 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -787,7 +787,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Cancino J.: OpenAlex dice otro ORCID](revision_identidad.html#caso-oadesac-cancino-j)
 
-El sitio publica hoy «0000-0002-1956-7600» y OpenAlex atribuye «0000-0002-8273-159X». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1111/apha.14203 · Díaz-Castro, Francisco · 0000-0003-1644-8742/0000-0002-3085-9057/0000-0003-3620-9861/0000-0002-9643-1037/0000-0002-9315-9365/0000-0002-2270-299X (Article); 10.1055/a-1929-0295 · Festa, Raúl Ricardo · 0000-0003-4757-483X/0000-0003-3620-9861 (Article)).
+El sitio publica hoy «0000-0002-1956-7600» y OpenAlex atribuye «0000-0002-8273-159X». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1055/a-1929-0295 · Festa, Raúl Ricardo · 0000-0003-4757-483X/0000-0003-3620-9861 (Article); 10.1111/apha.14203 · Díaz-Castro, Francisco · 0000-0003-1644-8742/0000-0002-3085-9057/0000-0003-3620-9861/0000-0002-9643-1037/0000-0002-9315-9365/0000-0002-2270-299X (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -886,7 +886,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Arroyo A.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-arroyo-a)
 
-El sitio publica hoy «0000-0003-0157-5175». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+El sitio publica hoy «0000-0003-0157-5175». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -903,7 +903,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Balboa E.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-balboa-e)
 
-El sitio publica hoy «0000-0002-8757-436X». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article); 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+El sitio publica hoy «0000-0002-8757-436X». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article); 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -965,7 +965,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Zambrano C.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-zambrano-c)
 
-El sitio publica hoy «0000-0002-9538-1816». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.15381/lengsoc.v22i2.23855 · Zambrano, Carolina · sin ORCID (s/d); 10.33423/jhetp.v23i3.5849 · Zambrano, Carolina · sin ORCID (s/d) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+El sitio publica hoy «0000-0002-9538-1816». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.33423/jhetp.v23i3.5849 · Zambrano, Carolina · sin ORCID (s/d); 10.15381/lengsoc.v22i2.23855 · Zambrano, Carolina · sin ORCID (s/d) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
 
 | Comprobar en | Enlace |
 |---|---|

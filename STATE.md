@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `62b970a` · Refresca STATE.md y las herramientas de revisión contra los datos ya p
+Último commit: `dc724bd` · Merge remote-tracking branch 'origin/main'
 Snapshot: 2026-09-01
 
 ---
