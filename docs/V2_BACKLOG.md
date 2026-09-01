@@ -166,3 +166,54 @@ y `CLAUDE.md` prohíbe suponer disponibilidad de APIs o credenciales.
 
 Más abajo, en una línea cada una: DataCite, OpenAIRE, Semantic Scholar,
 Europe PMC y Wikidata. Dimensions y Lens.org quedan fuera por requerir acuerdo.
+
+---
+
+## 8. Corpus paralelo declarado — producción institucional fuera de Scopus/SciVal (propuesta, 2026-08-27)
+
+**No confundir con §6 arriba:** eso descarta *fusionar* corpus de fuentes
+distintas en un solo universo. Esto es lo que `D-206` ya deja abierto en su
+propio texto — *"Un corpus nuevo —SciELO, OpenAlex— entraría como **corpus
+paralelo declarado**, nunca sumado al universo"* — y que hasta ahora nadie
+había propuesto ejecutar.
+
+**La necesidad, con evidencia acumulada:**
+
+- OpenAlex atribuye **1.112 obras** a la UFT por ROR. **698** ya están en el
+  universo Scopus/SciVal; **414 no** (`V2-26`).
+- De esas 414, la revisión humana ya confirmó **20** como producción real UFT
+  (DOI + tipo documental citable + autor con apellido ya presente en el
+  corpus + ≥3 citas en OpenAlex), aplicadas en `internal/openalex_cobertura.csv`
+  con veredicto `CONFIRMADO_PRODUCCION_UFT`.
+- La evidencia independiente de Crossref (`V2-26 bis`) confirma afiliación UFT
+  en **56 autores más** (sobre las 365 filas pendientes con DOI), sin haber
+  sido revisados todavía uno por uno.
+- Es decir: hay una base creciente y verificable de producción institucional
+  real que **Scopus y SciVal, por diseño, nunca van a indexar** (criterios de
+  indexación distintos, no un error de carga) — el informe hoy no la muestra
+  en ninguna parte.
+
+**Lo que esto NO es:** no propone tocar las 823 publicaciones del universo
+canónico, ni su cifra, ni ningún indicador que dependa de ese denominador
+(`D-16`). Sumar produciría exactamente la cifra irreconciliable que §6 arriba y
+`D-206` prohíben.
+
+**Lo que sí propondría, si se autoriza diseñarlo:**
+
+- Una sección o página aparte —"Producción institucional detectada fuera de
+  Scopus/SciVal" o equivalente—, con su propio denominador declarado
+  (`D-16`), que muestre los casos con veredicto `CONFIRMADO_PRODUCCION_UFT`
+  de `internal/openalex_cobertura.csv` a medida que la revisión avanza.
+  Nunca mezclada con `P-01`/`P-03` ni con ningún indicador del universo
+  primario.
+- Etiquetado explícito de la fuente y el método de verificación en cada obra
+  (OpenAlex + Crossref, revisión humana, fecha), para que nadie la lea como
+  Scopus.
+- Seguir la revisión humana de los 294 autores restantes sin evidencia fuerte
+  todavía (`internal/openalex_cobertura.csv`, `internal/openalex_cobertura_crossref.csv`)
+  antes de fijar un tamaño definitivo de este corpus paralelo.
+
+**Qué falta confirmar:** esto es una propuesta de alcance, no una decisión
+tomada — `D-206` exige que ampliar lo que el informe cubre sea "una decisión
+de alcance aparte, posterior y explícita". Falta que el usuario autorice
+diseñarla e implementarla, y decidir dónde vive en la navegación del sitio.

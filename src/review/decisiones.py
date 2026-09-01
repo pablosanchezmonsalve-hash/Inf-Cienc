@@ -61,6 +61,14 @@ VOCABULARIO: dict[str, tuple[str, str]] = {
                          "añade la asignación con el identificador tecleado"),
     "orcid_no_encontrado": ("Busqué y no tiene",
                             "registra que alguien buscó y no encontró registro"),
+    "unidad_confirmada": ("Sí, es su unidad",
+                          "registra la unidad académica declarada; APLICARLA al "
+                          "pipeline —traducirla al vocabulario oficial y que deje "
+                          "de figurar 'No determinada'— es un paso aparte, no "
+                          "automático (requiere el mismo criterio institucional "
+                          "de T-02)"),
+    "unidad_no_corresponde": ("No es su unidad",
+                              "descarta el candidato; no cambia nada"),
 }
 
 # Los veredictos que ofrece cada cola. Lo que no está aquí usa `POR_DEFECTO`.
@@ -70,7 +78,10 @@ COLAS: dict[str, list[str]] = {
     "ORCID sin confirmar": ["orcid_correcto", "orcid_incorrecto"],
     "ORCID no verificable": ["orcid_correcto", "orcid_incorrecto"],
     "OpenAlex discrepa": ["orcid_correcto", "orcid_incorrecto"],
+    "Repositorio institucional discrepa": ["orcid_correcto", "orcid_incorrecto"],
+    "Inventario de autoarchivo discrepa": ["orcid_correcto", "orcid_incorrecto"],
     "Firma sin ORCID": ["orcid_encontrado", "orcid_no_encontrado"],
+    "Candidato de unidad académica por autoarchivo": ["unidad_confirmada", "unidad_no_corresponde"],
 }
 
 # Colas cuyo veredicto necesita que además se teclee un identificador.
@@ -85,6 +96,10 @@ FAMILIA_ORCID = {
     "Mismo ORCID por afiliación", "Candidato por afiliación",
     "Candidato por afiliación (ambiguo)", "ORCID sin confirmar",
     "ORCID no verificable", "Firma sin ORCID", "OpenAlex discrepa",
+    "Repositorio institucional discrepa", "Candidato por repositorio institucional",
+    "Candidato por repositorio institucional (ambiguo)",
+    "Inventario de autoarchivo discrepa", "Candidato por inventario de autoarchivo",
+    "Candidato por inventario de autoarchivo (ambiguo)",
 }
 
 

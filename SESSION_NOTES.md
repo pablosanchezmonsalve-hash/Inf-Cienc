@@ -5553,6 +5553,10 @@ componente vivo del sitio: crecerá o se reducirá solo, en cada build, sin
 que nadie tenga que acordarse de actualizar un número a mano — el mismo
 principio que ya regía la cobertura de ORCID en esta misma página.
 
+
+
+---
+
 ## Cierre · Revisión humana de identidad exportada hoy, encontrada y aplicada
 
 El usuario pidió revisar si había datos actualizados que afectaran el
@@ -5618,3 +5622,688 @@ Ninguna acción de código pendiente. Si aparece otra exportación de
 `revisar-identidad.ps1`/`revision_identidad.html` en Descargas, el mismo
 flujo (`merge_decisions.py` → `apply_decisions.py --dry-run` →
 `apply_decisions.py` → reconstruir → verificar) se repite igual.
+
+---
+
+## Cierre · Nueva fuente de evidencia: el repositorio institucional (DSpace), y un riesgo de privacidad real capturado antes de publicarse
+
+### Cómo empezó
+
+Con los 82 casos pendientes de identidad ya visibles en
+`internal/revision_identidad.html` (cierre anterior), el usuario pidió
+aceptar como verificados los de "probabilidad alta" y listar aparte los de
+"probabilidad mediana". Se rechazó la petición tal cual: crucé el campo de
+confianza original (el del algoritmo de emparejamiento por nombre, previo a
+la re-verificación) contra las tres colas de los 82 pendientes y el
+resultado era el opuesto al que se buscaba — 24 de los 52 casos "ORCID sin
+confirmar" (evidencia ACTIVA de que el ORCID no coincide, según el registro
+público) tenían justamente "confianza alta" original. Aceptarlos habría
+confirmado como verificadas exactamente las asignaciones con más evidencia
+de estar mal. Se explicó con los números y no se aplicó nada (`D-08`, y el
+propio texto de la herramienta: "esta página no decide nada por usted").
+
+El usuario entonces preguntó si podía ver un documento oficial —
+"Inventario Repositorio"— con autores/ORCID, en su carpeta local. No es
+visible desde este entorno remoto (contenedor en la nube, sin acceso al
+disco del usuario); se pidió que lo subiera al chat, y lo hizo:
+`Inventario_Repositorio.csv`, un volcado de metadatos DSpace del
+repositorio institucional UFT — 3.271 obras (tesis de pregrado/posgrado,
+artículos, libros, capítulos autoarchivados), 157 columnas.
+
+### El análisis manual, y por qué no bastaba
+
+Un primer cruce por DOI compartido (publicaciones que ya están en el
+universo Scopus/SciVal Y en este inventario) alcanzó a 28 de los 82
+pendientes, con cuatro niveles reales de evidencia: 7 confirmaciones
+directas (mismo nombre en DSpace, mismo ORCID), 9 indirectas (el ORCID
+aparece en el registro, pero depositado por otro coautor), 2
+contradicciones directas (Arroyo A., Shabani R. — mismo nombre, ORCID
+distinto) y 10 sin evidencia real (DSpace no nombra a esa persona en ese
+registro específico).
+
+El usuario aportó un dato institucional que cambió el alcance: "los
+autores afiliados siempre figuran con el ORCID dentro del repositorio
+institucional" — y, al preguntársele si eso aplica sólo a quien deposita el
+archivo o a TODO coautor afiliado, aunque el repositorio no lo nombre
+individualmente, contestó que a todos. Eso significa que la pregunta
+correcta no es "¿esta publicación específica está en DSpace?" sino "¿esta
+persona tiene ALGUNA obra propia en DSpace, sea cual sea?" — su propia
+tesis, un artículo que autoarchivó ella misma. Un cruce por DOI no alcanza
+eso; hace falta buscar por nombre en las 3.271 filas completas.
+
+### El conector nuevo
+
+`src/enrich/dspace_inventario.py` (nuevo, con `--test`, sin salir a red —
+todo local). Reutiliza `clave_firma()`/la misma normalización de nombre que
+`orcid_crossref.py`, para no tener una segunda implementación divergente.
+Dos salidas, mismo patrón dual que ya existía para ORCID (`orcid_crossref` =
+ancla en DOI compartido; `orcid_afiliacion` = sólo por nombre):
+
+- `data/interim/dspace_verificacion.csv` — para las 322 firmas que YA
+  tienen ORCID asignado, cruza sus publicaciones propias contra el
+  inventario por DOI. De 154 firmas con algo que cruzar: **56
+  confirmaciones directas, 69 indirectas, 6 contradicciones directas, 23
+  sin coincidencia**.
+- `internal/dspace_candidatos.csv` — para firmas SIN ningún ORCID, busca
+  por apellido+inicial en TODO el inventario, con el mismo criterio
+  homónimo-seguro que `orcid_afiliacion.py` (declara cuántos candidatos hay,
+  nunca elige entre ellos). **16 firmas alcanzadas, 10 con coincidencia
+  1-a-1**.
+
+Se conectó a `build_review.py`: tres colas nuevas —"Repositorio
+institucional discrepa" (6, prioridad 1, misma urgencia que "OpenAlex
+discrepa" porque contradice una asignación YA PUBLICADA), "Candidato por
+repositorio institucional" (14) y su variante "(ambiguo)" (11)— más
+evidencia añadida al contexto de "ORCID sin confirmar" y "ORCID no
+verificable" cuando existe. La cola de pendientes pasó de 82 a **113**
+(188 → 219 casos totales) — no es un retroceso, es evidencia real que no
+existía antes. `decisiones.py` y `apply_decisions.py` se extendieron para
+que estas colas se puedan aplicar con el mismo flujo de siempre
+(`orcid_correcto`/`orcid_incorrecto` para la de discrepancia,
+`misma`/`distintas` para los candidatos) — con dos casos nuevos en el
+autotest, que sigue en verde completo.
+
+De los 6 "Repositorio institucional discrepa", 4 (Balboa E., Candia-Véjar
+A., Hayes-Ortiz T., Zambrano C.) NO estaban en ninguna cola anterior: su
+verificación contra el registro público de ORCID había pasado, pero DSpace
+—una fuente completamente distinta— dice otra cosa. Son casos nuevos que
+sólo esta fuente podía encontrar.
+
+### El hallazgo de privacidad, capturado antes de publicarse
+
+Antes de confirmar nada, se revisó si el repositorio de GitHub es público
+(`mcp__github__search_repositories`: lo es — `visibility: public`). Con
+eso confirmado, se escaneó el CSV completo por patrones de correo antes de
+copiarlo a `data/raw/` (que sí se versiona, decisión `T-16`): **2.539 de
+las 3.271 filas (78 %) traían un correo @uft.cl** en tres columnas
+`dc.description.provenance[en|en_US|es]` — el log de flujo de trabajo del
+propio DSpace («Submitted by X (correo)… Approved by Y (correo)»), no dato
+bibliométrico. Ninguna otra de las 157 columnas originales tenía correos
+(verificado sobre el archivo completo, no sólo las columnas obvias).
+
+Se quitaron esas tres columnas y se reescribió el archivo en UTF-8 (el
+original venía en cp1252) ANTES de que tocara `data/raw/`; se volvió a
+escanear el resultado y dio cero coincidencias de correo. El archivo sin
+limpiar no se conserva versionado en ningún lugar del proyecto — sólo vive,
+sin tocar, en la ruta de subida temporal de esta conversación. El
+conector nunca llegó a usar esas columnas para nada, así que la limpieza no
+le quitó ninguna capacidad.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-336 | Se rechaza aceptar como "verificados" los casos de confianza original alta, y se explica con evidencia por qué sería contraproducente | La confianza alta es la del algoritmo AL PROPONER la asignación, no una confirmación; 24 de los 52 casos "ORCID sin confirmar" la tenían, y son justo los que el registro público contradijo |
+| D-337 | El repositorio institucional (DSpace) se incorpora como fuente PERMANENTE de evidencia, no sólo para esta revisión puntual | Autorización explícita del usuario; produce evidencia real e independiente (56 confirmaciones directas, 6 contradicciones directas) que ninguna otra fuente había encontrado |
+| D-338 | La regla "todo autor afiliado figura con ORCID en el repositorio" se aplica a TODO coautor, no sólo a quien deposita el ítem | Aclaración explícita del usuario ante la pregunta directa — cambia el diseño del conector de "sólo DOI compartido" a "búsqueda por nombre en todo el inventario" |
+| D-339 | Las tres columnas `dc.description.provenance[*]` se eliminan del archivo ANTES de versionarlo en `data/raw/`, y el original sin limpiar no se conserva | El repositorio de GitHub es público; esas columnas traen el correo institucional de cientos de funcionarios y estudiantes en un log de flujo de trabajo, no en datos bibliométricos — publicarlas habría sido una fuga de datos personales reales que nadie decidió |
+| D-340 | Ninguna de las 113 asignaciones/candidatos que este cierre encontró se aplica automáticamente | Sigue rigiendo `D-08`: la evidencia se muestra, el veredicto lo pone una persona |
+
+### Verificación
+
+`dspace_inventario.py --test`: 10 casos, todos en verde. `apply_decisions.py
+--test`: 36 casos (2 nuevos de esta sesión), todos en verde. Auditoría
+completa (`run_all.py`), `build_all.py` (compuerta: 0 fallas),
+`06_assemble_site.py` (10 páginas, capa interna no incluida — verificado) y
+`node src/verify/run_all.mjs` completo (los seis bloques) corridos DESPUÉS
+de todos los cambios: sin fallos. El escaneo de correos sobre el archivo
+final de `data/raw/` dio cero coincidencias, verificado con un script aparte
+antes de este cierre.
+
+### Archivos creados o modificados
+
+```
+src/enrich/dspace_inventario.py       nuevo — conector, con --test
+data/raw/Inventario_Repositorio_Institucional_UFT.csv
+                                       nuevo — LIMPIO de columnas de provenance, UTF-8
+config/sources.yml                    fuente dspace_repositorio declarada,
+                                       con la limpieza de privacidad documentada
+docs/FUENTES_Y_APIS.md                §2.4 nueva
+Makefile                              revision: corre dspace_inventario.py primero
+.github/workflows/deploy.yml          paso de CI: dspace_inventario.py --test
+src/review/build_review.py            perfiles()/casos() leen dspace_verificacion.csv
+                                       y dspace_candidatos.csv; 3 colas nuevas
+src/review/decisiones.py              COLAS y FAMILIA_ORCID con las 3 colas nuevas
+src/review/apply_decisions.py         asignaciones_confirmadas() acepta
+                                       cand_dspace aparte; 2 casos nuevos en --test
+```
+
+### Ambigüedades abiertas
+
+- Los 113 pendientes (antes 82) siguen esperando revisión humana en
+  `internal/revision_identidad.html` — ninguno se decidió en este cierre.
+  Los 4 nuevos "Repositorio institucional discrepa" sin cola previa
+  (Balboa E., Candia-Véjar A., Hayes-Ortiz T., Zambrano C.) son los más
+  urgentes: contradicen una asignación que el sitio publica hoy.
+- Las de siempre, sin cambios: `T-06`, `T-19` en su techo, los 294 autores
+  de la propuesta de corpus paralelo (`V2_BACKLOG.md` §8).
+
+### Próximo paso recomendado
+
+El usuario revisa `internal/revision_identidad.html` caso por caso, ahora
+con la evidencia de DSpace incorporada donde exista. Cuando exporte el CSV
+de decisiones, se aplica con `apply_decisions.py`, se reconstruye el sitio,
+se corre la batería de verificación y se despliega — mismo flujo que T-02.
+
+## Cierre · Se aplican 5 casos de "ORCID sin confirmar" por autorización explícita, con un criterio estricto declarado antes de tocar nada
+
+### El pedido, y el límite que se le puso
+
+El usuario empezó a revisar la cola "Repositorio institucional discrepa" en
+el navegador y decidió los dos primeros casos (Arroyo A., Shabani R.), pero
+no comunicó el veredicto exacto — se le preguntó y no llegó respuesta
+todavía; esos dos quedan sin tocar. Luego pidió, para el resto: "aplica los
+cambios de los que tengas convicción".
+
+Es una autorización real (`CLAUDE.md`: una decisión explícita del usuario en
+la sesión actual precede incluso al propio `CLAUDE.md`), pero no una
+invitación a resolver ambigüedades por probabilidad — eso es justo lo que
+ya se había rechazado una vez esta sesión, con evidencia, cuando el usuario
+pidió aceptar los de "probabilidad alta". Se definió "convicción" con el
+criterio más estricto que la evidencia disponible sostiene: **mismo nombre
+Y mismo ORCID, en el repositorio institucional, contra una obra propia** —
+no una coincidencia de apellido sin publicación de por medio (los 10
+"Candidato por repositorio institucional" quedan fuera), no una
+confirmación indirecta donde DSpace nombra a otro coautor (los 9
+"confirma_indirecta" quedan fuera), y no una contradicción donde dos
+fuentes discrepan y hay que decidir cuál pesa más (los 4 "Repositorio
+institucional discrepa" sin tocar todavía quedan fuera).
+
+### Lo que se aplicó
+
+5 casos de "ORCID sin confirmar" cumplían el criterio, cruzando
+`data/interim/dspace_verificacion.csv` (veredicto `confirma_directa`)
+contra la cola viva y actual de `internal/revision_identidad.html` —no la
+foto de una corrida anterior—: **Caffarena P., Ferre Contreras A.,
+Giordanino E., López-Soto P., Poblete Alday P.** En los cinco, DSpace nombra
+a la misma persona (mismo apellido normalizado) con el mismo ORCID, en una
+obra propia con DOI. Se añadieron como filas nuevas a
+`internal/identity_decisions.csv`, con nota que declara explícitamente que
+la decisión la aplicó Claude con autorización del usuario — no se hizo
+pasar por un clic humano en la herramienta — y se aplicaron con
+`apply_decisions.py` (`--dry-run` primero, sin avisos ni contradicciones).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-341 | "Convicción" se define como evidencia dispositiva (mismo nombre + mismo ORCID contra una obra propia en una fuente independiente), no como probabilidad alta ni coincidencia de nombre sin ancla | Es la misma barra que ya usa el propio pipeline para NO encolar una asignación: `orcid_verificacion.csv` con veredicto `confirmada` nunca entra a revisión. DSpace `confirma_directa` es la misma clase de evidencia, sólo que de otra fuente |
+| D-342 | Los 10 candidatos por nombre sin publicación en común, los 9 "confirma_indirecta" y los 4 "Repositorio institucional discrepa" restantes NO se aplican, aunque exista autorización general | Cada uno exige un juicio real (¿son la misma persona sin nada que lo ancle? ¿cuál de dos fuentes en desacuerdo pesa más?) que este cierre no está en condiciones de dar por Claude, autorización o no |
+| D-343 | La nota de cada decisión aplicada por Claude lo declara explícitamente, en vez de imitar el formato de una decisión humana sin más | Trazabilidad: dentro de un año, alguien que lea `identity_decisions.csv` necesita saber que estas cinco no las revisó una persona mirando el registro, sino que se derivaron de un cruce automático con criterio estricto y autorización explícita |
+
+### Verificación
+
+`apply_decisions.py --dry-run` (sin avisos), luego aplicado de verdad:
+`config/orcid_revisado.yml` pasa de 13 a 18 confirmadas, con las 5 nuevas
+identificables por su nota. Auditoría completa, `build_all.py` (compuerta:
+0 fallas), `06_assemble_site.py`, y `node src/verify/run_all.mjs` completo
+—los seis bloques— corridos DESPUÉS de aplicar: sin fallos. La cola
+"ORCID sin confirmar" bajó de 52 a 47 pendientes; el resto de las colas
+—incluida "Repositorio institucional discrepa", donde siguen Arroyo A. y
+Shabani R.— no se tocó.
+
+### Archivos creados o modificados
+
+```
+internal/identity_decisions.csv       +5 filas, orcid_correcto, con nota de autoría
+config/orcid_revisado.yml             regenerado por apply_decisions.py (18 confirmadas)
+config/identidades_consolidadas.yml   regenerado (sin cambios de contenido en esta corrida)
+data/enriched/authors_orcid.csv       recalculado por el build (sin cambio de conteo:
+                                       las 5 ya tenían ORCID, sólo suben de confianza)
+```
+
+### Ambigüedades abiertas
+
+- Arroyo A. y Shabani R. siguen esperando el veredicto explícito del
+  usuario — no se tocaron.
+- Los 4 "Repositorio institucional discrepa" restantes (Balboa E.,
+  Candia-Véjar A., Hayes-Ortiz T., Zambrano C.), los 9 "confirma_indirecta"
+  y los 10 candidatos por nombre siguen en la cola, sin cambios.
+- Las de siempre: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Reconstruir y desplegar cuando el usuario lo pida (esta tanda no se
+desplegó a `main` todavía: son cambios de capa interna, no del sitio
+público — `authors_orcid.csv` sí alimenta el sitio, así que la próxima
+publicación a `main` los recogerá). Seguir esperando el veredicto de
+Arroyo A. / Shabani R., y seguir la revisión del resto de la cola.
+
+## Cierre · Segunda fuente institucional: el inventario de autoarchivo de biblioteca, con Facultad/Escuela — y Arroyo A. confirmado por TRES fuentes independientes
+
+### Qué llegó
+
+El usuario compartió un segundo insumo: `Inventario_Repositorio_AUTOARCHIVO_6.xlsx`,
+una hoja que el propio equipo de biblioteca mantiene a mano al autoarchivar
+cada obra —808 filas, 2004-2026—, con DOI, ORCID de quien solicitó la
+subida, y algo que la fuente anterior (el volcado DSpace) no tenía:
+**Facultad o Escuela**. El pedido: usarlo para completar datos "no
+determinados" de autores.
+
+Se verificó primero que no trajera datos personales (mismo chequeo que con
+el inventario anterior): sin correos, sin RUT, la columna «Revisado por»
+sólo trae nombres de pila de personal de biblioteca. Limpio para versionar
+tal cual.
+
+### El conector
+
+`src/enrich/autoarchivo_uft.py` (nuevo, `--test`, sin red), mismo patrón
+dual que `dspace_inventario.py` para ORCID —confirmación directa/indirecta,
+contradicción, candidato por nombre— más un tercer producto que la fuente
+anterior no permitía: candidatos de Facultad/Escuela para «No determinada»,
+**declarados en bruto, sin traducir al vocabulario oficial**. Esa
+traducción («CIDOC» → ¿qué facultad?, «Medicina» → ¿Escuela de Medicina
+dentro de Facultad de Medicina y Salud?) es el mismo trabajo institucional
+que exigió `T-02`, y este conector no lo adivina — se explicitó como
+decisión, no como omisión.
+
+Resultados reales:
+- **ORCID** (150 firmas cruzadas): 71 confirmaciones directas, 32
+  indirectas, **2 contradicciones directas**, 45 sin coincidencia. 9
+  candidatos nuevos por nombre (7 uno-a-uno).
+- **Facultad/Escuela**: 59 de las 294 firmas «No determinada» tienen un
+  candidato en este inventario.
+
+**El hallazgo que importa más:** `Arroyo A.` vuelve a aparecer contradicho
+— y esta vez con el MISMO ORCID alternativo (`...9257`) que ya había
+señalado el inventario DSpace del cierre anterior. Dos fuentes
+institucionales completamente independientes (el volcado de sistema y la
+hoja de biblioteca) coinciden en un ORCID distinto al publicado. Sumado a
+que el registro público de ORCID tampoco lo confirmaba desde el principio,
+son ya **tres fuentes** apuntando en la misma dirección — el usuario sigue
+revisando este caso por su cuenta, no se tocó. Nuevo también:
+`Rojas-Costa G.M.` trae DOS ORCID distintos dentro de esta misma hoja (dos
+obras suyas, dos identificadores) — inconsistencia interna de la propia
+fuente, declarada, no resuelta.
+
+Wireado en `build_review.py`: dos colas nuevas —«Inventario de autoarchivo
+discrepa» (2, prioridad 1) y «Candidato por inventario de autoarchivo» (7,
+más 2 ambiguos)—, y evidencia añadida al contexto de «ORCID sin confirmar»,
+«ORCID no verificable» y «OpenAlex discrepa» donde corresponde.
+`decisiones.py` y `apply_decisions.py` extendidos otra vez (tercera fuente
+de candidatos, sin cruzarse con las otras dos — verificado en el autotest).
+La cola pendiente pasó de 108 (tras aplicar los 5 casos del cierre
+anterior) a **119**.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-344 | El inventario de autoarchivo se trata como fuente DISTINTA de `dspace_repositorio`, con su propia cola y evidencia etiquetada aparte | Son sistemas distintos (volcado DSpace vs. hoja curada a mano por biblioteca) que pueden confirmarse o contradecirse; mezclarlas escondería cuál de las dos dice qué |
+| D-345 | El campo Facultad/Escuela se declara EN BRUTO, sin traducirlo a `config/matching_rules.yml` ni aplicarlo a `unidad_academica` | Traducir «CIDOC» o «Familia» a la jerarquía oficial exige el mismo criterio institucional que `T-02` — no es una operación mecánica que este conector pueda hacer por su cuenta |
+| D-346 | Los candidatos de unidad quedan en un CSV declarado (`internal/autoarchivo_unidad_candidatos.csv`), sin una herramienta interactiva de aplicación todavía | Construir el equivalente de `validacion_unidades.html` para este caso es una decisión de alcance aparte; no se construye sin que el usuario decida que la quiere |
+| D-347 | Ninguna de las 119 asignaciones/candidatos de esta tanda se aplica automáticamente | Sigue `D-08`; a diferencia del cierre anterior, el usuario no reiteró "aplica los que tengas convicción" para este insumo específico |
+
+### Verificación
+
+`autoarchivo_uft.py --test`: 9 casos, verde. `apply_decisions.py --test`:
+37 casos (1 nuevo), verde. Auditoría completa, `build_all.py` (compuerta: 0
+fallas), `06_assemble_site.py`, `node src/verify/run_all.mjs` completo —
+los seis bloques— corridos después de todos los cambios: sin fallos.
+
+### Archivos creados o modificados
+
+```
+src/enrich/autoarchivo_uft.py          nuevo — conector, con --test
+data/raw/Inventario_Repositorio_Autoarchivo.xlsx
+                                        nuevo — sin PII, verificado antes de versionar
+config/sources.yml                     fuente autoarchivo_biblioteca declarada
+docs/FUENTES_Y_APIS.md                 §2.5 nueva
+Makefile                               revision: corre autoarchivo_uft.py también
+.github/workflows/deploy.yml           paso de CI: autoarchivo_uft.py --test
+src/review/build_review.py             perfiles()/casos() leen las 2 salidas nuevas;
+                                        2 colas nuevas + evidencia en las existentes
+src/review/decisiones.py               COLAS y FAMILIA_ORCID con las colas nuevas
+src/review/apply_decisions.py          asignaciones_confirmadas() acepta
+                                        cand_autoarchivo aparte; 1 caso nuevo en --test
+```
+
+### Ambigüedades abiertas
+
+- Los 119 pendientes esperan revisión humana — ninguno se decidió en este
+  cierre, por decisión explícita (D-347).
+- `Rojas-Costa G.M.` trae dos ORCID distintos dentro de la misma fuente:
+  homónimo dentro del inventario de biblioteca, o error de captura — sin
+  investigar más.
+- Las 59 candidatas de Facultad/Escuela quedan declaradas, sin decidir si
+  se construye una herramienta de aplicación (paralela a T-02) para ellas.
+- Las de siempre: `T-06`, `T-19` en su techo, Arroyo A./Shabani R.
+  esperando el usuario.
+
+### Próximo paso recomendado
+
+Preguntarle al usuario si quiere: (a) que se aplique con el mismo criterio
+estricto de convicción de la tanda anterior a las nuevas confirmaciones
+directas de esta fuente, y (b) si construye una herramienta de revisión
+para los 59 candidatos de Facultad/Escuela, dado que su aplicación exige
+traducir al vocabulario oficial — decisión de alcance, no de código.
+
+## Cierre · Se aplican 3 confirmaciones de ORCID del inventario de autoarchivo, con el mismo criterio; ninguna asociación de Facultad/Escuela se tocó
+
+El usuario autorizó "aplica las confirmaciones directas con el mismo
+criterio" — mismo estándar que la tanda anterior (mismo nombre + mismo
+ORCID contra obra propia). Cruzando `data/interim/autoarchivo_verificacion.csv`
+(veredicto `confirma_directa`) contra la cola VIVA actual: **3 casos**
+cumplían y seguían pendientes — Arenas-Massa A., Landskron G.,
+Orellana-Donoso M.I. Aplicados igual que la vez anterior:
+`--dry-run` primero (sin avisos), filas nuevas en
+`internal/identity_decisions.csv` con nota de autoría explícita, aplicado
+con `apply_decisions.py`.
+
+El usuario preguntó a continuación si se habían considerado "nuevas
+asociaciones de facultad/escuela" — se aclaró de inmediato que NO: los 59
+candidatos de Facultad/Escuela del mismo archivo siguen sin tocar, en bruto,
+sin vocabulario oficial ni aplicación. La autorización de esta tanda cubría
+sólo ORCID, como se le había preguntado explícitamente.
+
+### Verificación
+
+`apply_decisions.py --dry-run` sin avisos, luego aplicado:
+`config/orcid_revisado.yml` pasa de 18 a 21 confirmadas. Auditoría
+completa, `build_all.py` (compuerta: 0 fallas), `06_assemble_site.py`,
+`node src/verify/run_all.mjs` completo — los seis bloques — sin fallos.
+"ORCID sin confirmar" bajó de 47 a 44 pendientes.
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv       +3 filas, orcid_correcto, con nota de autoría
+config/orcid_revisado.yml             regenerado (21 confirmadas)
+```
+
+### Ambigüedades abiertas
+
+Sin cambios: los 59 candidatos de Facultad/Escuela, Arroyo A./Shabani R.,
+los 4 "Repositorio institucional discrepa" restantes, T-06/T-19.
+
+### Próximo paso recomendado
+
+Sigue pendiente la pregunta (b) del cierre anterior: si se construye una
+herramienta de revisión para los 59 candidatos de Facultad/Escuela.
+
+## Cierre · Los candidatos de Facultad/Escuela se consolidan en el mismo documento de revisión, y se corrige un texto que habría sido falso para 27 de las 59 firmas
+
+### El pedido
+
+"Establece todo que requiera revisión en el mismo documento Revisión de
+Identidad" — respuesta a la pregunta (b) que quedó abierta: no una
+herramienta aparte, sino una cola más dentro de `revision_identidad.html`.
+
+### Lo que se construyó
+
+Nueva cola «Candidato de unidad académica por autoarchivo» (73 casos, uno
+por par firma×escuela candidata) en `build_review.py`, con vocabulario de
+veredicto nuevo en `decisiones.py`: `unidad_confirmada` / `unidad_no_corresponde`.
+El texto del veredicto declara honestamente el alcance: confirmar deja
+constancia en `identity_decisions.csv` de que la unidad es correcta para
+esa persona; APLICARLA al pipeline público —traducir el valor en bruto al
+vocabulario oficial, que deje de figurar «No determinada»— sigue siendo un
+paso aparte, sin construir todavía (exige el mismo criterio institucional
+de T-02, y no hay decisiones reales que aplicar hasta que el usuario
+revise). `apply_decisions.py --test` sigue en verde: el guardián de
+veredictos desconocidos y de cola equivocada reconoce el vocabulario nuevo
+sin que haga falta tocar la lógica de aplicación todavía.
+
+Antes de dar esto por terminado, se comprobó si el vocabulario ya validado
+en `config/matching_rules.yml` (T-02) reconocía alguna de las 73 cadenas en
+bruto («Medicina», «CIDOC», etc.) — **0 de 73**, salvo 3 casos donde la
+cadena YA es un nombre de Facultad canónico completo. Confirma lo que ya
+se había declarado: el vocabulario de T-02 se construyó desde afiliaciones
+Scopus, no desde esta nomenclatura abreviada de biblioteca: son alfabetos
+distintos y no hay atajo.
+
+### El error que se encontró y corrigió antes de terminar
+
+Al revisar el primer caso generado (`Allende-Valenzuela T.` → CIPEF), el
+texto decía "Hoy esta firma figura con unidad académica «No determinada»
+en el sitio público" — **falso para esta firma**: tiene otra publicación
+con «Facultad de Educación y Ciencias Sociales» ya determinada. «No
+determinada» es un atributo de cada PAR autor×publicación, no de la firma
+completa, y el texto lo trataba como si fuera lo segundo. Se comprobó el
+alcance real: **27 de las 59 firmas candidatas (46 %) ya tienen unidad
+determinada en alguna de sus otras publicaciones** — no son casos "sin
+ningún dato", son casos con un hueco puntual. Se corrigió la frase para
+distinguir los dos casos: cuando hay una unidad ya determinada, el texto la
+muestra y pide comparar; cuando no hay ninguna, mantiene la frase original.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-348 | Los 73 casos de unidad se integran como cola de `build_review.py`, no como herramienta aparte | Instrucción explícita del usuario: todo lo que requiera revisión, en el mismo documento |
+| D-349 | El veredicto `unidad_confirmada` registra el hecho en `identity_decisions.csv` pero NO aplica nada al pipeline todavía | Aplicar exige traducir al vocabulario oficial (criterio T-02) y no hay decisiones reales que aplicar aún; declarar la acción como "hecha" cuando no lo está habría sido falso |
+| D-350 | El texto de cada caso distingue «sin ninguna unidad determinada» de «con unidad determinada en otra publicación, hueco puntual aquí» | Afirmar en blanco que la firma "no tiene unidad" cuando SÍ la tiene en otra publicación (27 de 59 casos) habría sido una afirmación falsa sobre el propio dato |
+
+### Verificación
+
+`apply_decisions.py --test`: sin cambios de lógica, sigue en verde
+(guardianes de vocabulario reconocen las 2 nuevas entradas). Auditoría
+completa, `build_all.py` (compuerta: 0 fallas), `06_assemble_site.py`,
+`node src/verify/run_all.mjs` completo — sin fallos. Cola nueva verificada
+manualmente contra el HTML generado: botones correctos
+(`unidad_confirmada`/`unidad_no_corresponde`/`pendiente`), texto de
+contexto correcto en un caso de cada tipo (unidad ya determinada en otra
+publicación vs. ninguna).
+
+### Archivos modificados
+
+```
+src/review/decisiones.py     unidad_confirmada/unidad_no_corresponde en
+                              VOCABULARIO y COLAS
+src/review/build_review.py   d["autoarchivo_unidad"] cargado; nueva cola
+                              generada con el texto corregido
+docs/FUENTES_Y_APIS.md       §2.5 actualizada: ya no "queda pendiente"
+```
+
+### Ambigüedades abiertas
+
+- Las 73 candidaturas de unidad siguen sin decidir — el usuario las revisa
+  en el mismo documento que el resto.
+- El mecanismo de APLICACIÓN al pipeline sigue sin construir: cuando el
+  usuario tenga decisiones reales que exportar, hace falta un script nuevo
+  (análogo a `apply_unit_validation.py` pero para overrides por firma, no
+  por variante de vocabulario) — no se construyó a ciegas sin decisiones
+  que aplicar.
+- Las de siempre: Arroyo A./Shabani R., los 4 "Repositorio institucional
+  discrepa" restantes, T-06/T-19.
+
+### Próximo paso recomendado
+
+Esperar a que el usuario revise (puede ser por partes) y exporte
+decisiones. Cuando haya `unidad_confirmada` reales que aplicar, construir
+el script de aplicación correspondiente — recién ahí, no antes.
+
+## Cierre: fusión del export perdido, saga Arroyo A./Castro M., y tres bugs de reasignación de ORCID en una sola corrida
+
+### Contexto
+
+El usuario exportó `identity_decisions_3.csv` (303 filas) desde
+`revision_identidad.html` tras revisar una tanda de casos. Antes de
+aplicarlo, la comprobación de rutina («¿bajó el número de grupos
+consolidados?») encontró algo que no cuadraba: 37 → 12. Eso no es una
+tanda de revisión, es pérdida de datos.
+
+### El bug de exportación del navegador (hallado antes de aplicar nada)
+
+La función `entregar()` de `revision_identidad.html` exporta el array
+`CASOS` embebido en la página — que sólo contiene los casos que **siguen
+vivos** en la corrida que generó ese HTML. Un caso ya resuelto en un ciclo
+anterior (sin caso vivo pendiente) simplemente no está en `CASOS`, así que
+un export fresco desde una versión más vieja de la página no lo trae: no
+lo marca como "sin cambios", lo omite. Si ese export se usara para
+*reemplazar* `identity_decisions.csv` en vez de fusionarlo, esas
+decisiones desaparecerían.
+
+Se comprobó el alcance exacto contra el historial (`git show
+cb2ab6c~1:internal/identity_decisions.csv`): **72 filas** afectadas — 30
+que desaparecían del todo y 42 que volvían a "pendiente" pese a estar
+decididas. Se escribió un script de fusión (no se aplicó el export a
+ciegas) que: toma el export nuevo como base, y para cada fila del CSV
+anterior ausente en el nuevo, la reincorpora tal cual. Resultado: 349
+filas de datos, sin pérdida.
+
+Esto es un bug de la herramienta, no del usuario ni de sus datos — pero
+significa que **todo export parcial futuro debe fusionarse contra el
+historial, nunca reemplazar sin comparar**. Queda anotado para si se
+retoma `revision_identidad.html` más adelante (no se corrigió la causa
+raíz en el JS esta vez: el mitigante — fusionar contra git antes de
+aplicar — es suficiente mientras la revisión se haga en esta modalidad).
+
+### El caso Arroyo A.: contradicción de identidad resuelta con evidencia cruzada, no por conveniencia
+
+`ver-Arroyo A.` (revisión anterior) decía `orcid_correcto` para el ORCID
+hoy publicado. Los dos conectores nuevos —DSpace y autoarchivo—
+discrepaban: `dspacedesac-Arroyo A.` y `aadesac-Arroyo A.` decían
+`orcid_incorrecto` para esa misma firma. Dos fuentes institucionales
+independientes contra una revisión humana anterior: no se desempata por
+mayoría, se investiga.
+
+Se revisó con el usuario, caso por caso:
+- El perfil del ORCID hoy publicado tiene 140 obras y no declara afiliación
+  UFT — no hay nada ahí que lo respalde por sí solo.
+- Cruce por DOI (`internal/matching_log.csv` +
+  `data/interim/publications_universe.csv`): 3 de las 4 publicaciones de
+  Arroyo A. en el corpus coinciden EXACTAMENTE por DOI con lo que DSpace y
+  autoarchivo citan bajo un ORCID distinto — no es coincidencia de nombre,
+  es la misma obra.
+- El usuario encontró de forma independiente, directamente en el sitio de
+  ORCID (fuera del alcance de este entorno: `orcid.org` está bloqueado por
+  egress aquí), el Scopus Author ID `55159442300` en ese perfil alternativo
+  — y ese Scopus ID coincide con el que trae `authors_master_draft.csv`
+  para esta firma.
+
+Con evidencia convergente por dos vías independientes (DOI exacto +
+Scopus ID confirmado por el usuario en la fuente), decisión del usuario:
+«Sí, corrígelo y asígnalo». Aplicado: `ver-Arroyo A.` pasa a
+`orcid_incorrecto` (con nota del porqué) y se agrega
+`arroyoasignado-Arroyo A.` con `orcid_encontrado` →
+`0000-0002-6248-9257`.
+
+### El caso Castro M.: la fusión histórica se mantiene
+
+Una fusión histórica («Castro M.» = «Castro-Sepúlveda M.») parecía
+contradecir una lectura nueva de que «Castro M.» agrupa a dos personas
+distintas (Magdalena y Mauricio). Se mostró el conflicto al usuario, quien
+confirmó: «la fusión histórica era Mauricio, sigue siendo correcta» — sin
+cambios al CSV, la duda quedó resuelta por confirmación directa del
+titular de la decisión original.
+
+### Tres bugs de pipeline, una sola causa raíz
+
+Aplicar la decisión de Arroyo A. — retirar un ORCID Y asignar el correcto
+para la misma firma, en la misma corrida de `apply_decisions.py` — expuso
+tres fallas encadenadas, todas por la misma razón: código que calcula «el
+estado vigente» una vez al principio de la corrida, sin contar con que esa
+misma corrida va a modificar ese estado.
+
+1. `veredictos_orcid()`: `vigente` se leía de `authors_orcid.csv` en disco
+   ANTES de procesar las decisiones, así que `orcid_encontrado` veía la
+   firma «ya asignada» con el valor que la misma corrida estaba retirando,
+   y se negaba a asignar el reemplazo. Corregido con
+   `vigente_para_nuevo` (excluye las firmas retiradas en esta corrida).
+2. El filtro/concat final de `nuevas` contra `vig` en `main()`: descartaba
+   la asignación nueva por estar la firma ya en `vig` (el CSV crudo, que
+   todavía trae la fila vieja). Corregido con `vig_efectiva`/`reemplazadas`.
+3. `src/build/03_authors.py`: el filtro `ORCID_RETIRADO` excluía TODAS las
+   filas de una firma por nombre, no sólo la fila con el ORCID retirado
+   específico — así que la fila nueva y correcta también se descartaba.
+   Corregido comparando el valor retirado, no sólo el nombre.
+
+Cada uno se encontró verificando la salida real
+(`data/enriched/authors_orcid.csv` → `data/processed/authors.json`) tras
+cada paso, no asumiendo que el fix anterior bastaba. El principio "no se
+borra, se anota" (los ORCID retirados quedan en el CSV, filtrados en el
+build) es precisamente lo que hace este escenario sutil: las filas vieja y
+nueva conviven, y hay que reemplazar la vieja sin duplicar ni perder la
+nueva.
+
+Se agregaron dos casos nuevos a `apply_decisions.py --test`: «retirar y
+reemplazar la misma firma en una sola corrida» y «confirmar no abre hueco
+para un reemplazo» — ambos en verde.
+
+**Verificación de la etiqueta final** (no se dio por buena sin trazarla):
+en `03_authors.py`, la cadena que elige la etiqueta pública comprueba
+`fuente_orcid == FUENTE_BUSQUEDA` ANTES que cualquier rama de
+`comprobado_a_mano`/`veredicto`. `apply_decisions.py` marca
+`orcid_encontrado` con `"fuente": FUENTE_BUSQUEDA` (misma constante
+textual). Se confirmó que la ficha de Arroyo A. muestra
+`"orcid_veredicto_etiqueta": "encontrado por revisión"` precisamente por
+esa rama — no es una etiqueta vieja que sobrevivió por casualidad.
+
+### Estado final tras aplicar la tanda completa
+
+`internal/identity_decisions.csv`: 349 filas de datos (303 del export +
+72 restauradas − reconciliación de duplicados + la fila de Arroyo A.).
+Pipeline reconstruido de punta a punta:
+`dspace_inventario.py` → `autoarchivo_uft.py` → `build_review.py` →
+`build_all.py` → `06_assemble_site.py` → `node src/verify/run_all.mjs`.
+
+- `build_review.py`: 301 casos totales · 163 ya decididos · **138
+  pendientes** (33 decisiones del CSV ya no tienen caso vivo — son casos
+  resueltos, no un problema).
+- `build_all.py`: compuerta pública/interna 0 fallas · auditoría 29/30
+  reglas pasan (la única falla, E-06 sobre una columna de Scopus vacía,
+  es preexistente y no bloqueante, ajena a este trabajo).
+- `node src/verify/run_all.mjs`: contraste, estructura, flujos,
+  responsive, higiene, peso — los 6, sin fallos.
+- `apply_decisions.py --test`: 38/38 casos OK.
+
+Se reportó al usuario, pero **no se aplicó**, un análisis exploratorio de
+cuántos casos pendientes se resolverían si se confiara en el acuerdo entre
+las dos fuentes institucionales (DSpace + autoarchivo) para el ORCID de
+una firma — queda a la espera de autorización explícita, igual que el
+resto de los pendientes de esta cola.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-351 | Un export parcial de `revision_identidad.html` se fusiona contra el historial de git antes de aplicarse, nunca reemplaza el CSV directamente | La función `entregar()` sólo exporta casos vivos; un reemplazo directo pierde silenciosamente las decisiones ya resueltas (72 filas en este caso) |
+| D-352 | La contradicción de Arroyo A. se resuelve a favor del ORCID `0000-0002-6248-9257`, retirando el previamente publicado | Evidencia convergente por dos vías independientes: coincidencia exacta de DOI en 3/4 publicaciones contra DSpace/autoarchivo, y Scopus Author ID confirmado por el usuario directamente en el registro ORCID |
+| D-353 | La fusión histórica «Castro M. = Castro-Sepúlveda M. (Mauricio)» se mantiene sin cambios | Confirmación directa del usuario, autor de la decisión original, ante el conflicto mostrado |
+| D-354 | `veredictos_orcid()`, el filtro final de `nuevas`/`vig`, y el filtro `ORCID_RETIRADO` de `03_authors.py` deben calcular «vigente» contando con los retiros de la MISMA corrida, no sólo el estado en disco al inicio | Sin esto, retirar-y-reemplazar el ORCID de una firma en un solo ciclo de revisión (D-08 lo exige explícitamente) falla silenciosamente: la firma queda sin ORCID nuevo asignado |
+| D-355 | El análisis de acuerdo cross-fuente (DSpace × autoarchivo) para ORCID se reporta pero no se aplica sin autorización explícita | Sigue D-08/D-347: ningún hallazgo propio se convierte en aplicación sin que el usuario lo autorice para ese insumo específico |
+
+### Verificación
+
+`apply_decisions.py --test` (38/38), `build_all.py` (compuerta 0 fallas),
+`node src/verify/run_all.mjs` (6/6 sin fallos), y verificación manual de
+la cadena de etiquetado de veredicto ORCID en `03_authors.py` trazada
+línea por línea contra la salida real en `authors.json` — no se dio por
+buena la etiqueta sin confirmar la rama exacta que la produce.
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv   fusión de 72 filas históricas + fila de
+                                   Arroyo A. + corrección de ver-Arroyo A.
+src/review/apply_decisions.py     vigente_para_nuevo / vig_efectiva
+                                   (retirar-y-reemplazar en una corrida) +
+                                   2 casos de prueba nuevos
+src/build/03_authors.py           ORCID_RETIRADO compara valor, no sólo
+                                   nombre de firma
+config/identidades_consolidadas.yml,
+config/orcid_revisado.yml,
+data/enriched/authors_orcid.csv   regenerados por la corrida completa
+```
+
+### Ambigüedades abiertas
+
+- 138 pendientes en la cola de revisión, sin cambios de alcance frente al
+  cierre anterior.
+- El acuerdo cross-fuente DSpace × autoarchivo para ORCID fue analizado y
+  reportado, no aplicado — pendiente de autorización explícita.
+- El bug de exportación parcial en `revision_identidad.html` (`entregar()`
+  sólo exporta `CASOS` vivo) no se corrigió en el JS; se mitigó por fusión
+  manual contra git. Si la herramienta se retoma, vale la pena corregirlo
+  en la fuente.
+- Las de siempre: Shabani R., T-06/T-19, el mecanismo de aplicación para
+  `unidad_confirmada` (D-349, sigue sin construir).
+
+### Próximo paso recomendado
+
+Reportar al usuario el cierre completo de esta tanda (349 filas, 138
+pendientes, las dos resoluciones de identidad, los tres bugs corregidos)
+y reenviar `internal/revision_identidad.html` regenerado. Quedar a la
+espera de la siguiente tanda de revisión o de autorización sobre el
+análisis cross-fuente reportado.

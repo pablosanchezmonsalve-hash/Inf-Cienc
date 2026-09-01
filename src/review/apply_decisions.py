@@ -223,13 +223,20 @@ def canonica(firmas: list[str], frec: dict[str, int] | None = None) -> str:
                                          -len(s), s))[0]
 
 
-def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None) -> pd.DataFrame:
-    """Candidatos por afiliación que la revisión confirmó como la misma persona."""
+def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None,
+                             cand_dspace: pd.DataFrame | None = None,
+                             cand_autoarchivo: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Candidatos por afiliación o por alguno de los inventarios
+    institucionales que la revisión confirmó como la misma persona."""
     cols = ["nombre_en_fuente", "orcid", "publicaciones_de_respaldo", "confianza", "fuente"]
-    if cand is None:
+    por_firma = {r["nombre_en_fuente"]: r["orcid"] for _, r in cand.iterrows()} if cand is not None else {}
+    por_firma_dsp = ({r["nombre_en_fuente"]: r["orcid"] for _, r in cand_dspace.iterrows()}
+                     if cand_dspace is not None else {})
+    por_firma_aa = ({r["nombre_en_fuente"]: r["orcid"] for _, r in cand_autoarchivo.iterrows()}
+                    if cand_autoarchivo is not None else {})
+    if not por_firma and not por_firma_dsp and not por_firma_aa:
         return pd.DataFrame(columns=cols)
 
-    por_firma = {r["nombre_en_fuente"]: r["orcid"] for _, r in cand.iterrows()}
     filas = []
     for _, r in d[(d.veredicto == "misma") & (d.cola.str.startswith("Candidato por afiliación"))].iterrows():
         for f in firmas_de(r):
@@ -239,6 +246,25 @@ def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None) -> pd.D
                               # La confianza no la da el recuento de
                               # publicaciones —aquí no hay ninguna que respalde—
                               # sino que una persona lo comprobó.
+                              "confianza": "alta", "fuente": FUENTE_REVISION})
+
+    # Mismo criterio para los candidatos por nombre en el repositorio
+    # institucional (DSpace): otra fuente, mismo patrón de confirmación.
+    for _, r in d[(d.veredicto == "misma")
+                 & (d.cola.str.startswith("Candidato por repositorio institucional"))].iterrows():
+        for f in firmas_de(r):
+            if f in por_firma_dsp:
+                filas.append({"nombre_en_fuente": f, "orcid": por_firma_dsp[f],
+                              "publicaciones_de_respaldo": 0,
+                              "confianza": "alta", "fuente": FUENTE_REVISION})
+
+    # Idem para el inventario de autoarchivo de biblioteca.
+    for _, r in d[(d.veredicto == "misma")
+                 & (d.cola.str.startswith("Candidato por inventario de autoarchivo"))].iterrows():
+        for f in firmas_de(r):
+            if f in por_firma_aa:
+                filas.append({"nombre_en_fuente": f, "orcid": por_firma_aa[f],
+                              "publicaciones_de_respaldo": 0,
                               "confianza": "alta", "fuente": FUENTE_REVISION})
 
     # Los casos «Mismo ORCID por afiliación» agrupan varias firmas bajo un
@@ -311,6 +337,20 @@ def veredictos_orcid(d: pd.DataFrame, vigente: dict[str, str]) -> dict:
     errores: list[str] = []
     avisos: list[str] = []
 
+    # Retirar y reemplazar el ORCID de la MISMA firma en una sola corrida es
+    # un caso real, no hipotético: una fuente nueva contradice la asignación
+    # vigente Y propone la correcta a la vez. `vigente` se calculó ANTES de
+    # esta corrida (viene de `authors_orcid.csv` en disco), así que sin este
+    # ajuste "orcid_encontrado" vería la firma "ya asignada" con el valor que
+    # la misma corrida está retirando, y se negaría a añadir el reemplazo. Se
+    # calcula qué se va a retirar ANTES del bucle principal, y se usa una
+    # copia de `vigente` sin esas firmas sólo para la rama "orcid_encontrado".
+    firmas_retiradas_ahora = {
+        f for _, r in d[d.veredicto == "orcid_incorrecto"].iterrows()
+        for f in firmas_de(r) if f in vigente
+    }
+    vigente_para_nuevo = {f: v for f, v in vigente.items() if f not in firmas_retiradas_ahora}
+
     for _, r in d.iterrows():
         v = str(r.get("veredicto") or "")
         if not v.startswith("orcid_"):
@@ -326,9 +366,9 @@ def veredictos_orcid(d: pd.DataFrame, vigente: dict[str, str]) -> dict:
                     continue
                 (conf if v == "orcid_correcto" else ret)[f] = (actual, nota)
             elif v == "orcid_encontrado":
-                if f in vigente:
+                if f in vigente_para_nuevo:
                     avisos.append(f"«{f}»: se declara un ORCID encontrado a mano, "
-                                  f"pero ya tiene asignado {vigente[f]}. No se toca.")
+                                  f"pero ya tiene asignado {vigente_para_nuevo[f]}. No se toca.")
                     continue
                 if not propuesto:
                     errores.append(f"«{f}»: veredicto «orcid_encontrado» sin "
@@ -584,6 +624,33 @@ def autotest() -> int:
     casos.append(("sin candidatos devuelve vacío",
                   len(asignaciones_confirmadas(df([]), None)) == 0, None))
 
+    # 6 bis. Mismo criterio para los candidatos del repositorio institucional
+    # (DSpace): otra fuente, misma lógica de confirmación, sin mezclarse.
+    cand_dsp = pd.DataFrame([{"nombre_en_fuente": "Ríos T.", "orcid": "0000-Z"}])
+    a = asignaciones_confirmadas(df([
+        ("dspacecand-Ríos T.-0000-Z", "Candidato por repositorio institucional",
+         "Ríos T.", "misma"),
+        ("afil-López V.", "Candidato por afiliación", "López V.", "pendiente")]),
+        cand, cand_dsp)
+    casos.append(("candidato de DSpace confirmado se asigna",
+                  list(a.nombre_en_fuente) == ["Ríos T."] and a.orcid.iloc[0] == "0000-Z",
+                  a.to_dict("records")))
+    casos.append(("las dos fuentes de candidatos no se cruzan entre sí",
+                  "López V." not in set(a.nombre_en_fuente), None))
+
+    # 7 bis. Mismo criterio para el inventario de autoarchivo — tercera
+    # fuente, tampoco se cruza con las otras dos.
+    cand_aa = pd.DataFrame([{"nombre_en_fuente": "Soto B.", "orcid": "0000-W"}])
+    a = asignaciones_confirmadas(df([
+        ("aacand-Soto B.-0000-W", "Candidato por inventario de autoarchivo",
+         "Soto B.", "misma"),
+        ("dspacecand-Ríos T.-0000-Z", "Candidato por repositorio institucional",
+         "Ríos T.", "pendiente")]),
+        cand, cand_dsp, cand_aa)
+    casos.append(("candidato de autoarchivo confirmado se asigna",
+                  list(a.nombre_en_fuente) == ["Soto B."] and a.orcid.iloc[0] == "0000-W",
+                  a.to_dict("records")))
+
     # 8. Una firma que no está entre los candidatos no se inventa.
     a = asignaciones_confirmadas(df([
         ("afil-Fantasma Z.", "Candidato por afiliación", "Fantasma Z.", "misma")]), cand)
@@ -689,6 +756,28 @@ def autotest() -> int:
         ("sinorcid-X", "Firma sin ORCID", "X", "orcid_no_encontrado", "", "no está")]), VIG)
     casos.append(("orcid_no_encontrado deja constancia de que se buscó",
                   v["sin_registro"] == {"X": "no está"}, v))
+
+    # Retirar Y reemplazar la MISMA firma en una sola corrida (caso real:
+    # Arroyo A., 2026-09-01). "vigente" trae el valor viejo porque se leyó
+    # antes de esta corrida; la retirada tiene que "abrir hueco" para que
+    # orcid_encontrado no se niegue a añadir el reemplazo en la misma pasada.
+    v = veredictos_orcid(dfo([
+        ("ver-Aedo S.", "ORCID sin confirmar", "Aedo S.", "orcid_incorrecto", "", "no es suyo"),
+        ("nuevo-Aedo S.", "Firma sin ORCID", "Aedo S.", "orcid_encontrado", BUENO, "reemplazo")]), VIG)
+    casos.append(("retirar y reemplazar la misma firma en una sola corrida",
+                  v["retiradas"] == {"Aedo S.": ("0000-0001-5567-3374", "no es suyo")}
+                  and len(v["nuevas"]) == 1 and v["nuevas"][0]["orcid"] == BUENO
+                  and not v["errores"], v))
+
+    # Pero confirmar Y "encontrar" a la vez para la misma firma sigue sin
+    # tener sentido: confirmar dice que el vigente SÍ es correcto, así que no
+    # hay hueco que abrir. orcid_encontrado se comporta igual que sin la
+    # retirada: avisa y no toca nada.
+    v = veredictos_orcid(dfo([
+        ("ver-Aedo S.", "ORCID sin confirmar", "Aedo S.", "orcid_correcto", "", ""),
+        ("nuevo-Aedo S.", "Firma sin ORCID", "Aedo S.", "orcid_encontrado", BUENO, "")]), VIG)
+    casos.append(("confirmar no abre hueco para un reemplazo",
+                  not v["nuevas"] and len(v["avisos"]) == 1, v))
 
     # 13. El YAML de ORCID se relee intacto, con una nota hostil.
     dura = 'dice \'no\' y "sí" a la vez: # 3'
@@ -830,7 +919,11 @@ def main() -> int:
 
     cpath = INTERNAL / "orcid_candidatos_afiliacion.csv"
     cand = pd.read_csv(cpath, dtype=str) if cpath.exists() else None
-    nuevas = asignaciones_confirmadas(d, cand)
+    dspath = INTERNAL / "dspace_candidatos.csv"
+    cand_dspace = pd.read_csv(dspath, dtype=str) if dspath.exists() else None
+    aapath = INTERNAL / "autoarchivo_candidatos.csv"
+    cand_autoarchivo = pd.read_csv(aapath, dtype=str) if aapath.exists() else None
+    nuevas = asignaciones_confirmadas(d, cand, cand_dspace, cand_autoarchivo)
 
     opath = ENRICHED / "authors_orcid.csv"
     vig = pd.read_csv(opath, dtype=str)
@@ -849,8 +942,19 @@ def main() -> int:
         [{k: v for k, v in n.items() if k != "nota"} for n in orc["nuevas"]],
         columns=list(nuevas.columns))
     nuevas = pd.concat([nuevas, halladas], ignore_index=True)
-    nuevas = nuevas[~nuevas.nombre_en_fuente.isin(set(vig.nombre_en_fuente))]
     nuevas = nuevas.drop_duplicates("nombre_en_fuente")
+
+    # Reemplazo, no duplicado. `nuevas` sólo puede traer una firma que YA
+    # está en `vig` cuando `veredictos_orcid` la dejó pasar precisamente
+    # porque esta misma corrida la retiró (ver el comentario de
+    # `vigente_para_nuevo` más arriba): esa fila vieja hay que QUITARLA de
+    # `vig` antes de escribir —`vig_efectiva`—, o quedarían dos filas para
+    # la misma persona. Lo que sí sigue siendo un duplicado genuino es
+    # cualquier otra coincidencia entre `nuevas` y lo que queda en
+    # `vig_efectiva`, y ésas se filtran de `nuevas`.
+    reemplazadas = set(nuevas.nombre_en_fuente) & set(vig.nombre_en_fuente)
+    vig_efectiva = vig[~vig.nombre_en_fuente.isin(reemplazadas)]
+    nuevas = nuevas[~nuevas.nombre_en_fuente.isin(set(vig_efectiva.nombre_en_fuente))]
 
     print(f"  ORCID confirmados   : {len(orc['confirmadas'])} asignaciones que "
           "una persona respalda")
@@ -877,7 +981,7 @@ def main() -> int:
         yaml_orcid(orc, hoy), encoding="utf-8")
 
     if len(nuevas):
-        salida = pd.concat([vig, nuevas], ignore_index=True)
+        salida = pd.concat([vig_efectiva, nuevas], ignore_index=True)
         salida = salida.sort_values("nombre_en_fuente", kind="stable")
         salida.to_csv(opath, index=False, encoding="utf-8")
 

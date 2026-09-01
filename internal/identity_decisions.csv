@@ -1,7 +1,4 @@
 # Decisiones de identidad de autor — revisión humana
-# Fusionado por src/review/merge_decisions.py: incluye la exportación más
-# reciente MÁS las decisiones de rondas anteriores cuyo caso ya no aparece
-# en la cola viva (ver D-263 en SESSION_NOTES.md). No editar a mano.
 # pendiente: no se aplica nada; el caso sigue en la cola
 # misma: une las firmas en una identidad consolidada
 # distintas: no une nada; sirve para detectar contradicciones
@@ -11,227 +8,343 @@
 # orcid_incorrecto: RETIRA la asignación: la ficha vuelve a no tener ORCID
 # orcid_encontrado: añade la asignación con el identificador tecleado
 # orcid_no_encontrado: registra que alguien buscó y no encontró registro
-"caso_id","cola","firmas","veredicto","orcid_propuesto","nota","fecha"
-"afil-Arenas-Massa A.","Candidato por afiliación","Arenas-Massa A.","misma","","","2026-08-05"
-"afil-Barbieri G.G.","Candidato por afiliación","Barbieri G.G.","misma","","","2026-08-05"
-"afil-Busquets P.","Candidato por afiliación","Busquets P.","misma","","","2026-08-05"
-"afil-Caffarena P.","Candidato por afiliación","Caffarena P.","misma","","","2026-08-05"
-"afil-Escobar-González S.","Candidato por afiliación","Escobar-González S.","misma","","","2026-08-05"
-"afil-Ferre Contreras A.","Candidato por afiliación","Ferre Contreras A.","misma","","","2026-08-26"
-"afil-Jeria-Espinoza V.","Candidato por afiliación","Jeria-Espinoza V.","pendiente","","","2026-08-05"
-"afil-Landskron G.","Candidato por afiliación","Landskron G.","misma","","","2026-08-05"
-"afil-López V.","Candidato por afiliación","López V.","misma","","","2026-08-05"
-"afil-López-Soto P.","Candidato por afiliación","López-Soto P.","misma","","","2026-08-05"
-"afil-Mendez-Rebolledo G.","Candidato por afiliación","Mendez-Rebolledo G.","misma","","","2026-08-05"
-"afil-Ortiz F.","Candidato por afiliación","Ortiz F.","misma","","","2026-08-05"
-"afil-Poblete Alday P.","Candidato por afiliación","Poblete Alday P.","misma","","","2026-08-05"
-"afil-Ramos-Alarcón M.B.","Candidato por afiliación","Ramos-Alarcón M.B.","misma","","","2026-08-05"
-"afil-Sánchez M.","Candidato por afiliación","Sánchez M.","misma","","","2026-08-05"
-"afil-Sánchez-Duque C.","Candidato por afiliación","Sánchez-Duque C.","misma","","","2026-08-05"
-"afil-Venegas M.","Candidato por afiliación","Venegas M.","misma","","","2026-08-05"
-"afil-de la Fuente M.","Candidato por afiliación","de la Fuente M.","misma","","","2026-08-05"
-"afil-multi-0000-0001-7380-4753","Mismo ORCID por afiliación","Giordanino E. | Giordanino E.F.","misma","","","2026-08-05"
-"conf-Castro-Sepúlveda M.","ORCID en conflicto","Castro-Sepúlveda M.","misma","","","2026-09-01"
-"desac-Castro M.","Fuentes en desacuerdo","Castro M.","distintas","","Magalena Castro y Mauricio Castro son dos personas distintas. Magdalena: 0000-0002-5482-4676 Mauricio:  https://orcid.org/0000-0002-2270-299X","2026-09-01"
-"desac-Elorrieta V.","Fuentes en desacuerdo","Elorrieta V.","distintas","","","2026-08-05"
-"e09-Metabolism","Firma sin forma de persona","Metabolism","no_es_persona","","","2026-08-26"
-"e09-Movement Sciences (NUTRIM)","Firma sin forma de persona","Movement Sciences (NUTRIM)","no_es_persona","","","2026-08-26"
-"e09-School of Psychology","Firma sin forma de persona","School of Psychology","no_es_persona","","","2026-08-26"
-"e09-and Senior Lecturer","Firma sin forma de persona","and Senior Lecturer","no_es_persona","","","2026-08-26"
-"noverif-Altamirano M.","ORCID no verificable","Altamirano M.","pendiente","","",""
-"noverif-Barbieri G.G.","ORCID no verificable","Barbieri G.G.","pendiente","","",""
-"noverif-Bencina Matus F.","ORCID no verificable","Bencina Matus F.","orcid_incorrecto","","","2026-08-26"
-"noverif-Beytia Osses I.","ORCID no verificable","Beytia Osses I.","orcid_correcto","","","2026-08-26"
-"noverif-Buchuk P.","ORCID no verificable","Buchuk P.","orcid_incorrecto","","","2026-08-26"
-"noverif-Bustamante A.","ORCID no verificable","Bustamante A.","pendiente","","",""
-"noverif-Cartaya M.A.","ORCID no verificable","Cartaya M.A.","orcid_correcto","","","2026-08-26"
-"noverif-Cortina A.H.","ORCID no verificable","Cortina A.H.","pendiente","","",""
-"noverif-Cárdenas D.C.","ORCID no verificable","Cárdenas D.C.","pendiente","","",""
-"noverif-Cárdenas Larenas J.P.","ORCID no verificable","Cárdenas Larenas J.P.","orcid_correcto","","","2026-08-26"
-"noverif-Dávila C.M.","ORCID no verificable","Dávila C.M.","pendiente","","",""
-"noverif-Figueroa F.C.","ORCID no verificable","Figueroa F.C.","orcid_correcto","","","2026-08-26"
-"noverif-Gonzalez-Valderrama A.","ORCID no verificable","Gonzalez-Valderrama A.","pendiente","","",""
-"noverif-González-Hernández J.","ORCID no verificable","González-Hernández J.","pendiente","","",""
-"noverif-González-Valderrama A.","ORCID no verificable","González-Valderrama A.","pendiente","","",""
-"noverif-Gálvez M.","ORCID no verificable","Gálvez M.","orcid_incorrecto","","","2026-08-26"
-"noverif-Hernández R.N.","ORCID no verificable","Hernández R.N.","pendiente","","",""
-"noverif-Jeria-Espinoza V.","ORCID no verificable","Jeria-Espinoza V.","pendiente","","",""
-"noverif-Jorquera J.","ORCID no verificable","Jorquera J.","pendiente","","",""
-"noverif-Landreau C.C.","ORCID no verificable","Landreau C.C.","pendiente","","",""
-"noverif-Lucero-Mora J.","ORCID no verificable","Lucero-Mora J.","orcid_correcto","","","2026-08-26"
-"noverif-Mancilla R.","ORCID no verificable","Mancilla R.","orcid_correcto","","","2026-08-26"
-"noverif-Martin P.A.Q.S.","ORCID no verificable","Martin P.A.Q.S.","pendiente","","",""
-"noverif-Molina M.","ORCID no verificable","Molina M.","orcid_incorrecto","","","2026-08-26"
-"noverif-Moraga Concha J.","ORCID no verificable","Moraga Concha J.","orcid_correcto","","","2026-08-26"
-"noverif-Moyano C.","ORCID no verificable","Moyano C.","orcid_correcto","","","2026-08-26"
-"noverif-Moyano Davila C.","ORCID no verificable","Moyano Davila C.","orcid_incorrecto","","","2026-08-26"
-"noverif-Moyano Dávila C.","ORCID no verificable","Moyano Dávila C.","orcid_incorrecto","","","2026-08-26"
-"noverif-Murray N.P.","ORCID no verificable","Murray N.P.","orcid_correcto","","","2026-08-26"
-"noverif-Norambuena C.","ORCID no verificable","Norambuena C.","pendiente","","",""
-"noverif-Ortiz F.","ORCID no verificable","Ortiz F.","pendiente","","",""
-"noverif-Ramos A.","ORCID no verificable","Ramos A.","pendiente","","",""
-"noverif-Serrano M.J.","ORCID no verificable","Serrano M.J.","pendiente","","",""
-"noverif-Tavera A.T.","ORCID no verificable","Tavera A.T.","pendiente","","",""
-"noverif-Torrealba F.P.","ORCID no verificable","Torrealba F.P.","pendiente","","",""
-"noverif-Valderrama P.","ORCID no verificable","Valderrama P.","pendiente","","",""
-"noverif-Valencia I.","ORCID no verificable","Valencia I.","orcid_incorrecto","","","2026-08-26"
-"noverif-Vasquez F.","ORCID no verificable","Vasquez F.","orcid_incorrecto","","","2026-08-26"
-"noverif-Villarroel N.C.","ORCID no verificable","Villarroel N.C.","pendiente","","",""
-"noverif-Vásquez F.","ORCID no verificable","Vásquez F.","pendiente","","",""
-"noverif-Zañartu T.V.","ORCID no verificable","Zañartu T.V.","pendiente","","",""
-"oadesac-Cancino J.","OpenAlex discrepa","Cancino J.","orcid_incorrecto","","","2026-09-01"
-"oadesac-Castro M.","OpenAlex discrepa","Castro M.","orcid_correcto","","Magdalena Catro y Mauricio Catro son dos personas distintas. ","2026-09-01"
-"oadesac-Herrero J.","OpenAlex discrepa","Herrero J.","orcid_correcto","","","2026-09-01"
-"oadesac-Ortiz F.","OpenAlex discrepa","Ortiz F.","orcid_correcto","","","2026-09-01"
-"oadesac-Salvadó J.A.","OpenAlex discrepa","Salvadó J.A.","pendiente","","",""
-"oadesac-Águila D.","OpenAlex discrepa","Águila D.","pendiente","","",""
-"orcid-0000-0001-6065-5218","ORCID compartido","Galleguillos R. | Galleguillos R.B.","misma","","","2026-08-05"
-"orcid-0000-0002-0533-4531","ORCID compartido","Giglio A. | Giglio Jimenez A.","misma","","","2026-08-05"
-"orcid-0000-0002-1781-062X","ORCID compartido","Orellana Donoso M. | Orellana-Donoso M.","misma","","","2026-08-05"
-"orcid-0000-0002-2270-299X","ORCID compartido","Castro M. | Castro-Sepulveda M.","misma","","","2026-08-05"
-"orcid-0000-0002-4312-1318","ORCID compartido","Lopez-Arana S. | López-Arana S.","misma","","","2026-08-05"
-"orcid-0000-0002-4411-8655","ORCID compartido","Castillo O. | Castillo-Valenzuela O.","misma","","","2026-08-05"
-"orcid-0000-0002-5832-7327","ORCID compartido","Strauss F.-J. | Strauss F.J.","misma","","","2026-08-05"
-"orcid-0000-0002-6357-3469","ORCID compartido","Moyano C. | Moyano Davila C.","misma","","","2026-09-01"
-"orcid-0000-0002-7140-4294","ORCID compartido","Hartmann D. | Hartmann Schatloff D.","misma","","","2026-08-05"
-"orcid-0000-0002-9315-9365","ORCID compartido","Henriquez-Olguin C. | Henriquez-Olguín C. | Henríquez-Olguín C.","pendiente","","","2026-08-05"
-"orcid-0000-0003-0051-9833","ORCID compartido","Núnez-Lisboa M. | Núñez-Lisboa M.","misma","","","2026-08-05"
-"orcid-0000-0003-0402-5072","ORCID compartido","Álvarez C. | Álvarez-Valdés C.","misma","","","2026-08-05"
-"orcid-0000-0003-2175-2941","ORCID compartido","Foxley V.G. | Gubbins V. | Gubbins-Foxley V.","misma","","","2026-09-01"
-"orcid-0000-0003-3454-4252","ORCID compartido","Pizarro S. | Pizarro S.I.","misma","","","2026-08-05"
-"orcid-0000-0003-3620-9861","ORCID compartido","Cancino-Lopez J. | Cancino-López J.","misma","","","2026-08-05"
-"orcid-0000-0003-4763-074X","ORCID compartido","Diaz F. | Díaz F.","misma","","https://www.scopus.com/authid/detail.uri?authorId=35195498000","2026-08-05"
-"orcid-0009-0008-1613-0156","ORCID compartido","Lomboy Finsterbusch M.I. | Lomboy M.","misma","","","2026-08-05"
-"p03-arenasmassa","Variantes de nombre","Arenas-Massa A. | Arenas-Massa Á.","misma","","","2026-08-05"
-"p03-avilesdorlhiac","Variantes de nombre","Avilès Dorlhiac R. | Avilés-Dorlhiac R.","misma","","","2026-08-05"
-"p03-ballesteros","Variantes de nombre","Ballesteros P. | Ballesteros P. P.","pendiente","","","2026-08-05"
-"p03-caffarenabarcenilla","Variantes de nombre","Caffarena Barcenilla P. | Caffarena-Barcenilla C.","pendiente","","","2026-08-05"
-"p03-cancinolopez","Variantes de nombre","Cancino-Lopez J. | Cancino-López J.","misma","","","2026-08-05"
-"p03-carvajal","Variantes de nombre","Carvajal C. | Carvajal G.","pendiente","","","2026-08-05"
-"p03-castillo","Variantes de nombre","Castillo N. | Castillo O.","pendiente","","","2026-08-05"
-"p03-castillovalenzuela","Variantes de nombre","Castillo Valenzuela O. | Castillo-Valenzuela O.","misma","","","2026-08-05"
-"p03-castrosepulveda","Variantes de nombre","Castro-Sepulveda M. | Castro-Sepúlveda M.","misma","","","2026-08-05"
-"p03-ceronml","Variantes de nombre","Ceron M.L. | Cerón M.L.","misma","","","2026-08-05"
-"p03-crisostomoflores","Variantes de nombre","Crisóstomo Flores P. | Crisóstomo-Flores P.","misma","","","2026-08-05"
-"p03-dela","Variantes de nombre","De la Fuente López M. | De la Fuente M. | de la Cruz P.S.","pendiente","","","2026-08-05"
-"p03-diaz","Variantes de nombre","Diaz F. | Díaz F.","misma","","","2026-08-05"
-"p03-dominguez","Variantes de nombre","Dominguez A. | Domínguez A.","misma","","","2026-08-05"
-"p03-garcia","Variantes de nombre","Garcia J. | Garcia K. | García F.","pendiente","","","2026-08-05"
-"p03-gigliojimenez","Variantes de nombre","Giglio Jimenez A. | Giglio Jiménez A.","misma","","","2026-08-05"
-"p03-gomezbarbieri","Variantes de nombre","Gomez Barbieri G. | Gómez Barbieri G.","misma","","","2026-08-05"
-"p03-gonzalez","Variantes de nombre","González A. | González I.","pendiente","","","2026-08-05"
-"p03-gonzalezvalderrama","Variantes de nombre","Gonzalez- Valderrama A. | Gonzalez-Valderrama A. | González-Valderrama A.","pendiente","","","2026-08-05"
-"p03-gutierrez","Variantes de nombre","Gutierrez M. | Gutiérrez J. | Gutiérrez S.","pendiente","","","2026-08-05"
-"p03-hasbun","Variantes de nombre","Hasbun P. | Hasbún P.","misma","","","2026-08-05"
-"p03-henriquezolguin","Variantes de nombre","Henriquez-Olguin C. | Henriquez-Olguín C. | Henríquez-Olguin C. | Henríquez-Olguín C.","pendiente","","","2026-08-05"
-"p03-ibanez","Variantes de nombre","Ibañez H. | Ibañez V.","pendiente","","","2026-08-05"
-"p03-jimenezag","Variantes de nombre","Jimenez A.G. | Jiménez A.G.","misma","","","2026-08-05"
-"p03-lopezarana","Variantes de nombre","Lopez-Arana S. | López Arana S. | López-Arana S.","pendiente","","","2026-08-05"
-"p03-martinez","Variantes de nombre","Martinez M. | Martínez M.","pendiente","","","2026-08-05"
-"p03-martinezmardones","Variantes de nombre","Martinez-Mardones M. | Martinez-Mardones M.B.","pendiente","","","2026-08-05"
-"p03-massaaa","Variantes de nombre","Massa A.A. | Massa Á.A.","misma","","","2026-08-05"
-"p03-molina","Variantes de nombre","Molina C. | Molina M.","pendiente","","","2026-08-05"
-"p03-moralessepulveda","Variantes de nombre","Morales Sepúlveda J.P. | Morales-Sepulveda J.P.","misma","","","2026-08-05"
-"p03-moyanodavila","Variantes de nombre","Moyano Davila C. | Moyano Dávila C.","misma","","","2026-08-05"
-"p03-nunezlisboa","Variantes de nombre","Nuñez-Lisboa M. | Núñez-Lisboa M.N.","pendiente","","","2026-08-05"
-"p03-orellanadonoso","Variantes de nombre","Orellana Donoso M. | Orellana-Donoso M.I.","pendiente","","","2026-08-05"
-"p03-pinozuniga","Variantes de nombre","Pino-Zuñiga J. | Pino-Zúñiga J.","misma","","","2026-08-05"
-"p03-ponce","Variantes de nombre","Ponce D. | Ponce N. | Ponce P.","pendiente","","","2026-08-05"
-"p03-ramos","Variantes de nombre","Ramos A. | Ramos T.","pendiente","","","2026-08-05"
-"p03-reyes","Variantes de nombre","Reyes J. | Reyes M.","pendiente","","","2026-08-05"
-"p03-rodriguez","Variantes de nombre","Rodríguez C. | Rodríguez I.","pendiente","","","2026-08-05"
-"p03-ruizriquelme","Variantes de nombre","Ruiz Riquelme P. | Ruiz-Riquelme P.","misma","","","2026-08-05"
-"p03-salas","Variantes de nombre","Salas C. | Salas N.","pendiente","","","2026-08-05"
-"p03-sanchezduque","Variantes de nombre","Sanchez-Duque C.G. | Sánchez-Duque C.","misma","","","2026-08-05"
-"p03-sepulveda","Variantes de nombre","Sepulveda I. | Sepúlveda A I. | Sepúlveda P. P.","pendiente","","","2026-08-05"
-"p03-soto","Variantes de nombre","Soto L. | Soto M.","pendiente","","","2026-08-05"
-"p03-tabiloprieto","Variantes de nombre","Tabilo Prieto I. | Tabilo-Prieto I.","misma","","","2026-08-05"
-"p03-tapia","Variantes de nombre","Tapia I. | Tapia V.","pendiente","","","2026-08-05"
-"p03-valderrama","Variantes de nombre","Valderrama E P. | Valderrama P. | Valderrama Y.","pendiente","","","2026-08-05"
-"p03-valenzuela","Variantes de nombre","Valenzuela C. | Valenzuela L. G. | Valenzuela R. | Valenzuela T.","pendiente","","","2026-08-05"
-"p03-vallejos","Variantes de nombre","Vallejos G. | Vallejos P. G.","pendiente","","","2026-08-05"
-"p03-vansint","Variantes de nombre","Van Sint Jan N. | van Sint Jan D N.","pendiente","","","2026-08-05"
-"p03-vasquez","Variantes de nombre","Vasquez F. | Vásquez G.","pendiente","","","2026-08-05"
-"p03-zamorano","Variantes de nombre","Zamorano A. | Zamorano S.","pendiente","","","2026-08-05"
-"p04-Bressan, Rodrigo","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Castillo, Oscar","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-De la Fuente López, Marjorie","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Franco, Pamela","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Gutiérrez, Juan","Varios Scopus ID","","misma","","","2026-08-26"
-"p04-Hartmann Schatloff, Dan","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Ibáñez, Agustín","Varios Scopus ID","","distintas","","","2026-08-26"
-"p04-Lin, John C.","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Marques, Tiago Reis","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Miyata, Jun","Varios Scopus ID","","distintas","","","2026-08-26"
-"p04-Moreno, Sergio","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Moya, Patricia","Varios Scopus ID","","misma","","","2026-08-26"
-"p04-Qian, Hongwei","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Quezada, Mauricio","Varios Scopus ID","","misma","","","2026-08-26"
-"p04-Richter, Erik A.","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Rojas, Dario","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Rojas-Costa, Gonzalo M.","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Schumann, Gunter","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Torres, Keila","Varios Scopus ID","","pendiente","","","2026-08-05"
-"p04-Wolvius, Eppo","Varios Scopus ID","","pendiente","","","2026-08-05"
-"sinorcid-Dreyse J.","Firma sin ORCID","Dreyse J.","orcid_no_encontrado","","","2026-08-26"
-"sinorcid-Gonzalez-Valderrama A.","Firma sin ORCID","Gonzalez-Valderrama A.","orcid_no_encontrado","","","2026-08-26"
-"sinorcid-Jorquera J.","Firma sin ORCID","Jorquera J.","orcid_no_encontrado","","","2026-08-26"
-"sinorcid-Pedreros C.","Firma sin ORCID","Pedreros C.","orcid_no_encontrado","","","2026-08-26"
-"sinorcid-Reccius A.","Firma sin ORCID","Reccius A.","orcid_no_encontrado","","","2026-08-26"
-"sinorcid-Salas-Guzmán N.","Firma sin ORCID","Salas-Guzmán N.","orcid_no_encontrado","","","2026-08-26"
-"ver-Abara J.F.","ORCID sin confirmar","Abara J.F.","orcid_correcto","","","2026-09-01"
-"ver-Arenas-Massa A.","ORCID sin confirmar","Arenas-Massa A.","orcid_correcto","","","2026-09-01"
-"ver-Arroyo A.","ORCID sin confirmar","Arroyo A.","orcid_correcto","","","2026-09-01"
-"ver-Benites M.","ORCID sin confirmar","Benites M.","orcid_correcto","","","2026-09-01"
-"ver-Busquets P.","ORCID sin confirmar","Busquets P.","orcid_correcto","","","2026-09-01"
-"ver-Caffarena P.","ORCID sin confirmar","Caffarena P.","orcid_correcto","","","2026-09-01"
-"ver-Castillo N.","ORCID sin confirmar","Castillo N.","orcid_correcto","","","2026-09-01"
-"ver-De la Fuente M.","ORCID sin confirmar","De la Fuente M.","orcid_correcto","","","2026-08-26"
-"ver-Dominguez A.","ORCID sin confirmar","Dominguez A.","orcid_correcto","","","2026-09-01"
-"ver-Dreyse J.","ORCID sin confirmar","Dreyse J.","orcid_correcto","","https://orcid.org/0000-0002-8201-5956","2026-09-01"
-"ver-Díaz F.","ORCID sin confirmar","Díaz F.","orcid_correcto","","","2026-08-26"
-"ver-Escobar-González S.","ORCID sin confirmar","Escobar-González S.","orcid_correcto","","https://orcid.org/0000-0003-2786-1487","2026-09-01"
-"ver-Ferre Contreras A.","ORCID sin confirmar","Ferre Contreras A.","orcid_correcto","","https://orcid.org/0000-0003-1770-244X","2026-09-01"
-"ver-Fuente M.D.L.","ORCID sin confirmar","Fuente M.D.L.","orcid_correcto","","https://orcid.org/0000-0003-0577-7604","2026-09-01"
-"ver-Gaete M.","ORCID sin confirmar","Gaete M.","orcid_correcto","","","2026-08-26"
-"ver-García F.","ORCID sin confirmar","García F.","orcid_incorrecto","","","2026-09-01"
-"ver-Giordanino E.","ORCID sin confirmar","Giordanino E.","orcid_correcto","","","2026-09-01"
-"ver-Giordanino E.F.","ORCID sin confirmar","Giordanino E.F.","orcid_correcto","","","2026-09-01"
-"ver-González A.","ORCID sin confirmar","González A.","orcid_incorrecto","","","2026-09-01"
-"ver-Gómez G.","ORCID sin confirmar","Gómez G.","orcid_incorrecto","","","2026-09-01"
-"ver-Gómez G.G.","ORCID sin confirmar","Gómez G.G.","orcid_incorrecto","","","2026-09-01"
-"ver-Huepe-Artigas D.","ORCID sin confirmar","Huepe-Artigas D.","orcid_incorrecto","","","2026-09-01"
-"ver-Ishtiaque T.A.","ORCID sin confirmar","Ishtiaque T.A.","orcid_correcto","","","2026-09-01"
-"ver-Johansen A.","ORCID sin confirmar","Johansen A.","orcid_correcto","","","2026-09-01"
-"ver-Landskron G.","ORCID sin confirmar","Landskron G.","orcid_correcto","","","2026-09-01"
-"ver-López V.","ORCID sin confirmar","López V.","orcid_correcto","","","2026-09-01"
-"ver-López-Soto P.","ORCID sin confirmar","López-Soto P.","orcid_correcto","","","2026-09-01"
-"ver-Macho R.A.M.","ORCID sin confirmar","Macho R.A.M.","pendiente","","",""
-"ver-Martinez-Mardones M.","ORCID sin confirmar","Martinez-Mardones M.","pendiente","","",""
-"ver-Martinez-Mardones M.B.","ORCID sin confirmar","Martinez-Mardones M.B.","pendiente","","",""
-"ver-Martínez-Mardones M.B.","ORCID sin confirmar","Martínez-Mardones M.B.","pendiente","","",""
-"ver-Mendez-Rebolledo G.","ORCID sin confirmar","Mendez-Rebolledo G.","orcid_correcto","","","2026-09-01"
-"ver-Molina C.","ORCID sin confirmar","Molina C.","pendiente","","",""
-"ver-Orellana-Donoso M.I.","ORCID sin confirmar","Orellana-Donoso M.I.","pendiente","","",""
-"ver-Poblete Alday P.","ORCID sin confirmar","Poblete Alday P.","pendiente","","",""
-"ver-Ponce D.","ORCID sin confirmar","Ponce D.","pendiente","","",""
-"ver-Prieto I.T.","ORCID sin confirmar","Prieto I.T.","pendiente","","",""
-"ver-Quezada M.","ORCID sin confirmar","Quezada M.","orcid_correcto","","","2026-09-01"
-"ver-Ramirez P.","ORCID sin confirmar","Ramirez P.","pendiente","","",""
-"ver-Ramos T.","ORCID sin confirmar","Ramos T.","pendiente","","",""
-"ver-Ramos-Alarcón M.B.","ORCID sin confirmar","Ramos-Alarcón M.B.","pendiente","","",""
-"ver-Reccius A.","ORCID sin confirmar","Reccius A.","pendiente","","",""
-"ver-Reyes M.","ORCID sin confirmar","Reyes M.","pendiente","","",""
-"ver-Rodríguez C.","ORCID sin confirmar","Rodríguez C.","pendiente","","",""
-"ver-Rojas D.","ORCID sin confirmar","Rojas D.","orcid_correcto","","","2026-08-26"
-"ver-Salas C.","ORCID sin confirmar","Salas C.","pendiente","","",""
-"ver-Shabani R.","ORCID sin confirmar","Shabani R.","pendiente","","",""
-"ver-Soto M.","ORCID sin confirmar","Soto M.","pendiente","","",""
-"ver-Sánchez M.","ORCID sin confirmar","Sánchez M.","pendiente","","",""
-"ver-Torp O.","ORCID sin confirmar","Torp O.","pendiente","","",""
-"ver-Urrutia A.","ORCID sin confirmar","Urrutia A.","pendiente","","",""
-"ver-Val V.","ORCID sin confirmar","Val V.","pendiente","","",""
-"ver-Valenzuela C.","ORCID sin confirmar","Valenzuela C.","pendiente","","",""
-"ver-Vallejos G.","ORCID sin confirmar","Vallejos G.","pendiente","","",""
-"ver-Varas-Diaz G.","ORCID sin confirmar","Varas-Diaz G.","pendiente","","",""
-"ver-de la Fuente M.","ORCID sin confirmar","de la Fuente M.","pendiente","","",""
+# unidad_confirmada: registra la unidad académica declarada; APLICARLA al pipeline —traducirla al vocabulario oficial y que deje de figurar 'No determinada'— es un paso aparte, no automático (requiere el mismo criterio institucional de T-02)
+# unidad_no_corresponde: descarta el candidato; no cambia nada
+# Generado por internal/revision_identidad.html, fusionado con decisiones
+# históricas cuyo caso ya no aparece en la cola viva
+# Exportado: 2026-09-01 · Fusionado: 2026-09-01
+caso_id,cola,firmas,veredicto,orcid_propuesto,nota,fecha
+e09-Metabolism,Firma sin forma de persona,Metabolism,no_es_persona,,,2026-08-26
+e09-Movement Sciences (NUTRIM),Firma sin forma de persona,Movement Sciences (NUTRIM),no_es_persona,,,2026-08-26
+e09-School of Psychology,Firma sin forma de persona,School of Psychology,no_es_persona,,,2026-08-26
+e09-and Senior Lecturer,Firma sin forma de persona,and Senior Lecturer,no_es_persona,,,2026-08-26
+afil-multi-0000-0001-7380-4753,Mismo ORCID por afiliación,Giordanino E. | Giordanino E.F.,misma,,,2026-08-05
+orcid-0000-0001-6065-5218,ORCID compartido,Galleguillos R. | Galleguillos R.B.,misma,,,2026-08-05
+orcid-0000-0002-0533-4531,ORCID compartido,Giglio A. | Giglio Jimenez A.,misma,,,2026-08-05
+orcid-0000-0002-2270-299X,ORCID compartido,Castro M. | Castro-Sepulveda M.,misma,,,2026-08-05
+orcid-0000-0002-4411-8655,ORCID compartido,Castillo O. | Castillo-Valenzuela O.,misma,,,2026-08-05
+orcid-0000-0002-6357-3469,ORCID compartido,Moyano C. | Moyano Davila C.,misma,,,2026-09-01
+orcid-0000-0002-7140-4294,ORCID compartido,Hartmann D. | Hartmann Schatloff D.,misma,,,2026-08-05
+orcid-0000-0003-0402-5072,ORCID compartido,Álvarez C. | Álvarez-Valdés C.,misma,,,2026-08-05
+orcid-0000-0003-3454-4252,ORCID compartido,Pizarro S. | Pizarro S.I.,misma,,,2026-08-05
+orcid-0009-0008-1613-0156,ORCID compartido,Lomboy Finsterbusch M.I. | Lomboy M.,misma,,,2026-08-05
+orcid-0000-0003-2175-2941,ORCID compartido,Foxley V.G. | Gubbins V. | Gubbins-Foxley V.,misma,,,2026-09-01
+ver-Abara J.F.,ORCID sin confirmar,Abara J.F.,orcid_correcto,,,2026-09-01
+ver-Arenas-Massa A.,ORCID sin confirmar,Arenas-Massa A.,orcid_correcto,,,2026-09-01
+ver-Arroyo A.,ORCID sin confirmar,Arroyo A.,orcid_incorrecto,,"Corregido tras revisión: contradecía dspacedesac-Arroyo A. y aadesac-Arroyo A. El usuario verificó independientemente en el registro público de ORCID que 0000-0002-6248-9257 declara Scopus Author ID 55159442300 (distinto del 58862866100 que nuestro sistema tenía asociado a esta firma), y que 3 de las 4 publicaciones de Arroyo A. en nuestro corpus (mismos DOI, no sólo mismo nombre) son las que DSpace y el autoarchivo atribuyen a ese ORCID. El pipeline había enganchado el Scopus ID de otra persona.",2026-09-01
+dspacedesac-Arroyo A.,Repositorio institucional discrepa,Arroyo A.,orcid_incorrecto,,,2026-09-01
+aadesac-Arroyo A.,Inventario de autoarchivo discrepa,Arroyo A.,orcid_incorrecto,,,2026-09-01
+dspacedesac-Balboa E.,Repositorio institucional discrepa,Balboa E.,orcid_correcto,,,2026-09-01
+ver-Benites M.,ORCID sin confirmar,Benites M.,orcid_correcto,,,2026-09-01
+ver-Busquets P.,ORCID sin confirmar,Busquets P.,orcid_correcto,,,2026-09-01
+ver-Caffarena P.,ORCID sin confirmar,Caffarena P.,orcid_correcto,,,2026-09-01
+oadesac-Cancino J.,OpenAlex discrepa,Cancino J.,orcid_incorrecto,,,2026-09-01
+dspacedesac-Candia-Véjar A.,Repositorio institucional discrepa,Candia-Véjar A.,orcid_correcto,,,2026-09-01
+ver-Castillo N.,ORCID sin confirmar,Castillo N.,orcid_correcto,,,2026-09-01
+oadesac-Castro M.,OpenAlex discrepa,Castro M.,orcid_correcto,,Magdalena Catro y Mauricio Catro son dos personas distintas. ,2026-09-01
+desac-Castro M.,Fuentes en desacuerdo,Castro M.,distintas,,Magalena Castro y Mauricio Castro son dos personas distintas. Magdalena: 0000-0002-5482-4676 Mauricio:  https://orcid.org/0000-0002-2270-299X,2026-09-01
+conf-Castro-Sepúlveda M.,ORCID en conflicto,Castro-Sepúlveda M.,misma,,,2026-09-01
+ver-De la Fuente M.,ORCID sin confirmar,De la Fuente M.,orcid_correcto,,,2026-08-26
+ver-Dominguez A.,ORCID sin confirmar,Dominguez A.,orcid_correcto,,,2026-09-01
+ver-Dreyse J.,ORCID sin confirmar,Dreyse J.,orcid_correcto,,https://orcid.org/0000-0002-8201-5956,2026-09-01
+ver-Díaz F.,ORCID sin confirmar,Díaz F.,orcid_correcto,,,2026-08-26
+desac-Elorrieta V.,Fuentes en desacuerdo,Elorrieta V.,distintas,,,2026-08-05
+ver-Escobar-González S.,ORCID sin confirmar,Escobar-González S.,orcid_correcto,,https://orcid.org/0000-0003-2786-1487,2026-09-01
+ver-Ferre Contreras A.,ORCID sin confirmar,Ferre Contreras A.,orcid_correcto,,https://orcid.org/0000-0003-1770-244X,2026-09-01
+ver-Fuente M.D.L.,ORCID sin confirmar,Fuente M.D.L.,orcid_correcto,,https://orcid.org/0000-0003-0577-7604,2026-09-01
+ver-Gaete M.,ORCID sin confirmar,Gaete M.,orcid_correcto,,,2026-08-26
+ver-García F.,ORCID sin confirmar,García F.,orcid_incorrecto,,,2026-09-01
+ver-Giordanino E.,ORCID sin confirmar,Giordanino E.,orcid_correcto,,,2026-09-01
+ver-Giordanino E.F.,ORCID sin confirmar,Giordanino E.F.,orcid_correcto,,,2026-09-01
+ver-González A.,ORCID sin confirmar,González A.,orcid_incorrecto,,,2026-09-01
+ver-Gómez G.,ORCID sin confirmar,Gómez G.,orcid_incorrecto,,,2026-09-01
+ver-Gómez G.G.,ORCID sin confirmar,Gómez G.G.,orcid_incorrecto,,,2026-09-01
+dspacedesac-Hayes-Ortiz T.,Repositorio institucional discrepa,Hayes-Ortiz T.,orcid_correcto,,,2026-09-01
+oadesac-Herrero J.,OpenAlex discrepa,Herrero J.,orcid_correcto,,,2026-09-01
+ver-Huepe-Artigas D.,ORCID sin confirmar,Huepe-Artigas D.,orcid_incorrecto,,,2026-09-01
+ver-Ishtiaque T.A.,ORCID sin confirmar,Ishtiaque T.A.,orcid_correcto,,,2026-09-01
+ver-Johansen A.,ORCID sin confirmar,Johansen A.,orcid_correcto,,,2026-09-01
+ver-Landskron G.,ORCID sin confirmar,Landskron G.,orcid_correcto,,,2026-09-01
+ver-López V.,ORCID sin confirmar,López V.,orcid_correcto,,,2026-09-01
+ver-López-Soto P.,ORCID sin confirmar,López-Soto P.,orcid_correcto,,,2026-09-01
+ver-Macho R.A.M.,ORCID sin confirmar,Macho R.A.M.,orcid_correcto,,,2026-09-01
+ver-Martinez-Mardones M.,ORCID sin confirmar,Martinez-Mardones M.,orcid_correcto,,,2026-09-01
+ver-Martinez-Mardones M.B.,ORCID sin confirmar,Martinez-Mardones M.B.,orcid_correcto,,,2026-09-01
+ver-Martínez-Mardones M.B.,ORCID sin confirmar,Martínez-Mardones M.B.,orcid_correcto,,,2026-09-01
+ver-Mendez-Rebolledo G.,ORCID sin confirmar,Mendez-Rebolledo G.,orcid_correcto,,,2026-09-01
+ver-Molina C.,ORCID sin confirmar,Molina C.,pendiente,,,2026-09-01
+ver-Orellana-Donoso M.I.,ORCID sin confirmar,Orellana-Donoso M.I.,orcid_correcto,,"Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el inventario de autoarchivo de biblioteca nombra a «Orellana-Donoso, Mathias» con este mismo ORCID en una obra propia (10.3390/life14101301).",2026-09-01
+oadesac-Ortiz F.,OpenAlex discrepa,Ortiz F.,orcid_correcto,,,2026-09-01
+ver-Poblete Alday P.,ORCID sin confirmar,Poblete Alday P.,orcid_correcto,,"Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Poblete Alday, Patricia» con este mismo ORCID en una obra propia (10.5209/alhi.93678).",2026-09-01
+ver-Ponce D.,ORCID sin confirmar,Ponce D.,orcid_incorrecto,,,2026-09-01
+ver-Prieto I.T.,ORCID sin confirmar,Prieto I.T.,orcid_correcto,,,2026-09-01
+ver-Quezada M.,ORCID sin confirmar,Quezada M.,orcid_correcto,,,2026-09-01
+ver-Ramirez P.,ORCID sin confirmar,Ramirez P.,orcid_incorrecto,,,2026-09-01
+ver-Ramos T.,ORCID sin confirmar,Ramos T.,orcid_incorrecto,,,2026-09-01
+ver-Ramos-Alarcón M.B.,ORCID sin confirmar,Ramos-Alarcón M.B.,pendiente,,,2026-09-01
+ver-Reccius A.,ORCID sin confirmar,Reccius A.,pendiente,,,2026-09-01
+ver-Reyes M.,ORCID sin confirmar,Reyes M.,pendiente,,,2026-09-01
+ver-Rodríguez C.,ORCID sin confirmar,Rodríguez C.,pendiente,,,2026-09-01
+ver-Rojas D.,ORCID sin confirmar,Rojas D.,orcid_correcto,,,2026-08-26
+aadesac-Rojas-Costa G.M.,Inventario de autoarchivo discrepa,Rojas-Costa G.M.,orcid_correcto,,,2026-09-01
+ver-Salas C.,ORCID sin confirmar,Salas C.,orcid_correcto,,,2026-09-01
+oadesac-Salvadó J.A.,OpenAlex discrepa,Salvadó J.A.,orcid_correcto,,,2026-09-01
+ver-Shabani R.,ORCID sin confirmar,Shabani R.,orcid_correcto,,,2026-09-01
+dspacedesac-Shabani R.,Repositorio institucional discrepa,Shabani R.,orcid_correcto,,,2026-09-01
+ver-Soto M.,ORCID sin confirmar,Soto M.,pendiente,,,2026-09-01
+ver-Sánchez M.,ORCID sin confirmar,Sánchez M.,orcid_correcto,,,2026-09-01
+ver-Torp O.,ORCID sin confirmar,Torp O.,pendiente,,,2026-09-01
+ver-Urrutia A.,ORCID sin confirmar,Urrutia A.,orcid_correcto,,,2026-09-01
+ver-Val V.,ORCID sin confirmar,Val V.,orcid_incorrecto,,,2026-09-01
+ver-Valenzuela C.,ORCID sin confirmar,Valenzuela C.,pendiente,,,2026-09-01
+ver-Vallejos G.,ORCID sin confirmar,Vallejos G.,pendiente,,,2026-09-01
+ver-Varas-Diaz G.,ORCID sin confirmar,Varas-Diaz G.,orcid_correcto,,,2026-09-01
+dspacedesac-Zambrano C.,Repositorio institucional discrepa,Zambrano C.,orcid_correcto,,,2026-09-01
+ver-de la Fuente M.,ORCID sin confirmar,de la Fuente M.,orcid_correcto,,,2026-09-01
+oadesac-Águila D.,OpenAlex discrepa,Águila D.,orcid_correcto,,,2026-09-01
+p03-ballesteros,Variantes de nombre,Ballesteros P. | Ballesteros P. P.,misma,,,2026-08-26
+p03-caffarenabarcenilla,Variantes de nombre,Caffarena Barcenilla P. | Caffarena-Barcenilla C.,distintas,,,2026-08-26
+p03-carvajal,Variantes de nombre,Carvajal C. | Carvajal G.,distintas,,,2026-08-26
+p03-castillo,Variantes de nombre,Castillo N. | Castillo O.,distintas,,,2026-08-26
+p03-dela,Variantes de nombre,De la Fuente López M. | De la Fuente M. | de la Cruz P.S.,distintas,,,2026-08-26
+p03-garcia,Variantes de nombre,Garcia J. | Garcia K. | García F.,distintas,,,2026-08-26
+p03-gonzalez,Variantes de nombre,González A. | González I.,distintas,,,2026-08-26
+p03-gutierrez,Variantes de nombre,Gutierrez M. | Gutiérrez J. | Gutiérrez S.,distintas,,,2026-08-26
+p03-ibanez,Variantes de nombre,Ibañez H. | Ibañez V.,distintas,,,2026-08-26
+p03-martinezmardones,Variantes de nombre,Martinez-Mardones M. | Martinez-Mardones M.B.,misma,,,2026-08-26
+p03-molina,Variantes de nombre,Molina C. | Molina M.,distintas,,,2026-08-26
+p03-nunezlisboa,Variantes de nombre,Nuñez-Lisboa M. | Núñez-Lisboa M.N.,misma,,,2026-08-26
+p03-orellanadonoso,Variantes de nombre,Orellana Donoso M. | Orellana-Donoso M.I.,misma,,,2026-08-26
+p03-ponce,Variantes de nombre,Ponce D. | Ponce N. | Ponce P.,distintas,,,2026-08-26
+p03-ramos,Variantes de nombre,Ramos A. | Ramos T.,distintas,,,2026-08-26
+p03-reyes,Variantes de nombre,Reyes J. | Reyes M.,distintas,,,2026-08-26
+p03-rodriguez,Variantes de nombre,Rodríguez C. | Rodríguez I.,distintas,,,2026-08-26
+p03-salas,Variantes de nombre,Salas C. | Salas N.,distintas,,,2026-08-26
+p03-sanchezduque,Variantes de nombre,Sanchez-Duque C.G. | Sánchez-Duque C.,misma,,,2026-08-05
+p03-sepulveda,Variantes de nombre,Sepulveda I. | Sepúlveda A I. | Sepúlveda P. P.,distintas,,,2026-08-26
+p03-soto,Variantes de nombre,Soto L. | Soto M.,distintas,,,2026-08-26
+p03-tapia,Variantes de nombre,Tapia I. | Tapia V.,distintas,,,2026-08-26
+p03-valderrama,Variantes de nombre,Valderrama E P. | Valderrama P. | Valderrama Y.,distintas,,,2026-08-26
+p03-valenzuela,Variantes de nombre,Valenzuela C. | Valenzuela L. G. | Valenzuela R. | Valenzuela T.,distintas,,,2026-08-26
+p03-vallejos,Variantes de nombre,Vallejos G. | Vallejos P. G.,distintas,,,2026-08-26
+p03-vansint,Variantes de nombre,Van Sint Jan N. | van Sint Jan D N.,distintas,,,2026-08-26
+p03-vasquez,Variantes de nombre,Vasquez F. | Vásquez G.,distintas,,,2026-08-26
+p03-zamorano,Variantes de nombre,Zamorano A. | Zamorano S.,distintas,,,2026-08-26
+aaunidad-Allende-Valenzuela T.-CIPEF,Candidato de unidad académica por autoarchivo,Allende-Valenzuela T.,pendiente,,,
+aaunidad-Allende-Valenzuela T.-Educación parvularia,Candidato de unidad académica por autoarchivo,Allende-Valenzuela T.,pendiente,,,
+aaunidad-Andrade Kobayashi M.-Arte,Candidato de unidad académica por autoarchivo,Andrade Kobayashi M.,pendiente,,,
+aaunidad-Andrade Kobayashi M.-Literatura,Candidato de unidad académica por autoarchivo,Andrade Kobayashi M.,pendiente,,,
+aaunidad-Arenas-Massa Á.-Derecho,Candidato de unidad académica por autoarchivo,Arenas-Massa Á.,pendiente,,,
+aaunidad-Arroyo A.-Medicina,Candidato de unidad académica por autoarchivo,Arroyo A.,pendiente,,,
+aaunidad-Benites M.-Medicina,Candidato de unidad académica por autoarchivo,Benites M.,pendiente,,,
+aaunidad-Bustos-Muñoz D.-Publicidad,Candidato de unidad académica por autoarchivo,Bustos-Muñoz D.,pendiente,,,
+aaunidad-Caffarena P.-CIDOC,Candidato de unidad académica por autoarchivo,Caffarena P.,pendiente,,,
+aaunidad-Caffarena-Barcenilla C.-Educación parvularia,Candidato de unidad académica por autoarchivo,Caffarena-Barcenilla C.,pendiente,,,
+aaunidad-Cancino J.-Enfermería,Candidato de unidad académica por autoarchivo,Cancino J.,pendiente,,,
+aaunidad-Cancino J.-Kinesiología,Candidato de unidad académica por autoarchivo,Cancino J.,pendiente,,,
+aaunidad-Carvajal G.-CIDOC,Candidato de unidad académica por autoarchivo,Carvajal G.,pendiente,,,
+aaunidad-Carvajal G.-Literatura,Candidato de unidad académica por autoarchivo,Carvajal G.,pendiente,,,
+"p04-Castillo, Oscar",Varios Scopus ID,,misma,,,2026-08-26
+aaunidad-Chavez-Reyes A.-Medicina,Candidato de unidad académica por autoarchivo,Chavez-Reyes A.,pendiente,,,
+aaunidad-Cottin M.-Psicología,Candidato de unidad académica por autoarchivo,Cottin M.,pendiente,,,
+aaunidad-Crisóstomo Flores P.-Periodismo,Candidato de unidad académica por autoarchivo,Crisóstomo Flores P.,pendiente,,,
+aaunidad-Crisóstomo-Flores P.-Periodismo,Candidato de unidad académica por autoarchivo,Crisóstomo-Flores P.,pendiente,,,
+"p04-De la Fuente López, Marjorie",Varios Scopus ID,,misma,,,2026-08-26
+aaunidad-De la Fuente M.-Medicina,Candidato de unidad académica por autoarchivo,De la Fuente M.,pendiente,,,
+aaunidad-Diaz F.-Medicina,Candidato de unidad académica por autoarchivo,Diaz F.,pendiente,,,
+aaunidad-Díaz-Galaz L.-Educación parvularia,Candidato de unidad académica por autoarchivo,Díaz-Galaz L.,pendiente,,,
+aaunidad-Escobar-González S.-Educación básica,Candidato de unidad académica por autoarchivo,Escobar-González S.,pendiente,,,
+aaunidad-Farsani D.-Educación básica,Candidato de unidad académica por autoarchivo,Farsani D.,pendiente,,,
+aaunidad-Ferre Contreras A.-Medicina,Candidato de unidad académica por autoarchivo,Ferre Contreras A.,pendiente,,,
+aaunidad-Figueroa-Bustos A.-Periodismo,Candidato de unidad académica por autoarchivo,Figueroa-Bustos A.,pendiente,,,
+aaunidad-Figueroa-Moya D.-Educación parvularia,Candidato de unidad académica por autoarchivo,Figueroa-Moya D.,pendiente,,,
+aaunidad-Giglio A.-Facultad de Medicina y Salud,Candidato de unidad académica por autoarchivo,Giglio A.,pendiente,,,
+aaunidad-Giglio A.-Medicina,Candidato de unidad académica por autoarchivo,Giglio A.,pendiente,,,
+aaunidad-Gubbins V.-Familia,Candidato de unidad académica por autoarchivo,Gubbins V.,pendiente,,,
+"p04-Gutiérrez, Juan",Varios Scopus ID,,misma,,,2026-08-26
+"p04-Hartmann Schatloff, Dan",Varios Scopus ID,,misma,,,2026-08-26
+aaunidad-Hernandez A.-Enfermería,Candidato de unidad académica por autoarchivo,Hernandez A.,pendiente,,,
+aaunidad-Ibáñez-Muñoz R.C.-Educación básica,Candidato de unidad académica por autoarchivo,Ibáñez-Muñoz R.C.,pendiente,,,
+aaunidad-Landskron G.-Medicina,Candidato de unidad académica por autoarchivo,Landskron G.,pendiente,,,
+aaunidad-Letelier Widow G.-Formación General,Candidato de unidad académica por autoarchivo,Letelier Widow G.,pendiente,,,
+aaunidad-Lucero-Mora J.-Odontología,Candidato de unidad académica por autoarchivo,Lucero-Mora J.,pendiente,,,
+"aaunidad-López-Arana S.-Escuela de Nutrición y Dietética, Facultad de Medicina",Candidato de unidad académica por autoarchivo,López-Arana S.,pendiente,,,
+aaunidad-López-Arana S.-Nutrición,Candidato de unidad académica por autoarchivo,López-Arana S.,pendiente,,,
+aaunidad-Mardones-Falcone G.-Arquitectura,Candidato de unidad académica por autoarchivo,Mardones-Falcone G.,pendiente,,,
+aaunidad-Martínez-Mardones M.B.-Medicina,Candidato de unidad académica por autoarchivo,Martínez-Mardones M.B.,pendiente,,,
+aaunidad-Molina M.-Medicina,Candidato de unidad académica por autoarchivo,Molina M.,pendiente,,,
+aaunidad-Montero V.-Arte,Candidato de unidad académica por autoarchivo,Montero V.,pendiente,,,
+"p04-Moreno, Sergio",Varios Scopus ID,,misma,,,2026-08-26
+aaunidad-Moya P.-Odontología,Candidato de unidad académica por autoarchivo,Moya P.,pendiente,,,
+"p04-Moya, Patricia",Varios Scopus ID,,misma,,,2026-08-26
+aaunidad-Moyano Davila C.-Familia,Candidato de unidad académica por autoarchivo,Moyano Davila C.,pendiente,,,
+aaunidad-Moyano Dávila C.-Familia,Candidato de unidad académica por autoarchivo,Moyano Dávila C.,pendiente,,,
+aaunidad-Mujika I.-Kinesiología,Candidato de unidad académica por autoarchivo,Mujika I.,pendiente,,,
+aaunidad-Muszalski H.-Formación General,Candidato de unidad académica por autoarchivo,Muszalski H.,pendiente,,,
+aaunidad-Muzard A.-Psicología,Candidato de unidad académica por autoarchivo,Muzard A.,pendiente,,,
+aaunidad-Olive F.-Medicina,Candidato de unidad académica por autoarchivo,Olive F.,pendiente,,,
+aaunidad-Poblete Alday P.-CIDOC,Candidato de unidad académica por autoarchivo,Poblete Alday P.,pendiente,,,
+"p04-Quezada, Mauricio",Varios Scopus ID,,misma,,,2026-08-26
+aaunidad-Rego T.-Escuela de Filosofía,Candidato de unidad académica por autoarchivo,Rego T.,pendiente,,,
+aaunidad-Rego T.-Formación General,Candidato de unidad académica por autoarchivo,Rego T.,pendiente,,,
+"p04-Rojas, Dario",Varios Scopus ID,,misma,,,2026-08-26
+"p04-Rojas-Costa, Gonzalo M.",Varios Scopus ID,,misma,,,2026-08-26
+aaunidad-Salas-Guzmán N.-Psicología,Candidato de unidad académica por autoarchivo,Salas-Guzmán N.,pendiente,,,
+aaunidad-Santibáñez D.-Educación básica,Candidato de unidad académica por autoarchivo,Santibáñez D.,pendiente,,,
+aaunidad-Santos M.-CIDOC,Candidato de unidad académica por autoarchivo,Santos M.,pendiente,,,
+aaunidad-Silva-Figueroa A.M.-Medicina,Candidato de unidad académica por autoarchivo,Silva-Figueroa A.M.,pendiente,,,
+aaunidad-Simón L.-Nutrición,Candidato de unidad académica por autoarchivo,Simón L.,pendiente,,,
+aaunidad-Sánchez-Duque C.-CIPEF,Candidato de unidad académica por autoarchivo,Sánchez-Duque C.,pendiente,,,
+aaunidad-Sánchez-Duque C.-Educación básica,Candidato de unidad académica por autoarchivo,Sánchez-Duque C.,pendiente,,,
+aaunidad-Tabilo Prieto I.-Familia,Candidato de unidad académica por autoarchivo,Tabilo Prieto I.,pendiente,,,
+aaunidad-Tabilo-Prieto I.-Familia,Candidato de unidad académica por autoarchivo,Tabilo-Prieto I.,pendiente,,,
+"p04-Torres, Keila",Varios Scopus ID,,misma,,,2026-08-26
+aaunidad-Undurraga R.-Familia,Candidato de unidad académica por autoarchivo,Undurraga R.,pendiente,,,
+aaunidad-Valle M.A.-Ingeniería comercial,Candidato de unidad académica por autoarchivo,Valle M.A.,pendiente,,,
+aaunidad-Yanine F.-Facultad de Ingeniería,Candidato de unidad académica por autoarchivo,Yanine F.,pendiente,,,
+aaunidad-Yanine F.-Ingenieria civil informática,Candidato de unidad académica por autoarchivo,Yanine F.,pendiente,,,
+aaunidad-Yanine F.-Ingeniería Civil Industrial,Candidato de unidad académica por autoarchivo,Yanine F.,pendiente,,,
+aaunidad-Yanine F.-Ingeniería civil industrial,Candidato de unidad académica por autoarchivo,Yanine F.,pendiente,,,
+aaunidad-Yanine F.F.-Facultad de Ingeniería,Candidato de unidad académica por autoarchivo,Yanine F.F.,pendiente,,,
+aaunidad-Yanine F.F.-Ingenieria civil informática,Candidato de unidad académica por autoarchivo,Yanine F.F.,pendiente,,,
+aaunidad-Yanine F.F.-Ingeniería Civil Industrial,Candidato de unidad académica por autoarchivo,Yanine F.F.,pendiente,,,
+aaunidad-Yanine F.F.-Ingeniería civil industrial,Candidato de unidad académica por autoarchivo,Yanine F.F.,pendiente,,,
+aaunidad-Zambrano C.-Ingenieria civil informática,Candidato de unidad académica por autoarchivo,Zambrano C.,pendiente,,,
+aaunidad-Zbinden-Foncea H.-Kinesiología,Candidato de unidad académica por autoarchivo,Zbinden-Foncea H.,pendiente,,,
+aaunidad-de la Fuente M.-Medicina,Candidato de unidad académica por autoarchivo,de la Fuente M.,pendiente,,,
+aaunidad-Álvarez-Valdés C.-Educación básica,Candidato de unidad académica por autoarchivo,Álvarez-Valdés C.,pendiente,,,
+afil-Arenas-Massa A.,Candidato por afiliación,Arenas-Massa A.,misma,,,2026-08-05
+afil-Barbieri G.G.,Candidato por afiliación,Barbieri G.G.,misma,,,2026-08-05
+afil-Busquets P.,Candidato por afiliación,Busquets P.,misma,,,2026-08-05
+afil-Caffarena P.,Candidato por afiliación,Caffarena P.,misma,,,2026-08-05
+dspacecand-Carrasco G.-0000-0003-4498-3013,Candidato por repositorio institucional,Carrasco G.,pendiente,,,
+dspacecand-Carrasco G.-0009-0001-5917-5361,Candidato por repositorio institucional,Carrasco G.,pendiente,,,
+aacand-Castillo Valenzuela O.-0000-0002-4411-8655,Candidato por inventario de autoarchivo,Castillo Valenzuela O.,pendiente,,,
+aacand-Castro-Cruz M.-0000-0002-5482-4676,Candidato por inventario de autoarchivo,Castro-Cruz M.,pendiente,,,
+dspacecand-Donoso M.O.-0000-0002-9761-2112,Candidato por repositorio institucional,Donoso M.O.,pendiente,,,
+dspacecand-Donoso M.O.-0009-0000-6391-9012,Candidato por repositorio institucional,Donoso M.O.,pendiente,,,
+dspacecand-Donoso M.O.-0009-0004-5646-5146,Candidato por repositorio institucional,Donoso M.O.,pendiente,,,
+dspacecand-Díaz-Galaz L.-0000-0001-7439-4346,Candidato por repositorio institucional,Díaz-Galaz L.,pendiente,,,
+aacand-Díaz-Galaz L.-0000-0001-7439-4346,Candidato por inventario de autoarchivo,Díaz-Galaz L.,pendiente,,,
+afil-Escobar-González S.,Candidato por afiliación,Escobar-González S.,misma,,,2026-08-05
+afil-Ferre Contreras A.,Candidato por afiliación,Ferre Contreras A.,misma,,,2026-08-26
+dspacecand-amb-Figueroa-Toledo A.M.-0000-0002-2270-299X,Candidato por repositorio institucional (ambiguo),Figueroa-Toledo A.M.,pendiente,,,
+dspacecand-amb-Figueroa-Toledo A.M.-0000-0002-9643-1037,Candidato por repositorio institucional (ambiguo),Figueroa-Toledo A.M.,pendiente,,,
+dspacecand-González I.-0000-0002-8326-9800,Candidato por repositorio institucional,González I.,pendiente,,,
+aacand-Hernandez A.-0000-0003-3091-5386,Candidato por inventario de autoarchivo,Hernandez A.,pendiente,,,
+afil-Jeria-Espinoza V.,Candidato por afiliación,Jeria-Espinoza V.,misma,,,2026-08-26
+afil-Landskron G.,Candidato por afiliación,Landskron G.,misma,,,2026-08-05
+dspacecand-Letelier Widow G.-0000-0002-1625-2216,Candidato por repositorio institucional,Letelier Widow G.,pendiente,,,
+aacand-Letelier Widow G.-0000-0002-1625-2216,Candidato por inventario de autoarchivo,Letelier Widow G.,pendiente,,,
+afil-López V.,Candidato por afiliación,López V.,misma,,,2026-08-05
+afil-López-Soto P.,Candidato por afiliación,López-Soto P.,misma,,,2026-08-05
+dspacecand-Marrugo N.-0000-0001-7380-4753,Candidato por repositorio institucional,Marrugo N.,pendiente,,,
+afil-Mendez-Rebolledo G.,Candidato por afiliación,Mendez-Rebolledo G.,misma,,,2026-08-05
+dspacecand-amb-Morales Sepúlveda J.P.-0000-0002-7304-5256,Candidato por repositorio institucional (ambiguo),Morales Sepúlveda J.P.,pendiente,,,
+aacand-amb-Morales Sepúlveda J.P.-0000-0002-7304-5256,Candidato por inventario de autoarchivo (ambiguo),Morales Sepúlveda J.P.,pendiente,,,
+dspacecand-amb-Morales-Sepulveda J.P.-0000-0002-7304-5256,Candidato por repositorio institucional (ambiguo),Morales-Sepulveda J.P.,pendiente,,,
+aacand-amb-Morales-Sepulveda J.P.-0000-0002-7304-5256,Candidato por inventario de autoarchivo (ambiguo),Morales-Sepulveda J.P.,pendiente,,,
+dspacecand-Olive F.-0009-0000-0892-6746,Candidato por repositorio institucional,Olive F.,pendiente,,,
+aacand-Olive F.-0009-0000-0892-6746,Candidato por inventario de autoarchivo,Olive F.,pendiente,,,
+dspacecand-Olive F.-0009-0005-8141-8912,Candidato por repositorio institucional,Olive F.,pendiente,,,
+dspacecand-amb-Olive F.-0000-0002-0533-4531,Candidato por repositorio institucional (ambiguo),Olive F.,pendiente,,,
+afil-Ortiz F.,Candidato por afiliación,Ortiz F.,misma,,,2026-08-05
+dspacecand-Pedreros C.-0000-0003-1770-244X,Candidato por repositorio institucional,Pedreros C.,pendiente,,,
+dspacecand-amb-Pedreros C.-0000-0002-0533-4531,Candidato por repositorio institucional (ambiguo),Pedreros C.,pendiente,,,
+dspacecand-amb-Pino-Zuñiga J.-0000-0003-3620-9861,Candidato por repositorio institucional (ambiguo),Pino-Zuñiga J.,pendiente,,,
+dspacecand-amb-Pino-Zúñiga J.-0000-0003-3620-9861,Candidato por repositorio institucional (ambiguo),Pino-Zúñiga J.,pendiente,,,
+afil-Poblete Alday P.,Candidato por afiliación,Poblete Alday P.,misma,,,2026-08-05
+afil-Ramos-Alarcón M.B.,Candidato por afiliación,Ramos-Alarcón M.B.,misma,,,2026-08-05
+dspacecand-Rodríguez I.-0009-0009-8381-9217,Candidato por repositorio institucional,Rodríguez I.,pendiente,,,
+dspacecand-amb-Rodríguez I.-0000-0002-2270-299X,Candidato por repositorio institucional (ambiguo),Rodríguez I.,pendiente,,,
+dspacecand-amb-Rodríguez I.-0000-0002-9643-1037,Candidato por repositorio institucional (ambiguo),Rodríguez I.,pendiente,,,
+dspacecand-Salas-Guzmán N.-0000-0001-8815-5979,Candidato por repositorio institucional,Salas-Guzmán N.,pendiente,,,
+aacand-Salas-Guzmán N.-0000-0001-8815-5979,Candidato por inventario de autoarchivo,Salas-Guzmán N.,pendiente,,,
+afil-Sánchez M.,Candidato por afiliación,Sánchez M.,misma,,,2026-08-05
+afil-Sánchez-Duque C.,Candidato por afiliación,Sánchez-Duque C.,misma,,,2026-08-05
+afil-Venegas M.,Candidato por afiliación,Venegas M.,misma,,,2026-08-05
+dspacecand-amb-Vergara K.-0000-0002-0533-4531,Candidato por repositorio institucional (ambiguo),Vergara K.,pendiente,,,
+afil-de la Fuente M.,Candidato por afiliación,de la Fuente M.,misma,,,2026-08-05
+noverif-Altamirano M.,ORCID no verificable,Altamirano M.,pendiente,,,
+noverif-Barbieri G.G.,ORCID no verificable,Barbieri G.G.,pendiente,,,
+noverif-Bencina Matus F.,ORCID no verificable,Bencina Matus F.,orcid_incorrecto,,,2026-08-26
+noverif-Beytia Osses I.,ORCID no verificable,Beytia Osses I.,orcid_correcto,,,2026-08-26
+"p04-Bressan, Rodrigo",Varios Scopus ID,,distintas,,,2026-08-26
+noverif-Buchuk P.,ORCID no verificable,Buchuk P.,orcid_incorrecto,,,2026-08-26
+noverif-Bustamante A.,ORCID no verificable,Bustamante A.,pendiente,,,
+noverif-Cartaya M.A.,ORCID no verificable,Cartaya M.A.,orcid_correcto,,,2026-08-26
+noverif-Cortina A.H.,ORCID no verificable,Cortina A.H.,pendiente,,,
+noverif-Cárdenas D.C.,ORCID no verificable,Cárdenas D.C.,pendiente,,,
+noverif-Cárdenas Larenas J.P.,ORCID no verificable,Cárdenas Larenas J.P.,orcid_correcto,,,2026-08-26
+noverif-Dávila C.M.,ORCID no verificable,Dávila C.M.,pendiente,,,
+noverif-Figueroa F.C.,ORCID no verificable,Figueroa F.C.,orcid_correcto,,,2026-08-26
+"p04-Franco, Pamela",Varios Scopus ID,,distintas,,,2026-08-26
+noverif-Gonzalez-Valderrama A.,ORCID no verificable,Gonzalez-Valderrama A.,pendiente,,,
+noverif-González-Hernández J.,ORCID no verificable,González-Hernández J.,pendiente,,,
+noverif-González-Valderrama A.,ORCID no verificable,González-Valderrama A.,pendiente,,,
+noverif-Gálvez M.,ORCID no verificable,Gálvez M.,orcid_incorrecto,,,2026-08-26
+noverif-Hernández R.N.,ORCID no verificable,Hernández R.N.,pendiente,,,
+"p04-Ibáñez, Agustín",Varios Scopus ID,,distintas,,,2026-08-26
+noverif-Jeria-Espinoza V.,ORCID no verificable,Jeria-Espinoza V.,pendiente,,,
+noverif-Jorquera J.,ORCID no verificable,Jorquera J.,pendiente,,,
+noverif-Landreau C.C.,ORCID no verificable,Landreau C.C.,pendiente,,,
+"p04-Lin, John C.",Varios Scopus ID,,distintas,,,2026-08-26
+noverif-Lucero-Mora J.,ORCID no verificable,Lucero-Mora J.,orcid_correcto,,,2026-08-26
+noverif-Mancilla R.,ORCID no verificable,Mancilla R.,orcid_correcto,,,2026-08-26
+"p04-Marques, Tiago Reis",Varios Scopus ID,,distintas,,,2026-08-26
+noverif-Martin P.A.Q.S.,ORCID no verificable,Martin P.A.Q.S.,pendiente,,,
+"p04-Miyata, Jun",Varios Scopus ID,,distintas,,,2026-08-26
+noverif-Moraga Concha J.,ORCID no verificable,Moraga Concha J.,orcid_correcto,,,2026-08-26
+noverif-Moyano C.,ORCID no verificable,Moyano C.,orcid_correcto,,,2026-08-26
+noverif-Moyano Davila C.,ORCID no verificable,Moyano Davila C.,orcid_incorrecto,,,2026-08-26
+noverif-Moyano Dávila C.,ORCID no verificable,Moyano Dávila C.,orcid_incorrecto,,,2026-08-26
+noverif-Murray N.P.,ORCID no verificable,Murray N.P.,orcid_correcto,,,2026-08-26
+noverif-Norambuena C.,ORCID no verificable,Norambuena C.,pendiente,,,
+noverif-Ortiz F.,ORCID no verificable,Ortiz F.,pendiente,,,
+"p04-Qian, Hongwei",Varios Scopus ID,,distintas,,,2026-08-26
+noverif-Ramos A.,ORCID no verificable,Ramos A.,pendiente,,,
+"p04-Richter, Erik A.",Varios Scopus ID,,distintas,,,2026-08-26
+"p04-Schumann, Gunter",Varios Scopus ID,,distintas,,,2026-08-26
+noverif-Serrano M.J.,ORCID no verificable,Serrano M.J.,pendiente,,,
+noverif-Tavera A.T.,ORCID no verificable,Tavera A.T.,pendiente,,,
+noverif-Torrealba F.P.,ORCID no verificable,Torrealba F.P.,pendiente,,,
+noverif-Valderrama P.,ORCID no verificable,Valderrama P.,pendiente,,,
+noverif-Valencia I.,ORCID no verificable,Valencia I.,orcid_incorrecto,,,2026-08-26
+noverif-Vasquez F.,ORCID no verificable,Vasquez F.,orcid_incorrecto,,,2026-08-26
+noverif-Villarroel N.C.,ORCID no verificable,Villarroel N.C.,orcid_correcto,,,2026-09-01
+noverif-Vásquez F.,ORCID no verificable,Vásquez F.,pendiente,,,2026-09-01
+"p04-Wolvius, Eppo",Varios Scopus ID,,distintas,,,2026-09-01
+noverif-Zañartu T.V.,ORCID no verificable,Zañartu T.V.,orcid_correcto,,,2026-09-01
+sinorcid-Pedreros C.,Firma sin ORCID,Pedreros C.,orcid_no_encontrado,,,2026-08-26
+sinorcid-Salas-Guzmán N.,Firma sin ORCID,Salas-Guzmán N.,orcid_no_encontrado,,,2026-08-26
+noverif-Molina M.,ORCID no verificable,Molina M.,orcid_incorrecto,,,2026-08-26
+orcid-0000-0002-1781-062X,ORCID compartido,Orellana Donoso M. | Orellana-Donoso M.,misma,,,2026-08-05
+orcid-0000-0002-4312-1318,ORCID compartido,Lopez-Arana S. | López-Arana S.,misma,,,2026-08-05
+orcid-0000-0002-5832-7327,ORCID compartido,Strauss F.-J. | Strauss F.J.,misma,,,2026-08-05
+orcid-0000-0003-0051-9833,ORCID compartido,Núnez-Lisboa M. | Núñez-Lisboa M.,misma,,,2026-08-05
+orcid-0000-0003-3620-9861,ORCID compartido,Cancino-Lopez J. | Cancino-López J.,misma,,,2026-08-05
+orcid-0000-0003-4763-074X,ORCID compartido,Diaz F. | Díaz F.,misma,,https://www.scopus.com/authid/detail.uri?authorId=35195498000,2026-08-05
+p03-arenasmassa,Variantes de nombre,Arenas-Massa A. | Arenas-Massa Á.,misma,,,2026-08-05
+p03-avilesdorlhiac,Variantes de nombre,Avilès Dorlhiac R. | Avilés-Dorlhiac R.,misma,,,2026-08-05
+p03-cancinolopez,Variantes de nombre,Cancino-Lopez J. | Cancino-López J.,misma,,,2026-08-05
+p03-castillovalenzuela,Variantes de nombre,Castillo Valenzuela O. | Castillo-Valenzuela O.,misma,,,2026-08-05
+p03-castrosepulveda,Variantes de nombre,Castro-Sepulveda M. | Castro-Sepúlveda M.,misma,,,2026-08-05
+p03-ceronml,Variantes de nombre,Ceron M.L. | Cerón M.L.,misma,,,2026-08-05
+p03-crisostomoflores,Variantes de nombre,Crisóstomo Flores P. | Crisóstomo-Flores P.,misma,,,2026-08-05
+p03-diaz,Variantes de nombre,Diaz F. | Díaz F.,misma,,,2026-08-05
+p03-dominguez,Variantes de nombre,Dominguez A. | Domínguez A.,misma,,,2026-08-05
+p03-gigliojimenez,Variantes de nombre,Giglio Jimenez A. | Giglio Jiménez A.,misma,,,2026-08-05
+p03-gomezbarbieri,Variantes de nombre,Gomez Barbieri G. | Gómez Barbieri G.,misma,,,2026-08-05
+p03-hasbun,Variantes de nombre,Hasbun P. | Hasbún P.,misma,,,2026-08-05
+p03-jimenezag,Variantes de nombre,Jimenez A.G. | Jiménez A.G.,misma,,,2026-08-05
+p03-massaaa,Variantes de nombre,Massa A.A. | Massa Á.A.,misma,,,2026-08-05
+p03-moralessepulveda,Variantes de nombre,Morales Sepúlveda J.P. | Morales-Sepulveda J.P.,misma,,,2026-08-05
+p03-moyanodavila,Variantes de nombre,Moyano Davila C. | Moyano Dávila C.,misma,,,2026-08-05
+p03-pinozuniga,Variantes de nombre,Pino-Zuñiga J. | Pino-Zúñiga J.,misma,,,2026-08-05
+p03-ruizriquelme,Variantes de nombre,Ruiz Riquelme P. | Ruiz-Riquelme P.,misma,,,2026-08-05
+p03-tabiloprieto,Variantes de nombre,Tabilo Prieto I. | Tabilo-Prieto I.,misma,,,2026-08-05
+sinorcid-Dreyse J.,Firma sin ORCID,Dreyse J.,orcid_no_encontrado,,,2026-08-26
+sinorcid-Gonzalez-Valderrama A.,Firma sin ORCID,Gonzalez-Valderrama A.,orcid_no_encontrado,,,2026-08-26
+sinorcid-Jorquera J.,Firma sin ORCID,Jorquera J.,orcid_no_encontrado,,,2026-08-26
+sinorcid-Reccius A.,Firma sin ORCID,Reccius A.,orcid_no_encontrado,,,2026-08-26
+arroyoasignado-Arroyo A.,Firma sin ORCID,Arroyo A.,orcid_encontrado,0000-0002-6248-9257,"Decisión del usuario (2026-09-01), verificada con evidencia cruzada: DSpace y el inventario de autoarchivo de biblioteca coinciden en que 3 de las 4 publicaciones de esta firma (mismos DOI que nuestro corpus, no sólo mismo nombre) son de ""Arroyo, Antonio"", ORCID 0000-0002-6248-9257. El usuario confirmó independientemente en el registro público de ORCID que ese identificador declara Scopus Author ID 55159442300 — distinto del 58862866100 que el pipeline había enganchado por error para esta firma.",2026-09-01

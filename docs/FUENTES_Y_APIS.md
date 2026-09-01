@@ -114,6 +114,68 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 El detalle metodológico y el argumento de por qué el 100 % no es alcanzable
 están en `docs/ORCID_COVERAGE.md`.
 
+### 2.4 Repositorio institucional UFT (DSpace) — **entregado y ejecutado el 2026-09-01**
+
+No es una API: es un export de metadatos DSpace (`data/raw/Inventario_Repositorio_Institucional_UFT.csv`,
+3.271 filas) que el responsable del proyecto entregó directamente —tesis de
+pregrado/posgrado y artículos/libros/capítulos autoarchivados por sus propios
+autores. `src/enrich/dspace_inventario.py` no sale a red: lee ese archivo y lo
+cruza contra el corpus propio.
+
+Dos productos, no uno:
+
+- **Contraste** (`data/interim/dspace_verificacion.csv`) para las 322 firmas
+  que ya tienen ORCID asignado: busca sus publicaciones propias en el
+  inventario por DOI compartido. De 154 firmas con algo que cruzar,
+  **56 confirmaciones directas** (el propio nombre, con el mismo ORCID),
+  **69 confirmaciones indirectas** (el ORCID aparece en la obra, depositada
+  por otro coautor), **6 contradicciones directas** (el propio nombre, con un
+  ORCID DISTINTO al publicado) y 23 sin coincidencia.
+- **Candidatos por nombre** (`internal/dspace_candidatos.csv`) para firmas SIN
+  ningún ORCID: busca por apellido+inicial en TODO el inventario —su propia
+  tesis, un artículo suyo autoarchivado—, no sólo en publicaciones ya
+  compartidas. 16 firmas alcanzadas, 10 con coincidencia 1-a-1.
+
+Ninguno de los dos sube nada a `verificado` por sí solo: alimenta
+`build_review.py` con dos colas nuevas —«Repositorio institucional discrepa» y
+«Candidato por repositorio institucional»— para que una persona decida
+(`D-08`), igual que las demás fuentes de esta sección. La premisa de que un
+autor afiliado a la UFT declara su ORCID en el repositorio institucional la
+declaró el responsable del proyecto en sesión; el conector no la verifica de
+forma independiente, la aplica.
+
+### 2.5 Inventario de autoarchivo — hoja curada por biblioteca UFT — **entregado y ejecutado el 2026-09-01**
+
+Distinta de §2.4: no es el volcado de metadatos de DSpace, es una hoja de
+cálculo (`data/raw/Inventario_Repositorio_Autoarchivo.xlsx`, 808 obras,
+2004–2026) que el propio equipo de biblioteca mantiene a mano al
+autoarchivar cada ítem — trae DOI, ORCID de quien solicitó la subida, y
+**Facultad o Escuela**, un campo que DSpace no tiene. `src/enrich/autoarchivo_uft.py`,
+mismo patrón que `dspace_inventario.py`: no sale a red, no traduce nada al
+vocabulario oficial, no aplica nada por su cuenta.
+
+**ORCID** (`data/interim/autoarchivo_verificacion.csv`,
+`internal/autoarchivo_candidatos.csv`): de 150 firmas con algo que cruzar,
+**71 confirmaciones directas, 32 indirectas, 2 contradicciones directas**
+(`Arroyo A.` — con el MISMO ORCID alternativo que ya señalaba §2.4:
+evidencia cruzada de dos fuentes independientes — y `Rojas-Costa G.M.`,
+que además trae dos ORCID distintos dentro de esta misma hoja) y 45 sin
+coincidencia. Candidatos por nombre para firmas sin ORCID: 9 (7 uno-a-uno).
+
+**Facultad o Escuela** (`internal/autoarchivo_unidad_candidatos.csv`): de
+las 294 firmas con unidad académica «No determinada», **59 tienen un
+candidato** en este inventario (73 casos, algunas firmas con más de una
+escuela candidata). El valor se declara TAL CUAL lo escribió biblioteca
+(«Medicina», «CIDOC», «Familia»...), sin mapear a
+`config/matching_rules.yml` — esa traducción es el mismo trabajo
+institucional que exigió `T-02`. Desde el 2026-09-01 SÍ es una cola de
+`build_review.py` («Candidato de unidad académica por autoarchivo»), a
+pedido del usuario de reunir toda revisión pendiente en un solo documento:
+confirmar un caso deja constancia en `identity_decisions.csv` de que la
+unidad declarada es correcta para esa persona, pero APLICARLA al pipeline
+público —traducirla al vocabulario oficial y que deje de figurar «No
+determinada»— sigue siendo un paso aparte, todavía sin construir.
+
 ---
 
 ## 3. Propuestas de nuevas integraciones

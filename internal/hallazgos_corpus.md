@@ -1,6 +1,6 @@
 # Hallazgos sobre el corpus
 
-**Generado** el 2026-08-26 por `src/review/build_hallazgos.py`. Regenerable.
+**Generado** el 2026-09-01 por `src/review/build_hallazgos.py`. Regenerable.
 
 Esto **no es la cola de revisión de identidad**. Aquí no hay veredictos que aplicar: son preguntas sobre el corpus —qué publicaciones son de la institución y cuáles faltan— y responderlas cambia el alcance del informe, que es una decisión y no un botón.
 

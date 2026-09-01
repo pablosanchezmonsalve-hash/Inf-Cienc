@@ -1,10 +1,10 @@
 # Validación institucional de unidades académicas
 
-**Generado** el 2026-08-26 por `src/review/build_unit_validation.py`. Regenerable.
+**Generado** el 2026-09-01 por `src/review/build_unit_validation.py`. Regenerable.
 
 ## Qué se pide
 
-El informe cienciométrico agrupa la producción por unidad académica. Esos nombres **no vienen de un catálogo oficial**: están deducidos de cómo aparecen escritos en las afiliaciones de Scopus, porque no había un catálogo disponible al construir la plataforma.
+El informe bibliométrico agrupa la producción por unidad académica. Esos nombres **no vienen de un catálogo oficial**: están deducidos de cómo aparecen escritos en las afiliaciones de Scopus, porque no había un catálogo disponible al construir la plataforma.
 
 Mientras sigan sin validar, el indicador de producción por unidad se publica con confiabilidad baja y una advertencia que lo declara. Para retirar esa advertencia hacen falta tres cosas:
 
@@ -22,12 +22,11 @@ Sobre **1.207** apariciones firma × publicación de la ventana 2023–2025. **4
 
 | Unidad como aparece en el informe | Pares | ¿Nombre oficial correcto? | Corrección |
 |---|---:|---|---|
-| Facultad de Medicina y Salud | 530 | ☐ sí  ☐ no | |
-| Facultad de Educación y Ciencias Sociales | 52 | ☐ sí  ☐ no | |
-| Facultad de Ingeniería | 50 | ☐ sí  ☐ no | |
-| Facultad de Odontología | 34 | ☐ sí  ☐ no | |
+| Facultad de Medicina y Salud | 564 | ☐ sí  ☐ no | |
+| Facultad de Educación y Ciencias Sociales | 53 | ☐ sí  ☐ no | |
+| Facultad de Ingeniería | 52 | ☐ sí  ☐ no | |
 | Facultad de Economía y Negocios | 29 | ☐ sí  ☐ no | |
-| Escuela de Nutrición y Dietética | 24 | ☐ sí  ☐ no | |
+| Escuela de Nutrición y Dietética | 25 | ☐ sí  ☐ no | |
 | Escuela de Kinesiología | 22 | ☐ sí  ☐ no | |
 | Facultad de Derecho | 6 | ☐ sí  ☐ no | |
 | Facultad de Artes | 6 | ☐ sí  ☐ no | |
@@ -35,11 +34,7 @@ Sobre **1.207** apariciones firma × publicación de la ventana 2023–2025. **4
 | Facultad de Arquitectura, Diseño y Estudios Creativos | 3 | ☐ sí  ☐ no | |
 | Escuela de Enfermería | 3 | ☐ sí  ☐ no | |
 | Escuela de Ciencias de la Familia | 2 | ☐ sí  ☐ no | |
-| Facultad de Odontología y Ciencias de la Rehabilitación | 1 | ☐ sí  ☐ no | |
-| School of Nutrition and Dietetic | 1 | ☐ sí  ☐ no | |
-| School of Civil Engineering | 1 | ☐ sí  ☐ no | |
 | Escuela de Ingeniería Civil Industrial | 1 | ☐ sí  ☐ no | |
-| School of Engineering | 1 | ☐ sí  ☐ no | |
 
 ### Variantes de escritura que se agrupan bajo cada nombre
 
@@ -48,11 +43,10 @@ El sistema reconoce estas formas y las lleva al nombre canónico. Si falta algun
 | Nombre canónico | Variantes reconocidas |
 |---|---|
 | Escuela de Ingeniería Civil Industrial | `Escuela de Ingeniería Civil Industrial`, `School of Industrial Engineering` |
-| Facultad de Medicina y Salud | `Facultad de Medicina`, `Faculty of Medicine`, `Escuela de Medicina`, `School of Medicine`, `School of Medicine UFT-CLC` |
+| Facultad de Medicina y Salud | `Facultad de Medicina`, `Faculty of Medicine`, `Escuela de Medicina`, `School of Medicine`, `School of Medicine UFT-CLC`, `Facultad de Odontología`, `Faculty of Dentistry`, `Escuela de Odontología`, `School of Dentistry` |
 | Escuela de Kinesiología | `Escuela de Kinesiología`, `School of Kinesiology` |
-| Escuela de Nutrición y Dietética | `Escuela de Nutrición y Dietética`, `School of Nutrition and Dietetics` |
-| Facultad de Ingeniería | `Facultad de Ingeniería`, `Faculty of Engineering` |
-| Facultad de Odontología | `Facultad de Odontología`, `Faculty of Dentistry`, `Escuela de Odontología`, `School of Dentistry` |
+| Escuela de Nutrición y Dietética | `Escuela de Nutrición y Dietética`, `School of Nutrition and Dietetics`, `School of Nutrition and Dietetic` |
+| Facultad de Ingeniería | `Facultad de Ingeniería`, `Faculty of Engineering`, `School of Civil Engineering`, `School of Engineering` |
 | Facultad de Educación y Ciencias Sociales | `Facultad de Educación`, `Faculty of Education`, `Facultad de Educación Psicología y Familia`, `Facultad de Educación, Psicología y Familia`, `Escuela de Psicología`, `School of Psychology` |
 | Facultad de Economía y Negocios | `Facultad de Economía y Negocios`, `Faculty of Economics and Business`, `School of Economics and Business`, `Facultad de Economía y Negocios en la Univ` |
 | Facultad de Derecho | `Facultad de Derecho`, `Faculty of Law`, `Escuela de Derecho`, `School of Law` |
@@ -74,8 +68,9 @@ El informe suma la producción de cada escuela a su facultad. Una jerarquía equ
 | Escuela de Nutrición y Dietética | Facultad de Medicina y Salud | **confirmada** | ☐ sí  ☐ no | |
 | Escuela de Enfermería | Facultad de Medicina y Salud | **confirmada** | ☐ sí  ☐ no | |
 | Escuela de Ciencias de la Familia | Facultad de Educación y Ciencias Sociales | **confirmada** | ☐ sí  ☐ no | |
+| Escuela de Ingeniería Civil Industrial | Facultad de Ingeniería | **confirmada** | ☐ sí  ☐ no | |
 
-**0 de 4 jerarquías están inferidas**, no confirmadas. Son las que más importa revisar.
+**0 de 5 jerarquías están inferidas**, no confirmadas. Son las que más importa revisar.
 
 ¿Falta alguna escuela o instituto que deba sumar a una facultad y no aparezca en esta tabla?
 
@@ -85,27 +80,23 @@ El informe suma la producción de cada escuela a su facultad. Una jerarquía equ
 
 Una afiliación real por unidad, tal como la entrega Scopus. Sirve para juzgar si el nombre deducido es razonable.
 
-**Facultad de Medicina y Salud** (530 pares)
+**Facultad de Medicina y Salud** (564 pares)
 
 > Escuela de Medicina, Universidad Finis Terrae, Santiago, 7501015, Chile, Faculty of Medicine and Science, Universidad San Sebastián, Santiago, 8420524, Chile
 
-**Facultad de Educación y Ciencias Sociales** (52 pares)
+**Facultad de Educación y Ciencias Sociales** (53 pares)
 
 > Escuela de Psicología, Universidad Finis Terrae, Santiago de Chile, Chile
 
-**Facultad de Ingeniería** (50 pares)
+**Facultad de Ingeniería** (52 pares)
 
 > Faculty of Engineering, Universidad Finis Terrae, Providencia, Santiago, Chile
-
-**Facultad de Odontología** (34 pares)
-
-> Clinic of Reconstructive Dentistry, Center for Dental Medicine, University of Zurich, Zurich, Switzerland, Center for Studies and Innovation in Dentistry, Faculty of Dentistry, Universidad Finis Terra
 
 **Facultad de Economía y Negocios** (29 pares)
 
 > Faculty of Economics and Business, University Finis Terrae, Chile
 
-**Escuela de Nutrición y Dietética** (24 pares)
+**Escuela de Nutrición y Dietética** (25 pares)
 
 > Facultad de Medicina, Escuela de Nutrición y Dietética, Universidad Finis Terrae, Santiago, Chile
 
@@ -137,25 +128,9 @@ Una afiliación real por unidad, tal como la entrega Scopus. Sirve para juzgar s
 
 > School of Family Sciences, Universidad Finis Terrae, Santiago, Chile
 
-**Facultad de Odontología y Ciencias de la Rehabilitación** (1 pares)
-
-> Universidad San Sebastián, Facultad de Odontología y Ciencias de la Rehabilitación, Carrera de Fonoaudiología, Santiago, Chile, Universidad Finis Terrae, Facultad de Educación, Psicología y Familia, S
-
-**School of Nutrition and Dietetic** (1 pares)
-
-> School of Nutrition and Dietetic, Finis Terrae University, Santiago, 7501014, Chile
-
-**School of Civil Engineering** (1 pares)
-
-> School of Civil Engineering, Universidad Finis Terrae, Avenida Pedro de Valdivia 1509, Santiago, Providencia, Chile
-
 **Escuela de Ingeniería Civil Industrial** (1 pares)
 
 > School of Industrial Engineering, Universidad Finis Terrae, Santiago, Chile
-
-**School of Engineering** (1 pares)
-
-> School of Engineering, Universidad Finis Terrae, Providencia, Santiago, Chile
 
 ---
 

@@ -95,6 +95,12 @@ jobs:
       - name: Verificar la lógica de candidatos por afiliación
         run: python3 src/enrich/orcid_afiliacion.py --test
 
+      - name: Verificar la lógica de contraste con el repositorio institucional
+        run: python3 src/enrich/dspace_inventario.py --test
+
+      - name: Verificar la lógica de contraste con el inventario de autoarchivo
+        run: python3 src/enrich/autoarchivo_uft.py --test
+
       # La consulta a ROR no corre en CI —sale a red— pero su extracción sí se
       # comprueba: es la parte que puede romperse en silencio si la API cambia
       # de forma, y la que decidiría mal qué organización es la institución.
