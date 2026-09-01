@@ -58,6 +58,7 @@ async function main() {
   const c = await mod('core.js');
   const v = await mod('vista.js');
   const vx = await mod('vista_explorador.js');
+  const hm = await mod('visualizations/heatmap.js');
 
   const meta = await leerJSON('meta.json');
   const series = await leerJSON('series.json');
@@ -132,6 +133,17 @@ async function main() {
       html = rellenar(html, 'cifras', sec.cifras, a);
       html = rellenar(html, 'cortes', sec.cortes, a);
       html = rellenar(html, 'diferidos', vx.diferidos(catalogo, clave), a);
+      // El mapa de calor (Bento Grid) sólo existe en produccion.html — las
+      // demás páginas de tipo "seccion" no tienen `#heatmap-contenedor`, y
+      // `rellenar()` lo reportaría en `faltantes` si se intentara ahí.
+      // El ancho es una estimación razonable para la primera pintura sin
+      // guion: el `ResizeObserver` de `montarHeatmap()` la corrige apenas
+      // el navegador mide el contenedor real.
+      if (archivo === 'produccion.html') {
+        const agregado = hm.agregarMatriz(publicaciones);
+        html = rellenar(html, 'heatmap-contenedor',
+          hm.renderHeatmap(agregado, { ancho: 760 }), a);
+      }
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'catalogo') {
       // Se pre-renderiza porque es contenido de referencia: es justo la página

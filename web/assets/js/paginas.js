@@ -6,6 +6,7 @@ import * as v from './vista.js';
 import * as X from './explorador.js';
 import * as VX from './vista_explorador.js';
 import * as anim from './animar.js';
+import { montarHeatmap } from './visualizations/heatmap.js';
 
 /* ============================================================== portada */
 
@@ -37,6 +38,10 @@ async function montarExplorador(claveSeccion) {
     controles: document.getElementById('controles'),
     cifras: document.getElementById('cifras'),
     cortes: document.getElementById('cortes'),
+    // Sólo existe en produccion.html (Bento Grid). El resto de las
+    // secciones no tiene este contenedor y zonas.heatmap queda null —
+    // se comprueba antes de usarlo, igual que zonas.diferidos.
+    heatmap: document.getElementById('heatmap-contenedor'),
   };
   if (!zonas.cifras) return;
 
@@ -100,6 +105,11 @@ async function montarExplorador(claveSeccion) {
     // geometría antes y después del cambio, y el orden sólo se garantiza si el
     // repintado ocurre en medio.
     anim.transicion(zonas.cortes, () => { zonas.cortes.innerHTML = partes.cortes; });
+
+    // El mapa de calor de temáticas (Bento Grid) reacciona al mismo recorte
+    // que el resto de la página: mismo criterio, un solo filtro. No lleva
+    // pantalla de "sin datos" separada — montarHeatmap() ya la resuelve.
+    if (zonas.heatmap) montarHeatmap(zonas.heatmap, X.recorte(publicaciones, sel));
 
     zonas.cifras.querySelectorAll('[data-valor]').forEach(e => {
       if (antes.size && antes.get(e.dataset.valor) !== e.textContent) e.classList.add('cambia');
