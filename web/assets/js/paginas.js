@@ -486,7 +486,11 @@ async function autores() {
 
 /* ============================================================ ficha autor */
 async function fichaAutor() {
-  const id = new URLSearchParams(location.search).get('id');
+  const idCrudo = new URLSearchParams(location.search).get('id');
+  // Los identificadores que emite el propio build son slugs (letras, dígitos,
+  // guion): `orellana-donoso-m`. Cualquier otra cosa en `?id=` no es un
+  // identificador válido y se trata como ausente, no como ruta de `fetch`.
+  const id = idCrudo && /^[a-z0-9-]{1,80}$/.test(idCrudo) ? idCrudo : null;
   const cont = document.getElementById('ficha');
   // Sin identificador la página quedaba en blanco: ni encabezado —la ficha es
   // la única del sitio sin h1 propio en el archivo, porque lo pone el JS— ni
@@ -526,8 +530,8 @@ async function fichaAutor() {
     <div><span>Nombre en fuente</span>${c.escapar(a.nombre_en_fuente)}</div>
     <div><span>Unidad académica</span>${c.escapar(a.unidades_academicas.join(' · '))}</div>
     <div><span>Scopus Author ID</span>${a.scopus_author_ids.length
-      ? a.scopus_author_ids.map(s => `<a class="enlace-dato" href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
-          target="_blank" rel="noopener">${s}</a>`).join(' · ')
+      ? a.scopus_author_ids.map(s => `<a class="enlace-dato" href="https://www.scopus.com/authid/detail.uri?authorId=${encodeURIComponent(s)}"
+          target="_blank" rel="noopener">${c.escapar(s)}</a>`).join(' · ')
       : '<span class="sin-dato-txt">No resuelto</span>'}</div>
     <div><span>ORCID</span>${a.orcid
       ? `<a class="enlace-dato" href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`

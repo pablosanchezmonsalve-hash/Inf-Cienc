@@ -65,6 +65,18 @@ INTERIM = ROOT / "data" / "interim"
 ENRICHED = ROOT / "data" / "enriched"
 
 
+def _json_para_script(obj) -> str:
+    """JSON seguro para incrustar en <script>: json.dumps no escapa '</',
+    así que un título o afiliación con "</script>" cerraría el bloque antes
+    de tiempo y el resto se interpretaría como HTML."""
+    return (
+        json.dumps(obj, ensure_ascii=False)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+    )
+
+
 def cargar() -> dict:
     """Lee lo que existe y declara lo que falta, en vez de reventar."""
     faltan = []
@@ -1052,10 +1064,10 @@ def render(cs: list[dict], meta: dict) -> str:
       </div>
     </article>"""
 
-    datos = json.dumps([{"id": c["id"], "cola": c["cola"],
+    datos = _json_para_script([{"id": c["id"], "cola": c["cola"],
                          "firmas": [{"nombre": f["nombre"]} for f in c["firmas"]],
                          "previa": c.get("previa")}
-                        for c in cs], ensure_ascii=False)
+                        for c in cs])
 
     return f"""<!doctype html>
 <html lang="es">

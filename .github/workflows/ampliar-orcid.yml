@@ -164,6 +164,8 @@ jobs:
 
       - name: Guardar el resultado en el repositorio
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.commitear }}
+        env:
+          RAMA: ${{ github.ref_name }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -184,7 +186,7 @@ jobs:
             git commit -m "Cobertura de ORCID ampliada desde el registro
 
           Ejecutado por el workflow «Ampliar la cobertura de ORCID»."
-            git push origin "HEAD:${{ github.ref_name }}"
+            git push origin "HEAD:$RAMA"
           fi
 
       - name: Resumen
