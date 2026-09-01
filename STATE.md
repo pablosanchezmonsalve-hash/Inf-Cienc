@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `7f9906f` · El treemap de producción también reacciona al recorte del explorador
+Último commit: `d68ae5c` · Auditoría completa: corrige cifras obsoletas, registra repo privado y 
 Snapshot: 2026-09-01
 
 ---

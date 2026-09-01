@@ -5618,3 +5618,121 @@ Ninguna acción de código pendiente. Si aparece otra exportación de
 `revisar-identidad.ps1`/`revision_identidad.html` en Descargas, el mismo
 flujo (`merge_decisions.py` → `apply_decisions.py --dry-run` →
 `apply_decisions.py` → reconstruir → verificar) se repite igual.
+
+---
+
+## Cierre · Auditoría de 7 frentes y corrección de consistencia documental (2026-09-01)
+
+El usuario pidió auditar el repositorio a fondo ("completa, ahora") con una
+metodología de 7 frentes y evidencia, e incorporar habilidades de experto según
+lo requiriera el desafío. Se reconstruyó el pipeline desde cero y se verificó
+contra la **verdad ejecutable**, no contra lo que la memoria de sesión
+recordaba. Frentes B (pipeline), C (capas), D (replicabilidad), E (metodología)
+y F (repo/CI) quedaron en verde. Los hallazgos reales fueron de **consistencia
+documental** — cifras que quedaron atrás de la última consolidación.
+
+### Hallazgos de cifras obsoletas y su corrección
+
+La consolidación de identidad del 2026-09-01 llevó la base publicada de 556 a
+**542 entidades** y la cobertura de ORCID de 216/556 a **277/542 (51,1 %)**.
+Varios documentos y una advertencia servida seguían citando la base vieja:
+
+1. **`config/sources.yml`**: `ror_api`/`scopus_api`/`openalex_api` decían
+   `ejecutada: false` cuando los artefactos enriquecidos existen
+   (`ror_institucion.json`, `scopus_api_consulta.json`, `authors_orcid.csv`).
+   El flag era un metadato que dejó de sincronizarse con la evidencia.
+   Corregido a `true` con `fecha_ejecucion` real (ror 2026-08-25; scopus y
+   openalex 2026-08-26), alineado con las fechas de los artefactos y de
+   T-06/V2-19/V2-26.
+2. **`docs/ORCID_COVERAGE.md`**: §2-bis y §3 reescritos sobre la base 277/542,
+   con las etiquetas reales de las fichas (`verificado` 155, `declarado por el
+   titular` 41, `confirmado por revisión` 17, `comprobado a mano` 22, `no
+   verificable` 20, `sin confirmar` 22) y la distribución por rango de
+   publicaciones (1 pub 38,9 % → 10+ 100 %). El aviso de base y el §4 dejaron
+   de citar 556/216; contextos cronológicos que nombran 556 quedan como
+   historia. **69,2 %** (no 69,6) de las entidades tienen una sola publicación.
+3. **`STATE.md`**: regenerado con `snapshot.py` (no a mano). Sigue declarando
+   «113 casos / 6 pendientes», que es la cuenta de la última corrida de `make
+   revision` (puertas como `openalex_*` no se cuentan ahí); la tabla de colas
+   sí refleja las 10 colas reales. No se reconcilió la diferencia entre esa
+   lista de 113 y el ~450 total de PENDIENTE_REVISION_HUMANA en `internal/`
+   porque es la definición de ese campo —ver mejora abajo.
+4. **`docs/INDICATORS.md`** (P-06) y **`docs/V2_BACKLOG.md`** (V2-01 y el
+   párrafo de la vía Crossref) y **`docs/AUTHOR_PROFILE.md`**: actualizados a
+   base 542/277 (322 asignaciones sobre firmas sin consolidar). P-06 conserva
+   una nota al pie que distingue la decisión histórica de la base vigente.
+5. **`config/indicators.yml` `AU-03.advertencia`** — el único hallazgo que era
+   una **figura servida**: decía «466 de las 556 entidades tienen h≤1» (84 %),
+   cifra que no se puede re-derivar: hoy el h-index sólo se computa para las
+   **50 entidades interpretables** (n≥5) y de ellas sólo **4 tienen h≤1**. La
+   advertencia citaba una visión del indicador (h computado para todas) que
+   contradice al built real (`03_authors.py`: sólo muestra h cuando la muestra
+   es legible). Reescribí la advertencia para describir lo que el sitio
+   realmente hace, anclado en los 50/542 reales, en vez de inventar un 466
+   equivalente.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-338 | Los flags `ejecutada: false` de las 3 APIs en `sources.yml` se cambian a `true` con fecha de ejecución, en vez de borrar el campo | El campo ya existía para las 3; dejarlo en `false` engañaría a una próxima sesión a reconsultar APIs o creer inexistentes los artefactos enriquecidos. `crossref_api`/`orcid_api` se dejan sin flag (así están hoy) |
+| D-339 | La advertencia de AU-03 no se «porta» a 542 multiplicando 466, se reescribe para describir el gate real (`n≥5`, 50 de 542) | `CLAUDE.md` prohíbe inventar cifras. El 466/556 (84 %) implica computar h para todas las entidades, lo que contradice `03_authors.py` («sólo cuando la muestra lo hace mínimamente legible»). La frase honesta y derivable es la del gate |
+| D-340 | `config/indicators.yml` (AU-03) es la fuente de lo publicado; el número de `indicator_feasibility.py` (497 de 589) es la nota interna de la factibilidad y se deja | La factibilidad describe la decisión del analista de no publicar por falta de discriminación sobre firmas sin consolidar; cambiarlo exigiría re-correr el análisis con criterio nuevo, no una doc-fix |
+
+### Mejora detectada, no aplicada
+
+`STATE.md` «113 casos / 6 pendientes» (transición de `make revision`) y el
+~450 pendientes de `internal/*` son dos cuentas que un futuro lector puede
+confundir. `snapshot.py` podría aclarar que la línea de 113 se refiere a las
+cuatro colas de identidad que `make revision` consolida, distinguiéndolas del
+total de PENDIENTE_REVISION_HUMANA de `openalex_cobertura`/`orcid_hallazgos`.
+Queda como mejora de la vista derivada, no un error de datos.
+
+### Verificación
+
+Reconstruido de punta a punta DESPUÉS de los cambios: `src/audit/run_all.py`
+(0 bloqueantes), `build_all.py` (compuerta 0 fallas, 542 fichas),
+`06_assemble_site.py` (10 páginas), y la advertencia servida confirmada en
+`dist/data/catalogo.json` (`AU-03` con el texto nuevo y `n≥5, 50 de las 542`).
+`grep "466 de las 556" dist/` y `data/processed/` → vacío. YAML de
+`sources.yml`/`indicators.yml` válido.
+
+### Notas de entorno (no de repo)
+
+- **pandas**: esta máquina tiene **3.0.5** instalado, fuera del pin
+  `pandas>=2.0,<3.0` de `requirements.txt`. El build corrió bien en 3.0.5,
+  pero `make instalar` con `requirements.txt` instalará una versión menor. No
+  rompe, es una diferencia de ambiente entre máquinas.
+- **Playwright/Chromium**: `node src/verify/run_all.mjs` exige el navegador ya
+  descargado (`npx playwright install chromium`); el Makefile `verificar` lo
+  asume instalado y CI lo descarga. Una falla de browser NO es una falla de
+  verificación del sitio. El `package.json` queda como dev-dependency, sitio
+  sin dependencias runtime.
+
+### Archivos creados o modificados
+
+```
+config/sources.yml               flags ejecutada + fecha_ejecucion (ror/scopus/openalex)
+config/indicators.yml            AU-03.advertencia reescrita (gate real, no 466/556)
+docs/ORCID_COVERAGE.md           277/542 + etiquetas reales + distribución por rango
+docs/INDICATORS.md               P-06 nota de consolidación 2026-09-01
+docs/V2_BACKLOG.md               V2-01 y vía Crossref a 277/542
+docs/AUTHOR_PROFILE.md           ORCID 277/542 (51,1 %)
+STATE.md                         regenerado con snapshot.py (no a mano)
+docs/VALIDATION_REPORT.md        regenerado por auditoría
+SESSION_NOTES.md                 este cierre
+```
+
+### Ambigüedades abiertas
+
+Ninguna nueva. Las de siempre: `T-06` en su techo, `T-19` corriendo por cron
+mensual, y las colas humanas de `internal/` sin revisar (414 cobertura, 56
+`orcid_hallazgos`). El STATE sigue declarando 113/6 por definición de `make
+revision` — mejora propuesta arriba, no aplicada.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Si se quiere, aplicar la mejora de
+`snapshot.py` para distinguir las dos cuentas de pendientes (identidad vs.
+cobertura), y decidir si `.gitignore`/`requirements.txt` deben tolerar pandas
+3.x alguna vez.
