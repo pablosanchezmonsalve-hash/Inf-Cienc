@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `6830db5` · Merge remote-tracking branch 'origin/main' into claude/state-review-ne
-Snapshot: 2026-08-27
+Último commit: `054677c` · Merge remote-tracking branch 'origin/main'
+Snapshot: 2026-09-01
 
 ---
 
@@ -64,7 +64,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
 
-`make revision` reúne estas colas en 113 casos, de los que **6 siguen pendientes**: 107 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 188 casos, de los que **82 siguen pendientes**: 106 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
