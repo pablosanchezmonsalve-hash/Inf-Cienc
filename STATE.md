@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `dc724bd` · Merge remote-tracking branch 'origin/main'
+Último commit: `eaa0c80` · Regenera STATE.md y las herramientas de revisión tras la fusión
 Snapshot: 2026-09-01
 
 ---
@@ -65,7 +65,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
 
-`make revision` reúne estas colas en 219 casos, de los que **113 siguen pendientes**: 106 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 219 casos, de los que **108 siguen pendientes**: 111 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -78,7 +78,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 358
+## Decisiones tomadas: 361
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

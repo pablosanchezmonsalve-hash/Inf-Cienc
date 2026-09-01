@@ -12,14 +12,17 @@
 # sin_registro  alguien buscó en el registro y no encontró a esta
 #               persona. No es lo mismo que «nadie ha mirado».
 #
-# Aplicado: 2026-08-26
+# Aplicado: 2026-09-01
 
-fecha_de_aplicacion: 2026-08-26
+fecha_de_aplicacion: 2026-09-01
 
 confirmadas:
   - firma: Beytia Osses I.
     orcid: 0009-0008-4178-5429
     nota: ''
+  - firma: Caffarena P.
+    orcid: 0000-0002-2609-6413
+    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el repositorio institucional (DSpace) nombra a «Caffarena, Paula» con este mismo ORCID en una obra propia (10.4067/s0719-26812025000200173) — mismo nombre, mismo identificador, fuente independiente del registro público de ORCID que había marcado el caso sin confirmar.'
   - firma: Cartaya M.A.
     orcid: 0000-0001-8098-9960
     nota: ''
@@ -32,15 +35,24 @@ confirmadas:
   - firma: Díaz F.
     orcid: 0000-0003-4763-074X
     nota: ''
+  - firma: Ferre Contreras A.
+    orcid: 0000-0003-1770-244X
+    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Ferre Contreras, Andrés» con este mismo ORCID en una obra propia (10.1097/ccm.0000000000006806).'
   - firma: Figueroa F.C.
     orcid: 0000-0002-1280-9742
     nota: ''
   - firma: Gaete M.
     orcid: 0000-0003-1846-2417
     nota: ''
+  - firma: Giordanino E.
+    orcid: 0000-0001-7380-4753
+    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Giordanino, Elian» con este mismo ORCID en una obra propia (10.1016/j.rmclc.2025.10.002).'
   - firma: Lucero-Mora J.
     orcid: 0000-0002-8554-7181
     nota: ''
+  - firma: López-Soto P.
+    orcid: 0000-0003-2559-6464
+    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «López-Soto, Paulo» con este mismo ORCID en una obra propia (10.1016/j.rmclc.2025.12.005).'
   - firma: Mancilla R.
     orcid: 0000-0002-2143-6386
     nota: ''
@@ -53,6 +65,9 @@ confirmadas:
   - firma: Murray N.P.
     orcid: 0000-0001-8154-8550
     nota: ''
+  - firma: Poblete Alday P.
+    orcid: 0000-0001-6191-8518
+    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Poblete Alday, Patricia» con este mismo ORCID en una obra propia (10.5209/alhi.93678).'
   - firma: Rojas D.
     orcid: 0000-0002-1675-2958
     nota: ''

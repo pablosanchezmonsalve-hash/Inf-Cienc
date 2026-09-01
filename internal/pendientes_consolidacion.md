@@ -2,7 +2,7 @@
 
 **Generado** el 2026-09-01 por `src/review/build_review.py`. Regenerable.
 
-Quedan **113 casos** de 219. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **108 casos** de 219. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -14,7 +14,7 @@ Quedan **113 casos** de 219. Cada uno lleva el enlace al caso dentro de la herra
 
 ---
 
-## ORCID sin confirmar — 52 pendiente(s)
+## ORCID sin confirmar — 47 pendiente(s)
 
 ### [Abara J.F. → 0000-0001-8190-2361: ¿es suyo?](revision_identidad.html#caso-ver-abara-j-f)
 
@@ -46,7 +46,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Arroyo A. → 0000-0003-0157-5175: ¿es suyo?](revision_identidad.html#caso-ver-arroyo-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con un ORCID DISTINTO al que tiene asignado aquí (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con un ORCID DISTINTO al que tiene asignado aquí (10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -88,21 +88,6 @@ El titular declara obras en su registro y NINGUNA coincide con las atribuidas a 
 Publicaciones atribuidas, para comparar contra el registro:
 
 - 2024 · Mood states and academic performance in the objective structured clinical examination. The mediating effect of self-efficacy — <https://doi.org/10.1016/j.nedt.2024.106116>
-
-### [Caffarena P. → 0000-0002-2609-6413: ¿es suyo?](revision_identidad.html#caso-ver-caffarena-p)
-
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.4067/s0719-26812025000200173 · Caffarena, Paula · 0000-0002-2609-6413/0000-0003-4666-2491 (Article)).
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0002-2609-6413> |
-| Buscar «Caffarena P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Caffarena%20P.> |
-| Perfil 60513695700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60513695700> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · POOR PEOPLE DIE MORE. THE 1957 INFLUENZA EPIDEMIC AND SOCIAL INEQUALITY IN CHILE; [LOS POBRES MUEREN MÁS. LA EPIDEMIA DE INFLUENZA DE 1957 Y LA DESIGUALDAD SOCIAL EN CHILE] — <https://doi.org/10.4067/s0719-26812025000200173>
-- 2023 · Stories of Initiates: The Lived Experience of Female Social Workers in the Implementation of the Welfare State in Chile, 1925–1950 — <https://doi.org/10.1007/978-3-031-21663-3_4>
 
 ### [Castillo N. → 0000-0002-9377-136X: ¿es suyo?](revision_identidad.html#caso-ver-castillo-n)
 
@@ -166,20 +151,6 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 - 2025 · Authority, formation and teaching work: reflections of young teachers in Chile and Argentina; [Autoridad, formación y trabajo docente: reflexiones de profesores jóvenes en Chile y Argentina] — <https://doi.org/10.23854/autoc.v9i2.493>
 
-### [Ferre Contreras A. → 0000-0003-1770-244X: ¿es suyo?](revision_identidad.html#caso-ver-ferre-contreras-a)
-
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.1097/ccm.0000000000006806 · Ferre Contreras, Andrés · 0000-0003-1770-244X (Article)).
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0003-1770-244X> |
-| Buscar «Ferre Contreras A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ferre%20Contreras%20A.> |
-| Perfil 45861101100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=45861101100> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · Pharmacological Research Agenda on Adult Extracorporeal Membrane Oxygenation Using the Delphi Method: A Position Paper of the Extracorporeal Membrane Oxygenation Pharmacology Network — <https://doi.org/10.1097/CCM.0000000000006806>
-
 ### [Fuente M.D.L. → 0000-0003-0577-7604: ¿es suyo?](revision_identidad.html#caso-ver-fuente-m-d-l)
 
 El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
@@ -207,21 +178,6 @@ El titular declara obras en su registro y NINGUNA coincide con las atribuidas a 
 Publicaciones atribuidas, para comparar contra el registro:
 
 - 2023 · Epidemiological profile of patients with COVID-19 admitted to a tertiary care public hospital; [Experiencia de la pandemia por SARS-CoV-2 en un centro hospitalario de alta complejidad en Chile] — <https://doi.org/10.4067/S0034-98872023000300280>
-
-### [Giordanino E. → 0000-0001-7380-4753: ¿es suyo?](revision_identidad.html#caso-ver-giordanino-e)
-
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.1016/j.rmclc.2025.10.002 · Fernández, Adrián · 0000-0001-7380-4753 (Article); 10.1016/j.rmclc.2025.10.002 · Giordanino, Elian · 0000-0001-7380-4753 (Article); 10.1016/j.rmclc.2025.01.004 · Marrugo, Neguith · 0000-0001-7380-4753 (Article)).
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0001-7380-4753> |
-| Buscar «Giordanino E.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Giordanino%20E.> |
-| Perfil 57200188404 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57200188404> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · Management of systolic dysfunction in patients with hypertrophic cardiomyopathy: challenges and perspectives; [Manejo de la disfunción sistólica en pacientes con miocardiopatía hipertrófica: desafíos y perspectivas] — <https://doi.org/10.1016/j.rmclc.2025.10.002>
-- 2025 · Pulmonary hypertension and connective tissue disease, a serious presentation; [Hipertensión pulmonar y enfermedad del tejido conectivo, una grave presentación] — <https://doi.org/10.1016/j.rmclc.2025.01.004>
 
 ### [Giordanino E.F. → 0000-0001-7380-4753: ¿es suyo?](revision_identidad.html#caso-ver-giordanino-e-f)
 
@@ -327,7 +283,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Landskron G. → 0000-0002-7953-6769: ¿es suyo?](revision_identidad.html#caso-ver-landskron-g)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1038/s41598-024-80228-1 · Quintanilla, Maria Elena · 0000-0002-7953-6769 (Article); 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article); 10.1016/j.rgmx.2024.08.004 · von Muhlenbrock, Christian · 0000-0002-7953-6769 (Article); 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article); 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article); 10.1038/s41598-024-80228-1 · Quintanilla, Maria Elena · 0000-0002-7953-6769 (Article); 10.1016/j.rgmx.2024.08.004 · von Muhlenbrock, Christian · 0000-0002-7953-6769 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -358,20 +314,6 @@ El titular declara obras en su registro y NINGUNA coincide con las atribuidas a 
 Publicaciones atribuidas, para comparar contra el registro:
 
 - 2023 · Effect of Curcumin Consumption on Inflammation and Oxidative Stress in Patients on Hemodialysis: A Literature Review — <https://doi.org/10.3390/nu15102239>
-
-### [López-Soto P. → 0000-0003-2559-6464: ¿es suyo?](revision_identidad.html#caso-ver-l-pez-soto-p)
-
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.1016/j.rmclc.2025.12.005 · López-Soto, Paulo · 0000-0003-2559-6464 (Article)).
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0003-2559-6464> |
-| Buscar «López-Soto P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=L%C3%B3pez-Soto%20P.> |
-| Perfil 60389420900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60389420900> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · training in information and research competencies using AI in bioethics classes; [Formación en competencias informacionales e investigativas con el uso de IA en clases de bioética] — <https://doi.org/10.1016/j.rmclc.2025.12.005>
 
 ### [Macho R.A.M. → 0000-0001-7592-1136: ¿es suyo?](revision_identidad.html#caso-ver-macho-r-a-m)
 
@@ -472,20 +414,6 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 - 2024 · Hepatic Hilum Variations and Their Clinical Considerations in the Liver: A Systematic Review and Meta-Analysis — <https://doi.org/10.3390/life14101301>
 
-### [Poblete Alday P. → 0000-0001-6191-8518: ¿es suyo?](revision_identidad.html#caso-ver-poblete-alday-p)
-
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) la nombra a ella misma con el mismo ORCID (10.5209/alhi.93678 · Poblete Alday, Patricia · 0000-0001-6191-8518 (Article)).
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0001-6191-8518> |
-| Buscar «Poblete Alday P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Poblete%20Alday%20P.> |
-| Perfil 55816334800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55816334800> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2023 · The Spinster: Archetype of Projective Horror in the Contemporary Hispanic American Sinister Narrative; [La solterona: arquetipo del horror proyectivo en las narrativas de lo siniestro] — <https://doi.org/10.5209/alhi.93678>
-
 ### [Ponce D. → 0000-0002-6178-6938: ¿es suyo?](revision_identidad.html#caso-ver-ponce-d)
 
 El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
@@ -575,7 +503,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Reccius A. → 0009-0004-3236-3030: ¿es suyo?](revision_identidad.html#caso-ver-reccius-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -787,7 +715,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Cancino J.: OpenAlex dice otro ORCID](revision_identidad.html#caso-oadesac-cancino-j)
 
-El sitio publica hoy «0000-0002-1956-7600» y OpenAlex atribuye «0000-0002-8273-159X». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1055/a-1929-0295 · Festa, Raúl Ricardo · 0000-0003-4757-483X/0000-0003-3620-9861 (Article); 10.1111/apha.14203 · Díaz-Castro, Francisco · 0000-0003-1644-8742/0000-0002-3085-9057/0000-0003-3620-9861/0000-0002-9643-1037/0000-0002-9315-9365/0000-0002-2270-299X (Article)).
+El sitio publica hoy «0000-0002-1956-7600» y OpenAlex atribuye «0000-0002-8273-159X». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1111/apha.14203 · Díaz-Castro, Francisco · 0000-0003-1644-8742/0000-0002-3085-9057/0000-0003-3620-9861/0000-0002-9643-1037/0000-0002-9315-9365/0000-0002-2270-299X (Article); 10.1055/a-1929-0295 · Festa, Raúl Ricardo · 0000-0003-4757-483X/0000-0003-3620-9861 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -806,7 +734,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Castro M.: OpenAlex dice otro ORCID](revision_identidad.html#caso-oadesac-castro-m)
 
-El sitio publica hoy «0000-0002-2270-299X» y OpenAlex atribuye «0000-0002-5482-4676». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.3390/sports12070183 · Arce-Álvarez, Alexis · 0000-0002-2270-299X (Article); 10.1016/j.fas.2023.09.002 · Becerra, Eduardo · sin ORCID (s/d)).
+El sitio publica hoy «0000-0002-2270-299X» y OpenAlex atribuye «0000-0002-5482-4676». Uno de los dos no es de esta persona. la asignación vigente NO se ha modificado Compare las publicaciones de abajo con el registro de cada titular: la que aparezca en uno y no en el otro decide. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.fas.2023.09.002 · Becerra, Eduardo · sin ORCID (s/d); 10.3390/sports12070183 · Arce-Álvarez, Alexis · 0000-0002-2270-299X (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -886,7 +814,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Arroyo A.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-arroyo-a)
 
-El sitio publica hoy «0000-0003-0157-5175». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+El sitio publica hoy «0000-0003-0157-5175». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.rmclc.2025.04.003 · Arroyo, Antonio · 0000-0002-6248-9257 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -903,7 +831,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Balboa E.: DSpace dice otro ORCID](revision_identidad.html#caso-dspacedesac-balboa-e)
 
-El sitio publica hoy «0000-0002-8757-436X». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article); 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
+El sitio publica hoy «0000-0002-8757-436X». El repositorio institucional (DSpace) nombra a esta misma persona en una obra propia con un ORCID distinto: 10.3389/fphar.2024.1406784 · Balboa, Elisa · 0000-0003-0577-7604/0000-0002-7953-6769 (Article); 10.1016/j.lfs.2024.122851 · Fierro Arenas, Aaron · 0000-0002-7953-6769/0000-0003-0577-7604 (Article) Compare ambos registros: el que declara las publicaciones reales de esta persona decide.
 
 | Comprobar en | Enlace |
 |---|---|

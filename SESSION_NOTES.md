@@ -5712,3 +5712,87 @@ El usuario revisa `internal/revision_identidad.html` caso por caso, ahora
 con la evidencia de DSpace incorporada donde exista. Cuando exporte el CSV
 de decisiones, se aplica con `apply_decisions.py`, se reconstruye el sitio,
 se corre la batería de verificación y se despliega — mismo flujo que T-02.
+
+## Cierre · Se aplican 5 casos de "ORCID sin confirmar" por autorización explícita, con un criterio estricto declarado antes de tocar nada
+
+### El pedido, y el límite que se le puso
+
+El usuario empezó a revisar la cola "Repositorio institucional discrepa" en
+el navegador y decidió los dos primeros casos (Arroyo A., Shabani R.), pero
+no comunicó el veredicto exacto — se le preguntó y no llegó respuesta
+todavía; esos dos quedan sin tocar. Luego pidió, para el resto: "aplica los
+cambios de los que tengas convicción".
+
+Es una autorización real (`CLAUDE.md`: una decisión explícita del usuario en
+la sesión actual precede incluso al propio `CLAUDE.md`), pero no una
+invitación a resolver ambigüedades por probabilidad — eso es justo lo que
+ya se había rechazado una vez esta sesión, con evidencia, cuando el usuario
+pidió aceptar los de "probabilidad alta". Se definió "convicción" con el
+criterio más estricto que la evidencia disponible sostiene: **mismo nombre
+Y mismo ORCID, en el repositorio institucional, contra una obra propia** —
+no una coincidencia de apellido sin publicación de por medio (los 10
+"Candidato por repositorio institucional" quedan fuera), no una
+confirmación indirecta donde DSpace nombra a otro coautor (los 9
+"confirma_indirecta" quedan fuera), y no una contradicción donde dos
+fuentes discrepan y hay que decidir cuál pesa más (los 4 "Repositorio
+institucional discrepa" sin tocar todavía quedan fuera).
+
+### Lo que se aplicó
+
+5 casos de "ORCID sin confirmar" cumplían el criterio, cruzando
+`data/interim/dspace_verificacion.csv` (veredicto `confirma_directa`)
+contra la cola viva y actual de `internal/revision_identidad.html` —no la
+foto de una corrida anterior—: **Caffarena P., Ferre Contreras A.,
+Giordanino E., López-Soto P., Poblete Alday P.** En los cinco, DSpace nombra
+a la misma persona (mismo apellido normalizado) con el mismo ORCID, en una
+obra propia con DOI. Se añadieron como filas nuevas a
+`internal/identity_decisions.csv`, con nota que declara explícitamente que
+la decisión la aplicó Claude con autorización del usuario — no se hizo
+pasar por un clic humano en la herramienta — y se aplicaron con
+`apply_decisions.py` (`--dry-run` primero, sin avisos ni contradicciones).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-341 | "Convicción" se define como evidencia dispositiva (mismo nombre + mismo ORCID contra una obra propia en una fuente independiente), no como probabilidad alta ni coincidencia de nombre sin ancla | Es la misma barra que ya usa el propio pipeline para NO encolar una asignación: `orcid_verificacion.csv` con veredicto `confirmada` nunca entra a revisión. DSpace `confirma_directa` es la misma clase de evidencia, sólo que de otra fuente |
+| D-342 | Los 10 candidatos por nombre sin publicación en común, los 9 "confirma_indirecta" y los 4 "Repositorio institucional discrepa" restantes NO se aplican, aunque exista autorización general | Cada uno exige un juicio real (¿son la misma persona sin nada que lo ancle? ¿cuál de dos fuentes en desacuerdo pesa más?) que este cierre no está en condiciones de dar por Claude, autorización o no |
+| D-343 | La nota de cada decisión aplicada por Claude lo declara explícitamente, en vez de imitar el formato de una decisión humana sin más | Trazabilidad: dentro de un año, alguien que lea `identity_decisions.csv` necesita saber que estas cinco no las revisó una persona mirando el registro, sino que se derivaron de un cruce automático con criterio estricto y autorización explícita |
+
+### Verificación
+
+`apply_decisions.py --dry-run` (sin avisos), luego aplicado de verdad:
+`config/orcid_revisado.yml` pasa de 13 a 18 confirmadas, con las 5 nuevas
+identificables por su nota. Auditoría completa, `build_all.py` (compuerta:
+0 fallas), `06_assemble_site.py`, y `node src/verify/run_all.mjs` completo
+—los seis bloques— corridos DESPUÉS de aplicar: sin fallos. La cola
+"ORCID sin confirmar" bajó de 52 a 47 pendientes; el resto de las colas
+—incluida "Repositorio institucional discrepa", donde siguen Arroyo A. y
+Shabani R.— no se tocó.
+
+### Archivos creados o modificados
+
+```
+internal/identity_decisions.csv       +5 filas, orcid_correcto, con nota de autoría
+config/orcid_revisado.yml             regenerado por apply_decisions.py (18 confirmadas)
+config/identidades_consolidadas.yml   regenerado (sin cambios de contenido en esta corrida)
+data/enriched/authors_orcid.csv       recalculado por el build (sin cambio de conteo:
+                                       las 5 ya tenían ORCID, sólo suben de confianza)
+```
+
+### Ambigüedades abiertas
+
+- Arroyo A. y Shabani R. siguen esperando el veredicto explícito del
+  usuario — no se tocaron.
+- Los 4 "Repositorio institucional discrepa" restantes (Balboa E.,
+  Candia-Véjar A., Hayes-Ortiz T., Zambrano C.), los 9 "confirma_indirecta"
+  y los 10 candidatos por nombre siguen en la cola, sin cambios.
+- Las de siempre: `T-06`, `T-19` en su techo.
+
+### Próximo paso recomendado
+
+Reconstruir y desplegar cuando el usuario lo pida (esta tanda no se
+desplegó a `main` todavía: son cambios de capa interna, no del sitio
+público — `authors_orcid.csv` sí alimenta el sitio, así que la próxima
+publicación a `main` los recogerá). Seguir esperando el veredicto de
+Arroyo A. / Shabani R., y seguir la revisión del resto de la cola.
