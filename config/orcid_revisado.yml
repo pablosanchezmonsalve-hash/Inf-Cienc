@@ -17,6 +17,9 @@
 fecha_de_aplicacion: 2026-09-01
 
 confirmadas:
+  - firma: Arenas-Massa A.
+    orcid: 0000-0003-3188-0189
+    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el inventario de autoarchivo de biblioteca nombra a «Arenas Massa, Ángela» con este mismo ORCID en una obra propia (10.1016/j.ssaho.2025.102231).'
   - firma: Beytia Osses I.
     orcid: 0009-0008-4178-5429
     nota: ''
@@ -47,6 +50,9 @@ confirmadas:
   - firma: Giordanino E.
     orcid: 0000-0001-7380-4753
     nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Giordanino, Elian» con este mismo ORCID en una obra propia (10.1016/j.rmclc.2025.10.002).'
+  - firma: Landskron G.
+    orcid: 0000-0002-7953-6769
+    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el inventario de autoarchivo de biblioteca nombra a «Landskron, Glauben» con este mismo ORCID en obras propias (10.1016/j.lfs.2024.122851, entre otras).'
   - firma: Lucero-Mora J.
     orcid: 0000-0002-8554-7181
     nota: ''
@@ -65,6 +71,9 @@ confirmadas:
   - firma: Murray N.P.
     orcid: 0000-0001-8154-8550
     nota: ''
+  - firma: Orellana-Donoso M.I.
+    orcid: 0000-0002-1781-062X
+    nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): el inventario de autoarchivo de biblioteca nombra a «Orellana-Donoso, Mathias» con este mismo ORCID en una obra propia (10.3390/life14101301).'
   - firma: Poblete Alday P.
     orcid: 0000-0001-6191-8518
     nota: 'Aplicado por Claude, autorizado explícitamente por el usuario (2026-09-01): DSpace nombra a «Poblete Alday, Patricia» con este mismo ORCID en una obra propia (10.5209/alhi.93678).'

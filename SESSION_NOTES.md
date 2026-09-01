@@ -5905,3 +5905,46 @@ estricto de convicción de la tanda anterior a las nuevas confirmaciones
 directas de esta fuente, y (b) si construye una herramienta de revisión
 para los 59 candidatos de Facultad/Escuela, dado que su aplicación exige
 traducir al vocabulario oficial — decisión de alcance, no de código.
+
+## Cierre · Se aplican 3 confirmaciones de ORCID del inventario de autoarchivo, con el mismo criterio; ninguna asociación de Facultad/Escuela se tocó
+
+El usuario autorizó "aplica las confirmaciones directas con el mismo
+criterio" — mismo estándar que la tanda anterior (mismo nombre + mismo
+ORCID contra obra propia). Cruzando `data/interim/autoarchivo_verificacion.csv`
+(veredicto `confirma_directa`) contra la cola VIVA actual: **3 casos**
+cumplían y seguían pendientes — Arenas-Massa A., Landskron G.,
+Orellana-Donoso M.I. Aplicados igual que la vez anterior:
+`--dry-run` primero (sin avisos), filas nuevas en
+`internal/identity_decisions.csv` con nota de autoría explícita, aplicado
+con `apply_decisions.py`.
+
+El usuario preguntó a continuación si se habían considerado "nuevas
+asociaciones de facultad/escuela" — se aclaró de inmediato que NO: los 59
+candidatos de Facultad/Escuela del mismo archivo siguen sin tocar, en bruto,
+sin vocabulario oficial ni aplicación. La autorización de esta tanda cubría
+sólo ORCID, como se le había preguntado explícitamente.
+
+### Verificación
+
+`apply_decisions.py --dry-run` sin avisos, luego aplicado:
+`config/orcid_revisado.yml` pasa de 18 a 21 confirmadas. Auditoría
+completa, `build_all.py` (compuerta: 0 fallas), `06_assemble_site.py`,
+`node src/verify/run_all.mjs` completo — los seis bloques — sin fallos.
+"ORCID sin confirmar" bajó de 47 a 44 pendientes.
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv       +3 filas, orcid_correcto, con nota de autoría
+config/orcid_revisado.yml             regenerado (21 confirmadas)
+```
+
+### Ambigüedades abiertas
+
+Sin cambios: los 59 candidatos de Facultad/Escuela, Arroyo A./Shabani R.,
+los 4 "Repositorio institucional discrepa" restantes, T-06/T-19.
+
+### Próximo paso recomendado
+
+Sigue pendiente la pregunta (b) del cierre anterior: si se construye una
+herramienta de revisión para los 59 candidatos de Facultad/Escuela.
