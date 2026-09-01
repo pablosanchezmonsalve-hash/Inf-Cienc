@@ -144,6 +144,35 @@ autor afiliado a la UFT declara su ORCID en el repositorio institucional la
 declaró el responsable del proyecto en sesión; el conector no la verifica de
 forma independiente, la aplica.
 
+### 2.5 Inventario de autoarchivo — hoja curada por biblioteca UFT — **entregado y ejecutado el 2026-09-01**
+
+Distinta de §2.4: no es el volcado de metadatos de DSpace, es una hoja de
+cálculo (`data/raw/Inventario_Repositorio_Autoarchivo.xlsx`, 808 obras,
+2004–2026) que el propio equipo de biblioteca mantiene a mano al
+autoarchivar cada ítem — trae DOI, ORCID de quien solicitó la subida, y
+**Facultad o Escuela**, un campo que DSpace no tiene. `src/enrich/autoarchivo_uft.py`,
+mismo patrón que `dspace_inventario.py`: no sale a red, no traduce nada al
+vocabulario oficial, no aplica nada por su cuenta.
+
+**ORCID** (`data/interim/autoarchivo_verificacion.csv`,
+`internal/autoarchivo_candidatos.csv`): de 150 firmas con algo que cruzar,
+**71 confirmaciones directas, 32 indirectas, 2 contradicciones directas**
+(`Arroyo A.` — con el MISMO ORCID alternativo que ya señalaba §2.4:
+evidencia cruzada de dos fuentes independientes — y `Rojas-Costa G.M.`,
+que además trae dos ORCID distintos dentro de esta misma hoja) y 45 sin
+coincidencia. Candidatos por nombre para firmas sin ORCID: 9 (7 uno-a-uno).
+
+**Facultad o Escuela** (`internal/autoarchivo_unidad_candidatos.csv`): de
+las 294 firmas con unidad académica «No determinada», **59 tienen un
+candidato** en este inventario. El valor se declara TAL CUAL lo escribió
+biblioteca («Medicina», «CIDOC», «Familia»...), sin mapear a
+`config/matching_rules.yml` — esa traducción es el mismo trabajo
+institucional que exigió `T-02`, y unas pocas firmas ya muestran más de una
+escuela distinta entre sus obras (homónimos o cambio de unidad, sin decidir
+cuál). Es un archivo de candidatos declarados, no una cola de
+`build_review.py`: la extensión a una herramienta interactiva de revisión
+queda pendiente de que se decida el alcance de esa traducción.
+
 ---
 
 ## 3. Propuestas de nuevas integraciones

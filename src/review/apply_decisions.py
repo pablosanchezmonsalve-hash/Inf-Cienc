@@ -224,14 +224,17 @@ def canonica(firmas: list[str], frec: dict[str, int] | None = None) -> str:
 
 
 def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None,
-                             cand_dspace: pd.DataFrame | None = None) -> pd.DataFrame:
-    """Candidatos por afiliación o por el repositorio institucional que la
-    revisión confirmó como la misma persona."""
+                             cand_dspace: pd.DataFrame | None = None,
+                             cand_autoarchivo: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Candidatos por afiliación o por alguno de los inventarios
+    institucionales que la revisión confirmó como la misma persona."""
     cols = ["nombre_en_fuente", "orcid", "publicaciones_de_respaldo", "confianza", "fuente"]
     por_firma = {r["nombre_en_fuente"]: r["orcid"] for _, r in cand.iterrows()} if cand is not None else {}
     por_firma_dsp = ({r["nombre_en_fuente"]: r["orcid"] for _, r in cand_dspace.iterrows()}
                      if cand_dspace is not None else {})
-    if not por_firma and not por_firma_dsp:
+    por_firma_aa = ({r["nombre_en_fuente"]: r["orcid"] for _, r in cand_autoarchivo.iterrows()}
+                    if cand_autoarchivo is not None else {})
+    if not por_firma and not por_firma_dsp and not por_firma_aa:
         return pd.DataFrame(columns=cols)
 
     filas = []
@@ -252,6 +255,15 @@ def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None,
         for f in firmas_de(r):
             if f in por_firma_dsp:
                 filas.append({"nombre_en_fuente": f, "orcid": por_firma_dsp[f],
+                              "publicaciones_de_respaldo": 0,
+                              "confianza": "alta", "fuente": FUENTE_REVISION})
+
+    # Idem para el inventario de autoarchivo de biblioteca.
+    for _, r in d[(d.veredicto == "misma")
+                 & (d.cola.str.startswith("Candidato por inventario de autoarchivo"))].iterrows():
+        for f in firmas_de(r):
+            if f in por_firma_aa:
+                filas.append({"nombre_en_fuente": f, "orcid": por_firma_aa[f],
                               "publicaciones_de_respaldo": 0,
                               "confianza": "alta", "fuente": FUENTE_REVISION})
 
@@ -612,6 +624,19 @@ def autotest() -> int:
     casos.append(("las dos fuentes de candidatos no se cruzan entre sí",
                   "López V." not in set(a.nombre_en_fuente), None))
 
+    # 7 bis. Mismo criterio para el inventario de autoarchivo — tercera
+    # fuente, tampoco se cruza con las otras dos.
+    cand_aa = pd.DataFrame([{"nombre_en_fuente": "Soto B.", "orcid": "0000-W"}])
+    a = asignaciones_confirmadas(df([
+        ("aacand-Soto B.-0000-W", "Candidato por inventario de autoarchivo",
+         "Soto B.", "misma"),
+        ("dspacecand-Ríos T.-0000-Z", "Candidato por repositorio institucional",
+         "Ríos T.", "pendiente")]),
+        cand, cand_dsp, cand_aa)
+    casos.append(("candidato de autoarchivo confirmado se asigna",
+                  list(a.nombre_en_fuente) == ["Soto B."] and a.orcid.iloc[0] == "0000-W",
+                  a.to_dict("records")))
+
     # 8. Una firma que no está entre los candidatos no se inventa.
     a = asignaciones_confirmadas(df([
         ("afil-Fantasma Z.", "Candidato por afiliación", "Fantasma Z.", "misma")]), cand)
@@ -860,7 +885,9 @@ def main() -> int:
     cand = pd.read_csv(cpath, dtype=str) if cpath.exists() else None
     dspath = INTERNAL / "dspace_candidatos.csv"
     cand_dspace = pd.read_csv(dspath, dtype=str) if dspath.exists() else None
-    nuevas = asignaciones_confirmadas(d, cand, cand_dspace)
+    aapath = INTERNAL / "autoarchivo_candidatos.csv"
+    cand_autoarchivo = pd.read_csv(aapath, dtype=str) if aapath.exists() else None
+    nuevas = asignaciones_confirmadas(d, cand, cand_dspace, cand_autoarchivo)
 
     opath = ENRICHED / "authors_orcid.csv"
     vig = pd.read_csv(opath, dtype=str)

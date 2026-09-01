@@ -112,6 +112,12 @@ def cargar() -> dict:
                        "contraste con el repositorio institucional"),
         "dspace_cand": leer(INTERNAL / "dspace_candidatos.csv",
                             "candidatos por nombre en el repositorio institucional"),
+        # Lo emite `autoarchivo_uft.py`: fuente DISTINTA de dspace_inventario
+        # (la hoja curada por biblioteca, no el volcado crudo de DSpace).
+        "autoarchivo": leer(INTERIM / "autoarchivo_verificacion.csv",
+                            "contraste con el inventario de autoarchivo"),
+        "autoarchivo_cand": leer(INTERNAL / "autoarchivo_candidatos.csv",
+                                 "candidatos por nombre en el inventario de autoarchivo"),
         # Para enseñar de qué publicaciones se habla, con su DOI: verificar un
         # ORCID a mano es abrir el registro del titular y comparar obras, y sin
         # los títulos delante eso obliga a cruzar tres archivos.
@@ -133,13 +139,19 @@ def cargar() -> dict:
 
 def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None,
              verif: pd.DataFrame | None = None, uni: pd.DataFrame | None = None,
-             dspace: pd.DataFrame | None = None) -> dict:
+             dspace: pd.DataFrame | None = None,
+             autoarchivo: pd.DataFrame | None = None) -> dict:
     """Ficha de evidencia por forma de firma."""
     # Contraste contra el repositorio institucional, si se corrió el conector.
     dsp = {}
     if dspace is not None:
         dsp = {r["nombre_en_fuente"]: (r["veredicto"], r.get("evidencia"))
                for _, r in dspace.iterrows()}
+    # Idem contra el inventario de autoarchivo (fuente distinta, misma forma).
+    aa = {}
+    if autoarchivo is not None:
+        aa = {r["nombre_en_fuente"]: (r["veredicto"], r.get("evidencia"))
+              for _, r in autoarchivo.iterrows()}
     # Veredicto de la verificación contra el registro público, si se ejecutó.
     ver = {}
     if verif is not None:
@@ -171,6 +183,7 @@ def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None
         o = orc.get(n, (None, None, None))
         v = ver.get(n)
         ds = dsp.get(n)
+        aaf = aa.get(n)
         out[n] = {
             "nombre": n,
             "n_pub": int(r["n_publicaciones"]),
@@ -184,6 +197,8 @@ def perfiles(master: pd.DataFrame, log: pd.DataFrame, orcid: pd.DataFrame | None
             "orcid_afiliacion_ok": (str(v[2]).lower() == "true") if v else None,
             "dspace_veredicto": ds[0] if ds else None,
             "dspace_evidencia": ds[1] if ds else None,
+            "autoarchivo_veredicto": aaf[0] if aaf else None,
+            "autoarchivo_evidencia": aaf[1] if aaf else None,
             "eids": sorted(eids), "coautores": sorted(coaut),
             "obras": [(e,) + obras.get(e, (None, None, None)) for e in sorted(eids)],
         }
@@ -235,6 +250,30 @@ def _evidencia_dspace(f: dict) -> str:
                               "asignado aquí",
         "sin_coincidencia_en_dspace": "El repositorio institucional (DSpace) "
                                       "tiene esa misma publicación pero sin este ORCID",
+    }
+    txt = frases.get(v, "")
+    if not txt:
+        return ""
+    return f" {txt} ({ev})." if ev else f" {txt}."
+
+
+def _evidencia_autoarchivo(f: dict) -> str:
+    """Igual que `_evidencia_dspace`, para el inventario de autoarchivo de
+    biblioteca — fuente distinta, mismo tipo de frase."""
+    v, ev = f.get("autoarchivo_veredicto"), f.get("autoarchivo_evidencia")
+    if not v:
+        return ""
+    frases = {
+        "confirma_directa": "El inventario de autoarchivo de biblioteca la "
+                            "nombra a ella misma con el mismo ORCID",
+        "confirma_indirecta": "El inventario de autoarchivo incluye este "
+                              "mismo ORCID en una de sus publicaciones, "
+                              "aunque a nombre de otro coautor",
+        "contradice_directa": "El inventario de autoarchivo la nombra a ella "
+                              "misma con un ORCID DISTINTO al que tiene "
+                              "asignado aquí",
+        "sin_coincidencia": "El inventario de autoarchivo tiene esa misma "
+                            "publicación pero sin este ORCID",
     }
     txt = frases.get(v, "")
     if not txt:
@@ -379,7 +418,7 @@ def casos(d: dict, perf: dict) -> list[dict]:
                              + str(r.get("detalle") or "")
                              + " Compare las publicaciones de abajo con el registro de "
                                "cada titular: la que aparezca en uno y no en el otro decide."
-                             + _evidencia_dspace(f)),
+                             + _evidencia_dspace(f) + _evidencia_autoarchivo(f)),
                 "firmas": [f], "cruces": None,
             })
 
@@ -403,7 +442,30 @@ def casos(d: dict, perf: dict) -> list[dict]:
                             "institucional (DSpace) nombra a esta misma persona en una "
                             f"obra propia con un ORCID distinto: {r['evidencia']} "
                             "Compare ambos registros: el que declara las publicaciones "
-                            "reales de esta persona decide."),
+                            "reales de esta persona decide."
+                            + _evidencia_autoarchivo(f)),
+                "firmas": [f], "cruces": None,
+            })
+
+    # ── Inventario de autoarchivo discrepa. Misma lógica que la cola
+    #    anterior, con la fuente distinta declarada aparte (biblioteca, no el
+    #    volcado de DSpace) para que la procedencia de cada evidencia quede
+    #    trazable: las dos pueden coincidir o no coincidir entre sí.
+    if d["autoarchivo"] is not None:
+        aac = d["autoarchivo"][d["autoarchivo"].veredicto == "contradice_directa"]
+        for _, r in aac.iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            out.append({
+                "id": f"aadesac-{r['nombre_en_fuente']}",
+                "cola": "Inventario de autoarchivo discrepa", "prioridad": 1,
+                "titulo": f"{r['nombre_en_fuente']}: el autoarchivo dice otro ORCID",
+                "contexto": (f"El sitio publica hoy «{r['orcid_actual']}». El inventario de "
+                            "autoarchivo de biblioteca nombra a esta misma persona con un "
+                            f"ORCID distinto: {r['evidencia']} Compare ambos registros: el "
+                            "que declara las publicaciones reales de esta persona decide."
+                            + _evidencia_dspace(f)),
                 "firmas": [f], "cruces": None,
             })
 
@@ -482,7 +544,7 @@ def casos(d: dict, perf: dict) -> list[dict]:
                 "contexto": f"{detalle} La ficha pública de esta firma lleva hoy la "
                             "marca «sin confirmar». Abra el registro del titular y "
                             "compárelo con las publicaciones de abajo."
-                            + _evidencia_dspace(f),
+                            + _evidencia_dspace(f) + _evidencia_autoarchivo(f),
                 "firmas": [f], "cruces": None,
             })
 
@@ -494,7 +556,7 @@ def casos(d: dict, perf: dict) -> list[dict]:
                             "de modo que la comprobación automática no puede decir ni "
                             "que sí ni que no. Queda su nombre, su afiliación declarada "
                             "y el juicio de quien mire."
-                            + _evidencia_dspace(f),
+                            + _evidencia_dspace(f) + _evidencia_autoarchivo(f),
                 "firmas": [f], "cruces": None,
             })
 
@@ -548,6 +610,43 @@ def casos(d: dict, perf: dict) -> list[dict]:
                     "contexto": f"«{r['nombre_en_dspace']}» ({orcid}) coincide en apellido "
                                 f"e inicial con {int(r['ft'])} firmas distintas de este "
                                 "corpus. El nombre no basta para elegir.",
+                    "firmas": [f], "cruces": None,
+                })
+
+    # ── Mismo patrón, contra el inventario de autoarchivo de biblioteca.
+    if d["autoarchivo_cand"] is not None:
+        ac = d["autoarchivo_cand"].copy()
+        ac["ft"] = ac["orcid_reclamado_por_n_firmas"].astype(int)
+        for _, r in ac[ac.ft == 1].iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            out.append({
+                "id": f"aacand-{r['nombre_en_fuente']}-{r['orcid']}",
+                "cola": "Candidato por inventario de autoarchivo", "prioridad": 4,
+                "titulo": f"{r['nombre_en_fuente']} → {r['orcid']}?",
+                "contexto": f"«{r['nombre_en_autoarchivo']}» aparece en el inventario de "
+                            f"autoarchivo ({r['tipos_de_obra']}, "
+                            f"{r['obras_del_titular_en_el_inventario']} obra(s) propia(s)) "
+                            "con este ORCID, y coincide en apellido e inicial con esta "
+                            "firma. No hay ninguna publicación del universo Scopus/SciVal "
+                            "compartida con ese registro: por eso es un candidato y no "
+                            "una asignación.",
+                "firmas": [f], "cruces": None,
+            })
+        for orcid, g in ac[ac.ft > 1].groupby("orcid"):
+            for _, r in g.iterrows():
+                f = perf.get(r["nombre_en_fuente"])
+                if not f:
+                    continue
+                out.append({
+                    "id": f"aacand-amb-{r['nombre_en_fuente']}-{orcid}",
+                    "cola": "Candidato por inventario de autoarchivo (ambiguo)",
+                    "prioridad": 4,
+                    "titulo": f"{r['nombre_en_fuente']}: {int(r['ft'])} firmas reclaman {orcid}",
+                    "contexto": f"«{r['nombre_en_autoarchivo']}» ({orcid}) coincide en "
+                                f"apellido e inicial con {int(r['ft'])} firmas distintas de "
+                                "este corpus. El nombre no basta para elegir.",
                     "firmas": [f], "cruces": None,
                 })
 
@@ -1588,7 +1687,8 @@ def main() -> int:
     print("=" * 78)
 
     d = cargar()
-    perf = perfiles(d["master"], d["log"], d["orcid"], d["verif"], d["uni"], d["dspace"])
+    perf = perfiles(d["master"], d["log"], d["orcid"], d["verif"], d["uni"], d["dspace"],
+                    d["autoarchivo"])
     cs = casos(d, perf)
     if not cs:
         print("  No hay casos que revisar. No se escribe nada.")

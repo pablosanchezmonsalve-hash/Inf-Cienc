@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `eaa0c80` · Regenera STATE.md y las herramientas de revisión tras la fusión
+Último commit: `0229c20` · Aplica 5 confirmaciones de ORCID con criterio estricto y autorización 
 Snapshot: 2026-09-01
 
 ---
@@ -55,6 +55,8 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 |---|---|
 | `internal/ambiguities_authors.csv` | 414 |
 | `internal/ambiguities_publications.csv` | 14 |
+| `internal/autoarchivo_candidatos.csv` | 9 |
+| `internal/autoarchivo_unidad_candidatos.csv` | 73 |
 | `internal/dspace_candidatos.csv` | 25 |
 | `internal/identity_candidates.csv` | 17 |
 | `internal/openalex_cobertura.csv` | 414 |
@@ -65,7 +67,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
 
-`make revision` reúne estas colas en 219 casos, de los que **108 siguen pendientes**: 111 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 230 casos, de los que **119 siguen pendientes**: 111 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -78,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 361
+## Decisiones tomadas: 365
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

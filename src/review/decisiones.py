@@ -71,6 +71,7 @@ COLAS: dict[str, list[str]] = {
     "ORCID no verificable": ["orcid_correcto", "orcid_incorrecto"],
     "OpenAlex discrepa": ["orcid_correcto", "orcid_incorrecto"],
     "Repositorio institucional discrepa": ["orcid_correcto", "orcid_incorrecto"],
+    "Inventario de autoarchivo discrepa": ["orcid_correcto", "orcid_incorrecto"],
     "Firma sin ORCID": ["orcid_encontrado", "orcid_no_encontrado"],
 }
 
@@ -88,6 +89,8 @@ FAMILIA_ORCID = {
     "ORCID no verificable", "Firma sin ORCID", "OpenAlex discrepa",
     "Repositorio institucional discrepa", "Candidato por repositorio institucional",
     "Candidato por repositorio institucional (ambiguo)",
+    "Inventario de autoarchivo discrepa", "Candidato por inventario de autoarchivo",
+    "Candidato por inventario de autoarchivo (ambiguo)",
 }
 
 
