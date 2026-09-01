@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `6830db5` · Merge remote-tracking branch 'origin/main' into claude/state-review-ne
-Snapshot: 2026-08-27
+Último commit: `bf53361` · Corrige el hueco de 45vh entre las métricas y el tablero Bento en prod
+Snapshot: 2026-09-01
 
 ---
 
