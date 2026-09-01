@@ -1726,9 +1726,15 @@ svg.chart .trama { pointer-events: none; }
 /* Espacio al final para que el ÚLTIMO corte pueda subir hasta la cabecera.
    Sin esto el documento se acaba antes y el enlace del índice al último
    indicador no movía nada: el ancla parecía rota cuando lo que faltaba era
-   recorrido. Es la razón de que exista, no un margen decorativo. */
-.explorador-resultado > .cortes:last-child,
-.explorador-resultado > .cortes { padding-bottom: 45vh; }
+   recorrido. Es la razón de que exista, no un margen decorativo.
+
+   Va en `.explorador-resultado`, no en `.cortes`: en producción.html el
+   tablero Bento (jerarquía y temáticas) va DESPUÉS de `.cortes`, y ese
+   padding anclado a `.cortes` quedaba a mitad de página en vez de al final,
+   empujando el treemap lejos del resto de las métricas con un hueco de
+   45vh. El contenedor de resultado sí es el último elemento en todas las
+   páginas del explorador, con o sin Bento. */
+.explorador-resultado { padding-bottom: 45vh; }
 
 /* Buscador dentro del panel de filtros: misma caja que las dimensiones. */
 .dim-busca { padding: var(--e3) var(--e4) var(--e4); margin-bottom: var(--e2); }

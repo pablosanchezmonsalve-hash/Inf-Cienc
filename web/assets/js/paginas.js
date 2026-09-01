@@ -6,6 +6,7 @@ import * as v from './vista.js';
 import * as X from './explorador.js';
 import * as VX from './vista_explorador.js';
 import * as anim from './animar.js';
+import { montarHeatmap } from './visualizations/heatmap.js';
 
 /* ============================================================== portada */
 
@@ -37,6 +38,10 @@ async function montarExplorador(claveSeccion) {
     controles: document.getElementById('controles'),
     cifras: document.getElementById('cifras'),
     cortes: document.getElementById('cortes'),
+    // Sólo existe en produccion.html (Bento Grid). El resto de las
+    // secciones no tiene este contenedor y zonas.heatmap queda null —
+    // se comprueba antes de usarlo, igual que zonas.diferidos.
+    heatmap: document.getElementById('heatmap-contenedor'),
   };
   if (!zonas.cifras) return;
 
@@ -100,6 +105,11 @@ async function montarExplorador(claveSeccion) {
     // geometría antes y después del cambio, y el orden sólo se garantiza si el
     // repintado ocurre en medio.
     anim.transicion(zonas.cortes, () => { zonas.cortes.innerHTML = partes.cortes; });
+
+    // El mapa de calor de temáticas (Bento Grid) reacciona al mismo recorte
+    // que el resto de la página: mismo criterio, un solo filtro. No lleva
+    // pantalla de "sin datos" separada — montarHeatmap() ya la resuelve.
+    if (zonas.heatmap) montarHeatmap(zonas.heatmap, X.recorte(publicaciones, sel));
 
     zonas.cifras.querySelectorAll('[data-valor]').forEach(e => {
       if (antes.size && antes.get(e.dataset.valor) !== e.textContent) e.classList.add('cambia');
@@ -486,7 +496,11 @@ async function autores() {
 
 /* ============================================================ ficha autor */
 async function fichaAutor() {
-  const id = new URLSearchParams(location.search).get('id');
+  const idCrudo = new URLSearchParams(location.search).get('id');
+  // Los identificadores que emite el propio build son slugs (letras, dígitos,
+  // guion): `orellana-donoso-m`. Cualquier otra cosa en `?id=` no es un
+  // identificador válido y se trata como ausente, no como ruta de `fetch`.
+  const id = idCrudo && /^[a-z0-9-]{1,80}$/.test(idCrudo) ? idCrudo : null;
   const cont = document.getElementById('ficha');
   // Sin identificador la página quedaba en blanco: ni encabezado —la ficha es
   // la única del sitio sin h1 propio en el archivo, porque lo pone el JS— ni
@@ -526,8 +540,8 @@ async function fichaAutor() {
     <div><span>Nombre en fuente</span>${c.escapar(a.nombre_en_fuente)}</div>
     <div><span>Unidad académica</span>${c.escapar(a.unidades_academicas.join(' · '))}</div>
     <div><span>Scopus Author ID</span>${a.scopus_author_ids.length
-      ? a.scopus_author_ids.map(s => `<a class="enlace-dato" href="https://www.scopus.com/authid/detail.uri?authorId=${s}"
-          target="_blank" rel="noopener">${s}</a>`).join(' · ')
+      ? a.scopus_author_ids.map(s => `<a class="enlace-dato" href="https://www.scopus.com/authid/detail.uri?authorId=${encodeURIComponent(s)}"
+          target="_blank" rel="noopener">${c.escapar(s)}</a>`).join(' · ')
       : '<span class="sin-dato-txt">No resuelto</span>'}</div>
     <div><span>ORCID</span>${a.orcid
       ? `<a class="enlace-dato" href="https://orcid.org/${c.escapar(a.orcid)}" target="_blank" rel="noopener">${c.escapar(a.orcid)}</a>`

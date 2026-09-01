@@ -51,6 +51,18 @@ GRAFO = ROOT / "data" / "interim" / "coauthorship_graph.json"
 SALIDA = ROOT / "internal" / "red_coautoria.html"
 
 
+def _json_para_script(obj) -> str:
+    """JSON seguro para incrustar en <script>: json.dumps no escapa '</',
+    así que un título o afiliación con "</script>" cerraría el bloque antes
+    de tiempo y el resto se interpretaría como HTML."""
+    return (
+        json.dumps(obj, ensure_ascii=False)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+    )
+
+
 def apellido(firma: str) -> str:
     """La parte de la firma que no son iniciales, normalizada.
 
@@ -237,8 +249,8 @@ def main() -> int:
         fuera_personas=d["fuera"]["personas_en_menores"],
         fuera_aisladas=d["fuera"]["personas_aisladas"],
         excluidas=", ".join(d["excluidas"]) or "ninguna",
-        datos=json.dumps({"nodos": d["nodos"], "aristas": d["aristas"]},
-                         ensure_ascii=False)), encoding="utf-8")
+        datos=_json_para_script({"nodos": d["nodos"], "aristas": d["aristas"]})),
+        encoding="utf-8")
 
     print("\n  VISTA DE LA RED (capa interna)")
     print(f"    nodos dibujados      : {len(d['nodos'])} "

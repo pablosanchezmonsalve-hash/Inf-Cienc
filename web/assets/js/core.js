@@ -1141,9 +1141,24 @@ export function montarTooltip() {
 
   const mostrar = (el, x, y) => {
     resaltar(el);
-    tip.innerHTML = `<span class="tip-t">${el.dataset.tip}</span>
-      <span class="tip-v">${el.dataset.tipV}</span>
-      ${el.dataset.tipN ? `<span class="tip-n">${el.dataset.tipN}</span>` : ''}`;
+    // `dataset.tip` ya viene decodificado por el parser HTML: reinyectarlo con
+    // innerHTML anula el escape que se hizo al escribir el atributo. textContent
+    // no interpreta marcado, así que el dato vuelve a quedar inerte.
+    tip.replaceChildren();
+    const spanTip = document.createElement('span');
+    spanTip.className = 'tip-t';
+    spanTip.textContent = el.dataset.tip;
+    tip.append(spanTip);
+    const spanValor = document.createElement('span');
+    spanValor.className = 'tip-v';
+    spanValor.textContent = el.dataset.tipV;
+    tip.append(spanValor);
+    if (el.dataset.tipN) {
+      const spanN = document.createElement('span');
+      spanN.className = 'tip-n';
+      spanN.textContent = el.dataset.tipN;
+      tip.append(spanN);
+    }
     tip.hidden = false;
     const r = tip.getBoundingClientRect();
     // Se coloca arriba a la derecha del puntero, y salta abajo o a la izquierda
