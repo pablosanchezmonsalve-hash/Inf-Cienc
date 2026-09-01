@@ -10,7 +10,7 @@ Generado por `src/audit/05_validation_rules.py`. Reejecutable.
 | `E-04` | bloqueante | Año dentro de la ventana declarada | **PASA** | rango observado=2023-2025 |
 | `E-05` | bloqueante | Citas enteras y no negativas | **PASA** | mínimo=0 |
 | `E-06` | alta | Sin columnas de cobertura nula en el universo activo | **FALLA** | vacías=['Molecular Sequence Numbers'] |
-| `E-07` | alta | Sin columnas residuales de join en fuentes activas | **PASA** | detectadas en rdata (fuente de referencia, no activa): 6 |
+| `E-07` | alta | Sin columnas residuales de join en fuentes activas | **PASA** | fuente de referencia no leída (paquete `rdata` ausente); no afecta a las fuentes activas |
 | `E-08` | media | n de registros leído coincide con el declarado | **PASA** | declarado=816 leído=816 |
 | `D-01` | bloqueante | Sin EID repetido | **PASA** | 0 |
 | `D-02` | alta | Sin DOI repetido entre los no nulos | **PASA** | 0 |
