@@ -2,7 +2,7 @@
 
 **Generado** el 2026-09-01 por `src/review/build_review.py`. Regenerable.
 
-Quedan **138 casos** de 301. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **128 casos** de 290. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -47,7 +47,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Reccius A. → 0009-0004-3236-3030: ¿es suyo?](revision_identidad.html#caso-ver-reccius-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531 (Artículo de revista); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257 (Artículo de revista)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257 (Artículo de revista); 10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531 (Artículo de revista)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -364,6 +364,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 | Comprobar en | Enlace |
 |---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7439-4346> |
 | Buscar «Díaz-Galaz L.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=D%C3%ADaz-Galaz%20L.> |
 | Perfil 59351091000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59351091000> |
 
@@ -482,6 +483,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 | Comprobar en | Enlace |
 |---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1625-2216> |
 | Buscar «Letelier Widow G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Letelier%20Widow%20G.> |
 | Perfil 56976276800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56976276800> |
 
@@ -661,6 +663,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 | Comprobar en | Enlace |
 |---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-8815-5979> |
 | Buscar «Salas-Guzmán N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Salas-Guzm%C3%A1n%20N.> |
 | Perfil 57193774407 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57193774407> |
 
@@ -887,7 +890,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ---
 
-## Candidato por inventario de autoarchivo — 7 pendiente(s)
+## Candidato por inventario de autoarchivo — 4 pendiente(s)
 
 ### [Castillo Valenzuela O. → 0000-0002-4411-8655?](revision_identidad.html#caso-aacand-castillo-valenzuela-o-0000-0002-4411-8655)
 
@@ -915,19 +918,6 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 - 2024 · Perception of medical students regarding a hybrid Orthopedics course post COVID-19 pandemic. Cross-sectional study in Chile; [Percepción de estudiantes de Medicina sobre curso híbrido de Traumatología y Ortopedia post pandemia COVID-19. Estudio transversal en Chile] — <https://doi.org/10.1016/j.rmclc.2024.05.012>
 
-### [Díaz-Galaz L. → 0000-0001-7439-4346?](revision_identidad.html#caso-aacand-d-az-galaz-l-0000-0001-7439-4346)
-
-«Díaz-Galaz, Lorena» aparece en el inventario de autoarchivo (Artículo de revista, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Díaz-Galaz L.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=D%C3%ADaz-Galaz%20L.> |
-| Perfil 59351091000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59351091000> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2024 · Development of gestural language in childhood: how is it addressed in the guidelines proposed in documents that control kindergarten education in Chile?; [Desarrollo del lenguaje gestual en la infancia: ¿cómo se aborda en los lineamientos propuestos en documentos que rigen la educación parvularia en Chile?] — <https://doi.org/10.4067/S0718-07052024000100323>
-
 ### [Hernandez A. → 0000-0003-3091-5386?](revision_identidad.html#caso-aacand-hernandez-a-0000-0003-3091-5386)
 
 «Hernandez, Abdul» aparece en el inventario de autoarchivo (Artículo de revista, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
@@ -940,19 +930,6 @@ Publicaciones atribuidas, para comparar contra el registro:
 Publicaciones atribuidas, para comparar contra el registro:
 
 - 2024 · Mood states and academic performance in the objective structured clinical examination. The mediating effect of self-efficacy — <https://doi.org/10.1016/j.nedt.2024.106116>
-
-### [Letelier Widow G. → 0000-0002-1625-2216?](revision_identidad.html#caso-aacand-letelier-widow-g-0000-0002-1625-2216)
-
-«Letelier Widow, Gonzalo» aparece en el inventario de autoarchivo (Artículo de revista, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Letelier Widow G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Letelier%20Widow%20G.> |
-| Perfil 56976276800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56976276800> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · Scholastic roots of the Hobbesian state of nature; [Raíces escolásticas del estado de naturaleza hobbesiano] — <https://doi.org/10.5209/rpub.98780>
 
 ### [Olive F. → 0009-0000-0892-6746?](revision_identidad.html#caso-aacand-olive-f-0009-0000-0892-6746)
 
@@ -967,56 +944,9 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 - 2025 · Analysis of household-like waste discarded by health institutions in Chile: A descriptive study — <https://doi.org/10.1016/j.joclim.2025.100437>
 
-### [Salas-Guzmán N. → 0000-0001-8815-5979?](revision_identidad.html#caso-aacand-salas-guzm-n-n-0000-0001-8815-5979)
-
-«Salas-Guzmán, Natalia» aparece en el inventario de autoarchivo (Artículo de revista, 3 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Salas-Guzmán N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Salas-Guzm%C3%A1n%20N.> |
-| Perfil 57193774407 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57193774407> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · Redefining academic trajectories: A comprehensive analysis of the factors and impacts of the gender gap in STEM higher education — <https://doi.org/10.1108/IJSHE-02-2024-0129>
-- 2025 · Gender Stereotypes and Language Processing: Cognitive and Social Insights from a Decade of Research (2012–2023) — <https://doi.org/10.1111/ejed.70063>
-- 2024 · STEM and gender gap: a systematic review in WoS, Scopus, and ERIC databases (2012–2022) — <https://doi.org/10.3389/feduc.2024.1378640>
-- 2024 · Gender disparities in higher education: development and validation of the FACT-GÉN instrument — <https://doi.org/10.3389/feduc.2024.1456085>
-- 2025 · Bridging gaps: the role of gender and team composition in collective intelligence within STEM education — <https://doi.org/10.1080/2331186X.2024.2439655>
-
 ---
 
-## Candidato por inventario de autoarchivo (ambiguo) — 2 pendiente(s)
-
-### [Morales Sepúlveda J.P.: 2 firmas reclaman 0000-0002-7304-5256](revision_identidad.html#caso-aacand-amb-morales-sep-lveda-j-p-0000-0002-7304-5256)
-
-«Morales Sepúlveda, Juan Pablo» (0000-0002-7304-5256) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Morales Sepúlveda J.P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Morales%20Sep%C3%BAlveda%20J.P.> |
-| Perfil 57194732185 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57194732185> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2023 · The impact of loneliness and social adaptation on depressive symptoms: Behavioral and brain measures evidence from a brain health perspective — <https://doi.org/10.3389/fpsyg.2023.1096178>
-
-### [Morales-Sepulveda J.P.: 2 firmas reclaman 0000-0002-7304-5256](revision_identidad.html#caso-aacand-amb-morales-sepulveda-j-p-0000-0002-7304-5256)
-
-«Morales Sepúlveda, Juan Pablo» (0000-0002-7304-5256) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Morales-Sepulveda J.P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Morales-Sepulveda%20J.P.> |
-| Perfil 57194732185 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57194732185> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2024 · Cognitive, emotional, and social factors promoting psychosocial adaptation: a study of latent profiles in people living in socially vulnerable contexts — <https://doi.org/10.3389/fpsyg.2024.1321242>
-
----
-
-## Candidato por repositorio institucional — 14 pendiente(s)
+## Candidato por repositorio institucional — 11 pendiente(s)
 
 ### [Carrasco G. → 0000-0003-4498-3013?](revision_identidad.html#caso-dspacecand-carrasco-g-0000-0003-4498-3013)
 
@@ -1083,19 +1013,6 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 - 2024 · The Association between Anatomical Variants of Musculoskeletal Structures and Nerve Compressions of the Lower Limb: A Systematic Review and Meta-Analysis — <https://doi.org/10.3390/diagnostics14070695>
 
-### [Díaz-Galaz L. → 0000-0001-7439-4346?](revision_identidad.html#caso-dspacecand-d-az-galaz-l-0000-0001-7439-4346)
-
-«Díaz-Galaz, Lorena» aparece en el repositorio institucional (Article, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Díaz-Galaz L.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=D%C3%ADaz-Galaz%20L.> |
-| Perfil 59351091000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59351091000> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2024 · Development of gestural language in childhood: how is it addressed in the guidelines proposed in documents that control kindergarten education in Chile?; [Desarrollo del lenguaje gestual en la infancia: ¿cómo se aborda en los lineamientos propuestos en documentos que rigen la educación parvularia en Chile?] — <https://doi.org/10.4067/S0718-07052024000100323>
-
 ### [González I. → 0000-0002-8326-9800?](revision_identidad.html#caso-dspacecand-gonz-lez-i-0000-0002-8326-9800)
 
 «González, Ignacia» aparece en el repositorio institucional (Article, 2 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
@@ -1108,19 +1025,6 @@ Publicaciones atribuidas, para comparar contra el registro:
 Publicaciones atribuidas, para comparar contra el registro:
 
 - 2025 · Transcriptional activation of genes associated with the matrisome is a common feature of senescent endothelial cells — <https://doi.org/10.1007/s10522-025-10191-5>
-
-### [Letelier Widow G. → 0000-0002-1625-2216?](revision_identidad.html#caso-dspacecand-letelier-widow-g-0000-0002-1625-2216)
-
-«Letelier Widow, Gonzalo» aparece en el repositorio institucional (Artículo, 1 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Letelier Widow G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Letelier%20Widow%20G.> |
-| Perfil 56976276800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56976276800> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · Scholastic roots of the Hobbesian state of nature; [Raíces escolásticas del estado de naturaleza hobbesiano] — <https://doi.org/10.5209/rpub.98780>
 
 ### [Marrugo N. → 0000-0001-7380-4753?](revision_identidad.html#caso-dspacecand-marrugo-n-0000-0001-7380-4753)
 
@@ -1192,26 +1096,9 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 - 2023 · Effects of an antioxidants cocktail on glucose metabolism at rest, during exercise, and during a glucose load in healthy young subjects; [Efecto de un cóctel de antioxidantes sobre el metabolismo de la glucosa en reposo, durante el ejercicio y durante una carga de glucosa en sujetos jóvenes sanos] — <https://doi.org/10.4067/s0717-75182023000600593>
 
-### [Salas-Guzmán N. → 0000-0001-8815-5979?](revision_identidad.html#caso-dspacecand-salas-guzm-n-n-0000-0001-8815-5979)
-
-«Salas-Guzmán, Natalia» aparece en el repositorio institucional (s/d, 2 obra(s) propia(s)) con este ORCID, y coincide en apellido e inicial con esta firma. No hay ninguna publicación del universo Scopus/SciVal compartida con ese registro: por eso es un candidato y no una asignación.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Salas-Guzmán N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Salas-Guzm%C3%A1n%20N.> |
-| Perfil 57193774407 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57193774407> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2025 · Redefining academic trajectories: A comprehensive analysis of the factors and impacts of the gender gap in STEM higher education — <https://doi.org/10.1108/IJSHE-02-2024-0129>
-- 2025 · Gender Stereotypes and Language Processing: Cognitive and Social Insights from a Decade of Research (2012–2023) — <https://doi.org/10.1111/ejed.70063>
-- 2024 · STEM and gender gap: a systematic review in WoS, Scopus, and ERIC databases (2012–2022) — <https://doi.org/10.3389/feduc.2024.1378640>
-- 2024 · Gender disparities in higher education: development and validation of the FACT-GÉN instrument — <https://doi.org/10.3389/feduc.2024.1456085>
-- 2025 · Bridging gaps: the role of gender and team composition in collective intelligence within STEM education — <https://doi.org/10.1080/2331186X.2024.2439655>
-
 ---
 
-## Candidato por repositorio institucional (ambiguo) — 11 pendiente(s)
+## Candidato por repositorio institucional (ambiguo) — 9 pendiente(s)
 
 ### [Figueroa-Toledo A.M.: 2 firmas reclaman 0000-0002-2270-299X](revision_identidad.html#caso-dspacecand-amb-figueroa-toledo-a-m-0000-0002-2270-299x)
 
@@ -1236,32 +1123,6 @@ Publicaciones atribuidas, para comparar contra el registro:
 Publicaciones atribuidas, para comparar contra el registro:
 
 - 2024 · BMAL1 and CLOCK proteins exhibit differential association with mitochondrial dynamics, protein synthesis pathways and muscle strength in human muscle — <https://doi.org/10.1113/JP285955>
-
-### [Morales Sepúlveda J.P.: 2 firmas reclaman 0000-0002-7304-5256](revision_identidad.html#caso-dspacecand-amb-morales-sep-lveda-j-p-0000-0002-7304-5256)
-
-«Morales Sepúlveda, Juan Pablo» (0000-0002-7304-5256) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Morales Sepúlveda J.P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Morales%20Sep%C3%BAlveda%20J.P.> |
-| Perfil 57194732185 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57194732185> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2023 · The impact of loneliness and social adaptation on depressive symptoms: Behavioral and brain measures evidence from a brain health perspective — <https://doi.org/10.3389/fpsyg.2023.1096178>
-
-### [Morales-Sepulveda J.P.: 2 firmas reclaman 0000-0002-7304-5256](revision_identidad.html#caso-dspacecand-amb-morales-sepulveda-j-p-0000-0002-7304-5256)
-
-«Morales Sepúlveda, Juan Pablo» (0000-0002-7304-5256) coincide en apellido e inicial con 2 firmas distintas de este corpus. El nombre no basta para elegir.
-
-| Comprobar en | Enlace |
-|---|---|
-| Buscar «Morales-Sepulveda J.P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Morales-Sepulveda%20J.P.> |
-| Perfil 57194732185 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57194732185> |
-
-Publicaciones atribuidas, para comparar contra el registro:
-
-- 2024 · Cognitive, emotional, and social factors promoting psychosocial adaptation: a study of latent profiles in people living in socially vulnerable contexts — <https://doi.org/10.3389/fpsyg.2024.1321242>
 
 ### [Olive F.: 3 firmas reclaman 0000-0002-0533-4531](revision_identidad.html#caso-dspacecand-amb-olive-f-0000-0002-0533-4531)
 

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `507b8f0` · Fusiona 72 decisiones históricas que la exportación del navegador habí
+Último commit: `7dd40fd` · Resuelve la contradicción de Arroyo A. con evidencia cruzada y corrige
 Snapshot: 2026-09-01
 
 ---
@@ -35,8 +35,8 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Entidades de autor publicadas | **545** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
-| Firmas con ORCID | **322** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **275** | tras consolidación humana · **la que sirve el sitio** |
+| Firmas con ORCID | **327** | sin consolidar · `data/enriched/authors_orcid.csv` |
+| Entidades con ORCID | **278** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **40** | `config/indicators.yml` |
 | Indicadores publicados | **28** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
@@ -55,9 +55,9 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 |---|---|
 | `internal/ambiguities_authors.csv` | 414 |
 | `internal/ambiguities_publications.csv` | 14 |
-| `internal/autoarchivo_candidatos.csv` | 9 |
+| `internal/autoarchivo_candidatos.csv` | 4 |
 | `internal/autoarchivo_unidad_candidatos.csv` | 73 |
-| `internal/dspace_candidatos.csv` | 25 |
+| `internal/dspace_candidatos.csv` | 20 |
 | `internal/identity_candidates.csv` | 17 |
 | `internal/openalex_cobertura.csv` | 414 |
 | `internal/openalex_desacuerdos.csv` | 6 |
@@ -67,7 +67,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
 
-`make revision` reúne estas colas en 301 casos, de los que **138 siguen pendientes**: 163 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 290 casos, de los que **128 siguen pendientes**: 162 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 373
+## Decisiones tomadas: 376
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
