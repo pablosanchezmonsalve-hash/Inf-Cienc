@@ -164,14 +164,17 @@ coincidencia. Candidatos por nombre para firmas sin ORCID: 9 (7 uno-a-uno).
 
 **Facultad o Escuela** (`internal/autoarchivo_unidad_candidatos.csv`): de
 las 294 firmas con unidad académica «No determinada», **59 tienen un
-candidato** en este inventario. El valor se declara TAL CUAL lo escribió
-biblioteca («Medicina», «CIDOC», «Familia»...), sin mapear a
+candidato** en este inventario (73 casos, algunas firmas con más de una
+escuela candidata). El valor se declara TAL CUAL lo escribió biblioteca
+(«Medicina», «CIDOC», «Familia»...), sin mapear a
 `config/matching_rules.yml` — esa traducción es el mismo trabajo
-institucional que exigió `T-02`, y unas pocas firmas ya muestran más de una
-escuela distinta entre sus obras (homónimos o cambio de unidad, sin decidir
-cuál). Es un archivo de candidatos declarados, no una cola de
-`build_review.py`: la extensión a una herramienta interactiva de revisión
-queda pendiente de que se decida el alcance de esa traducción.
+institucional que exigió `T-02`. Desde el 2026-09-01 SÍ es una cola de
+`build_review.py` («Candidato de unidad académica por autoarchivo»), a
+pedido del usuario de reunir toda revisión pendiente en un solo documento:
+confirmar un caso deja constancia en `identity_decisions.csv` de que la
+unidad declarada es correcta para esa persona, pero APLICARLA al pipeline
+público —traducirla al vocabulario oficial y que deje de figurar «No
+determinada»— sigue siendo un paso aparte, todavía sin construir.
 
 ---
 

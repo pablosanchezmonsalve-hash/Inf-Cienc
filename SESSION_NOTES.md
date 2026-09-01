@@ -5948,3 +5948,95 @@ los 4 "Repositorio institucional discrepa" restantes, T-06/T-19.
 
 Sigue pendiente la pregunta (b) del cierre anterior: si se construye una
 herramienta de revisión para los 59 candidatos de Facultad/Escuela.
+
+## Cierre · Los candidatos de Facultad/Escuela se consolidan en el mismo documento de revisión, y se corrige un texto que habría sido falso para 27 de las 59 firmas
+
+### El pedido
+
+"Establece todo que requiera revisión en el mismo documento Revisión de
+Identidad" — respuesta a la pregunta (b) que quedó abierta: no una
+herramienta aparte, sino una cola más dentro de `revision_identidad.html`.
+
+### Lo que se construyó
+
+Nueva cola «Candidato de unidad académica por autoarchivo» (73 casos, uno
+por par firma×escuela candidata) en `build_review.py`, con vocabulario de
+veredicto nuevo en `decisiones.py`: `unidad_confirmada` / `unidad_no_corresponde`.
+El texto del veredicto declara honestamente el alcance: confirmar deja
+constancia en `identity_decisions.csv` de que la unidad es correcta para
+esa persona; APLICARLA al pipeline público —traducir el valor en bruto al
+vocabulario oficial, que deje de figurar «No determinada»— sigue siendo un
+paso aparte, sin construir todavía (exige el mismo criterio institucional
+de T-02, y no hay decisiones reales que aplicar hasta que el usuario
+revise). `apply_decisions.py --test` sigue en verde: el guardián de
+veredictos desconocidos y de cola equivocada reconoce el vocabulario nuevo
+sin que haga falta tocar la lógica de aplicación todavía.
+
+Antes de dar esto por terminado, se comprobó si el vocabulario ya validado
+en `config/matching_rules.yml` (T-02) reconocía alguna de las 73 cadenas en
+bruto («Medicina», «CIDOC», etc.) — **0 de 73**, salvo 3 casos donde la
+cadena YA es un nombre de Facultad canónico completo. Confirma lo que ya
+se había declarado: el vocabulario de T-02 se construyó desde afiliaciones
+Scopus, no desde esta nomenclatura abreviada de biblioteca: son alfabetos
+distintos y no hay atajo.
+
+### El error que se encontró y corrigió antes de terminar
+
+Al revisar el primer caso generado (`Allende-Valenzuela T.` → CIPEF), el
+texto decía "Hoy esta firma figura con unidad académica «No determinada»
+en el sitio público" — **falso para esta firma**: tiene otra publicación
+con «Facultad de Educación y Ciencias Sociales» ya determinada. «No
+determinada» es un atributo de cada PAR autor×publicación, no de la firma
+completa, y el texto lo trataba como si fuera lo segundo. Se comprobó el
+alcance real: **27 de las 59 firmas candidatas (46 %) ya tienen unidad
+determinada en alguna de sus otras publicaciones** — no son casos "sin
+ningún dato", son casos con un hueco puntual. Se corrigió la frase para
+distinguir los dos casos: cuando hay una unidad ya determinada, el texto la
+muestra y pide comparar; cuando no hay ninguna, mantiene la frase original.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-348 | Los 73 casos de unidad se integran como cola de `build_review.py`, no como herramienta aparte | Instrucción explícita del usuario: todo lo que requiera revisión, en el mismo documento |
+| D-349 | El veredicto `unidad_confirmada` registra el hecho en `identity_decisions.csv` pero NO aplica nada al pipeline todavía | Aplicar exige traducir al vocabulario oficial (criterio T-02) y no hay decisiones reales que aplicar aún; declarar la acción como "hecha" cuando no lo está habría sido falso |
+| D-350 | El texto de cada caso distingue «sin ninguna unidad determinada» de «con unidad determinada en otra publicación, hueco puntual aquí» | Afirmar en blanco que la firma "no tiene unidad" cuando SÍ la tiene en otra publicación (27 de 59 casos) habría sido una afirmación falsa sobre el propio dato |
+
+### Verificación
+
+`apply_decisions.py --test`: sin cambios de lógica, sigue en verde
+(guardianes de vocabulario reconocen las 2 nuevas entradas). Auditoría
+completa, `build_all.py` (compuerta: 0 fallas), `06_assemble_site.py`,
+`node src/verify/run_all.mjs` completo — sin fallos. Cola nueva verificada
+manualmente contra el HTML generado: botones correctos
+(`unidad_confirmada`/`unidad_no_corresponde`/`pendiente`), texto de
+contexto correcto en un caso de cada tipo (unidad ya determinada en otra
+publicación vs. ninguna).
+
+### Archivos modificados
+
+```
+src/review/decisiones.py     unidad_confirmada/unidad_no_corresponde en
+                              VOCABULARIO y COLAS
+src/review/build_review.py   d["autoarchivo_unidad"] cargado; nueva cola
+                              generada con el texto corregido
+docs/FUENTES_Y_APIS.md       §2.5 actualizada: ya no "queda pendiente"
+```
+
+### Ambigüedades abiertas
+
+- Las 73 candidaturas de unidad siguen sin decidir — el usuario las revisa
+  en el mismo documento que el resto.
+- El mecanismo de APLICACIÓN al pipeline sigue sin construir: cuando el
+  usuario tenga decisiones reales que exportar, hace falta un script nuevo
+  (análogo a `apply_unit_validation.py` pero para overrides por firma, no
+  por variante de vocabulario) — no se construyó a ciegas sin decisiones
+  que aplicar.
+- Las de siempre: Arroyo A./Shabani R., los 4 "Repositorio institucional
+  discrepa" restantes, T-06/T-19.
+
+### Próximo paso recomendado
+
+Esperar a que el usuario revise (puede ser por partes) y exporte
+decisiones. Cuando haya `unidad_confirmada` reales que aplicar, construir
+el script de aplicación correspondiente — recién ahí, no antes.

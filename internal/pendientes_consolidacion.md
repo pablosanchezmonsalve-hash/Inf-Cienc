@@ -2,7 +2,7 @@
 
 **Generado** el 2026-09-01 por `src/review/build_review.py`. Regenerable.
 
-Quedan **116 casos** de 230. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **189 casos** de 303. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -899,6 +899,739 @@ Publicaciones atribuidas, para comparar contra el registro:
 - 2023 · Scale E-portfolio for Higher Education — <https://doi.org/10.33423/jhetp.v23i3.5849>
 - 2023 · A study of lexical availability associated with the areas of learning and motivation for learning; [Um estudo de disponibilidade lexical associada à áreas de aprendizagem e motivação para aprender]; [Un estudio de disponibilidad léxica asociado a las áreas de aprendizaje y motivación por el aprendizaje] — <https://doi.org/10.15381/lengsoc.v22i2.23855>
 - 2024 · Design of a process for learning critical thinking in higher education students, using scientific infographics; [Diseño de un proceso para el aprendizaje del pensamiento crítico en estudiantes de educación superior, usando infografías científicas] — <https://doi.org/10.4067/S0718-50062024000300011>
+
+---
+
+## Candidato de unidad académica por autoarchivo — 73 pendiente(s)
+
+### [Allende-Valenzuela T. → CIPEF?](revision_identidad.html#caso-aaunidad-allende-valenzuela-t-cipef)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Allende-Valenzuela, Tamara» en «CIPEF» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0009-2334-0562> |
+| Buscar «Allende-Valenzuela T.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Allende-Valenzuela%20T.> |
+| Perfil 59321456000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59321456000> |
+
+### [Allende-Valenzuela T. → Educación parvularia?](revision_identidad.html#caso-aaunidad-allende-valenzuela-t-educaci-n-parvularia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Allende-Valenzuela, Tamara» en «Educación parvularia» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0009-2334-0562> |
+| Buscar «Allende-Valenzuela T.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Allende-Valenzuela%20T.> |
+| Perfil 59321456000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59321456000> |
+
+### [Andrade Kobayashi M. → Arte?](revision_identidad.html#caso-aaunidad-andrade-kobayashi-m-arte)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Andrade Kobayashi, Megumi» en «Arte» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6004-1301> |
+| Buscar «Andrade Kobayashi M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Andrade%20Kobayashi%20M.> |
+| Perfil 60590937300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60590937300> |
+
+### [Andrade Kobayashi M. → Literatura?](revision_identidad.html#caso-aaunidad-andrade-kobayashi-m-literatura)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Andrade Kobayashi, Megumi» en «Literatura» (2 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6004-1301> |
+| Buscar «Andrade Kobayashi M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Andrade%20Kobayashi%20M.> |
+| Perfil 60590937300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60590937300> |
+
+### [Arenas-Massa Á. → Derecho?](revision_identidad.html#caso-aaunidad-arenas-massa-derecho)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Derecho». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Arenas Massa, Ángela» en «Derecho» (10 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3188-0189> |
+| Buscar «Arenas-Massa Á.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Arenas-Massa%20%C3%81.> |
+| Perfil 56404649500 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56404649500> |
+
+### [Arroyo A. → Medicina?](revision_identidad.html#caso-aaunidad-arroyo-a-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Arroyo, Antonio» en «Medicina» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0157-5175> |
+| Buscar «Arroyo A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Arroyo%20A.> |
+| Perfil 58862866100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58862866100> |
+
+### [Benites M. → Medicina?](revision_identidad.html#caso-aaunidad-benites-m-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Benites, Martín Hernán» en «Medicina» (5 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-6366-534X> |
+| Buscar «Benites M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Benites%20M.> |
+| Perfil 56204920800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56204920800> |
+
+### [Bustos-Muñoz D. → Publicidad?](revision_identidad.html#caso-aaunidad-bustos-mu-oz-d-publicidad)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Bustos Muñoz, David» en «Publicidad» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0005-5991-8793> |
+| Buscar «Bustos-Muñoz D.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Bustos-Mu%C3%B1oz%20D.> |
+| Perfil 60630239800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60630239800> |
+
+### [Caffarena P. → CIDOC?](revision_identidad.html#caso-aaunidad-caffarena-p-cidoc)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Caffarena, Paula» en «CIDOC» (7 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-2609-6413> |
+| Buscar «Caffarena P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Caffarena%20P.> |
+| Perfil 60513695700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60513695700> |
+
+### [Caffarena-Barcenilla C. → Educación parvularia?](revision_identidad.html#caso-aaunidad-caffarena-barcenilla-c-educaci-n-parvularia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Caffarena-Barcenilla, Carolina» en «Educación parvularia» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-9550-3695> |
+| Buscar «Caffarena-Barcenilla C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Caffarena-Barcenilla%20C.> |
+| Perfil 57211584427 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57211584427> |
+
+### [Cancino J. → Enfermería?](revision_identidad.html#caso-aaunidad-cancino-j-enfermer-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Escuela de Kinesiología / Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Cancino, Jorge» en «Enfermería» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1956-7600> |
+| Buscar «Cancino J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Cancino%20J.> |
+| Perfil 36996964200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=36996964200> |
+| Perfil 57607000000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57607000000> |
+
+### [Cancino J. → Kinesiología?](revision_identidad.html#caso-aaunidad-cancino-j-kinesiolog-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Escuela de Kinesiología / Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Cancino, Jorge» en «Kinesiología» (11 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1956-7600> |
+| Buscar «Cancino J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Cancino%20J.> |
+| Perfil 36996964200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=36996964200> |
+| Perfil 57607000000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57607000000> |
+
+### [Carvajal G. → CIDOC?](revision_identidad.html#caso-aaunidad-carvajal-g-cidoc)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Carvajal, Gustavo» en «CIDOC» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-5283-2672> |
+| Buscar «Carvajal G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Carvajal%20G.> |
+| Perfil 57219929230 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57219929230> |
+
+### [Carvajal G. → Literatura?](revision_identidad.html#caso-aaunidad-carvajal-g-literatura)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Carvajal, Gustavo» en «Literatura» (3 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-5283-2672> |
+| Buscar «Carvajal G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Carvajal%20G.> |
+| Perfil 57219929230 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57219929230> |
+
+### [Chavez-Reyes A. → Medicina?](revision_identidad.html#caso-aaunidad-chavez-reyes-a-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Chávez-Reyes, Arturo» en «Medicina» (5 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6655-815X> |
+| Buscar «Chavez-Reyes A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Chavez-Reyes%20A.> |
+| Perfil 7801313307 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=7801313307> |
+
+### [Cottin M. → Psicología?](revision_identidad.html#caso-aaunidad-cottin-m-psicolog-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Cottin, Marianne» en «Psicología» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9460-7190> |
+| Buscar «Cottin M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Cottin%20M.> |
+| Perfil 57200079556 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57200079556> |
+
+### [Crisóstomo Flores P. → Periodismo?](revision_identidad.html#caso-aaunidad-cris-stomo-flores-p-periodismo)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Crisóstomo-Flores, Paz» en «Periodismo» (12 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9761-2112> |
+| Buscar «Crisóstomo Flores P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Cris%C3%B3stomo%20Flores%20P.> |
+| Perfil 57713608100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57713608100> |
+
+### [Crisóstomo-Flores P. → Periodismo?](revision_identidad.html#caso-aaunidad-cris-stomo-flores-p-periodismo)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Crisóstomo-Flores, Paz» en «Periodismo» (12 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9761-2112> |
+| Buscar «Crisóstomo-Flores P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Cris%C3%B3stomo-Flores%20P.> |
+| Perfil 57713608100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57713608100> |
+
+### [De la Fuente M. → Medicina?](revision_identidad.html#caso-aaunidad-de-la-fuente-m-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «De la Fuente, Marjorie» en «Medicina» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0577-7604> |
+| Buscar «De la Fuente M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=De%20la%20Fuente%20M.> |
+| Perfil 23090504600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23090504600> |
+
+### [Diaz F. → Medicina?](revision_identidad.html#caso-aaunidad-diaz-f-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Díaz, Franco» en «Medicina» (49 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-4763-074X> |
+| Buscar «Diaz F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Diaz%20F.> |
+| Perfil 35195498000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=35195498000> |
+
+### [Díaz-Galaz L. → Educación parvularia?](revision_identidad.html#caso-aaunidad-d-az-galaz-l-educaci-n-parvularia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Díaz-Galaz, Lorena» en «Educación parvularia» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Díaz-Galaz L.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=D%C3%ADaz-Galaz%20L.> |
+| Perfil 59351091000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59351091000> |
+
+### [Escobar-González S. → Educación básica?](revision_identidad.html#caso-aaunidad-escobar-gonz-lez-s-educaci-n-b-sica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Escobar González, Sebastián» en «Educación básica» (4 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-2786-1487> |
+| Buscar «Escobar-González S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Escobar-Gonz%C3%A1lez%20S.> |
+| Perfil 60071273600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60071273600> |
+
+### [Farsani D. → Educación básica?](revision_identidad.html#caso-aaunidad-farsani-d-educaci-n-b-sica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Farsani, Danyal» en «Educación básica» (23 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9412-3161> |
+| Buscar «Farsani D.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Farsani%20D.> |
+| Perfil 57191268752 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57191268752> |
+
+### [Ferre Contreras A. → Medicina?](revision_identidad.html#caso-aaunidad-ferre-contreras-a-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Ferre Contreras, Andrés» en «Medicina» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1770-244X> |
+| Buscar «Ferre Contreras A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ferre%20Contreras%20A.> |
+| Perfil 45861101100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=45861101100> |
+
+### [Figueroa-Bustos A. → Periodismo?](revision_identidad.html#caso-aaunidad-figueroa-bustos-a-periodismo)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Figueroa-Bustos, Arturo» en «Periodismo» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1748-1037> |
+| Buscar «Figueroa-Bustos A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Figueroa-Bustos%20A.> |
+| Perfil 57245866600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57245866600> |
+
+### [Figueroa-Moya D. → Educación parvularia?](revision_identidad.html#caso-aaunidad-figueroa-moya-d-educaci-n-parvularia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Figueroa-Moya, Daniela» en «Educación parvularia» (4 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-2118-9159> |
+| Buscar «Figueroa-Moya D.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Figueroa-Moya%20D.> |
+| Perfil 60158587100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60158587100> |
+
+### [Giglio A. → Facultad de Medicina y Salud?](revision_identidad.html#caso-aaunidad-giglio-a-facultad-de-medicina-y-salud)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Giglio, Andrés» en «Facultad de Medicina y Salud» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-0533-4531> |
+| Buscar «Giglio A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Giglio%20A.> |
+| Perfil 58509256700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58509256700> |
+
+### [Giglio A. → Medicina?](revision_identidad.html#caso-aaunidad-giglio-a-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Giglio, Andrés» en «Medicina» (17 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-0533-4531> |
+| Buscar «Giglio A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Giglio%20A.> |
+| Perfil 58509256700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58509256700> |
+
+### [Gubbins V. → Familia?](revision_identidad.html#caso-aaunidad-gubbins-v-familia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Gubbins, Verónica» en «Familia» (14 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-2175-2941> |
+| Buscar «Gubbins V.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gubbins%20V.> |
+| Perfil 57188672913 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57188672913> |
+
+### [Hernandez A. → Enfermería?](revision_identidad.html#caso-aaunidad-hernandez-a-enfermer-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Hernandez, Abdul» en «Enfermería» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Hernandez A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Hernandez%20A.> |
+| Perfil 51461053900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=51461053900> |
+
+### [Ibáñez-Muñoz R.C. → Educación básica?](revision_identidad.html#caso-aaunidad-ib-ez-mu-oz-r-c-educaci-n-b-sica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Ibáñez-Muñoz, Rosa» en «Educación básica» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-5798-1562> |
+| Buscar «Ibáñez-Muñoz R.C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ib%C3%A1%C3%B1ez-Mu%C3%B1oz%20R.C.> |
+| Perfil 58884093400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58884093400> |
+
+### [Landskron G. → Medicina?](revision_identidad.html#caso-aaunidad-landskron-g-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Landskron, Glauben» en «Medicina» (6 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-7953-6769> |
+| Buscar «Landskron G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Landskron%20G.> |
+| Perfil 54929856000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=54929856000> |
+
+### [Letelier Widow G. → Formación General?](revision_identidad.html#caso-aaunidad-letelier-widow-g-formaci-n-general)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Letelier Widow, Gonzalo» en «Formación General» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Letelier Widow G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Letelier%20Widow%20G.> |
+| Perfil 56976276800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56976276800> |
+
+### [Lucero-Mora J. → Odontología?](revision_identidad.html#caso-aaunidad-lucero-mora-j-odontolog-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Lucero-Mora, Joaquín» en «Odontología» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-8554-7181> |
+| Buscar «Lucero-Mora J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Lucero-Mora%20J.> |
+| Perfil 58828642600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58828642600> |
+
+### [López-Arana S. → Escuela de Nutrición y Dietética, Facultad de Medicina?](revision_identidad.html#caso-aaunidad-l-pez-arana-s-escuela-de-nutrici-n-y-diet-tica-facultad-de-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Escuela de Nutrición y Dietética / Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «López-Arana, Sandra» en «Escuela de Nutrición y Dietética, Facultad de Medicina» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-4312-1318> |
+| Buscar «López-Arana S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=L%C3%B3pez-Arana%20S.> |
+| Perfil 23089038400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23089038400> |
+
+### [López-Arana S. → Nutrición?](revision_identidad.html#caso-aaunidad-l-pez-arana-s-nutrici-n)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Escuela de Nutrición y Dietética / Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «López-Arana, Sandra» en «Nutrición» (11 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-4312-1318> |
+| Buscar «López-Arana S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=L%C3%B3pez-Arana%20S.> |
+| Perfil 23089038400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23089038400> |
+
+### [Mardones-Falcone G. → Arquitectura?](revision_identidad.html#caso-aaunidad-mardones-falcone-g-arquitectura)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Mardones Falcone, Gonzalo» en «Arquitectura» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3943-8731> |
+| Buscar «Mardones-Falcone G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Mardones-Falcone%20G.> |
+| Perfil 58931723900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58931723900> |
+
+### [Martínez-Mardones M.B. → Medicina?](revision_identidad.html#caso-aaunidad-mart-nez-mardones-m-b-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Martinez-Mardones, Mónica» en «Medicina» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3296-3330> |
+| Buscar «Martínez-Mardones M.B.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Mart%C3%ADnez-Mardones%20M.B.> |
+| Perfil 57225050522 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57225050522> |
+
+### [Molina M. → Medicina?](revision_identidad.html#caso-aaunidad-molina-m-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Molina, Marcelo» en «Medicina» (7 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-7091-2633> |
+| Buscar «Molina M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Molina%20M.> |
+| Perfil 55764694200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55764694200> |
+
+### [Montero V. → Arte?](revision_identidad.html#caso-aaunidad-montero-v-arte)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Montero, Valentina» en «Arte» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-4368-2868> |
+| Buscar «Montero V.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Montero%20V.> |
+| Perfil 57214681999 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57214681999> |
+
+### [Moya P. → Odontología?](revision_identidad.html#caso-aaunidad-moya-p-odontolog-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Moya, Patricia» en «Odontología» (21 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-8442-2571> |
+| Buscar «Moya P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Moya%20P.> |
+| Perfil 57767862900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57767862900> |
+| Perfil 60235456000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60235456000> |
+
+### [Moyano Davila C. → Familia?](revision_identidad.html#caso-aaunidad-moyano-davila-c-familia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Moyano Dávila, Camila» en «Familia» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6357-3469> |
+| Buscar «Moyano Davila C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Moyano%20Davila%20C.> |
+| Perfil 57201182805 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57201182805> |
+
+### [Moyano Dávila C. → Familia?](revision_identidad.html#caso-aaunidad-moyano-d-vila-c-familia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Escuela de Ciencias de la Familia». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Moyano Dávila, Camila» en «Familia» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6357-3469> |
+| Buscar «Moyano Dávila C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Moyano%20D%C3%A1vila%20C.> |
+| Perfil 57201182805 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57201182805> |
+
+### [Mujika I. → Kinesiología?](revision_identidad.html#caso-aaunidad-mujika-i-kinesiolog-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Escuela de Kinesiología / Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Mujika, Iñigo» en «Kinesiología» (7 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-8143-9132> |
+| Buscar «Mujika I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Mujika%20I.> |
+| Perfil 55942910500 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55942910500> |
+
+### [Muszalski H. → Formación General?](revision_identidad.html#caso-aaunidad-muszalski-h-formaci-n-general)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Muszalski, Hernán» en «Formación General» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7031-6957> |
+| Buscar «Muszalski H.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Muszalski%20H.> |
+| Perfil 57223206591 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57223206591> |
+
+### [Muzard A. → Psicología?](revision_identidad.html#caso-aaunidad-muzard-a-psicolog-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Muzard, Antonia» en «Psicología» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-3803-1983> |
+| Buscar «Muzard A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Muzard%20A.> |
+| Perfil 57193623305 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57193623305> |
+
+### [Olive F. → Medicina?](revision_identidad.html#caso-aaunidad-olive-f-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Olive, Fernanda» en «Medicina» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Olive F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Olive%20F.> |
+| Perfil 59732237300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59732237300> |
+
+### [Poblete Alday P. → CIDOC?](revision_identidad.html#caso-aaunidad-poblete-alday-p-cidoc)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Poblete Alday, Patricia» en «CIDOC» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-6191-8518> |
+| Buscar «Poblete Alday P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Poblete%20Alday%20P.> |
+| Perfil 55816334800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55816334800> |
+
+### [Rego T. → Escuela de Filosofía?](revision_identidad.html#caso-aaunidad-rego-t-escuela-de-filosof-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Rego, Thomas» en «Escuela de Filosofía» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-2271-4568> |
+| Buscar «Rego T.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Rego%20T.> |
+| Perfil 58179849100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58179849100> |
+
+### [Rego T. → Formación General?](revision_identidad.html#caso-aaunidad-rego-t-formaci-n-general)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Rego, Thomas» en «Formación General» (8 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-2271-4568> |
+| Buscar «Rego T.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Rego%20T.> |
+| Perfil 58179849100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58179849100> |
+
+### [Salas-Guzmán N. → Psicología?](revision_identidad.html#caso-aaunidad-salas-guzm-n-n-psicolog-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Salas-Guzmán, Natalia» en «Psicología» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Buscar «Salas-Guzmán N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Salas-Guzm%C3%A1n%20N.> |
+| Perfil 57193774407 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57193774407> |
+
+### [Santibáñez D. → Educación básica?](revision_identidad.html#caso-aaunidad-santib-ez-d-educaci-n-b-sica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Santibáñez, David» en «Educación básica» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7840-9138> |
+| Buscar «Santibáñez D.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Santib%C3%A1%C3%B1ez%20D.> |
+| Perfil 57194413591 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57194413591> |
+
+### [Santos M. → CIDOC?](revision_identidad.html#caso-aaunidad-santos-m-cidoc)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Santos, Marcelo» en «CIDOC» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-2658-3764> |
+| Buscar «Santos M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Santos%20M.> |
+| Perfil 57204120258 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57204120258> |
+| Perfil 60389552400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60389552400> |
+
+### [Silva-Figueroa A.M. → Medicina?](revision_identidad.html#caso-aaunidad-silva-figueroa-a-m-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Silva-Figueroa, Angélica» en «Medicina» (7 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-4992-7072> |
+| Buscar «Silva-Figueroa A.M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Silva-Figueroa%20A.M.> |
+| Perfil 57188743733 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57188743733> |
+
+### [Simón L. → Nutrición?](revision_identidad.html#caso-aaunidad-sim-n-l-nutrici-n)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Escuela de Nutrición y Dietética / Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Simón, Layla» en «Nutrición» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-0130-3519> |
+| Buscar «Simón L.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Sim%C3%B3n%20L.> |
+| Perfil 55554207700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55554207700> |
+
+### [Sánchez-Duque C. → CIPEF?](revision_identidad.html#caso-aaunidad-s-nchez-duque-c-cipef)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Sánchez-Duque, Carmen Gloria» en «CIPEF» (6 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0000-9651-2841> |
+| Buscar «Sánchez-Duque C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=S%C3%A1nchez-Duque%20C.> |
+| Perfil 60042606100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60042606100> |
+
+### [Sánchez-Duque C. → Educación básica?](revision_identidad.html#caso-aaunidad-s-nchez-duque-c-educaci-n-b-sica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Sánchez-Duque, Carmen Gloria» en «Educación básica» (6 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0000-9651-2841> |
+| Buscar «Sánchez-Duque C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=S%C3%A1nchez-Duque%20C.> |
+| Perfil 60042606100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60042606100> |
+
+### [Tabilo Prieto I. → Familia?](revision_identidad.html#caso-aaunidad-tabilo-prieto-i-familia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Tabilo Prieto, Ismael» en «Familia» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-7501-5085> |
+| Buscar «Tabilo Prieto I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Tabilo%20Prieto%20I.> |
+| Perfil 57832434200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57832434200> |
+
+### [Tabilo-Prieto I. → Familia?](revision_identidad.html#caso-aaunidad-tabilo-prieto-i-familia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Tabilo Prieto, Ismael» en «Familia» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-7501-5085> |
+| Buscar «Tabilo-Prieto I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Tabilo-Prieto%20I.> |
+| Perfil 57832434200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57832434200> |
+
+### [Undurraga R. → Familia?](revision_identidad.html#caso-aaunidad-undurraga-r-familia)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Escuela de Ciencias de la Familia». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Undurraga, Rosario» en «Familia» (24 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-5801-2125> |
+| Buscar «Undurraga R.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Undurraga%20R.> |
+| Perfil 55345490200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55345490200> |
+
+### [Valle M.A. → Ingeniería comercial?](revision_identidad.html#caso-aaunidad-valle-m-a-ingenier-a-comercial)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Economía y Negocios». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Valle, Mauricio A.» en «Ingeniería comercial» (6 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1362-2776> |
+| Buscar «Valle M.A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Valle%20M.A.> |
+| Perfil 55100663900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55100663900> |
+
+### [Yanine F. → Facultad de Ingeniería?](revision_identidad.html#caso-aaunidad-yanine-f-facultad-de-ingenier-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Franco Fernando» en «Facultad de Ingeniería» (1 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
+| Buscar «Yanine F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.> |
+| Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
+
+### [Yanine F. → Ingenieria civil informática?](revision_identidad.html#caso-aaunidad-yanine-f-ingenieria-civil-inform-tica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingenieria civil informática» (10 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
+| Buscar «Yanine F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.> |
+| Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
+
+### [Yanine F. → Ingeniería Civil Industrial?](revision_identidad.html#caso-aaunidad-yanine-f-ingenier-a-civil-industrial)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingeniería Civil Industrial» (2 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
+| Buscar «Yanine F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.> |
+| Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
+
+### [Yanine F. → Ingeniería civil industrial?](revision_identidad.html#caso-aaunidad-yanine-f-ingenier-a-civil-industrial)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingeniería civil industrial» (28 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
+| Buscar «Yanine F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.> |
+| Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
+
+### [Yanine F.F. → Facultad de Ingeniería?](revision_identidad.html#caso-aaunidad-yanine-f-f-facultad-de-ingenier-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Franco Fernando» en «Facultad de Ingeniería» (1 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
+| Buscar «Yanine F.F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.F.> |
+| Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
+
+### [Yanine F.F. → Ingenieria civil informática?](revision_identidad.html#caso-aaunidad-yanine-f-f-ingenieria-civil-inform-tica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingenieria civil informática» (10 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
+| Buscar «Yanine F.F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.F.> |
+| Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
+
+### [Yanine F.F. → Ingeniería Civil Industrial?](revision_identidad.html#caso-aaunidad-yanine-f-f-ingenier-a-civil-industrial)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingeniería Civil Industrial» (2 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
+| Buscar «Yanine F.F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.F.> |
+| Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
+
+### [Yanine F.F. → Ingeniería civil industrial?](revision_identidad.html#caso-aaunidad-yanine-f-f-ingenier-a-civil-industrial)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingeniería civil industrial» (28 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
+| Buscar «Yanine F.F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.F.> |
+| Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
+
+### [Zambrano C. → Ingenieria civil informática?](revision_identidad.html#caso-aaunidad-zambrano-c-ingenieria-civil-inform-tica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Zambrano, Carolina» en «Ingenieria civil informática» (2 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9538-1816> |
+| Buscar «Zambrano C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Zambrano%20C.> |
+| Perfil 54404332000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=54404332000> |
+
+### [Zbinden-Foncea H. → Kinesiología?](revision_identidad.html#caso-aaunidad-zbinden-foncea-h-kinesiolog-a)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Zbinden-Foncea, Herman» en «Kinesiología» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9643-1037> |
+| Buscar «Zbinden-Foncea H.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Zbinden-Foncea%20H.> |
+| Perfil 23010885100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23010885100> |
+
+### [de la Fuente M. → Medicina?](revision_identidad.html#caso-aaunidad-de-la-fuente-m-medicina)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «De la Fuente, Marjorie» en «Medicina» (1 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0577-7604> |
+| Buscar «de la Fuente M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=de%20la%20Fuente%20M.> |
+| Perfil 23090504600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23090504600> |
+
+### [Álvarez-Valdés C. → Educación básica?](revision_identidad.html#caso-aaunidad-lvarez-vald-s-c-educaci-n-b-sica)
+
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Álvarez Valdés, Carolina» en «Educación básica» (3 obra(s) con ese dato).
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0402-5072> |
+| Buscar «Álvarez-Valdés C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=%C3%81lvarez-Vald%C3%A9s%20C.> |
+| Perfil 57226107208 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57226107208> |
 
 ---
 

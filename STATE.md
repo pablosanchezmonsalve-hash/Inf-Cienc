@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ffc25d6` · Regenera BUILD_VERIFICATION.md tras la fusión
+Último commit: `6f66824` · Aplica 3 confirmaciones de ORCID del inventario de autoarchivo
 Snapshot: 2026-09-01
 
 ---
@@ -67,7 +67,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
 
-`make revision` reúne estas colas en 230 casos, de los que **116 siguen pendientes**: 114 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 303 casos, de los que **189 siguen pendientes**: 114 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 365
+## Decisiones tomadas: 368
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

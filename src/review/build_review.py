@@ -118,6 +118,10 @@ def cargar() -> dict:
                             "contraste con el inventario de autoarchivo"),
         "autoarchivo_cand": leer(INTERNAL / "autoarchivo_candidatos.csv",
                                  "candidatos por nombre en el inventario de autoarchivo"),
+        # Candidatos de Facultad/Escuela para 'No determinada' (D-345: en
+        # bruto, sin traducir al vocabulario oficial).
+        "autoarchivo_unidad": leer(INTERNAL / "autoarchivo_unidad_candidatos.csv",
+                                   "candidatos de unidad académica por autoarchivo"),
         # Para enseñar de qué publicaciones se habla, con su DOI: verificar un
         # ORCID a mano es abrir el registro del titular y comparar obras, y sin
         # los títulos delante eso obliga a cruzar tres archivos.
@@ -649,6 +653,48 @@ def casos(d: dict, perf: dict) -> list[dict]:
                                 "este corpus. El nombre no basta para elegir.",
                     "firmas": [f], "cruces": None,
                 })
+
+    # ── Candidatos de Facultad/Escuela por autoarchivo, para 'No determinada'
+    #    (D-345). El valor viaja EN BRUTO: no se traduce al vocabulario de
+    #    `config/matching_rules.yml`. Confirmar el caso deja constancia de que
+    #    la unidad declarada es correcta; aplicarla al pipeline público —y
+    #    decidir a qué unidad canónica corresponde— es un paso aparte.
+    if d["autoarchivo_unidad"] is not None:
+        for _, r in d["autoarchivo_unidad"].iterrows():
+            f = perf.get(r["nombre_en_fuente"])
+            if not f:
+                continue
+            n_distintas = int(r["escuelas_distintas_para_esta_firma"])
+            aviso = ("" if n_distintas == 1 else
+                     f" Esta firma tiene {n_distintas} escuelas distintas declaradas en el "
+                     "inventario entre sus distintas obras — puede ser más de una persona "
+                     "con el mismo apellido e inicial, o alguien que cambió de unidad. "
+                     "No se elige entre ellas: se muestran todas.")
+            # Esta firma puede tener ALGUNA publicación con unidad ya
+            # determinada y OTRA sin determinar a la vez —"No determinada" es
+            # por pareja autor×publicación, no un atributo único de la firma—,
+            # así que la frase no puede afirmar en blanco que "hoy figura como
+            # No determinada": eso sería falso para quien ya tiene una unidad
+            # real en otra de sus publicaciones.
+            ya_determinada = [u for u in f["unidades"] if u]
+            if ya_determinada:
+                estado = (f"En al menos una de sus publicaciones la unidad académica no se "
+                          f"pudo determinar; en otra(s) ya figura «{' / '.join(ya_determinada)}». "
+                          "Compare si coincide con lo que declara el autoarchivo.")
+            else:
+                estado = ("Hoy esta firma figura con unidad académica «No determinada» en "
+                          "todas sus publicaciones del sitio público.")
+            out.append({
+                "id": f"aaunidad-{r['nombre_en_fuente']}-{r['escuela_declarada_en_autoarchivo']}",
+                "cola": "Candidato de unidad académica por autoarchivo", "prioridad": 3,
+                "titulo": f"{r['nombre_en_fuente']} → {r['escuela_declarada_en_autoarchivo']}?",
+                "contexto": (f"{estado} El inventario de autoarchivo de biblioteca "
+                            f"declara «{r['nombre_en_autoarchivo']}» en «"
+                            f"{r['escuela_declarada_en_autoarchivo']}» "
+                            f"({int(r['obras_con_esta_escuela'])} obra(s) con ese dato)."
+                            + aviso),
+                "firmas": [f], "cruces": None,
+            })
 
     if d["amb"] is None:
         return sorted(out, key=lambda c: (c["prioridad"], c["titulo"]))
