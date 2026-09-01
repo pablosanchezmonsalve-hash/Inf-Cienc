@@ -7,6 +7,7 @@ import * as X from './explorador.js';
 import * as VX from './vista_explorador.js';
 import * as anim from './animar.js';
 import { montarHeatmap } from './visualizations/heatmap.js';
+import { montarTreemap, construirArbol } from './visualizations/treemap.js';
 
 /* ============================================================== portada */
 
@@ -38,10 +39,11 @@ async function montarExplorador(claveSeccion) {
     controles: document.getElementById('controles'),
     cifras: document.getElementById('cifras'),
     cortes: document.getElementById('cortes'),
-    // Sólo existe en produccion.html (Bento Grid). El resto de las
-    // secciones no tiene este contenedor y zonas.heatmap queda null —
-    // se comprueba antes de usarlo, igual que zonas.diferidos.
+    // Sólo existen en produccion.html (Bento Grid). El resto de las
+    // secciones no tiene estos contenedores y quedan en null — se
+    // comprueban antes de usarlos, igual que zonas.diferidos.
     heatmap: document.getElementById('heatmap-contenedor'),
+    treemap: document.getElementById('treemap-contenedor'),
   };
   if (!zonas.cifras) return;
 
@@ -110,6 +112,18 @@ async function montarExplorador(claveSeccion) {
     // que el resto de la página: mismo criterio, un solo filtro. No lleva
     // pantalla de "sin datos" separada — montarHeatmap() ya la resuelve.
     if (zonas.heatmap) montarHeatmap(zonas.heatmap, X.recorte(publicaciones, sel));
+
+    // El treemap cuenta pares autor×publicación (criterio de
+    // 07_hierarchy.py, distinto del resto de la página) — construirArbol()
+    // es el mismo cálculo portado a JS, verificado línea a línea contra
+    // hierarchy.json sobre el corpus completo antes de usarse aquí (mismo
+    // resultado, sin recorte). Se recalcula en TODO pintar(), incluida la
+    // limpieza del recorte: si sólo se recalculara cuando hay filtro activo,
+    // "Ver todo" habría dejado el treemap congelado en el último filtro.
+    if (zonas.treemap) {
+      montarTreemap(zonas.treemap,
+        construirArbol(X.recorte(publicaciones, sel), jerarquia, metaBase.institucion_corta));
+    }
 
     zonas.cifras.querySelectorAll('[data-valor]').forEach(e => {
       if (antes.size && antes.get(e.dataset.valor) !== e.textContent) e.classList.add('cambia');
