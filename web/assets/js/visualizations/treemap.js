@@ -16,6 +16,7 @@
    `src/design/validar_paleta.py` para cómo se miden esos tokens. */
 
 import { esSinDato } from '../core.js';
+import { mediana } from '../explorador.js';
 
 /* --------------------------------------------------------------- layout */
 
@@ -153,9 +154,102 @@ export function renderTreemap(nodos, { ancho, alto, nivel = 'unidad', conHijos =
 /** Prepara los hijos de un nodo de `hierarchy.json` para `squarify()`:
     aplana `{nombre, n_publicaciones, citas_totales}` a `{nombre, valor,
     citas}`, que es el vocabulario que entiende el layout. */
-const aPlano = hijos => (hijos || []).map(h => ({
+/** Exportada: `prerender.mjs` la necesita para dibujar el primer nivel del
+    treemap bajo Node, con la misma conversión que usa el navegador. */
+export const aPlano = hijos => (hijos || []).map(h => ({
   nombre: h.nombre, valor: h.n_publicaciones, citas: h.citas_totales, _origen: h,
 }));
+
+/* --------------------------------------------------------- árbol reactivo */
+
+/** Nodo con la misma forma que `hierarchy.json` (`nombre`, `n_publicaciones`,
+    `citas_totales`, `citas_mediana`, y `hijos` si corresponde). */
+function nodo(nombre, stats, hijos = null) {
+  const n = { nombre, n_publicaciones: stats.n_publicaciones,
+              citas_totales: stats.citas_totales, citas_mediana: stats.citas_mediana };
+  if (hijos) n.hijos = hijos;
+  return n;
+}
+
+/** Una mediana de medianas no es la mediana del conjunto — igual que
+    `_sumar()` en `07_hierarchy.py`, se declara `null`, no se inventa. */
+const sumar = nodos => ({
+  n_publicaciones: nodos.reduce((s, n) => s + n.n_publicaciones, 0),
+  citas_totales: nodos.reduce((s, n) => s + n.citas_totales, 0),
+  citas_mediana: null,
+});
+
+/** Reconstruye el árbol Raíz > Facultad > Escuela sobre un recorte de
+    publicaciones — el mismo criterio que `07_hierarchy.py` (pares
+    autor×publicación), no "publicaciones distintas": `unidades_conteo` de
+    cada publicación (cuántos autores UFT hay por unidad, sin identidades)
+    es lo que permite reconstruirlo en el navegador sin recibir datos de
+    persona. Puerto línea a línea de `construir()` en `07_hierarchy.py` —
+    si una de las dos cambia, la otra tiene que cambiar igual, o el treemap
+    del recorte completo (sin filtrar) dejaría de coincidir con
+    `hierarchy.json`.
+
+    `jerarquia` es `meta.jerarquia` (escuela → facultad, plano). */
+export function construirArbol(publicaciones, jerarquia, nombreRaiz) {
+  const j = jerarquia || {};
+  const facultadDe = u => j[u] || u;
+
+  // 1. Estadísticas por unidad CRUDA (facultad o escuela, tal como aparece
+  //    en unidades_conteo), sumando sobre pares, no sobre publicaciones.
+  const listasPorUnidad = new Map(); // unidad -> [citas, citas, ...] (una por par)
+  for (const p of publicaciones) {
+    const conteo = p.unidades_conteo || {};
+    for (const [unidad, n] of Object.entries(conteo)) {
+      if (!listasPorUnidad.has(unidad)) listasPorUnidad.set(unidad, []);
+      const lista = listasPorUnidad.get(unidad);
+      if (typeof p.citas === 'number') {
+        for (let i = 0; i < n; i++) lista.push(p.citas);
+      }
+      lista.n_publicaciones = (lista.n_publicaciones || 0) + n;
+    }
+  }
+  const stats = new Map();
+  for (const [unidad, lista] of listasPorUnidad) {
+    stats.set(unidad, {
+      n_publicaciones: lista.n_publicaciones || 0,
+      citas_totales: lista.reduce((s, c) => s + c, 0),
+      citas_mediana: lista.length ? mediana(lista) : null,
+    });
+  }
+
+  // 2. Agrupar escuelas bajo su facultad. Una unidad cuya facultad_de(u) es
+  //    ella misma NO se repite como hija de sí misma.
+  const escuelasPorFacultad = new Map();
+  for (const [unidad, s] of stats) {
+    const facultad = facultadDe(unidad);
+    if (!escuelasPorFacultad.has(facultad)) escuelasPorFacultad.set(facultad, []);
+    if (facultad !== unidad) escuelasPorFacultad.get(facultad).push(nodo(unidad, s));
+  }
+
+  // 3. Un nodo de facultad por cada clave, sumando su estadística propia
+  //    (si la tiene) con la de sus escuelas hijas (si las tiene).
+  const facultades = [];
+  for (const [facultad, escuelas] of escuelasPorFacultad) {
+    let statsFacultad = stats.get(facultad);
+    if (!statsFacultad) {
+      statsFacultad = escuelas.length
+        ? sumar(escuelas) : { n_publicaciones: 0, citas_totales: 0, citas_mediana: null };
+    } else if (escuelas.length) {
+      const propio = statsFacultad;
+      const agregado = sumar(escuelas);
+      statsFacultad = {
+        n_publicaciones: propio.n_publicaciones + agregado.n_publicaciones,
+        citas_totales: propio.citas_totales + agregado.citas_totales,
+        citas_mediana: propio.citas_mediana,
+      };
+    }
+    escuelas.sort((a, b) => b.n_publicaciones - a.n_publicaciones);
+    facultades.push(nodo(facultad, statsFacultad, escuelas.length ? escuelas : null));
+  }
+  facultades.sort((a, b) => b.n_publicaciones - a.n_publicaciones);
+
+  return nodo(nombreRaiz, sumar(facultades), facultades);
+}
 
 /** Monta un treemap con drill-down en `contenedor` (un elemento del DOM) a
     partir de `arbol` (el `raiz` de `hierarchy.json`).
@@ -169,6 +263,14 @@ const aPlano = hijos => (hijos || []).map(h => ({
     volver. Se re-dibuja solo, con `ResizeObserver`, si el contenedor cambia
     de tamaño — el sitio no usa JS de terceros para eso tampoco. */
 export function montarTreemap(contenedor, arbolRaiz) {
+  // Un recorte del explorador vuelve a llamar a esta función sobre el MISMO
+  // contenedor con un árbol distinto. replaceChildren() más abajo crea un
+  // `lienzo` nuevo cada vez, pero el ResizeObserver de la corrida anterior
+  // seguía observando el `lienzo` viejo (ya desprendido del DOM) para
+  // siempre si no se desconectaba — mismo bug que ya se corrigió en
+  // heatmap.js, mismo arreglo.
+  contenedor._treemapObserver?.disconnect();
+
   const pila = [{ nombre: arbolRaiz.nombre, hijos: aPlano(arbolRaiz.hijos) }];
 
   const migas = document.createElement('div');
@@ -260,8 +362,10 @@ export function montarTreemap(contenedor, arbolRaiz) {
   dibujar();
 
   let pendiente = null;
-  new ResizeObserver(() => {
+  const observador = new ResizeObserver(() => {
     clearTimeout(pendiente);
     pendiente = setTimeout(() => dibujar(), 120);
-  }).observe(lienzo);
+  });
+  observador.observe(lienzo);
+  contenedor._treemapObserver = observador;
 }

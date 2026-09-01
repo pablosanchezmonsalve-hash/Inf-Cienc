@@ -37,6 +37,26 @@ def main() -> None:
     unidades_por_eid = (authorship.dropna(subset=["unidad_academica"])
                         .groupby("eid")["unidad_academica"]
                         .apply(lambda s: sorted(set(s))).to_dict())
+    # Recuento SIN deduplicar: cuántos pares autor×publicación caen en cada
+    # unidad para este trabajo. `unidades` (arriba) ya perdió esa multiplicidad
+    # a propósito para el recuento "publicaciones distintas"; este campo
+    # existe para que el navegador pueda reconstruir el criterio de
+    # `07_hierarchy.py` (pares autor×publicación) sobre un recorte filtrado,
+    # sin tener que enviar identidades de autor — sólo un conteo por unidad.
+    #
+    # NO se usa `.groupby().apply(lambda s: s.value_counts().to_dict())`: con
+    # `unidad_academica` categórica, pandas expande el dict devuelto en un
+    # MultiIndex (eid, unidad) en vez de dejarlo como valor opaco por grupo —
+    # el resultado quedaba vacío para todo `eid` real. Bucle manual, mismo
+    # patrón que `_stats_por_unidad()` en `07_hierarchy.py`.
+    unidades_conteo_por_eid: dict[str, dict[str, int]] = {}
+    con_unidad = authorship.dropna(subset=["unidad_academica"])
+    for eid, unidad in zip(con_unidad["eid"], con_unidad["unidad_academica"]):
+        # str(): unidad_academica es categórica; una clave de dict categórica
+        # serializa a JSON igual, pero es mejor no depender de eso.
+        unidad = str(unidad)
+        bucket = unidades_conteo_por_eid.setdefault(eid, {})
+        bucket[unidad] = bucket.get(unidad, 0) + 1
 
     registros = []
     for _, r in uni.iterrows():
@@ -73,6 +93,7 @@ def main() -> None:
             "topic": b.clean(r["topic"]),
             "ods": b.split_multi(r["ods"]),
             "unidades": unidades_por_eid.get(eid, []),
+            "unidades_conteo": unidades_conteo_por_eid.get(eid, {}),
             # Banderas de disponibilidad: gobiernan qué se puede mostrar
             "tiene_metricas": r["tiene_metricas"] == "True",
             "tiene_autoria": r["tiene_autoria_detallada"] == "True",

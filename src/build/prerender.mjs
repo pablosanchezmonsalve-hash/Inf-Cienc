@@ -59,6 +59,7 @@ async function main() {
   const v = await mod('vista.js');
   const vx = await mod('vista_explorador.js');
   const hm = await mod('visualizations/heatmap.js');
+  const tm = await mod('visualizations/treemap.js');
 
   const meta = await leerJSON('meta.json');
   const series = await leerJSON('series.json');
@@ -143,6 +144,21 @@ async function main() {
         const agregado = hm.agregarMatriz(publicaciones);
         html = rellenar(html, 'heatmap-contenedor',
           hm.renderHeatmap(agregado, { ancho: 760 }), a);
+
+        // Treemap: primer nivel (facultades) del árbol sin filtrar —
+        // construirArbol() es la misma función que el navegador usa en cada
+        // recorte, verificada contra hierarchy.json sobre el corpus
+        // completo. Sólo el nivel 1 se pre-renderiza (nadie puede hacer
+        // drill-down sin JavaScript de todos modos); `montarTreemap()`
+        // hidrata el resto al cargar el módulo.
+        const arbol = tm.construirArbol(publicaciones, jerarquia, meta.institucion_corta);
+        const anchoTM = 760, altoTM = Math.round(anchoTM * 0.55);
+        const nodosTM = tm.squarify(tm.aPlano(arbol.hijos), { ancho: anchoTM, alto: altoTM });
+        const conHijosTM = n => !!(n._origen && n._origen.hijos && n._origen.hijos.length);
+        html = rellenar(html, 'treemap-contenedor',
+          `<div class="treemap-lienzo"><div class="treemap-capa">${tm.renderTreemap(nodosTM,
+            { ancho: anchoTM, alto: altoTM, nivel: 'Facultad', conHijos: conHijosTM })}</div></div>`,
+          a);
       }
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'catalogo') {
