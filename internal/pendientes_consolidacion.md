@@ -1,8 +1,8 @@
 # Pendientes de consolidación
 
-**Generado** el 2026-08-26 por `src/review/build_review.py`. Regenerable.
+**Generado** el 2026-09-01 por `src/review/build_review.py`. Regenerable.
 
-Quedan **6 casos** de 113. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **82 casos** de 188. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -11,6 +11,775 @@ Quedan **6 casos** de 113. Cada uno lleva el enlace al caso dentro de la herrami
 1. Genere la herramienta: `py src\review\build_review.py` (o `scripts\revisar-identidad.ps1`, que hace la secuencia entera).
 2. Los enlaces `revision_identidad.html#caso-…` abren la página **en el caso concreto**. Requieren tener el archivo al lado de este documento, que es donde lo deja el generador.
 3. Decida en la página, exporte el CSV y aplíquelo con `apply_decisions.py`.
+
+---
+
+## ORCID sin confirmar — 52 pendiente(s)
+
+### [Abara J.F. → 0000-0001-8190-2361: ¿es suyo?](revision_identidad.html#caso-ver-abara-j-f)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-8190-2361> |
+| Buscar «Abara J.F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Abara%20J.F.> |
+| Perfil 57190811072 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57190811072> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · The Formation Process of the Socialist Party of Chile: A Study on the Origins of Some of Its Fundamental Definitions; [El proceso formativo del Partido Socialista de Chile: estudio sobre el origen de algunas de sus definiciones fundamentales] — <https://doi.org/10.38178/07183089/1211230605>
+
+### [Arenas-Massa A. → 0000-0003-3188-0189: ¿es suyo?](revision_identidad.html#caso-ver-arenas-massa-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3188-0189> |
+| Buscar «Arenas-Massa A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Arenas-Massa%20A.> |
+| Perfil 56404649500 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56404649500> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Social and health factors affecting work-related accidents among older informal workers in Chile: A probit model analysis based on CASEN 2022 — <https://doi.org/10.1016/j.ssaho.2025.102231>
+
+### [Arroyo A. → 0000-0003-0157-5175: ¿es suyo?](revision_identidad.html#caso-ver-arroyo-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0157-5175> |
+| Buscar «Arroyo A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Arroyo%20A.> |
+| Perfil 58862866100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58862866100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Protamine induced vasoplegic syndrome. The importance of ECLS with ECMO and CALS protocol in complex cases; [Síndrome vasopléjico inducido por protamina. La importancia del ECLS con ECMO y protocolo CALS en casos complejos] — <https://doi.org/10.1016/j.rmclc.2025.04.003>
+- 2025 · Challenges in cerebral hemorrhage and liver cirrhosis. bilateral ventricular shunt as a therapeutic alternative; [Desafíos en hemorragia cerebral y cirrosis hepática. derivación ventricular bilateral como alternativa terapéutica] — <https://doi.org/10.1016/j.rmclc.2025.04.004>
+- 2025 · Intracranial hypotension syndrome in neurocritical patient: a case report; [Síndrome de hipotensión intracraneal en paciente neurocrítico: reporte de caso] — <https://doi.org/10.1016/j.rmclc.2025.04.002>
+- 2024 · Efficacy of hemoadsorptive therapy combined with high-volume hemofiltration in the management of refractory septic shock; [Eficacia de la terapia hemoadsortiva combinada con hemofiltración de alto volumen en el manejo del shock séptico refractario] — <https://doi.org/10.1016/j.rmclc.2023.10.003>
+
+### [Benites M. → 0000-0001-6366-534X: ¿es suyo?](revision_identidad.html#caso-ver-benites-m)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-6366-534X> |
+| Buscar «Benites M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Benites%20M.> |
+| Perfil 56204920800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56204920800> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · In situ simulation in the intensive care unit: A phenomenological study of staff experiences — <https://doi.org/10.1177/02676591241272058>
+
+### [Busquets P. → 0000-0002-1041-0543: ¿es suyo?](revision_identidad.html#caso-ver-busquets-p)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1041-0543> |
+| Buscar «Busquets P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Busquets%20P.> |
+| Perfil 56778059300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56778059300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Mood states and academic performance in the objective structured clinical examination. The mediating effect of self-efficacy — <https://doi.org/10.1016/j.nedt.2024.106116>
+
+### [Caffarena P. → 0000-0002-2609-6413: ¿es suyo?](revision_identidad.html#caso-ver-caffarena-p)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-2609-6413> |
+| Buscar «Caffarena P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Caffarena%20P.> |
+| Perfil 60513695700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60513695700> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · POOR PEOPLE DIE MORE. THE 1957 INFLUENZA EPIDEMIC AND SOCIAL INEQUALITY IN CHILE; [LOS POBRES MUEREN MÁS. LA EPIDEMIA DE INFLUENZA DE 1957 Y LA DESIGUALDAD SOCIAL EN CHILE] — <https://doi.org/10.4067/s0719-26812025000200173>
+- 2023 · Stories of Initiates: The Lived Experience of Female Social Workers in the Implementation of the Welfare State in Chile, 1925–1950 — <https://doi.org/10.1007/978-3-031-21663-3_4>
+
+### [Castillo N. → 0000-0002-9377-136X: ¿es suyo?](revision_identidad.html#caso-ver-castillo-n)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9377-136X> |
+| Buscar «Castillo N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Castillo%20N.> |
+| Perfil 58752377300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58752377300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Retropubic suburethral mesh (TVT): clinical experience and data analysis at the Hospital El Carmen de Maipú; [Malla suburetral retropúbica (TVT): experiencia clínica y análisis de datos en el Hospital El Carmen de Maipú] — <https://doi.org/10.24875/RECHOG.23000036>
+
+### [Dominguez A. → 0000-0002-4277-3445: ¿es suyo?](revision_identidad.html#caso-ver-dominguez-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-4277-3445> |
+| Buscar «Dominguez A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Dominguez%20A.> |
+| Perfil 59180378700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59180378700> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Intragastric administration of short chain fatty acids greatly reduces voluntary ethanol intake in rats — <https://doi.org/10.1038/s41598-024-80228-1>
+
+### [Dreyse J. → 0000-0002-8201-5956: ¿es suyo?](revision_identidad.html#caso-ver-dreyse-j)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-8201-5956> |
+| Buscar «Dreyse J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Dreyse%20J.> |
+| Perfil 55664536400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55664536400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · BCGitis: Mycobacterium bovis BCG pelvic abscess after intravesical immunotherapy for bladder cancer. A case report; [BCGitis: Absceso pélvico por Mycobacterium bovis BCG posterior a inmunoterapia en cáncer de vejiga. Reporte de un caso] — <https://doi.org/10.1016/j.rmclc.2025.03.004>
+- 2023 · Macroagglutination as cause of death: when Virchow's perfect storm strikes; [Le Grand Mort: la tríada, o más bien orgía, de Virchow que acabó en muerte] — <https://doi.org/10.1016/j.rmclc.2023.07.004>
+- 2023 · The U-Shaped Association between Sleep Duration, All-Cause Mortality and Cardiovascular Risk in a Hispanic/Latino Clinically Based Cohort — <https://doi.org/10.3390/jcm12154961>
+- 2024 · Is the time below 90% of SpO2 during sleep (T90%) a metric of good health? A longitudinal analysis of two cohorts — <https://doi.org/10.1007/s11325-023-02909-x>
+- 2023 · Clinical Concepts for Triple Therapy Use in Patients with COPD: A Delphi Consensus — <https://doi.org/10.2147/COPD.S424128>
+- 2023 · Probable coinfection of andes hantavirus and legionella in a critically ill patient: First description of a case in the literature and literature review; [Probable coinfección por hantavirus variante Andes y Legionella en un paciente crítico: primera descripción en la literatura de un caso y revisión de la literatura] — <https://doi.org/10.1016/j.rmclc.2023.09.009>
+- … y 10 más
+
+### [Escobar-González S. → 0000-0003-2786-1487: ¿es suyo?](revision_identidad.html#caso-ver-escobar-gonz-lez-s)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-2786-1487> |
+| Buscar «Escobar-González S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Escobar-Gonz%C3%A1lez%20S.> |
+| Perfil 60071273600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60071273600> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Authority, formation and teaching work: reflections of young teachers in Chile and Argentina; [Autoridad, formación y trabajo docente: reflexiones de profesores jóvenes en Chile y Argentina] — <https://doi.org/10.23854/autoc.v9i2.493>
+
+### [Ferre Contreras A. → 0000-0003-1770-244X: ¿es suyo?](revision_identidad.html#caso-ver-ferre-contreras-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1770-244X> |
+| Buscar «Ferre Contreras A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ferre%20Contreras%20A.> |
+| Perfil 45861101100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=45861101100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Pharmacological Research Agenda on Adult Extracorporeal Membrane Oxygenation Using the Delphi Method: A Position Paper of the Extracorporeal Membrane Oxygenation Pharmacology Network — <https://doi.org/10.1097/CCM.0000000000006806>
+
+### [Fuente M.D.L. → 0000-0003-0577-7604: ¿es suyo?](revision_identidad.html#caso-ver-fuente-m-d-l)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0577-7604> |
+| Buscar «Fuente M.D.L.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Fuente%20M.D.L.> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Correction: Exploring the lutein therapeutic potential in steatotic liver disease: mechanistic insights and future directions(Front. Pharmacol., (2024), 15, (1406784), 10.3389/fphar.2024.1406784) — <https://doi.org/10.3389/fphar.2025.1633575>
+
+### [García F. → 0000-0002-9548-5252: ¿es suyo?](revision_identidad.html#caso-ver-garc-a-f)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9548-5252> |
+| Buscar «García F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Garc%C3%ADa%20F.> |
+| Perfil 58857164000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58857164000> |
+| Perfil 59465758900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59465758900> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Epidemiological profile of patients with COVID-19 admitted to a tertiary care public hospital; [Experiencia de la pandemia por SARS-CoV-2 en un centro hospitalario de alta complejidad en Chile] — <https://doi.org/10.4067/S0034-98872023000300280>
+
+### [Giordanino E. → 0000-0001-7380-4753: ¿es suyo?](revision_identidad.html#caso-ver-giordanino-e)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7380-4753> |
+| Buscar «Giordanino E.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Giordanino%20E.> |
+| Perfil 57200188404 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57200188404> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Management of systolic dysfunction in patients with hypertrophic cardiomyopathy: challenges and perspectives; [Manejo de la disfunción sistólica en pacientes con miocardiopatía hipertrófica: desafíos y perspectivas] — <https://doi.org/10.1016/j.rmclc.2025.10.002>
+- 2025 · Pulmonary hypertension and connective tissue disease, a serious presentation; [Hipertensión pulmonar y enfermedad del tejido conectivo, una grave presentación] — <https://doi.org/10.1016/j.rmclc.2025.01.004>
+
+### [Giordanino E.F. → 0000-0001-7380-4753: ¿es suyo?](revision_identidad.html#caso-ver-giordanino-e-f)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7380-4753> |
+| Buscar «Giordanino E.F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Giordanino%20E.F.> |
+| Perfil 57200188404 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57200188404> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Main topic: Heart failure; [Tema central: Insuficiencia Card√≠aca] — <https://doi.org/10.1016/j.rmclc.2025.10.012>
+
+### [González A. → 0000-0002-6139-4299: ¿es suyo?](revision_identidad.html#caso-ver-gonz-lez-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6139-4299> |
+| Buscar «González A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gonz%C3%A1lez%20A.> |
+| Perfil 56586062200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56586062200> |
+| Perfil 59249254000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59249254000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Interpretable machine learning model for characterizing magnetic susceptibility-based biomarkers in first episode psychosis — <https://doi.org/10.1016/j.cmpb.2025.109067>
+- 2023 · BDNF and Cognitive Function in Chilean Schizophrenic Patients — <https://doi.org/10.3390/ijms241310569>
+- 2023 · Quantitative Susceptibility Mapping MRI in Deep-Brain Nuclei in First-Episode Psychosis — <https://doi.org/10.1093/schbul/sbad041>
+- 2023 · The Public Health Services at the Metropolitan Region (MR) of Chile have nine acute psychiatric beds per 100,000 over 18 years old inhabitants, insufficient for current need; [Los Servicios de Salud Públicos de la Región Metropolitana (RM) cuentan con 9 camas psiquiátricas de corta estadía por 100.000 habitantes mayores de 18 años, insuficiente para la necesidad actual] — <https://doi.org/10.4067/s0034-98872023000801078>
+
+### [Gómez G. → 0000-0001-5193-2738: ¿es suyo?](revision_identidad.html#caso-ver-g-mez-g)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-5193-2738> |
+| Buscar «Gómez G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=G%C3%B3mez%20G.> |
+| Perfil 58979787500 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58979787500> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Tension-free hernioplasty of inguinal hernia under local anesthesia: our experience — <https://doi.org/10.23736/S0393-3660.23.05152-5>
+
+### [Gómez G.G. → 0000-0001-5193-2738: ¿es suyo?](revision_identidad.html#caso-ver-g-mez-g-g)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-5193-2738> |
+| Buscar «Gómez G.G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=G%C3%B3mez%20G.G.> |
+| Perfil 58979787500 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58979787500> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · The role of radiotherapy and surgery in carcinoma spinocellular an up to date of diagnosis, initial management, and treatment: a narrative review and a case study report — <https://doi.org/10.23736/S0394-9508.23.05548-1>
+
+### [Huepe-Artigas D. → 0000-0002-1258-5670: ¿es suyo?](revision_identidad.html#caso-ver-huepe-artigas-d)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1258-5670> |
+| Buscar «Huepe-Artigas D.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Huepe-Artigas%20D.> |
+| Perfil 56586230400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56586230400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Cognitive, emotional, and social factors promoting psychosocial adaptation: a study of latent profiles in people living in socially vulnerable contexts — <https://doi.org/10.3389/fpsyg.2024.1321242>
+
+### [Ishtiaque T.A. → 0000-0002-3041-9748: ¿es suyo?](revision_identidad.html#caso-ver-ishtiaque-t-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-3041-9748> |
+| Buscar «Ishtiaque T.A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ishtiaque%20T.A.> |
+| Perfil 58018299100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58018299100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Uncertainty management in the design phase of road projects — <https://doi.org/10.1016/j.procs.2023.01.497>
+
+### [Johansen A. → 0000-0003-0063-3679: ¿es suyo?](revision_identidad.html#caso-ver-johansen-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0063-3679> |
+| Buscar «Johansen A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Johansen%20A.> |
+| Perfil 23980210200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23980210200> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Uncertainty management in the design phase of road projects — <https://doi.org/10.1016/j.procs.2023.01.497>
+
+### [Landskron G. → 0000-0002-7953-6769: ¿es suyo?](revision_identidad.html#caso-ver-landskron-g)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-7953-6769> |
+| Buscar «Landskron G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Landskron%20G.> |
+| Perfil 54929856000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=54929856000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Treatment of small intestinal bacterial overgrowth in Chilean patients with irritable bowel syndrome: A prospective and comparative study; [Tratamiento de sobrecrecimiento bacteriano en el intestino delgado en pacientes chilenos con síndrome de intestino irritable: un estudio prospectivo y comparativo] — <https://doi.org/10.1016/j.rgmx.2024.08.004>
+- 2025 · Enhancing the Affinity of a Novel Selective scFv for Soluble ST2 through Computational Design — <https://doi.org/10.1021/acs.jcim.4c02027>
+- 2025 · Correction: Exploring the lutein therapeutic potential in steatotic liver disease: mechanistic insights and future directions(Front. Pharmacol., (2024), 15, (1406784), 10.3389/fphar.2024.1406784) — <https://doi.org/10.3389/fphar.2025.1633575>
+- 2024 · Corrigendum: The role of cholesterol and mitochondrial bioenergetics in activation of the inflammasome in IBD (Front. Immunol., (2022), 13, 1028953, 10.3389/fimmu.2022.1028953) — <https://doi.org/10.3389/fimmu.2024.1384162>
+- 2024 · Pannexin-1 expression in tumor cells correlates with colon cancer progression and survival — <https://doi.org/10.1016/j.lfs.2024.122851>
+- 2024 · Exploring the lutein therapeutic potential in steatotic liver disease: mechanistic insights and future directions — <https://doi.org/10.3389/fphar.2024.1406784>
+- … y 1 más
+
+### [López V. → 0000-0003-1323-7843: ¿es suyo?](revision_identidad.html#caso-ver-l-pez-v)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1323-7843> |
+| Buscar «López V.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=L%C3%B3pez%20V.> |
+| Perfil 58291010100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58291010100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Effect of Curcumin Consumption on Inflammation and Oxidative Stress in Patients on Hemodialysis: A Literature Review — <https://doi.org/10.3390/nu15102239>
+
+### [López-Soto P. → 0000-0003-2559-6464: ¿es suyo?](revision_identidad.html#caso-ver-l-pez-soto-p)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-2559-6464> |
+| Buscar «López-Soto P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=L%C3%B3pez-Soto%20P.> |
+| Perfil 60389420900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60389420900> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · training in information and research competencies using AI in bioethics classes; [Formación en competencias informacionales e investigativas con el uso de IA en clases de bioética] — <https://doi.org/10.1016/j.rmclc.2025.12.005>
+
+### [Macho R.A.M. → 0000-0001-7592-1136: ¿es suyo?](revision_identidad.html#caso-ver-macho-r-a-m)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7592-1136> |
+| Buscar «Macho R.A.M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Macho%20R.A.M.> |
+| Perfil 57226375250 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57226375250> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Presentation of a new classification in abdominoplasty plications; [Presentación de una nueva clasificación de plicaturas en abdominoplastia] — <https://doi.org/10.4321/S0376-78922023000200004>
+
+### [Martinez-Mardones M. → 0000-0003-3296-3330: ¿es suyo?](revision_identidad.html#caso-ver-martinez-mardones-m)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3296-3330> |
+| Buscar «Martinez-Mardones M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Martinez-Mardones%20M.> |
+| Perfil 57225050522 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57225050522> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Spanish version of the ICIQ-Bowel questionnaire among colorectal cancer patients: construct and criterion validity: Comprehensive assessment of bowel function — <https://doi.org/10.1186/s12876-023-02970-6>
+
+### [Martinez-Mardones M.B. → 0000-0003-3296-3330: ¿es suyo?](revision_identidad.html#caso-ver-martinez-mardones-m-b)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3296-3330> |
+| Buscar «Martinez-Mardones M.B.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Martinez-Mardones%20M.B.> |
+| Perfil 57225050522 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57225050522> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Commentary: Functional bowel complaints and the impact on quality of life after colorectal cancer surgery in the elderly — <https://doi.org/10.3389/fonc.2023.1150181>
+
+### [Martínez-Mardones M.B. → 0000-0003-3296-3330: ¿es suyo?](revision_identidad.html#caso-ver-mart-nez-mardones-m-b)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3296-3330> |
+| Buscar «Martínez-Mardones M.B.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Mart%C3%ADnez-Mardones%20M.B.> |
+| Perfil 57225050522 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57225050522> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Low Rectovaginal Fistula Repair: Full Cutaneous Martius Flap — <https://doi.org/10.1097/DCR.0000000000003412>
+
+### [Mendez-Rebolledo G. → 0000-0001-7948-3807: ¿es suyo?](revision_identidad.html#caso-ver-mendez-rebolledo-g)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7948-3807> |
+| Buscar «Mendez-Rebolledo G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Mendez-Rebolledo%20G.> |
+| Perfil 55891096400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55891096400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Acute effect of short foot exercise on dynamic stability and foot kinematic in trail runners: a proof-of-concept study — <https://doi.org/10.7717/peerj.20364>
+
+### [Molina C. → 0000-0001-8208-0435: ¿es suyo?](revision_identidad.html#caso-ver-molina-c)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-8208-0435> |
+| Buscar «Molina C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Molina%20C.> |
+| Perfil 55130350300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55130350300> |
+| Perfil 58941265400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58941265400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Myotendinous Junction Anesthesia: An Alternative Infiltration Site for Ultrasound-Guided Injections — <https://doi.org/10.1016/j.eats.2024.103195>
+
+### [Orellana-Donoso M.I. → 0000-0002-1781-062X: ¿es suyo?](revision_identidad.html#caso-ver-orellana-donoso-m-i)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1781-062X> |
+| Buscar «Orellana-Donoso M.I.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Orellana-Donoso%20M.I.> |
+| Perfil 57219486372 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57219486372> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Hepatic Hilum Variations and Their Clinical Considerations in the Liver: A Systematic Review and Meta-Analysis — <https://doi.org/10.3390/life14101301>
+
+### [Poblete Alday P. → 0000-0001-6191-8518: ¿es suyo?](revision_identidad.html#caso-ver-poblete-alday-p)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-6191-8518> |
+| Buscar «Poblete Alday P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Poblete%20Alday%20P.> |
+| Perfil 55816334800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55816334800> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · The Spinster: Archetype of Projective Horror in the Contemporary Hispanic American Sinister Narrative; [La solterona: arquetipo del horror proyectivo en las narrativas de lo siniestro] — <https://doi.org/10.5209/alhi.93678>
+
+### [Ponce D. → 0000-0002-6178-6938: ¿es suyo?](revision_identidad.html#caso-ver-ponce-d)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6178-6938> |
+| Buscar «Ponce D.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ponce%20D.> |
+| Perfil 58189290000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58189290000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Population well-being and the COVID-19 vaccination program in Chile: evidence from Google Trends — <https://doi.org/10.1016/j.puhe.2023.03.007>
+
+### [Prieto I.T. → 0000-0002-7501-5085: ¿es suyo?](revision_identidad.html#caso-ver-prieto-i-t)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-7501-5085> |
+| Buscar «Prieto I.T.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Prieto%20I.T.> |
+| Perfil 57832434200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57832434200> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Performing parenthood through digital communication technologies at school: the case of WhatsApp parents’ groups in Chile — <https://doi.org/10.1332/20467435Y2024D000000022>
+
+### [Quezada M. → 0000-0003-1637-1909: ¿es suyo?](revision_identidad.html#caso-ver-quezada-m)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1637-1909> |
+| Buscar «Quezada M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Quezada%20M.> |
+| Perfil 56013972600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56013972600> |
+| Perfil 60138063800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60138063800> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Effects of Exercise on Cardiovascular and Metabolic Responses in Adults and Childhood Cancer Survivors: The Role of NETosis and Low-Grade Inflammation as a Novel Therapeutic Target—A Narrative Review — <https://doi.org/10.3390/ijms262210843>
+- 2024 · Role of NLRP3 Inflammasome in Heart Failure Patients Undergoing Cardiac Surgery as a Potential Determinant of Postoperative Atrial Fibrillation and Remodeling: Is SGLT2 Cotransporter Inhibition an Alternative for Cardioprotection? — <https://doi.org/10.3390/antiox13111388>
+
+### [Ramirez P. → 0000-0003-0593-7161: ¿es suyo?](revision_identidad.html#caso-ver-ramirez-p)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0593-7161> |
+| Buscar «Ramirez P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ramirez%20P.> |
+| Perfil 59158543100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59158543100> |
+| Perfil 59866075000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59866075000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · American Society for Transplantation and Cellular Therapy International Affairs Committee: Report of the 4th Workshop on Quality as a Development Tool for Hematopoietic Cell Transplantation Programs at the 2023 Tandem BMT Meetings — <https://doi.org/10.1016/j.jtct.2024.02.011>
+
+### [Ramos T. → 0000-0001-8563-5483: ¿es suyo?](revision_identidad.html#caso-ver-ramos-t)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-8563-5483> |
+| Buscar «Ramos T.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ramos%20T.> |
+| Perfil 57682886400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57682886400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Can Frontal Assessment Battery Discriminate between Patients with Alzheimer’s and Frontotemporal Dementia? — <https://doi.org/10.1093/arclin/acaf073>
+
+### [Ramos-Alarcón M.B. → 0009-0009-5482-9467: ¿es suyo?](revision_identidad.html#caso-ver-ramos-alarc-n-m-b)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0009-5482-9467> |
+| Buscar «Ramos-Alarcón M.B.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ramos-Alarc%C3%B3n%20M.B.> |
+| Perfil 60374611700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60374611700> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Masson's Tumor: case report and literature review; [Tumor de Masson: presentación de un caso clínico y revisión bibliográfica] — <https://doi.org/10.1016/j.rmclc.2025.12.004>
+
+### [Reccius A. → 0009-0004-3236-3030: ¿es suyo?](revision_identidad.html#caso-ver-reccius-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0004-3236-3030> |
+| Buscar «Reccius A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Reccius%20A.> |
+| Perfil 24402097000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=24402097000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Challenges in cerebral hemorrhage and liver cirrhosis. bilateral ventricular shunt as a therapeutic alternative; [Desafíos en hemorragia cerebral y cirrosis hepática. derivación ventricular bilateral como alternativa terapéutica] — <https://doi.org/10.1016/j.rmclc.2025.04.004>
+- 2025 · Intracranial hypotension syndrome in neurocritical patient: a case report; [Síndrome de hipotensión intracraneal en paciente neurocrítico: reporte de caso] — <https://doi.org/10.1016/j.rmclc.2025.04.002>
+- 2025 · Optimal Arterial Pressure Transducer Positioning for Neurocritical Care Patients: A Review — <https://doi.org/10.1089/neu.2024.0463>
+- 2023 · Evaluation of participants’ perception of an in situ simulation training program in an adult critical care center; [Evaluación de la percepción de los participantes de un programa de entrenamiento con simulación in situ en un centro de paciente crítico adulto] — <https://doi.org/10.1016/j.rmclc.2023.03.009>
+- 2024 · Severe osmotic demyelination syndrome with cortical involvement in the context of severe hyponatremia and central diabetes insipidus: an uncommon presentation of an unusual combination — <https://doi.org/10.1136/bcr-2023-257210>
+- 2024 · Analysis of Vancomycin Dosage and Plasma Levels in Critically Ill Adult Patients Requiring Extracorporeal Membrane Oxygenation (ECMO) — <https://doi.org/10.1177/08850666241243306>
+- … y 2 más
+
+### [Reyes M. → 0000-0001-5279-4234: ¿es suyo?](revision_identidad.html#caso-ver-reyes-m)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-5279-4234> |
+| Buscar «Reyes M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Reyes%20M.> |
+| Perfil 55819047100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55819047100> |
+| Perfil 59926881700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59926881700> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Hypophosphatemia in ICU. It’s not all refeeding syndrome; [Hipofosfatemia en UCI. No todo es síndrome de realimentación] — <https://doi.org/10.32641/andespediatr.v96i2.5607>
+
+### [Rodríguez C. → 0000-0001-9578-495X: ¿es suyo?](revision_identidad.html#caso-ver-rodr-guez-c)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-9578-495X> |
+| Buscar «Rodríguez C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Rodr%C3%ADguez%20C.> |
+| Perfil 57199444228 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57199444228> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Artificial intelligence in diagnosing upper limb musculoskeletal disorders: a systematic review and meta-analysis of diagnostic tests — <https://doi.org/10.1530/EOR-23-0174>
+- 2024 · Deep learning models for tendinopathy detection: a systematic review and meta-analysis of diagnostic tests — <https://doi.org/10.1530/EOR-24-0016>
+
+### [Salas C. → 0000-0002-9495-9866: ¿es suyo?](revision_identidad.html#caso-ver-salas-c)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9495-9866> |
+| Buscar «Salas C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Salas%20C.> |
+| Perfil 57202021763 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57202021763> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · The U-Shaped Association between Sleep Duration, All-Cause Mortality and Cardiovascular Risk in a Hispanic/Latino Clinically Based Cohort — <https://doi.org/10.3390/jcm12154961>
+- 2024 · Is the time below 90% of SpO2 during sleep (T90%) a metric of good health? A longitudinal analysis of two cohorts — <https://doi.org/10.1007/s11325-023-02909-x>
+- 2023 · Clinical Application of the Multicomponent Grading System for Sleep Apnea Classification and Incident Cardiovascular Mortality — <https://doi.org/10.1055/S-0043-1776770>
+
+### [Shabani R. → 0000-0001-8781-7862: ¿es suyo?](revision_identidad.html#caso-ver-shabani-r)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-8781-7862> |
+| Buscar «Shabani R.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Shabani%20R.> |
+| Perfil 57485639100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57485639100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Uncertainty management in the design phase of road projects — <https://doi.org/10.1016/j.procs.2023.01.497>
+
+### [Soto M. → 0000-0002-6502-4287: ¿es suyo?](revision_identidad.html#caso-ver-soto-m)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6502-4287> |
+| Buscar «Soto M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Soto%20M.> |
+| Perfil 57613682900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57613682900> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Tension-free hernioplasty of inguinal hernia under local anesthesia: our experience — <https://doi.org/10.23736/S0393-3660.23.05152-5>
+- 2024 · An update in ovaric cystic pediculated detached: an unusual clinical presentation — <https://doi.org/10.23736/S0394-9508.23.05593-6>
+
+### [Sánchez M. → 0000-0003-3976-6997: ¿es suyo?](revision_identidad.html#caso-ver-s-nchez-m)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3976-6997> |
+| Buscar «Sánchez M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=S%C3%A1nchez%20M.> |
+| Perfil 60343580000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60343580000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · “HABIENDO VISTO PRESUMIDO EL PATÍBULO ESTA CIUDAD AYER, LE VEAN EN EL ALTAR HOY”: THE CASE OF THE ORDINATION OF THE PRIEST GERÓNIMO DE FUENZALIDA Y GUZMÁN; [“HABIENDO VISTO PRESUMIDO EL PATÍBULO ESTA CIUDAD AYER, LE VEAN EN EL ALTAR HOY”: EL CASO DE LA ORDENACIÓN DEL PRESBÍTERO GERÓNIMO DE FUENZALIDA Y GUZMÁN] — <https://doi.org/10.7764/HIST.58.2.71991>
+
+### [Torp O. → 0000-0002-1916-5097: ¿es suyo?](revision_identidad.html#caso-ver-torp-o)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1916-5097> |
+| Buscar «Torp O.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Torp%20O.> |
+| Perfil 23981613300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23981613300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Uncertainty management in the design phase of road projects — <https://doi.org/10.1016/j.procs.2023.01.497>
+
+### [Urrutia A. → 0000-0002-1806-1616: ¿es suyo?](revision_identidad.html#caso-ver-urrutia-a)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1806-1616> |
+| Buscar «Urrutia A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Urrutia%20A.> |
+| Perfil 7007060404 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=7007060404> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Explainable Hidden Markov Model for road safety: a case of road closure recommendations in extreme weather conditions — <https://doi.org/10.3233/JIFS-211746>
+- 2023 · Exploring the use of gender-fair language by influencers — <https://doi.org/10.1108/EJMBE-10-2022-0320>
+
+### [Val V. → 0000-0003-3680-3385: ¿es suyo?](revision_identidad.html#caso-ver-val-v)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3680-3385> |
+| Buscar «Val V.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Val%20V.> |
+| Perfil 59560241600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59560241600> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Subtalar joint revision arthrodesis due to non-union: a case report; [Revisión de artrodesis subtalar por no unión: a propósito de un caso] — <https://doi.org/10.1016/j.rmclc.2025.01.002>
+
+### [Valenzuela C. → 0000-0003-3564-153X: ¿es suyo?](revision_identidad.html#caso-ver-valenzuela-c)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3564-153X> |
+| Buscar «Valenzuela C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Valenzuela%20C.> |
+| Perfil 59246912900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59246912900> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · The Public Health Services at the Metropolitan Region (MR) of Chile have nine acute psychiatric beds per 100,000 over 18 years old inhabitants, insufficient for current need; [Los Servicios de Salud Públicos de la Región Metropolitana (RM) cuentan con 9 camas psiquiátricas de corta estadía por 100.000 habitantes mayores de 18 años, insuficiente para la necesidad actual] — <https://doi.org/10.4067/s0034-98872023000801078>
+
+### [Vallejos G. → 0000-0002-6807-1791: ¿es suyo?](revision_identidad.html#caso-ver-vallejos-g)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6807-1791> |
+| Buscar «Vallejos G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Vallejos%20G.> |
+| Perfil 57210135895 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57210135895> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Retropubic suburethral mesh (TVT): clinical experience and data analysis at the Hospital El Carmen de Maipú; [Malla suburetral retropúbica (TVT): experiencia clínica y análisis de datos en el Hospital El Carmen de Maipú] — <https://doi.org/10.24875/RECHOG.23000036>
+
+### [Varas-Diaz G. → 0000-0002-4621-056X: ¿es suyo?](revision_identidad.html#caso-ver-varas-diaz-g)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-4621-056X> |
+| Buscar «Varas-Diaz G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Varas-Diaz%20G.> |
+| Perfil 57192709467 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57192709467> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Concurrent ankle-assisted movement, biofeedback, and proprioceptive stimulation reduces lower limb motor impairment and improves gait in persons with stroke — <https://doi.org/10.1080/09593985.2022.2122763>
+
+### [de la Fuente M. → 0000-0003-0577-7604: ¿es suyo?](revision_identidad.html#caso-ver-de-la-fuente-m)
+
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-0577-7604> |
+| Buscar «de la Fuente M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=de%20la%20Fuente%20M.> |
+| Perfil 23090504600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=23090504600> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Exploring the lutein therapeutic potential in steatotic liver disease: mechanistic insights and future directions — <https://doi.org/10.3389/fphar.2024.1406784>
 
 ---
 
@@ -110,5 +879,367 @@ El sitio publica hoy «0009-0000-6108-5958» y OpenAlex atribuye «0000-0002-599
 Publicaciones atribuidas, para comparar contra el registro:
 
 - 2025 · Maqui and Chronic Kidney Disease: A Narrative Review on the Potential Nephroprotective Role of Anthocyanins — <https://doi.org/10.3390/nu17061058>
+
+---
+
+## ORCID no verificable — 24 pendiente(s)
+
+### [Altamirano M. → 0000-0002-4290-4388: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-altamirano-m)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-4290-4388> |
+| Buscar «Altamirano M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Altamirano%20M.> |
+| Perfil 59228527700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59228527700> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Collaborative Consumption in an Emerging Market: What Motivates Consumers to Adopt It under Economic and Political Uncertainty? — <https://doi.org/10.3390/su152115482>
+
+### [Barbieri G.G. → 0009-0006-1130-7157: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-barbieri-g-g)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0006-1130-7157> |
+| Buscar «Barbieri G.G.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Barbieri%20G.G.> |
+| Perfil 58870862400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58870862400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Chile-Italy a Historicist View of Pandemics and Epidemics: ¿What are the Lessons we Must Learn? A Scoping Review Article — <https://doi.org/10.13133/2531-7288/2820>
+
+### [Bustamante A. → 0000-0002-5385-6967: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-bustamante-a)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-5385-6967> |
+| Buscar «Bustamante A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Bustamante%20A.> |
+| Perfil 56699703400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56699703400> |
+| Perfil 57760310700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57760310700> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Plasma α-Actin as an Early Marker of Muscle Damage After Repeated Bouts of Eccentric Cycling — <https://doi.org/10.1080/02701367.2022.2060926>
+
+### [Cortina A.H. → 0000-0003-3091-5386: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-cortina-a-h)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3091-5386> |
+| Buscar «Cortina A.H.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Cortina%20A.H.> |
+| Perfil 51461053900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=51461053900> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Cross-Cultural Adaptation and Psychometric Evaluation of Condom Use Self-Efficacy Scale in Chilean College Students — <https://doi.org/10.1891/JNM-2021-0053>
+- 2024 · Criteria for Designating a Health Care Facility as a Teaching Institution: An Analysis of International Regulations and Practices; [Criterios para denominar a un establecimiento de salud como asistencial docente: análisis de normativas y prácticas internacionales] — <https://doi.org/10.4067/s0034-98872024000300382>
+- 2024 · Self-regulated learning among Chilean dental assistant students: differences by gender and academic semester; [Autorregulación del aprendizaje en estudiantes chilenos de nivel técnico superior de Odontología: diferencias entre género y semestre de estudio] — <https://doi.org/10.1016/j.rmclc.2024.09.004>
+- 2025 · Phenomenological Study of Body Mapping in Nursing Students: Making Life Experiences During the Pandemic Visible; [Estudio fenomenológico de la cartografía corporal y relatos autobiográficos en estudiantes de enfermería para revelar experiencias de vida durante la pandemia]; [Estudo fenomenológico de mapeamento corporal e narrativas autobiográficas em estudantes de enfermagem para revelar experiências de vida durante a pandemia] — <https://doi.org/10.14198/cuid.27940>
+
+### [Cárdenas D.C. → 0000-0002-6533-3266: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-c-rdenas-d-c)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6533-3266> |
+| Buscar «Cárdenas D.C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=C%C3%A1rdenas%20D.C.> |
+| Perfil 58191038400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58191038400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Ogilvie syndrome: current management on the subject of a case; [Síndrome de Ogilvie: manejo actual a propósito de un caso] — <https://doi.org/10.35687/s2452-454920230061833>
+
+### [Dávila C.M. → 0000-0002-6357-3469: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-d-vila-c-m)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-6357-3469> |
+| Buscar «Dávila C.M.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=D%C3%A1vila%20C.M.> |
+| Perfil 57201182805 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57201182805> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · #Maternity: emergence of maternal digital markets in Chilean Instagram accounts; [#Maternidade: emergência dos mercados digitais maternos nas contas chilenas de Instagram]; [#Maternidad: emergencia de mercados digitales maternales en cuentas chilenas de Instagram] — <https://doi.org/10.7764/cdi.55.53227>
+- 2024 · Performing parenthood through digital communication technologies at school: the case of WhatsApp parents’ groups in Chile — <https://doi.org/10.1332/20467435Y2024D000000022>
+- 2024 · Acceleration in School Time: Issues of Educational Justice Between the Use of Digital Technology and the Idea of Skholé — <https://doi.org/10.1007/978-981-97-3418-4_20>
+
+### [Gonzalez-Valderrama A. → 0000-0003-4716-4021: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-gonzalez-valderrama-a)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-4716-4021> |
+| Buscar «Gonzalez-Valderrama A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gonzalez-Valderrama%20A.> |
+| Perfil 56586062200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56586062200> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Human development, inequality, and their associations with brain structure across 29 countries — <https://doi.org/10.1192/j.eurpsy.2025.10060>
+- 2025 · Premorbid school performance trajectories in patients with treatment-resistant schizophrenia prescribed clozapine in the public health system in Chile: A case-control study, 2007-2020 — <https://doi.org/10.1017/S0033291725101062>
+- 2025 · Longitudinal changes in striatocortical connectivity in first-episode psychosis associated with the emergence of treatment resistance — <https://doi.org/10.1038/s41537-025-00653-7>
+- 2023 · The incidence of non-affective psychotic disorders in low and middle-income countries: a systematic review and meta-analysis — <https://doi.org/10.1007/s00127-022-02397-6>
+- 2023 · Country-level gender inequality is associated with structural differences in the brains of women and men — <https://doi.org/10.1073/pnas.2218782120>
+- 2023 · Dysconnectivity in Schizophrenia Revisited: Abnormal Temporal Organization of Dynamic Functional Connectivity in Patients With a First Episode of Psychosis — <https://doi.org/10.1093/schbul/sbac187>
+
+### [González-Hernández J. → 0000-0003-3835-7104: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-gonz-lez-hern-ndez-j)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-3835-7104> |
+| Buscar «González-Hernández J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gonz%C3%A1lez-Hern%C3%A1ndez%20J.> |
+| Perfil 59867109100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59867109100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Development of Normative Data for the Mini Mental State Examination (MMSE) in the Elderly Population of Chile: A Multi-City Study; [Nuevos datos normativos para el Mini Mental State Examination (MMSE) en la población de personas mayores en Chile] — <https://doi.org/10.4067/s0034-98872023001101464>
+
+### [González-Valderrama A. → 0000-0003-4716-4021: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-gonz-lez-valderrama-a)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-4716-4021> |
+| Buscar «González-Valderrama A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Gonz%C3%A1lez-Valderrama%20A.> |
+| Perfil 56586062200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=56586062200> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Intra and inter-individual variability in functional connectomes of patients with First Episode of Psychosis — <https://doi.org/10.1016/j.nicl.2023.103391>
+- 2025 · Cognitive function at first episode in patients subsequently developing treatment-resistant schizophrenia — <https://doi.org/10.1016/j.schres.2025.01.017>
+
+### [Hernández R.N. → 0000-0002-3871-3108: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-hern-ndez-r-n)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-3871-3108> |
+| Buscar «Hernández R.N.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Hern%C3%A1ndez%20R.N.> |
+| Perfil 60238613900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60238613900> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · The personal pantheon as an expression of popular piety and religious sense in modern pluralism; [El panteón personal como una expresión de piedad popular y de sentido religioso en el pluralismo moderno] — <https://doi.org/10.22199/issn.0719-8175-6479>
+
+### [Jeria-Espinoza V. → 0009-0000-4168-198X: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-jeria-espinoza-v)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0000-4168-198X> |
+| Buscar «Jeria-Espinoza V.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Jeria-Espinoza%20V.> |
+| Perfil 60130836200 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60130836200> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Redox biology at the intersection of physical activity and air pollution: Mechanisms, consequences, and complexity — <https://doi.org/10.1016/j.freeradbiomed.2025.09.047>
+
+### [Jorquera J. → 0000-0003-4348-8678: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-jorquera-j)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-4348-8678> |
+| Buscar «Jorquera J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Jorquera%20J.> |
+| Perfil 12765789400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=12765789400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · The U-Shaped Association between Sleep Duration, All-Cause Mortality and Cardiovascular Risk in a Hispanic/Latino Clinically Based Cohort — <https://doi.org/10.3390/jcm12154961>
+- 2024 · Is the time below 90% of SpO2 during sleep (T90%) a metric of good health? A longitudinal analysis of two cohorts — <https://doi.org/10.1007/s11325-023-02909-x>
+- 2023 · Association between Acute Respiratory Distress Syndrome Due to COVID-19 and Long-Term Sleep and Circadian Sleep–Wake Disorders — <https://doi.org/10.3390/jcm12206639>
+- 2023 · Clinical Application of the Multicomponent Grading System for Sleep Apnea Classification and Incident Cardiovascular Mortality — <https://doi.org/10.1055/S-0043-1776770>
+- 2024 · Obstructive Sleep Apnea and Nocturnal Hypoxemia Increase the Cardiovascular Risk in Chilean; [La apnea obstructiva del sueño y la hipoxemia nocturna aumentan el riesgo cardiovascular basal en población chilena] — <https://doi.org/10.4067/s0034-98872024000400424>
+
+### [Landreau C.C. → 0009-0000-7474-5273: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-landreau-c-c)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0000-7474-5273> |
+| Buscar «Landreau C.C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Landreau%20C.C.> |
+| Perfil 59532772900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59532772900> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Vaginal infiltration for relief of neuropathic pain after sacrospinous hysteropexy: First successful mid-term report; [Infiltración vaginal para el alivio del dolor neuropático post histeropexia sacroespinosa: primer reporte exitoso a mediano plazo] — <https://doi.org/10.5867/medwave.2025.01.2958>
+
+### [Martin P.A.Q.S. → 0009-0006-3555-1787: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-martin-p-a-q-s)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0006-3555-1787> |
+| Buscar «Martin P.A.Q.S.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Martin%20P.A.Q.S.> |
+| Perfil 59533750400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59533750400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Vaginal infiltration for relief of neuropathic pain after sacrospinous hysteropexy: First successful mid-term report; [Infiltración vaginal para el alivio del dolor neuropático post histeropexia sacroespinosa: primer reporte exitoso a mediano plazo] — <https://doi.org/10.5867/medwave.2025.01.2958>
+
+### [Norambuena C. → 0000-0002-7561-9524: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-norambuena-c)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-7561-9524> |
+| Buscar «Norambuena C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Norambuena%20C.> |
+| Perfil 57224136890 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57224136890> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Retropubic suburethral mesh (TVT): clinical experience and data analysis at the Hospital El Carmen de Maipú; [Malla suburetral retropúbica (TVT): experiencia clínica y análisis de datos en el Hospital El Carmen de Maipú] — <https://doi.org/10.24875/RECHOG.23000036>
+
+### [Ortiz F. → 0000-0001-7665-7488: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-ortiz-f)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7665-7488> |
+| Buscar «Ortiz F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ortiz%20F.> |
+| Perfil 58805268100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58805268100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2024 · Eco-Innovation in the Food Industry: Exploring Consumer Motivations in an Emerging Market — <https://doi.org/10.3390/foods13010004>
+
+### [Ramos A. → 0000-0002-1248-0553: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-ramos-a)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-1248-0553> |
+| Buscar «Ramos A.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Ramos%20A.> |
+| Perfil 58861387700 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58861387700> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Challenges in cerebral hemorrhage and liver cirrhosis. bilateral ventricular shunt as a therapeutic alternative; [Desafíos en hemorragia cerebral y cirrosis hepática. derivación ventricular bilateral como alternativa terapéutica] — <https://doi.org/10.1016/j.rmclc.2025.04.004>
+- 2024 · Efficacy of hemoadsorptive therapy combined with high-volume hemofiltration in the management of refractory septic shock; [Eficacia de la terapia hemoadsortiva combinada con hemofiltración de alto volumen en el manejo del shock séptico refractario] — <https://doi.org/10.1016/j.rmclc.2023.10.003>
+
+### [Serrano M.J. → 0000-0001-7968-9434: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-serrano-m-j)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0001-7968-9434> |
+| Buscar «Serrano M.J.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Serrano%20M.J.> |
+| Perfil 58743009800 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58743009800> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · The Public Health Services at the Metropolitan Region (MR) of Chile have nine acute psychiatric beds per 100,000 over 18 years old inhabitants, insufficient for current need; [Los Servicios de Salud Públicos de la Región Metropolitana (RM) cuentan con 9 camas psiquiátricas de corta estadía por 100.000 habitantes mayores de 18 años, insuficiente para la necesidad actual] — <https://doi.org/10.4067/s0034-98872023000801078>
+
+### [Tavera A.T. → 0000-0002-9369-0172: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-tavera-a-t)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-9369-0172> |
+| Buscar «Tavera A.T.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Tavera%20A.T.> |
+| Perfil 58521750000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58521750000> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Patricio Guzmán Campos, photographer: close to close with architecture: Photographs of the work of Suárez, Bermejo and Borchers; [Patricio Guzmán Campos, fotógrafo: el cuerpo a cuerpo con la arquitectura: Fotografías de la obra de Suárez, Bermejo y Borchers] — <https://doi.org/10.24192/2386-7027(2023)(v19)(08)>
+
+### [Torrealba F.P. → 0000-0002-8138-029X: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-torrealba-f-p)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-8138-029X> |
+| Buscar «Torrealba F.P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Torrealba%20F.P.> |
+| Perfil 58545865400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=58545865400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2023 · Environmental pertinence and inspection: a proposal for armonization; [Consulta de pertinencia y fiscalización ambiental: una propuesta de armonización] — <https://doi.org/10.4067/S0718-09502023000100161>
+- 2024 · Legal configuration of wetlands in the ordinary jurisprudence of the Supreme Court: An analysis through the recurso de protección (2018–2022) and the impact of the stay order on the execution of real estate projects; [Configuración jurídica de los humedales en la jurisprudencia ordinaria de la Corte Suprema: Un análisis a través del recurso de protección (2018–2022) y el impacto de la orden de paralizar en la ejecución de proyectos inmobiliarios] — <https://doi.org/10.5354/0719-4633.2024.72647>
+
+### [Valderrama P. → 0000-0002-2232-8168: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-valderrama-p)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-2232-8168> |
+| Buscar «Valderrama P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Valderrama%20P.> |
+| Perfil 57062781400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57062781400> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Sudden Cardiac Death: Trend Analysis by Sex and Age, Chile 2010 to 2020; [Muerte súbita cardíaca: Análisis de tendencia según sexo y edad, Chile 2010 a 2020] — <https://doi.org/10.4067/s0034-98872025001100760>
+- 2024 · 2024 SIAC guidelines on cardiorespiratory rehabilitation in pediatric patients with congenital heart disease; [Guía SIAC 2024 sobre rehabilitación cardiorrespiratoria en pacientes pediátricos con cardiopatías congénitas] — <https://doi.org/10.1016/j.recesp.2024.02.017>
+
+### [Villarroel N.C. → 0009-0006-5333-8840: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-villarroel-n-c)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0006-5333-8840> |
+| Buscar «Villarroel N.C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Villarroel%20N.C.> |
+| Perfil 59533750300 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59533750300> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Vaginal infiltration for relief of neuropathic pain after sacrospinous hysteropexy: First successful mid-term report; [Infiltración vaginal para el alivio del dolor neuropático post histeropexia sacroespinosa: primer reporte exitoso a mediano plazo] — <https://doi.org/10.5867/medwave.2025.01.2958>
+
+### [Vásquez F. → 0000-0003-1769-3969: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-v-squez-f)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0003-1769-3969> |
+| Buscar «Vásquez F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=V%C3%A1squez%20F.> |
+| Perfil 24400395100 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=24400395100> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Maqui and Chronic Kidney Disease: A Narrative Review on the Potential Nephroprotective Role of Anthocyanins — <https://doi.org/10.3390/nu17061058>
+- 2025 · Practical recommendations for nutritional management of chronic kidney disease for stages 3 to 5 with and without dialysis for adults and the elderly in Chile; [Recomendaciones prácticas para el manejo nutricional de la enfermedad renal crónica en etapas 3 a 5 con y sin diálisis para adultos y personas mayores en Chile] — <https://doi.org/10.4067/s0717-75182025000100063>
+- 2025 · Nutritional Status of 8,128,014 Chilean and Immigrant Children and Adolescents Evaluated by the National Board of School Aid and Scholarships (JUNAEB) Between 2013 and 2023 — <https://doi.org/10.3390/nu17020327>
+
+### [Zañartu T.V. → 0009-0005-2748-7888: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-za-artu-t-v)
+
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire.
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0009-0005-2748-7888> |
+| Buscar «Zañartu T.V.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Za%C3%B1artu%20T.V.> |
+| Perfil 59986560600 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=59986560600> |
+
+Publicaciones atribuidas, para comparar contra el registro:
+
+- 2025 · Suitability and relevance of the complaint appeal against the decisions of contentious-administrative proceedings; [Idoneidad y pertinencia del recurso de queja en contra de las decisiones de los procedimientos contencioso-administrativos] — <https://doi.org/10.7764/redad.41.9>
+- 2025 · Fee-based contracts in private and public health services: a review of counter-indicators and indicators of labor subordination; [Contratos a honorarios en la salud privada y pública: una revisión de contraindicios e indicios de subordinación laboral] — <https://doi.org/10.24822/rjduandes.0902.4>
 
 ---
