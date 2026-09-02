@@ -192,3 +192,14 @@ indicadores:
           categoria: declarado, publicar: true, confiabilidad: baja,
           solo_recuento: true, advertencia_destacada: true,
           advertencia: "Recuento que cada Facultad declara en su propio sitio, no un índice bibliográfico: no aplica los criterios de cobertura de Scopus, y SciVal no lo mide — no tiene citas, FWCI ni ningún otro indicador de impacto. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}
+
+  # V2-26: OpenAlex atribuye a la institución obras que el universo Scopus no
+  # tiene. Evidencia distinta de PD-01 — no es una Facultad declarando su
+  # propia lista editorial, es una API externa cuyos candidatos pasan uno por
+  # uno por revisión humana (internal/revision_cobertura_openalex.html) antes
+  # de contarse aquí. Los que siguen pendientes de esa revisión NUNCA se
+  # cuentan como producción confirmada, aunque existan como candidatos.
+  PD-02: {nombre: "Producción institucional confirmada por revisión de cobertura OpenAlex, fuera de Scopus",
+          categoria: declarado, publicar: true, confiabilidad: baja,
+          solo_recuento: true, advertencia_destacada: true,
+          advertencia: "OpenAlex atribuye a la institución obras que el universo Scopus no tiene; cada candidato se confirma con revisión humana caso por caso (V2-26) antes de contarse — nunca automáticamente, y los que aún no se revisaron no se cuentan. No tiene citas, FWCI ni ningún otro indicador de impacto: SciVal no lo mide. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}

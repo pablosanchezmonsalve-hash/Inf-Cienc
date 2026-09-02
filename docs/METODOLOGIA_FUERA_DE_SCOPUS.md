@@ -20,11 +20,13 @@ sí, aunque las dos respeten `D-206`:
 - `PD-01` (publicado): la Facultad de Medicina y Salud autodeclara su propio
   listado de publicaciones en su sitio. El proyecto no verifica cada título
   contra una fuente independiente antes de contarlo.
-- La cola de revisión OpenAlex + Crossref (`V2-26`, **no publicada**): 414
-  obras que OpenAlex atribuye a la UFT y que el universo Scopus no tiene;
-  cada una pasa por un criterio explícito —DOI, tipo documental, apellido ya
-  presente en el corpus, corroboración independiente de Crossref cuando
-  existe— antes de que una persona la confirme una por una.
+- `PD-02` (publicado el 2026-09-02, con autorización explícita del usuario —
+  ver §4): la cola de revisión OpenAlex + Crossref (`V2-26`); de las 414
+  obras que OpenAlex atribuye a la UFT y que el universo Scopus no tiene,
+  sólo las que una persona confirmó una por una —DOI, tipo documental,
+  apellido ya presente en el corpus, corroboración independiente de Crossref
+  cuando existe— se cuentan aquí. Las que siguen sin revisión (394) se
+  publican como cifra de transparencia, nunca como producción confirmada.
 
 Si un tercer origen (SciELO, un segundo listado de otra Facultad, un
 repositorio institucional) se agrega sin este marco, el riesgo concreto es
@@ -43,9 +45,9 @@ institución declarados?**
 | | Nivel D — Declarado | Nivel V — Verificado obra por obra |
 |---|---|---|
 | **Qué certifica** | La fuente agrega/publica un conjunto; el proyecto no re-verifica cada título individualmente | Cada registro pasa un criterio explícito antes de contar |
-| **Ejemplo real** | `PD-01` — Facultad de Medicina y Salud | Cola OpenAlex, `internal/openalex_cobertura.csv` (`V2-26`) |
-| **Estado** | Publicado (`produccion-ampliada.html`) | Construida como herramienta de revisión; **no publicada** como indicador |
-| **Mecanismo de "cuenta"** | `corpus_paralelo_declarado: true` en `config/sources.yml` + `09_produccion_declarada.py` | `internal/openalex_cobertura_decisiones.csv` (veredicto humano) → `apply_openalex_review.py` → `resolucion: CONFIRMADO_PRODUCCION_UFT` |
+| **Ejemplo real** | `PD-01` — Facultad de Medicina y Salud | `PD-02` — cola OpenAlex, `internal/openalex_cobertura.csv` (`V2-26`) |
+| **Estado** | Publicado (`produccion-ampliada.html`) | Publicado (`produccion-ampliada.html`, `PD-02`, desde 2026-09-02) |
+| **Mecanismo de "cuenta"** | `corpus_paralelo_declarado: true` en `config/sources.yml` + `09_produccion_declarada.py` | `internal/openalex_cobertura_decisiones.csv` (veredicto humano) → `apply_openalex_review.py` → `resolucion: CONFIRMADO_PRODUCCION_UFT` → agregado por año en `09_produccion_declarada.py` |
 | **Cifras reales (2026-09-02)** | 609 leídos → 63 duplicados por DOI colapsados → 325 fuera del universo Scopus → 83 en ventana 2023-2025 (cifra publicada), 222 fuera de ventana + 20 sin año (nota de transparencia) | 414 candidatos → 20 confirmados (`CONFIRMADO_PRODUCCION_UFT`), 394 `PENDIENTE_REVISION_HUMANA` — ninguno se promueve solo (`D-313`) |
 | **Corroboración cruzada** | Ninguna prevista: es la propia institución declarando | Crossref, cuando el DOI existe (`internal/openalex_cobertura_crossref.csv`) — refuerza, no reemplaza la revisión humana |
 
@@ -99,11 +101,14 @@ la segunda decide qué es un duplicado.
 ### Regla 4 — Cada nivel, su propio indicador
 
 Nunca combinar Nivel D y Nivel V bajo una etiqueta compartida como "fuera de
-Scopus", aunque los dos respeten `D-206`. `PD-01` (Nivel D, publicado) y la
-cola OpenAlex + Crossref (Nivel V, no publicada) son la instancia concreta
-de esta regla — ya declarada en `docs/V2_BACKLOG.md` §8. Si se autoriza
-publicar el Nivel V algún día, es un indicador propio (tentativamente
-`PD-02`), nunca una fila más dentro de `PD-01`.
+Scopus", aunque los dos respeten `D-206`. `PD-01` (Nivel D) y `PD-02` (Nivel
+V, cola OpenAlex + Crossref) son la instancia concreta de esta regla — ya
+declarada en `docs/V2_BACKLOG.md` §8. Publicados como dos indicadores
+separados, cada uno con su propia sección en `produccion-ampliada.html`;
+`PD-02` nunca es una fila más dentro de `PD-01`. El único punto en que se
+tocan es el total combinado de la página (`total_fuera_de_scopus`), que es
+la unión por DOI de los dos — aritmética declarada sobre ambos indicadores,
+no un tercero con fuente propia.
 
 ### Regla 5 — El denominador del universo no se toca, en ningún nivel
 
@@ -133,11 +138,16 @@ para todo lo que este documento describe.
 
 ## 4. Qué NO resuelve este documento
 
-- No autoriza construir un indicador para la cola OpenAlex + Crossref
-  (`PD-02` u otro nombre). Ampliar lo que el sitio publica sigue siendo,
-  por `D-206`/`D-16`, una decisión de alcance aparte, explícita y posterior,
-  que le corresponde al usuario.
-- No reabre `D-206`, `D-313`, `D-314` ni `D-398`.
+- **Actualización 2026-09-02**: el usuario autorizó explícitamente publicar
+  el Nivel V como `PD-02` ("Integra todo el contenido recuperado desde
+  APIs en un nuevo apartado que indique la producción total fuera de
+  Scopus") — exactamente la decisión de alcance aparte, explícita y
+  posterior que este documento exigía como condición. Implementado en
+  `09_produccion_declarada.py` y `produccion-ampliada.html`; ver
+  `docs/FUENTES_Y_APIS.md` §2.7. Esta sección se deja como registro de que
+  la autorización fue explícita, no implícita ni asumida.
+- No reabre `D-206`, `D-313`, `D-314` ni `D-398`: `PD-02` sigue sin tocar
+  `publications_universe.csv` ni ningún indicador de citas/FWCI.
 - No cambia nada del corpus Scopus/SciVal ni de `METHODOLOGY.md`.
 - Es un marco para clasificar y aislar fuentes nuevas — no reemplaza a
   `docs/DECISIONS.md` como registro de qué se decidió y cuándo.
@@ -147,14 +157,15 @@ para todo lo que este documento describe.
 ## Referencias
 
 - `docs/DECISIONS.md` — `D-16`, `D-206`, `D-226`, `D-313`, `D-314`, `D-370`,
-  `D-398`, `D-400`.
-- `docs/V2_BACKLOG.md` §8 — la propuesta, todavía sin autorizar, de publicar
-  el Nivel V.
+  `D-398`, `D-400`, y la decisión de autorización de `PD-02` (2026-09-02).
+- `docs/V2_BACKLOG.md` §8 — la propuesta de publicar el Nivel V, autorizada
+  y cerrada el 2026-09-02.
 - `docs/DATA_MODEL.md` — «Corpus paralelo declarado (fuera de este modelo)».
-- `docs/FUENTES_Y_APIS.md` §2.6 — la fuente Nivel D implementada.
+- `docs/FUENTES_Y_APIS.md` §2.6 (Nivel D, `PD-01`) y §2.7 (Nivel V, `PD-02`).
 - `config/sources.yml` → `facultad_medicina_publicaciones`,
-  `corpus_paralelo_declarado`.
-- `src/build/09_produccion_declarada.py` — mecanismo genérico de Nivel D.
+  `corpus_paralelo_declarado`, `openalex_api`.
+- `src/build/09_produccion_declarada.py` — mecanismo genérico de Nivel D
+  (`PD-01`) y agregación de Nivel V (`PD-02`) en un mismo build.
 - `src/review/build_openalex_review.py`, `src/review/apply_openalex_review.py`
-  — mecanismo de cola de Nivel V (herramienta de revisión, sin indicador
-  publicado todavía).
+  — mecanismo de cola de Nivel V; su `resolucion: CONFIRMADO_PRODUCCION_UFT`
+  alimenta `PD-02`.

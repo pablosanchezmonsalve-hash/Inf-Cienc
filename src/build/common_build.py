@@ -441,6 +441,10 @@ FUENTE_POR_INDICADOR = {
     # general (config/sources.yml declara cuáles Facultades contribuyen), y
     # hoy sólo una lo hace.
     "PD-01": "Declarado por la Facultad (no Scopus)",
+    # PD-02: evidencia de otra naturaleza que PD-01 — no es una Facultad
+    # declarando su propia lista, es OpenAlex confirmado por revisión humana
+    # caso por caso (V2-26).
+    "PD-02": "OpenAlex, confirmado por revisión humana (no Scopus)",
 }
 
 
