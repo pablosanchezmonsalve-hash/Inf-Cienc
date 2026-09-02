@@ -40,6 +40,7 @@ Salida:
 from __future__ import annotations
 
 import html as htmlmod
+import io
 import json
 import sys
 from datetime import date
@@ -248,10 +249,20 @@ pintarAvance();
 
 
 def _leer_previas(ruta: Path) -> dict[str, dict]:
-    """Decisiones de una corrida anterior de esta misma herramienta, si existe."""
+    """Decisiones de una corrida anterior de esta misma herramienta, si existe.
+
+    Se salta la cabecera de comentario por POSICIÓN, no con
+    `pd.read_csv(comment='#')`: eso trunca en la primera almohadilla ESTÉ
+    DONDE ESTÉ, y una nota como «ítem #3» perdería la mitad en silencio
+    (mismo bug que ya se corrigió en decisiones.py::leer()).
+    """
     if not ruta.exists():
         return {}
-    df = pd.read_csv(ruta, dtype=str, comment="#").fillna("")
+    lineas = ruta.read_text(encoding="utf-8-sig").splitlines()
+    i = 0
+    while i < len(lineas) and lineas[i].startswith("#"):
+        i += 1
+    df = pd.read_csv(io.StringIO("\n".join(lineas[i:])), dtype=str).fillna("")
     return {r["openalex_id"]: {"veredicto": r["veredicto"], "nota": r["nota"]}
             for _, r in df.iterrows() if r.get("veredicto") not in (None, "", "pendiente")}
 

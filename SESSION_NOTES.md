@@ -6972,3 +6972,141 @@ data/enriched/authors_orcid.csv     regenerados tras la fusión
 Push de la fusión. Reportar al usuario el resultado, incluyendo el bug
 de idempotencia encontrado y corregido — no estaba buscándolo, lo
 expuso la propia fusión.
+
+## Cierre: auditoría de todo lo vinculado a revisiones pendientes
+
+### Contexto
+
+El usuario pidió auditar todo el trabajo vinculado con revisiones
+pendientes — no un punto específico, un barrido completo. Se revisó
+integridad de datos, consistencia del pipeline, y se buscaron
+activamente patrones de bug ya conocidos de esta sesión en el resto del
+código, en vez de asumir que estaban contenidos a donde ya se habían
+corregido.
+
+### Hallazgo 1 (corregido): el bug de `comment='#'` seguía vivo en 4 archivos hermanos
+
+`decisiones.py::leer()` documenta el bug de `pd.read_csv(comment='#')`
+(trunca en la primera almohadilla esté donde esté) y lo corrigió — pero
+sólo para `identity_decisions.csv`. El mismo patrón exacto seguía sin
+corregir en `build_openalex_review.py`, `apply_unit_validation.py`,
+`apply_openalex_review.py` y `build_unit_validation.py`, los cuatro
+leyendo decisiones de revisión humana de otras colas (validación de
+unidades, cobertura OpenAlex). `internal/unit_validation_decisions.csv`
+no tiene almohadillas fuera de su cabecera hoy —no es una corrupción
+activa—, pero la vulnerabilidad era real para la próxima nota que
+mencione "ítem #3". Corregido con el mismo patrón (saltar cabecera por
+posición, no por `comment=`) en los cuatro archivos.
+
+### Hallazgo 2 (encontrado, NO corregido — necesita decisión de diseño): la cola "Varios Scopus ID" no tiene efecto en el pipeline
+
+Al auditar `identity_decisions.csv`, 20 filas —y sólo esas 20, las 20
+de la cola "Varios Scopus ID" (P-04)— tienen la columna `firmas` VACÍA.
+Se investigó por qué: `build_review.py` busca la ficha con
+`perf.get(r["nombre_en_fuente"])`, pero para esta cola
+`nombre_en_fuente` viene en formato "Apellido, Nombre completo" (p.
+ej. "Castillo, Oscar"), mientras que `perf` está indexado por la firma
+corta que usa el resto del proyecto ("Castillo O."). La búsqueda falla
+siempre, para las 20 filas, tengan o no ficha real.
+
+Pero incluso corrigiendo esa búsqueda, el problema de fondo seguiría: el
+mecanismo que consume veredictos "misma"/"distintas"
+(`grupos_de_identidad()`) necesita DOS firmas por fila para fusionar un
+par — `itertools.pairwise([un_solo_elemento])` no produce nada. Esta
+cola sólo puede aportar UNA firma por fila (el nombre completo con
+varios Scopus Author ID es una sola persona-candidata, no dos firmas
+distintas a comparar), así que el veredicto "misma"/"distintas" nunca
+tuvo, estructuralmente, manera de fusionar ni separar nada — no importa
+si la búsqueda de ficha funciona o no.
+
+Se verificó el alcance real: de los 20 casos, **10 corresponden a
+personas que SÍ están en la población UFT** (`en_poblacion_uft: True`
+en `internal/ambiguities_authors.csv`) — alguien, en una revisión
+anterior, miró la evidencia (¿coautoría en común? ¿los dos IDs firman la
+misma publicación?) y marcó "misma" o "distintas" pensando que eso
+registraba una decisión con efecto, y no lo tuvo — nunca lo tuvo, para
+ningún caso de esta cola, desde que se creó.
+
+**No se corrigió.** Arreglar la búsqueda de ficha es trivial, pero no
+alcanza: haría falta decidir qué debería HACER un veredicto "distintas"
+aquí — ¿partir la ficha en dos identidades? ¿marcar uno de los dos
+Scopus Author ID como sospechoso? Eso es una decisión de diseño sobre el
+modelo de datos, no un bug de una línea. Se documenta como hallazgo para
+que el usuario decida el rumbo antes de tocar nada.
+
+### Hallazgo 3 (encontrado, no corregido — fuera de alcance): `build_openalex_review.py` no corre contra el CSV actual
+
+Al probar el fix del Hallazgo 1, `build_openalex_review.py` lanzó
+`KeyError: 'nota'`: `internal/openalex_cobertura_decisiones.csv` sólo
+tiene las columnas `openalex_id,veredicto` — sin `nota` — y el código
+asume que existe. Es un bug preexistente, no causado por el fix (el
+código viejo con `comment='#'` habría fallado exactamente igual: la
+columna no existe en el archivo, sin importar cómo se lea). Pertenece a
+la vía de cobertura OpenAlex (V2-26), un área distinta de las 128
+revisiones de identidad de esta sesión, y aparentemente inactiva desde
+hace tiempo. No se tocó: no hay contexto suficiente para saber si el
+CSV está desactualizado o si el código lo está.
+
+### Verificado limpio
+
+- `identity_decisions.csv`: 419 filas, 0 `caso_id` duplicados, 0
+  veredictos desconocidos, 0 veredictos fuera de su cola, 0 filas
+  PENDIENTES con firmas vacías (el problema del Hallazgo 2 está
+  contenido a filas YA decididas de una sola cola).
+- `apply_decisions.py --test` (40/40), `dspace_inventario.py --test`,
+  `autoarchivo_uft.py --test`: todos en verde.
+- Estado de git: limpio, sin pushes paralelos, rama al día con origin.
+- `apply_unit_validation.py --dry-run` corre limpio con el fix del
+  Hallazgo 1 aplicado; confirma independientemente (desde una validación
+  de 2026-08-26, anterior a la confusión de hoy) que "Facultad de
+  Educación, Psicología y Familia" corrige A "Facultad de Educación y
+  Ciencias Sociales" — el mismo sentido que confirmó el usuario
+  directamente en finis.cl.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-363 | El fix de lectura segura de CSV (saltar cabecera por posición, no por `comment=`) se replica en los 4 archivos hermanos que compartían el mismo patrón sin corregir | Mismo bug ya documentado y corregido una vez en `decisiones.py`; dejarlo sin corregir en 4 sitios más es dejar la misma vulnerabilidad de corrupción silenciosa a la espera de una nota con almohadilla |
+| D-364 | La cola "Varios Scopus ID" (P-04) NO se corrige todavía: se documenta como hallazgo que necesita una decisión de diseño del usuario, no un fix mecánico | Corregir sólo la búsqueda de ficha no resolvería el problema real (el mecanismo de fusión necesita 2 firmas por fila, esta cola sólo puede dar 1); decidir qué debe hacer un veredicto aquí es una decisión sobre el modelo de datos, reservada al usuario |
+
+### Verificación
+
+`apply_decisions.py --test` (40/40), `dspace_inventario.py --test`,
+`autoarchivo_uft.py --test` en verde tras los cambios. Sintaxis validada
+en los 4 archivos corregidos (`ast.parse`); `apply_unit_validation.py
+--dry-run` y `build_unit_validation.py` corridos de verdad, sin errores.
+`build_openalex_review.py`/`apply_openalex_review.py` probados: el
+primero falla por el Hallazgo 3 (preexistente, documentado, no
+corregido), el segundo corre limpio.
+
+### Archivos modificados
+
+```
+src/review/build_openalex_review.py,
+src/review/apply_unit_validation.py,
+src/review/apply_openalex_review.py,
+src/review/build_unit_validation.py    fix de lectura segura de CSV
+internal/validacion_unidades.md,
+internal/validacion_unidades.html      regenerados (fecha), sin cambio
+                                        de contenido sustantivo
+```
+
+### Ambigüedades abiertas
+
+- **Hallazgo 2 sin resolver**: 20 veredictos "misma"/"distintas" de la
+  cola "Varios Scopus ID" son y siempre fueron inertes. Necesita
+  decisión del usuario sobre qué debería hacer un veredicto ahí antes de
+  tocar el código.
+- **Hallazgo 3 sin resolver**: `build_openalex_review.py` no corre
+  contra el CSV de decisiones actual. Fuera de alcance de esta
+  auditoría (área V2-26, no las 128 revisiones de identidad).
+- Las de siempre.
+
+### Próximo paso recomendado
+
+Reportar los tres hallazgos al usuario con su severidad real (uno
+corregido, uno esperando decisión de diseño, uno fuera de alcance
+documentado). No proponer una solución para el Hallazgo 2 sin que el
+usuario decida primero qué debe significar "distintas" para un nombre
+con varios Scopus Author ID.

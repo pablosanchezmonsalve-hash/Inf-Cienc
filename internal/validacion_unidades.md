@@ -1,6 +1,6 @@
 # Validación institucional de unidades académicas
 
-**Generado** el 2026-09-01 por `src/review/build_unit_validation.py`. Regenerable.
+**Generado** el 2026-09-02 por `src/review/build_unit_validation.py`. Regenerable.
 
 ## Qué se pide
 
