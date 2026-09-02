@@ -8724,3 +8724,119 @@ Ninguna acción de código pendiente. Si se quiere, alguien puede revisar
 `internal/scopus_author_search_multiples_id.csv` caso por caso y aplicar
 una decisión (mismo mecanismo que la cola de identidad existente) para
 los 3 candidatos nuevos.
+
+## Cierre: aplicación de decisiones y listado — Scopus Author Search (2026-09-02, continuación)
+
+### Contexto
+
+Mismo día, continuación del cierre anterior. El usuario autorizó revisar
+los 3 candidatos nuevos de "múltiples Scopus ID" y pidió aplicar la
+decisión resultante y entregar un listado HTML del resto de los casos.
+
+### Qué se hizo
+
+**Revisión de los 3 candidatos** (cruce contra `authors_orcid.csv`,
+`openalex_cobertura.csv`, `orcid_ampliacion_log.csv` y el corpus real):
+- **Esis Villarroel, Ivette S.** → confirmada como una sola persona. Dos
+  fuentes independientes (Crossref, ya en el proyecto; Scopus Author
+  Search, nuevo) coinciden en el mismo ORCID `0000-0002-2379-8380` para
+  los dos Scopus Author ID de la fuente, y `openalex_cobertura.csv` aporta
+  3 publicaciones más de la misma persona (todas de Derecho, fuera del
+  universo Scopus) que corroboran. Cumple el umbral de evidencia
+  dispositiva que este proyecto exige (mismo nombre + mismo ORCID contra
+  el trabajo propio de la persona, corroborado por fuente independiente).
+- **Caffarena, Paula** → NO confirmada, queda pendiente. El proyecto ya
+  tenía ORCID distintos asignados a las dos firmas (`0000-0002-2609-6413`
+  vs. `0000-0001-9550-3695`) — si fueran la misma persona se esperaría el
+  mismo ORCID. Hay coincidencia temática (historia social/sanitaria
+  chilena) pero coincidencia temática sola no alcanza el umbral —mismo
+  criterio ya aplicado a "Moya, Patricia" en una sesión anterior—, y en
+  este caso hay evidencia que más bien argumenta EN CONTRA de la fusión.
+- **Cabello, José Miguel** → NO confirmada, queda pendiente. Sin ORCID en
+  ninguna fuente para verificar ninguno de los dos perfiles; sólo
+  coherencia temática (Medicine/urología), insuficiente por sí sola.
+
+**Mecanismo de aplicación** (D-430): se construyó
+`src/review/apply_scopus_author_decisions.py`, calcado del patrón ya
+existente de `apply_openalex_review.py` (lee un CSV pequeño de veredictos
+humanos, actualiza `resolucion`/`nota_resolucion` por nombre, idempotente,
+`--test`/`--dry-run`/real). Las 3 decisiones de arriba quedaron escritas
+en `internal/scopus_author_search_decisiones.csv` con su razonamiento
+completo, y se aplicaron sobre `internal/scopus_author_search_multiples_id.csv`
+(verificado con `--dry-run` antes de escribir de verdad).
+
+**Listado HTML** (`internal/scopus_author_search_listado.html`): cubre lo
+que la revisión de los 3 candidatos no cubrió — los 2 casos que quedaron
+pendientes (con su razonamiento completo), los 4 casos ya conocidos por el
+proyecto (sin dato nuevo, sólo confirmación), y las 24 filas del contraste
+de ORCID que no fueron "coincide" (1 nueva asignación posible — Bastías,
+Jaime — y 23 sin firma UFT reconocida en el proyecto).
+
+**Hallazgo al armar el listado, no automático** (D-431): revisando las 23
+filas "sin_firma_uft_en_el_proyecto" a mano, "Fernández Abara, Joaquín
+Fernández" (ORCID `0000-0001-8190-2361`) es casi seguro la misma persona
+que "Abara J.F.", que el proyecto ya tiene con el ORCID idéntico
+(`data/enriched/authors_orcid.csv`, vía OpenAlex). El cruce automático de
+`contraste_orcid()` no lo detectó porque compara por firma corta exacta
+y este documento escribe el apellido compuesto completo ("Fernández
+Abara") mientras el corpus del proyecto lo abrevia distinto ("Abara") —
+un límite real del cruce por apellido+inicial cuando hay apellidos
+compuestos, no una fuente nueva de identidad. Se dejó marcado en el
+listado HTML en vez de corregirlo en el código: corregir el cruce para
+apellidos compuestos en general es un cambio de alcance mayor (afecta
+`contraste_orcid()` y potencialmente otros cruces por firma del proyecto)
+que no se investigó a fondo para las otras 22 filas — no se generalizó
+un arreglo a partir de un solo caso verificado a mano.
+
+### Verificación
+
+`scopus_author_search.py --test` (14/14) y
+`apply_scopus_author_decisions.py --test` (5/5) sin cambios. `--dry-run`
+antes de aplicar de verdad: confirmó exactamente 3 cambios, los
+esperados. `src/audit/run_all.py` y `src/build/build_all.py` completos
+sin fallas nuevas; `git diff --stat -- data/processed/` vacío — este
+cierre tampoco toca la capa pública.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-430 | Se aplican las 3 decisiones vía un mecanismo dedicado (`apply_scopus_author_decisions.py`), no editando el CSV de la cola a mano | Mismo patrón que `apply_openalex_review.py`: la decisión queda registrada con su razonamiento en un archivo separado, versionado, reaplicable — no se pierde si se regenera la cola |
+| D-431 | El hallazgo "Fernández Abara" / "Abara J.F." se deja como nota marcada en el listado, no como corrección de código | Es un solo caso verificado a mano; generalizar el cruce por apellido compuesto a las otras 22 filas sin evidencia equivalente habría sido inventar una regla no probada |
+
+### Archivos modificados
+
+```
+src/enrich/scopus_author_search.py               resolucion/nota_resolucion en candidatos_multiples_id
+src/review/apply_scopus_author_decisions.py       nuevo
+internal/scopus_author_search_decisiones.csv      nuevo — 3 decisiones con razonamiento
+internal/scopus_author_search_multiples_id.csv    actualizado — 1 confirmada, 6 pendientes
+internal/scopus_author_search_listado.html        nuevo — listado de lectura, capa interna
+STATE.md, docs/DECISIONS.md                       regenerados
+```
+
+### Supuestos descartados
+
+- Que el hallazgo "Fernández Abara"/"Abara J.F." justificaba revisar las
+  otras 22 filas "sin_firma_uft_en_el_proyecto" en busca de coincidencias
+  similares: descartado por alcance — un caso verificado a mano no es
+  base para asumir que las demás tienen el mismo patrón.
+
+### Ambigüedades abiertas
+
+- Caffarena y Cabello siguen pendientes — evidencia insuficiente, no
+  evidencia en contra (salvo Caffarena, donde hay un argumento activo
+  en contra de la fusión).
+- Las 23 filas "sin_firma_uft_en_el_proyecto" siguen sin investigar caso
+  por caso, salvo la excepción marcada (Fernández Abara).
+- El límite de `contraste_orcid()` con apellidos compuestos queda
+  documentado pero no corregido.
+
+### Próximo paso recomendado
+
+Si se quiere avanzar el hallazgo D-431, confirmar "Fernández Abara" =
+"Abara J.F." con una fuente adicional (Crossref u OpenAlex por DOI) antes
+de fusionar. Si se quiere generalizar la detección de apellidos
+compuestos en `contraste_orcid()`, primero revisar las otras 22 filas a
+mano para ver cuántas comparten el patrón — no vale la pena generalizar
+el código para un caso.

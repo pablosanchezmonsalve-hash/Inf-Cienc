@@ -218,6 +218,10 @@ def candidatos_multiples_id(filas_fuente: list[dict], ids_por_nombre: dict[str, 
             "nota": ("Puede ser un perfil Scopus fragmentado (misma persona, dos "
                      "identificadores) o una homonimia — esta fuente no lo decide, "
                      "igual que la regla P-04 del proyecto (D-08)."),
+            # Por defecto, pendiente: la decide una persona
+            # (apply_scopus_author_decisions.py la actualiza, nunca este script).
+            "resolucion": "PENDIENTE_REVISION_HUMANA",
+            "nota_resolucion": "",
         })
     return out
 
