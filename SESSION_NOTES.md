@@ -6043,3 +6043,73 @@ criterio visual, y hacer commit + push del refinement UX de la parte superior.
 - Commit + push de la paleta H (aún sin commitear sobre `23d102e`).
 - Nota operativa: `dist/`, `data/processed/` son derivados no versionados; el
   servidor 8000 (PID 2440) sirve `dist/` ya reconstruido.
+
+## Sesión 2026-09-01 (noche) - Fix visual del heatmap de Producción
+
+### Síntoma
+El usuario reportó "los gráficos y mapas" de Producción rotos visualmente tras
+la paleta H. Causa raíz: en H, `--accion-viva` dejó de ser teal (color de dato
+fuerte) y pasó a **champán claro** `#f0ddca`; el heatmap lo usaba como relleno
+de magnitud → **champán sobre papel champán = invisible (1,16:1)**, además
+diluido por `fill-opacity` (0,06–0,94).
+
+### Cambio
+- `web/assets/js/visualizations/heatmap.js` (línea 91): `fill="var(--accion-viva)"`
+  → `fill="var(--serie-1)"` (bordeaux del dato). `es-clara`/texto intactos.
+- Comentario de cabecera (líneas 14-18) actualizado para no citar el token viejo.
+
+### Verificación
+- Pixel-sampling del `.heatmap-svg` renderizado: celdas bordeaux (p. ej.
+  `#91313b`, `#a5555d`, `#b06b71`) sobre papel champán; gradiente de intensidad
+  legible. Treemap: etiquetas claras `#fdf6ef` confirmadas (contraste 4,99:1).
+- Contraste del texto del heatmap: bordeaux claro→texto vino ok; bordeaux
+  intenso→ texto claro (`es-clara`) ok. Umbral `es-clara` intacto.
+- `py src/build/06_assemble_site.py` OK; `node src/verify/run_all.mjs dist` →
+  **VERIFICACIÓN COMPLETA · sin fallos**.
+
+### Capturas
+- `_rev_produccion.png` regenerada (416 KB, fullPage, servidor `dist/`).
+
+### Pendiente
+- Commit (aún sin commitear) de `web/assets/js/visualizations/heatmap.js`.
+- Nota: previewl del foco en la red (`core.js:830`, anillo `--accion-viva`
+  champán) queda como acento; no es fallo WCAG y no se tocó.
+- Confirmación visual del usuario sobre el heatmap corregido.
+
+## Sesión 2026-09-01 (noche) - Mejoras de UX/comprensión en los mapas de Producción
+
+### Cambios
+- **Heatmap** (`web/assets/js/visualizations/heatmap.js`): umbral `es-clara` de
+  `intensidad > 0.55` → `> 0.66`. Antes la cifra cambiaba a texto claro en la
+  franja op 0,54 (contraste de luz sólo 2,84:1); con el nuevo cruce el texto
+  oscuro cubre las celdas claras y el claro las oscuras, minimizando la banda
+  donde ninguno llegaba a 4,5:1 (la rampa bordeaux-alpha pasa por un centro
+  "embarrado" irreducible entre op 0,64-0,72; ambos colores ≥3,7:1 ahí).
+- **Heatmap**: nueva **leyenda de escala** dentro del SVG (`renderLegend`):
+  barra de 4 pastillas (op 0,06→0,94) con marcas 0 / mitad / máximo (real).
+  Comparte la escala raíz cuadrada de las celdas.
+- **Treemap** (`web/assets/js/visualizations/treemap.js`): nueva leyenda bajo
+  las migas con las 4 pastillas `ord-*` + gris `--sin-dato`, y texto que aclara
+  que el tono identifica la celda (no codifica magnitud) y que gris = sin datos.
+
+### CSS (token-only, en `modern-ui.css`)
+- `.heatmap-leyenda`, `.heatmap-ley-guia`, `.heatmap-ley-titulo`,
+  `.heatmap-ley-marca`, `.treemap-leyenda`, `.treemap-ley-titulo`,
+  `.treemap-ley-mostrar`, `.treemap-ley-sin`, `.treemap-ley-rotulo`.
+  Sólo referencias a tokens de `app.css`; sin hex propios.
+
+### Verificación
+- `node src/verify/run_all.mjs dist` → **sin fallos** (responsivo, higiene,
+  contraste, peso).
+- Sonda DOM: leyenda del heatmap con marcas 0/17/34 (máx real 34), pastillas
+  op 0,06→0,94; leyenda del treemap con 5 muestras; **desborde X = 0**.
+- `_rev_produccion.png` regenerada (422 KB).
+
+### Archivos tocados
+`web/assets/js/visualizations/heatmap.js`, `treemap.js`, `web/assets/css/modern-ui.css`,
+`SESSION_NOTES.md`.
+
+### Pendiente
+- Commit (aún sin commitear) de los 3 archivos de código + SESSION_NOTES.md.
+- Confirmación visual del usuario de que tanto leyendas como el heatmap corregido
+  se ven bien en claro y en oscuro.

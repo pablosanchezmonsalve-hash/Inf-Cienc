@@ -12,10 +12,12 @@
    `montarHeatmap()` es la única parte que toca el DOM.
 
    Escala de color: NO se introduce un tono nuevo. Se modula la opacidad de
-   `--accion-viva` (el mismo token que ya usa el resto del sitio para "dato
-   activo"), de modo que la intensidad se lee con el sistema cromático
-   existente en los dos temas, sin depender de una paleta secuencial nueva
-   que alguien tendría que validar aparte. */
+   `--serie-1` (el bordeaux del dato), no de `--accion-viva`: en la paleta H
+   `--accion-viva` es champagne (un acento claro), inadecuado como relleno de
+   magnitud sobre el fondo champán. La intensidad se lee entonces como
+   bordeaux sobre champán con el sistema cromático existente en los dos temas,
+   sin depender de una paleta secuencial nueva que alguien tendría que validar
+   aparte. */
 
 import { esSinDato } from '../core.js';
 
@@ -63,8 +65,44 @@ export function agregarMatriz(publicaciones, { campo = 'asjc', topN = 8 } = {}) 
 const MARGEN_IZQ = 210;  // ancho reservado para el nombre de categoría
 const MARGEN_SUP = 28;   // alto reservado para el año
 
+const LEGEND_X = MARGEN_IZQ;               // misma línea de salida que las celdas
+const LEGEND_SW = 22;                       // ancho de cada pastilla de la escala
+const LEGEND_H = 12;
+const LEGEND_GUTTER = 20;                   // separación vertical tras la última fila
+
+function renderLegend(maximo, ancho, baseY) {
+  // Leyenda de escala: deja claro qué codifica la intensidad sin forzar la
+  // lectura de opacidades. La escala es raíz cuadrada (como las celdas), así
+  // que la posición de cada marcador es el cuadrado del valor que representa.
+  const fila = n => n > 0 ? Math.sqrt(n / maximo) : 0;
+  const puntos = [
+    { t: '0',                f: 0 },
+    { t: nf.format(Math.ceil(maximo / 2)), f: fila(Math.ceil(maximo / 2)) },
+    { t: nf.format(maximo),  f: fila(maximo) },
+  ];
+  const pastillas = [0, .33, .66, 1].map((f, i) => {
+    const x = LEGEND_X + i * LEGEND_SW;
+    return `<rect x="${x}" y="${baseY + 2}" width="${LEGEND_SW}" height="${LEGEND_H}" rx="3"
+        fill="var(--serie-1)" fill-opacity="${(0.06 + f * 0.88).toFixed(3)}"/>`;
+  }).join('');
+
+  const lastX = LEGEND_X + LEGEND_SW * 3;
+  const marcas = puntos.map((p, i) => {
+    const x = LEGEND_X + p.f * (LEGEND_SW * 3);
+    const et = `<text x="${x}" y="${baseY + LEGEND_H + 14}" class="heatmap-ley-marca"
+        text-anchor="${i === 0 ? 'start' : (i === puntos.length - 1 ? 'end' : 'middle')}">${p.t}</text>`;
+    const guia = i === 0 || i === puntos.length - 1 ? '' : `<line x1="${x}" y1="${baseY + 2}" x2="${x}" y2="${baseY + LEGEND_H + 2}" class="heatmap-ley-guia"/>`;
+    return et + guia;
+  }).join('');
+
+  return `<g class="heatmap-leyenda" role="img" aria-label="Escala de 0 a ${nf.format(maximo)} publicaciones">
+    <text x="${LEGEND_X + LEGEND_SW * 3 + 8}" y="${baseY + LEGEND_H - 1}" class="heatmap-ley-titulo">publicaciones</text>
+    ${pastillas}${marcas}
+  </g>`;
+}
+
 export function renderHeatmap({ anios, categorias, matriz, maximo }, { ancho, altoFila = 34 } = {}) {
-  const alto = MARGEN_SUP + categorias.length * altoFila;
+  const alto = MARGEN_SUP + categorias.length * altoFila + LEGEND_GUTTER + LEGEND_H + 18;
   const anchoCol = Math.max(28, (ancho - MARGEN_IZQ) / Math.max(1, anios.length));
 
   const cabeceraAnios = anios.map((a, i) => {
@@ -88,9 +126,9 @@ export function renderHeatmap({ anios, categorias, matriz, maximo }, { ancho, al
           aria-label="${escapar(cat)}, ${anio}: ${nf.format(n)} publicaciones"
           data-tip="${escapar(cat)}" data-tip-v="${nf.format(n)} pub." data-tip-n="${anio}">
         <rect x="${x + 2}" y="${y + 3}" width="${anchoCol - 4}" height="${altoFila - 6}" rx="6"
-          fill="var(--accion-viva)" fill-opacity="${(0.06 + intensidad * 0.88).toFixed(3)}"/>
+          fill="var(--serie-1)" fill-opacity="${(0.06 + intensidad * 0.88).toFixed(3)}"/>
         ${n > 0 && anchoCol >= 30 ? `<text x="${x + anchoCol / 2}" y="${y + altoFila / 2 + 4}"
-          class="heatmap-cifra${intensidad > 0.55 ? ' es-clara' : ''}" text-anchor="middle">${n}</text>` : ''}
+          class="heatmap-cifra${intensidad > 0.66 ? ' es-clara' : ''}" text-anchor="middle">${n}</text>` : ''}
       </g>`;
     }).join('');
 
@@ -99,7 +137,7 @@ export function renderHeatmap({ anios, categorias, matriz, maximo }, { ancho, al
 
   return `<svg class="chart heatmap-svg" viewBox="0 0 ${ancho} ${alto}" role="img"
       aria-label="Frecuencia de temática ASJC por año">
-    ${cabeceraAnios}${filas}
+    ${cabeceraAnios}${filas}${renderLegend(maximo, ancho, MARGEN_SUP + categorias.length * altoFila + LEGEND_GUTTER)}
   </svg>`;
 }
 
