@@ -7110,3 +7110,121 @@ corregido, uno esperando decisión de diseño, uno fuera de alcance
 documentado). No proponer una solución para el Hallazgo 2 sin que el
 usuario decida primero qué debe significar "distintas" para un nombre
 con varios Scopus Author ID.
+
+## Cierre: revisión caso por caso del Hallazgo 2 (9 de 10 confirmados, 1 revertido a pendiente) y corrección del bug de búsqueda
+
+### Contexto
+
+El usuario pidió ver los 10 casos reales del Hallazgo 2 (población UFT)
+antes de decidir nada, y luego pidió revisarlos caso por caso antes de
+decidir — no aceptar el patrón "misma" uniforme con confianza ciega.
+
+### La revisión
+
+Para cada uno de los 10, se cruzó el/los Scopus Author ID contra el
+export crudo de Scopus (`Authors with affiliations`, que trae la
+afiliación ESPECÍFICA de esa persona en cada publicación, no la de todos
+los coautores) y se comparó: misma unidad académica exacta, mismo tema
+de investigación, entre los identificadores en conflicto.
+
+**9 de 10 — evidencia fuerte y consistente**: Castillo Oscar, De la
+Fuente López Marjorie, Gutiérrez Juan, Hartmann Schatloff Dan, Moreno
+Sergio, Quezada Mauricio, Rojas Dario, Rojas-Costa Gonzalo M., Torres
+Keila. En cada uno, ambos (o los varios) identificadores firman desde la
+MISMA unidad académica exacta Y sobre el MISMO tema de investigación —
+coincidencia por homonimia en ambos ejes a la vez es poco plausible.
+
+**1 de 10 — dispersión temática real**: Moya, Patricia. Un mismo
+identificador (57767862900) firma tanto "atención de urgencia por
+ideación suicida" (Salud Pública) como "determinantes de caries en
+preescolares" (Odontología) — mucho más dispersión que los otros 9. No
+se confirmó junto con el resto.
+
+**Verificación cruzada, no buscada a propósito**: al aplicar, "Castillo
+O." y "Hartmann Schatloff D." resultaron ya fusionados en el sitio con
+"Castillo-Valenzuela O." y "Hartmann D." respectivamente, vía una
+consolidación de variantes de nombre (P-03) decidida por separado. La
+unidad académica de esa ficha fusionada ("Escuela de Nutrición y
+Dietética, Facultad de Medicina y Salud" para Castillo) coincide
+exactamente con la afiliación que ya se había verificado para el caso
+P-04 — dos decisiones tomadas por caminos completamente distintos
+(consolidación de nombre vs. revisión de Scopus Author ID) llegan a la
+misma conclusión. No prueba nada por sí sola, pero es la clase de
+coincidencia que refuerza en vez de contradecir.
+
+### Aplicado
+
+Se corrigió PRIMERO el bug de búsqueda de ficha que el Hallazgo 2 ya
+había identificado (`nombre_en_fuente` en formato "Apellido, Nombre" vs.
+`perf` indexado por firma corta "Apellido N."): se agregó
+`_firma_corta_p04()` en `build_review.py`, copia deliberada y declarada
+de `_firma_corta()`/`id_by_short` de `04_author_population.py` (no
+importable directo: el módulo empieza con dígito). Verificado contra el
+HTML regenerado: las 10 firmas UFT ahora se vinculan a su ficha real; las
+10 que no están en la población siguen —correctamente— sin firma.
+
+Luego se actualizó `identity_decisions.csv`: los 9 casos confirmados
+recibieron la firma correcta y una nota con la evidencia específica
+revisada (afiliación + tema, no una frase genérica); Moya, Patricia se
+revirtió de "misma" a "pendiente" con nota explicando la dispersión
+temática que la deja fuera de este lote.
+
+### Lo que esto NO cambió, dicho con la misma honestidad que el hallazgo original
+
+Confirmado con `apply_decisions.py --dry-run`/real: "grupos consolidados"
+se mantuvo en 37 antes y después — los 9 "misma" no fusionaron ni
+separaron nada, exactamente como predijo el Hallazgo 2 (el mecanismo de
+fusión necesita 2 firmas por fila para formar un par; esta cola sólo
+puede dar 1). Lo que SÍ cambió: el registro ahora es preciso —firma
+correctamente vinculada, evidencia específica en vez de una nota vacía—,
+y la cola de pendientes subió de 128 a 129 (Moya, Patricia vuelve a
+estar genuinamente abierta, no falsamente resuelta).
+
+No se tocó el diseño del mecanismo de fusión (seguía siendo la pregunta
+sin responder del Hallazgo 2: qué debería hacer "distintas" aquí). Eso
+sigue pendiente de una decisión del usuario, no se resolvió con este
+cierre.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-365 | Se confirma "misma" para 9 de los 10 casos P-04 de la población UFT, con evidencia de afiliación+tema específica por caso | Revisión caso por caso solicitada explícitamente por el usuario, no un patrón aceptado en bloque |
+| D-366 | Moya, Patricia NO se confirma junto con el resto; se revierte a pendiente | Un mismo Scopus Author ID cubre dos temas de investigación bastante distintos — más dispersión que los otros 9, no alcanza el mismo nivel de evidencia |
+| D-367 | Se corrige la búsqueda de ficha de la cola P-04 (`_firma_corta_p04`) antes de aplicar las confirmaciones | Sin esto, la ficha real seguiría sin vincularse aunque el veredicto estuviera bien registrado — el Hallazgo 2 ya lo había identificado como bug de código, no de diseño |
+
+### Verificación
+
+`apply_decisions.py --test` (40/40), `build_all.py` (compuerta 0
+fallas, 538 fichas — sin cambio, como se predijo), `node
+src/verify/run_all.mjs` (6/6). Verificado manualmente que las 10 firmas
+UFT ahora aparecen en `CASOS` del HTML regenerado, y que las 9
+confirmadas + la revertida quedan correctamente reflejadas en
+`identity_decisions.csv` tras una relectura limpia.
+
+### Archivos modificados
+
+```
+src/review/build_review.py        _firma_corta_p04() + fix de búsqueda
+internal/identity_decisions.csv   9 filas confirmadas con evidencia,
+                                   1 revertida a pendiente
+config/orcid_revisado.yml,
+config/identidades_consolidadas.yml,
+data/enriched/authors_orcid.csv   regenerados (sin cambio sustantivo
+                                   por este cierre específico)
+```
+
+### Ambigüedades abiertas
+
+- El diseño del mecanismo de fusión para P-04 sigue sin resolver
+  (Hallazgo 2 original): qué debe hacer "distintas" aquí es una
+  decisión de modelo de datos, no tocada.
+- Moya, Patricia queda pendiente de revisión adicional.
+- Las de siempre.
+
+### Próximo paso recomendado
+
+Reportar al usuario: 9 confirmados con evidencia caso por caso, 1
+diferido con motivo claro, el bug de búsqueda corregido, y la aclaración
+honesta de que el mecanismo de fusión real sigue sin existir — esto deja
+el registro correcto, no la pregunta de diseño resuelta.

@@ -119,6 +119,20 @@ REFERENCIA_UNIDADES_AUTOARCHIVO: dict[str, str] = {
 }
 
 
+def _firma_corta_p04(nombre_completo: str) -> str:
+    """«Apellido, Nombre» -> «Apellido N.». Copia deliberada de
+    `_firma_corta()`/`id_by_short` en `src/audit/04_author_population.py`
+    (nombre de módulo empieza con dígito, no es importable directo). Si un
+    día dejan de coincidir, la cola «Varios Scopus ID» vuelve a no encontrar
+    ninguna ficha — exactamente el bug que esto corrigió."""
+    partes = nombre_completo.split(",")
+    corta = partes[0].strip()
+    if len(partes) > 1:
+        iniciales = "".join(p[0] + "." for p in partes[1].split() if p[:1].isalpha())
+        corta = f"{corta} {iniciales}".strip()
+    return corta
+
+
 def _json_para_script(obj) -> str:
     """JSON seguro para incrustar en <script>: json.dumps no escapa '</',
     así que un título o afiliación con "</script>" cerraría el bloque antes
@@ -811,7 +825,14 @@ def casos(d: dict, perf: dict) -> list[dict]:
     # ── Un nombre con varios Scopus Author ID (P-04): perfil fragmentado u homonimia.
     p04 = d["amb"][d["amb"].tipo.str.startswith("P-04")]
     for _, r in p04.iterrows():
-        f = perf.get(r["nombre_en_fuente"])
+        # `nombre_en_fuente` aquí es el nombre COMPLETO ("Apellido, Nombre"),
+        # no la firma corta ("Apellido N.") con la que se indexa `perf` —
+        # buscarlo tal cual fallaba SIEMPRE, para las 20 filas de esta cola,
+        # y las decisiones humanas quedaban con "firmas": [] sin que nada lo
+        # avisara (auditoría de sesión, 2026-09-02). Mismo cálculo que
+        # `id_by_short`/`_firma_corta` en 04_author_population.py — si un día
+        # deja de coincidir con ese, esta cola vuelve a romperse en silencio.
+        f = perf.get(_firma_corta_p04(r["nombre_en_fuente"]))
         # La auditoría ya midió dos cosas sobre este caso. Se usan para ordenar
         # la cola y para decir qué lecturas siguen en pie, nunca para decidir.
         uft = str(r.get("en_poblacion_uft", "True")) == "True"

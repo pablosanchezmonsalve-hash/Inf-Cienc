@@ -2,7 +2,7 @@
 
 **Generado** el 2026-09-02 por `src/review/build_review.py`. Regenerable.
 
-Quedan **128 casos** de 290. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **129 casos** de 290. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -47,7 +47,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Reccius A. → 0009-0004-3236-3030: ¿es suyo?](revision_identidad.html#caso-ver-reccius-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257 (Artículo de revista); 10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531 (Artículo de revista)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531 (Artículo de revista); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257 (Artículo de revista)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -887,6 +887,21 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 | Registro del titular en ORCID | <https://orcid.org/0000-0003-0402-5072> |
 | Buscar «Álvarez-Valdés C.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=%C3%81lvarez-Vald%C3%A9s%20C.> |
 | Perfil 57226107208 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57226107208> |
+
+---
+
+## Varios Scopus ID — 1 pendiente(s)
+
+### [Moya, Patricia](revision_identidad.html#caso-p04-moya-patricia)
+
+Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57767862900 · 60235456000
+
+| Comprobar en | Enlace |
+|---|---|
+| Registro del titular en ORCID | <https://orcid.org/0000-0002-8442-2571> |
+| Buscar «Moya P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Moya%20P.> |
+| Perfil 57767862900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57767862900> |
+| Perfil 60235456000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60235456000> |
 
 ---
 
