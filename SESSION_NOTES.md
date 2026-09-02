@@ -5904,3 +5904,89 @@ Facultad no rellena ese campo en todas las entradas.
 
 Decidir con el usuario si `AGENTS.md` se versiona. El contraste de la Facultad
 quedó cerrado como insumo documentado (D-347).
+
+## Sesión 2026-09-01 (noche) - Interactividad de la parte superior
+
+Contexto: el usuario declaró *"No me gusta la parte superior del sitio. Es poco
+interactiva"* (cabecera + barra de vigencia). Se aplicó criterio UX de fuentes
+confiables (USWDS, GOV.UK, RSS, NN/g): claridad > decoración, menos carga
+cognitiva, accesibilidad WCAG 2.2, progressive enhancement, feedback de estado
+visible. Objetivo: **usuario final del informe**.
+
+### Hallazgo estructural clave
+El header, la barra de vigencia y el pie **no son HTML por página**: los genera
+la función _sin DOM_ `cromo(meta, paginaActual)` en `web/assets/js/core.js`,
+compartida por los 10 HTML y usada por el pre-renderizador (Node) y por la
+hidratación (navegador). Mejorar la parte superior es tocar **un solo
+cuerpo de código** (core.js + app.css + paginas.js) que ya conoce
+`paginaActual` y `meta` — no hay 10 copias que sincronizar.
+
+### Mejoras implementadas (todas en `web/`, ninguna toca fuentes/de datos)
+1. **Nav agrupado por sección + colapsable.** `NAV_GRUPOS` (Informe / Datos /
+   Sobre este informe) con `navHtml()`. En banda ancha (≥900px) una sola fila sin
+   rótulos; en móvil/tablet se pliega tras un botón hamburguesa `.nav-toggle`
+   con `aria-expanded` y cierre al elegir sección. `overflow-x: auto`
+   eliminado → adiós doble barra de scroll interna.
+2. **Migas de posición en la barra.** `.v-migas` (Portada · {página}); en la
+   portada se suprime el par redundante («Portada → Portada») con CSS por
+   `data-pagina="portada"`. Clase propia para no chocar con el breadcrumb de
+   contenido de secciones (`.migas`, línea 508). No se duplica el H1: cada
+   página ya tiene uno propio (WCAG: no crear segundo H1 ni saltar niveles).
+3. **Chips de vigencia interactivos.** `Fuente` / `Ventana` / `Citas al` pasan
+   de texto plano a `<details class="v-chip">` nativo: despliegan un panel
+   explicativo de una línea, accesible por teclado y por móvil, sin JS.
+4. **Badge de recorte en vivo.** `.recorte-vivo` en la barra (slot oculto por
+   defecto). `paginas.js: actualizarRecorteVivo()` lo enciende al filtrar y lo
+   apaga al limpiar; vive en la barra de todas las páginas pero sólo se
+   rellena desde el explorador. Verificado: «Recorte 319 de 823 publicaciones».
+5. **Selector de año en la barra.** `.v-anio` (`<select id="recorte-anio">`),
+   oculto salvo en páginas explorador, que `montarSelectorAnio()` rellena con
+   los años reales del corpus y preselecciona el activo; al cambiar aplica el
+   recorte (mismo filtro que tocar el chip de año).
+6. **Mini-foco en portada.** Atajos de un toque `#minifoco` (Exploración
+   rápida): «Publicaciones {último año}» y «Ver todo» cuando hay recorte.
+   No duplican los filtros: son entradas rápidas que aplican el recorte vía el
+   cierre `fijar` (único dueño de `sel` y del repintado).
+
+Decisiones de integración:
+- El `<select>` del año y el `#minifoco` son **elementos estables**: el escucha
+  se engancha una vez (`.addEventListener`) y el contenido se redibuja con
+  `redibujarSelectorAnio()`/`redibujarMiniFoco()` en cada `pintar()`, evitando
+  manejadores acumulados.
+- `actual()`/`cambiar()` devuelven el recorte vigente en cada momento, para que
+  el handler nunca trabaje con un `sel` anticuado tras varios repintados.
+- Progressive enhancement íntegro: sin JS el `<details>` y las migas se leen
+  igual; el badge/select/mini-foco quedan `hidden`.
+- Print: `.nav-toggle`, `.v-migas`, `.v-chip`, `.recorte-vivo`, `.v-anio`,
+  `.minifoco` entran en la regla `@media print { display:none }`.
+
+### Verificación
+- `py src/build/06_assemble_site.py` → 10 páginas pre-renderizadas, capa interna
+  no incluida (verificado), peso 3548 KB.
+- `node src/verify/run_all.mjs dist` → **completa sin fallos** (contraste 0,
+  estructura 0, flujos 0 excepciones JS, responsive 0px desborde, higiene sin
+  fallos, peso dentro de techo).
+- Sonda Playwright dirigida (servidor persistente Node, puerto 8852) confirmó
+  en runtime: 3 grupos de nav, hamburguesa oculta en escritorio y `flex` +
+  abre+`aria-expanded` en móvil 480px, miga «Portada» en índice, chip
+  «Fuente Scopus · SciVal» con panel, `<select>` con 4 años poblado, mini-foco
+  visible, badge oculto sin filtro y **badge «Recorte 319 de 823» tras pulsar
+  el mini-foco**, botón «Ver todo» al haber recorte.
+- Capturas regeneradas (PNG, raíz repo, viewport 1440, fullPage): `_cap_*.png`
+  (9 páginas) + `_cap_index_recorte.png`. Ojo operativo: las capturas al
+  principio salieron en blanco porque el servidor de captura apuntaba a la raíz
+  del repo en vez de `dist/` (el `.html` no está en la raíz); se corrigió el
+  `root` del servidor. Servidor persistente en script Node, no `Start-Job`.
+
+### Pendientes (sin bloqueo)
+- `_cap_autor.png` es de una corrida anterior (90 KB); la ficha autor no se
+  volvió a capturar en esta pasada (no listada). Regenerarla si se quiere.
+- Decidido con el usuario: se implementaron **ambas** mejoras restantes
+  (selector de año + mini-foco). No queda ninguno de los 6 TODOs originales
+  abierto; solo queda cerrar con commit.
+- SESSION_NOTES del cierre de tramo previo (V2-28) ya documenta los 68 DOIs
+  como insumo documentado (D-346/D-347).
+
+### Próximo paso recomendado
+Revisar con el usuario las capturas (`explorer _cap_*.png`), confirmar el
+criterio visual, y hacer commit + push del refinement UX de la parte superior.
