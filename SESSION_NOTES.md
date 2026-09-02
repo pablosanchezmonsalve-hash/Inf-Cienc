@@ -5736,3 +5736,85 @@ Ninguna acción de código pendiente. Si se quiere, aplicar la mejora de
 `snapshot.py` para distinguir las dos cuentas de pendientes (identidad vs.
 cobertura), y decidir si `.gitignore`/`requirements.txt` deben tolerar pandas
 3.x alguna vez.
+
+---
+
+## Cierre · V2-27: recuperación y almacenamiento de las publicaciones del sitio de la Facultad de Medicina
+
+El usuario compartió `https://facultadmedicina.finis.cl/investigacion-y-postgrado/publicaciones/`
+y pidió «recuperar la información» y almacenarla, tras pedir primero el método.
+
+### El método investigado
+
+El sitio es **WordPress**. La API REST (`/wp-json`) está abierta, pero **no hay
+un custom post type de publicaciones** (el endpoint `/publicacion` da 404; los
+`types` listan sólo los estándar de WordPress). Todo el contenido vive como
+HTML incrustado en el `content` de **la página** `publicaciones`
+(id 10009) — la respuesta de
+`/wp-json/wp/v2/pages?slug=publicaciones&_fields=content` pesó ~950 KB e incluye
+los 609 registros completos. Conclusión de la investigación de la vía: **la API
+REST de la página es la fuente correcta**, en una sola respuesta, sin paginar.
+
+### Qué se construyó
+
+`src/enrich/facultad_medicina_publicaciones.py`: baja la página vía `wp-json`,
+parsea cada `<div class="sima-pub-item">` (badge índice, badge año, `<h4>`
+título, `<dl>` con Primer autor / Autor/a correspondencia / Autor/a UFT, enlace
+"Ver DOI"), deduce la sección del `<h2>` previo, normaliza el DOI a minúsculas
+y lo cruza contra `data/interim/publications_universe.csv`. Modos: `--test`
+(parsa una muestra local guardada, sin red), `--sin-red` (usa la muestra) y el
+modo por defecto (consulta la red).
+
+### Resultado de la corrida real
+
+- **609 registros** → 347 con DOI → **279 en el universo Scopus**.
+- Por sección: Medicina 554 (por año), Nutrición y Dietética 34, Libros 11,
+  Enfermería 10.
+- Medicina por año: 2025=136, 2024=114, 2023=75, 2021=66, 2020=29, 2019=32,
+  2018=26, 2017=23, 2016=20, 2015=15, 2022=9, 2014=6, 2013=3 — coincide
+  exactamente con los encabezados de la página.
+- Libros y buena parte de Enfermería/Nutrición **no traen DOI** (listados
+  textuales/obras editoriales), por eso el cruce sólo aplica casi en su
+  totalidad al bloque de Medicina (278 de 343 con DOI en universo).
+- **60 DOIs están repetidos** dentro de la página (el sitio lista varias
+  publicaciones dos veces, p. ej. Pharmacogenomics como #026 y #027) — observación
+  de calidad de la fuente, no un bug del parser; los registros se guardan crudos
+  y quien consuma decide deduplicar.
+
+### Almacenamiento (por capa)
+
+```
+data/enriched/facultad_medicina_publicaciones.json   registros estructurados (capa de datos externos)
+internal/facultad_medicina_cruce.csv                 cruce contra el universo markado (capa interna)
+src/enrich/facultad_medicina_publicaciones.py        extractor
+```
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-341 | El resultado se guarda como **referencia de contraste**, no como entrada de un corpus | `D-314`: confirmar que una obra es producción real UFT no la convierte en parte del universo — ampliarlo es una decisión de alcance aparte. Este cruce sólo clasifica en-universo / fuera, igual que la revisión de cobertura OpenAlex |
+| D-342 | `data/enriched/` (JSON) + `internal/` (CSV de cruce) en vez de `data/processed/` | No es un artefacto del pipeline (`STEPS` no lo consume): es fuente externa ingerida para contraste. El JSON estructurado va con los otros enriquecimientos externos (`authors_orcid.csv`, `scopus_api_consulta.json`); el CSV de cruce, a la capa interna |
+| D-343 | No se deduplica en el extractor; se guardan los 609 registros crudos | El sitio lista duplicados; borrarlos en el extractor ocultaría un dato de la fuente y forzaría una decisión (cuál queda) que no le toca a la ingesta decidir |
+
+### Verificación
+
+`--test` con la muestra local: 609 registros, campos correctos en un registro
+conocido por DOI, secciones Enfermería/Libros/Nutrición detectadas (sin red).
+Corrida real de red: misma cuenta 609/347/279. `pd.read_csv` del cruce línea a
+línea: coincide el `eid_scopus` con el universo.
+
+### Ambigüedades abiertas
+
+- Los 60 DOIs duplicados de la fuente: sin decidir cuál queda (D-343).
+- Los 68 registros con DOI que **no** están en el universo (347 − 279) son
+  candidatos a revisión de cobertura (producción real UFT fuera de Scopus o
+  error del listado) — podría enriquecerse igual que `V2-26` si se decide
+  mirarlos: es producción propia de la Facultad declarada por sí misma.
+- Las de siempre: `T-06`, `T-19`.
+
+### Próximo paso recomendado
+
+Decidir si los 68 con DOI fuera del universo merecen la misma herramienta de
+revisión que OpenAlex (cruzar contra Crossref por DOI, listado para una persona),
+o si el cruce ya aporta suficiente para el contraste que se buscaba.
