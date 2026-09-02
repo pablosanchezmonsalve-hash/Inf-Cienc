@@ -409,6 +409,23 @@ def veredictos_orcid(d: pd.DataFrame, vigente: dict[str, str]) -> dict:
         errores.append(f"«{f}» se declara a la vez con el ORCID correcto y con "
                        "el ORCID equivocado")
 
+    # «No encontrado en el registro» es ausencia de evidencia, no una
+    # afirmación sobre un ORCID concreto — no pesa lo mismo que «correcto» o
+    # «equivocado», que sí la tienen (D-341: convicción exige evidencia
+    # dispositiva). Por eso NO se trata como la misma clase de contradicción
+    # que conf∩ret: se desempata siempre a favor del veredicto con evidencia,
+    # sin importar el orden temporal en que se registraron. Encontrado real:
+    # «Dreyse J.» quedó en `sin_registro` (2026-08-26, búsqueda sin éxito) Y
+    # en `confirmadas` (2026-09-01, ORCID 0000-0002-8201-5956 con URL de
+    # respaldo) — dos filas reales de `identity_decisions.csv`, ninguna se
+    # borra (es historial), pero sólo una debe gobernar lo publicado.
+    for f in sorted((set(conf) | set(ret)) & set(sinreg)):
+        avisos.append(f"«{f}»: figura como «no encontrado en el registro» y "
+                       "también con un veredicto de ORCID correcto/equivocado "
+                       "con evidencia — prevalece este último; se descarta el "
+                       "«no encontrado»")
+        del sinreg[f]
+
     return {"confirmadas": conf, "retiradas": ret, "sin_registro": sinreg,
             "nuevas": nuevas, "errores": errores, "avisos": avisos}
 

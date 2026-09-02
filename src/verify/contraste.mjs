@@ -94,9 +94,12 @@ const medir = () => {
   });
 
   /* Objetos gráficos: barras, líneas de referencia, puntos de leyenda. Piso 3:1
-     contra la superficie sobre la que están dibujados (WCAG 1.4.11). */
+     contra la superficie sobre la que están dibujados (WCAG 1.4.11).
+     `rect.acum-pista` (el riel de fondo de acumulada(), I-05) faltaba aquí:
+     medía 1,21:1/1,08:1 sin que esta batería lo detectara nunca, porque su
+     selector no lo cubría — el mismo hueco que dejó pasar el caso real. */
   const graf = [];
-  document.querySelectorAll('svg.chart rect.barra, svg.chart circle').forEach(el => {
+  document.querySelectorAll('svg.chart rect.barra, svg.chart circle, svg.chart rect.acum-pista').forEach(el => {
     if (!el.getClientRects().length) return;
     const f = parse(getComputedStyle(el).fill) || parse(el.getAttribute('fill'));
     const trazo = parse(getComputedStyle(el).stroke);

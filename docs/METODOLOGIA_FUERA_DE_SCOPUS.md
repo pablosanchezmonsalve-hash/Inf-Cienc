@@ -4,7 +4,7 @@
 
 Este documento fija cómo se clasifica, construye y publica cualquier fuente de
 datos que no sea el corpus Scopus/SciVal. No reemplaza a `METHODOLOGY.md`
-—ese gobierna el corpus canónico— ni a `D-206`/`D-341` —esos ya establecen
+—ese gobierna el corpus canónico— ni a `D-206`/`D-398` —esos ya establecen
 que un corpus nuevo se publica aparte, con denominador propio, nunca fusionado
 al universo—. Responde la pregunta que esos textos dejan abierta: **cuando hay
 más de una fuente fuera de Scopus, ¿cómo se relacionan entre sí?**
@@ -90,7 +90,7 @@ nueva.
 
 La deduplicación en sí vive en el consumidor, no en el conector: el conector
 de Medicina no deduplica —conserva los 609 registros crudos tal como la
-fuente los declara (`D-343`, sesión V2-27: "borrarlos en el extractor
+fuente los declara (`D-400`, sesión V2-27: "borrarlos en el extractor
 ocultaría un dato de la fuente")—; es `09_produccion_declarada.py`, que sabe
 que va a publicar un recuento, quien deduplica por `(facultad, DOI)` antes
 de contar (`D-370`). Ingestar y contar son responsabilidades distintas; sólo
@@ -137,7 +137,7 @@ para todo lo que este documento describe.
   (`PD-02` u otro nombre). Ampliar lo que el sitio publica sigue siendo,
   por `D-206`/`D-16`, una decisión de alcance aparte, explícita y posterior,
   que le corresponde al usuario.
-- No reabre `D-206`, `D-313`, `D-314` ni `D-341`.
+- No reabre `D-206`, `D-313`, `D-314` ni `D-398`.
 - No cambia nada del corpus Scopus/SciVal ni de `METHODOLOGY.md`.
 - Es un marco para clasificar y aislar fuentes nuevas — no reemplaza a
   `docs/DECISIONS.md` como registro de qué se decidió y cuándo.
@@ -146,8 +146,8 @@ para todo lo que este documento describe.
 
 ## Referencias
 
-- `docs/DECISIONS.md` — `D-16`, `D-206`, `D-226`, `D-313`, `D-314`, `D-341`,
-  `D-343`, `D-370`.
+- `docs/DECISIONS.md` — `D-16`, `D-206`, `D-226`, `D-313`, `D-314`, `D-370`,
+  `D-398`, `D-400`.
 - `docs/V2_BACKLOG.md` §8 — la propuesta, todavía sin autorizar, de publicar
   el Nivel V.
 - `docs/DATA_MODEL.md` — «Corpus paralelo declarado (fuera de este modelo)».

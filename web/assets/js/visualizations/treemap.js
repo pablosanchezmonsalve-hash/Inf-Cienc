@@ -125,16 +125,24 @@ function colorDe(nombre, indice) {
     `.citas`, `.rect`. `nivel`: rótulo del nivel actual, para el `aria-label`
     ("Facultad" / "Escuela"), sólo texto, no cambia el dato. */
 export function renderTreemap(nodos, { ancho, alto, nivel = 'unidad', conHijos = () => false } = {}) {
+  // Un solo punto de tabulación para todo el mapa (la primera celda
+  // realmente dibujada — algunas se saltan por `w<=0||h<=0`), no una por
+  // celda: el mismo "veinte paradas de Tab" que las barras ya evitan
+  // (paginas.js, tecladoGraficos()), que recorre estas celdas con flechas
+  // generalizando el mismo mecanismo.
+  let primeraVisible = true;
   const celdas = nodos.map((n, i) => {
     const { x, y, w, h } = n.rect;
     if (w <= 0 || h <= 0) return '';
     const color = colorDe(n.nombre, i);
     const clicable = conHijos(n);
+    const tab = primeraVisible ? 0 : -1;
+    primeraVisible = false;
     const etiqueta = (w >= CABE_ETIQUETA && h >= 24)
       ? `<text x="${x + 8}" y="${y + 18}" class="treemap-etq">${escapar(n.nombre)}</text>
          ${h >= 42 ? `<text x="${x + 8}" y="${y + 34}" class="treemap-cifra">${nf.format(n.valor)}</text>` : ''}`
       : '';
-    return `<g class="treemap-nodo${clicable ? ' es-clicable' : ''}" tabindex="0"
+    return `<g class="treemap-nodo${clicable ? ' es-clicable' : ''}" tabindex="${tab}"
         role="${clicable ? 'button' : 'listitem'}"
         aria-label="${escapar(n.nombre)}: ${nf.format(n.valor)} publicaciones${n.citas != null ? `, ${nf.format(n.citas)} citas` : ''}${clicable ? '. Activar para ver el detalle' : ''}"
         data-tip="${escapar(n.nombre)}" data-tip-v="${nf.format(n.valor)} pub."

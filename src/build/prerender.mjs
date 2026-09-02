@@ -67,7 +67,6 @@ async function main() {
   // pre-renderizado y el que se repinta al filtrar no pueden divergir.
   const proc = vx.procedencias(series, meta);
   const { kpis } = await leerJSON('kpis.json');
-  const { ejes } = await leerJSON('ejes.json');
   const { publicaciones } = await leerJSON('publications.json');
   const catalogo = await leerJSON('catalogo.json');
   // Sólo lo usa C-05 (red de coautoría); el mismo mapa que arma el navegador
@@ -191,21 +190,6 @@ async function main() {
       const conOrcid = autoresOrcid.filter(a2 => a2.orcid).length;
       html = rellenar(html, 'orcid-cobertura',
         `${c.nf.format(conOrcid)} de ${c.nf.format(autoresOrcid.length)} formas de firma con ORCID`, a);
-      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
-    } else if (tipo === 'modulos') {
-      const codigos = (html.match(/id="modulos"[^>]*data-indicadores="([^"]+)"/) || [])[1]
-        ?.split(',').map(s => s.trim()) || [];
-      // El eje se identifica por el nombre del archivo, que ya es la clave de
-      // la sección. Si falta su panel en ejes.json, se aborta: una sección sin
-      // el aviso de qué NO responde es justo la que lo necesitaba.
-      const clave = archivo.replace(/\.html$/, '');
-      if (!ejes[clave]) {
-        console.error(`\nFALTA EL PANEL CONCEPTUAL de '${clave}' en ejes.json`);
-        process.exit(1);
-      }
-      const a = [];
-      html = rellenar(html, 'modulos',
-        v.paginaModulos(codigos, series, ejes[clave], await leerJSON('catalogo.json')), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     }
 

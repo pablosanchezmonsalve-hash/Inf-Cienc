@@ -1202,8 +1202,17 @@ svg.chart .barra.deficit,
 svg.chart .barra.superavit { fill: var(--serie-1); }
 
 /* Acumulada: la pista muestra el total contra el que se lee cada tramo, y la
-   línea vertical dice que un tramo está CONTENIDO en el siguiente. */
-svg.chart .acum-pista { fill: var(--red); }
+   línea vertical dice que un tramo está CONTENIDO en el siguiente. Antes
+   usaba `--red` (1,21:1 claro / 1,08:1 oscuro, medido con Chromium contra
+   `--superficie`): muy por debajo del piso 3:1 de WCAG 1.4.11 para objetos
+   gráficos, y `contraste.mjs` nunca lo medía porque su selector sólo cubre
+   `rect.barra`/`circle` — ver ese archivo para la ampliación de cobertura.
+   `--tinta-3` ya es un token validado (6,18:1 / 5,75:1 contra `--superficie`
+   en este mismo componente, medido) — se reutiliza en vez de inventar uno.
+   Sin opacidad reducida a propósito: medida con `opacity:.55` la mezcla baja
+   a 2,38:1/2,73:1 y vuelve a incumplir el piso — el mismo error que se
+   corrige aquí, evitado por no repetirlo. */
+svg.chart .acum-pista { fill: var(--tinta-3); }
 svg.chart .acum-nido {
   stroke: var(--linea-fuerte); stroke-width: 1.4; stroke-dasharray: 3 3; fill: none;
 }
@@ -1233,6 +1242,16 @@ svg.chart.red-svg .nodo-red:focus { outline: none; }
 svg.chart.red-svg .nodo-red:focus-visible circle.marca-nodo {
   stroke: var(--accion-viva); stroke-width: 2.6;
 }
+/* Fijar un nodo con clic o Intro: mismo patrón que `svg.chart.hay-foco
+   .marca`/`.marca.activa` (dimming al filtrar), aplicado aquí al par
+   nodo+coautores en vez de a la barra activa. `.en-foco` la ponen `data-red-nodo`
+   y sus `data-vecinos`, y las líneas `.vinculo` cuyo `data-a`/`data-b` coincide
+   con el nodo fijado — ver la interacción en paginas.js. */
+svg.chart.red-svg.hay-foco .nodo-red { opacity: .12; }
+svg.chart.red-svg.hay-foco .nodo-red.en-foco { opacity: 1; }
+svg.chart.red-svg.hay-foco .vinculo { opacity: .05; }
+svg.chart.red-svg.hay-foco .vinculo.en-foco { opacity: .95; stroke: var(--tinta); stroke-width: 1.5; }
+svg.chart.red-svg .nodo-red.en-foco circle.marca-nodo { stroke: var(--accion-viva); stroke-width: 2.6; }
 svg.chart.red-svg text.etiqueta-grupo {
   fill: var(--tinta-2);
   font: 650 10px var(--f-ui); letter-spacing: .06em; text-transform: uppercase;
@@ -1541,7 +1560,15 @@ svg.chart .trama { pointer-events: none; }
    las cifras son lo primero que se ve, y el contexto metodológico está a un
    clic en vez de ocupar la pantalla. */
 
-.explorador { display: grid; gap: var(--e5); }
+/* `min-width: 0` en el ítem de grid, no en `.explorador`: el mínimo implícito
+   de un ítem de grid/flex es el de su CONTENIDO (`min-width: auto`), no el de
+   su contenedor. Una faceta con una etiqueta larga sin punto de corte —«Facultad
+   de Arquitectura, Diseño y Estudios Creativos»— empujaba el panel entero a su
+   ancho de contenido (717px) aunque el viewport fuera de 430px: desborde
+   horizontal medido, no de estilo. El `.chip` en sí ya envuelve su texto (no
+   lleva `white-space: nowrap`); lo que faltaba era dejarlo encogerse primero. */
+.explorador { display: grid; gap: var(--e5); min-width: 0; }
+.explorador-panel { min-width: 0; }
 @media (min-width: 62rem) {
   /* Los controles a un lado y el resultado al otro: se ve la causa y el
      efecto a la vez. Apilados, cambiar un filtro movía el resultado fuera de
@@ -1734,7 +1761,7 @@ svg.chart .trama { pointer-events: none; }
    empujando el treemap lejos del resto de las métricas con un hueco de
    45vh. El contenedor de resultado sí es el último elemento en todas las
    páginas del explorador, con o sin Bento. */
-.explorador-resultado { padding-bottom: 45vh; }
+.explorador-resultado { padding-bottom: 45vh; min-width: 0; }
 
 /* Buscador dentro del panel de filtros: misma caja que las dimensiones. */
 .dim-busca { padding: var(--e3) var(--e4) var(--e4); margin-bottom: var(--e2); }

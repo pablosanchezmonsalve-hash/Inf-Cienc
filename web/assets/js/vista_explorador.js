@@ -156,10 +156,16 @@ export function grafico(pubs_sel, clave, titulo, forma, jerarquia) {
   if (!datos.length) {
     return `<p class="vacio">Ninguna publicación en este recorte.</p>`;
   }
+  // 'qs_area' y 'unidad' son multivaluados (MULTIVALUADO más abajo): una
+  // publicación puede aportar a varias barras, y sin la trama esta portada
+  // —la primera pantalla del sitio— dejaba leer las barras como si sumaran
+  // el total, justo lo que METHODOLOGY.md §6 prohíbe. `dibujar()`, que
+  // dibuja el mismo corte dentro de cada sección, ya lo hacía bien; esta
+  // vía paralela para la portada se había quedado atrás.
   return forma === 'barrasV'
     ? c.barrasV(datos.map(d => ({ anio: d.valor, n: d.n })),
         { titulo, etiquetaX: 'anio', etiquetaY: 'n' })
-    : c.barrasH(datos, { titulo });
+    : c.barrasH(datos, { titulo, trama: MULTIVALUADO.has(clave) });
 }
 
 /* Qué indicador dibuja cada corte de la portada. Los cortes de sección ya
@@ -207,10 +213,21 @@ function selloCorte(sub, campo, cod, proc) {
 }
 
 export function cortes(pubs_sel, proc, jerarquia) {
+  // El aviso de P-07 se reutiliza tal cual del corte de sección, en vez de
+  // escribirlo una segunda vez: dos textos para la misma advertencia
+  // metodológica divergen sin que nadie lo note (ver SESSION_NOTES.md sobre
+  // AU-01/AU-02/AU-03 duplicados). Se busca en vez de importarse aparte
+  // porque SECCIONES ya es la fuente de verdad de ese texto. (Definida
+  // dentro de la función, no al nivel del módulo: `SECCIONES` se declara
+  // más abajo en este mismo archivo.)
+  const avisoUnidad = SECCIONES.produccion.cortes.find(c2 => c2.campo === 'unidad')?.aviso || '';
   return CORTES.map(([clave, titulo, forma]) => `
     <section class="corte" data-corte="${clave}">
       <h3>${c.escapar(titulo)}</h3>
       <div class="grafico">${grafico(pubs_sel, clave, titulo, forma, jerarquia)}</div>
+      ${MULTIVALUADO.has(clave)
+        ? '<p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>' : ''}
+      ${clave === 'unidad' && avisoUnidad ? `<p class="nota">${c.escapar(avisoUnidad)}</p>` : ''}
       ${selloCorte(pubs_sel, clave, COD_PORTADA[clave], proc)}
     </section>`).join('');
 }

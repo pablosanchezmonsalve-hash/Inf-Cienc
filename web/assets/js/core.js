@@ -516,41 +516,6 @@ export function barrasV(datos, {
   </svg></div>`;
 }
 
-/** Anillo. Reservado a proporciones binarias, que es donde se lee bien. */
-export function anillo(datos, { titulo = '' } = {}) {
-  const total = datos.reduce((s, d) => s + d.n, 0) || 1;
-  const r = 58, grosor = 22, c = 2 * Math.PI * r;
-  let offset = 0;
-  const color = (d, i) => colorDe(d, i, 'serie');
-
-  const arcos = datos.map((d, i) => {
-    // Un hueco de 2 px de superficie entre segmentos: separa sin inventar color.
-    const len = Math.max(0, c * (d.n / total) - 2);
-    const seg = `<circle r="${r}" cx="72" cy="72" fill="none" stroke="${color(d, i)}"
-      stroke-width="${grosor}" stroke-linecap="butt"
-      stroke-dasharray="${len} ${c - len}" stroke-dashoffset="${-offset}"
-      transform="rotate(-90 72 72)"><title>${escapar(d.valor)}: ${nf.format(d.n)}</title></circle>`;
-    offset += c * (d.n / total);
-    return seg;
-  }).join('');
-
-  const mayor = datos.reduce((a, b) => (b.n > a.n ? b : a), datos[0]);
-  const centro = `
-    <text x="72" y="68" text-anchor="middle" class="valor" style="font-size:20px">
-      ${(100 * mayor.n / total).toFixed(1).replace('.', ',')} %</text>
-    <text x="72" y="85" text-anchor="middle" style="font-size:10px">${escapar(recortar(mayor.valor, 92, 10))}</text>`;
-
-  const leyenda = datos.map((d, i) =>
-    `<div><span class="punto" style="background:${color(d, i)}"></span>${escapar(d.valor)}:
-     <strong>${nf.format(d.n)}</strong> (${(100 * d.n / total).toFixed(1).replace('.', ',')} %)</div>`).join('');
-
-  return `<div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
-    <svg class="chart" viewBox="0 0 144 144" style="width:144px;flex:none" role="img"
-      aria-label="${escapar(titulo ? titulo + ' — gráfico de anillo' : 'Gráfico de anillo')}"
-      >${arcos}${centro}</svg>
-    <div class="leyenda" style="display:grid;gap:.4rem">${leyenda}</div></div>`;
-}
-
 /* ═══════════════════════════════════════════ red() — C-05, coautoría
 
    Cuarta primitiva, no una variante de las tres anteriores. Las otras tres
@@ -732,11 +697,19 @@ function svgRedNodos(D, activa, foco) {
     const enFoco = hayFoco && (a.a === foco || a.b === foco);
     let op = act ? (cruza ? .55 : .32) : .07;
     if (hayFoco) op = enFoco ? .95 : .05;
-    return `<line class="vinculo" x1="${p.x.toFixed(1)}" y1="${p.y.toFixed(1)}"
+    return `<line class="vinculo" data-a="${a.a}" data-b="${a.b}"
+      x1="${p.x.toFixed(1)}" y1="${p.y.toFixed(1)}"
       x2="${q.x.toFixed(1)}" y2="${q.y.toFixed(1)}"
       stroke="${enFoco ? 'var(--tinta)' : (cruza ? 'var(--tinta-3)' : 'var(--eje)')}"
       stroke-width="${enFoco ? 1.5 : (cruza ? .9 : .7)}" opacity="${op}"/>`;
   }).join('');
+  // Los primeros D.nav.length nodos (los de mayor grado, tope 90 — ver
+  // disponerRed) son los únicos que entran a la tabulación giratoria: son el
+  // conjunto que pasoTecladoRed()/la interacción cliente recorren con
+  // flechas. Un nodo fuera de ese tope sigue siendo clicable con mouse y
+  // legible por tooltip, pero no suma una parada de Tab más — el mismo
+  // criterio que ya evitó "veinte pulsaciones de Tab" en las barras.
+  const ordenNav = D.nav.map(e => e.i);
   const nodos = D.con.map(e => {
     const act = activa(e);
     const enFoco = hayFoco && (e.i === foco || vecinosFoco.has(e.i));
@@ -744,7 +717,10 @@ function svgRedNodos(D, activa, foco) {
     const esF = e.i === foco;
     const anillo = e.puente
       ? `<circle r="${(radioNodoRed(e) + 2.6).toFixed(2)}" fill="none" stroke="var(--tinta)" stroke-width="1.15" opacity=".75"/>` : '';
-    return `<g class="nodo-red" data-red-nodo="${e.i}" role="button" ${tipRed(e)}
+    const kNav = ordenNav.indexOf(e.i);
+    const tab = kNav === -1 ? '' : ` tabindex="${kNav === 0 ? 0 : -1}"`;
+    return `<g class="nodo-red" data-red-nodo="${e.i}" data-vecinos="${[...e.vec].join(',')}"
+        role="button"${tab} ${tipRed(e)}
         transform="translate(${e.x.toFixed(1)},${e.y.toFixed(1)})" opacity="${op}">
       ${anillo}<circle class="marca-nodo" r="${radioNodoRed(e)}" fill="${rellenoNodoRed(e)}"
         stroke="${esF ? 'var(--accion-viva)' : (sinUnidadRed(e) ? 'var(--tinta-3)' : 'var(--superficie)')}"
@@ -777,8 +753,8 @@ function svgRedNodos(D, activa, foco) {
     <text class="aislados-titulo" x="0" y="594">${D.ais.length} firmas con cero coautores internos — dato real, no ausencia</text>
   </g>`;
   return `<div class="grafico"><svg class="chart red-svg${hayFoco ? ' hay-foco' : ''}"
-      viewBox="0 0 ${D.W} ${Math.round(D.altura)}" role="img" tabindex="0"
-      aria-label="Red de coautoría interna: ${D.con.length} firmas conectadas en ${D.claves.length} grupos, ${D.ais.length} sin coautoría interna. Tabla equivalente debajo.">
+      viewBox="0 0 ${D.W} ${Math.round(D.altura)}" role="img" data-nav="${ordenNav.join(',')}"
+      aria-label="Red de coautoría interna: ${D.con.length} firmas conectadas en ${D.claves.length} grupos, ${D.ais.length} sin coautoría interna. Cada firma es un nodo enfocable con el tabulador y las flechas; Intro fija el foco en ella y sus coautores, Escape lo suelta. Tabla equivalente debajo.">
     ${defsTramaRed()}${lineas}${nodos}${sep}${cuadros}${etiquetas}
   </svg></div>`;
 }
@@ -874,25 +850,6 @@ export function red(D, forma, activa = () => true, foco = null) {
   if (forma === 'matriz') return svgRedMatriz(D, activa);
   if (forma === 'arcos') return svgRedArcos(D, activa);
   return svgRedNodos(D, activa, foco);
-}
-
-/** Navegación por teclado: un solo punto de tabulación para todo el gráfico,
-    flechas para recorrer las firmas dibujadas, Intro para fijar, Escape para
-    soltar. Devuelve el siguiente { kIdx, foco } o null si la tecla no es suya. */
-export function pasoTecladoRed(D, kIdx, focoActual, key) {
-  if (key === 'Escape') return { kIdx, foco: null };
-  let d = 0;
-  if (key === 'ArrowRight' || key === 'ArrowDown') d = 1;
-  if (key === 'ArrowLeft' || key === 'ArrowUp') d = -1;
-  if (d) {
-    const k = (kIdx + d + D.nav.length) % D.nav.length;
-    return { kIdx: k, foco: D.nav[k].i };
-  }
-  if (key === 'Enter' || key === ' ') {
-    const e = D.nav[kIdx];
-    return { kIdx, foco: focoActual === e.i ? null : e.i };
-  }
-  return null;
 }
 
 /* ═══════════════════════ formas elegidas por la RELACIÓN del dato

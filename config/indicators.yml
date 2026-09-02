@@ -191,4 +191,4 @@ indicadores:
   PD-01: {nombre: "Producción declarada por las Facultades, fuera de Scopus",
           categoria: declarado, publicar: true, confiabilidad: baja,
           solo_recuento: true, advertencia_destacada: true,
-          advertencia: "Recuento que cada Facultad declara en su propio sitio, no un índice bibliográfico: no aplica los criterios de cobertura de Scopus, y SciVal no lo mide — no tiene citas, FWCI ni ningún otro indicador de impacto. Nunca se suma al universo que construye el resto del sitio (D-206, D-341). Ver Producción ampliada."}
+          advertencia: "Recuento que cada Facultad declara en su propio sitio, no un índice bibliográfico: no aplica los criterios de cobertura de Scopus, y SciVal no lo mide — no tiene citas, FWCI ni ningún otro indicador de impacto. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}
