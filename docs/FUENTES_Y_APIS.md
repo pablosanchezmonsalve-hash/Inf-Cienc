@@ -246,6 +246,53 @@ indicador de citas/FWCI (D-206, D-398): "confirmado" aquí significa que un
 humano concluyó que la obra es producción real UFT fuera del corpus
 indexado, no que entra al corpus.
 
+### 2.8 Autoarchivo institucional — producción por unidad declarada (PD-03) — **publicado el 2026-09-02**
+
+Tercera fuente de `produccion-ampliada.html`, de otra naturaleza que §2.6 y
+§2.7: el usuario pidió sumar "todas [las Facultades], usando el
+repositorio institucional". El volcado DSpace (§2.4) no sirve para eso —su
+columna `collection` es un handle opaco, sin nombre de Facultad en ningún
+lado del export, verificado antes de descartarlo—, pero la hoja
+AUTOARCHIVOS que biblioteca cura (§2.5,
+`data/raw/Inventario_Repositorio_Autoarchivo.xlsx`) sí: 808 obras
+autoarchivadas por sus propios autores (artículo, capítulo, libro,
+ponencia — nunca tesis), cada una con DOI, año, título y la Facultad o
+Escuela que biblioteca le asignó, fila por fila, para toda la institución
+de una vez.
+
+El obstáculo real: ese campo de Facultad/Escuela viene EN BRUTO (§2.5 ya lo
+advertía). De los 35 valores distintos que trae, la mayoría no tiene una
+relación escuela→Facultad validada institucionalmente hoy —
+`config/matching_rules.yml` sólo confirma 5 escuelas en su `jerarquia`, más
+las que su `vocabulario` (regla I-07) resuelve directo a nivel de Facultad—.
+Nuevo conector `src/enrich/autoarchivo_produccion.py` reutiliza EXACTAMENTE
+esas dos funciones de producción (`canonical_academic_unit()` +
+`facultad_de()`, las mismas que ya usa `P-07`), más un puñado de alias
+explícitos y documentados uno por uno (dos, "Educación básica"/"Educación
+parvularia", tomados de `REFERENCIA_UNIDADES_AUTOARCHIVO` porque el usuario
+los confirmó DIRECTAMENTE contra finis.cl — el resto de esa referencia
+sigue marcada "sin verificar" y NO se usa aquí). Cada registro trae
+`unidad_declarada` (siempre) y `facultad` (sólo si está validada) por
+separado — nunca se fuerza la segunda a partir de la primera.
+
+**Resultado (2026-09-02):** 808 leídos, 7 duplicados colapsados por DOI,
+498 fuera del universo Scopus. De esas, 341 con Facultad validada (125 en
+la ventana 2023-2025 — la cifra que entra a `PD-03`) y 157 sin Facultad
+validada (57 en ventana), publicadas por unidad declarada en vez de
+adivinar a qué Facultad pertenecen — nunca ocultas.
+
+**Solapamiento real con §2.6 y §2.7, verificado antes de publicar el
+total:** Medicina aparece declarada en su propio sitio (PD-01) Y
+autoarchivada por sus autores (PD-03) — y algunas de las confirmaciones de
+V2-26 (PD-02) también están autoarchivadas. El total combinado de
+`produccion-ampliada.html` une las tres por DOI antes de sumar, exactamente
+por esto.
+
+`PD-03` es Nivel D para las filas con Facultad validada (declarado por
+biblioteca, no verificado obra por obra) según
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md` — mismo nivel que `PD-01`, fuente
+distinta.
+
 ---
 
 ## 3. Propuestas de nuevas integraciones

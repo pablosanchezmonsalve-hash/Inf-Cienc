@@ -118,11 +118,15 @@ def _leer_registros(spec: dict) -> tuple[list[dict], list[str]]:
     return validos, invalidos
 
 
-def _deduplicar(registros: list[dict]) -> tuple[list[dict], int]:
-    """Agrupa por (facultad, doi normalizado) entre los que TIENEN doi.
+def _deduplicar(registros: list[dict], clave_unidad=lambda r: r["facultad"]) -> tuple[list[dict], int]:
+    """Agrupa por (unidad, doi normalizado) entre los que TIENEN doi.
 
     Sin doi no hay clave confiable — esos registros nunca se deduplican
-    (se documenta como límite conocido, no se inventa una clave).
+    (se documenta como límite conocido, no se inventa una clave). `unidad`
+    es `facultad` por defecto (PD-01, siempre canónica); PD-03 pasa
+    `facultad or unidad_declarada` porque no todas sus filas tienen
+    Facultad validada, y dos filas de la MISMA unidad en bruto con el mismo
+    DOI siguen siendo el mismo duplicado que hay que colapsar.
     """
     con_doi, sin_doi = [], []
     for r in registros:
@@ -131,12 +135,16 @@ def _deduplicar(registros: list[dict]) -> tuple[list[dict], int]:
     vistos: dict[tuple[str, str], dict] = {}
     colapsados = 0
     for r in con_doi:
-        clave = (r["facultad"], str(r["doi"]).strip().lower())
+        clave = (clave_unidad(r), str(r["doi"]).strip().lower())
         if clave in vistos:
             colapsados += 1
             continue
         vistos[clave] = r
     return list(vistos.values()) + sin_doi, colapsados
+
+
+def _dois(registros: list[dict]) -> set[str]:
+    return {str(r["doi"]).strip().lower() for r in registros if r.get("doi")}
 
 
 def _anio_valido(r: dict, inicio: int, fin: int) -> str:
@@ -159,6 +167,16 @@ def _leer_openalex_cobertura() -> tuple[list[dict], bool]:
         return [], False
     with OPENALEX_COBERTURA.open(encoding="utf-8") as f:
         return list(csv.DictReader(f)), True
+
+
+AUTOARCHIVO_PRODUCCION = b.ROOT / "data" / "enriched" / "autoarchivo_produccion.json"
+
+
+def _leer_autoarchivo_produccion() -> tuple[list[dict], bool]:
+    """Filas de data/enriched/autoarchivo_produccion.json (PD-03), si existe."""
+    if not AUTOARCHIVO_PRODUCCION.exists():
+        return [], False
+    return json.loads(AUTOARCHIVO_PRODUCCION.read_text(encoding="utf-8")), True
 
 
 def main() -> None:
@@ -286,20 +304,100 @@ def main() -> None:
         ) if existe_oa else None,
     }
 
-    # ── Total combinado: unión por DOI entre PD-01 y PD-02 ──
-    # No es un tercer indicador con fuente propia: es la suma de los dos de
-    # arriba, restando lo que ambas fuentes ya declaran (verificado: 3 DOI
-    # del cierre V2-27 de Medicina coinciden con confirmaciones de V2-26).
-    dois_pd01 = {str(r["doi"]).strip().lower() for r in en_ventana if r.get("doi")}
-    dois_pd02 = {str(r["doi"]).strip().lower() for r in oa_en_ventana if r.get("doi")}
-    duplicados_entre_fuentes = len(dois_pd01 & dois_pd02)
+    # ── PD-03: producción autoarchivada en el repositorio institucional ──
+    # Tercera fuente, de otra naturaleza que PD-01 y PD-02: no es una
+    # Facultad declarando su sitio (PD-01) ni una API externa con revisión
+    # caso por caso (PD-02) — es la hoja AUTOARCHIVOS que biblioteca cura,
+    # con Facultad/Escuela declarada EN BRUTO fila por fila (ver docstring
+    # del módulo y de autoarchivo_produccion.py). Sólo las filas con
+    # `facultad` VALIDADA entran a la tabla Facultad × año y al total
+    # combinado; las que no, se cuentan aparte como `unidades_sin_mapeo`
+    # (transparencia, nunca ocultas, nunca forzadas a una Facultad).
+    filas_aa, existe_aa = _leer_autoarchivo_produccion()
+    dedup_aa, colapsados_aa = _deduplicar(
+        filas_aa, clave_unidad=lambda r: r.get("facultad") or r.get("unidad_declarada", ""))
+
+    en_universo_aa = [r for r in dedup_aa if r.get("en_universo_scopus")]
+    fuera_del_universo_aa = [r for r in dedup_aa if not r.get("en_universo_scopus")]
+
+    por_ventana_aa = defaultdict(list)
+    for r in fuera_del_universo_aa:
+        por_ventana_aa[_anio_valido(r, inicio, fin)].append(r)
+    aa_en_ventana = por_ventana_aa["en_ventana"]
+    aa_fuera_de_ventana = por_ventana_aa["fuera_de_ventana"]
+    aa_sin_anio = por_ventana_aa["sin_anio"]
+
+    aa_en_ventana_con_facultad = [r for r in aa_en_ventana if r.get("facultad")]
+    aa_en_ventana_sin_facultad = [r for r in aa_en_ventana if not r.get("facultad")]
+    fuera_universo_con_facultad_aa = [r for r in fuera_del_universo_aa if r.get("facultad")]
+
+    conteo_aa = Counter((r["facultad"], int(r["anio"])) for r in aa_en_ventana_con_facultad)
+    aa_por_facultad_anio = sorted(
+        ({"facultad": f, "anio": a, "n": n} for (f, a), n in conteo_aa.items()),
+        key=lambda x: (x["facultad"], x["anio"]),
+    )
+
+    conteo_sin_mapeo = Counter(r["unidad_declarada"] for r in aa_en_ventana_sin_facultad)
+    aa_unidades_sin_mapeo = sorted(
+        ({"unidad_declarada": u, "n": n} for u, n in conteo_sin_mapeo.items()),
+        key=lambda x: (-x["n"], x["unidad_declarada"]),
+    )
+
+    resumen_aa = {
+        "total_leido": len(filas_aa),
+        "duplicados_colapsados_por_doi": colapsados_aa,
+        "en_universo_scopus": len(en_universo_aa),
+        "fuera_del_universo": len(fuera_del_universo_aa),
+        "con_facultad_validada": len(fuera_universo_con_facultad_aa),
+        "en_ventana_con_facultad": len(aa_en_ventana_con_facultad),
+        "en_ventana_sin_facultad": len(aa_en_ventana_sin_facultad),
+        "fuera_de_ventana": len(aa_fuera_de_ventana),
+        "sin_anio": len(aa_sin_anio),
+    }
+
+    autoarchivo_produccion = {
+        "disponible": existe_aa,
+        "fuente": {
+            "nombre": b.SOURCES.get("autoarchivo_biblioteca", {}).get("nombre"),
+            "conector": "src/enrich/autoarchivo_produccion.py",
+        },
+        "resumen": resumen_aa,
+        "por_facultad_anio": aa_por_facultad_anio,
+        "unidades_sin_mapeo": aa_unidades_sin_mapeo,
+        "nota": b.nota("PD-03"),
+        "procedencia": b.procedencia(
+            "PD-03",
+            cubiertas=len(aa_en_ventana_con_facultad),
+            n=len(fuera_universo_con_facultad_aa),
+            unidad="publicaciones autoarchivadas",
+            corte=b.SOURCES.get("autoarchivo_biblioteca", {}).get("fecha_export"),
+        ) if existe_aa else None,
+    }
+
+    # ── Total combinado: unión por DOI entre PD-01, PD-02 y PD-03 ──
+    # No es un cuarto indicador con fuente propia: es la suma de los tres de
+    # arriba, restando lo que más de una fuente ya declara (verificado: hay
+    # solapamiento real entre las tres, no sólo entre pares — Medicina
+    # aparece declarada en su propio sitio Y autoarchivada por sus autores).
+    dois_pd01 = _dois(en_ventana)
+    dois_pd02 = _dois(oa_en_ventana)
+    dois_pd03 = _dois(aa_en_ventana_con_facultad)
+    union_dois = dois_pd01 | dois_pd02 | dois_pd03
+    sin_doi_pd01 = sum(1 for r in en_ventana if not r.get("doi"))
+    sin_doi_pd02 = sum(1 for r in oa_en_ventana if not r.get("doi"))
+    sin_doi_pd03 = sum(1 for r in aa_en_ventana_con_facultad if not r.get("doi"))
+    total_en_ventana = len(union_dois) + sin_doi_pd01 + sin_doi_pd02 + sin_doi_pd03
+    duplicados_entre_fuentes = (
+        len(en_ventana) + len(oa_en_ventana) + len(aa_en_ventana_con_facultad) - total_en_ventana
+    )
 
     total_fuera_de_scopus = {
-        "en_ventana": len(en_ventana) + len(oa_en_ventana) - duplicados_entre_fuentes,
+        "en_ventana": total_en_ventana,
         "pd01_en_ventana": len(en_ventana),
         "pd02_en_ventana": len(oa_en_ventana),
+        "pd03_en_ventana": len(aa_en_ventana_con_facultad),
         "duplicados_entre_fuentes": duplicados_entre_fuentes,
-    } if (fuentes_meta or existe_oa) else None
+    } if (fuentes_meta or existe_oa or existe_aa) else None
 
     salida = {
         "meta": b.build_meta(),
@@ -317,12 +415,14 @@ def main() -> None:
             corte=fecha_ejecucion_mas_reciente,
         ) if fuentes_meta else None,
         "openalex_cobertura": openalex_cobertura,
+        "autoarchivo_produccion": autoarchivo_produccion,
         "total_fuera_de_scopus": total_fuera_de_scopus,
     }
     b.write_json(salida, "produccion_declarada.json")
 
-    if not fuentes_meta and not existe_oa:
-        print("  ninguna fuente declarada (config/sources.yml) ni internal/openalex_cobertura.csv")
+    if not fuentes_meta and not existe_oa and not existe_aa:
+        print("  ninguna fuente declarada: ni config/sources.yml, ni "
+              "internal/openalex_cobertura.csv, ni data/enriched/autoarchivo_produccion.json")
         print("  OK · data/processed/produccion_declarada.json (vacío, sin fuentes)")
         return
 
@@ -350,10 +450,23 @@ def main() -> None:
         print("\n  PD-02: falta internal/openalex_cobertura.csv (correr "
               "src/enrich/openalex_cobertura.py)")
 
+    if existe_aa:
+        print(f"\n  Autoarchivo leído   : {len(filas_aa)} ({colapsados_aa} duplicados colapsados)")
+        print(f"  fuera del universo  : {len(fuera_del_universo_aa)}")
+        print(f"    con Facultad validada, en ventana {inicio}-{fin} : {len(aa_en_ventana_con_facultad)}")
+        print(f"    sin Facultad validada, en ventana {inicio}-{fin}: {len(aa_en_ventana_sin_facultad)}"
+              " (no se cuentan por Facultad)")
+        print(f"    fuera de ventana                        : {len(aa_fuera_de_ventana)}")
+        print(f"    sin año                                 : {len(aa_sin_anio)}")
+    else:
+        print("\n  PD-03: falta data/enriched/autoarchivo_produccion.json (correr "
+              "src/enrich/autoarchivo_produccion.py)")
+
     if total_fuera_de_scopus:
         print(f"\n  TOTAL fuera de Scopus, en ventana: {total_fuera_de_scopus['en_ventana']}"
               f"  ({len(en_ventana)} PD-01 + {len(oa_en_ventana)} PD-02"
-              f" - {duplicados_entre_fuentes} en ambas)")
+              f" + {len(aa_en_ventana_con_facultad)} PD-03"
+              f" - {duplicados_entre_fuentes} repetidas entre fuentes)")
 
     print("\n  OK · data/processed/produccion_declarada.json")
 

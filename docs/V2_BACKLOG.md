@@ -224,14 +224,31 @@ apartado que indique la producción total fuera de Scopus"):
   (`config/indicators.yml`) dice, en prosa, que cada caso pasa por
   revisión humana antes de contarse.
 - El total combinado de la página (`total_fuera_de_scopus`) une por DOI
-  `PD-01` y `PD-02`: 3 DOI del cierre V2-27 de Medicina coinciden con
-  confirmaciones de V2-26, y se restan una sola vez.
+  todas las fuentes fuera de Scopus (ver `PD-03` abajo): el solapamiento
+  real se resta antes de sumar, no se cuenta dos veces la misma obra.
 - La evidencia independiente de Crossref (`V2-26 bis`) y la revisión de los
   294 autores restantes **siguen sin resolver** — `PD-02` sólo cuenta lo ya
   confirmado hoy, y crecerá a medida que la revisión avance (correr de
   nuevo `09_produccion_declarada.py` después de aplicar más decisiones en
   `apply_openalex_review.py`).
 
-Ver `src/build/09_produccion_declarada.py`, `docs/FUENTES_Y_APIS.md` §2.7 y
-`docs/METODOLOGIA_FUERA_DE_SCOPUS.md` (marco Nivel D/Nivel V; `PD-01` es
-Nivel D, `PD-02` es Nivel V).
+**Segunda ronda, mismo día:** el usuario pidió, además, sumar "todas [las
+Facultades], usando el repositorio institucional" — implementado como
+`PD-03`, tercera fuente de otra naturaleza que `PD-01`/`PD-02`: la hoja de
+autoarchivo que biblioteca cura (`data/raw/Inventario_Repositorio_Autoarchivo.xlsx`),
+para TODA la institución a la vez. Su Facultad/Escuela viene en bruto por
+fila; `src/enrich/autoarchivo_produccion.py` (nuevo) resuelve a Facultad
+canónica sólo donde esa relación está validada institucionalmente
+(reutilizando `common.canonical_academic_unit()`/`facultad_de()`, las
+mismas funciones que `P-07`), y publica el resto por unidad declarada, sin
+forzar ninguna Facultad sin validar. Resultado: 808 leídos → 498 fuera del
+universo → 341 con Facultad validada (125 en ventana 2023-2025, la cifra
+que entra al total) + 157 sin Facultad validada (57 en ventana, publicadas
+aparte, nunca ocultas). El total combinado de la página pasó a unir las
+TRES fuentes por DOI: hay solapamiento real entre las tres, no sólo entre
+pares (Medicina aparece declarada en su propio sitio Y autoarchivada por
+sus autores).
+
+Ver `src/build/09_produccion_declarada.py`, `docs/FUENTES_Y_APIS.md` §2.7
+(`PD-02`) y §2.8 (`PD-03`), y `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` (marco
+Nivel D/Nivel V; `PD-01` y `PD-03` son Nivel D, `PD-02` es Nivel V).

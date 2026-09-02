@@ -74,11 +74,11 @@ Se modelan y quedan vacíos, con la razón explícita. No se omiten del esquema.
 ## Corpus paralelo declarado (fuera de este modelo)
 
 `data/processed/produccion_declarada.json` no es parte del diagrama de
-arriba: agrega DOS fuentes de otra naturaleza que el resto del modelo, cada
-una fuera del universo Scopus/SciVal y ninguna unida jamás a `Publicacion`
-ni a ningún indicador de este modelo — mezclar criterios de indexación
-distintos sin declararlo sería exactamente el error que este proyecto evita
-(D-206, D-398):
+arriba: agrega TRES fuentes de otra naturaleza que el resto del modelo,
+cada una fuera del universo Scopus/SciVal y ninguna unida jamás a
+`Publicacion` ni a ningún indicador de este modelo — mezclar criterios de
+indexación distintos sin declararlo sería exactamente el error que este
+proyecto evita (D-206, D-398):
 
 - `PD-01` (clave `por_facultad_anio`): recuento agregado (Facultad × año) de
   publicaciones que una Facultad declara en su propio sitio. Nivel D
@@ -89,8 +89,17 @@ distintos sin declararlo sería exactamente el error que este proyecto evita
   humano confirmó caso por caso (V2-26) que el universo no tiene. Nivel V
   (verificado por revisión humana, no por fuente independiente). Ver
   `docs/FUENTES_Y_APIS.md` §2.7, `internal/openalex_cobertura.csv`.
+- `PD-03` (clave `autoarchivo_produccion`): recuento agregado (Facultad ×
+  año) de publicaciones que sus propios autores autoarchivaron en el
+  repositorio institucional. Nivel D, pero con un límite propio: la
+  Facultad/Escuela declarada por biblioteca viene en bruto, así que sólo se
+  agrega por Facultad donde esa relación está validada
+  (`config/matching_rules.yml`); el resto se publica por unidad declarada,
+  en `unidades_sin_mapeo`, nunca forzado a una Facultad. Ver
+  `docs/FUENTES_Y_APIS.md` §2.8, `data/enriched/autoarchivo_produccion.json`.
 
-La clave `total_fuera_de_scopus` es la unión por DOI de las dos — aritmética
-sobre PD-01 y PD-02, no un tercer indicador con fuente propia. Ver
-`docs/METODOLOGIA_FUERA_DE_SCOPUS.md` para el marco general de niveles de
-evidencia.
+La clave `total_fuera_de_scopus` es la unión por DOI de las tres —
+aritmética sobre PD-01, PD-02 y PD-03, no un cuarto indicador con fuente
+propia; hay solapamiento real entre las tres (verificado, no asumido) y se
+resta antes de sumar. Ver `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` para el
+marco general de niveles de evidencia.
