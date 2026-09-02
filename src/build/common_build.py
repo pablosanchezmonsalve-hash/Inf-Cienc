@@ -445,6 +445,10 @@ FUENTE_POR_INDICADOR = {
     # declarando su propia lista, es OpenAlex confirmado por revisión humana
     # caso por caso (V2-26).
     "PD-02": "OpenAlex, confirmado por revisión humana (no Scopus)",
+    # PD-03: repositorio institucional (autoarchivo curado por biblioteca),
+    # cubre todas las Facultades a la vez — no una API externa ni el sitio
+    # de una sola Facultad.
+    "PD-03": "Repositorio institucional, autoarchivo (no Scopus)",
 }
 
 

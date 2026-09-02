@@ -316,16 +316,18 @@ fuentes:
     archivo: "data/raw/Inventario_Repositorio_Autoarchivo.xlsx"
     formato: "xlsx"
     hoja: "AUTOARCHIVOS"
-    conector: "src/enrich/autoarchivo_uft.py"
-    rol: "verificación y candidatos de ORCID; candidatos EN BRUTO de Facultad/Escuela"
+    conector: "src/enrich/autoarchivo_uft.py, src/enrich/autoarchivo_produccion.py"
+    rol: "verificación y candidatos de ORCID; candidatos EN BRUTO de Facultad/Escuela; corpus paralelo declarado (PD-03) para las relaciones YA validadas"
     aporta:
       - contraste_de_orcid_ya_asignado_contra_una_obra_propia
       - candidatos_de_orcid_por_nombre_para_firmas_sin_ninguno
       - candidatos_de_facultad_o_escuela_para_no_determinada_sin_traducir_al_vocabulario
+      - produccion_declarada_por_unidad_fuera_del_corpus_scopus_pd_03
     salida: >-
       data/interim/autoarchivo_verificacion.csv,
       internal/autoarchivo_candidatos.csv,
-      internal/autoarchivo_unidad_candidatos.csv
+      internal/autoarchivo_unidad_candidatos.csv,
+      data/enriched/autoarchivo_produccion.json
     fecha_export: "2026-09-01"       # fecha en que el usuario entregó el archivo
     n_registros_leido: 808
     entregado_por: "responsable del proyecto (sesión 2026-09-01)"
@@ -338,7 +340,12 @@ fuentes:
       dato que `dspace_repositorio` no tiene. Ese campo se declara EN BRUTO
       («Medicina», «CIDOC», etc., sin traducir a `config/matching_rules.yml`):
       traducirlo a la jerarquía oficial es el mismo trabajo institucional que
-      exigió `T-02`, y este conector no lo hace por su cuenta. Las dos
+      exigió `T-02`. `autoarchivo_produccion.py` (2026-09-02) SÍ lo traduce,
+      pero SÓLO para las relaciones que ya están validadas (jerarquía
+      confirmada, vocabulario I-07, o las dos entradas de
+      `REFERENCIA_UNIDADES_AUTOARCHIVO` que el usuario confirmó contra
+      finis.cl) — el resto de las ~35 cadenas EN BRUTO se publica por
+      unidad declarada, nunca forzado a una Facultad sin validar. Las dos
       fuentes pueden confirmarse o contradecirse entre sí (`Arroyo A.`
       aparece contradicho en ambas, con el mismo ORCID alternativo en las
       dos — evidencia cruzada, no una casualidad).

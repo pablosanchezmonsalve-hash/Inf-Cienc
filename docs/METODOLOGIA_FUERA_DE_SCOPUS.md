@@ -14,8 +14,9 @@ más de una fuente fuera de Scopus, ¿cómo se relacionan entre sí?**
 ## 0. Por qué hace falta esto ahora
 
 Hasta el 2026-09-01 "fuera de Scopus" tenía un solo caso real. Ya no: existen
-dos fuentes con esa etiqueta y son **metodológicamente incompatibles** entre
-sí, aunque las dos respeten `D-206`:
+tres fuentes con esa etiqueta, publicadas en el mismo día, y son
+**metodológicamente incompatibles** entre sí, aunque las tres respeten
+`D-206`:
 
 - `PD-01` (publicado): la Facultad de Medicina y Salud autodeclara su propio
   listado de publicaciones en su sitio. El proyecto no verifica cada título
@@ -27,13 +28,19 @@ sí, aunque las dos respeten `D-206`:
   apellido ya presente en el corpus, corroboración independiente de Crossref
   cuando existe— se cuentan aquí. Las que siguen sin revisión (394) se
   publican como cifra de transparencia, nunca como producción confirmada.
+- `PD-03` (publicado el 2026-09-02, misma autorización): la hoja de
+  autoarchivo que biblioteca cura, para TODA la institución a la vez —no
+  una sola Facultad como `PD-01`—. Mismo Nivel D que `PD-01` (biblioteca
+  declara, el proyecto no reverifica obra por obra), pero con un límite
+  propio: la Facultad/Escuela viene en bruto por fila, y sólo una parte de
+  esas cadenas tiene una relación escuela→Facultad validada
+  institucionalmente. Ver §1 (Regla 2, nota sobre granularidad parcial).
 
-Si un tercer origen (SciELO, un segundo listado de otra Facultad, un
-repositorio institucional) se agrega sin este marco, el riesgo concreto es
-que alguien —humano o Claude, en una sesión futura sin este contexto—
-termine sumando ambos tipos de evidencia bajo el mismo indicador, o
-reinventando desde cero una distinción que ya se resolvió una vez. Este
-documento existe para que eso no pase.
+Si un cuarto origen (SciELO, un segundo listado de otra Facultad) se agrega
+sin este marco, el riesgo concreto es que alguien —humano o Claude, en una
+sesión futura sin este contexto— termine sumando distintos tipos de
+evidencia bajo el mismo indicador, o reinventando desde cero una distinción
+que ya se resolvió una vez. Este documento existe para que eso no pase.
 
 ## 1. El eje que importa: nivel de evidencia por obra
 
@@ -45,16 +52,27 @@ institución declarados?**
 | | Nivel D — Declarado | Nivel V — Verificado obra por obra |
 |---|---|---|
 | **Qué certifica** | La fuente agrega/publica un conjunto; el proyecto no re-verifica cada título individualmente | Cada registro pasa un criterio explícito antes de contar |
-| **Ejemplo real** | `PD-01` — Facultad de Medicina y Salud | `PD-02` — cola OpenAlex, `internal/openalex_cobertura.csv` (`V2-26`) |
+| **Ejemplo real** | `PD-01` — Facultad de Medicina y Salud; `PD-03` — autoarchivo institucional | `PD-02` — cola OpenAlex, `internal/openalex_cobertura.csv` (`V2-26`) |
 | **Estado** | Publicado (`produccion-ampliada.html`) | Publicado (`produccion-ampliada.html`, `PD-02`, desde 2026-09-02) |
-| **Mecanismo de "cuenta"** | `corpus_paralelo_declarado: true` en `config/sources.yml` + `09_produccion_declarada.py` | `internal/openalex_cobertura_decisiones.csv` (veredicto humano) → `apply_openalex_review.py` → `resolucion: CONFIRMADO_PRODUCCION_UFT` → agregado por año en `09_produccion_declarada.py` |
-| **Cifras reales (2026-09-02)** | 609 leídos → 63 duplicados por DOI colapsados → 325 fuera del universo Scopus → 83 en ventana 2023-2025 (cifra publicada), 222 fuera de ventana + 20 sin año (nota de transparencia) | 414 candidatos → 20 confirmados (`CONFIRMADO_PRODUCCION_UFT`), 394 `PENDIENTE_REVISION_HUMANA` — ninguno se promueve solo (`D-313`) |
+| **Mecanismo de "cuenta"** | `corpus_paralelo_declarado: true` en `config/sources.yml` + `09_produccion_declarada.py` (`PD-01`); lectura directa de `data/enriched/autoarchivo_produccion.json` en el mismo build, agregada sólo donde la Facultad está validada (`PD-03`) | `internal/openalex_cobertura_decisiones.csv` (veredicto humano) → `apply_openalex_review.py` → `resolucion: CONFIRMADO_PRODUCCION_UFT` → agregado por año en `09_produccion_declarada.py` |
+| **Cifras reales (2026-09-02)** | `PD-01`: 609 leídos → 63 duplicados por DOI colapsados → 325 fuera del universo Scopus → 83 en ventana 2023-2025 (cifra publicada), 222 fuera de ventana + 20 sin año. `PD-03`: 808 leídos → 7 duplicados colapsados → 498 fuera del universo → 341 con Facultad validada (125 en ventana, cifra publicada) + 157 sin Facultad validada (57 en ventana, publicadas por unidad declarada, nunca forzadas) | 414 candidatos → 20 confirmados (`CONFIRMADO_PRODUCCION_UFT`), 394 `PENDIENTE_REVISION_HUMANA` — ninguno se promueve solo (`D-313`) |
 | **Corroboración cruzada** | Ninguna prevista: es la propia institución declarando | Crossref, cuando el DOI existe (`internal/openalex_cobertura_crossref.csv`) — refuerza, no reemplaza la revisión humana |
 
 Mezclar estos dos niveles bajo un mismo número sería el mismo error que
 `METHODOLOGY.md` §3 y §4 ya evitan dentro del corpus canónico —presentar
 certidumbres distintas como si fueran la misma medición— aplicado ahora a lo
 que queda fuera de él.
+
+**Matiz que `PD-03` agrega, dentro del mismo Nivel D**: "declarado" no
+significa "siempre agregable a Facultad". `PD-01` viene de UNA Facultad que
+declara su propio sitio — su granularidad (Facultad × año) nunca está en
+duda. `PD-03` viene de biblioteca, para toda la institución, con la unidad
+en bruto por fila — la granularidad SÍ varía según cuánto de esa cadena
+esté validado. Esto no es un tercer nivel de evidencia (la pregunta de la
+§1 sigue siendo la misma: nadie reverifica la obra, sólo la unidad
+declarada), es un límite de COMPLETITUD dentro del mismo Nivel D, y se
+resuelve igual que cualquier otro límite conocido en este proyecto: se
+declara, nunca se oculta ni se fuerza (ver Regla 2 abajo).
 
 ## 2. Las reglas
 
@@ -71,15 +89,26 @@ nada sin esta clasificación escrita.
 Fuentes del **mismo** nivel comparten mecanismo; fuentes de niveles
 **distintos** nunca lo comparten, aunque ambas digan "fuera de Scopus".
 
-Ya construido para Nivel D: la bandera `corpus_paralelo_declarado: true` +
-`09_produccion_declarada.py` descubren genéricamente cualquier fuente de
-este nivel. Una segunda Facultad que publique su propio listado se integra
-agregando su entrada a `sources.yml` con la misma bandera y un conector que
-siga el esquema documentado en `facultad_medicina_publicaciones.py` —cero
-cambios en `src/build/`. Una fuente Nivel V no puede enchufarse ahí: necesita
-su propio mecanismo de cola y su propio criterio de "confirmado", porque el
-nivel de evidencia por registro es cualitativamente distinto, no un dato más
-en la misma tabla.
+Ya construido para Nivel D con Facultad SIEMPRE canónica: la bandera
+`corpus_paralelo_declarado: true` + `09_produccion_declarada.py` descubren
+genéricamente cualquier fuente de este tipo. Una segunda Facultad que
+publique su propio listado se integra agregando su entrada a `sources.yml`
+con la misma bandera y un conector que siga el esquema documentado en
+`facultad_medicina_publicaciones.py` —cero cambios en `src/build/`.
+
+`PD-03` es Nivel D pero NO tiene Facultad siempre canónica (ver el matiz de
+§1), así que NO usa ese mismo mecanismo — forzar su esquema habría exigido
+que `_leer_registros()`/`_deduplicar()` de `PD-01` aceptaran `facultad`
+vacía, mezclando dos contratos distintos en una sola función. Vive como su
+propio bloque en `09_produccion_declarada.py`, con su propia deduplicación
+(por unidad-o-Facultad + DOI) y su propia partición (con Facultad validada
+/ sin ella). Una tercera fuente de este tipo —otro inventario con unidad en
+bruto— seguiría el mismo patrón que `PD-03`, no el de `PD-01`.
+
+Una fuente Nivel V no puede enchufarse en ninguno de los dos: necesita su
+propio mecanismo de cola y su propio criterio de "confirmado", porque el
+nivel de evidencia por registro es cualitativamente distinto, no un dato
+más en la misma tabla.
 
 ### Regla 3 — Evidencia cruzada refuerza, nunca duplica
 
@@ -101,14 +130,18 @@ la segunda decide qué es un duplicado.
 ### Regla 4 — Cada nivel, su propio indicador
 
 Nunca combinar Nivel D y Nivel V bajo una etiqueta compartida como "fuera de
-Scopus", aunque los dos respeten `D-206`. `PD-01` (Nivel D) y `PD-02` (Nivel
-V, cola OpenAlex + Crossref) son la instancia concreta de esta regla — ya
-declarada en `docs/V2_BACKLOG.md` §8. Publicados como dos indicadores
+Scopus", aunque las tres respeten `D-206`. `PD-01`/`PD-03` (Nivel D) y `PD-02`
+(Nivel V, cola OpenAlex + Crossref) son la instancia concreta de esta regla —
+ya declarada en `docs/V2_BACKLOG.md` §8. Publicados como tres indicadores
 separados, cada uno con su propia sección en `produccion-ampliada.html`;
-`PD-02` nunca es una fila más dentro de `PD-01`. El único punto en que se
-tocan es el total combinado de la página (`total_fuera_de_scopus`), que es
-la unión por DOI de los dos — aritmética declarada sobre ambos indicadores,
-no un tercero con fuente propia.
+ninguno es una fila más dentro de otro — ni siquiera `PD-01` y `PD-03`,
+que comparten nivel: son fuentes distintas (una Facultad declarando su
+sitio; biblioteca curando autoarchivo institucional), con mecanismos de
+"cuenta" distintos (ver Regla 2), y mezclarlas en una sola tabla ocultaría
+esa diferencia. El único punto en que se tocan las tres es el total
+combinado de la página (`total_fuera_de_scopus`), que es la unión por DOI
+de las tres — aritmética declarada sobre los tres indicadores, no un cuarto
+con fuente propia.
 
 ### Regla 5 — El denominador del universo no se toca, en ningún nivel
 
@@ -146,8 +179,15 @@ para todo lo que este documento describe.
   `09_produccion_declarada.py` y `produccion-ampliada.html`; ver
   `docs/FUENTES_Y_APIS.md` §2.7. Esta sección se deja como registro de que
   la autorización fue explícita, no implícita ni asumida.
-- No reabre `D-206`, `D-313`, `D-314` ni `D-398`: `PD-02` sigue sin tocar
-  `publications_universe.csv` ni ningún indicador de citas/FWCI.
+- **Segunda actualización, mismo día**: el usuario pidió, además, sumar
+  "todas [las Facultades], usando el repositorio institucional" — otra
+  decisión de alcance aparte y explícita, distinta de la anterior.
+  Implementada como `PD-03` (autoarchivo institucional, Nivel D con el
+  límite de granularidad de §1): sólo se agrega por Facultad donde esa
+  relación está validada institucionalmente; el resto se publica por
+  unidad declarada. Ver `docs/FUENTES_Y_APIS.md` §2.8.
+- No reabre `D-206`, `D-313`, `D-314` ni `D-398`: ni `PD-02` ni `PD-03`
+  tocan `publications_universe.csv` ni ningún indicador de citas/FWCI.
 - No cambia nada del corpus Scopus/SciVal ni de `METHODOLOGY.md`.
 - Es un marco para clasificar y aislar fuentes nuevas — no reemplaza a
   `docs/DECISIONS.md` como registro de qué se decidió y cuándo.
@@ -157,15 +197,22 @@ para todo lo que este documento describe.
 ## Referencias
 
 - `docs/DECISIONS.md` — `D-16`, `D-206`, `D-226`, `D-313`, `D-314`, `D-370`,
-  `D-398`, `D-400`, y la decisión de autorización de `PD-02` (2026-09-02).
+  `D-398`, `D-400`, y las decisiones de autorización de `PD-02`/`PD-03`
+  (2026-09-02).
 - `docs/V2_BACKLOG.md` §8 — la propuesta de publicar el Nivel V, autorizada
   y cerrada el 2026-09-02.
 - `docs/DATA_MODEL.md` — «Corpus paralelo declarado (fuera de este modelo)».
-- `docs/FUENTES_Y_APIS.md` §2.6 (Nivel D, `PD-01`) y §2.7 (Nivel V, `PD-02`).
+- `docs/FUENTES_Y_APIS.md` §2.6 (Nivel D, `PD-01`), §2.7 (Nivel V, `PD-02`)
+  y §2.8 (Nivel D con límite de granularidad, `PD-03`).
 - `config/sources.yml` → `facultad_medicina_publicaciones`,
-  `corpus_paralelo_declarado`, `openalex_api`.
+  `corpus_paralelo_declarado`, `openalex_api`, `autoarchivo_biblioteca`.
 - `src/build/09_produccion_declarada.py` — mecanismo genérico de Nivel D
-  (`PD-01`) y agregación de Nivel V (`PD-02`) en un mismo build.
+  (`PD-01`), agregación de Nivel V (`PD-02`), y bloque propio para Nivel D
+  con granularidad parcial (`PD-03`), en un mismo build.
 - `src/review/build_openalex_review.py`, `src/review/apply_openalex_review.py`
   — mecanismo de cola de Nivel V; su `resolucion: CONFIRMADO_PRODUCCION_UFT`
   alimenta `PD-02`.
+- `src/enrich/autoarchivo_produccion.py` — reutiliza
+  `common.canonical_academic_unit()`/`common.facultad_de()` (las mismas
+  funciones que `P-07`) para resolver `PD-03` a Facultad sólo donde esa
+  relación está validada.

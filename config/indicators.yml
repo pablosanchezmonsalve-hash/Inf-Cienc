@@ -203,3 +203,14 @@ indicadores:
           categoria: declarado, publicar: true, confiabilidad: baja,
           solo_recuento: true, advertencia_destacada: true,
           advertencia: "OpenAlex atribuye a la institución obras que el universo Scopus no tiene; cada candidato se confirma con revisión humana caso por caso (V2-26) antes de contarse — nunca automáticamente, y los que aún no se revisaron no se cuentan. No tiene citas, FWCI ni ningún otro indicador de impacto: SciVal no lo mide. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}
+
+  # Repositorio institucional (hoja de autoarchivo que cura biblioteca):
+  # cubre TODAS las Facultades a la vez, a diferencia de PD-01 (una sola,
+  # su propio sitio). La Facultad/Escuela viene EN BRUTO por obra — sólo se
+  # agrega por Facultad cuando la relación escuela->facultad está validada
+  # institucionalmente (config/matching_rules.yml); el resto se publica por
+  # unidad declarada, nunca forzado a una Facultad.
+  PD-03: {nombre: "Producción autoarchivada en el repositorio institucional, fuera de Scopus",
+          categoria: declarado, publicar: true, confiabilidad: baja,
+          solo_recuento: true, advertencia_destacada: true,
+          advertencia: "Obras que sus propios autores autoarchivaron en el repositorio institucional, con la Facultad o Escuela que biblioteca les asignó. Se agrega por Facultad sólo cuando esa relación está validada institucionalmente; el resto se cuenta por separado, por unidad declarada, nunca forzado a una Facultad que no está confirmada. No tiene citas, FWCI ni ningún otro indicador de impacto: SciVal no lo mide. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}

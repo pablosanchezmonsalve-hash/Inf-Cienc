@@ -8190,3 +8190,186 @@ responder porque el usuario redirigió el pedido), el mecanismo
 tocar `src/build/`: sólo hace falta un conector que siga el esquema
 documentado en `facultad_medicina_publicaciones.py` y su entrada en
 `config/sources.yml`.
+
+---
+
+## Cierre: `PD-03` — el repositorio institucional cubre todas las Facultades, con la unidad en bruto por fila
+
+### Contexto
+
+La pregunta original que el cierre anterior dejó abierta ("agreguemos el
+listado de otra Facultad") volvió: **"dale, avancemos con el listado de
+otra Facultad"**. Se preguntó, vía `AskUserQuestion`, cuál Facultad y de
+dónde saldría su fuente (otro sitio con la misma API de WordPress, o un
+archivo) — con el aviso explícito de que el acceso a
+`facultadmedicina.finis.cl` desde este entorno seguía bloqueado (probado
+con `curl`, `CONNECT tunnel failed, response 403`, mismo hallazgo que la
+sesión que corrió ese conector por primera vez). El usuario contestó, en
+texto libre, algo distinto de las opciones ofrecidas: **"Todas. Utiliza el
+repositorio institucional"** y **"Documentación repositorio institucional"**.
+
+### Investigación antes de escribir código
+
+"Repositorio institucional" nombra, literalmente, la fuente
+`dspace_repositorio` de `config/sources.yml`. Verificado (no asumido) antes
+de diseñar nada:
+
+- El volcado DSpace (`data/raw/Inventario_Repositorio_Institucional_UFT.csv`,
+  3.271 filas, 154 columnas) **no tiene Facultad usable**: `collection` es
+  un handle opaco (`20.500.12254/2311`, sin nombre en ningún lado del
+  export) y `dc.uft.carrera` está vacía en 3.267 de 3.271 filas. Mezcla
+  además tesis (464 filas) con producción académica real —a diferencia de
+  la hoja de autoarchivo, que sólo trae artículo/capítulo/libro/ponencia.
+- `autoarchivo_biblioteca` (`data/raw/Inventario_Repositorio_Autoarchivo.xlsx`,
+  hoja AUTOARCHIVOS, 808 filas) **sí sirve**: trae DOI (806/808), año
+  (808/808), título y la Facultad o Escuela que biblioteca asignó a cada
+  obra, fila por fila, para toda la institución — pero ese campo de
+  Facultad/Escuela viene declarado EN BRUTO, exactamente como
+  `config/sources.yml` ya advertía desde antes de esta sesión.
+
+De los 35 valores distintos que trae ese campo, la mayoría no tiene una
+relación escuela→Facultad validada institucionalmente hoy:
+`config/matching_rules.yml` sólo confirma 5 escuelas en su `jerarquia`
+(Kinesiología, Nutrición y Dietética, Enfermería, Ciencias de la Familia,
+Ingeniería Civil Industrial), más las que su `vocabulario` (regla I-07,
+validado el 2026-08-26) resuelve directo a nivel de Facultad (Medicina,
+Odontología, Psicología, Derecho, Arquitectura, Historia). Forzar el resto
+—CIDOC, CIPEF, Formación General, Periodismo, Literatura, Filosofía,
+Publicidad, Ingeniería comercial, Ingeniería civil informática, Diseño,
+Arte, y otro puñado más chico— a una Facultad adivinada habría sido
+inventar una relación institucional, exactamente lo que `CLAUDE.md`
+prohíbe. `REFERENCIA_UNIDADES_AUTOARCHIVO` (`src/review/build_review.py`,
+de una sesión anterior) ya marcaba casi todos esos casos "fuente externa,
+sin verificar en finis.cl directamente" — sólo dos ("Educación básica",
+"Educación parvularia") están confirmados ahí DIRECTAMENTE contra finis.cl.
+
+### Qué se construyó
+
+Nuevo conector `src/enrich/autoarchivo_produccion.py`: por cada fila,
+`unidad_declarada` (la cadena en bruto, siempre) y `facultad` (sólo si la
+relación está validada, si no cadena vacía — nunca inferida). La resolución
+reutiliza EXACTAMENTE `common.canonical_academic_unit()` +
+`common.facultad_de()` de `src/audit/common.py` — las mismas dos funciones
+que ya usa `P-07` en producción, no una copia nueva — más un puñado de
+alias explícitos y documentados uno por uno: dos truncados de escuelas ya
+confirmadas ("Nutrición"→Nutrición y Dietética, "Familia"→Ciencias de la
+Familia) y los dos ÚNICOS casos de `REFERENCIA_UNIDADES_AUTOARCHIVO`
+confirmados contra finis.cl. El DOI de esta hoja es texto libre (decenas de
+valores tipo "artículo sin doi"/"libro no tiene doi" en la misma columna,
+no un campo estructurado): se validó por forma (`10\.\d{4,9}/\S+`), no sólo
+por "no vacío" — de otro modo esas frases se habrían contado como DOI
+reales.
+
+`src/build/09_produccion_declarada.py` gana un tercer bloque, `PD-03`, que
+NO reutiliza el mecanismo `corpus_paralelo_declarado` de `PD-01` (que exige
+Facultad siempre canónica): lee `autoarchivo_produccion.json` directo,
+deduplica por `(facultad o unidad_declarada, DOI)`, separa
+`en_universo_scopus`/ventana igual que `PD-01`, y agrega por Facultad × año
+SÓLO entre las filas con Facultad validada. Las filas sin Facultad validada
+(57 en ventana) se cuentan aparte, por unidad declarada, en su propia
+tabla de transparencia — nunca ocultas, nunca forzadas.
+
+**Verificado antes de publicar el total, no asumido:** hay solapamiento
+real entre las tres fuentes, no sólo entre pares — Medicina aparece
+declarada en su propio sitio (`PD-01`) Y autoarchivada por sus propios
+autores (`PD-03`), y algunas confirmaciones de V2-26 (`PD-02`) también
+están autoarchivadas. El total combinado (`total_fuera_de_scopus`) pasó de
+unir 2 fuentes por DOI a unir 3, restando 19 apariciones repetidas entre
+ellas antes de sumar: **209** = 83 (`PD-01`) + 20 (`PD-02`) + 125 (`PD-03`)
+− 19.
+
+`vista.js::produccionDeclarada()` gana una tercera subsección
+("Autoarchivada en el repositorio institucional"), con dos tablas: Facultad
+× año (sólo unidades validadas) y unidad declarada × N (sin Facultad
+validada) — la segunda tabla es la parte más importante de este cierre
+metodológicamente: dice explícitamente, con cifras reales, cuánto de este
+corpus NO se pudo agregar por Facultad y por qué, en vez de forzarlo o
+callarlo. `PD-03` en `config/indicators.yml` (categoría `declarado`,
+`solo_recuento: true`).
+
+### Verificación
+
+`python3 src/enrich/autoarchivo_produccion.py --test` (11 casos, incluye
+el mapeo válido/no-válido y la validación de forma del DOI) +
+`python3 src/audit/run_all.py` (29/30, misma falla preexistente E-06,
+no relacionada) + `build_all.py` (build 09 imprime los tres bloques y el
+total: "209 (83 PD-01 + 20 PD-02 + 125 PD-03 - 19 repetidas entre fuentes)")
++ `06_assemble_site.py` (`produccion-ampliada.html` 16.2 KB, sin avisos) +
+`node run_all.mjs` (6/6). Captura Playwright en claro/oscuro: las tres
+secciones se ven completas, con la tabla de unidades sin mapeo visible y
+cero errores de consola. `indicadores.html` lista `PD-03` bajo "Producción
+declarada (fuera de Scopus)" con fuente "Repositorio institucional,
+autoarchivo (no Scopus)".
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-419 | El volcado DSpace (`dspace_repositorio`) no se usa para `PD-03`; se usa `autoarchivo_biblioteca` en su lugar | Verificado que DSpace no tiene Facultad usable (`collection` es un handle opaco, `dc.uft.carrera` vacía en 99,9% de las filas) y mezcla tesis con producción académica; autoarchivo trae Facultad/Escuela, DOI, año y título por fila, y sólo producción académica |
+| D-420 | La resolución de Facultad para `PD-03` reutiliza `common.canonical_academic_unit()`/`facultad_de()` (las mismas funciones de `P-07`) más un alias explícito de 5 casos ya validados en sesiones anteriores; el resto de las ~35 unidades en bruto NO se mapea | Cualquier mapeo nuevo, no reutilizado de una fuente ya validada institucionalmente, habría sido inventar una relación escuela→Facultad — la misma regla que `REFERENCIA_UNIDADES_AUTOARCHIVO` ya aplicaba distinguiendo "confirmado contra finis.cl" de "fuente externa sin verificar" |
+| D-421 | Las publicaciones autoarchivadas sin Facultad validada (57 en ventana) se publican por unidad declarada en bruto, en su propia tabla, nunca forzadas a una Facultad ni ocultas | Mismo principio que "fuera de ventana"/"pendientes de revisión" en `PD-01`/`PD-02`: un límite de cobertura se declara, no se disimula agregando de más o quedándose callado |
+| D-422 | El total combinado de la página pasa de unión por DOI de 2 fuentes a unión de 3 (`PD-01`+`PD-02`+`PD-03`) | Verificado antes de publicar: hay solapamiento real entre las tres, no sólo entre pares (Medicina declarada Y autoarchivada); sumar sin deduplicar habría contado la misma obra hasta tres veces |
+
+### Archivos modificados
+
+```
+src/enrich/autoarchivo_produccion.py   nuevo — conector, mapeo validado, --test
+src/build/09_produccion_declarada.py   bloque PD-03, _deduplicar() generalizado
+                                        con clave_unidad, total de 3 fuentes
+config/indicators.yml                  PD-03 (categoría declarado, solo_recuento)
+src/build/common_build.py              FUENTE_POR_INDICADOR["PD-03"]
+config/sources.yml                     autoarchivo_biblioteca: conector/aporta/salida
+                                        actualizados con el nuevo uso
+web/assets/js/vista.js                 produccionDeclarada(): subsección PD-03,
+                                        total combinado a 3 fuentes
+docs/FUENTES_Y_APIS.md                 §2.8 nueva
+docs/DATA_MODEL.md                     "Corpus paralelo declarado" describe las 3
+docs/METODOLOGIA_FUERA_DE_SCOPUS.md    matiz de granularidad parcial dentro de
+                                        Nivel D; Regla 2/4 actualizadas
+docs/V2_BACKLOG.md                     §8 ampliada con la segunda ronda
+data/enriched/autoarchivo_produccion.json  nuevo — salida real del conector
+STATE.md, docs/DECISIONS.md            regenerados
+```
+
+### Supuestos descartados
+
+- Que el volcado DSpace serviría para esto sin más trabajo: verificado que
+  no tiene Facultad usable antes de intentar construir nada sobre él.
+- Que agrupar los ~35 valores en bruto por parecido de nombre ("Psicología"
+  suena a Educación, "Arquitectura" suena a Arquitectura y Diseño") bastaba
+  para publicarlos como Facultad: descartado — sólo cuenta lo que YA está
+  validado en otro archivo del proyecto (jerarquia, vocabulario I-07,
+  finis.cl confirmado), nada nuevo se validó en esta sesión por primera vez.
+- Que "Arte" (5 filas) era lo mismo que "Facultad de Artes Visuales" del
+  vocabulario: descartado por no ser una variante exacta — queda sin
+  mapear, igual que "Diseño".
+- Que el total combinado sólo necesitaba deduplicar PD-01 contra PD-02 (ya
+  hecho en el cierre anterior): descartado al verificar que PD-03 también
+  solapa con ambas — la unión se generalizó a las tres fuentes, no se
+  agregó PD-03 como una suma directa.
+
+### Ambigüedades abiertas
+
+- Las 57 publicaciones sin Facultad validada (y las 199 de todo el
+  historial de la hoja, dentro y fuera de ventana) quedan sin resolver:
+  traducir "CIDOC"/"Periodismo"/"Arquitectura"/etc. a la jerarquía oficial
+  sigue siendo el mismo trabajo institucional que exigió `T-02`, y esta
+  sesión no lo hizo por su cuenta — sólo reutilizó lo que ya estaba
+  confirmado.
+- La pregunta que el cierre "Producción ampliada" original planteaba —el
+  listado propio de OTRA Facultad en su propio sitio, como `PD-01`— sigue
+  sin responder: `facultadmedicina.finis.cl` fue el único caso probado, y
+  el acceso de red a `finis.cl` sigue bloqueado desde este entorno. El
+  mecanismo `corpus_paralelo_declarado` sigue listo para recibirla cuando
+  exista.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Si se quiere aumentar la cobertura de
+`PD-03` por Facultad, el paso siguiente es institucional, no técnico:
+alguien con autoridad para confirmarlo debe decidir a qué Facultad
+pertenecen las ~30 unidades que hoy quedan sin mapeo (empezando por las de
+mayor volumen: Ingeniería civil informática, Ingeniería comercial,
+Formación General, CIDOC, Periodismo, CIPEF, Diseño) y agregar esa
+confirmación a `config/matching_rules.yml` — este conector la recogería
+sin cambios de código, igual que ya recoge las que sí están validadas.

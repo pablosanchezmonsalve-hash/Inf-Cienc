@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `35e0e35` · Revisa los 128 pendientes de identidad con evidencia real: 46 confirma
+Último commit: `4ccec18` · Publica PD-02: la cola de cobertura OpenAlex confirmada por revisión h
 Snapshot: 2026-09-02
 
 ---
@@ -37,8 +37,8 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **328** | sin consolidar · `data/enriched/authors_orcid.csv` |
 | Entidades con ORCID | **275** | tras consolidación humana · **la que sirve el sitio** |
-| Indicadores evaluados | **42** | `config/indicators.yml` |
-| Indicadores publicados | **30** | `config/indicators.yml`, `publicar: true` |
+| Indicadores evaluados | **43** | `config/indicators.yml` |
+| Indicadores publicados | **31** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 418
+## Decisiones tomadas: 422
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

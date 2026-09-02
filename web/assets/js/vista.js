@@ -153,37 +153,46 @@ export function catalogo(cat) {
     ${secciones}`;
 }
 
-/** Producción ampliada: dos fuentes, de naturaleza distinta, de producción
+/** Producción ampliada: tres fuentes, de naturaleza distinta, de producción
     fuera del corpus indexado en Scopus — nunca mezcladas en los gráficos
     de producción/impacto del resto del sitio, y por eso viven en su propia
     página con su propio marcado, no reutilizando `RENDER`/`kpiCarta` de
     los indicadores Scopus/SciVal.
 
     PD-01 es lo que cada Facultad declara editorialmente en su propio
-    sitio. PD-02 es lo que OpenAlex atribuye a la institución y un humano
-    confirmó caso por caso (V2-26) — evidencia de otro tipo, sin Facultad
-    declarada, así que va en su propia subsección con su propia tabla por
-    año, no mezclada en la tabla Facultad × año de PD-01.
+    sitio (hoy sólo Medicina). PD-02 es lo que OpenAlex atribuye a la
+    institución y un humano confirmó caso por caso (V2-26). PD-03 es lo
+    que sus propios autores autoarchivaron en el repositorio institucional,
+    con la Facultad o Escuela que biblioteca les asignó — cubre TODAS las
+    Facultades a la vez, pero esa unidad viene en bruto: sólo se agrega por
+    Facultad cuando la relación está validada institucionalmente
+    (`config/matching_rules.yml`); el resto se cuenta aparte, por unidad
+    declarada, nunca forzado a una Facultad sin validar. Ninguna de las
+    tres declara Facultad de la misma forma que otra, así que cada una va
+    en su propia subsección, no mezclada en la tabla de otra.
 
     Los párrafos de transparencia (fuera de ventana / sin año / pendientes
-    de revisión) se componen aquí desde los datos — nunca una cifra escrita
-    a mano — porque ocultarlos habría sido tan engañoso como mezclarlos en
-    un gráfico Scopus. */
+    de revisión / sin Facultad validada) se componen aquí desde los datos —
+    nunca una cifra escrita a mano — porque ocultarlos habría sido tan
+    engañoso como mezclarlos en un gráfico Scopus. */
 export function produccionDeclarada(datos) {
   const { resumen, por_facultad_anio: filas, fuera_de_ventana_o_sin_anio: extra,
           ventana, procedencia: proc, nota, fuentes,
-          openalex_cobertura: oa, total_fuera_de_scopus: total } = datos;
+          openalex_cobertura: oa, autoarchivo_produccion: aa,
+          total_fuera_de_scopus: total } = datos;
 
   const hayPD01 = !!(fuentes && fuentes.length);
   const hayPD02 = !!(oa && oa.disponible);
+  const hayPD03 = !!(aa && aa.disponible);
 
-  if (!hayPD01 && !hayPD02) {
+  if (!hayPD01 && !hayPD02 && !hayPD03) {
     return `
     <p class="nota">Todavía no hay ninguna fuente de producción fuera de
     Scopus: ni una Facultad con listado propio en
     <code>config/sources.yml</code>, ni <code>internal/openalex_cobertura.csv</code>
-    (V2-26). Esta sección aparece vacía a propósito: el dato es opcional,
-    no un indicador que debiera existir.</p>`;
+    (V2-26), ni <code>data/enriched/autoarchivo_produccion.json</code>. Esta
+    sección aparece vacía a propósito: el dato es opcional, no un indicador
+    que debiera existir.</p>`;
   }
 
   const kpi = (valor, etiqueta, secundario) => `
@@ -197,13 +206,14 @@ export function produccionDeclarada(datos) {
     <div class="kpis">${kpi(
       total.en_ventana, `Producción total fuera de Scopus, ${ventana.inicio}-${ventana.fin}`,
       `${c.nf.format(total.pd01_en_ventana)} declaradas por las Facultades + `
-      + `${c.nf.format(total.pd02_en_ventana)} confirmadas por revisión de cobertura OpenAlex`
+      + `${c.nf.format(total.pd02_en_ventana)} confirmadas por revisión de cobertura OpenAlex + `
+      + `${c.nf.format(total.pd03_en_ventana)} autoarchivadas en el repositorio institucional`
       + (total.duplicados_entre_fuentes
-        ? `, menos ${c.nf.format(total.duplicados_entre_fuentes)} que las dos fuentes declaran`
+        ? `, menos ${c.nf.format(total.duplicados_entre_fuentes)} repetidas entre esas fuentes`
         : ''))}</div>
-    <p class="nota">Suma de las dos fuentes de abajo, sin contar dos veces la
-    misma obra: se unen por DOI y lo que aparece en ambas se resta una sola
-    vez.</p>` : '';
+    <p class="nota">Suma de las tres fuentes de abajo, sin contar dos veces la
+    misma obra: se unen por DOI y lo que aparece en más de una se resta las
+    veces que se repite.</p>` : '';
 
   const pd01HTML = hayPD01 ? (() => {
     const kpisHTML = [
@@ -307,7 +317,76 @@ export function produccionDeclarada(datos) {
     <p class="nota">Falta <code>internal/openalex_cobertura.csv</code>: correr
     <code>src/enrich/openalex_cobertura.py</code>.</p>`;
 
-  return `${totalHTML}${pd01HTML}${pd02HTML}`;
+  const pd03HTML = hayPD03 ? (() => {
+    const r = aa.resumen;
+    const kpisHTML = [
+      kpi(r.total_leido, 'Registros autoarchivados',
+        `${r.duplicados_colapsados_por_doi} duplicados de la fuente ya colapsados`),
+      kpi(r.fuera_del_universo, 'Fuera del universo Scopus',
+        'el conjunto que este corpus paralelo aporta de nuevo'),
+      kpi(r.en_ventana_con_facultad, `Con Facultad validada, en la ventana ${ventana.inicio}-${ventana.fin}`,
+        'la cifra que entra al total combinado de arriba'),
+      kpi(r.en_ventana_sin_facultad, 'Sin Facultad validada, misma ventana',
+        'unidad declarada en bruto: NO se cuenta por Facultad, ver la lista abajo'),
+    ].join('');
+
+    const filaTabla = (r2) => `
+      <tr><td>${c.escapar(r2.facultad)}</td><td>${r2.anio}</td>
+        <td>${c.nf.format(r2.n)}</td></tr>`;
+
+    const tabla = aa.por_facultad_anio.length ? `
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Facultad</th><th scope="col">Año</th>
+            <th scope="col">Publicaciones autoarchivadas</th></tr></thead>
+          <tbody>${aa.por_facultad_anio.map(filaTabla).join('')}</tbody>
+        </table>
+      </div>` : `
+      <p class="nota">Ninguna publicación con Facultad validada cae dentro
+      de la ventana ${ventana.inicio}-${ventana.fin}.</p>`;
+
+    const filaUnidad = (u) => `<tr><td>${c.escapar(u.unidad_declarada)}</td><td>${c.nf.format(u.n)}</td></tr>`;
+    const tablaSinMapeo = (aa.unidades_sin_mapeo || []).length ? `
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Unidad declarada (en bruto)</th>
+            <th scope="col">Publicaciones, en ventana</th></tr></thead>
+          <tbody>${aa.unidades_sin_mapeo.map(filaUnidad).join('')}</tbody>
+        </table>
+      </div>` : '';
+
+    const notaExtra = (r.fuera_de_ventana || r.sin_anio) ? `
+      <p class="nota">Además, ${c.nf.format(r.fuera_de_ventana)} fuera de la
+      ventana ${ventana.inicio}-${ventana.fin} y ${c.nf.format(r.sin_anio)}
+      sin año declarado, sin descartarse.</p>` : '';
+
+    return `
+      <h2>Autoarchivada en el repositorio institucional</h2>
+      <div class="kpis" data-n="4">${kpisHTML}</div>
+      ${c.nota(aa.nota)}
+      <h3>Por Facultad y año, dentro de la ventana ${ventana.inicio}-${ventana.fin}
+      — sólo unidades con relación escuela→Facultad validada</h3>
+      ${tabla}
+      ${notaExtra}
+      ${c.sello(aa.procedencia)}
+      <h3>Por unidad declarada, sin Facultad validada institucionalmente</h3>
+      <p class="nota">Estas ${c.nf.format(r.en_ventana_sin_facultad)} publicaciones,
+      dentro de la misma ventana, están fuera de Scopus tanto como las de
+      arriba — pero la Facultad o Escuela que biblioteca les asignó no tiene
+      hoy una relación validada a nivel de Facultad
+      (<code>config/matching_rules.yml</code>). Se cuentan aquí, por su
+      propia unidad, en vez de adivinar a qué Facultad pertenecen.</p>
+      ${tablaSinMapeo}
+      <p class="nota">En esta subsección, «Cobertura» es el porcentaje de lo
+      autoarchivado con Facultad validada que cae dentro de la ventana
+      ${ventana.inicio}-${ventana.fin} — no el sentido habitual del sello en
+      el resto del sitio.</p>`;
+  })() : `
+    <h2>Autoarchivada en el repositorio institucional</h2>
+    <p class="nota">Falta <code>data/enriched/autoarchivo_produccion.json</code>:
+    correr <code>src/enrich/autoarchivo_produccion.py</code>.</p>`;
+
+  return `${totalHTML}${pd01HTML}${pd02HTML}${pd03HTML}`;
 }
 
 /** La lista de procedencia de metodologia.html: fuentes, ventana temporal,
