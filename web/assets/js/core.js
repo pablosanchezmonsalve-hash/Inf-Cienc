@@ -90,6 +90,7 @@ export const PAGINAS = [
   ['autores.html', 'Autores'],
   ['publicaciones.html', 'Publicaciones'],
   ['indicadores.html', 'Indicadores'],
+  ['produccion-ampliada.html', 'Producción ampliada'],
   ['metodologia.html', 'Metodología'],
 ];
 

@@ -183,3 +183,12 @@ indicadores:
          estado: no_calculable,
          razon: "La ventana 2023-2025 no sostiene una tendencia.",
          que_falta: "Datos anteriores a 2023."}
+
+  # ------------------------------- producción declarada (corpus paralelo, no Scopus)
+  # Deliberadamente AUSENTE de kpis_portada: eso es lo que mantiene este dato
+  # fuera de los gráficos Scopus/SciVal existentes. Vive sólo en su propia
+  # sección (produccion-ampliada.html).
+  PD-01: {nombre: "Producción declarada por las Facultades, fuera de Scopus",
+          categoria: declarado, publicar: true, confiabilidad: baja,
+          solo_recuento: true, advertencia_destacada: true,
+          advertencia: "Recuento que cada Facultad declara en su propio sitio, no un índice bibliográfico: no aplica los criterios de cobertura de Scopus, y SciVal no lo mide — no tiene citas, FWCI ni ningún otro indicador de impacto. Nunca se suma al universo que construye el resto del sitio (D-206, D-341). Ver Producción ampliada."}

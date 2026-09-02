@@ -11,6 +11,7 @@ const RUTAS = [
   ['index.html', ''], ['produccion.html', ''], ['impacto.html', ''],
   ['colaboracion.html', ''], ['tematica.html', ''], ['autores.html', ''],
   ['publicaciones.html', ''], ['indicadores.html', ''],
+  ['produccion-ampliada.html', ''],
   ['metodologia.html', ''],
   ['autor.html', '?id=giglio-jimenez-a'],
 ];

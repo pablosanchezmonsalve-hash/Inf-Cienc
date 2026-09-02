@@ -24,7 +24,7 @@ if sys.platform == "win32":
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 STEPS = ["01_publications", "02_indicators", "03_authors", "04_glossary", "07_hierarchy",
-         "08_validation_status"]
+         "08_validation_status", "09_produccion_declarada"]
 
 # El grafo de coautoría (C-05) va DESPUÉS de 03_authors, que es quien deja la
 # consolidación de identidades aplicada, y ANTES de la compuerta 05.

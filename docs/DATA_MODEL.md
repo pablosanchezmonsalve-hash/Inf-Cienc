@@ -70,3 +70,14 @@ Se modelan y quedan vacíos, con la razón explícita. No se omiten del esquema.
 | `Afiliacion.ror_id` | No verificado | Registro ROR |
 | `UnidadAcademica` oficial | Sin catálogo institucional | Validación con la universidad |
 | `scopus_export.fecha_corte` | No declarada por el export | Reexportar con fecha registrada |
+
+## Corpus paralelo declarado (fuera de este modelo)
+
+`data/processed/produccion_declarada.json` no es parte del diagrama de
+arriba: es un recuento agregado (Facultad × año) de publicaciones que una
+Facultad declara en su propio sitio, fuera del universo Scopus/SciVal.
+Nunca se une a `Publicacion` ni a ningún indicador de este modelo — mezclar
+criterios de indexación distintos sin declararlo sería exactamente el
+error que este proyecto evita (D-206, D-341). Ver
+`docs/FUENTES_Y_APIS.md` §2.6 y `config/sources.yml` →
+`facultad_medicina_publicaciones`.
