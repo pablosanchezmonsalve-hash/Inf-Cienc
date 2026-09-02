@@ -7760,3 +7760,32 @@ hay push paralelo a la rama antes de subir (patrón ya establecido en
 sesiones anteriores). Cuando el usuario retome: la nota sobre
 `ejes.json`/`SECCIONES` duplicados (arriba) es la única pieza no resuelta
 que vale la pena decidir explícitamente, no ejecutar sin más contexto.
+
+### Barrido adicional (continuación del mismo cierre)
+
+Tras comitear lo anterior, una segunda pasada dirigida a áreas que los 5
+agentes no habían recorrido —`design/`, `package.json`, `scripts/*.ps1`, y
+un grep de las cifras "556"/"542" en todo el repo, no sólo en `docs/`—
+encontró un hallazgo real más: `config/indicators.yml` (AU-03, h-index)
+declaraba «50 de las 542 entidades publicadas» en su `advertencia` — un
+número vivo, no histórico, que no se había corregido junto con el resto
+del cluster porque este campo específico no lo lee ningún paso del build
+(`grep -rn "AU-03" src/build/*.py` no devuelve nada: el texto real que ve
+el lector vive duplicado en `paginas.js`/`docs/GLOSSARY.md`, hallazgo ya
+documentado). Corregido a 538 de todas formas: es la fuente que un lector
+directo de `config/indicators.yml` vería, aunque el build no la sirva hoy.
+
+Las demás apariciones de "556"/"542" fuera de `docs/` resultaron ser
+citas históricas deliberadas (comentarios en `common_build.py`,
+`03_authors.py`, `05_verify_public_layer.py`, `paginas.js`,
+`src/state/snapshot.py` que documentan un bug pasado como ejemplo, no una
+cifra vigente) o la maqueta de diseño ya declarada como congelada a
+propósito (`design/informe/`, decisión de una sesión anterior: "refrescarla
+es una tarea de diseño... no una corrección de una línea"). No se tocaron.
+`scripts/*.ps1` y `package.json` no mostraron ningún problema: todos los
+`.py` que los scripts de PowerShell invocan existen, y `package.json`
+declara playwright como única dependencia, correctamente marcada
+`devDependencies` (README.md ya declara 0 dependencias en runtime).
+
+`python3 src/build/build_all.py` + `06_assemble_site.py` + `node
+src/verify/run_all.mjs`: limpio de nuevo tras este ajuste.
