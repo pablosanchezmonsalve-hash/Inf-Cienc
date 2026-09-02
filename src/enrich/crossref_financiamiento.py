@@ -37,12 +37,15 @@ EL CONTRATO DE LA API NO ESTÁ VERIFICADO DESDE ESTE REPOSITORIO
     hallazgo que ya documentan `openalex_cobertura.py` y
     `facultad_medicina_publicaciones.py` para sus propios dominios;
     comprobado aquí con una consulta real, que devolvió
-    `CONNECT tunnel failed, response 403`). El conector sigue exactamente
-    el mismo patrón de caché y manejo de errores que
+    `CONNECT tunnel failed, response 403`). El conector usa
+    `crossref_client.py` (mismo patrón de caché y manejo de errores que
     `orcid_crossref.py`/`openalex_cobertura_crossref.py` —que SÍ corrieron,
-    en una sesión con acceso de red real— y su lógica de parseo está
-    probada con `--test`, sin red. Ejecutarlo de verdad queda para una
-    máquina con acceso a `api.crossref.org`.
+    en una sesión con acceso de red real; factorizado a un módulo
+    compartido porque este conector es ya la tercera copia del mismo
+    transporte, y los dos anteriores no se tocan por no tener relación con
+    esta sesión) — y su lógica de parseo está probada con `--test`, sin
+    red. Ejecutarlo de verdad queda para una máquina con acceso a
+    `api.crossref.org`.
 
 USO
     python3 src/enrich/crossref_financiamiento.py             # consulta Crossref
@@ -57,13 +60,8 @@ Salida:
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
-import time
-import urllib.error
-import urllib.parse
-import urllib.request
 from pathlib import Path
 
 import pandas as pd
@@ -73,47 +71,11 @@ if sys.platform == "win32":
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "audit"))
 import common as c  # noqa: E402
+from crossref_client import consultar  # noqa: E402
 
-CACHE = c.ROOT / "data" / "cache" / "crossref"
 RAW_SCOPUS = c.ROOT / c.SOURCES["scopus_export"]["archivo"]
 SALIDA = c.ROOT / "data" / "enriched" / "crossref_financiamiento.csv"
 CFG = c.MATCHING["enriquecimiento_externo"]["orcid"]
-API = "https://api.crossref.org/works/"
-
-
-def _cache_path(doi: str) -> Path:
-    return CACHE / (re.sub(r"[^a-zA-Z0-9]+", "_", doi)[:120] + ".json")
-
-
-def consultar(doi: str, mailto: str, pausa: float = 0.12) -> dict | None:
-    """Mismo patrón de caché y de errores que openalex_cobertura_crossref.py:
-    404 se cachea como "sin registro", cualquier otro error se propaga para
-    que el llamador decida si sigue o aborta."""
-    path = _cache_path(doi)
-    if path.exists():
-        with open(path, encoding="utf-8") as fh:
-            return json.load(fh).get("message")
-
-    url = API + urllib.parse.quote(doi, safe="")
-    req = urllib.request.Request(url, headers={
-        "User-Agent": f"InformeCienciometrico/1.0 (mailto:{mailto})",
-        "Accept": "application/json",
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.load(resp)
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps({"message": None}), encoding="utf-8")
-            return None
-        raise
-    finally:
-        time.sleep(pausa)
-
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-    return data.get("message")
 
 
 def normalizar_doi(doi) -> str:
@@ -151,6 +113,16 @@ def financiadores_crossref(msg: dict) -> list[dict]:
     return out
 
 
+def _texto_financiador(f: dict) -> str:
+    """'Nombre (funder DOI) [proyectos]', omitiendo lo que falte."""
+    texto = f["nombre"]
+    if f["funder_doi"]:
+        texto += f" ({f['funder_doi']})"
+    if f["proyectos"]:
+        texto += f" [{f['proyectos']}]"
+    return texto
+
+
 def evidencia_de_publicacion(row: dict, msg: dict | None) -> dict:
     fin_scopus = financiadores_scopus(row.get("Funding Details"))
     base = {
@@ -168,11 +140,7 @@ def evidencia_de_publicacion(row: dict, msg: dict | None) -> dict:
         **base,
         "crossref_encontrado": True,
         "crossref_financiado": bool(fin_crossref),
-        "crossref_financiadores": " | ".join(
-            f"{f['nombre']}" + (f" ({f['funder_doi']})" if f['funder_doi'] else "")
-            + (f" [{f['proyectos']}]" if f['proyectos'] else "")
-            for f in fin_crossref
-        ),
+        "crossref_financiadores": " | ".join(_texto_financiador(f) for f in fin_crossref),
     }
 
 

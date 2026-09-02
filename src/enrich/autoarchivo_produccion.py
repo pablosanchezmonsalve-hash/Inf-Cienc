@@ -222,14 +222,26 @@ def extraer(df: pd.DataFrame) -> list[dict]:
 
 
 def cruzar(registros: list[dict], universo: pd.DataFrame) -> list[dict]:
-    doi_universo = set(universo["doi"].dropna().astype(str).str.lower().str.strip())
+    # Índice por DOI construido una sola vez: antes, cada publicación CON
+    # match volvía a rastrear las ~823 filas del universo entero
+    # (universo.loc[...]) para recuperar el eid/año — O(n·m) evitable. "El
+    # primer match gana" ante un DOI repetido en el universo, igual que
+    # antes con iloc[0].
+    universo_por_doi: dict[str, tuple] = {}
+    for doi, eid, anio in zip(universo["doi"], universo["eid"], universo["anio"]):
+        if pd.isna(doi):
+            continue
+        doi_norm = str(doi).strip().lower()
+        if doi_norm and doi_norm not in universo_por_doi:
+            universo_por_doi[doi_norm] = (eid, anio)
+
     for r in registros:
-        r["en_universo_scopus"] = bool(r["doi"] and r["doi"] in doi_universo)
-        if r["en_universo_scopus"]:
-            fila = universo.loc[universo["doi"].astype(str).str.lower() == r["doi"]]
-            if not fila.empty:
-                r["eid_scopus"] = fila.iloc[0]["eid"]
-                r["anio_scopus"] = int(fila.iloc[0]["anio"]) if pd.notna(fila.iloc[0]["anio"]) else None
+        match = universo_por_doi.get(r["doi"]) if r["doi"] else None
+        r["en_universo_scopus"] = match is not None
+        if match:
+            eid, anio = match
+            r["eid_scopus"] = eid
+            r["anio_scopus"] = int(anio) if pd.notna(anio) else None
     return registros
 
 
