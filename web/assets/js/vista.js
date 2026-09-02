@@ -148,9 +148,11 @@ export function catalogo(cat) {
     regenera en cada build. Un indicador diferido está verificado como
     calculable; uno no calculable no lo está, y aproximarlo sería inventar la
     métrica.</p>
-    <nav class="rail" aria-label="Categorías del catálogo">
-      <p class="rail-titulo">En esta página</p><ol>${indice}</ol></nav>
-    ${secciones}`;
+    <div class="disposicion">
+      <nav class="rail" aria-label="Categorías del catálogo">
+        <p class="rail-titulo">En esta página</p><ol>${indice}</ol></nav>
+      <div>${secciones}</div>
+    </div>`;
 }
 
 /** Producción ampliada: tres fuentes, de naturaleza distinta, de producción
