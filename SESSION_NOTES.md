@@ -7228,3 +7228,155 @@ Reportar al usuario: 9 confirmados con evidencia caso por caso, 1
 diferido con motivo claro, el bug de búsqueda corregido, y la aclaración
 honesta de que el mecanismo de fusión real sigue sin existir — esto deja
 el registro correcto, no la pregunta de diseño resuelta.
+
+## Cierre: "Producción ampliada" — corpus paralelo declarado por las Facultades, fuera de Scopus
+
+### Cómo empezó
+
+El usuario preguntó si los datos de la Facultad de Medicina (§2.6,
+`facultad_medicina_publicaciones.py`) podían alimentar los gráficos del
+sitio. Se explicó por qué no directamente —esos datos no tienen métricas
+SciVal, no pasaron por el criterio de indexación de Scopus, mezclarlos
+presentaría calidad y comparabilidad distintas como si fueran la misma
+medición— y se ofreció la alternativa correcta: una nota de cobertura, o
+un corpus paralelo declarado aparte. El usuario contestó con su objetivo
+real: "ampliar la cobertura de la plataforma, no limitarnos a Scopus".
+Se le preguntó explícitamente (`AskUserQuestion`) dónde debía vivir ese
+dato y si el mecanismo debía ser general o sólo para Medicina — eligió
+sección aparte y mecanismo general para cualquier Facultad.
+
+### El diseño (plan mode)
+
+Dado el alcance (pipeline de build, configuración de indicadores, y el
+sitio), se usó `EnterPlanMode`: dos agentes Explore en paralelo (uno
+sobre convenciones de build/config, otro sobre convenciones de sitio/JS)
+más un agente Plan para converger en un diseño concreto, y verificación
+manual de los hallazgos más consecuentes antes de escribir el plan final
+(varios: el conteo real de duplicados/universo en el JSON existente, que
+`eid_scopus`/`anio_scopus` no siempre están presentes como claves, la
+convención exacta de `config/sources.yml`/`indicators.yml`, y — el
+hallazgo más importante— que `common_build.procedencia()` siempre usa la
+fecha de corte de SciVal como "Corte", que habría sido engañosa para un
+indicador que no tiene nada que ver con SciVal).
+
+### Lo aplicado
+
+**Esquema común, no una fuente hardcodeada**: todo conector de
+"producción declarada" escribe un JSON con un campo `facultad` (nombre
+CANÓNICO, el mismo que usa la jerarquía de `matching_rules.yml`) — sin
+eso, agrupar por facultad exige nombrar la Facultad en el código Python.
+`facultad_medicina_publicaciones.py` ganó ese campo (constante
+`FACULTAD`, un `assert` nuevo en `--test`); como no se pudo re-ejecutar
+el scraper (egress bloqueado en este entorno, igual que con
+`orcid.org`/`finis.cl` en sesiones anteriores), se parchearon los 609
+registros existentes en `data/enriched/` e `internal/` in situ, sin
+inventar ningún dato nuevo.
+
+**`config/sources.yml`** ganó la entrada que faltaba (el encabezado del
+archivo ya exigía que "todo indicador publicado debe poder rastrearse
+hasta una entrada de este archivo" — un hueco real, no nuevo de este
+cierre) con la bandera `corpus_paralelo_declarado: true`: es lo que
+`09_produccion_declarada.py` usa para DESCUBRIR fuentes de este tipo sin
+nombrar "Medicina" en `src/build/` — una segunda Facultad que sume su
+propio listado más adelante sólo necesita su propia entrada con esa
+bandera, nada en el build cambia.
+
+**`src/build/09_produccion_declarada.py`** (nuevo, agregado a `STEPS`):
+deduplica por (facultad, DOI) — la fuente trae duplicados a propósito
+(`D-343` original: "el sitio lista duplicados; borrarlos en el extractor
+ocultaría un dato de la fuente"), así que la deduplicación se hace aquí,
+en el consumidor, no en la ingesta. Separa lo ya indexado en Scopus (pura
+divulgación) de lo nuevo, y dentro de lo nuevo separa por la ventana
+2023-2025: lo de fuera de ventana o sin año NUNCA se oculta, va a una
+nota de transparencia aparte. No corre `sys.exit()` si no hay fuentes
+declaradas — este dato es opcional por diseño, a diferencia de la
+auditoría.
+
+**`config/indicators.yml`** ganó `PD-01` con `solo_recuento: true` (mismo
+campo que ya usa T-04 para ODS) y categoría nueva `declarado`.
+Deliberadamente AUSENTE de `kpis_portada` — eso es lo que mantiene el
+dato fuera de los gráficos existentes. `common_build.procedencia()` ganó
+un parámetro `corte` opcional para no mostrar la fecha de corte de
+SciVal en un indicador que no tiene relación con SciVal.
+
+**`web/produccion-ampliada.html`** (nuevo): cifras clave, tabla Facultad
+× año, nota de transparencia compuesta en runtime desde los datos reales
+(nunca cifras escritas a mano), advertencia reutilizando `.nota-destacada`
+y el sello de procedencia reutilizando `sello()` — con una frase propia
+aclarando que "Cobertura" aquí significa algo distinto (% dentro de la
+ventana temporal, no % de datos poblados) que en el resto del sitio.
+Registrada en los tres puntos que hacían falta (`prerender.mjs`,
+`paginas.js`, nav en `core.js`) y en los dos archivos de verificación que
+fallan adrede si una página en `dist/` no está en su lista
+(`estructura.mjs`, `contraste.mjs`).
+
+### Verificación
+
+`facultad_medicina_publicaciones.py --test`, `build_all.py` (compuerta 0
+fallas), `06_assemble_site.py` (11 páginas, sin avisos de cabecera ni de
+contenedor vacío), `node run_all.mjs` (6/6, incluido contraste WCAG de
+los componentes reutilizados con datos reales). Verificación manual con
+Playwright: nav en el lugar correcto con `aria-current` bien puesto,
+contenido presente con JavaScript DESACTIVADO (contenido
+pre-renderizado, no sólo cliente), capturas de pantalla en tema claro y
+oscuro. Regresión: `kpis.json` sigue con los mismos 6 códigos de
+siempre — PD-01 no tocó ningún gráfico existente.
+
+Números reales de esta corrida: 609 registros leídos, 63 duplicados
+colapsados, 221 ya en el universo Scopus, 325 fuera de él — de esos, 83
+dentro de la ventana 2023-2025 (la cifra publicada), 222 fuera de
+ventana y 20 sin año (declarados en la nota de transparencia, no
+ocultados).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-368 | Los datos de la Facultad de Medicina NO se mezclan en los gráficos Scopus/SciVal existentes | No tienen métricas SciVal ni pasaron por el criterio de indexación de Scopus — mezclarlos presentaría calidad y comparabilidad distintas como si fueran la misma medición |
+| D-369 | Se construye un mecanismo GENERAL de "producción declarada" (esquema común + bandera en `sources.yml`), no una integración hardcodeada a Medicina | El usuario lo pidió explícitamente; una segunda Facultad que sume su propio listado no debe requerir tocar `src/build/` |
+| D-370 | La deduplicación por DOI ocurre en `09_produccion_declarada.py` (el consumidor), no en el conector de Medicina | La decisión original de no deduplicar en la ingesta (`D-343` de la sesión V2-27: "borrarlos en el extractor ocultaría un dato de la fuente") sigue vigente; alguien tenía que deduplicar antes de publicar un recuento, y ese alguien es quien construye el indicador, no quien ingiere |
+| D-371 | PD-01 se excluye deliberadamente de `kpis_portada` y de la ventana ya usada por el resto de indicadores para su fecha de "Corte" | Es lo que mantiene este dato fuera de los gráficos Scopus/SciVal existentes y evita publicar una fecha de corte (la de SciVal) que no tiene relación con este indicador |
+| D-372 | Lo fuera de la ventana 2023-2025 o sin año declarado NUNCA se oculta: va a una nota de transparencia aparte, con cifras reales | Ocultarlo habría sido tan engañoso como mezclarlo en un gráfico Scopus — la ventana temporal del proyecto no es motivo para dejar de contar un dato declarado |
+
+### Archivos modificados
+
+```
+src/enrich/facultad_medicina_publicaciones.py   campo 'facultad'
+data/enriched/facultad_medicina_publicaciones.json,
+internal/facultad_medicina_cruce.csv            parcheados con 'facultad'
+config/sources.yml                              nueva entrada
+src/build/09_produccion_declarada.py            nuevo
+src/build/build_all.py                          STEPS += 1
+src/build/common_build.py                       procedencia(corte=...), FUENTE_POR_INDICADOR
+config/indicators.yml                           PD-01
+src/build/02_indicators.py                      CATEGORIAS += declarado
+web/produccion-ampliada.html                    nuevo
+web/assets/js/vista.js                          produccionDeclarada()
+web/assets/js/paginas.js                        dispatch + función
+web/assets/js/core.js                           nav
+src/build/prerender.mjs                         rama nueva
+src/verify/estructura.mjs, contraste.mjs        registro de página
+docs/FUENTES_Y_APIS.md                          §2.6 nueva
+docs/DATA_MODEL.md                              nota de corpus paralelo
+docs/V2_BACKLOG.md                              nota distinguiendo de §8
+```
+
+### Ambigüedades abiertas
+
+- El mecanismo es general, pero sólo tiene UNA fuente real hoy
+  (Medicina). No se construyó ninguna abstracción especulativa más allá
+  de la bandera en `sources.yml` y el esquema documentado — si aparece
+  una segunda Facultad, se sabrá si el esquema alcanza o hace falta
+  ajustarlo.
+- No se reejecutó el scraper de Medicina (egress bloqueado): los datos
+  parcheados son los mismos 609 registros de la corrida del 2026-09-01,
+  con el campo `facultad` agregado. Una corrida real, cuando se pueda,
+  reflejaría el sitio actualizado.
+- Las de siempre: Moya Patricia pendiente, el mecanismo de fusión de
+  "Varios Scopus ID" sin resolver, T-06/T-19.
+
+### Próximo paso recomendado
+
+Reportar al usuario que la sección está publicada, con los números
+reales y la explicación de por qué no toca ningún gráfico existente.
+Confirmar que el push está limpio (sin pushes paralelos) antes de subir.

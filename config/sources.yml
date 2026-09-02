@@ -342,3 +342,41 @@ fuentes:
       fuentes pueden confirmarse o contradecirse entre sí (`Arroyo A.`
       aparece contradicho en ambas, con el mismo ORCID alternativo en las
       dos — evidencia cruzada, no una casualidad).
+
+  facultad_medicina_publicaciones:
+    nombre: "Facultad de Medicina y Salud UFT — listado propio de publicaciones (API REST de WordPress)"
+    tipo: "api"
+    endpoint: "https://facultadmedicina.finis.cl/wp-json/wp/v2/pages?slug=publicaciones&_fields=id,title,link,content"
+    autenticacion: "ninguna"
+    conector: "src/enrich/facultad_medicina_publicaciones.py"
+    rol: "corpus paralelo declarado por la institución, no verificado por Scopus (D-206, D-341)"
+    # La bandera que 09_produccion_declarada.py usa para DESCUBRIR fuentes de
+    # este tipo sin nombrar "Medicina" en el código: una segunda Facultad que
+    # sume su propio listado más adelante sólo necesita esta misma bandera en
+    # su propia entrada, y su propio conector siguiendo el mismo esquema (ver
+    # el docstring de facultad_medicina_publicaciones.py) — nada en
+    # src/build/ cambia.
+    corpus_paralelo_declarado: true
+    aporta:
+      - produccion_declarada_por_la_facultad_fuera_del_corpus_scopus
+    salida: "data/enriched/facultad_medicina_publicaciones.json, internal/facultad_medicina_cruce.csv"
+    # El único de los dos que 09_produccion_declarada.py lee.
+    salida_declarada: "data/enriched/facultad_medicina_publicaciones.json"
+    fecha_corte: null              # cada descarga lleva su propia fecha, no una fecha de corte fija
+    fecha_ejecucion: "2026-09-01"  # última corrida real (Cierre · V2-27, SESSION_NOTES.md)
+    n_registros_leido: 609
+    nota: >-
+      La Facultad publica su propia lista de producción (Medicina por año,
+      Enfermería, Nutrición y Dietética, y Libros) en su sitio, con criterio
+      editorial propio: no es un índice bibliográfico y no aplica los mismos
+      criterios de cobertura que Scopus. El conector cruza por DOI contra
+      publications_universe.csv sólo para separar lo que ya está en el
+      corpus indexado de lo que declara por fuera de él; NUNCA escribe en
+      publications_universe.csv ni en ningún artefacto que mezcle ambos
+      conteos. Publica sólo RECUENTOS por facultad × año (PD-01) — nunca
+      citas ni FWCI, porque SciVal sólo mide lo indexado en Scopus. La
+      fuente NO deduplica (609 registros crudos, DOIs repetidos): "el sitio
+      lista duplicados; borrarlos en el extractor ocultaría un dato de la
+      fuente y forzaría una decisión que no le toca a la ingesta" — la
+      deduplicación por DOI ocurre en el consumidor,
+      `src/build/09_produccion_declarada.py`.

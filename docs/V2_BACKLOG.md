@@ -218,3 +218,12 @@ canónico, ni su cifra, ni ningún indicador que dependa de ese denominador
 tomada — `D-206` exige que ampliar lo que el informe cubre sea "una decisión
 de alcance aparte, posterior y explícita". Falta que el usuario autorice
 diseñarla e implementarla, y decidir dónde vive en la navegación del sitio.
+
+> **Distinto de esto:** `produccion-ampliada.html` (implementado
+> 2026-09-02) publica un corpus paralelo declarado de otra naturaleza —
+> agregados Facultad × año que una Facultad autodeclara en su propio
+> sitio, sin verificación individual obra por obra — bajo el mismo
+> principio `D-206`. No sustituye esta propuesta de individual
+> `CONFIRMADO_PRODUCCION_UFT` (evidencia OpenAlex + Crossref + revisión
+> humana caso por caso), que sigue abierta. Ver
+> `src/build/09_produccion_declarada.py` y `docs/FUENTES_Y_APIS.md` §2.6.

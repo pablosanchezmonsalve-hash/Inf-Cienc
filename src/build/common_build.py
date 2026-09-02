@@ -437,11 +437,16 @@ FUENTE_POR_INDICADOR = {
     # catálogo publica esta columna, así que dejarlo caer en el genérico
     # «Scopus · SciVal» sería publicar una procedencia falsa.
     "AU-05": "Crossref · registro de ORCID",
+    # PD-01 no nombra una Facultad específica a propósito: el mecanismo es
+    # general (config/sources.yml declara cuáles Facultades contribuyen), y
+    # hoy sólo una lo hace.
+    "PD-01": "Declarado por la Facultad (no Scopus)",
 }
 
 
 def procedencia(code: str, cubiertas: int | None = None,
-                n: int | None = None, unidad: str = "publicaciones") -> dict:
+                n: int | None = None, unidad: str = "publicaciones",
+                corte: str | None = None) -> dict:
     """Sello de procedencia de un indicador: fuente, corte, N y cobertura.
 
     El N NO es global: cambia según el indicador —823 en producción, 816 en
@@ -449,6 +454,12 @@ def procedencia(code: str, cubiertas: int | None = None,
     exactamente el error que este proyecto persigue. `cubiertas` es cuántas
     publicaciones tienen realmente el dato; si es None se asume el denominador
     completo.
+
+    `corte` por defecto es la fecha de corte de SciVal — válido para
+    cualquier indicador Scopus/SciVal, pero engañoso para uno que no viene de
+    ninguna de las dos (p. ej. PD-01, producción declarada por una Facultad):
+    mostraría una fecha de corte que no tiene relación con ese dato. Un
+    llamador con su propia fecha de referencia la pasa explícita.
     """
     spec = INDICATORS["indicadores"].get(code, {})
     # El denominador de config está en publicaciones. Un indicador que se
@@ -461,7 +472,7 @@ def procedencia(code: str, cubiertas: int | None = None,
     umbral = INDICATORS["reglas_transversales"]["cobertura_minima_sin_advertencia"]
     return {
         "fuente": FUENTE_POR_INDICADOR.get(code, "Scopus · SciVal"),
-        "corte": SOURCES["scival_export"]["fecha_corte"],
+        "corte": corte if corte is not None else SOURCES["scival_export"]["fecha_corte"],
         "n": n,
         "cubiertas": cub,
         "unidad": unidad,

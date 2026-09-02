@@ -176,6 +176,37 @@ unidad declarada es correcta para esa persona, pero APLICARLA al pipeline
 público —traducirla al vocabulario oficial y que deje de figurar «No
 determinada»— sigue siendo un paso aparte, todavía sin construir.
 
+### 2.6 Facultad de Medicina y Salud — listado propio de publicaciones — **implementado el 2026-09-01, publicado el 2026-09-02**
+
+Distinta de §2.4 y §2.5 en naturaleza, no sólo en fuente: no es un inventario
+institucional para cruzar identidad de autor, es el listado de producción
+que la propia Facultad publica en su sitio
+(`https://facultadmedicina.finis.cl/investigacion-y-postgrado/publicaciones/`),
+vía la API REST de WordPress. `src/enrich/facultad_medicina_publicaciones.py`
+lo baja, lo estructura (facultad, sección, año, título, autores, DOI) y lo
+cruza por DOI contra `data/interim/publications_universe.csv`. No sale a
+red durante el build normal — se ejecuta aparte, y su salida se versiona
+(`data/enriched/facultad_medicina_publicaciones.json`,
+`internal/facultad_medicina_cruce.csv`).
+
+**609 registros**, 347 con DOI (284 DOIs únicos: la fuente lista
+duplicados, y el conector no los colapsa — "el sitio lista duplicados;
+borrarlos en el extractor ocultaría un dato de la fuente", `D-343`), **279
+ya en el universo Scopus**. El resto —lo que la Facultad declara y Scopus
+no indexa— NO se suma a `publications_universe.csv` ni a ningún indicador
+de citas/FWCI (D-206, D-341): eso mezclaría criterios de indexación
+distintos con evidencia que SciVal nunca midió.
+
+En cambio, alimenta un **corpus paralelo declarado**: el indicador `PD-01`
+("Producción declarada por las Facultades, fuera de Scopus"), calculado por
+`src/build/09_produccion_declarada.py`, publicado en su propia página
+(`produccion-ampliada.html`) — sólo recuentos por Facultad × año, dentro de
+la ventana 2023-2025, con nota explícita de cuántos registros adicionales
+quedan fuera de ventana o sin año. El mecanismo es general, no hardcodeado
+a Medicina: cualquier fuente que declare `corpus_paralelo_declarado: true`
+en `config/sources.yml` con un JSON del mismo esquema (documentado en el
+docstring del conector) se descubre sola.
+
 ---
 
 ## 3. Propuestas de nuevas integraciones

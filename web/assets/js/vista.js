@@ -588,6 +588,86 @@ export function catalogo(cat) {
     ${secciones}`;
 }
 
+/** Producción ampliada: recuentos que una Facultad declara en su propio
+    sitio, fuera del corpus indexado en Scopus. Es un corpus PARALELO
+    declarado (D-206, D-341) — nunca aparece en los gráficos de
+    producción/impacto del resto del sitio, y por eso vive en su propia
+    página con su propio marcado, no reutilizando `RENDER`/`kpiCarta` de
+    los indicadores Scopus/SciVal.
+
+    El párrafo de transparencia (fuera de ventana / sin año) se compone
+    aquí desde `datos.fuera_de_ventana_o_sin_anio` — nunca una cifra
+    escrita a mano — porque ocultar esos registros habría sido tan
+    engañoso como mezclarlos en un gráfico Scopus: la ventana temporal del
+    proyecto no es motivo para que un dato declarado deje de contarse. */
+export function produccionDeclarada(datos) {
+  const { resumen, por_facultad_anio: filas, fuera_de_ventana_o_sin_anio: extra,
+          ventana, procedencia: proc, nota, fuentes } = datos;
+
+  if (!fuentes || !fuentes.length) {
+    return `
+    <p class="nota">Ninguna Facultad tiene, por ahora, un listado propio
+    declarado en <code>config/sources.yml</code>. Esta sección aparece vacía
+    a propósito: el dato es opcional, no un indicador que debiera existir.</p>`;
+  }
+
+  const kpi = (valor, etiqueta, secundario) => `
+    <div class="kpi">
+      <span class="valor">${c.nf.format(valor)}</span>
+      <span class="etiqueta">${c.escapar(etiqueta)}</span>
+      ${secundario ? `<span class="secundario">${c.escapar(secundario)}</span>` : ''}
+    </div>`;
+
+  const kpisHTML = [
+    kpi(resumen.total_leido, 'Registros declarados',
+      `por las Facultades participantes, ${resumen.duplicados_colapsados_por_doi} duplicados de la fuente ya colapsados`),
+    kpi(resumen.en_universo_scopus, 'Ya en el universo Scopus',
+      'divulgación: ya se cuentan en el resto del sitio, no se repiten aquí'),
+    kpi(resumen.fuera_del_universo, 'Fuera del universo Scopus',
+      'el conjunto que este corpus paralelo aporta de nuevo'),
+    kpi(resumen.en_ventana, `En la ventana ${ventana.inicio}-${ventana.fin}`,
+      'la cifra principal de la tabla de abajo'),
+  ].join('');
+
+  const filaTabla = (r) => `
+    <tr><td>${c.escapar(r.facultad)}</td><td>${r.anio}</td>
+      <td>${c.nf.format(r.n)}</td></tr>`;
+
+  const tabla = filas.length ? `
+    <div class="tabla-envoltura tabla-datos">
+      <table>
+        <thead><tr><th scope="col">Facultad</th><th scope="col">Año</th>
+          <th scope="col">Publicaciones declaradas</th></tr></thead>
+        <tbody>${filas.map(filaTabla).join('')}</tbody>
+      </table>
+    </div>` : `
+    <p class="nota">Ninguna publicación declarada cae dentro de la ventana
+    ${ventana.inicio}-${ventana.fin}. Ver la nota de transparencia abajo:
+    no significa que no haya datos, sino que los que hay quedan fuera de
+    esta ventana o sin año declarado.</p>`;
+
+  const notaExtra = (extra || []).filter(e => e.fuera_de_ventana || e.sin_anio)
+    .map(e => {
+      const partes = [];
+      if (e.fuera_de_ventana) partes.push(`${c.nf.format(e.fuera_de_ventana)} fuera de la ventana ${ventana.inicio}-${ventana.fin}`);
+      if (e.sin_anio) partes.push(`${c.nf.format(e.sin_anio)} sin año declarado`);
+      return `${c.escapar(e.facultad)}: ${partes.join(', ')}`;
+    }).join('; ');
+
+  return `
+    <div class="kpis" data-n="4">${kpisHTML}</div>
+    ${c.nota(nota)}
+    <h2>Por Facultad y año, dentro de la ventana ${ventana.inicio}-${ventana.fin}</h2>
+    ${tabla}
+    ${notaExtra ? `<p class="nota">Registros declarados adicionales que
+    quedan fuera de esta tabla, sin descartarse: ${notaExtra}.</p>` : ''}
+    ${c.sello(proc)}
+    <p class="nota">En esta página, «Cobertura» es el porcentaje de lo
+    declarado que cae dentro de la ventana ${ventana.inicio}-${ventana.fin}
+    — no el sentido habitual del sello en el resto del sitio (porcentaje de
+    publicaciones con un dato poblado).</p>`;
+}
+
 /** La lista de procedencia de metodologia.html: fuentes, ventana temporal,
     fecha de corte de citas, export de origen y build. Vivía inline en
     paginas.js — se saca aquí por lo mismo que el resto del archivo: para que

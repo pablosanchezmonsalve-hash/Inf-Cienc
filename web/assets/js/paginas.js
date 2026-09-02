@@ -690,6 +690,11 @@ async function catalogo() {
   if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'));
 }
 
+async function produccionAmpliada() {
+  const cont = document.getElementById('produccion-declarada');
+  if (!yaPintado(cont)) cont.innerHTML = v.produccionDeclarada(await c.cargar('produccion_declarada.json'));
+}
+
 /* ══════════════════════════════════════════ teclado dentro de un gráfico */
 
 /* Cada barra era un punto de tabulación. Medido en Áreas temáticas: 41 de los
@@ -729,7 +734,7 @@ function tecladoGraficos() {
 }
 
 /* ============================================================== arranque */
-const PAGINAS = { portada, seccion, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
+const PAGINAS = { portada, seccion, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo, produccionAmpliada };
 
 document.addEventListener('DOMContentLoaded', async () => {
   const pagina = document.body.dataset.pagina;

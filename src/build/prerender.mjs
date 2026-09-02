@@ -168,6 +168,11 @@ async function main() {
       const a = [];
       html = rellenar(html, 'catalogo', v.catalogo(await leerJSON('catalogo.json')), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    } else if (tipo === 'produccionAmpliada') {
+      const a = [];
+      html = rellenar(html, 'produccion-declarada',
+        v.produccionDeclarada(await leerJSON('produccion_declarada.json')), a);
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'metodologia') {
       // El glosario es el destino de todo enlace `#slug` a una definición,
       // desde el tooltip de ayuda contextual o desde otra página (p. ej.
