@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `24d5557` · Formaliza la metodología para datos fuera de Scopus: jerarquía de dos 
+Último commit: `644ec74` · Auditoría integral: corrige una contradicción de identidad ORCID, un b
 Snapshot: 2026-09-02
 
 ---
