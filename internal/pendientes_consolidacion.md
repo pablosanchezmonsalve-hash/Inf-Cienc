@@ -2,7 +2,7 @@
 
 **Generado** el 2026-09-01 por `src/review/build_review.py`. Regenerable.
 
-Quedan **138 casos** de 301. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **138 casos** de 300. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -47,7 +47,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Reccius A. → 0009-0004-3236-3030: ¿es suyo?](revision_identidad.html#caso-ver-reccius-a)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531 (Artículo de revista); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257 (Artículo de revista)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1089/neu.2024.0463 · Giglio, Andrés · 0000-0002-0533-4531/0000-0003-1770-244X/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article); 10.1016/j.rmclc.2025.04.002 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -67,7 +67,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Reyes M. → 0000-0001-5279-4234: ¿es suyo?](revision_identidad.html#caso-ver-reyes-m)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.32641/andespediatr.v96i2.5607 · Gómez Lund, Oscar · 0000-0003-4763-074X (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.32641/andespediatr.v96i2.5607 · Díaz, Franco · 0000-0003-4763-074X (Artículo de revista)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.32641/andespediatr.v96i2.5607 · Gómez Lund, Oscar · 0000-0003-4763-074X (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -112,7 +112,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Torp O. → 0000-0002-1916-5097: ¿es suyo?](revision_identidad.html#caso-ver-torp-o)
 
-El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1016/j.procs.2023.01.497 · Shabani, Rouzbeh · 0000-0002-9412-3161 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1016/j.procs.2023.01.497 · Farsani, Danyal · 0000-0002-9412-3161 (Artículo de revista)).
+El titular declara obras en su registro y NINGUNA coincide con las atribuidas a esta firma. La ficha pública de esta firma lleva hoy la marca «sin confirmar». Abra el registro del titular y compárelo con las publicaciones de abajo. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1016/j.procs.2023.01.497 · Shabani, Rouzbeh · 0000-0002-9412-3161 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1369,7 +1369,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Altamirano M. → 0000-0002-4290-4388: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-altamirano-m)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/su152115482 · Llanos-Herrera, Gonzalo R. · 0000-0002-2516-3549/0000-0003-4273-4259 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.3390/su152115482 · Mansilla-Obando, Katherine · 0000-0003-4273-4259 (Artículo de revista)).
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/su152115482 · Llanos-Herrera, Gonzalo R. · 0000-0002-2516-3549/0000-0003-4273-4259 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1443,7 +1443,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Dávila C.M. → 0000-0002-6357-3469: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-d-vila-c-m)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1332/20467435y2024d000000022 · Tabilo Prieto, Ismael · 0000-0002-7501-5085/0000-0002-6357-3469 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1332/20467435y2024d000000022 · Tabilo Prieto, Ismael · 0000-0002-7501-5085 (Artículo de revista)).
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1332/20467435y2024d000000022 · Tabilo Prieto, Ismael · 0000-0002-7501-5085/0000-0002-6357-3469 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1521,7 +1521,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Jeria-Espinoza V. → 0009-0000-4168-198X: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-jeria-espinoza-v)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.freeradbiomed.2025.09.047 · Henríquez-Olguín, Carlos · 0000-0002-9315-9365/0009-0000-4168-198X (Artículo de revista)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1016/j.freeradbiomed.2025.09.047 · Henriquez-Olguin, Carlos · 0000-0002-9315-9365 (Artículo de revista)).
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) incluye este mismo ORCID en el registro de una de sus publicaciones, aunque bajo el nombre de otro coautor (10.1016/j.freeradbiomed.2025.09.047 · Henríquez-Olguín, Carlos · 0000-0002-9315-9365/0009-0000-4168-198X (Artículo de revista)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1595,7 +1595,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Ortiz F. → 0000-0001-7665-7488: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-ortiz-f)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/foods13010004 · Mansilla-Obando, Katherine · 0000-0003-4273-4259/0000-0002-2516-3549/0009-0009-8078-2738 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.3390/foods13010004 · Mansilla-Obando, Katherine · 0000-0003-4273-4259 (Artículo de revista)).
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/foods13010004 · Mansilla-Obando, Katherine · 0000-0003-4273-4259/0000-0002-2516-3549/0009-0009-8078-2738 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1609,7 +1609,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Ramos A. → 0000-0002-1248-0553: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-ramos-a)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257 (Artículo de revista)).
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.1016/j.rmclc.2025.04.004 · Arroyo, Antonio · 0000-0002-6248-9257/0009-0004-3236-3030 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -1682,7 +1682,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Vásquez F. → 0000-0003-1769-3969: sin nada contra qué contrastar](revision_identidad.html#caso-noverif-v-squez-f)
 
-El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/nu17020327 · Bustos-Arriagada, Edson · 0000-0003-4698-1425/0000-0002-8536-3729/0000-0002-4312-1318 (Article)). El inventario de autoarchivo tiene esa misma publicación pero sin este ORCID (10.3390/nu17020327 · Bustos-Arriagada, Edson · 0000-0003-4698-1425 (Artículo de revista)).
+El titular no declara ninguna obra con DOI en su registro, de modo que la comprobación automática no puede decir ni que sí ni que no. Queda su nombre, su afiliación declarada y el juicio de quien mire. El repositorio institucional (DSpace) tiene esa misma publicación pero sin este ORCID (10.3390/nu17020327 · Bustos-Arriagada, Edson · 0000-0003-4698-1425/0000-0002-8536-3729/0000-0002-4312-1318 (Article)).
 
 | Comprobar en | Enlace |
 |---|---|
