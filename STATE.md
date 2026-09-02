@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ddadf8a` · Publica "Producción ampliada": corpus paralelo declarado por las Facul
+Último commit: `24d5557` · Formaliza la metodología para datos fuera de Scopus: jerarquía de dos 
 Snapshot: 2026-09-02
 
 ---
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 400
+## Decisiones tomadas: 409
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

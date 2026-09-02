@@ -84,7 +84,13 @@ export function renderHeatmap({ anios, categorias, matriz, maximo }, { ancho, al
       // suele tener una cola larga, y una escala lineal deja casi todo el
       // mapa con opacidad casi cero salvo un par de celdas dominantes.
       const intensidad = maximo > 0 ? Math.sqrt(n / maximo) : 0;
-      return `<g class="heatmap-celda" tabindex="0" role="gridcell"
+      // Un solo punto de tabulación para todo el mapa (la primera celda),
+      // no una por celda: antes eran hasta 24 paradas de Tab para llegar al
+      // resto de la página, justo lo que el propio sitio ya evitó en las
+      // barras (paginas.js, tecladoGraficos()) — que también recorre estas
+      // celdas con flechas, generalizando el mismo mecanismo.
+      const tab = fi === 0 && ai === 0 ? 0 : -1;
+      return `<g class="heatmap-celda" tabindex="${tab}" role="gridcell"
           aria-label="${escapar(cat)}, ${anio}: ${nf.format(n)} publicaciones"
           data-tip="${escapar(cat)}" data-tip-v="${nf.format(n)} pub." data-tip-n="${anio}">
         <rect x="${x + 2}" y="${y + 3}" width="${anchoCol - 4}" height="${altoFila - 6}" rx="6"

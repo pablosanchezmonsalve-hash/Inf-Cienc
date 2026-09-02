@@ -24,6 +24,7 @@ Salidas:
 
 from __future__ import annotations
 
+import io
 import json
 import re
 import subprocess
@@ -145,14 +146,26 @@ def extraer_decisiones() -> list[dict]:
     texto = leer("SESSION_NOTES.md")
     sesion_actual = "?"
     filas = []
-    for linea in texto.splitlines():
-        m_sesion = re.match(r"^## Sesión (\S+) — (.+)$", linea.strip())
+    vistos: dict[str, int] = {}
+    for n, linea in enumerate(texto.splitlines(), start=1):
+        # El paréntesis intermedio es real: "## Sesión 2026-08-27 (cont.) — ...",
+        # "(EN CURSO)", "(tarde)". Sin tolerarlo, la sesión no matchea, el título
+        # anterior queda pegado, y la columna "Fase" de docs/DECISIONS.md termina
+        # atribuyendo filas enteras a la sesión equivocada.
+        m_sesion = re.match(r"^## Sesión (\S+)(?:\s*\([^)]*\))?\s+—\s+(.+)$", linea.strip())
         if m_sesion:
             sesion_actual = m_sesion.group(2)
             continue
         m = re.match(r"^\|\s*(D-\d+)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|$", linea.strip())
         if m:
-            filas.append({"id": m.group(1), "decision": m.group(2),
+            id_ = m.group(1)
+            if id_ in vistos:
+                print(f"  AVISO · {id_} reutilizado: línea {vistos[id_]} y línea "
+                      f"{n} de SESSION_NOTES.md. Corregir la numeración a mano "
+                      "(no se renombra solo: DECISIONS.md es una vista, no la "
+                      "fuente).", file=sys.stderr)
+            vistos[id_] = n
+            filas.append({"id": id_, "decision": m.group(2),
                           "fundamento": m.group(3), "fase": sesion_actual})
     return filas
 
@@ -265,11 +278,21 @@ def colas_internas() -> list[tuple[str, int]]:
     out = []
     for p in sorted((ROOT / "internal").glob("*.csv")):
         try:
-            df = pd.read_csv(p, nrows=0)
+            # Sin saltar las líneas de cabecera "#" por posición, una cola con
+            # cabecera-comentario (como identity_decisions.csv) pierde su
+            # primera línea de datos como si fuera la fila de encabezado — el
+            # mismo bug que ya se corrigió en src/review/decisiones.py y
+            # hermanos, aplicado aquí antes de que llegara a afectar una cola
+            # real con columna `resolucion`.
+            lineas = p.read_text(encoding="utf-8-sig").splitlines()
+            i = 0
+            while i < len(lineas) and lineas[i].startswith("#"):
+                i += 1
+            df = pd.read_csv(io.StringIO("\n".join(lineas[i:])), dtype=str)
         except Exception:
             continue
         if "resolucion" in df.columns:
-            out.append((p.stem, len(pd.read_csv(p))))
+            out.append((p.stem, len(df)))
     return out
 
 

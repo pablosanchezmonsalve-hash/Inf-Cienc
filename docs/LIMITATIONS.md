@@ -18,10 +18,11 @@ El corte de citas es el **22 de julio de 2026**. Las publicaciones de 2025
 tienen entre 7 y 19 meses de ventana de citación: sus indicadores de impacto
 son provisionales por construcción.
 
-## 2. Sin identificador persistente de autor
+## 2. Sin identificador persistente de autor, en el export original
 
-**ORCID no existe en ninguna de las fuentes.** El único identificador es el
-Scopus Author ID, con dos problemas verificados:
+**ORCID no existe en ninguna de las fuentes originales de Fase 1** (el export
+de Scopus/SciVal). El único identificador ahí es el Scopus Author ID, con dos
+problemas verificados:
 
 - **20 nombres completos** están asociados a más de un Scopus Author ID
   (perfiles fragmentados u homonimia).
@@ -33,11 +34,18 @@ Scopus Author ID, con dos problemas verificados:
 
 Estas ambigüedades están **declaradas y encoladas, no resueltas**. La cifra de
 589 autores debe leerse como *589 formas de firma detectadas*, no como 589
-personas. El número real de personas es menor y sólo puede fijarse con
-validación humana o con ORCID.
+personas. Consolidación humana (`D-08`, nunca automática) fijó **538
+entidades reales** (84 formas de firma resultaron ser 37 personas,
+`config/identidades_consolidadas.yml`) — esa es la base que sirve el sitio.
 
-Recuperar ORCID desde Crossref (cobertura DOI: 97,7 %) o desde el repositorio
-institucional es la vía identificada. **No implementada en Fase 1.**
+**Actualización posterior a Fase 1: ORCID sí se recuperó**, desde Crossref,
+el repositorio institucional (DSpace), el inventario de autoarchivo de
+biblioteca y la propia API pública de ORCID — nunca inventado, siempre con
+su fuente declarada por firma. Cobertura hoy: **327 formas de firma con
+ORCID** sin consolidar, **274 entidades con ORCID** tras consolidación
+humana (`STATE.md`). El detalle metodológico completo —qué vía aportó qué,
+dónde persiste la brecha y por qué no llega al 100 %— vive en
+`docs/ORCID_COVERAGE.md` y `docs/ORCID_GUIDE.md`, no se repite aquí.
 
 ## 3. Unidad académica incompleta
 
@@ -48,10 +56,13 @@ parseando la cadena de afiliación.
   sobre cadenas de afiliación ponderadas por frecuencia). Ambos denominadores
   son legítimos y se declaran por separado.
 - **437 pares quedan como `No determinada`.** No se imputan.
-- El vocabulario controlado de 13 unidades es **inferido de los datos y no está
-  validado institucionalmente**. 11 variantes quedan fuera del vocabulario y se
-  conservan tal cual (incluidos artefactos de la fuente como
-  `Facultad de MedicinaEscuela de Medicina`, donde falta la coma separadora).
+- El vocabulario controlado de 13 unidades se infirió de los datos y, desde
+  entonces, **fue validado institucionalmente** (`T-02`, cerrado 2026-08-26;
+  `config/matching_rules.yml`: `vocabulario_validado_por_institucion: true`).
+  11 variantes quedan fuera del vocabulario y se conservan tal cual (incluidos
+  artefactos de la fuente como `Facultad de MedicinaEscuela de Medicina`,
+  donde falta la coma separadora) — la validación cubre el vocabulario, no
+  esas variantes residuales.
 
 **Ninguna comparación entre unidades académicas es completa.**
 
@@ -104,7 +115,7 @@ El campo `Authors with affiliations` usa la coma como separador tanto entre
 nombre y afiliación como dentro de la propia afiliación. En **8 de 818
 publicaciones** el número de bloques no coincide con el número de autores
 declarados: en esos casos la atribución autor→afiliación puede ser incorrecta.
-Están registradas en `internal/matching_reconciliation.csv`.
+Están registradas en `data/interim/matching_reconciliation.csv`.
 
 Durante la auditoría se detectó y corrigió un error propio en esta lógica: la
 extracción de unidad académica tomaba la facultad de **otra** institución
@@ -113,44 +124,35 @@ cuando el autor tenía doble afiliación (30 pares se atribuían a
 corrección redujo la cobertura declarada de unidad de 70,1 % a los valores
 reales del punto 3.
 
-### Cuatro firmas publicadas que probablemente no son personas
+### Cuatro firmas que resultaron ser fragmentos de cadena de afiliación, no personas — resuelto
 
-El mismo separador produce un segundo efecto, y este llega hasta lo publicado:
-**cuatro de las formas de firma son probables fragmentos de cadena de
-afiliación** que entraron en la lista de autores. Tienen ficha pública.
+El mismo separador produjo un segundo efecto que llegó hasta lo publicado:
+**cuatro formas de firma eran fragmentos de cadena de afiliación** que habían
+entrado en la lista de autores.
 
-| Firma | Publicación | Qué la delata |
+| Firma | Publicación | Qué la delataba |
 |---|---|---|
 | `and Senior Lecturer` | `2-s2.0-85190421197` | posición 9 de 7 autores declarados |
 | `School of Psychology` | `2-s2.0-85151493381` | la misma firma en las posiciones 2, 5 y 9 |
 | `Metabolism` | `2-s2.0-85199751688` | ninguna inicial con punto |
 | `Movement Sciences (NUTRIM)` | `2-s2.0-85207388806` | ninguna inicial con punto |
 
-En **las cuatro publicaciones son la única detección UFT**: si se descartaran,
-esas publicaciones quedarían sin autoría UFT nombrada. Siguen en el universo,
-porque la afiliación que las trajo es real; lo que se pone en duda es el nombre,
-no la afiliación.
+En las cuatro publicaciones era la única detección UFT: descartar la firma no
+retira la publicación del universo, porque la afiliación que la trajo es
+real — lo que estaba en duda era el nombre, no la afiliación.
 
-**Las tres señales no pesan igual, y eso decide cuánto puede afirmarse.** Las
-dos primeras de la tabla son invariantes: la fuente se contradice a sí misma. La
-tercera —no llevar ninguna inicial con punto— es una heurística sobre la forma
-del nombre. Aquí aísla exactamente estos cuatro casos entre 589 firmas, pero en
-otro corpus marcaría a un autor mononímico, que es una persona real. Por eso
-`Metabolism` y `Movement Sciences (NUTRIM)`, que sólo disparan esa tercera, son
-**probables** y no un hecho establecido.
+Las detectó la regla `E-09` de `src/audit/05_validation_rules.py`, y **no se
+eliminaron automáticamente**: declarar que una firma no es una persona es una
+decisión de identidad, y `D-08` la reserva a la revisión humana. Pasaron por
+esa revisión y **las cuatro se confirmaron como fragmentos** (ninguna era un
+autor mononímico real): `config/firmas_e09_resueltas.yml` las registra en
+`descartadas`, y ya no forman parte de las entidades publicadas.
 
-Las detecta la regla `E-09` de `src/audit/05_validation_rules.py`, y **no se
-eliminan**: declarar que una firma no es una persona es una decisión de
-identidad, y `D-08` la reserva a la revisión humana. Están encoladas en
-`internal/ambiguities_authors.csv` y en la cola «Firma sin forma de persona» de
-`make revision`.
-
-**Efecto en `P-06`:** publica **556**, y si las cuatro se confirmaran, las firmas
-que corresponden a personas serían **552**. La nota del indicador lo declara
-mientras la revisión siga pendiente. Al resolver,
-`config/firmas_e09_resueltas.yml` registra los dos veredictos: las descartadas
-dejan de contar, y las confirmadas como persona salen de la cola sin cambiar
-ninguna cifra.
+**Efecto en `P-06`:** las 589 formas de firma detectadas en la fuente,
+consolidadas por revisión humana (84 formas → 37 personas, `D-08`) y con
+estas 4 ya descartadas, publican **538 entidades** (`STATE.md`,
+`data/processed/authors.json`) — la cifra ya refleja la resolución, no una
+proyección hipotética.
 
 ## 8. Un duplicado probable sin resolver
 

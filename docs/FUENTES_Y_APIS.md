@@ -98,8 +98,11 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 - **`orcid_afiliacion.py` — candidatos.** Encuentra a quien declara la
   institución sin que haya publicación compartida que lo ancle. Dos homónimos de
   la misma universidad son indistinguibles por este método, así que **no escribe
-  en la capa publicable**: deja 20 candidatos en `internal/` para revisión
-  humana. 18 de ellos ya se confirmaron uno a uno.
+  en la capa publicable**: deja candidatos en `internal/` para revisión humana
+  (hoy, 20 pendientes). Las confirmaciones acumuladas por esta vía —25 a la
+  fecha— se escriben en `authors_orcid.csv`, no en el archivo de candidatos: el
+  conector lo regenera en cada corrida, así que no es el lugar donde persiste
+  qué ya se revisó.
 
 ### 2.3 Lo que aportó cada vía, medido
 
@@ -107,9 +110,10 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 |---|---|
 | Crossref | 174 |
 | Registro de ORCID (`doi-self`) | 48 |
-| OpenAlex (`doi-self`, vía autorías) | 80 |
-| Revisión humana sobre candidatos por afiliación | 20 |
-| **Total** | **322 formas de firma · 280 de 538 entidades publicadas** |
+| OpenAlex (`doi-self`, vía autorías) | 79 |
+| Revisión humana sobre candidatos por afiliación | 25 |
+| Revisión humana (búsqueda manual en el registro) | 1 |
+| **Total** | **327 formas de firma · 274 de 538 entidades publicadas** |
 
 El detalle metodológico y el argumento de por qué el 100 % no es alcanzable
 están en `docs/ORCID_COVERAGE.md`.
@@ -191,10 +195,10 @@ red durante el build normal — se ejecuta aparte, y su salida se versiona
 
 **609 registros**, 347 con DOI (284 DOIs únicos: la fuente lista
 duplicados, y el conector no los colapsa — "el sitio lista duplicados;
-borrarlos en el extractor ocultaría un dato de la fuente", `D-343`), **279
+borrarlos en el extractor ocultaría un dato de la fuente", `D-400`), **279
 ya en el universo Scopus**. El resto —lo que la Facultad declara y Scopus
 no indexa— NO se suma a `publications_universe.csv` ni a ningún indicador
-de citas/FWCI (D-206, D-341): eso mezclaría criterios de indexación
+de citas/FWCI (D-206, D-398): eso mezclaría criterios de indexación
 distintos con evidencia que SciVal nunca midió.
 
 En cambio, alimenta un **corpus paralelo declarado**: el indicador `PD-01`

@@ -136,6 +136,11 @@ async function montarExplorador(claveSeccion) {
   // controles se repintan enteros a cada cambio, así que enganchar escuchas a
   // cada botón los dejaría colgando del marcado anterior.
   document.addEventListener('click', e => {
+    // C-05: fijar/soltar un nodo y resaltar sus coautores. Se resuelve sin
+    // volver a pedir datos ni repintar `zonas.cortes` —a diferencia de un
+    // filtro— porque no cambia el recorte, sólo qué se resalta.
+    const nodoRed = e.target.closest('.nodo-red[data-red-nodo]');
+    if (nodoRed) { alternarFocoRed(nodoRed); return; }
     const chip = e.target.closest('.chip[data-dim]');
     if (chip) {
       const { dim, valor } = chip.dataset;
@@ -171,26 +176,6 @@ async function montarExplorador(claveSeccion) {
   addEventListener('popstate', () => { sel = X.leerURL(); pintar(); });
 
   if (!yaPintado(zonas.cifras) || X.hayRecorte(sel)) pintar();
-}
-
-/* ============================================================== módulos */
-
-async function modulos() {
-  const cont = document.getElementById('modulos');
-  if (!yaPintado(cont)) {
-    const codigos = cont.dataset.indicadores.split(',').map(s => s.trim());
-    const series = await c.cargar('series.json');
-    // El eje se identifica por el archivo, igual que en el pre-renderizado, y
-    // por el mismo motivo: es la clave de la sección y ya está en la URL.
-    const clave = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
-    const { ejes } = await c.cargar('ejes.json');
-    // El catálogo se pide para que un indicador declarado en la página pero no
-    // publicado se dibuje como diferido en vez de desaparecer.
-    const catalogo = await c.cargar('catalogo.json');
-    cont.innerHTML = v.paginaModulos(codigos, series, ejes[clave], catalogo);
-  }
-  conmutadorVistas(cont);
-  scrollSpy(cont);
 }
 
 /* Conmutador Gráfico ⇄ Tabla. Un solo escucha delegado para toda la página:
@@ -711,30 +696,82 @@ async function produccionAmpliada() {
    gráfico se vuelve más rápido en vez de más lento. */
 function tecladoGraficos() {
   document.addEventListener('keydown', e => {
-    const marca = e.target.closest?.('svg.chart g.marca');
-    if (!marca) return;
-    const marcas = [...marca.closest('svg.chart').querySelectorAll('g.marca')];
-    const i = marcas.indexOf(marca);
-    let j = null;
-    // Las dos orientaciones responden a los cuatro cursores a propósito: el
-    // lector no tiene por qué saber si la serie se dibujó en horizontal o en
-    // vertical para poder recorrerla.
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = Math.min(i + 1, marcas.length - 1);
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = Math.max(i - 1, 0);
-    else if (e.key === 'Home') j = 0;
-    else if (e.key === 'End') j = marcas.length - 1;
-    else return;
+    // `g.nodo-red[tabindex]` generaliza la misma rotación a la red de
+    // coautoría (C-05): sólo los nodos con `tabindex` ya puesto entran a la
+    // tabulación (el tope de 90 por grado que fija `disponerRed()` en
+    // core.js) — el resto del selector, y este bucle, no cambian.
+    // `g.heatmap-celda`/`g.treemap-nodo` con `tabindex` reproducen el mismo
+    // punto único de tabulación que ya tenían las barras: antes cada celda
+    // llevaba `tabindex="0"` a mano (hasta 24 paradas en el mapa de calor de
+    // producción.html), justo lo que este mecanismo existe para evitar.
+    const marca = e.target.closest?.(
+      'svg.chart g.marca, svg.chart g.nodo-red[tabindex], ' +
+      'svg.chart g.heatmap-celda[tabindex], svg.chart g.treemap-nodo[tabindex]');
+    if (marca) {
+      const esRed = marca.classList.contains('nodo-red');
+      const sel = esRed ? 'g.nodo-red[tabindex]'
+        : marca.classList.contains('heatmap-celda') ? 'g.heatmap-celda[tabindex]'
+        : marca.classList.contains('treemap-nodo') ? 'g.treemap-nodo[tabindex]'
+        : 'g.marca';
+      const marcas = [...marca.closest('svg.chart').querySelectorAll(sel)];
+      const i = marcas.indexOf(marca);
+      let j = null;
+      // Las dos orientaciones responden a los cuatro cursores a propósito: el
+      // lector no tiene por qué saber si la serie se dibujó en horizontal o en
+      // vertical para poder recorrerla. La red da la vuelta al llegar a una
+      // punta (mismo criterio que ya tenía `pasoTecladoRed`, ahora inline);
+      // las barras se quedan en el extremo, comportamiento sin cambios.
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        j = esRed ? (i + 1) % marcas.length : Math.min(i + 1, marcas.length - 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        j = esRed ? (i - 1 + marcas.length) % marcas.length : Math.max(i - 1, 0);
+      }
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = marcas.length - 1;
+      else if (esRed && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); alternarFocoRed(marca); return; }
+      else if (esRed && e.key === 'Escape') { e.preventDefault(); soltarFocoRed(marca.closest('svg.red-svg')); return; }
+      else return;
 
-    e.preventDefault();
-    if (j === i) return;
-    marca.setAttribute('tabindex', '-1');
-    marcas[j].setAttribute('tabindex', '0');
-    marcas[j].focus();
+      e.preventDefault();
+      if (j === i) return;
+      marca.setAttribute('tabindex', '-1');
+      marcas[j].setAttribute('tabindex', '0');
+      marcas[j].focus();
+      return;
+    }
   });
 }
 
+/** C-05: fija (o suelta, si ya estaba fijado) el nodo `g` y resalta sus
+    coautores directos — mismo patrón visual que el filtro atenúa las barras
+    inactivas (`svg.chart.hay-foco .marca`), aplicado al nodo y sus vecinos
+    en vez de a una serie. Puramente de marcado: no vuelve a pedir datos ni
+    repinta el SVG, sólo alterna clases ya previstas en `app.css`. */
+function alternarFocoRed(g) {
+  const svg = g.closest('svg.red-svg');
+  if (!svg) return;
+  if (g.classList.contains('en-foco')) { soltarFocoRed(svg); return; }
+  soltarFocoRed(svg, { mantenerHayFoco: true });
+  svg.classList.add('hay-foco');
+  g.classList.add('en-foco');
+  const vecinos = new Set((g.dataset.vecinos || '').split(',').filter(Boolean));
+  const i = g.dataset.redNodo;
+  svg.querySelectorAll('.nodo-red[data-red-nodo]').forEach(n => {
+    if (vecinos.has(n.dataset.redNodo)) n.classList.add('en-foco');
+  });
+  svg.querySelectorAll('.vinculo').forEach(l => {
+    if (l.dataset.a === i || l.dataset.b === i) l.classList.add('en-foco');
+  });
+}
+
+function soltarFocoRed(svg, { mantenerHayFoco = false } = {}) {
+  if (!svg) return;
+  svg.querySelectorAll('.en-foco').forEach(el => el.classList.remove('en-foco'));
+  if (!mantenerHayFoco) svg.classList.remove('hay-foco');
+}
+
 /* ============================================================== arranque */
-const PAGINAS = { portada, seccion, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo, produccionAmpliada };
+const PAGINAS = { portada, seccion, publicaciones, autores, fichaAutor, metodologia, catalogo, produccionAmpliada };
 
 document.addEventListener('DOMContentLoaded', async () => {
   const pagina = document.body.dataset.pagina;

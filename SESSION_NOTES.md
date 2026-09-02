@@ -2366,14 +2366,14 @@ paleta.
 
 | # | Decisión | Fundamento |
 |---|---|---|
-| D-138 | La BANDA es la unidad de composición de las páginas narrativas | Una banda sostiene una afirmación; un indicador diferido metido entre los publicados se lee como uno más |
-| D-139 | Las cuatro superficies de consulta NO llevan bandas | Filtro y paginación: quien llega ahí viene a buscar, no a que le cuenten. Convertirlas en narrativa arreglaba la estética y rompía la función |
-| D-140 | `.banda-contraste` redefine los tokens en su ámbito | Evita una segunda hoja de estilo para «lo que va sobre fondo oscuro»; lo que cae dentro se adapta solo |
-| D-141 | La forma del gráfico la elige la RELACIÓN del dato | Contrastado contra el Visual Vocabulary del FT. `I-05` era correctitud, no estética |
-| D-142 | La equivalencia ortográfica de firmas NO viola `D-08` | Es equivalencia de cadena, no juicio de identidad: la misma firma con otros diacríticos |
-| D-143 | La vista de la red vive en `internal/` mientras `C-05` esté diferido | Una persona partida en dos nodos hace que la figura afirme que dos investigadores no colaboran |
-| D-144 | La paleta institucional es **Ink Black · Deep Ocean · Jungle Teal · Peach Glow · Racing Red** (`071e22 · 1d7874 · 679289 · f4c095 · ee2e31`) | La fijó el usuario. Estuvo aplicada, se sustituyó por un índigo de alto contraste **sin consultarle** y se perdió. Validada: dato 5,14:1 / 5,79:1, ΔE 21,8 / 23,4 frente a la advertencia, daltonismo 30,1 / 22,5. Es más ajustada que el índigo en la separación del ámbar pero cumple |
-| D-145 | Una elección cromática del usuario se registra como DECISIÓN, no como preferencia | `DECISIONS.md` tenía anotado cómo se declaran los tokens y cómo los valida el instrumento, pero no QUÉ colores eligió el usuario. Al no estar registrada, nada la sostuvo cuando el rediseño cambió de rumbo. El hueco no era de código: era de memoria |
+| D-375 | La BANDA es la unidad de composición de las páginas narrativas | Una banda sostiene una afirmación; un indicador diferido metido entre los publicados se lee como uno más |
+| D-376 | Las cuatro superficies de consulta NO llevan bandas | Filtro y paginación: quien llega ahí viene a buscar, no a que le cuenten. Convertirlas en narrativa arreglaba la estética y rompía la función |
+| D-377 | `.banda-contraste` redefine los tokens en su ámbito | Evita una segunda hoja de estilo para «lo que va sobre fondo oscuro»; lo que cae dentro se adapta solo |
+| D-378 | La forma del gráfico la elige la RELACIÓN del dato | Contrastado contra el Visual Vocabulary del FT. `I-05` era correctitud, no estética |
+| D-379 | La equivalencia ortográfica de firmas NO viola `D-08` | Es equivalencia de cadena, no juicio de identidad: la misma firma con otros diacríticos |
+| D-380 | La vista de la red vive en `internal/` mientras `C-05` esté diferido | Una persona partida en dos nodos hace que la figura afirme que dos investigadores no colaboran |
+| D-381 | La paleta institucional es **Ink Black · Deep Ocean · Jungle Teal · Peach Glow · Racing Red** (`071e22 · 1d7874 · 679289 · f4c095 · ee2e31`) | La fijó el usuario. Estuvo aplicada, se sustituyó por un índigo de alto contraste **sin consultarle** y se perdió. Validada: dato 5,14:1 / 5,79:1, ΔE 21,8 / 23,4 frente a la advertencia, daltonismo 30,1 / 22,5. Es más ajustada que el índigo en la separación del ámbar pero cumple |
+| D-382 | Una elección cromática del usuario se registra como DECISIÓN, no como preferencia | `DECISIONS.md` tenía anotado cómo se declaran los tokens y cómo los valida el instrumento, pero no QUÉ colores eligió el usuario. Al no estar registrada, nada la sostuvo cuando el rediseño cambió de rumbo. El hueco no era de código: era de memoria |
 
 ### Correcciones sobre el propio trabajo
 
@@ -4632,11 +4632,11 @@ sénior, en bucle autónomo, para llevar la plataforma a una interfaz
 
 | # | Decisión | Fundamento |
 |---|---|---|
-| D-322 | Se le planteó al usuario, ANTES de tocar color, que "adoptar de forma autónoma" una paleta nueva chocaba con `D-144`/`D-145` (la paleta la fija el usuario; hay un incidente registrado de un cambio sin consultar que se perdió) | Autorizó una paleta nueva CON la condición de verla medida antes de aplicarla — condición que sigue pendiente de cerrarse, ver Ambigüedades |
+| D-322 | Se le planteó al usuario, ANTES de tocar color, que "adoptar de forma autónoma" una paleta nueva chocaba con `D-381`/`D-382` (la paleta la fija el usuario; hay un incidente registrado de un cambio sin consultar que se perdió) | Autorizó una paleta nueva CON la condición de verla medida antes de aplicarla — condición que sigue pendiente de cerrarse, ver Ambigüedades |
 | D-323 | El treemap colorea las facultades por PROFUNDIDAD (rampa ordinal `--ord-1..4`, ya validada) más gris de "sin dato", no por categoría con `--serie-1..6` | Medido: `--serie-3` vs `--serie-6` da ΔE 2,5 bajo deuteranopía — el propio comentario del token en `app.css` ya avisaba que las cuatro reservadas nunca se habían validado juntas. Con 10 facultades, ningún subconjunto de las seis alcanza separación segura |
 | D-324 | Mapa de calor de temáticas ASJC×año en vez de un diagrama de Sankey | Este proyecto no tiene un flujo real que dibujar —un tema es un atributo de una publicación, no un tránsito—; forzar un Sankey habría sido inventar la forma del dato (`CLAUDE.md`) |
 | D-325 | `hierarchy.json` (nuevo) NO agrega FWCI ni percentil de citación por unidad, sólo cuenta y suma citas (operación aditiva) | Mismo argumento que `D-18`: el FWCI de una facultad no es el promedio de sus publicaciones |
-| D-326 | `--bento-acento` reutiliza el par YA declarado en `--serie-6` (reservado, sin validar) en vez de un séptimo tono nuevo | Medido SOLO (no junto a otras series): contraste 5,66:1/7,55:1, ΔE 24,5/30,3 vs `--aviso-borde` — mismo orden que `D-144` |
+| D-326 | `--bento-acento` reutiliza el par YA declarado en `--serie-6` (reservado, sin validar) en vez de un séptimo tono nuevo | Medido SOLO (no junto a otras series): contraste 5,66:1/7,55:1, ΔE 24,5/30,3 vs `--aviso-borde` — mismo orden que `D-381` |
 
 ### Qué se aplicó
 
@@ -4882,9 +4882,9 @@ sí es alcanzable), se confirmó:
 
 | # | Decisión | Fundamento |
 |---|---|---|
-| D-317 | Se corrige `docs/FUENTES_Y_APIS.md` §3.6: la vía real es la API REST ArticleMeta, no OAI-PMH como decía la versión anterior sin verificar | `CLAUDE.md` prohíbe suponer disponibilidad de APIs sin confirmar; la sección anterior no citaba ninguna fuente para la afirmación OAI-PMH |
-| D-318 | No se escribe conector para SciELO en esta sesión | Sin filtro de institución en la API, construirlo exige antes una decisión de alcance (qué colección(es) barrer, qué ventana de fechas) que le corresponde a quien lo vaya a ejecutar — escribir código sin esa decisión sería adivinar el alcance, que `CLAUDE.md` también prohíbe |
-| D-319 | `V2_BACKLOG.md` §7 registra V2-21 como «investigado», no como «implementado» ni «cerrado» | Es investigación pura sin artefacto ejecutable; usar el mismo lenguaje que V2-19/V2-20 (que sí tienen código) sería sobrerrepresentar el avance |
+| D-383 | Se corrige `docs/FUENTES_Y_APIS.md` §3.6: la vía real es la API REST ArticleMeta, no OAI-PMH como decía la versión anterior sin verificar | `CLAUDE.md` prohíbe suponer disponibilidad de APIs sin confirmar; la sección anterior no citaba ninguna fuente para la afirmación OAI-PMH |
+| D-384 | No se escribe conector para SciELO en esta sesión | Sin filtro de institución en la API, construirlo exige antes una decisión de alcance (qué colección(es) barrer, qué ventana de fechas) que le corresponde a quien lo vaya a ejecutar — escribir código sin esa decisión sería adivinar el alcance, que `CLAUDE.md` también prohíbe |
+| D-385 | `V2_BACKLOG.md` §7 registra V2-21 como «investigado», no como «implementado» ni «cerrado» | Es investigación pura sin artefacto ejecutable; usar el mismo lenguaje que V2-19/V2-20 (que sí tienen código) sería sobrerrepresentar el avance |
 
 ### Verificación
 
@@ -4975,9 +4975,9 @@ Scopus, que siguen siendo ciertas y no dependen de `T-02`.
 
 | # | Decisión | Fundamento |
 |---|---|---|
-| D-320 | Se corrige la advertencia de P-07 en las tres fuentes que la repiten, en vez de sólo en la que se vio primero | Un hallazgo de auditoría que se corrige a medias deja la misma afirmación falsa viva en otro lugar; verificar contra `dist/` (no contra el código fuente solo) es lo que reveló que `config/indicators.yml` no era la fuente real de lo publicado |
-| D-321 | No se toca `design/informe/Apendice.dc.html`, que tiene la misma frase y cifras de consolidación más viejas todavía (63→30, hoy 84→37) | Es una maqueta de diseño con cifras congeladas a propósito (`design/informe/README.md`: «no son maqueta» en el sentido de que salieron de datos reales, pero SÍ son una foto fija, no un dato vivo); refrescarla es una tarea de diseño con su propio criterio de banda/paleta, no una corrección de una línea — queda declarada, no corregida |
-| D-322 | Los artefactos internos regenerados por los tres `build_*_review.py` durante la auditoría se descartan (`git checkout --`) en vez de comitearse | No reflejan ninguna decisión nueva, sólo la fecha de corrida y un orden no determinista; comitearlos sería ruido en el historial sin información |
+| D-386 | Se corrige la advertencia de P-07 en las tres fuentes que la repiten, en vez de sólo en la que se vio primero | Un hallazgo de auditoría que se corrige a medias deja la misma afirmación falsa viva en otro lugar; verificar contra `dist/` (no contra el código fuente solo) es lo que reveló que `config/indicators.yml` no era la fuente real de lo publicado |
+| D-387 | No se toca `design/informe/Apendice.dc.html`, que tiene la misma frase y cifras de consolidación más viejas todavía (63→30, hoy 84→37) | Es una maqueta de diseño con cifras congeladas a propósito (`design/informe/README.md`: «no son maqueta» en el sentido de que salieron de datos reales, pero SÍ son una foto fija, no un dato vivo); refrescarla es una tarea de diseño con su propio criterio de banda/paleta, no una corrección de una línea — queda declarada, no corregida |
+| D-388 | Los artefactos internos regenerados por los tres `build_*_review.py` durante la auditoría se descartan (`git checkout --`) en vez de comitearse | No reflejan ninguna decisión nueva, sólo la fecha de corrida y un orden no determinista; comitearlos sería ruido en el historial sin información |
 
 ### Verificación
 
@@ -5115,10 +5115,10 @@ anchoEtiqueta - 14, 13)`. Verificado con captura antes/después.
 
 | # | Decisión | Fundamento |
 |---|---|---|
-| D-323 | `meta.json` publica `jerarquia` (escuela→facultad) para que el explorador reactivo pueda agregar «Unidad académica» igual que `series.json` | Sin esto, cada corte reactivo habría tenido que traer su propio criterio, y `vista.js` ya prometía en su nota de P-07 un comportamiento que la web no cumplía |
-| D-324 | El corte nuevo «Escuelas dentro de cada facultad» NO lleva `cod` propio | No es un indicador nuevo — es P-07 visto por escuela. Darle `cod: 'P-07'` habría duplicado el `id="P-07"` en la página (dos secciones con el mismo id) y roto el ancla del índice lateral |
-| D-325 | No se concilia la divergencia entre `series.json.P-07.datos` (610, por pares autor×publicación) y el recorte reactivo (414, por publicaciones deduplicadas) en esta sesión | Es una divergencia metodológica preexistente entre dos bases de conteo distintas, no algo que este arreglo haya introducido — reconciliarla es una decisión aparte sobre qué denominador debe gobernar la vista, no una corrección de bug |
-| D-326 | El Treemap que el usuario describe no se implementa ni se busca reemplazar por otra cosa hasta preguntarle | No hay ningún rastro en el repositorio; adivinar qué gráfico quiso decir y construir algo distinto arriesgaría entregar lo equivocado |
+| D-389 | `meta.json` publica `jerarquia` (escuela→facultad) para que el explorador reactivo pueda agregar «Unidad académica» igual que `series.json` | Sin esto, cada corte reactivo habría tenido que traer su propio criterio, y `vista.js` ya prometía en su nota de P-07 un comportamiento que la web no cumplía |
+| D-390 | El corte nuevo «Escuelas dentro de cada facultad» NO lleva `cod` propio | No es un indicador nuevo — es P-07 visto por escuela. Darle `cod: 'P-07'` habría duplicado el `id="P-07"` en la página (dos secciones con el mismo id) y roto el ancla del índice lateral |
+| D-391 | No se concilia la divergencia entre `series.json.P-07.datos` (610, por pares autor×publicación) y el recorte reactivo (414, por publicaciones deduplicadas) en esta sesión | Es una divergencia metodológica preexistente entre dos bases de conteo distintas, no algo que este arreglo haya introducido — reconciliarla es una decisión aparte sobre qué denominador debe gobernar la vista, no una corrección de bug |
+| D-392 | El Treemap que el usuario describe no se implementa ni se busca reemplazar por otra cosa hasta preguntarle | No hay ningún rastro en el repositorio; adivinar qué gráfico quiso decir y construir algo distinto arriesgaría entregar lo equivocado |
 
 ### Verificación
 
@@ -6520,8 +6520,8 @@ cobertura real.
 
 | # | Decisión | Fundamento |
 |---|---|---|
-| D-336 | Se buscó activamente en `Descargas` una exportación de revisión sin aplicar en vez de asumir que "revisar datos actualizados" sólo significaba `git fetch` | El pedido explícito de la sesión anterior fue *"revisa cualquier dato actualizado que pueda afectar el trabajo realizado"* — el trabajo de identidad consolidada afecta directamente `authors.json`/`hierarchy.json`, que son insumo del treemap recién hecho reactivo esta misma sesión |
-| D-337 | Los 14 retiros de ORCID se aplicaron sin pedir confirmación caso por caso | Ya venían de una decisión humana explícita en la exportación (`orcid_incorrecto`), no de una heurística nueva — `apply_decisions.py` sólo traduce un veredicto ya dado a los artefactos que el build consume |
+| D-393 | Se buscó activamente en `Descargas` una exportación de revisión sin aplicar en vez de asumir que "revisar datos actualizados" sólo significaba `git fetch` | El pedido explícito de la sesión anterior fue *"revisa cualquier dato actualizado que pueda afectar el trabajo realizado"* — el trabajo de identidad consolidada afecta directamente `authors.json`/`hierarchy.json`, que son insumo del treemap recién hecho reactivo esta misma sesión |
+| D-394 | Los 14 retiros de ORCID se aplicaron sin pedir confirmación caso por caso | Ya venían de una decisión humana explícita en la exportación (`orcid_incorrecto`), no de una heurística nueva — `apply_decisions.py` sólo traduce un veredicto ya dado a los artefactos que el build consume |
 
 ### Verificación
 
@@ -6609,9 +6609,9 @@ Varios documentos y una advertencia servida seguían citando la base vieja:
 
 | # | Decisión | Fundamento |
 |---|---|---|
-| D-338 | Los flags `ejecutada: false` de las 3 APIs en `sources.yml` se cambian a `true` con fecha de ejecución, en vez de borrar el campo | El campo ya existía para las 3; dejarlo en `false` engañaría a una próxima sesión a reconsultar APIs o creer inexistentes los artefactos enriquecidos. `crossref_api`/`orcid_api` se dejan sin flag (así están hoy) |
-| D-339 | La advertencia de AU-03 no se «porta» a 542 multiplicando 466, se reescribe para describir el gate real (`n≥5`, 50 de 542) | `CLAUDE.md` prohíbe inventar cifras. El 466/556 (84 %) implica computar h para todas las entidades, lo que contradice `03_authors.py` («sólo cuando la muestra lo hace mínimamente legible»). La frase honesta y derivable es la del gate |
-| D-340 | `config/indicators.yml` (AU-03) es la fuente de lo publicado; el número de `indicator_feasibility.py` (497 de 589) es la nota interna de la factibilidad y se deja | La factibilidad describe la decisión del analista de no publicar por falta de discriminación sobre firmas sin consolidar; cambiarlo exigiría re-correr el análisis con criterio nuevo, no una doc-fix |
+| D-395 | Los flags `ejecutada: false` de las 3 APIs en `sources.yml` se cambian a `true` con fecha de ejecución, en vez de borrar el campo | El campo ya existía para las 3; dejarlo en `false` engañaría a una próxima sesión a reconsultar APIs o creer inexistentes los artefactos enriquecidos. `crossref_api`/`orcid_api` se dejan sin flag (así están hoy) |
+| D-396 | La advertencia de AU-03 no se «porta» a 542 multiplicando 466, se reescribe para describir el gate real (`n≥5`, 50 de 542) | `CLAUDE.md` prohíbe inventar cifras. El 466/556 (84 %) implica computar h para todas las entidades, lo que contradice `03_authors.py` («sólo cuando la muestra lo hace mínimamente legible»). La frase honesta y derivable es la del gate |
+| D-397 | `config/indicators.yml` (AU-03) es la fuente de lo publicado; el número de `indicator_feasibility.py` (497 de 589) es la nota interna de la factibilidad y se deja | La factibilidad describe la decisión del analista de no publicar por falta de discriminación sobre firmas sin consolidar; cambiarlo exigiría re-correr el análisis con criterio nuevo, no una doc-fix |
 
 ### Mejora detectada, no aplicada
 
@@ -6727,9 +6727,9 @@ src/enrich/facultad_medicina_publicaciones.py        extractor
 
 | # | Decisión | Fundamento |
 |---|---|---|
-| D-341 | El resultado se guarda como **referencia de contraste**, no como entrada de un corpus | `D-314`: confirmar que una obra es producción real UFT no la convierte en parte del universo — ampliarlo es una decisión de alcance aparte. Este cruce sólo clasifica en-universo / fuera, igual que la revisión de cobertura OpenAlex |
-| D-342 | `data/enriched/` (JSON) + `internal/` (CSV de cruce) en vez de `data/processed/` | No es un artefacto del pipeline (`STEPS` no lo consume): es fuente externa ingerida para contraste. El JSON estructurado va con los otros enriquecimientos externos (`authors_orcid.csv`, `scopus_api_consulta.json`); el CSV de cruce, a la capa interna |
-| D-343 | No se deduplica en el extractor; se guardan los 609 registros crudos | El sitio lista duplicados; borrarlos en el extractor ocultaría un dato de la fuente y forzaría una decisión (cuál queda) que no le toca a la ingesta decidir |
+| D-398 | El resultado se guarda como **referencia de contraste**, no como entrada de un corpus | `D-314`: confirmar que una obra es producción real UFT no la convierte en parte del universo — ampliarlo es una decisión de alcance aparte. Este cruce sólo clasifica en-universo / fuera, igual que la revisión de cobertura OpenAlex |
+| D-399 | `data/enriched/` (JSON) + `internal/` (CSV de cruce) en vez de `data/processed/` | No es un artefacto del pipeline (`STEPS` no lo consume): es fuente externa ingerida para contraste. El JSON estructurado va con los otros enriquecimientos externos (`authors_orcid.csv`, `scopus_api_consulta.json`); el CSV de cruce, a la capa interna |
+| D-400 | No se deduplica en el extractor; se guardan los 609 registros crudos | El sitio lista duplicados; borrarlos en el extractor ocultaría un dato de la fuente y forzaría una decisión (cuál queda) que no le toca a la ingesta decidir |
 
 ### Verificación
 
@@ -6740,7 +6740,7 @@ línea: coincide el `eid_scopus` con el universo.
 
 ### Ambigüedades abiertas
 
-- Los 60 DOIs duplicados de la fuente: sin decidir cuál queda (D-343).
+- Los 60 DOIs duplicados de la fuente: sin decidir cuál queda (D-400).
 - Los 68 registros con DOI que **no** están en el universo (347 − 279) son
   candidatos a revisión de cobertura (producción real UFT fuera de Scopus o
   error del listado) — podría enriquecerse igual que `V2-26` si se decide
@@ -7283,7 +7283,7 @@ bandera, nada en el build cambia.
 
 **`src/build/09_produccion_declarada.py`** (nuevo, agregado a `STEPS`):
 deduplica por (facultad, DOI) — la fuente trae duplicados a propósito
-(`D-343` original: "el sitio lista duplicados; borrarlos en el extractor
+(`D-400` original: "el sitio lista duplicados; borrarlos en el extractor
 ocultaría un dato de la fuente"), así que la deduplicación se hace aquí,
 en el consumidor, no en la ingesta. Separa lo ya indexado en Scopus (pura
 divulgación) de lo nuevo, y dentro de lo nuevo separa por la ventana
@@ -7334,7 +7334,7 @@ ocultados).
 |---|---|---|
 | D-368 | Los datos de la Facultad de Medicina NO se mezclan en los gráficos Scopus/SciVal existentes | No tienen métricas SciVal ni pasaron por el criterio de indexación de Scopus — mezclarlos presentaría calidad y comparabilidad distintas como si fueran la misma medición |
 | D-369 | Se construye un mecanismo GENERAL de "producción declarada" (esquema común + bandera en `sources.yml`), no una integración hardcodeada a Medicina | El usuario lo pidió explícitamente; una segunda Facultad que sume su propio listado no debe requerir tocar `src/build/` |
-| D-370 | La deduplicación por DOI ocurre en `09_produccion_declarada.py` (el consumidor), no en el conector de Medicina | La decisión original de no deduplicar en la ingesta (`D-343` de la sesión V2-27: "borrarlos en el extractor ocultaría un dato de la fuente") sigue vigente; alguien tenía que deduplicar antes de publicar un recuento, y ese alguien es quien construye el indicador, no quien ingiere |
+| D-370 | La deduplicación por DOI ocurre en `09_produccion_declarada.py` (el consumidor), no en el conector de Medicina | La decisión original de no deduplicar en la ingesta (`D-400` de la sesión V2-27: "borrarlos en el extractor ocultaría un dato de la fuente") sigue vigente; alguien tenía que deduplicar antes de publicar un recuento, y ese alguien es quien construye el indicador, no quien ingiere |
 | D-371 | PD-01 se excluye deliberadamente de `kpis_portada` y de la ventana ya usada por el resto de indicadores para su fecha de "Corte" | Es lo que mantiene este dato fuera de los gráficos Scopus/SciVal existentes y evita publicar una fecha de corte (la de SciVal) que no tiene relación con este indicador |
 | D-372 | Lo fuera de la ventana 2023-2025 o sin año declarado NUNCA se oculta: va a una nota de transparencia aparte, con cifras reales | Ocultarlo habría sido tan engañoso como mezclarlo en un gráfico Scopus — la ventana temporal del proyecto no es motivo para dejar de contar un dato declarado |
 
@@ -7456,3 +7456,307 @@ Ninguna acción de código pendiente de este cierre. Si el usuario decide
 avanzar con un indicador Nivel V para la cola OpenAlex/Crossref, ese sería
 un nuevo ciclo de diseño (EnterPlanMode), apoyado en el checklist de este
 documento — no una continuación automática de este cierre.
+
+## Cierre: auditoría integral del repositorio — inconsistencias, errores de datos, accesibilidad y correctitud metodológica de gráficos
+
+### Contexto
+
+El usuario pidió una auditoría rigurosa y detallada de todo el repositorio
+—inconsistencias, errores, información desactualizada— con corrección
+directa y sin consultas, seguida de una auditoría específica de interfaz,
+gráficos, visualización e interacción. Se lanzaron 5 agentes en paralelo
+(pipeline backend/config, documentación, integridad de
+SESSION_NOTES/DECISIONS/STATE, frontend y registro de páginas, gráficos y
+accesibilidad), cada uno con instrucción explícita de verificar contra el
+repositorio real (ejecutar código, correr las herramientas del propio
+proyecto) y no reportar nada sin evidencia. Se revisaron y aplicaron los
+hallazgos de los 5, con verificación propia antes de cada corrección — en
+al menos tres casos (ver «Errores propios» abajo) esa verificación evitó
+aplicar un hallazgo tal como venía reportado.
+
+### Qué se corrigió
+
+**Integridad de datos (prioridad más alta, tabla maestra de autores).**
+`config/orcid_revisado.yml` tenía a «Dreyse J.» a la vez en `confirmadas`
+(ORCID `0000-0002-8201-5956`, respaldado por `authors_orcid.csv` vía
+OpenAlex, confianza alta) y en `sin_registro` (nota vacía). Causa raíz:
+`veredictos_orcid()` en `apply_decisions.py` sólo comprobaba
+`confirmadas ∩ retiradas`, nunca `confirmadas ∩ sin_registro` ni
+`retiradas ∩ sin_registro`. Hoy no afectaba lo publicado por una
+casualidad de orden en `estado_orcid()` (03_authors.py), pero una futura
+regeneración de `authors_orcid.csv` sin esa fila concreta habría publicado
+«buscado y no encontrado» sobre una persona con ORCID confirmado por
+revisión humana. Se agregó el guardián que falta (evidencia siempre le
+gana a ausencia de evidencia, sin importar el orden temporal de los
+veredictos) y se corrió `apply_decisions.py` de verdad: el único cambio
+real fue eliminar la entrada contradictoria de `sin_registro` (327→327
+asignaciones, sin backlog oculto — verificado con `git diff`).
+
+**Bug de regex en `snapshot.py` — 55 % de `docs/DECISIONS.md` mal
+atribuido.** `extraer_decisiones()` no toleraba un paréntesis entre la
+fecha y el guion largo de un encabezado `## Sesión` (`(cont.)`,
+`(EN CURSO)`, `(tarde)`): 6 de 16 encabezados no matcheaban, y la sesión
+anterior quedaba pegada. Medido antes/después: "cierre de T-17 y T-18"
+pasó de aparecer en 154 filas (de las que sólo 4 eran suyas) a 4; "Bento
+Grid..." pasó de 0 apariciones a 57. Se agregó también detección de IDs
+`D-NNN` repetidos (aviso a stderr, no bloqueante) y el mismo patrón seguro
+de lectura de CSV (saltar líneas `#` por posición) que ya tenían otros 5
+archivos, aplicado ahora a `colas_internas()`, que había quedado fuera de
+ese barrido anterior.
+
+**26 IDs de decisión duplicados, renumerados.** `SESSION_NOTES.md` tenía
+26 números `D-NNN` reutilizados en sesiones distintas con contenido no
+relacionado (`D-138`–`D-145`, `D-317`–`D-326`, `D-336`–`D-343`) — el
+propio `D-341`/`D-343` que motivó la sospecha inicial. Causa: numeración
+manual sin verificar el máximo ya usado al abrir cada sesión nueva, no un
+bug de generación. Se conservó el ID de la primera aparición cronológica
+de cada uno; la segunda aparición se renumeró a `D-375`–`D-400`
+(secuencial, sin reabrir ninguna decisión: el texto no cambió, sólo su
+identificador). Se buscaron y corrigieron las referencias en prosa que
+dependían del número viejo apuntando al contenido correcto: 3 para
+`D-343`→`D-400` (SESSION_NOTES.md, en el cierre de Medicina y en `D-370`),
+2 para `D-144`/`D-145`→`D-381`/`D-382` (cierre de paleta), y 6 más para
+`D-341`→`D-398` y `D-343`→`D-400` fuera de `SESSION_NOTES.md`
+(`apply_decisions.py`, `web/assets/js/vista.js`, `config/sources.yml`,
+`config/indicators.yml`, `docs/FUENTES_Y_APIS.md`, `docs/DATA_MODEL.md`,
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md`) — verificadas una por una leyendo
+el contexto real, no asumidas por proximidad numérica. `docs/DECISIONS.md`
+pasó de 400 filas con 374 IDs únicos a 400 filas con 400 IDs únicos.
+
+**Documentación: números desactualizados en 10 documentos.** Cluster de
+cifras de autores/ORCID que llevaba dos consolidaciones sin propagarse
+(556→542→538 entidades; 74/77/84 formas fusionadas en 30/34/37 personas) en
+`README.md`, `docs/AUTHOR_PROFILE.md`, `docs/V2_BACKLOG.md`,
+`docs/ORCID_COVERAGE.md`, `docs/INDICATORS.md`, `docs/DATA_LICENSE.md`,
+`docs/DEPLOYMENT.md`, `docs/FUENTES_Y_APIS.md` — reconciliados contra
+`STATE.md` (538 entidades, 274 con ORCID, 84 formas → 37 personas). Se
+corrigió también, en `docs/LIMITATIONS.md`, la sección "cuatro firmas que
+probablemente no son personas": ya se habían resuelto (las cuatro
+confirmadas como fragmentos vía `E-09`, descartadas en
+`firmas_e09_resueltas.yml`) y el documento seguía describiéndolas como
+pendientes con la cifra vieja (556→552 hipotético). `docs/ARCHITECTURE.md`
+decía "diseño aprobado, sin implementar" y marcaba `src/build/`,
+`data/processed/` y `web/` como pendientes de Fase 3, y ROR/OpenAlex como
+"consulta sin ejecutar" — los tres ya ejecutados y con fecha real en
+`config/sources.yml` desde el 2026-08-25/26; reescrito para describir lo
+implementado. `docs/LIMITATIONS.md` también afirmaba que el vocabulario de
+unidades académicas «no está validado institucionalmente», contradiciendo
+`config/matching_rules.yml` (`vocabulario_validado_por_institucion: true`,
+`T-02` cerrado 2026-08-26). Además: 41/29 indicadores (no 40/28, con
+`PD-01` agregado al catálogo de `docs/INDICATORS.md`, que no lo tenía),
+400 decisiones (no 353), ruta `internal/matching_reconciliation.csv`
+corregida a `data/interim/` (`docs/LIMITATIONS.md`), 11 páginas (no 10) en
+`README.md`/`_cabecera.html`/`06_assemble_site.py`/`run_all.mjs`, y
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md`, `docs/FUENTES_Y_APIS.md` y
+`docs/OPERACION.md` agregados al índice de `README.md`, que no los tenía.
+
+**Violación metodológica en la portada — barras multivaluadas sin trama.**
+`vista_explorador.js`'s `grafico()` (el explorador de la portada, distinto
+de `dibujar()` que usan las secciones) dibujaba "Áreas QS" y "Unidades
+académicas" —ambos multivaluados: una publicación puede aportar a varias
+barras— sin la trama rayada que marca esa condición en el resto del
+sitio, y sin el aviso de P-07. Verificado en `dist/index.html`: cero
+`rect.trama` en esos dos cortes antes del fix. Es la primera pantalla del
+sitio; un lector podía leer las barras como si sumaran el total, que es
+exactamente lo que `docs/METHODOLOGY.md` §6 prohíbe. Corregido pasando
+`trama: MULTIVALUADO.has(clave)` y reutilizando (no reescribiendo) el
+aviso de P-07 ya declarado en `SECCIONES.produccion`.
+
+**`explorador.js` — dos bugs reales en cortes reactivos (R-01, C-06), no
+sólo el gráfico de la portada.** `CAMPOS.cuartil` devolvía `[]` para
+publicaciones sin `sjr_percentil`, así que el gráfico "parte de un
+100 %" (R-01, `proporcional()`) se redibujaba, en cuanto se tocaba
+cualquier filtro, como si el 100 % del recorte tuviera cuartil — mientras
+el sello de cobertura, un párrafo más abajo, seguía mostrando el
+porcentaje real. `02_indicators.py` sí declara un quinto valor, "Sin dato
+declarado" (61 de 823), para exactamente este caso; `explorador.js` no lo
+tenía. Se agregó el mismo bucket, y se corrigió `cobertura()` para
+seguir excluyéndolo del cálculo de cobertura (igual que Python excluye
+"Sin dato declarado" al sumar la cobertura de R-01) — confirmado con
+Playwright: tras un clic de filtro, el gráfico reactivo pasa a mostrar
+14,9 %/14,5 %/21,5 %/39,5 %/9,6 % (cinco segmentos, el quinto es "sin
+dato"), no cuatro. Aparte, y más grave: los tramos de C-06 (autores por
+publicación) en `explorador.js` (`TRAMOS_AUTORES`) usaban fronteras
+DISTINTAS a las de `02_indicators.py` (JS: 1,2,3,4–5,6–10,11–20,21 o más;
+Python: 1,2–3,4–6,7–10,11–20,21+) — no una etiqueta distinta, un binning
+distinto: el mismo valor podía caer en un tramo diferente según cuál de
+las dos versiones se estuviera mirando. Se igualaron los tramos JS a los
+de Python.
+
+**Accesibilidad de teclado — tres hallazgos reales, dos independientes.**
+(1) La red de coautoría (C-05): `role="button"` en cada nodo sin
+`tabindex`, `pasoTecladoRed()` escrito y nunca llamado, ningún
+`addEventListener` sobre `[data-red-nodo]`. Se implementó con tabulación
+giratoria (un solo punto de entrada, capado a los 90 nodos de mayor grado
+que ya calculaba `disponerRed()`) y resaltado de nodo+coautores por clase
+CSS —`data-vecinos`/`data-a`/`data-b` embebidos en el SVG en el
+renderizado, sin necesitar volver a pedir datos ni re-renderizar—, en vez
+de reproducir la ruta de re-render completo que `pasoTecladoRed()` (ya
+eliminada, dependía de `D.nav`) hubiera exigido. Verificado con
+Playwright: clic fija/suelta el foco, `Tab` aterriza en el nodo con
+`tabindex=0`, flecha mueve el foco del navegador, `Intro` fija, `Escape`
+suelta — sin errores de consola. (2) `heatmap.js`/`treemap.js` daban
+`tabindex="0"` a CADA celda (hasta 24+9 paradas de Tab en
+`produccion.html`), reintroduciendo el problema que las barras ya
+habían resuelto (`docs/UX_UI.md` §10.1); se aplicó el mismo patrón
+giratorio, generalizando el selector de `tecladoGraficos()` en
+`paginas.js` en vez de duplicar el mecanismo. (3) `rect.acum-pista` (el
+riel de fondo de `acumulada()`, I-05) medía 1,21:1 en claro y 1,08:1 en
+oscuro contra `--superficie` —muy por debajo del piso 3:1 de WCAG
+1.4.11—, y `contraste.mjs` nunca lo detectaba porque su selector de
+"objetos gráficos" no lo cubría. Se cambió el token a `--tinta-3`
+(6,18:1/5,75:1, medido, ya validado y en uso en el mismo componente) y se
+amplió el selector de `contraste.mjs` para que este tipo de falla no
+vuelva a pasar sin medirse.
+
+**Código muerto real, verificado por alcanzabilidad, no por grep de
+texto.** ~440 líneas: la arquitectura completa "modulos" —`RENDER`,
+`modulo()`, `rail()`, `panelEje()`, `moduloDiferido()`, `paginaModulos()`,
+`banda()`, `cierre()`, `hero()`, `kpis()`, `kpisRestantes`, `panorama()`
+en `vista.js`; `modulos()` en `paginas.js`; la rama `tipo === 'modulos'`
+en `prerender.mjs`— quedó inalcanzable desde que ninguna página lleva
+`data-pagina="modulos"`, superada por la arquitectura "sección"/explorador
+reactivo. `anillo()` en `core.js` (su único llamador vivo era
+`RENDER['C-01']`, también muerto: C-01 se dibuja hoy como `barrasH`) y
+`pasoTecladoRed()` (superada por el mecanismo de foco por CSS descrito
+arriba) también se eliminaron. `docs/UX_UI.md` §12.4 todavía citaba
+"Anillo de `C-01`" como ejemplo de la escala `'serie'`, que ahora no tiene
+ningún gráfico publicado que la use — corregido para decirlo así, sin
+inventar un ejemplo que no existe.
+
+**Herramientas de verificación con defectos propios.**
+`src/verify/higiene.py`: la detección de clases entre comillas no
+toleraba un espacio inicial (`' chip-on'`, `' ordenada'`), dando dos
+falsos positivos de "clase sin usar"; `EFIMEROS` tenía `'limpiar2'`
+(id real: `limpiar-recorte`) y le faltaba `'q'` (creado dinámicamente,
+buscado por `getElementById` en `paginas.js`), dando un falso positivo de
+"id ausente" en cada corrida. `src/verify/responsive.mjs` cubría sólo
+`index`/`impacto` sin guarda de cobertura — se amplió a las 11 páginas
+(mismo patrón que `contraste.mjs`/`estructura.mjs`) y ENCONTRÓ un
+desborde horizontal real: `publicaciones.html` desbordaba 303px en móvil
+(430px) porque `.explorador-panel` (un ítem de grid) no tenía
+`min-width: 0`, así que un chip de filtro con etiqueta larga ("Facultad
+de Arquitectura, Diseño y Estudios Creativos") empujaba el panel entero a
+su ancho de contenido (717px) — el clásico atrapa-desborde de
+`min-width: auto` en CSS Grid. Corregido en `app.css`. `responsive.mjs`
+tampoco fallaba nunca (nunca llamaba `process.exit(1)`); ahora sí.
+
+### Errores propios, corregidos antes de aplicar
+
+- Un agente reportó `data-indicadores` como marcado vestigial de la
+  arquitectura "modulos" muerta y se quitó de 4 páginas de sección; el
+  build se rompió (`04_glossary.py`'s `verificar_denominadores()` lo lee
+  directamente del HTML para comprobar que el panel de `EJES.md` declara
+  el denominador correcto — un uso real, en Python, que el grep de JS del
+  agente no podía ver). Revertido antes de comitear; verificado con
+  `python3 src/build/build_all.py` completo.
+- Al medir el contraste del riel de I-05, `opacity: .55` sobre
+  `--tinta-3` parecía visualmente más sutil pero medía 2,38:1/2,73:1 —
+  vuelve a incumplir el piso. Se descartó antes de comitear; el fix final
+  usa el color sólido, medido.
+- La primera corrección de `.explorador-panel` mantuvo
+  `min-width: auto` implícito en el propio `.explorador`; el desborde
+  seguía. Se agregó `min-width: 0` en el nivel correcto (el ítem de grid,
+  no el contenedor) tras diagnosticar con Playwright cuál elemento
+  concreto excedía el viewport.
+
+### Verificación
+
+Cada corrección de código se verificó ejecutando la herramienta real que
+la mide, no por inspección: `python3 src/audit/run_all.py` (30 reglas, 0
+bloqueantes), `python3 src/review/apply_decisions.py --test` (batería
+completa, incluidos los casos nuevos), `python3 src/build/build_all.py` +
+`06_assemble_site.py` (11 páginas, sin avisos), `node
+src/verify/run_all.mjs` completo — **contraste, estructura, flujos,
+responsive, higiene, peso: 6/6 en verde**, incluida la cobertura ampliada
+de `contraste.mjs`/`responsive.mjs` que antes no medía estos casos.
+Verificación manual con Playwright, sin asumir nada del código: captura de
+los 4 elementos con `getBoundingClientRect()` que causaban el desborde de
+`publicaciones.html`; secuencia completa clic→Tab→flecha→Intro→Escape
+sobre C-05 con verificación de clases DOM en cada paso; lectura de los
+textos reales del SVG de R-01 tras un filtro de cliente.
+`python3 src/state/snapshot.py`: 400 decisiones indexadas, 400 IDs únicos
+(antes 374), sin avisos de duplicado.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-401 | `veredictos_orcid()` descarta siempre `sin_registro` cuando la misma firma tiene un veredicto `confirmadas`/`retiradas` con evidencia, sin importar el orden temporal en que se registraron | «No encontrado» es ausencia de evidencia, no una afirmación sobre un ORCID concreto — no pesa lo mismo que un veredicto con evidencia dispositiva (`D-341` original, ORCID) |
+| D-402 | El regex de `## Sesión` en `snapshot.py` tolera un paréntesis opcional entre la fecha y el guion largo | 6 de 16 encabezados reales no matcheaban y mal-atribuían la "Fase" de hasta el 55 % de las filas de `docs/DECISIONS.md` a la sesión anterior |
+| D-403 | Los 26 IDs `D-NNN` duplicados se resuelven conservando la primera aparición cronológica y renumerando sólo la segunda (`D-375`–`D-400`), sin tocar el texto de ninguna decisión | Es un error de numeración manual, no una decisión que reabrir (`CLAUDE.md`); el ID es una etiqueta, no el contenido |
+| D-404 | La arquitectura "modulos" (`RENDER`, `modulo()`, `paginaModulos()`, `hero()`, `kpis()`, `panorama()`, `anillo()`, ~440 líneas) se elimina en vez de mantenerse | Verificado inalcanzable por trazado real desde los puntos de entrada (`data-pagina`, `tipo` de `prerender.mjs`), no por conteo textual — cero páginas la usan desde que la arquitectura de explorador reactivo la sustituyó |
+| D-405 | El foco de C-05 (clic/teclado, resaltar nodo+coautores) se implementa con clases CSS sobre el SVG ya renderizado, no re-renderizando `svgRedNodos()` con `foco` | Evita necesitar `D` (el layout completo) en el navegador después del renderizado inicial; los datos para resaltar (`data-vecinos`, `data-a`/`data-b`) ya estaban disponibles en el SVG sin ese costo |
+| D-406 | `data-indicadores` se conserva en `produccion.html`/`impacto.html`/`colaboracion.html`/`tematica.html` pese a que ningún JS de cliente lo lee ya | `04_glossary.py`'s `verificar_denominadores()` lo lee directamente del HTML como cruce de cobertura de `EJES.md` — quitarlo rompe el build (`BUILD ABORTADO`), confirmado al revertir |
+| D-407 | Los tramos de "autores por publicación" en `explorador.js` se igualan a los de `02_indicators.py`, en vez de mantener un esquema propio para la vista reactiva | Eran fronteras de bin distintas para el mismo indicador (C-06): el gráfico cambiaba de agrupación al tocar cualquier filtro, no sólo de rótulo |
+| D-408 | `CAMPOS.cuartil` en `explorador.js` devuelve `['Sin dato declarado']` en vez de `[]`, y `cobertura()` excluye ese valor explícitamente al contar cobertura | Mismo criterio que `02_indicators.py` (R-01): el gráfico "parte de un 100 %" necesita el bucket para no mentir sobre el reparto; el sello de cobertura necesita excluirlo para no mentir sobre cuánto dato hay |
+| D-409 | El riel de fondo de `acumulada()` (I-05) usa `--tinta-3` en vez de `--red` | `--red` medía 1,21:1/1,08:1 contra `--superficie`, bajo el piso 3:1 de WCAG 1.4.11; `--tinta-3` (6,18:1/5,75:1, medido) es un token ya validado en el mismo componente |
+
+### Archivos modificados
+
+```
+config/orcid_revisado.yml             elimina entrada contradictoria (Dreyse J.)
+config/sources.yml, config/indicators.yml   referencia D-341→D-398 corregida
+src/review/apply_decisions.py         guardián sin_registro∩(confirmadas∪retiradas)
+src/state/snapshot.py                 regex de sesión, detección de ID duplicado, CSV seguro
+SESSION_NOTES.md                      26 IDs renumerados + referencias en prosa corregidas
+STATE.md, docs/DECISIONS.md           regenerados
+README.md, PLAN.md                    cifras, índice de documentación, fecha de actualización
+docs/ARCHITECTURE.md                  reescrito: estado implementado, no diseño pendiente
+docs/LIMITATIONS.md                   ORCID recuperado, vocabulario validado, E-09 resuelto, ruta corregida
+docs/AUTHOR_PROFILE.md, docs/V2_BACKLOG.md, docs/ORCID_COVERAGE.md,
+docs/INDICATORS.md, docs/DATA_LICENSE.md, docs/DEPLOYMENT.md,
+docs/FUENTES_Y_APIS.md                538/274, tramos de fusión, PD-01 en catálogo
+docs/METHODOLOGY.md                   fecha de actualización
+docs/UX_UI.md                         ejemplo de escala 'serie' corregido
+web/assets/js/vista.js                −434 líneas (arquitectura modulos muerta)
+web/assets/js/core.js                 −anillo(), −pasoTecladoRed(), +data-vecinos/data-a/data-b/data-nav en red()
+web/assets/js/paginas.js              +alternarFocoRed/soltarFocoRed, tecladoGraficos() generalizado, −modulos()
+web/assets/js/vista_explorador.js     grafico()/cortes() con trama+aviso, PAGINAS sin modulos
+web/assets/js/explorador.js           TRAMOS_AUTORES, CAMPOS.cuartil, cobertura(), docstring reubicado
+web/assets/js/visualizations/heatmap.js, treemap.js   tabindex giratorio
+web/assets/css/app.css                --acum-pista, min-width:0 en .explorador-panel/.explorador-resultado
+src/build/prerender.mjs               rama 'modulos' eliminada, carga de ejes.json sin uso eliminada
+src/build/06_assemble_site.py         "once páginas"
+src/verify/higiene.py                 EFIMEROS, regex de clases con espacio inicial
+src/verify/responsive.mjs             reescrito: 11 páginas, guarda de cobertura, falla de verdad
+src/verify/contraste.mjs, run_all.mjs rect.acum-pista, "11 páginas"
+web/_cabecera.html, web/produccion.html, web/impacto.html,
+web/colaboracion.html, web/tematica.html   "once páginas" / data-indicadores conservado
+```
+
+### Supuestos descartados
+
+- Que `data-indicadores` en las páginas de sección era marcado
+  vestigial de la arquitectura muerta: es una fuente de datos real para
+  `04_glossary.py`, verificado al romper el build.
+- Que reducir la opacidad de `--tinta-3` en el riel de I-05 bastaba para
+  quedar "suficientemente sutil": medido, no alcanza 3:1 por debajo de
+  ~70 % de mezcla, y a esa mezcla ya no es más sutil que el color sólido.
+- Que las 4 firmas de `E-09` seguían pendientes de revisión (como decían
+  varios documentos): ya estaban resueltas y descartadas.
+
+### Ambigüedades abiertas
+
+- Ninguna nueva de esta auditoría. Las de siempre: Moya Patricia
+  pendiente, la fusión de "Varios Scopus ID" sin resolver (Hallazgo 2 de
+  la auditoría anterior), 129 pendientes de identidad, T-06/T-19.
+- Nota para una sesión futura, no una ambigüedad de esta: `ejes.json`
+  (`04_glossary.py`, `docs/EJES.md`) ya no lo consume ningún JS de
+  cliente —la arquitectura de secciones reactivas (`vista_explorador.js`)
+  reescribió su propio texto "qué responde/no responde" en
+  `SECCIONES`, en vez de leer el artefacto—, así que hay dos copias de la
+  misma prosa metodológica que pueden divergir sin que nada lo note (ya
+  divergieron parcialmente, verificado). No se tocó: es una decisión de
+  arquitectura (¿leer `ejes.json` desde el cliente, o retirar el paso de
+  build?), no un bug de una línea.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente de este cierre — las 17 correcciones
+de esta auditoría están aplicadas, verificadas con las herramientas reales
+del proyecto y listas para revisión antes de comitear. Confirmar que no
+hay push paralelo a la rama antes de subir (patrón ya establecido en
+sesiones anteriores). Cuando el usuario retome: la nota sobre
+`ejes.json`/`SECCIONES` duplicados (arriba) es la única pieza no resuelta
+que vale la pena decidir explícitamente, no ejecutar sin más contexto.

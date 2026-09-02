@@ -349,7 +349,7 @@ fuentes:
     endpoint: "https://facultadmedicina.finis.cl/wp-json/wp/v2/pages?slug=publicaciones&_fields=id,title,link,content"
     autenticacion: "ninguna"
     conector: "src/enrich/facultad_medicina_publicaciones.py"
-    rol: "corpus paralelo declarado por la institución, no verificado por Scopus (D-206, D-341)"
+    rol: "corpus paralelo declarado por la institución, no verificado por Scopus (D-206, D-398)"
     # La bandera que 09_produccion_declarada.py usa para DESCUBRIR fuentes de
     # este tipo sin nombrar "Medicina" en el código: una segunda Facultad que
     # sume su propio listado más adelante sólo necesita esta misma bandera en

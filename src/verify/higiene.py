@@ -60,7 +60,7 @@ for m in re.finditer(r'class="([^"]*)"', marcado):
 # class="a ${cond ? 'b' : ''}" no cierra la comilla antes de la interpolación.
 for m in re.finditer(r'class="([^"]{0,200}?)(?:\$\{|")', marcado):
     clases_marcado.update(re.findall(r'[a-záéíóúñ][\w-]*', m.group(1), re.I))
-clases_marcado.update(re.findall(r"'([a-z][\w-]*)'", js))
+clases_marcado.update(re.findall(r"'\s*([a-z][\w-]*)'", js))
 for m in re.findall(r'className\s*\+=\s*.([\w\s-]+)', marcado):
     clases_marcado.update(m.split())
 # `class="num ${cond ? 'ordenada' : ''}"` dentro de plantilla literal.
@@ -92,8 +92,11 @@ if sin_uso:
 # ---- 4. Identificadores que el JS busca y que deben existir en algún HTML
 ids_html = set(re.findall(r'\bid="([^"]+)"', html))
 ids_js = set(re.findall(r"getElementById\('([^']+)'\)", js))
-# Estos los crea el propio JS al pintar la paginación o el estado vacío.
-EFIMEROS = {'ant', 'sig', 'limpiar2'}
+# Estos los crea el propio JS al pintar la paginación o el estado vacío, o
+# los busca por `closest('#...')` en vez de `getElementById` (así que este
+# chequeo, que sólo mira `getElementById`, nunca los ve declarados aunque sí
+# usados — 'limpiar-recorte' en paginas.js, con closest()).
+EFIMEROS = {'ant', 'sig', 'limpiar-recorte', 'q'}
 faltan = sorted(i for i in ids_js - ids_html - EFIMEROS)
 print(f'  getElementById: {len(ids_js)} distintos · ausentes del HTML: {len(faltan)}')
 if faltan:
