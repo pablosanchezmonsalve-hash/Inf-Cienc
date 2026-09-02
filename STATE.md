@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `a350464` · Aclara la cola de Facultad/Escuela: centros de investigación y unidade
+Último commit: `9f83257` · Fusiona origin/main (sesión paralela) y corrige un bug real de idempot
 Snapshot: 2026-09-02
 
 ---
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 388
+## Decisiones tomadas: 390
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
