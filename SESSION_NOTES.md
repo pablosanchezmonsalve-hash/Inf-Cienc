@@ -8517,3 +8517,81 @@ combinada" que imprime al final, y decidir con esa cifra real si `X-03`
 cruza el umbral para publicarse — y si publicarlo, además, requiere su
 propia decisión de alcance sobre qué mostrar (financiador, número de
 proyecto, o sólo el booleano "tiene financiamiento declarado").
+
+---
+
+## Cierre: bug real encontrado al mostrar `indicadores.html` — el índice lateral flotaba sobre el contenido en escritorio
+
+### Contexto
+
+Pedido: "Regenera indicadores.html y mostrame que quedó bien" (confirmar
+visualmente `PD-01`/`PD-02`/`PD-03`/`X-03` tras los cierres anteriores).
+Al capturar la página con Playwright en ≥1040px de ancho apareció un
+defecto real, sin relación con el contenido agregado hoy: el índice "En
+esta página" (`<nav class="rail">`) queda fijo (`position: sticky`) y
+**flota semitransparente sobre las secciones** a medida que se hace
+scroll, en vez de vivir en una columna al costado — visible en la captura
+que se le mostró al usuario antes de preguntar si corregirlo. Confirmado
+"sí, arreglalo".
+
+### Diagnóstico
+
+`web/assets/css/app.css` ya declara una clase `.disposicion`
+(`display: grid; grid-template-columns: var(--rail) minmax(0, 1fr)` a
+≥1040px) diseñada exactamente para envolver `[.rail, contenido]` en dos
+columnas — pero **ningún código de armado de página la aplicaba**:
+`vista.js::catalogo()` (el índice de `indicadores.html`) devolvía
+`<nav class="rail">` y las secciones como hermanos sueltos, sin ningún
+contenedor. Sin una columna que lo acote, `.rail` (`position: sticky`) se
+vuelve un bloque de ancho completo que se pega a `top: 7.4rem` y tapa lo
+que sigue debajo.
+
+Verificado ANTES de asumir el mismo bug en otras páginas: el índice "En
+esta sección" de `vista_explorador.js` (producción/impacto/colaboración/
+áreas temáticas) NO tiene este problema — vive dentro de
+`.explorador-panel`, que ya es su propia columna fija de 17rem con
+`position: sticky` + `overflow-y: auto` acotado (`app.css` línea ~1572,
+mecanismo previo y distinto de `.disposicion`). Confirmado con una captura
+de `produccion.html` en el mismo punto de scroll: sin overlap. El bug
+estaba aislado a `catalogo()`, la única función que emitía `.rail` sin
+ningún contenedor de grid.
+
+### Corrección
+
+`vista.js::catalogo()`: el `<nav class="rail">` y las secciones ahora se
+envuelven en `<div class="disposicion">`. Verificado antes de aplicar que
+ningún selector de JS asume la profundidad del DOM anterior: `paginas.js`
+(scroll-spy) y `src/verify/flujos.mjs` usan `.rail a` (descendiente, no hijo
+directo) y `document.getElementById(id)` para las secciones observadas —
+ninguno se rompe con un contenedor extra.
+
+### Verificación
+
+`06_assemble_site.py` + `node run_all.mjs` (6/6, incluido `flujos.mjs` que
+ejercita el scroll-spy de este mismo rail con un clic real y comprueba que
+marca exactamente un enlace activo). Captura Playwright en claro y oscuro,
+mismo punto de scroll que mostró el bug: el índice ahora vive en su propia
+columna angosta a la izquierda, sin superponerse a ninguna sección, en los
+dos temas. Captura en 390px (breakpoint móvil, `.disposicion` sigue
+`display: block` ahí): sin cambios respecto de antes — la fila de pastillas
+horizontal de siempre.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-426 | `catalogo()` envuelve `.rail` y las secciones en `.disposicion`; el resto del sitio no se toca | `.disposicion` ya existía en `app.css` sin usarse en ningún lado — era la pieza que faltaba, no una clase nueva que inventar. Verificado que `vista_explorador.js` no tiene el mismo bug (columna propia ya correcta) antes de asumir un alcance mayor |
+
+### Archivos modificados
+
+```
+web/assets/js/vista.js   catalogo(): .rail + secciones envueltos en .disposicion
+```
+
+### Ambigüedades abiertas
+
+Ninguna nueva.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente.

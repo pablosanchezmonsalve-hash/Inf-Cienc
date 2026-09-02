@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `a76a8c0` · Publica PD-03: producción autoarchivada en el repositorio instituciona
+Último commit: `b42b083` · Implementa Crossref para financiamiento declarado: la fuente complemen
 Snapshot: 2026-09-02
 
 ---
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 425
+## Decisiones tomadas: 426
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
