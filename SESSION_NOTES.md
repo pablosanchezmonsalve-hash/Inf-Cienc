@@ -7380,3 +7380,79 @@ docs/V2_BACKLOG.md                              nota distinguiendo de §8
 Reportar al usuario que la sección está publicada, con los números
 reales y la explicación de por qué no toca ningún gráfico existente.
 Confirmar que el push está limpio (sin pushes paralelos) antes de subir.
+
+## Cierre: metodología para datos fuera de Scopus — jerarquía de niveles de evidencia (documentación, sin indicador nuevo)
+
+### Contexto
+
+Con `PD-01` ya publicado, el usuario preguntó cómo aportaban a esa misma
+sección los datos de cobertura OpenAlex/Crossref que ya existían en
+`internal/openalex_cobertura.csv` (`V2-26`). La respuesta —que son una
+evidencia distinta, no una extensión de `PD-01`— llevó a la pregunta
+explícita del usuario: "Me gustaría pensar en una metodología para
+implementar todo lo que esté fuera de scopus". Tras exponer la idea central
+en conversación (dos niveles de evidencia, incompatibles entre sí, que no
+deben mezclarse aunque ambos compartan la etiqueta "fuera de Scopus") y
+ofrecer formalizarla, el usuario pidió explícitamente: "Genera un doc".
+
+### Qué se hizo
+
+Nuevo `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`: formaliza la distinción entre
+**Nivel D** (declarado por la institución, sin verificación individual por
+obra — `PD-01`/Facultad de Medicina, 609 registros, 83 en ventana) y
+**Nivel V** (verificado obra por obra mediante criterio explícito —
+la cola OpenAlex + Crossref, 414 candidatos, 20 confirmados vía revisión
+humana, 394 pendientes; no publicada como indicador). Cinco reglas:
+clasificar antes de construir, esquema compartido por nivel (nunca por
+fuente ni entre niveles distintos), evidencia cruzada refuerza el mismo
+registro en vez de duplicarlo, cada nivel con su propio indicador, y el
+denominador del universo Scopus/SciVal no se toca en ningún nivel. Incluye
+un checklist operativo de 5 preguntas para clasificar cualquier fuente
+futura sin tener que rederivar el razonamiento desde cero.
+
+No se propuso ni se construyó ningún indicador nuevo (ningún `PD-02`):
+el propio documento declara en su §4 qué NO resuelve, y ampliar el alcance
+publicado sigue siendo, por `D-16`/`D-206`, una decisión aparte que le
+corresponde al usuario. Es un documento de clasificación, no una
+implementación.
+
+Verificado antes de escribir, no asumido: se leyó `docs/METHODOLOGY.md`
+completo (gobierna el corpus canónico, no toca esta pregunta — no hay
+duplicación) y se confirmaron con `python3` las cifras reales citadas
+(`data/processed/produccion_declarada.json`, `internal/openalex_cobertura.csv`,
+`internal/openalex_cobertura_decisiones.csv`) en vez de repetirlas de
+memoria de la sesión anterior. Se agregaron referencias cruzadas de una
+línea desde `docs/FUENTES_Y_APIS.md` §2.6, `docs/V2_BACKLOG.md` §8 y
+`docs/DATA_MODEL.md` (todas ya mencionaban el mecanismo; ahora apuntan
+también al marco general), y una entrada nueva en el mapa de lectura de
+`src/state/snapshot.py` (`MAPA_LECTURA`) para que `STATE.md` la exponga.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-373 | Toda fuente fuera de Scopus se clasifica en Nivel D (declarado) o Nivel V (verificado obra por obra) antes de construir cualquier mecanismo para ella | `PD-01` y la cola OpenAlex/Crossref ya son dos fuentes reales con esa etiqueta compartida y evidencia incompatible; sin una regla explícita, una tercera fuente futura podría mezclarlas bajo el mismo indicador |
+| D-374 | El documento de metodología no autoriza ni construye ningún indicador nuevo para la cola OpenAlex/Crossref | Ampliar el alcance publicado sigue siendo, por `D-16`/`D-206`, una decisión de alcance aparte y explícita que le corresponde al usuario — pensar la metodología no es autorizar su siguiente aplicación |
+
+### Archivos modificados
+
+```
+docs/METODOLOGIA_FUERA_DE_SCOPUS.md   nuevo
+docs/FUENTES_Y_APIS.md                referencia cruzada en §2.6
+docs/V2_BACKLOG.md                    referencia cruzada en el blockquote de §8
+docs/DATA_MODEL.md                    referencia cruzada en «Corpus paralelo declarado»
+src/state/snapshot.py                 MAPA_LECTURA += 1 entrada
+```
+
+### Ambigüedades abiertas
+
+- Ninguna nueva. Las de siempre: Moya Patricia pendiente, el mecanismo de
+  fusión de "Varios Scopus ID" sin resolver (Hallazgo 2), 129 pendientes
+  de identidad, T-06/T-19.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente de este cierre. Si el usuario decide
+avanzar con un indicador Nivel V para la cola OpenAlex/Crossref, ese sería
+un nuevo ciclo de diseño (EnterPlanMode), apoyado en el checklist de este
+documento — no una continuación automática de este cierre.

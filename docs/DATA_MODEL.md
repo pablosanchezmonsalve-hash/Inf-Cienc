@@ -79,5 +79,7 @@ Facultad declara en su propio sitio, fuera del universo Scopus/SciVal.
 Nunca se une a `Publicacion` ni a ningún indicador de este modelo — mezclar
 criterios de indexación distintos sin declararlo sería exactamente el
 error que este proyecto evita (D-206, D-341). Ver
-`docs/FUENTES_Y_APIS.md` §2.6 y `config/sources.yml` →
-`facultad_medicina_publicaciones`.
+`docs/FUENTES_Y_APIS.md` §2.6, `config/sources.yml` →
+`facultad_medicina_publicaciones`, y `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`
+para el marco general (este corpus es Nivel D — declarado, no verificado
+obra por obra).

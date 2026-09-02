@@ -207,6 +207,10 @@ a Medicina: cualquier fuente que declare `corpus_paralelo_declarado: true`
 en `config/sources.yml` con un JSON del mismo esquema (documentado en el
 docstring del conector) se descubre sola.
 
+`PD-01` es Nivel D (declarado, sin verificación individual por obra) según
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md`. No confundir con la cola de revisión
+de §3.1 (OpenAlex + Crossref), que es Nivel V y aún no está publicada.
+
 ---
 
 ## 3. Propuestas de nuevas integraciones

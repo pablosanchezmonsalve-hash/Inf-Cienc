@@ -227,3 +227,9 @@ diseñarla e implementarla, y decidir dónde vive en la navegación del sitio.
 > `CONFIRMADO_PRODUCCION_UFT` (evidencia OpenAlex + Crossref + revisión
 > humana caso por caso), que sigue abierta. Ver
 > `src/build/09_produccion_declarada.py` y `docs/FUENTES_Y_APIS.md` §2.6.
+>
+> El marco general para relacionar estos dos tipos de evidencia —y
+> clasificar cualquier fuente futura de la misma familia— está en
+> `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`: `produccion-ampliada.html` es
+> Nivel D (declarado), esta propuesta sería Nivel V (verificado obra por
+> obra) si se autoriza construirla.
