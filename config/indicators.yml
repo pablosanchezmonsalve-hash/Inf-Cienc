@@ -178,7 +178,7 @@ indicadores:
   X-03: {nombre: "Indicadores de financiamiento", categoria: descriptivo, publicar: false,
          estado: no_calculable,
          razon: "Cobertura 37,4 %: insuficiente para reportar sin sesgo.",
-         que_falta: "Fuente complementaria de financiamiento."}
+         que_falta: "Fuente complementaria de financiamiento: src/enrich/crossref_financiamiento.py está implementado y probado (--test), pero api.crossref.org no es alcanzable desde este entorno (config/sources.yml -> crossref_financiamiento_api, ejecutada: false). Falta correrlo con acceso de red real y medir la cobertura combinada."}
   X-04: {nombre: "Tendencia de largo plazo", categoria: descriptivo, publicar: false,
          estado: no_calculable,
          razon: "La ventana 2023-2025 no sostiene una tendencia.",

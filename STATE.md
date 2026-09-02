@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4ccec18` · Publica PD-02: la cola de cobertura OpenAlex confirmada por revisión h
+Último commit: `a76a8c0` · Publica PD-03: producción autoarchivada en el repositorio instituciona
 Snapshot: 2026-09-02
 
 ---
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 422
+## Decisiones tomadas: 425
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

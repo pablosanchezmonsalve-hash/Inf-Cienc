@@ -8373,3 +8373,147 @@ mayor volumen: Ingeniería civil informática, Ingeniería comercial,
 Formación General, CIDOC, Periodismo, CIPEF, Diseño) y agregar esa
 confirmación a `config/matching_rules.yml` — este conector la recogería
 sin cambios de código, igual que ya recoge las que sí están validadas.
+
+---
+
+## Cierre: Crossref para financiamiento — la fuente complementaria que `X-03` ya pedía, implementada y probada, sin poder ejecutarse aquí
+
+### Contexto
+
+**"Integra API Crossref."** El proyecto ya usa Crossref para dos preguntas
+(ORCID declarado por el editor; evidencia de afiliación para la cola
+OpenAlex, V2-26 bis) — no era obvio qué dato NUEVO pedía el usuario. Se
+preguntó, vía `AskUserQuestion`, entre las tres ampliaciones que
+`docs/FUENTES_Y_APIS.md` §3.4 ya dejaba planteadas sin construir
+(financiamiento, acceso abierto contrastado, referencias/citación interna)
+— el usuario delegó la elección: **"No estoy seguro/a — elegí vos"**.
+
+### Por qué financiamiento, y no las otras dos
+
+Investigado antes de elegir, no por preferencia:
+
+- **Acceso abierto**: Crossref no tiene un campo limpio de "acceso
+  abierto" (sólo URLs de licencia que exigen heurística) —
+  `docs/FUENTES_Y_APIS.md` §3.5 ya identificaba Unpaywall como la
+  herramienta correcta para esa pregunta específica. Elegirla habría sido
+  duplicar un trabajo que el proyecto ya tiene mejor resuelto en otro
+  lado.
+- **Referencias**: la de mayor alcance técnico (una estructura de grafo
+  nueva, comparable a C-05) — demasiado grande para "elegí vos" sin
+  confirmar el diseño con el usuario primero.
+- **Financiamiento**: al revisar `config/indicators.yml` se encontró que
+  **ya existe** `X-03` ("Indicadores de financiamiento"), sin publicar,
+  con razón explícita — "Cobertura 37,4 %: insuficiente para reportar sin
+  sesgo" — y `que_falta` diciendo, literalmente, "Fuente complementaria de
+  financiamiento". Verificado: esa cobertura sale de `Funding
+  Details`/`Funding Texts`, campos reales del export nativo de Scopus (306
+  de 818 filas), que **ningún paso del pipeline extraía** — no llegan a
+  `publications_universe.csv` (confirmado antes de escribir código). Elegir
+  esta opción no es inventar una pregunta nueva: es construir exactamente
+  la pieza que el proyecto ya había identificado como faltante, con su
+  propio umbral de decisión ya declarado.
+
+### Qué se construyó
+
+Nuevo conector `src/enrich/crossref_financiamiento.py`, mismo patrón de
+caché/errores que `openalex_cobertura_crossref.py` (que sí corrió, en una
+sesión con acceso de red real). Por cada publicación con DOI: extrae por
+fin `Funding Details` del export de Scopus (texto libre, separado por
+`;`), y consulta Crossref para traer `message.funder` (nombre +
+identificador del Crossref Funder Registry + números de proyecto). Las dos
+cadenas se reportan una al lado de la otra, **sin fusionarlas**: decidir
+que "CONICYT" y su sucesora "ANID" son la misma entidad es el mismo tipo de
+normalización de vocabulario institucional que
+`unidad_academica.vocabulario` no hace sin validación, y este conector
+sigue el mismo principio.
+
+**No pudo ejecutarse de verdad.** Antes de darlo por bloqueado, se
+comprobó: `curl` directo a `api.crossref.org` devuelve `CONNECT tunnel
+failed, response 403`, y `curl "$HTTPS_PROXY/__agentproxy/status"`
+confirma que es el gateway del proxy rechazando la conexión por política
+("policy denial"), no un error transitorio ni un problema de configuración
+local que se pudiera corregir desde la sesión. Correr el conector de
+verdad (`--limit 3`) reprodujo el mismo 403 tres veces y, correctamente,
+**no escribió ningún archivo** ("Sin resultados") en vez de dejar una
+salida vacía o a medias.
+
+`config/sources.yml` gana `crossref_financiamiento_api`, con
+`ejecutada: false` explícito (primer caso de esta bandera en el archivo;
+hasta ahora las tres fuentes API que alguna vez estuvieron sin ejecutar ya
+corrieron). `config/indicators.yml` -> `X-03` **no cambia su
+`publicar`/`estado`** — seguiría siendo inventar un resultado publicar algo
+sin la cifra real de cobertura combinada —; sólo su `que_falta` se
+actualiza para decir que la fuente complementaria ya está implementada y
+probada, pendiente de una corrida real.
+
+### Verificación
+
+`python3 src/enrich/crossref_financiamiento.py --test`: 11/11
+comprobaciones (parseo de `Funding Details`, extracción de `funder` de
+Crossref, casos sin financiamiento en ninguna fuente, casos donde sólo una
+de las dos declara financiamiento, normalización de DOI). Corrida real
+intentada y documentada como bloqueada (ver arriba). `python3
+src/audit/run_all.py`/`build_all.py`/`06_assemble_site.py`/`node
+run_all.mjs`: sin cambios de comportamiento — ningún paso del build
+consume todavía `data/enriched/crossref_financiamiento.csv` (no existe:
+la corrida real no produjo salida), así que el sitio publicado no cambia
+con este cierre.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-423 | De las tres ampliaciones de Crossref propuestas (financiamiento, acceso abierto, referencias), se implementa financiamiento | Es la única que resuelve una brecha YA documentada (`X-03`, `que_falta: "Fuente complementaria de financiamiento"`) en vez de proponer un indicador nuevo sin precedente; acceso abierto duplicaría el rol ya asignado a Unpaywall (§3.5) y referencias excede el alcance de una elección delegada sin diseño previo |
+| D-424 | `crossref_financiamiento.py` reporta el financiador de Scopus y el de Crossref como dos cadenas separadas, sin fusionarlas | Normalizar nombres de financiador entre fuentes (p. ej. CONICYT/ANID, la misma entidad renombrada) es el mismo trabajo de vocabulario institucional que `unidad_academica.vocabulario` exige validar antes de aplicar — no una decisión que tome un conector por su cuenta |
+| D-425 | `X-03` permanece sin publicar (`publicar: false` sin cambios); sólo se actualiza `que_falta` | La fuente complementaria está implementada pero no ejecutada (red bloqueada, confirmado con `curl` y el estado del proxy) — no hay cifra real de cobertura combinada, y publicar sin ella sería inventar un resultado, exactamente lo que `CLAUDE.md` prohíbe |
+
+### Archivos modificados
+
+```
+src/enrich/crossref_financiamiento.py   nuevo — conector, --test (11 casos)
+config/sources.yml                      crossref_financiamiento_api (ejecutada: false)
+config/indicators.yml                   X-03.que_falta actualizado (sin cambiar publicar/estado)
+docs/FUENTES_Y_APIS.md                  §3.4 y tabla de plataformas actualizadas
+STATE.md, docs/DECISIONS.md             regenerados
+```
+
+### Supuestos descartados
+
+- Que "Integra API Crossref" pedía ampliar alguno de los conectores
+  Crossref ya existentes (ORCID, evidencia V2-26 bis): investigado y
+  descartado — ninguno de los dos trae financiamiento, y el usuario
+  delegó explícitamente la elección de QUÉ dato nuevo traer.
+- Que bastaba con el campo `Funding Details` de Scopus, ya en el export,
+  para levantar `X-03` sin tocar Crossref: descartado porque el pedido
+  explícito era integrar Crossref, y porque la razón documentada de
+  `X-03` (cobertura insuficiente) pide una fuente COMPLEMENTARIA, no sólo
+  extraer lo que ya había.
+- Que al no poder ejecutar la consulta convenía igual estimar o simular
+  una cobertura combinada para poder publicar `X-03`: descartado sin
+  ambigüedad — sería inventar el dato que este proyecto existe para no
+  inventar.
+
+### Ambigüedades abiertas
+
+- La cobertura combinada real (Scopus + Crossref) sigue sin medirse. Hasta
+  que alguien corra `crossref_financiamiento.py` desde una máquina con
+  acceso a `api.crossref.org`, no hay forma de saber si `X-03` cruza el
+  umbral que hoy lo bloquea — ni de si publicar financiamiento por
+  proyecto/financiador es, además, una decisión de alcance que alguien
+  deba tomar aparte, incluso con cobertura suficiente.
+- Igual que con `facultadmedicina.finis.cl` y `dspace`/`autoarchivo`, el
+  patrón se repite: este entorno de ejecución no tiene salida a la mayoría
+  de los dominios externos reales del proyecto. Cualquier integración de
+  API nueva debería anticiparse a esto desde el diseño (caché,
+  `--limit`/`--test`, abortar sin escribir nada a medias), como ya lo hace
+  ésta.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. El paso siguiente es de infraestructura,
+no de diseño: correr `python3 src/enrich/crossref_financiamiento.py` desde
+una máquina con acceso real a `api.crossref.org`, revisar la "cobertura
+combinada" que imprime al final, y decidir con esa cifra real si `X-03`
+cruza el umbral para publicarse — y si publicarlo, además, requiere su
+propia decisión de alcance sobre qué mostrar (financiador, número de
+proyecto, o sólo el booleano "tiene financiamiento declarado").
