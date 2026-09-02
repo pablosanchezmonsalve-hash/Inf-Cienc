@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `7dd40fd` · Resuelve la contradicción de Arroyo A. con evidencia cruzada y corrige
-Snapshot: 2026-09-01
+Último commit: `0a74ee8` · Aplica el acuerdo cross-fuente DSpace × autoarchivo bajo dos criterios
+Snapshot: 2026-09-02
 
 ---
 
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 376
+## Decisiones tomadas: 378
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -65,6 +65,60 @@ INTERIM = ROOT / "data" / "interim"
 ENRICHED = ROOT / "data" / "enriched"
 
 
+# Contexto sobre unidades de autoarchivo que NO son autoexplicativas: centros
+# de investigación y unidades transversales que la cola de revisión, sin esta
+# nota, presenta como si fueran candidatas a "escuela de una facultad" —
+# exactamente la confusión que motivó esto (sesión 2026-09-02). NO se usa
+# para traducir el dato (sigue viajando en bruto, D-345): es sólo la nota que
+# el revisor necesita para entender qué es cada cosa antes de decidir.
+#
+# Fuente: búsqueda web sobre finis.cl — no se pudo leer la página directo,
+# egress bloqueado en este entorno (403 de política de red). El usuario
+# confirmó EN VIVO, en el sitio, sólo el nombre "Facultad de Educación y
+# Ciencias Sociales"; el resto es orientativo y está marcado como tal.
+REFERENCIA_UNIDADES_AUTOARCHIVO: dict[str, str] = {
+    "CIDOC": ("Es un centro de INVESTIGACIÓN, no una escuela de docencia — "
+             "el Centro de Investigación y Documentación, de la Facultad de "
+             "Humanidades y Comunicaciones (fuente externa, sin verificar "
+             "en finis.cl directamente)."),
+    "CIPEF": ("Es un centro de INVESTIGACIÓN, no una escuela de docencia — "
+             "el Centro de Investigación en Psicología, Educación y "
+             "Familia (fuente externa, sin verificar en finis.cl "
+             "directamente)."),
+    "Formación General": ("NO es una escuela de ninguna facultad: es la "
+             "Dirección de Filosofía y Formación General, unidad "
+             "transversal que depende directamente de la Vicerrectoría "
+             "Académica y da los cursos de formación general para TODA la "
+             "universidad, no de una facultad en particular (fuente "
+             "externa, sin verificar en finis.cl directamente)."),
+    "Escuela de Filosofía": ("Fuente externa (sin verificar en finis.cl "
+             "directamente): pertenecería a la Facultad de Humanidades y "
+             "Comunicaciones — distinta de «Formación General» arriba, "
+             "aunque ambas tratan filosofía."),
+    "Periodismo": ("Fuente externa (sin verificar en finis.cl "
+             "directamente): Escuela de Periodismo y Comunicación, "
+             "Facultad de Humanidades y Comunicaciones."),
+    "Literatura": ("Fuente externa (sin verificar en finis.cl "
+             "directamente): Escuela de Literatura, Facultad de "
+             "Humanidades y Comunicaciones."),
+    "Publicidad": ("Fuente externa (sin verificar en finis.cl "
+             "directamente): carrera de la Facultad de Arquitectura, "
+             "Diseño y Estudios Creativos."),
+    "Ingeniería comercial": ("Fuente externa (sin verificar en finis.cl "
+             "directamente): Facultad de Economía y Negocios."),
+    "Ingenieria civil informática": ("Fuente externa (sin verificar en "
+             "finis.cl directamente): probablemente «Ingeniería Civil en "
+             "Informática y Telecomunicaciones», Facultad de Ingeniería."),
+    "Educación básica": ("Fuente externa: Pedagogía en Educación Básica, "
+             "Facultad de Educación y Ciencias Sociales (nombre de la "
+             "facultad confirmado por el usuario en finis.cl)."),
+    "Educación parvularia": ("Fuente externa: Pedagogía en Educación "
+             "Parvularia, Facultad de Educación y Ciencias Sociales "
+             "(nombre de la facultad confirmado por el usuario en "
+             "finis.cl)."),
+}
+
+
 def _json_para_script(obj) -> str:
     """JSON seguro para incrustar en <script>: json.dumps no escapa '</',
     así que un título o afiliación con "</script>" cerraría el bloque antes
@@ -684,6 +738,8 @@ def casos(d: dict, perf: dict) -> list[dict]:
             else:
                 estado = ("Hoy esta firma figura con unidad académica «No determinada» en "
                           "todas sus publicaciones del sitio público.")
+            referencia = REFERENCIA_UNIDADES_AUTOARCHIVO.get(r["escuela_declarada_en_autoarchivo"])
+            nota_referencia = f" {referencia}" if referencia else ""
             out.append({
                 "id": f"aaunidad-{r['nombre_en_fuente']}-{r['escuela_declarada_en_autoarchivo']}",
                 "cola": "Candidato de unidad académica por autoarchivo", "prioridad": 3,
@@ -692,7 +748,7 @@ def casos(d: dict, perf: dict) -> list[dict]:
                             f"declara «{r['nombre_en_autoarchivo']}» en «"
                             f"{r['escuela_declarada_en_autoarchivo']}» "
                             f"({int(r['obras_con_esta_escuela'])} obra(s) con ese dato)."
-                            + aviso),
+                            + aviso + nota_referencia),
                 "firmas": [f], "cruces": None,
             })
 

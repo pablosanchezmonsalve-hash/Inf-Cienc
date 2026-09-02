@@ -1,6 +1,6 @@
 # Pendientes de consolidación
 
-**Generado** el 2026-09-01 por `src/review/build_review.py`. Regenerable.
+**Generado** el 2026-09-02 por `src/review/build_review.py`. Regenerable.
 
 Quedan **128 casos** de 290. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
@@ -158,7 +158,7 @@ Publicaciones atribuidas, para comparar contra el registro:
 
 ### [Allende-Valenzuela T. → CIPEF?](revision_identidad.html#caso-aaunidad-allende-valenzuela-t-cipef)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Allende-Valenzuela, Tamara» en «CIPEF» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Allende-Valenzuela, Tamara» en «CIPEF» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Es un centro de INVESTIGACIÓN, no una escuela de docencia — el Centro de Investigación en Psicología, Educación y Familia (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -168,7 +168,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Allende-Valenzuela T. → Educación parvularia?](revision_identidad.html#caso-aaunidad-allende-valenzuela-t-educaci-n-parvularia)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Allende-Valenzuela, Tamara» en «Educación parvularia» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Allende-Valenzuela, Tamara» en «Educación parvularia» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Fuente externa: Pedagogía en Educación Parvularia, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -188,7 +188,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Andrade Kobayashi M. → Literatura?](revision_identidad.html#caso-aaunidad-andrade-kobayashi-m-literatura)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Andrade Kobayashi, Megumi» en «Literatura» (2 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Andrade Kobayashi, Megumi» en «Literatura» (2 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Fuente externa (sin verificar en finis.cl directamente): Escuela de Literatura, Facultad de Humanidades y Comunicaciones.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -228,7 +228,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Bustos-Muñoz D. → Publicidad?](revision_identidad.html#caso-aaunidad-bustos-mu-oz-d-publicidad)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Bustos Muñoz, David» en «Publicidad» (2 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Bustos Muñoz, David» en «Publicidad» (2 obra(s) con ese dato). Fuente externa (sin verificar en finis.cl directamente): carrera de la Facultad de Arquitectura, Diseño y Estudios Creativos.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -238,7 +238,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Caffarena P. → CIDOC?](revision_identidad.html#caso-aaunidad-caffarena-p-cidoc)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Caffarena, Paula» en «CIDOC» (7 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Caffarena, Paula» en «CIDOC» (7 obra(s) con ese dato). Es un centro de INVESTIGACIÓN, no una escuela de docencia — el Centro de Investigación y Documentación, de la Facultad de Humanidades y Comunicaciones (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -248,7 +248,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Caffarena-Barcenilla C. → Educación parvularia?](revision_identidad.html#caso-aaunidad-caffarena-barcenilla-c-educaci-n-parvularia)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Caffarena-Barcenilla, Carolina» en «Educación parvularia» (2 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Caffarena-Barcenilla, Carolina» en «Educación parvularia» (2 obra(s) con ese dato). Fuente externa: Pedagogía en Educación Parvularia, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -280,7 +280,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Carvajal G. → CIDOC?](revision_identidad.html#caso-aaunidad-carvajal-g-cidoc)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Carvajal, Gustavo» en «CIDOC» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Carvajal, Gustavo» en «CIDOC» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Es un centro de INVESTIGACIÓN, no una escuela de docencia — el Centro de Investigación y Documentación, de la Facultad de Humanidades y Comunicaciones (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -290,7 +290,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Carvajal G. → Literatura?](revision_identidad.html#caso-aaunidad-carvajal-g-literatura)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Carvajal, Gustavo» en «Literatura» (3 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Carvajal, Gustavo» en «Literatura» (3 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Fuente externa (sin verificar en finis.cl directamente): Escuela de Literatura, Facultad de Humanidades y Comunicaciones.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -320,7 +320,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Crisóstomo Flores P. → Periodismo?](revision_identidad.html#caso-aaunidad-cris-stomo-flores-p-periodismo)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Crisóstomo-Flores, Paz» en «Periodismo» (12 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Crisóstomo-Flores, Paz» en «Periodismo» (12 obra(s) con ese dato). Fuente externa (sin verificar en finis.cl directamente): Escuela de Periodismo y Comunicación, Facultad de Humanidades y Comunicaciones.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -330,7 +330,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Crisóstomo-Flores P. → Periodismo?](revision_identidad.html#caso-aaunidad-cris-stomo-flores-p-periodismo)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Crisóstomo-Flores, Paz» en «Periodismo» (12 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Crisóstomo-Flores, Paz» en «Periodismo» (12 obra(s) con ese dato). Fuente externa (sin verificar en finis.cl directamente): Escuela de Periodismo y Comunicación, Facultad de Humanidades y Comunicaciones.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -360,7 +360,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Díaz-Galaz L. → Educación parvularia?](revision_identidad.html#caso-aaunidad-d-az-galaz-l-educaci-n-parvularia)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Díaz-Galaz, Lorena» en «Educación parvularia» (1 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Díaz-Galaz, Lorena» en «Educación parvularia» (1 obra(s) con ese dato). Fuente externa: Pedagogía en Educación Parvularia, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -370,7 +370,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Escobar-González S. → Educación básica?](revision_identidad.html#caso-aaunidad-escobar-gonz-lez-s-educaci-n-b-sica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Escobar González, Sebastián» en «Educación básica» (4 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Escobar González, Sebastián» en «Educación básica» (4 obra(s) con ese dato). Fuente externa: Pedagogía en Educación Básica, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -380,7 +380,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Farsani D. → Educación básica?](revision_identidad.html#caso-aaunidad-farsani-d-educaci-n-b-sica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Farsani, Danyal» en «Educación básica» (23 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Farsani, Danyal» en «Educación básica» (23 obra(s) con ese dato). Fuente externa: Pedagogía en Educación Básica, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -400,7 +400,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Figueroa-Bustos A. → Periodismo?](revision_identidad.html#caso-aaunidad-figueroa-bustos-a-periodismo)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Figueroa-Bustos, Arturo» en «Periodismo» (3 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Figueroa-Bustos, Arturo» en «Periodismo» (3 obra(s) con ese dato). Fuente externa (sin verificar en finis.cl directamente): Escuela de Periodismo y Comunicación, Facultad de Humanidades y Comunicaciones.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -410,7 +410,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Figueroa-Moya D. → Educación parvularia?](revision_identidad.html#caso-aaunidad-figueroa-moya-d-educaci-n-parvularia)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Figueroa-Moya, Daniela» en «Educación parvularia» (4 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Figueroa-Moya, Daniela» en «Educación parvularia» (4 obra(s) con ese dato). Fuente externa: Pedagogía en Educación Parvularia, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -459,7 +459,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Ibáñez-Muñoz R.C. → Educación básica?](revision_identidad.html#caso-aaunidad-ib-ez-mu-oz-r-c-educaci-n-b-sica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Ibáñez-Muñoz, Rosa» en «Educación básica» (1 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Ibáñez-Muñoz, Rosa» en «Educación básica» (1 obra(s) con ese dato). Fuente externa: Pedagogía en Educación Básica, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -479,7 +479,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Letelier Widow G. → Formación General?](revision_identidad.html#caso-aaunidad-letelier-widow-g-formaci-n-general)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Letelier Widow, Gonzalo» en «Formación General» (1 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Letelier Widow, Gonzalo» en «Formación General» (1 obra(s) con ese dato). NO es una escuela de ninguna facultad: es la Dirección de Filosofía y Formación General, unidad transversal que depende directamente de la Vicerrectoría Académica y da los cursos de formación general para TODA la universidad, no de una facultad en particular (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -600,7 +600,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Muszalski H. → Formación General?](revision_identidad.html#caso-aaunidad-muszalski-h-formaci-n-general)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Muszalski, Hernán» en «Formación General» (2 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Muszalski, Hernán» en «Formación General» (2 obra(s) con ese dato). NO es una escuela de ninguna facultad: es la Dirección de Filosofía y Formación General, unidad transversal que depende directamente de la Vicerrectoría Académica y da los cursos de formación general para TODA la universidad, no de una facultad en particular (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -629,7 +629,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Poblete Alday P. → CIDOC?](revision_identidad.html#caso-aaunidad-poblete-alday-p-cidoc)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Poblete Alday, Patricia» en «CIDOC» (2 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Poblete Alday, Patricia» en «CIDOC» (2 obra(s) con ese dato). Es un centro de INVESTIGACIÓN, no una escuela de docencia — el Centro de Investigación y Documentación, de la Facultad de Humanidades y Comunicaciones (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -639,7 +639,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Rego T. → Escuela de Filosofía?](revision_identidad.html#caso-aaunidad-rego-t-escuela-de-filosof-a)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Rego, Thomas» en «Escuela de Filosofía» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Rego, Thomas» en «Escuela de Filosofía» (1 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Fuente externa (sin verificar en finis.cl directamente): pertenecería a la Facultad de Humanidades y Comunicaciones — distinta de «Formación General» arriba, aunque ambas tratan filosofía.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -649,7 +649,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Rego T. → Formación General?](revision_identidad.html#caso-aaunidad-rego-t-formaci-n-general)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Rego, Thomas» en «Formación General» (8 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Rego, Thomas» en «Formación General» (8 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. NO es una escuela de ninguna facultad: es la Dirección de Filosofía y Formación General, unidad transversal que depende directamente de la Vicerrectoría Académica y da los cursos de formación general para TODA la universidad, no de una facultad en particular (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -669,7 +669,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Santibáñez D. → Educación básica?](revision_identidad.html#caso-aaunidad-santib-ez-d-educaci-n-b-sica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Santibáñez, David» en «Educación básica» (3 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Educación y Ciencias Sociales». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Santibáñez, David» en «Educación básica» (3 obra(s) con ese dato). Fuente externa: Pedagogía en Educación Básica, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -679,7 +679,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Santos M. → CIDOC?](revision_identidad.html#caso-aaunidad-santos-m-cidoc)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Santos, Marcelo» en «CIDOC» (2 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Medicina y Salud». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Santos, Marcelo» en «CIDOC» (2 obra(s) con ese dato). Es un centro de INVESTIGACIÓN, no una escuela de docencia — el Centro de Investigación y Documentación, de la Facultad de Humanidades y Comunicaciones (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -710,7 +710,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Sánchez-Duque C. → CIPEF?](revision_identidad.html#caso-aaunidad-s-nchez-duque-c-cipef)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Sánchez-Duque, Carmen Gloria» en «CIPEF» (6 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Sánchez-Duque, Carmen Gloria» en «CIPEF» (6 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Es un centro de INVESTIGACIÓN, no una escuela de docencia — el Centro de Investigación en Psicología, Educación y Familia (fuente externa, sin verificar en finis.cl directamente).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -720,7 +720,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Sánchez-Duque C. → Educación básica?](revision_identidad.html#caso-aaunidad-s-nchez-duque-c-educaci-n-b-sica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Sánchez-Duque, Carmen Gloria» en «Educación básica» (6 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Sánchez-Duque, Carmen Gloria» en «Educación básica» (6 obra(s) con ese dato). Esta firma tiene 2 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Fuente externa: Pedagogía en Educación Básica, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
@@ -760,7 +760,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Valle M.A. → Ingeniería comercial?](revision_identidad.html#caso-aaunidad-valle-m-a-ingenier-a-comercial)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Economía y Negocios». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Valle, Mauricio A.» en «Ingeniería comercial» (6 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Economía y Negocios». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Valle, Mauricio A.» en «Ingeniería comercial» (6 obra(s) con ese dato). Fuente externa (sin verificar en finis.cl directamente): Facultad de Economía y Negocios.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -780,7 +780,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Yanine F. → Ingenieria civil informática?](revision_identidad.html#caso-aaunidad-yanine-f-ingenieria-civil-inform-tica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingenieria civil informática» (10 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingenieria civil informática» (10 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Fuente externa (sin verificar en finis.cl directamente): probablemente «Ingeniería Civil en Informática y Telecomunicaciones», Facultad de Ingeniería.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -820,7 +820,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Yanine F.F. → Ingenieria civil informática?](revision_identidad.html#caso-aaunidad-yanine-f-f-ingenieria-civil-inform-tica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingenieria civil informática» (10 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas.
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Yanine, Fernando» en «Ingenieria civil informática» (10 obra(s) con ese dato). Esta firma tiene 4 escuelas distintas declaradas en el inventario entre sus distintas obras — puede ser más de una persona con el mismo apellido e inicial, o alguien que cambió de unidad. No se elige entre ellas: se muestran todas. Fuente externa (sin verificar en finis.cl directamente): probablemente «Ingeniería Civil en Informática y Telecomunicaciones», Facultad de Ingeniería.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -850,7 +850,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Zambrano C. → Ingenieria civil informática?](revision_identidad.html#caso-aaunidad-zambrano-c-ingenieria-civil-inform-tica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Zambrano, Carolina» en «Ingenieria civil informática» (2 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «Facultad de Ingeniería». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Zambrano, Carolina» en «Ingenieria civil informática» (2 obra(s) con ese dato). Fuente externa (sin verificar en finis.cl directamente): probablemente «Ingeniería Civil en Informática y Telecomunicaciones», Facultad de Ingeniería.
 
 | Comprobar en | Enlace |
 |---|---|
@@ -880,7 +880,7 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 
 ### [Álvarez-Valdés C. → Educación básica?](revision_identidad.html#caso-aaunidad-lvarez-vald-s-c-educaci-n-b-sica)
 
-En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Álvarez Valdés, Carolina» en «Educación básica» (3 obra(s) con ese dato).
+En al menos una de sus publicaciones la unidad académica no se pudo determinar; en otra(s) ya figura «No determinada». Compare si coincide con lo que declara el autoarchivo. El inventario de autoarchivo de biblioteca declara «Álvarez Valdés, Carolina» en «Educación básica» (3 obra(s) con ese dato). Fuente externa: Pedagogía en Educación Básica, Facultad de Educación y Ciencias Sociales (nombre de la facultad confirmado por el usuario en finis.cl).
 
 | Comprobar en | Enlace |
 |---|---|
