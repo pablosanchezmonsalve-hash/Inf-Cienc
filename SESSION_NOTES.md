@@ -7856,3 +7856,188 @@ Ninguno de código. Sigue pendiente, por elección explícita del usuario:
 revisión caso por caso de los 129 pendientes de identidad
 (`internal/revision_identidad.html`) — empieza en el próximo cierre de
 esta misma sesión.
+
+## Cierre: revisión caso por caso de los 128 pendientes de identidad — 46 confirmados con evidencia, 82 declarados sin evidencia suficiente, y un bug real de asignación descubierto en el camino
+
+### Contexto
+
+Con la autorización explícita del usuario ("los 129 pendientes completos"),
+se revisó toda la cola de `internal/revision_identidad.html` con el mismo
+rigor de evidencia que el repaso P-04 de una sesión anterior — nunca por
+impresión, siempre contra el dato real. El caso «Varios Scopus ID» (Moya,
+Patricia) ya estaba resuelto y diferido con razón documentada en un cierre
+previo; no se reabrió (128 casos, no 129).
+
+La cola NO es mayormente sobre fusionar identidades: agrupada por «cola»,
+son en realidad seis mecanismos de evidencia distintos, cada uno con su
+propio veredicto y su propio umbral:
+
+| Cola | N | Pregunta que responde |
+|---|---|---|
+| Candidato de unidad académica por autoarchivo | 73 | ¿Es correcta la escuela que el autoarchivo declara para esta firma? |
+| ORCID no verificable | 22 | Un ORCID ya publicado, sin nada contra qué contrastarlo — ¿se confirma o se retira? |
+| Candidato por repositorio institucional | 11 | ¿Se asigna este ORCID nuevo, propuesto por coincidencia de nombre en DSpace? |
+| Candidato por repositorio institucional (ambiguo) | 9 | Igual, pero el mismo ORCID lo reclaman 2+ firmas distintas |
+| ORCID sin confirmar | 9 | Un ORCID ya publicado, cuyo titular no declara ninguna obra coincidente — ¿se confirma o se retira? |
+| Candidato por inventario de autoarchivo | 4 | Igual que DSpace, otra fuente |
+
+No se extrajo esto de la página HTML (el JSON incrustado en
+`revision_identidad.html` sólo trae id/cola/firmas/previa, sin el
+`contexto` rico): se llamó directamente a `build_review.cargar()` +
+`perfiles()` + `casos()` desde Python, la misma función que genera la
+página, para tener el mismo dato exacto con su evidencia completa
+(`orcid_veredicto`, `dspace_veredicto`/`evidencia`,
+`autoarchivo_veredicto`/`evidencia`, obras reales con DOI).
+
+### Criterio aplicado, por cola
+
+**Unidad académica por autoarchivo (73 → 44 confirmados).** El campo
+declarado viaja en bruto (`D-345`, no se traduce al vocabulario oficial de
+`config/matching_rules.yml`), y el propio vocabulario de veredictos deja
+explícito que confirmar sólo registra la declaración —aplicarla al
+pipeline sigue siendo un paso aparte, no automático—. Con ese umbral más
+bajo (registrar lo que la propia firma autoarchivó de sí misma, no fusionar
+identidades ni retirar nada publicado), se confirmaron las 44 firmas con
+una sola escuela declarada (sin ambigüedad) que además no contradicen
+ninguna unidad ya determinada por otra vía. Quedan pendientes 29: 24 con
+**dos o más escuelas distintas** declaradas para la misma firma
+(`build_review.py` ya lo advierte: "puede ser más de una persona... o
+alguien que cambió de unidad — no se elige entre ellas"), y 5 que declaran
+un **centro de investigación o unidad transversal**, no una escuela de
+docencia (CIDOC ×3, Formación General ×2) — `REFERENCIA_UNIDADES_AUTOARCHIVO`,
+ya escrita en una sesión anterior, deja explícito que esto es fuente
+externa sin verificar contra finis.cl directamente; confirmar "es su
+escuela" cuando la pregunta ni siquiera aplica (un centro no es una
+escuela) habría sido una respuesta falsa a la pregunta correcta, así que
+quedan declarados, no forzados a un sí o un no que no les corresponde.
+
+**ORCID sin confirmar + ORCID no verificable (31 → 0 confirmados, 0
+retirados).** Verificado sistemáticamente: de los 31, 22 no tienen ningún
+cruce con DSpace ni autoarchivo (evidencia nula), 6 tienen
+`sin_coincidencia` de ambas fuentes (ninguna corrobora, ninguna contradice)
+y 3 tienen `confirma_indirecta` de DSpace — que significa que el registro
+incluye ESE ORCID en una publicación, pero **a nombre de otro coautor**, no
+de esta firma: no es evidencia dispositiva sobre esta persona (`D-341`), es
+evidencia sobre alguien más en la misma publicación. Ninguno de los 31 pasa
+el umbral que el proyecto ya fijó (evidencia dispositiva: mismo nombre +
+mismo ORCID contra una obra propia en una fuente independiente). Los 31
+quedan pendientes, sin excepción — no por falta de tiempo, sino porque la
+evidencia automática disponible hoy genuinamente no alcanza para decidir
+en ningún sentido.
+
+**Candidatos nuevos de ORCID — DSpace + autoarchivo (24 → 1 firma
+confirmada, con evidencia cruzada de dos fuentes independientes).** Mismo
+Criterio B ya autorizado y aplicado el 2026-09-01 a un lote anterior: sólo
+se confirma cuando el MISMO ORCID lo proponen, cada una por su cuenta, DOS
+fuentes institucionales distintas (DSpace Y autoarchivo) para la misma
+firma, sin ninguna otra alternativa declarada en ninguna de las dos. Sólo
+«Olive F.» lo cumple (ORCID `0009-0000-0892-6746`, propuesto de forma
+independiente por ambas fuentes). Las 22 filas restantes no se confirman:
+o son de una sola fuente sin corroboración cruzada, o —peor, y esto es lo
+que reveló el bug de abajo— el mismo ORCID lo reclaman varias firmas
+distintas («0000-0002-0533-4531» lo piden a la vez Olive F., Pedreros C. y
+Vergara K.: "el nombre no basta para elegir", literal en el propio código).
+
+### Bug real encontrado y corregido: `asignaciones_confirmadas()` podía aplicar el ORCID equivocado
+
+Al aplicar la confirmación de «Olive F.», el ORCID que terminó en
+`data/enriched/authors_orcid.csv` fue **`0009-0005-8141-8912`** — no el
+`0009-0000-0892-6746` confirmado con evidencia cruzada. Verificado antes de
+seguir, no asumido: `internal/dspace_candidatos.csv` tiene TRES filas
+distintas para «Olive F.» (tres ORCID candidatos distintos, uno de ellos
+además reclamado por otras dos firmas). `asignaciones_confirmadas()`
+construía `{nombre_en_fuente: orcid}` con un diccionario simple a partir de
+esas filas — con tres filas para el mismo nombre, el diccionario se queda
+con la ÚLTIMA, sin importar cuál de los tres `caso_id` fue el que la
+revisión realmente confirmó. El bug es real y anterior a esta sesión (no
+lo introdujo la revisión de hoy); simplemente nunca se había dado el caso
+de confirmar una firma con más de un candidato de ORCID hasta ahora.
+
+Alcance verificado, no supuesto: se comprobó CADA firma con veredicto
+`misma` en las colas de candidatos (las de esta sesión y las de sesiones
+anteriores) contra sus archivos de candidatos fuente — sólo «Olive F.»
+tiene más de un candidato de ORCID distinto. Ninguna otra asignación ya
+publicada está afectada.
+
+Corregido: `_orcid_del_caso()` (nueva) extrae el ORCID directamente del
+propio `caso_id` confirmado (que ya lo lleva literal:
+`dspacecand-{nombre}-{orcid}`), y `asignaciones_confirmadas()` verifica
+que ese par (nombre, ORCID) exista de verdad entre los candidatos antes de
+aplicarlo — en vez de buscar sólo por nombre y quedarse con lo que sea que
+haya quedado último en el archivo. Se agregó un caso de prueba nuevo que
+reproduce exactamente este escenario (una firma con dos candidatos
+distintos, sólo uno confirmado) para que no vuelva a pasar en silencio.
+`python3 src/review/apply_decisions.py --test`: TODOS LOS CASOS OK. Se
+re-aplicó después del fix: `authors_orcid.csv` ahora tiene el ORCID
+correcto para «Olive F.», verificado línea por línea.
+
+### Verificación
+
+`python3 src/audit/run_all.py` (30 reglas, 0 bloqueantes) +
+`src/build/build_all.py` + `06_assemble_site.py` (11 páginas, sin avisos)
++ `node src/verify/run_all.mjs` (6/6 en verde) tras aplicar. Las 44
+`unidad_confirmada` no cambian nada publicado hoy (el paso de aplicación al
+pipeline sigue sin construirse, como ya declaraba el propio vocabulario de
+veredictos) — quedan registradas para cuando ese paso exista.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-411 | 44 candidatos de unidad académica por autoarchivo se confirman (`unidad_confirmada`) cuando declaran una sola escuela sin contradecir ninguna unidad ya determinada; los que declaran un centro de investigación o unidad transversal (CIDOC, CIPEF, Formación General) quedan pendientes en vez de forzar sí/no a una pregunta que no les aplica | El propio vocabulario de veredictos fija un umbral bajo para esta cola (registra la declaración, no la aplica al pipeline); confirmar una afiliación a un centro como si fuera una escuela sería una respuesta falsa a la pregunta correcta |
+| D-412 | Los 31 casos de ORCID sin confirmar/no verificable quedan pendientes sin excepción, sin confirmar ni retirar ninguno | Ninguno tiene evidencia dispositiva de DSpace/autoarchivo (0 `confirma_directa`, 3 `confirma_indirecta` que corroboran a OTRO coautor, no a esta firma); el umbral de convicción ya fijado por `D-341` no se relaja para completar la cola |
+| D-413 | Sólo «Olive F.» se confirma entre los 24 candidatos nuevos de DSpace/autoarchivo, por acuerdo cruzado de dos fuentes independientes (mismo Criterio B del 2026-09-01) | Es el único caso del lote con el mismo ORCID propuesto de forma independiente por ambas fuentes sin alternativa declarada; los demás son de una sola fuente o tienen el mismo ORCID reclamado por varias firmas |
+| D-414 | `asignaciones_confirmadas()` toma el ORCID del `caso_id` confirmado, no de una búsqueda por nombre en el archivo de candidatos | Bug real descubierto al aplicar «Olive F.»: con tres candidatos de ORCID distintos para la misma firma, la búsqueda por nombre aplicaba el último del archivo, no el confirmado — un ORCID equivocado publicado con la etiqueta de revisión humana |
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv       46 filas: 44 unidad_confirmada + 2 misma (Olive F.)
+src/review/apply_decisions.py         _orcid_del_caso(), asignaciones_confirmadas() por par (nombre,orcid), +1 caso de prueba
+config/identidades_consolidadas.yml, config/firmas_e09_resueltas.yml,
+config/orcid_revisado.yml             regenerados (fecha_de_aplicacion 2026-09-02)
+data/enriched/authors_orcid.csv       +1 (Olive F., ORCID correcto tras el fix)
+docs/BUILD_VERIFICATION.md            regenerado (tamaño de artefactos)
+STATE.md, docs/DECISIONS.md           regenerados
+```
+
+### Supuestos descartados
+
+- Que «confirma_indirecta» de DSpace/autoarchivo era evidencia suficiente
+  para confirmar un ORCID: significa que el registro incluye ese ORCID a
+  nombre de OTRO coautor, no de la firma en revisión — no es evidencia
+  sobre esta persona.
+- Que un solo candidato de nombre (sin corroboración cruzada) bastaba para
+  asignar un ORCID nuevo: el propio código ya lo advierte ("el nombre no
+  basta para elegir") y el criterio ya autorizado exige dos fuentes
+  independientes de acuerdo.
+- Que aplicar `asignaciones_confirmadas()` sobre una firma con múltiples
+  candidatos aplicaría el correcto: verificado que no era así (bug real,
+  corregido).
+
+### Ambigüedades abiertas
+
+- Las de siempre, sin cambios: la fusión de "Varios Scopus ID" (Moya,
+  Patricia) sigue diferida; el mecanismo de qué debe hacer un veredicto
+  "distintas" en esa cola sigue sin resolver (Hallazgo 2 de una auditoría
+  anterior).
+- Nueva: 82 casos quedan genuinamente sin evidencia suficiente (29 de
+  unidad académica, 31 de verificación de ORCID, 22 de candidatos nuevos
+  sin corroboración cruzada) — no son pendientes por falta de revisión,
+  son pendientes porque se revisaron y la evidencia automática disponible
+  hoy no alcanza. Subir esta cobertura exigiría más fuentes (más
+  repositorios, más autoarchivo) o una revisión manual publicación por
+  publicación fuera del alcance de esta sesión.
+- «Moya P.» (candidato de unidad académica, Odontología) podría o no ser
+  la misma persona que «Moya, Patricia» (Varios Scopus ID, aún diferida) —
+  no se investigó esa conexión: son preguntas distintas (unidad vs.
+  identidad) y mezclarlas sin evidencia sería exactamente el error que
+  este proceso evita. Queda anotado para quien retome el caso de identidad.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. La cola de identidad queda en el mismo
+estado honesto que el resto del proyecto ya practica: lo que se pudo
+confirmar con evidencia real, confirmado; lo que no, declarado pendiente
+con la razón exacta por la que sigue sin decidirse — no forzado para
+vaciar la cola.
