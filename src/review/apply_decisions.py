@@ -351,6 +351,20 @@ def veredictos_orcid(d: pd.DataFrame, vigente: dict[str, str]) -> dict:
     }
     vigente_para_nuevo = {f: v for f, v in vigente.items() if f not in firmas_retiradas_ahora}
 
+    # NO ES LA PRIMERA VEZ QUE SE APLICA. `identity_decisions.csv` no borra
+    # decisiones ya cumplidas (misma razón de siempre: es historial, no un
+    # buzón de tareas). Si un retirar-y-reemplazar YA quedó reflejado en
+    # `authors_orcid.csv` por una corrida anterior, `vigente` (leído de ese
+    # mismo archivo) ya trae el ORCID NUEVO, no el viejo — y sin este chequeo
+    # `orcid_incorrecto` retiraría el reemplazo correcto pensando que sigue
+    # siendo el error original. Se detectó fusionando dos ramas que habían
+    # aplicado la misma decisión de Arroyo A. por separado.
+    propuestos_por_firma: dict[str, str] = {}
+    for _, r in d[d.veredicto == "orcid_encontrado"].iterrows():
+        propuesto = str(r.get("orcid_propuesto") or "").strip().upper()
+        for f in firmas_de(r):
+            propuestos_por_firma[f] = propuesto
+
     for _, r in d.iterrows():
         v = str(r.get("veredicto") or "")
         if not v.startswith("orcid_"):
@@ -363,6 +377,11 @@ def veredictos_orcid(d: pd.DataFrame, vigente: dict[str, str]) -> dict:
                 if not actual:
                     avisos.append(f"«{f}»: veredicto «{v}» pero hoy no tiene "
                                   "ninguna asignación vigente que confirmar o retirar")
+                    continue
+                if v == "orcid_incorrecto" and propuestos_por_firma.get(f) == actual:
+                    avisos.append(f"«{f}»: el retiro ya está aplicado — lo vigente "
+                                  f"hoy ({actual}) es el reemplazo, no el original. "
+                                  "No se retira de nuevo.")
                     continue
                 (conf if v == "orcid_correcto" else ret)[f] = (actual, nota)
             elif v == "orcid_encontrado":
@@ -768,6 +787,18 @@ def autotest() -> int:
                   v["retiradas"] == {"Aedo S.": ("0000-0001-5567-3374", "no es suyo")}
                   and len(v["nuevas"]) == 1 and v["nuevas"][0]["orcid"] == BUENO
                   and not v["errores"], v))
+
+    # Volver a aplicar el MISMO par de decisiones una segunda vez, ya con el
+    # reemplazo instalado como vigente (caso real: fusionar dos ramas que
+    # habían corrido apply_decisions.py por separado sobre la decisión de
+    # Arroyo A.). Sin el chequeo, esto "retira" el reemplazo correcto
+    # pensando que sigue siendo el error original.
+    v = veredictos_orcid(dfo([
+        ("ver-Aedo S.", "ORCID sin confirmar", "Aedo S.", "orcid_incorrecto", "", "no es suyo"),
+        ("nuevo-Aedo S.", "Firma sin ORCID", "Aedo S.", "orcid_encontrado", BUENO, "reemplazo")]),
+        {"Aedo S.": BUENO})
+    casos.append(("reaplicar un retirar-y-reemplazar ya vigente no se retira de nuevo",
+                  not v["retiradas"] and len(v["avisos"]) == 1 and not v["errores"], v))
 
     # Pero confirmar Y "encontrar" a la vez para la misma firma sigue sin
     # tener sentido: confirmar dice que el vigente SÍ es correcto, así que no

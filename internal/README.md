@@ -14,11 +14,16 @@ verifica; el workflow de despliegue lo comprueba otra vez antes de publicar.
 Nada de lo que hay aquí ha llegado nunca a
 https://pablosanchezmonsalve-hash.github.io/Inf-Cienc/
 
-**No excluido del repositorio, y eso es deliberado.** Este repositorio es
-público, de modo que **estos archivos también lo son**. Las compuertas protegen
-el sitio; ninguna protege el repositorio, porque no se construyó para eso.
+**No excluido del repositorio, y eso era deliberado mientras el repo era
+público.** Este directorio estuvo versionado desde `T-16` (2026-08-03) con la
+transparencia como argumento: documentar la incertidumbre es lo que hace
+auditable al proyecto. En la auditoría de 2026-09-01 se revirtió esa decisión y
+el repositorio pasó a **privado**, en parte para cerrar la exposición de
+`data/raw/` (exports de Elsevier, «no redistribuibles» según `DATA_LICENSE.md`)
+y de las colas internas. El razonamiento de `T-16` y los gatillos que lo
+condicionaban quedan aquí como registro, aunque el escenario ya no es público.
 
-Se decidió mantenerlo así (`T-16`, cerrado el 2026-08-03) tras sopesarlo:
+El razonamiento original que sostuvo `T-16` era:
 
 - Los **nombres de los autores ya son públicos**: están en Scopus. El
   repositorio no los revela.
@@ -26,15 +31,16 @@ Se decidió mantenerlo así (`T-16`, cerrado el 2026-08-03) tras sopesarlo:
   ser la misma persona sin haberlo comprobado. Se mantienen visibles porque
   documentar la incertidumbre es lo que hace auditable al proyecto, y
   esconderla lo haría parecer más seguro de lo que es.
-- Las **exportaciones originales de Elsevier** (`data/raw/`) están igualmente
-  versionadas. Su redistribución puede exceder lo que permite la licencia
+- Las **exportaciones originales de Elsevier** (`data/raw/`) están versionadas.
+  Su redistribución puede exceder lo que permite la licencia
   institucional: es una cuestión abierta con quien administra la suscripción,
-  no una decisión que este proyecto pueda cerrar por su cuenta.
+  no una decisión que este proyecto pueda cerrar por su cuenta. La auditoría de
+  2026-09-01 la cerró para el repositorio al pasarlo a privado.
 
-**Cuándo habría que revisar esta decisión:** si la plataforma pasa a ser un
-servicio institucional formal, si Elsevier plantea la redistribución, o si
-alguna de las personas listadas en las colas objeta aparecer en ellas.
-Cualquiera de las tres cambia el cálculo.
+**Cuándo habría que revisar esta decisión (o la visibilidad del repo):** si la
+plataforma pasa a ser un servicio institucional formal, si Elsevier plantea la
+redistribución, o si alguna de las personas listadas en las colas objeta
+aparecer en ellas. Cualquiera de las tres cambia el cálculo.
 
 ## Regla que sigue vigente
 
