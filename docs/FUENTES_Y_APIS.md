@@ -38,6 +38,31 @@ exports, y sin identificador persistente no hay identidad de autor estable.
 | SciVal | Export XLSX manual | — | `src/audit/common.py` (lectura) | `data/interim/` |
 | Crossref | REST, `api.crossref.org/works/{doi}` | Ninguna (`mailto` para el *polite pool*) | `src/enrich/orcid_crossref.py`, `src/enrich/openalex_cobertura_crossref.py` | `data/enriched/authors_orcid.csv`, `internal/openalex_cobertura_crossref.csv` |
 | ORCID | Public API v3.0, `pub.orcid.org` | Token `client_credentials`, alcance `/read-public`, gratuito | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | `data/enriched/orcid_verificacion.csv`, `internal/orcid_*.csv` |
+| DataCite | REST, `api.datacite.org/dois/{doi}` | Ninguna | `src/enrich/datacite.py` | `data/enriched/authors_orcid.csv`, `internal/datacite_log.csv` |
+| Europe PMC | REST, `ebi.ac.uk/europepmc/webservices/rest/search` | Ninguna | `src/enrich/europepmc.py` | `data/enriched/authors_orcid.csv`, `internal/europepmc_log.csv` |
+| Zenodo | REST, `zenodo.org/api/records` | Ninguna | `src/enrich/zenodo.py` | `data/enriched/authors_orcid.csv`, `internal/zenodo_log.csv` |
+
+### 2.2 DataCite, Europe PMC y Zenodo — fuentes de datos no tradicionales
+
+Tres APIs públicas sin autenticación que aportan **outputs no tradicionales**
+que ni Scopus ni OpenAlex indexan bien: `src/enrich/datacite.py` (datasets,
+software), `src/enrich/europepmc.py` (acceso abierto biomédico) y
+`src/enrich/zenodo.py` (preservación CERN, parte de OpenAIRE).
+
+- **Añaden ORCID donde no había**, con el mismo emparejamiento por apellido e
+  inicial que `orcid_crossref.py` (que se importa, no se reescribe — `D-08`).
+- **Son fuentes independientes**: a diferencia de OpenAlex, no ingieren
+  Crossref, así que una coincidencia con una asignación vigente cuenta como
+  confirmación, no como comprobación circular.
+- **Escriben** asignaciones nuevas en `data/enriched/authors_orcid.csv`
+  (fusionando con lo previo) y dejan traza en `internal/`.
+- **Caché en disco y pausa** entre consultas, igual que los demás conectores.
+
+> GitHub (`src/enrich/github_orcid.py`) queda implementado pero **inactivo por
+> defecto**: su REST API no permite buscar por ORCID en el bio de un perfil sin
+> autenticación. Requiere un token en
+> `enriquecimiento_externo.github.token` de `config/matching_rules.yml` y, aun
+> así, la búsqueda amplia exige GraphQL. Se documenta pero no se ejecuta.
 
 ### 2.1 Crossref — de dónde salió el primer ORCID
 
