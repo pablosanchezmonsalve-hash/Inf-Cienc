@@ -8041,3 +8041,152 @@ estado honesto que el resto del proyecto ya practica: lo que se pudo
 confirmar con evidencia real, confirmado; lo que no, declarado pendiente
 con la razón exacta por la que sigue sin decidirse — no forzado para
 vaciar la cola.
+
+---
+
+## Cierre: `PD-02` — la cola OpenAlex confirmada (Nivel V) se publica como segundo indicador de "producción fuera de Scopus"
+
+### Contexto
+
+El usuario pidió agregar el listado de otra Facultad al mecanismo de
+`produccion-ampliada.html`. Antes de tocar código se preguntó, vía
+`AskUserQuestion`, cuál Facultad y de dónde saldría su fuente real (otro
+sitio con la misma API de WordPress, o un archivo) — `CLAUDE.md` prohíbe
+suponer disponibilidad de una fuente sin confirmarla. El usuario descartó
+la pregunta y, en su lugar, dio una instrucción distinta: **"Integra todo
+el contenido recuperado desde API's en un nuevo apartado que indique la
+producción total fuera de scopus"**.
+
+Investigado qué contenido "recuperado desde APIs" podía significar
+razonablemente producción fuera de Scopus:
+
+- `facultad_medicina_publicaciones` (wp-json) — ya integrado como `PD-01`.
+- `internal/openalex_cobertura.csv` (`openalex_api`, V2-26) — 414
+  candidatos que OpenAlex atribuye a la institución y el universo no
+  tiene, de los cuales **20 ya pasaron por revisión humana y quedaron
+  `CONFIRMADO_PRODUCCION_UFT`** (`internal/revision_cobertura_openalex.html`,
+  `apply_openalex_review.py`) y **394 siguen `PENDIENTE_REVISION_HUMANA`**.
+  El resto de las fuentes API del proyecto (Crossref, ORCID, ROR, Scopus
+  API) no son listados de producción: son verificación de identidad o de
+  fecha de corte, ninguna aporta obras nuevas.
+
+Esto es exactamente el escenario que `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`
+había dejado planteado el 2026-09-02 más temprano en esta misma sesión (con
+otro nombre de trabajo): esa cola es **Nivel V** (verificado obra por
+obra), distinto de `PD-01` (**Nivel D**, declarado), y §4 de ese documento
+decía explícitamente que publicarla como indicador "es una decisión de
+alcance aparte, explícita y posterior, que le corresponde al usuario" —
+tentativamente nombrada ahí mismo `PD-02`. La instrucción del usuario ES
+esa autorización explícita.
+
+### Qué se construyó
+
+`src/build/09_produccion_declarada.py` (ya existente para `PD-01`) se
+extendió para leer también `internal/openalex_cobertura.csv`, filtrar
+`resolucion == CONFIRMADO_PRODUCCION_UFT`, aplicar la misma ventana
+temporal 2023-2025, y agregar por año (nunca por Facultad: esta evidencia
+es por autor, no una declaración editorial de una unidad, así que no entra
+al mecanismo `corpus_paralelo_declarado` de `PD-01`). Nuevo indicador
+`PD-02` en `config/indicators.yml`, categoría `declarado` (compartida con
+`PD-01`), `solo_recuento: true`, ausente de `kpis_portada` por el mismo
+motivo que `PD-01`.
+
+**Verificado antes de sumar cifras, no asumido:** 3 de los 20 DOI
+confirmados por OpenAlex ya estaban en el listado que Medicina declara en
+su propio sitio (`10.1097/gme.0000000000002620`,
+`10.1007/s12565-025-00855-0`, `10.35366/112734`) — los tres, dentro de la
+ventana 2023-2025 de `PD-01`. Sumar `PD-01` + `PD-02` sin deduplicar habría
+contado esas tres obras dos veces. El total combinado
+(`total_fuera_de_scopus`, publicado al inicio de `produccion-ampliada.html`)
+une por DOI normalizado y resta la intersección: **83 + 20 − 3 = 100**. No
+es un tercer indicador con entrada propia en `sources.yml` — es aritmética
+declarada sobre `PD-01` y `PD-02`, documentada como tal para que nadie la
+repita mal.
+
+Los 394 casos `PENDIENTE_REVISION_HUMANA` se publican como cifra de
+transparencia en la propia sección de `PD-02` ("Pendientes de revisión"),
+con el mismo principio que ya rige `PD-01` para fuera-de-ventana/sin-año:
+nunca se cuentan como producción confirmada, nunca se ocultan.
+
+`vista.js::produccionDeclarada()` se reestructuró en tres bloques: total
+combinado (arriba), subsección "Declarada por las Facultades" (`PD-01`,
+sin cambios de contenido, sólo de encabezado), subsección nueva
+"Confirmada por revisión de cobertura OpenAlex (V2-26)" (`PD-02`, con su
+propia tabla año → N y su propio sello de procedencia). Ningún otro punto
+de integración del sitio cambió: `produccion-ampliada.html`,
+`prerender.mjs`, `paginas.js`, `core.js`, `estructura.mjs`, `contraste.mjs`
+ya estaban registrados desde la implementación de `PD-01` y siguen
+sirviendo sin modificación — sólo consumen un JSON con más campos.
+
+### Verificación
+
+`python3 src/audit/run_all.py` (29/30, la única falla es `E-06`
+preexistente y no relacionada) + `src/build/build_all.py` (build 09
+imprime ambos bloques y el total: "100 (83 PD-01 + 20 PD-02 - 3 en ambas)")
++ `06_assemble_site.py` (`produccion-ampliada.html` 10.9 KB, sin avisos) +
+`node src/verify/run_all.mjs` (6/6 en verde). Captura de pantalla con
+Playwright en tema claro y oscuro: las cuatro cifras de `PD-02`
+(evaluados/confirmadas/en ventana/pendientes) y el total combinado se ven
+correctamente, sin errores de consola. `indicadores.html` lista `PD-02`
+bajo "Producción declarada (fuera de Scopus)" con fuente "OpenAlex,
+confirmado por revisión humana (no Scopus)" — no "Scopus · SciVal".
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-415 | La cola de revisión de cobertura OpenAlex (V2-26) se publica como indicador propio `PD-02`, sólo para los casos con veredicto `CONFIRMADO_PRODUCCION_UFT` | Autorización explícita del usuario en esta sesión, exactamente la condición que `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` §4 y `docs/V2_BACKLOG.md` §8 dejaban pendiente; los 394 casos sin revisar NUNCA se cuentan como confirmados |
+| D-416 | `PD-02` se agrega sólo por año, nunca por Facultad, y no entra al mecanismo `corpus_paralelo_declarado` de `PD-01` | Es evidencia por autor (OpenAlex + revisión humana), no una declaración editorial de una unidad académica — forzarla a la forma Facultad × año de `PD-01` habría inventado una relación que la fuente no tiene |
+| D-417 | El total combinado "producción fuera de Scopus" es la unión por DOI de `PD-01` y `PD-02`, sin entrada propia en `config/sources.yml` | Verificado que 3 DOI aparecen en ambas fuentes; sumarlas sin deduplicar habría contado la misma obra dos veces. Es aritmética sobre dos indicadores ya sourceados, no un tercer indicador |
+| D-418 | Los casos `PENDIENTE_REVISION_HUMANA` de la cola OpenAlex se publican como cifra de transparencia junto a `PD-02`, nunca como producción confirmada ni ocultos | Mismo principio ya aplicado a fuera-de-ventana/sin-año en `PD-01`: ocultar cuánto falta por revisar sería tan engañoso como inflar el recuento con lo no confirmado |
+
+### Archivos modificados
+
+```
+config/indicators.yml                 PD-02 (categoría declarado, solo_recuento)
+src/build/common_build.py             FUENTE_POR_INDICADOR["PD-02"]
+src/build/09_produccion_declarada.py  lee internal/openalex_cobertura.csv,
+                                       agrega PD-02 por año, calcula total_fuera_de_scopus
+web/assets/js/vista.js                produccionDeclarada(): tres bloques (total, PD-01, PD-02)
+docs/FUENTES_Y_APIS.md                §2.7 nueva; §3.1 actualizada
+docs/DATA_MODEL.md                    "Corpus paralelo declarado" describe PD-01 y PD-02
+docs/METODOLOGIA_FUERA_DE_SCOPUS.md   Nivel V marcado como publicado (PD-02), no hipotético
+docs/V2_BACKLOG.md                    §8 marcada implementada; fila V2-26 actualizada
+STATE.md, docs/DECISIONS.md           regenerados
+```
+
+### Supuestos descartados
+
+- Que "todo el contenido recuperado desde APIs" incluía fuentes como
+  Crossref, ORCID o ROR: revisadas todas las entradas de `sources.yml` con
+  `tipo: api` — ninguna otra es un listado de producción; son verificación
+  de identidad, de fecha de corte, o de identidad institucional.
+- Que los 394 casos `PENDIENTE_REVISION_HUMANA` podían aproximarse o
+  estimarse como producción probable para dar una cifra "más completa":
+  se descartó explícitamente — publicar un candidato no revisado como
+  producción confirmada sería inventar el dato que `CLAUDE.md` prohíbe.
+- Que bastaba con sumar `PD-01` y `PD-02` sin verificar solapamiento: se
+  comprobó el cruce de DOI antes de publicar el total y se encontraron 3
+  casos reales que habrían duplicado el recuento.
+
+### Ambigüedades abiertas
+
+- Los 394 casos pendientes de revisión de V2-26 no se resolvieron en esta
+  sesión — `PD-02` crecerá cuando avance esa revisión (correr de nuevo
+  `apply_openalex_review.py` y luego `09_produccion_declarada.py`).
+- La evidencia de Crossref (`V2-26 bis`, `internal/openalex_cobertura_crossref.csv`)
+  sigue sin usarse como refuerzo automático de ninguna confirmación — apoya
+  la revisión humana, no decide por nadie (`docs/V2_BACKLOG.md` §8).
+- Sigue sin construirse un tercer Nivel (o una regla explícita) para una
+  fuente que no encaje limpiamente en D o V, si aparece — el checklist de
+  `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` §3 ya lo anticipa como posibilidad.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Si en el futuro se agrega el listado
+propio de otra Facultad (la pregunta original que esta sesión no llegó a
+responder porque el usuario redirigió el pedido), el mecanismo
+`corpus_paralelo_declarado` de `PD-01` ya está listo para recibirla sin
+tocar `src/build/`: sólo hace falta un conector que siga el esquema
+documentado en `facultad_medicina_publicaciones.py` y su entrada en
+`config/sources.yml`.

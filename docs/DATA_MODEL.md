@@ -74,12 +74,23 @@ Se modelan y quedan vacíos, con la razón explícita. No se omiten del esquema.
 ## Corpus paralelo declarado (fuera de este modelo)
 
 `data/processed/produccion_declarada.json` no es parte del diagrama de
-arriba: es un recuento agregado (Facultad × año) de publicaciones que una
-Facultad declara en su propio sitio, fuera del universo Scopus/SciVal.
-Nunca se une a `Publicacion` ni a ningún indicador de este modelo — mezclar
-criterios de indexación distintos sin declararlo sería exactamente el
-error que este proyecto evita (D-206, D-398). Ver
-`docs/FUENTES_Y_APIS.md` §2.6, `config/sources.yml` →
-`facultad_medicina_publicaciones`, y `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`
-para el marco general (este corpus es Nivel D — declarado, no verificado
-obra por obra).
+arriba: agrega DOS fuentes de otra naturaleza que el resto del modelo, cada
+una fuera del universo Scopus/SciVal y ninguna unida jamás a `Publicacion`
+ni a ningún indicador de este modelo — mezclar criterios de indexación
+distintos sin declararlo sería exactamente el error que este proyecto evita
+(D-206, D-398):
+
+- `PD-01` (clave `por_facultad_anio`): recuento agregado (Facultad × año) de
+  publicaciones que una Facultad declara en su propio sitio. Nivel D
+  (declarado, no verificado obra por obra). Ver `docs/FUENTES_Y_APIS.md`
+  §2.6, `config/sources.yml` → `facultad_medicina_publicaciones`.
+- `PD-02` (clave `openalex_cobertura`): recuento agregado (por año, sin
+  Facultad) de publicaciones que OpenAlex atribuye a la institución y un
+  humano confirmó caso por caso (V2-26) que el universo no tiene. Nivel V
+  (verificado por revisión humana, no por fuente independiente). Ver
+  `docs/FUENTES_Y_APIS.md` §2.7, `internal/openalex_cobertura.csv`.
+
+La clave `total_fuera_de_scopus` es la unión por DOI de las dos — aritmética
+sobre PD-01 y PD-02, no un tercer indicador con fuente propia. Ver
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md` para el marco general de niveles de
+evidencia.

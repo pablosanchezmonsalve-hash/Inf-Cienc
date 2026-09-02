@@ -212,8 +212,39 @@ en `config/sources.yml` con un JSON del mismo esquema (documentado en el
 docstring del conector) se descubre sola.
 
 `PD-01` es Nivel D (declarado, sin verificación individual por obra) según
-`docs/METODOLOGIA_FUERA_DE_SCOPUS.md`. No confundir con la cola de revisión
-de §3.1 (OpenAlex + Crossref), que es Nivel V y aún no está publicada.
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md`. No confundir con `PD-02` (§2.7), que
+es Nivel V: cada caso pasó por revisión humana antes de contarse.
+
+### 2.7 OpenAlex — cobertura confirmada por revisión humana, fuera de Scopus (V2-26) — **publicado el 2026-09-02**
+
+Segunda fuente de `produccion-ampliada.html`, de otra naturaleza que §2.6:
+no es una Facultad declarando su propia lista editorial, es
+`src/enrich/openalex_cobertura.py` preguntándole a OpenAlex quién publica
+desde la institución (por ROR, `V2-20`) y comparando contra el universo
+Scopus — la brecha que §3.1 mide. Cada caso de esa brecha (414) pasa por
+revisión humana caso por caso en
+`internal/revision_cobertura_openalex.html`
+(`src/review/apply_openalex_review.py`) antes de contarse: sólo los que
+quedan `CONFIRMADO_PRODUCCION_UFT` alimentan el indicador `PD-02`
+("Producción institucional confirmada por revisión de cobertura OpenAlex,
+fuera de Scopus"), calculado por el mismo `09_produccion_declarada.py` que
+PD-01. Los que siguen `PENDIENTE_REVISION_HUMANA` (394 hoy) NUNCA se
+cuentan como producción confirmada — se publican como cifra de
+transparencia, no se ocultan ni se dan por buenos.
+
+`PD-02` no trae `facultad` (es evidencia por autor, no una declaración
+editorial de una unidad), así que no entra al mecanismo de
+`corpus_paralelo_declarado` de §2.6: tiene su propia sección en
+`produccion-ampliada.html`, agregada sólo por año. El total combinado que
+la página encabeza (`total_fuera_de_scopus`) es la unión por DOI de PD-01 y
+PD-02 — no un tercer indicador con fuente propia, sino aritmética sobre los
+dos de arriba: 3 DOI de Medicina (§2.6) coinciden con confirmaciones de
+V2-26, y se restan una sola vez para no contar la misma obra dos veces.
+
+Como PD-01, `PD-02` NUNCA toca `publications_universe.csv` ni ningún
+indicador de citas/FWCI (D-206, D-398): "confirmado" aquí significa que un
+humano concluyó que la obra es producción real UFT fuera del corpus
+indexado, no que entra al corpus.
 
 ---
 
@@ -253,7 +284,10 @@ formalidad: es lo que separa una propuesta de una promesa.
   compara contra el universo. Es la primera vez que la brecha de cobertura que
   `LIMITATIONS.md` advierte en prosa se puede **medir**. Su resultado es una cola
   de revisión en `internal/`, nunca un ajuste del corpus: Scopus y OpenAlex
-  indexan con criterios distintos y sumarlos no significa nada (`D-206`).
+  indexan con criterios distintos y sumarlos no significa nada (`D-206`). Desde
+  el 2026-09-02, los casos que esa revisión CONFIRMA (no los pendientes) se
+  publican como recuento en `PD-02` (§2.7) — nunca al universo, pero ya no sólo
+  en la capa interna.
 - **Dependencia declarada:** el contraste necesita el ROR de la institución
   (`V2-20`). Sin él esa mitad no corre, y se dice; no se sustituye por una
   comparación de nombres, que la regla `I-05` prohíbe.

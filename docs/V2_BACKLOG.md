@@ -161,7 +161,7 @@ y `CLAUDE.md` prohíbe suponer disponibilidad de APIs o credenciales.
 | # | Integración | Desbloquea | Qué falta confirmar |
 |---|---|---|---|
 | ~~**V2-19**~~ | OpenAlex · **ejecutado (2026-08-26)**, `src/enrich/orcid_openalex.py` | ORCID donde no había: **80 asignaciones nuevas**, cobertura 242 → 322. Contraste institucional por ROR: **68 publicaciones** que este proyecto atribuye a la UFT y OpenAlex no (cola en `internal/openalex_deteccion.csv`), **6 desacuerdos** de ORCID encolados (`internal/openalex_desacuerdos.csv`), ninguno resuelto automáticamente (`D-08`) | Cerrado. Recordatorio vigente: OpenAlex no es fuente independiente de verificación —ingiere Crossref—, así que sus 212 concordancias no suben ninguna asignación a «verificado» |
-| ~~**V2-26**~~ | OpenAlex **por institución** · **ejecutado (2026-08-26)**, `src/enrich/openalex_cobertura.py` | Mide la brecha de cobertura que `LIMITATIONS.md` sólo advertía en prosa: OpenAlex atribuye **1.112 obras** a la UFT por ROR, de las cuales **698 ya están en el universo** y **414 no** (385 con DOI ausente del universo, 29 sin DOI en OpenAlex). Cola de revisión en `internal/openalex_cobertura.csv`, **nunca un ajuste del corpus** (`D-206`): Scopus y OpenAlex indexan con criterios distintos | Cerrado. Las 414 son candidatas a revisión humana, no producción confirmada perdida — pueden ser desambiguación errónea de OpenAlex, tipo documental excluido a propósito, o fecha fuera de ventana |
+| ~~**V2-26**~~ | OpenAlex **por institución** · **ejecutado (2026-08-26)**, `src/enrich/openalex_cobertura.py` | Mide la brecha de cobertura que `LIMITATIONS.md` sólo advertía en prosa: OpenAlex atribuye **1.112 obras** a la UFT por ROR, de las cuales **698 ya están en el universo** y **414 no** (385 con DOI ausente del universo, 29 sin DOI en OpenAlex). Cola de revisión en `internal/openalex_cobertura.csv`, **nunca un ajuste del corpus** (`D-206`): Scopus y OpenAlex indexan con criterios distintos | Cerrado. De las 414, **20 confirmadas** (`CONFIRMADO_PRODUCCION_UFT`) publicadas desde el 2026-09-02 como `PD-02` (§8 abajo); **394 siguen pendientes de revisión** — no son producción confirmada perdida, pueden ser desambiguación errónea de OpenAlex, tipo documental excluido a propósito, o fecha fuera de ventana |
 | ~~**V2-20**~~ | ROR · **conector escrito (2026-08-19)**, `src/enrich/ror_institucion.py` | Cierra `ror_id` e `isni`, y contrasta el patrón de detección institucional contra los nombres que ROR registra | **Falta ejecutar la consulta.** El entorno de desarrollo no alcanza `api.ror.org`; se corre desde la máquina del proyecto y se pega el resultado en `config/institution.yml`. La lógica está verificada con 12 casos en CI |
 | **V2-21** | SciELO | Mide la brecha de cobertura que hoy sólo se advierte en prosa: humanidades, ciencias sociales y publicación en español | **Investigado el 2026-08-26** (`docs/FUENTES_Y_APIS.md` §3.6): la interfaz real es la API REST ArticleMeta, sin autenticación, pero **no filtra por institución** — sólo por ISSN, colección y fecha. El dato de afiliación existe por artículo, pero exige cosechar identificadores y volver a pedir cada uno individualmente: más trabajo que `V2-19`/`V2-26`, no menos. Queda sin confirmar el código de colección de Chile y si limitarse a esa colección alcanza — `scielo.readthedocs.io` y `articlemeta.scielo.org` bloqueados desde este entorno, igual que `api.ror.org` en `V2-20`. Sin código escrito: es una decisión de alcance |
 | **V2-22** | API de Scopus | `V2-05` y la ambigüedad `A-05`: fecha de corte declarada por la propia consulta, y actualización como objetivo del `Makefile` | Clave institucional, si la suscripción la habilita, y si exige IP institucional. **Bloqueante** |
@@ -174,7 +174,7 @@ Europe PMC y Wikidata. Dimensions y Lens.org quedan fuera por requerir acuerdo.
 
 ---
 
-## 8. Corpus paralelo declarado — producción institucional fuera de Scopus/SciVal (propuesta, 2026-08-27)
+## 8. Corpus paralelo declarado — producción institucional fuera de Scopus/SciVal (propuesta el 2026-08-27, **implementada el 2026-09-02** como `PD-02`)
 
 **No confundir con §6 arriba:** eso descarta *fusionar* corpus de fuentes
 distintas en un solo universo. Esto es lo que `D-206` ya deja abierto en su
@@ -203,37 +203,35 @@ canónico, ni su cifra, ni ningún indicador que dependa de ese denominador
 (`D-16`). Sumar produciría exactamente la cifra irreconciliable que §6 arriba y
 `D-206` prohíben.
 
-**Lo que sí propondría, si se autoriza diseñarlo:**
+**Lo que se implementó (2026-09-02), con autorización explícita del
+usuario** ("Integra todo el contenido recuperado desde APIs en un nuevo
+apartado que indique la producción total fuera de Scopus"):
 
-- Una sección o página aparte —"Producción institucional detectada fuera de
-  Scopus/SciVal" o equivalente—, con su propio denominador declarado
-  (`D-16`), que muestre los casos con veredicto `CONFIRMADO_PRODUCCION_UFT`
-  de `internal/openalex_cobertura.csv` a medida que la revisión avanza.
-  Nunca mezclada con `P-01`/`P-03` ni con ningún indicador del universo
-  primario.
-- Etiquetado explícito de la fuente y el método de verificación en cada obra
-  (OpenAlex + Crossref, revisión humana, fecha), para que nadie la lea como
-  Scopus.
-- Seguir la revisión humana de los 294 autores restantes sin evidencia fuerte
-  todavía (`internal/openalex_cobertura.csv`, `internal/openalex_cobertura_crossref.csv`)
-  antes de fijar un tamaño definitivo de este corpus paralelo.
+- Una sección propia — `PD-02` en `produccion-ampliada.html` ("Confirmada
+  por revisión de cobertura OpenAlex (V2-26)") —, con su propio
+  denominador declarado (`D-16`), que agrega por año los casos con
+  veredicto `CONFIRMADO_PRODUCCION_UFT` de `internal/openalex_cobertura.csv`
+  dentro de la ventana 2023-2025 (**20** hoy). Nunca mezclada con
+  `P-01`/`P-03` ni con ningún indicador del universo primario. Se agrega
+  sólo por año, no por Facultad: esta evidencia es por autor, no una
+  declaración editorial de una unidad.
+- Los **394** casos que siguen `PENDIENTE_REVISION_HUMANA` se publican como
+  cifra de transparencia en la misma sección — nunca como producción
+  confirmada, nunca ocultos.
+- Etiquetado explícito de la fuente y el método de verificación: el sello
+  de procedencia de la sección declara "OpenAlex, confirmado por revisión
+  humana (no Scopus)", y la advertencia metodológica de `PD-02`
+  (`config/indicators.yml`) dice, en prosa, que cada caso pasa por
+  revisión humana antes de contarse.
+- El total combinado de la página (`total_fuera_de_scopus`) une por DOI
+  `PD-01` y `PD-02`: 3 DOI del cierre V2-27 de Medicina coinciden con
+  confirmaciones de V2-26, y se restan una sola vez.
+- La evidencia independiente de Crossref (`V2-26 bis`) y la revisión de los
+  294 autores restantes **siguen sin resolver** — `PD-02` sólo cuenta lo ya
+  confirmado hoy, y crecerá a medida que la revisión avance (correr de
+  nuevo `09_produccion_declarada.py` después de aplicar más decisiones en
+  `apply_openalex_review.py`).
 
-**Qué falta confirmar:** esto es una propuesta de alcance, no una decisión
-tomada — `D-206` exige que ampliar lo que el informe cubre sea "una decisión
-de alcance aparte, posterior y explícita". Falta que el usuario autorice
-diseñarla e implementarla, y decidir dónde vive en la navegación del sitio.
-
-> **Distinto de esto:** `produccion-ampliada.html` (implementado
-> 2026-09-02) publica un corpus paralelo declarado de otra naturaleza —
-> agregados Facultad × año que una Facultad autodeclara en su propio
-> sitio, sin verificación individual obra por obra — bajo el mismo
-> principio `D-206`. No sustituye esta propuesta de individual
-> `CONFIRMADO_PRODUCCION_UFT` (evidencia OpenAlex + Crossref + revisión
-> humana caso por caso), que sigue abierta. Ver
-> `src/build/09_produccion_declarada.py` y `docs/FUENTES_Y_APIS.md` §2.6.
->
-> El marco general para relacionar estos dos tipos de evidencia —y
-> clasificar cualquier fuente futura de la misma familia— está en
-> `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`: `produccion-ampliada.html` es
-> Nivel D (declarado), esta propuesta sería Nivel V (verificado obra por
-> obra) si se autoriza construirla.
+Ver `src/build/09_produccion_declarada.py`, `docs/FUENTES_Y_APIS.md` §2.7 y
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md` (marco Nivel D/Nivel V; `PD-01` es
+Nivel D, `PD-02` es Nivel V).
