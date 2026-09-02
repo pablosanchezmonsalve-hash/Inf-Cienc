@@ -36,7 +36,7 @@ exports, y sin identificador persistente no hay identidad de autor estable.
 |---|---|---|---|---|
 | Scopus | Export CSV manual | — | `src/audit/common.py` (lectura) | `data/interim/` |
 | SciVal | Export XLSX manual | — | `src/audit/common.py` (lectura) | `data/interim/` |
-| Crossref | REST, `api.crossref.org/works/{doi}` | Ninguna (`mailto` para el *polite pool*) | `src/enrich/orcid_crossref.py`, `src/enrich/openalex_cobertura_crossref.py` | `data/enriched/authors_orcid.csv`, `internal/openalex_cobertura_crossref.csv` |
+| Crossref | REST, `api.crossref.org/works/{doi}` | Ninguna (`mailto` para el *polite pool*) | `src/enrich/orcid_crossref.py`, `src/enrich/openalex_cobertura_crossref.py`, `src/enrich/crossref_financiamiento.py` (implementado, sin ejecutar — §3.4) | `data/enriched/authors_orcid.csv`, `internal/openalex_cobertura_crossref.csv`, `data/enriched/crossref_financiamiento.csv` |
 | ORCID | Public API v3.0, `pub.orcid.org` | Token `client_credentials`, alcance `/read-public`, gratuito | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | `data/enriched/orcid_verificacion.csv`, `internal/orcid_*.csv` |
 
 ### 2.1 Crossref — de dónde salió el primer ORCID
@@ -409,14 +409,40 @@ No es una integración nueva: es usar más del conector que ya existe.
 
 ### 3.4 Crossref — ampliar lo ya implementado
 
-- **Financiadores** (`funder`): `PROJECT_SPEC` no incluye financiamiento, pero
-  el export de Scopus sí trae el campo y hoy no se explota.
+- **Financiadores** (`funder`) — **implementado y probado el 2026-09-02;
+  falta ejecutar la consulta.** `PROJECT_SPEC` no incluye financiamiento,
+  pero el export de Scopus sí trae el campo (`Funding Details`/`Funding
+  Texts`, 306 de 818 filas, 37,4 %) y hasta ahora ningún paso del pipeline
+  lo extraía —no llega a `publications_universe.csv`, verificado antes de
+  escribir código—. Es, literalmente, la "fuente complementaria de
+  financiamiento" que `config/indicators.yml` -> `X-03` declara que falta
+  para poder evaluar si ese indicador cruza el umbral de cobertura que hoy
+  lo mantiene sin publicar. Nuevo conector
+  `src/enrich/crossref_financiamiento.py`: extrae por fin el campo de
+  Scopus, y consulta Crossref por DOI para traer el `funder` que el editor
+  registró ahí directamente (con el identificador del Crossref Funder
+  Registry cuando existe) — una fuente distinta, no una segunda copia del
+  mismo dato. Reporta las dos cadenas de financiador una al lado de la
+  otra, sin fusionarlas (normalizar nombres de financiador entre fuentes es
+  el mismo trabajo de vocabulario institucional que
+  `unidad_academica.vocabulario`, no algo que este conector decida por su
+  cuenta). Probado con `--test` (11 casos); la consulta real no pudo
+  correr desde este entorno — `api.crossref.org` devuelve `CONNECT tunnel
+  failed, response 403` (política del gateway de red, confirmado con
+  `curl` y con el estado del proxy, no un error transitorio). Ver
+  `config/sources.yml` -> `crossref_financiamiento_api`
+  (`ejecutada: false`).
 - **Licencias y acceso abierto**: contrastaría el `open_access` de SciVal contra
-  una fuente distinta.
+  una fuente distinta. Nota: Crossref no tiene un campo limpio de "acceso
+  abierto" (sólo URLs de licencia, que exigen heurística para clasificar);
+  §3.5 (Unpaywall) es la herramienta que este proyecto ya identificó para
+  esa pregunta específica — no se duplicó ese trabajo aquí.
 - **Referencias**: habilitaría análisis de citación interna que hoy no existe.
-- **Hay que confirmar:** nada técnico; sí una decisión de alcance, porque cada
-  uno de estos añade indicadores nuevos al catálogo y eso es una decisión, no
-  una consecuencia.
+  Es la más grande de las tres en alcance (necesitaría una estructura de
+  grafo nueva, comparable a la de C-05) — sin empezar.
+- **Hay que confirmar:** nada técnico para financiadores (ya implementado);
+  para las otras dos, publicarlas sigue siendo una decisión de alcance,
+  porque cada una añade un indicador nuevo al catálogo.
 
 ### 3.5 Unpaywall — acceso abierto verificado
 

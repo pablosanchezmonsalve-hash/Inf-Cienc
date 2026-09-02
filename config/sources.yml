@@ -189,6 +189,38 @@ fuentes:
       (D-206). Empareja por apellido contra los autores que Crossref lista;
       no siempre encuentra una coincidencia única.
 
+  crossref_financiamiento_api:
+    nombre: "Crossref — REST API (financiamiento declarado, fuente complementaria para X-03)"
+    tipo: "api"
+    endpoint: "https://api.crossref.org/works/{doi}"
+    autenticacion: "ninguna (mailto para el polite pool)"
+    conector: "src/enrich/crossref_financiamiento.py"
+    rol: "enriquecimiento — la 'fuente complementaria de financiamiento' que config/indicators.yml -> X-03 declara que falta"
+    aporta:
+      - financiador_y_numero_de_proyecto_segun_crossref
+      - contraste_contra_funding_details_de_scopus_sin_fusionar
+    salida: "data/enriched/crossref_financiamiento.csv"
+    fecha_corte: null            # cada consulta lleva la suya
+    ejecutada: false              # implementado y probado con --test el 2026-09-02; api.crossref.org
+                                   # devuelve CONNECT tunnel failed / 403 desde este entorno (gateway,
+                                   # "policy denial" — ver curl "$HTTPS_PROXY/__agentproxy/status").
+                                   # Corrida real pendiente de una máquina con acceso.
+    nota: >-
+      Tercera pregunta a este mismo endpoint (junto a crossref_api y
+      crossref_cobertura_api): qué financiador y número de proyecto declaró
+      el EDITOR directamente en Crossref (message.funder, con el
+      identificador del Crossref Funder Registry cuando existe) — distinto
+      del texto libre que Scopus exporta en Funding Details/Funding Texts
+      (306 de 818 filas, 37,4 %, hoy sin extraer a ningún artefacto
+      procesado: no llega a publications_universe.csv, verificado). NO
+      fusiona el nombre de financiador de una fuente con el de la otra —
+      normalizar "CONICYT" y su sucesora "ANID" a la misma entidad es
+      trabajo de vocabulario institucional, no de este conector — reporta
+      las dos cadenas una al lado de la otra. La cobertura combinada
+      resultante es la cifra que decide si X-03 cruza el umbral que hoy lo
+      mantiene sin publicar; esa decisión queda pendiente de la corrida
+      real.
+
   orcid_api:
     nombre: "ORCID — Public API v3.0"
     tipo: "api"
