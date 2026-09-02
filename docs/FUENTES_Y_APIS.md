@@ -293,6 +293,59 @@ biblioteca, no verificado obra por obra) según
 `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` — mismo nivel que `PD-01`, fuente
 distinta.
 
+### 2.9 Scopus Author Search — directorio de autores por afiliación — **entregado y ejecutado el 2026-09-02**
+
+Distinta en naturaleza de todo lo demás que este proyecto usa de Scopus:
+no es un export de publicaciones (`scopus_export`, 823 filas, ventana
+2023-2025), es el directorio de AUTORES que Scopus Author Search asocia a
+la afiliación "Universidad Finis Terrae" — 812 perfiles (nombre, Scopus
+Author ID, N° de documentos según Scopus, área temática, ORCID cuando
+existe), sin ventana temporal ni filtro de año (confirmado con el usuario:
+"búsqueda por afiliación", nada más). Capa interna, nunca publicable
+directamente (D-08): alimenta dos colas de revisión, nunca decide.
+
+**Por qué hacía falta, y qué no puede ver el detector automático del
+proyecto.** `P-04` (`src/audit/04_author_population.py`) ya detecta
+"nombre con más de un Scopus Author ID" — pero sólo cuando los dos
+identificadores aparecen, DENTRO del corpus de 823 publicaciones, bajo la
+misma cadena de nombre exacta. No puede ver un identificador cuyas
+publicaciones caen fuera del corpus (otra ventana, otro tipo documental),
+ni conectar dos identificadores que aparecen bajo grafías distintas del
+mismo nombre. Scopus Author Search sí los ve, porque ya agrupó por
+identificador antes de exportar.
+
+`src/enrich/scopus_author_search.py` (nuevo) cruza los 812 perfiles contra
+el corpus y contra `internal/ambiguities_authors.csv`, y produce:
+
+- `internal/scopus_author_search_multiples_id.csv` — **7 nombres** con 2+
+  Scopus Author ID. 4 ya estaban conocidos (Moya Patricia, Hartmann
+  Schatloff Dan, Quezada Mauricio, Torres Keila — esta fuente los confirma
+  de forma independiente). **3 son nuevos, no detectables por `P-04` antes
+  de esta fuente**: "Esis Villarroel, Ivette S." (un segundo perfil con 14
+  documentos y ORCID propio, invisible al detector porque ninguna de esas
+  14 publicaciones está en el corpus), "Cabello, José Miguel" (mismo
+  patrón), "Caffarena, Paula" (sus dos identificadores SÍ están en el
+  corpus, pero uno aparece bajo "Barcenilla, Paula Caffarena" — apellidos
+  en otro orden, cadena distinta). Cada candidato lleva el detalle
+  necesario para revisar sin volver a buscar nada: qué dice SciVal de cada
+  identificador, si aparece en el corpus y con cuántas publicaciones, y
+  bajo qué otro nombre si corresponde.
+- `internal/scopus_author_search_orcid.csv` — contraste del ORCID que
+  Scopus declara en el perfil del autor (tercera fuente independiente,
+  además de Crossref y el registro público de ORCID) contra
+  `data/enriched/authors_orcid.csv`. De 50 filas con ORCID: **26
+  coinciden** con lo ya asignado (corroboración), **0 contradicen**, **1
+  es nuevo** (firma ya reconocida como UFT, sin ORCID asignado todavía:
+  "Bastías, Jaime"), **23** corresponden a firmas que Scopus asocia a la
+  afiliación pero que la población UFT del proyecto no reconoce como tal
+  (fuera de la ventana 2023-2025, u homonimia — no se investiga más sin
+  evidencia adicional).
+
+Ninguna de las dos salidas escribe en `data/enriched/authors_orcid.csv` ni
+en ninguna ficha publicada. Un ORCID que contradijera al ya asignado se
+reportaría como conflicto, igual que hace `orcid_crossref.py` — no ocurrió
+en esta corrida, pero el conector está probado para ese caso (`--test`).
+
 ---
 
 ## 3. Propuestas de nuevas integraciones
