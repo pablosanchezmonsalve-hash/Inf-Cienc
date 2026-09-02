@@ -6376,3 +6376,99 @@ Reportar al usuario el resultado con el encuadre correcto: el Criterio A
 fortalece trazabilidad sin cambiar lo visible; el Criterio B resolvió 10
 filas de cola reales. Reenviar `internal/revision_identidad.html`
 regenerado. Esperar la siguiente tanda de revisión del usuario.
+
+## Cierre: la cola de Facultad/Escuela mezclaba tres categorías distintas — se añade contexto, no vocabulario
+
+### Contexto
+
+El usuario abrió la cola «Candidato de unidad académica por autoarchivo»
+(73 casos) y no logró entender el criterio: «Parece que no está claro el
+funcionamiento de Escuelas/Facultades». Pidió recuperar información real
+de facultades y carreras de la Universidad Finis Terrae para aclararlo.
+
+### El hallazgo: no es un vocabulario incompleto, son tres preguntas distintas disfrazadas de una
+
+Los 26 valores en bruto del inventario de autoarchivo no son todos
+«escuelas»:
+1. Facultades y Escuelas reales (la mayoría).
+2. **Centros de investigación** (`CIDOC`, `CIPEF`) — viven dentro de una
+   facultad pero no son unidades de docencia.
+3. **Unidades transversales** (`Formación General`) — la Dirección de
+   Filosofía y Formación General depende directamente de la
+   Vicerrectoría Académica, PARALELA a las 8 facultades, no subordinada
+   a ninguna.
+
+Preguntarle al revisor «¿es correcto asignar esta escuela?» sobre un
+centro de investigación o una unidad transversal es la pregunta
+equivocada — de ahí la confusión reportada.
+
+### finis.cl está bloqueado en este entorno — confirmado en dos capas, no una vez
+
+`WebFetch` a `finis.cl` devolvió `EGRESS_BLOCKED`. Antes de reportarlo
+como límite del entorno, se probó también `curl` directo contra el mismo
+dominio a través del proxy configurado: `CONNECT tunnel failed, response
+403` — confirma que es una denegación de política de red de la
+organización para este sandbox, en dos vías independientes, no un fallo
+puntual de una herramienta. Toda la información de facultades/escuelas
+viene de `WebSearch` (fragmentos, no la página completa) y se etiquetó
+así explícitamente en el código y en lo reportado al usuario.
+
+### La corrección del usuario que evitó un error real
+
+Basado en `WebSearch`, se propuso que el nombre canónico vigente era
+«Facultad de Educación, Psicología y Familia» (no «Facultad de Educación
+y Ciencias Sociales», que usa hoy `config/matching_rules.yml`). Se pidió
+al usuario confirmarlo DIRECTAMENTE en finis.cl antes de tocar nada — y
+confirmó lo contrario: el nombre vigente es «Facultad de Educación y
+Ciencias Sociales», el que el proyecto ya usaba. La búsqueda web llevaba
+a una página desactualizada o a un nombre alternativo, no al oficial
+vigente. **No se tocó el nombre canónico.** Esto confirma por qué D-345
+y el propio código insisten en no traducir automáticamente estos valores
+al vocabulario oficial sin verificación humana directa: una fuente
+externa indirecta, aunque razonable, puede estar equivocada.
+
+### Lo que se aplicó
+
+No se tocó `config/matching_rules.yml` (el nombre canónico de facultad
+queda como estaba, confirmado correcto). Se agregó
+`REFERENCIA_UNIDADES_AUTOARCHIVO` en `src/review/build_review.py`: un
+diccionario de CONTEXTO (no de traducción) que añade una frase aclaratoria
+al caso cuando el valor en bruto es uno de los 11 identificados como no
+autoexplicativos (`CIDOC`, `CIPEF`, `Formación General`, `Escuela de
+Filosofía`, `Periodismo`, `Literatura`, `Publicidad`, `Ingeniería
+comercial`, `Ingenieria civil informática`, `Educación básica`,
+`Educación parvularia`). Cada entrada declara su fuente y si está
+verificada o no contra finis.cl directamente. El valor en bruto sigue
+viajando sin traducir (D-345 no cambia): esto sólo ayuda a quien revisa a
+entender qué es cada cosa antes de decidir, no decide por él.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-359 | El nombre canónico «Facultad de Educación y Ciencias Sociales» se mantiene sin cambios | Confirmado directamente por el usuario en finis.cl, contradiciendo la propuesta basada en `WebSearch` — la fuente indirecta estaba equivocada |
+| D-360 | Se agrega contexto aclaratorio a la cola de unidad académica (centros de investigación vs. escuelas vs. unidades transversales), sin traducir el valor en bruto al vocabulario oficial | El problema reportado era de comprensión del caso, no de vocabulario faltante; D-345 ya reserva la traducción oficial para cuando exista decisión institucional validada |
+
+### Verificación
+
+`build_review.py` (mismos 128 pendientes, sin cambio de conteo — es sólo
+texto de contexto), `build_all.py` (compuerta 0 fallas), `node
+src/verify/run_all.mjs` (6/6). Se comprobó manualmente que la nota
+aparece correctamente en `internal/pendientes_consolidacion.md` para
+casos de CIDOC, CIPEF y Formación General.
+
+### Ambigüedades abiertas
+
+- Las notas de `REFERENCIA_UNIDADES_AUTOARCHIVO` para 8 de los 11 valores
+  siguen sin verificación directa contra finis.cl (sólo `WebSearch`) — el
+  propio texto lo declara. Si el usuario las revisa y encuentra un error
+  como el de la Facultad de Educación, corregir el diccionario es
+  inmediato.
+- Sigue sin existir el mecanismo de aplicación para `unidad_confirmada`
+  (D-349).
+
+### Próximo paso recomendado
+
+El usuario revisa la cola con el contexto nuevo. Si encuentra que alguna
+nota está mal, se corrige puntualmente — no requiere reabrir todo el
+diseño.
