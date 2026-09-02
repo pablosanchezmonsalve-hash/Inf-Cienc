@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `bdef2ef` · Corrige una cifra viva desactualizada en config/indicators.yml (AU-03:
+Último commit: `07ff9c3` · Cierra la duplicación ejes.json/SECCIONES: el panel "responde/no respo
 Snapshot: 2026-09-02
 
 ---
@@ -35,8 +35,8 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Entidades de autor publicadas | **538** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
-| Firmas con ORCID | **327** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **274** | tras consolidación humana · **la que sirve el sitio** |
+| Firmas con ORCID | **328** | sin consolidar · `data/enriched/authors_orcid.csv` |
+| Entidades con ORCID | **275** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **41** | `config/indicators.yml` |
 | Indicadores publicados | **29** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
@@ -67,7 +67,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
 
-`make revision` reúne estas colas en 290 casos, de los que **129 siguen pendientes**: 161 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 290 casos, de los que **83 siguen pendientes**: 207 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 410
+## Decisiones tomadas: 414
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

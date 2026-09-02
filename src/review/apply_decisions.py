@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import itertools
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -223,6 +224,32 @@ def canonica(firmas: list[str], frec: dict[str, int] | None = None) -> str:
                                          -len(s), s))[0]
 
 
+_ORCID_SUFIJO = re.compile(r"-(\d{4}-\d{4}-\d{4}-\d{3}[\dX])$")
+
+
+def _orcid_del_caso(caso_id: str) -> str | None:
+    """El ORCID que un `caso_id` de candidato (`dspacecand-...`, `aacand-...`)
+    confirma, leído del propio id en vez de vuelto a buscar por nombre.
+
+    POR QUÉ NO BASTA CON `nombre_en_fuente`
+        Una misma firma puede tener MÁS DE UN candidato en `dspace_candidatos.csv`
+        (nombre coincide, pero hay varios ORCID posibles sin publicación en
+        común que desempate). Buscar `{nombre_en_fuente: orcid}` en un dict
+        se queda con el ÚLTIMO candidato del archivo para esa firma —no
+        necesariamente el que la revisión confirmó—. Medido: «Olive F.» tenía
+        tres candidatos distintos en `dspace_candidatos.csv`; confirmar el
+        primero (`0009-0000-0892-6746`, el único con evidencia cruzada de
+        `autoarchivo_candidatos.csv` también) aplicaba en su lugar el
+        tercero (`0009-0005-8141-8912`, sin ningún respaldo) — un ORCID
+        equivocado publicado con la etiqueta «revisión humana confirmó
+        esto», que es exactamente el daño que esta función existe para
+        evitar. El ORCID va literal en el `caso_id`
+        (`build_review.py::casos()`); se lee de ahí.
+    """
+    m = _ORCID_SUFIJO.search(caso_id)
+    return m.group(1) if m else None
+
+
 def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None,
                              cand_dspace: pd.DataFrame | None = None,
                              cand_autoarchivo: pd.DataFrame | None = None) -> pd.DataFrame:
@@ -230,11 +257,12 @@ def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None,
     institucionales que la revisión confirmó como la misma persona."""
     cols = ["nombre_en_fuente", "orcid", "publicaciones_de_respaldo", "confianza", "fuente"]
     por_firma = {r["nombre_en_fuente"]: r["orcid"] for _, r in cand.iterrows()} if cand is not None else {}
-    por_firma_dsp = ({r["nombre_en_fuente"]: r["orcid"] for _, r in cand_dspace.iterrows()}
-                     if cand_dspace is not None else {})
-    por_firma_aa = ({r["nombre_en_fuente"]: r["orcid"] for _, r in cand_autoarchivo.iterrows()}
-                    if cand_autoarchivo is not None else {})
-    if not por_firma and not por_firma_dsp and not por_firma_aa:
+    # (nombre, orcid) válidos de verdad, no sólo el nombre: ver `_orcid_del_caso`.
+    pares_dsp = ({(r["nombre_en_fuente"], r["orcid"]) for _, r in cand_dspace.iterrows()}
+                if cand_dspace is not None else set())
+    pares_aa = ({(r["nombre_en_fuente"], r["orcid"]) for _, r in cand_autoarchivo.iterrows()}
+               if cand_autoarchivo is not None else set())
+    if not por_firma and not pares_dsp and not pares_aa:
         return pd.DataFrame(columns=cols)
 
     filas = []
@@ -250,20 +278,24 @@ def asignaciones_confirmadas(d: pd.DataFrame, cand: pd.DataFrame | None,
 
     # Mismo criterio para los candidatos por nombre en el repositorio
     # institucional (DSpace): otra fuente, mismo patrón de confirmación.
+    # El ORCID se toma del `caso_id` confirmado, no de una búsqueda por
+    # nombre — ver `_orcid_del_caso`.
     for _, r in d[(d.veredicto == "misma")
                  & (d.cola.str.startswith("Candidato por repositorio institucional"))].iterrows():
+        orcid = _orcid_del_caso(r["caso_id"])
         for f in firmas_de(r):
-            if f in por_firma_dsp:
-                filas.append({"nombre_en_fuente": f, "orcid": por_firma_dsp[f],
+            if orcid and (f, orcid) in pares_dsp:
+                filas.append({"nombre_en_fuente": f, "orcid": orcid,
                               "publicaciones_de_respaldo": 0,
                               "confianza": "alta", "fuente": FUENTE_REVISION})
 
     # Idem para el inventario de autoarchivo de biblioteca.
     for _, r in d[(d.veredicto == "misma")
                  & (d.cola.str.startswith("Candidato por inventario de autoarchivo"))].iterrows():
+        orcid = _orcid_del_caso(r["caso_id"])
         for f in firmas_de(r):
-            if f in por_firma_aa:
-                filas.append({"nombre_en_fuente": f, "orcid": por_firma_aa[f],
+            if orcid and (f, orcid) in pares_aa:
+                filas.append({"nombre_en_fuente": f, "orcid": orcid,
                               "publicaciones_de_respaldo": 0,
                               "confianza": "alta", "fuente": FUENTE_REVISION})
 
@@ -662,29 +694,50 @@ def autotest() -> int:
 
     # 6 bis. Mismo criterio para los candidatos del repositorio institucional
     # (DSpace): otra fuente, misma lógica de confirmación, sin mezclarse.
-    cand_dsp = pd.DataFrame([{"nombre_en_fuente": "Ríos T.", "orcid": "0000-Z"}])
+    # El ORCID de prueba usa la forma real (4-4-4-3+dígito de control): la
+    # función lo extrae del propio `caso_id` con esa forma exacta (ver
+    # `_orcid_del_caso`), así que un ORCID de prueba con otra forma no la
+    # ejercitaría de verdad.
+    cand_dsp = pd.DataFrame([{"nombre_en_fuente": "Ríos T.", "orcid": "0000-0001-2222-333X"}])
     a = asignaciones_confirmadas(df([
-        ("dspacecand-Ríos T.-0000-Z", "Candidato por repositorio institucional",
+        ("dspacecand-Ríos T.-0000-0001-2222-333X", "Candidato por repositorio institucional",
          "Ríos T.", "misma"),
         ("afil-López V.", "Candidato por afiliación", "López V.", "pendiente")]),
         cand, cand_dsp)
     casos.append(("candidato de DSpace confirmado se asigna",
-                  list(a.nombre_en_fuente) == ["Ríos T."] and a.orcid.iloc[0] == "0000-Z",
+                  list(a.nombre_en_fuente) == ["Ríos T."] and a.orcid.iloc[0] == "0000-0001-2222-333X",
                   a.to_dict("records")))
     casos.append(("las dos fuentes de candidatos no se cruzan entre sí",
                   "López V." not in set(a.nombre_en_fuente), None))
 
+    # 6 ter. Con MÁS DE UN candidato para la misma firma, sólo se asigna el
+    # ORCID que el caso_id confirmado nombra — no el que quede último en el
+    # archivo de candidatos. Caso real que expuso el bug: «Olive F.» tenía
+    # tres candidatos en dspace_candidatos.csv; confirmar el primero aplicaba
+    # el tercero.
+    cand_dsp_multi = pd.DataFrame([
+        {"nombre_en_fuente": "Ríos T.", "orcid": "0000-0001-2222-333X"},
+        {"nombre_en_fuente": "Ríos T.", "orcid": "0000-0009-9999-999X"},
+    ])
+    a = asignaciones_confirmadas(df([
+        ("dspacecand-Ríos T.-0000-0001-2222-333X", "Candidato por repositorio institucional",
+         "Ríos T.", "misma")]),
+        cand, cand_dsp_multi)
+    casos.append(("con varios candidatos, se asigna el confirmado y no el último del archivo",
+                  list(a.nombre_en_fuente) == ["Ríos T."] and a.orcid.iloc[0] == "0000-0001-2222-333X",
+                  a.to_dict("records")))
+
     # 7 bis. Mismo criterio para el inventario de autoarchivo — tercera
     # fuente, tampoco se cruza con las otras dos.
-    cand_aa = pd.DataFrame([{"nombre_en_fuente": "Soto B.", "orcid": "0000-W"}])
+    cand_aa = pd.DataFrame([{"nombre_en_fuente": "Soto B.", "orcid": "0000-0001-4444-555X"}])
     a = asignaciones_confirmadas(df([
-        ("aacand-Soto B.-0000-W", "Candidato por inventario de autoarchivo",
+        ("aacand-Soto B.-0000-0001-4444-555X", "Candidato por inventario de autoarchivo",
          "Soto B.", "misma"),
-        ("dspacecand-Ríos T.-0000-Z", "Candidato por repositorio institucional",
+        ("dspacecand-Ríos T.-0000-0001-2222-333X", "Candidato por repositorio institucional",
          "Ríos T.", "pendiente")]),
         cand, cand_dsp, cand_aa)
     casos.append(("candidato de autoarchivo confirmado se asigna",
-                  list(a.nombre_en_fuente) == ["Soto B."] and a.orcid.iloc[0] == "0000-W",
+                  list(a.nombre_en_fuente) == ["Soto B."] and a.orcid.iloc[0] == "0000-0001-4444-555X",
                   a.to_dict("records")))
 
     # 8. Una firma que no está entre los candidatos no se inventa.
