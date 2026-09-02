@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `895ec49` · /simplify: extrae particiones duplicadas en 09_produccion_declarada.py
+Último commit: `f14f310` · Integra Scopus Author Search: 3 candidatos nuevos de identidad fragmen
 Snapshot: 2026-09-02
 
 ---
@@ -66,6 +66,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_conflicts.csv` | 1 |
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
+| `internal/scopus_author_search_multiples_id.csv` | 7 |
 | `internal/scopus_author_search_orcid.csv` | 50 |
 
 `make revision` reúne estas colas en 290 casos, de los que **83 siguen pendientes**: 207 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
@@ -81,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 429
+## Decisiones tomadas: 431
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

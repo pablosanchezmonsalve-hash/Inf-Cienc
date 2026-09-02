@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Scopus Author Search — listado de casos (capa interna)</title>
+<style>
+  :root { color-scheme: light; }
+  body { font: 15px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+         max-width: 920px; margin: 0 auto; padding: 2rem 1.25rem 4rem; color: #1b1f23; background: #fff; }
+  h1 { font-size: 1.5rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.5rem; border-bottom: 2px solid #1b1f23; padding-bottom: .35rem; }
+  .fuente { color: #57606a; font-size: .9rem; margin-bottom: 1.5rem; }
+  .resumen { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px;
+             padding: 1rem 1.25rem; margin: 1rem 0 2rem; font-size: .92rem; }
+  .resumen ul { margin: .4rem 0 0; padding-left: 1.2rem; }
+  .caso { border: 1px solid #d0d7de; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .caso h3 { margin: 0 0 .5rem; font-size: 1.02rem; }
+  .badge { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .02em;
+           padding: .15rem .55rem; border-radius: 999px; text-transform: uppercase; margin-left: .5rem; }
+  .badge.pendiente { background: #fff8c5; color: #7d5a00; border: 1px solid #d4a72c; }
+  .badge.confirmado { background: #dafbe1; color: #1a7f37; border: 1px solid #4ac26b; }
+  .evidencia { font-size: .92rem; margin: .5rem 0; }
+  .evidencia dt { font-weight: 600; color: #57606a; margin-top: .5rem; }
+  .evidencia dd { margin: .15rem 0 0; }
+  .nota { font-size: .88rem; color: #57606a; margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed #d0d7de; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: .75rem 0 1.5rem; }
+  th, td { text-align: left; padding: .4rem .6rem; border-bottom: 1px solid #eaeef2; }
+  th { color: #57606a; font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+  tr:hover { background: #f6f8fa; }
+  code { background: #f6f8fa; padding: .1rem .3rem; border-radius: 4px; font-size: .85em; }
+  .flag { background: #fff1e5; border: 1px solid #ffb77c; border-radius: 6px; padding: .5rem .75rem;
+          font-size: .85rem; margin-top: .5rem; }
+  .footer { margin-top: 3rem; font-size: .8rem; color: #57606a; }
+</style>
+</head>
+<body>
+
+<h1>Scopus Author Search — listado de casos</h1>
+<p class="fuente">Capa interna. Fuente: <code>data/raw/Scopus_Author_Search_UFT.csv</code>
+(812 perfiles, entregado 2026-09-02, búsqueda por afiliación "Universidad Finis Terrae", sin
+ventana de años). Generado por <code>src/enrich/scopus_author_search.py</code>. Ninguno de
+estos casos decide nada por sí solo (D-08) — es evidencia para revisión humana.</p>
+
+<div class="resumen">
+  <strong>Ya resuelto en esta sesión:</strong> "Esis Villarroel, Ivette S." se confirmó como
+  la misma persona (dos perfiles Scopus fusionados) por convergencia de ORCID entre Crossref
+  y Scopus Author Search — ver <code>internal/scopus_author_search_decisiones.csv</code>.
+  Este listado cubre <strong>el resto</strong>:
+  <ul>
+    <li><strong>2</strong> candidatos nuevos de "más de un Scopus Author ID", pendientes</li>
+    <li><strong>4</strong> casos ya conocidos por el proyecto (confirman, no aportan dato nuevo)</li>
+    <li><strong>24</strong> filas del contraste de ORCID: 1 nueva asignación posible, 23 firmas
+      sin equivalente reconocido en la población UFT del proyecto</li>
+  </ul>
+</div>
+
+<h2>Candidatos nuevos de "más de un Scopus Author ID" — pendientes</h2>
+
+<div class="caso">
+  <h3>Caffarena, Paula <span class="badge pendiente">Pendiente</span></h3>
+  <dl class="evidencia">
+    <dt>Auth-ID 60513695700</dt>
+    <dd>SciVal: 3 docs. En el corpus del proyecto: sí, 2 publicaciones (historia social/sanitaria
+      chilena, 2023 y 2025).</dd>
+    <dt>Auth-ID 57221045821</dt>
+    <dd>SciVal: 11 docs. En el corpus: sí, 1 publicación — pero bajo el nombre
+      <strong>"Barcenilla, Paula Caffarena"</strong> (apellidos en otro orden), no bajo
+      "Caffarena, Paula".</dd>
+  </dl>
+  <p class="nota"><strong>Por qué queda pendiente, no confirmada:</strong> el proyecto ya tenía
+  ORCID asignados a las dos firmas involucradas, y son <strong>distintos</strong> — "Caffarena P."
+  = <code>0000-0002-2609-6413</code> (confirmado por revisión humana en una sesión anterior) y
+  "Caffarena Barcenilla" = <code>0000-0001-9550-3695</code> (Crossref). Si fueran la misma
+  persona se esperaría el mismo ORCID. Las dos escriben sobre el mismo campo (historia social y
+  sanitaria de Chile) — coincidencia temática real, pero no es la evidencia dispositiva que este
+  proyecto exige para fusionar identidades. Lectura más probable: dos historiadoras distintas en
+  temas afines, no un perfil fragmentado.</p>
+</div>
+
+<div class="caso">
+  <h3>Cabello, José Miguel <span class="badge pendiente">Pendiente</span></h3>
+  <dl class="evidencia">
+    <dt>Auth-ID 56264351700</dt>
+    <dd>SciVal: 11 docs. En el corpus: sí, 1 publicación ("Use of Radiofrequency in Robot-Assisted
+      Partial Nephrectomy...", Current Oncology, 2025 — urología).</dd>
+    <dt>Auth-ID 56919369400</dt>
+    <dd>SciVal: 4 docs. No aparece en el corpus del proyecto bajo ningún nombre.</dd>
+  </dl>
+  <p class="nota"><strong>Por qué queda pendiente:</strong> ningún ORCID en ninguna fuente para
+  verificar ninguno de los dos perfiles. Los dos declaran área "Medicine" — coherente con el
+  paper de urología que sí está en el corpus — pero coherencia temática sola no es evidencia
+  dispositiva. Pendiente por falta de evidencia, no por evidencia en contra.</p>
+</div>
+
+<h2>Ya conocidos por el proyecto — esta fuente los confirma, sin aportar dato nuevo</h2>
+<table>
+  <thead><tr><th>Nombre (Scopus)</th><th>Scopus Author ID</th><th>Estado ya registrado</th></tr></thead>
+  <tbody>
+    <tr><td>Moya, Patricia</td><td>57767862900 · 60235456000</td>
+      <td>Pendiente (D-366) — dispersión temática entre los dos identificadores</td></tr>
+    <tr><td>Hartmann Schatloff, Dan</td><td>58612624500 · 59093175300</td>
+      <td>Registrado en <code>ambiguities_authors.csv</code> (P-04), sin decisión aplicada</td></tr>
+    <tr><td>Quezada, Mauricio</td><td>56013972600 · 60138063800</td>
+      <td>Registrado en <code>ambiguities_authors.csv</code> (P-04), sin decisión aplicada</td></tr>
+    <tr><td>Torres, Keila</td><td>57224867683 · 60596438800</td>
+      <td>Registrado en <code>ambiguities_authors.csv</code> (P-04), sin decisión aplicada</td></tr>
+  </tbody>
+</table>
+
+<h2>Contraste de ORCID — nuevo</h2>
+<table>
+  <thead><tr><th>Nombre (Scopus)</th><th>Firma corta</th><th>ORCID (Scopus Author Search)</th><th>Estado</th></tr></thead>
+  <tbody>
+    <tr><td>Bastías, Jaime</td><td>Bastías J.</td><td><code>0000-0001-8264-734X</code></td>
+      <td>Firma ya reconocida como UFT; no tenía ORCID asignado — candidato a agregar</td></tr>
+  </tbody>
+</table>
+
+<h2>Contraste de ORCID — sin firma UFT reconocida en el proyecto (23)</h2>
+<p style="font-size:.9rem;color:#57606a">Scopus Author Search los asocia a la afiliación, pero
+la población UFT del proyecto (extraída del corpus 2023-2025) no tiene una firma equivalente.
+Puede ser: producción fuera de la ventana temporal, homonimia, o una diferencia de cómo se
+parseó el apellido entre las dos fuentes — no se investigó caso por caso más allá de lo que
+sigue.</p>
+
+<div class="flag">
+  <strong>Encontrado al revisar esta lista, no automático:</strong>
+  "Fernández Abara, Joaquín Fernández" (Auth-ID 57190811072, ORCID
+  <code>0000-0001-8190-2361</code>) es casi seguro la misma persona que <strong>"Abara J.F."</strong>,
+  que el proyecto ya tiene con el <strong>mismo ORCID</strong> exacto
+  (<code>data/enriched/authors_orcid.csv</code>, vía OpenAlex). La comparación automática no lo
+  detectó porque este documento escribe el apellido compuesto completo ("Fernández Abara") y el
+  corpus del proyecto lo abrevia distinto ("Abara") — un límite conocido del cruce por
+  apellido+inicial, no una fuente nueva de identidad. Vale la pena confirmarlo aparte.
+</div>
+
+<table>
+  <thead><tr><th>Nombre (Scopus)</th><th>Firma corta</th><th>ORCID (Scopus Author Search)</th></tr></thead>
+  <tbody>
+    <tr><td>Amarouch García, Ismael Amarouch</td><td>Amarouch García I.A.</td><td><code>0000-0003-2444-8179</code></td></tr>
+    <tr><td>Andrade, Megumi Andrade</td><td>Andrade M.A.</td><td><code>0000-0002-6004-1301</code></td></tr>
+    <tr><td>Ayala Munita, Matías León</td><td>Ayala Munita M.L.</td><td><code>0000-0002-9372-1645</code></td></tr>
+    <tr><td>Barros, Joaquín Reyes</td><td>Barros J.R.</td><td><code>0000-0002-0665-6452</code></td></tr>
+    <tr><td>Bolt, Alfredo</td><td>Bolt A.</td><td><code>0000-0003-1901-9804</code></td></tr>
+    <tr><td>Bugueño, Rodrigo Andrés Poyanco</td><td>Bugueño R.A.P.</td><td><code>0000-0001-7767-6760</code></td></tr>
+    <tr><td>Bustos Arriagada, Edson</td><td>Bustos Arriagada E.</td><td><code>0000-0003-4698-1425</code></td></tr>
+    <tr><td>Cortés, Pablo</td><td>Cortés P.</td><td><code>0000-0003-3076-0804</code></td></tr>
+    <tr><td>Díaz, F. R.</td><td>Díaz F.R.</td><td><code>0000-0003-4763-074X</code></td></tr>
+    <tr style="background:#fff1e5"><td>Fernández Abara, Joaquín Fernández</td><td>Fernández Abara J.F.</td><td><code>0000-0001-8190-2361</code></td></tr>
+    <tr><td>Fortuny, Esteban Fortuny</td><td>Fortuny E.F.</td><td><code>0000-0002-0864-5669</code></td></tr>
+    <tr><td>Fuentes Anabalón, Edgardo</td><td>Fuentes Anabalón E.</td><td><code>0000-0001-9656-3163</code></td></tr>
+    <tr><td>Lehmann, Rodrigo Barcia</td><td>Lehmann R.B.</td><td><code>0000-0003-1021-446X</code></td></tr>
+    <tr><td>Letelier Widow, Gonzalo Letelier</td><td>Letelier Widow G.L.</td><td><code>0000-0002-1625-2216</code></td></tr>
+    <tr><td>Letelier, Rene F.</td><td>Letelier R.F.</td><td><code>0000-0002-1571-460X</code></td></tr>
+    <tr><td>Mardones Falcone, Gonzalo</td><td>Mardones Falcone G.</td><td><code>0000-0003-3943-8731</code></td></tr>
+    <tr><td>Opitz, Tania</td><td>Opitz T.</td><td><code>0000-0001-9639-4267</code></td></tr>
+    <tr><td>Phillips, Jaime Phillips</td><td>Phillips J.P.</td><td><code>0000-0002-4054-3187</code></td></tr>
+    <tr><td>Saldías, Ignacio Chuecas</td><td>Saldías I.C.</td><td><code>0000-0002-9558-2685</code></td></tr>
+    <tr><td>Sanhueza, María Carolina</td><td>Sanhueza M.C.</td><td><code>0000-0003-3705-1613</code></td></tr>
+    <tr><td>Santibañez, David P.</td><td>Santibañez D.P.</td><td><code>0000-0001-7840-9138</code></td></tr>
+    <tr><td>Simón, Layla Y.</td><td>Simón L.Y.</td><td><code>0000-0002-0130-3519</code></td></tr>
+    <tr><td>Zambrano-Matamala, Carolina Del C.</td><td>Zambrano-Matamala C.D.C.</td><td><code>0000-0002-9538-1816</code></td></tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  Generado a mano a partir de <code>internal/scopus_author_search_multiples_id.csv</code> y
+  <code>internal/scopus_author_search_orcid.csv</code> — 2026-09-02. No es una herramienta de
+  revisión interactiva (compárese con <code>internal/revision_identidad.html</code>); es un
+  listado de lectura. Ningún veredicto de este listado se aplicó salvo el ya registrado en
+  <code>internal/scopus_author_search_decisiones.csv</code>.
+</div>
+
+</body>
+</html>
