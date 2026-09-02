@@ -32,6 +32,99 @@ async function seccion() {
   return montarExplorador(clave || null);
 }
 
+/* Estado del recorte en la barra de vigencia. La barra pertenece al cromo aux
+   (core.js) y existe en todas las páginas; éste es el único sitio donde se
+   enciende el badge `.recorte-vivo`. En cualquier otra página queda oculto por
+   su atributo hidden. Un vistazo a la parte superior debe bastar para saber
+   que hay un recorte activo, sin bajar a los controles. */
+function actualizarRecorteVivo(publicaciones, sel) {
+  const badge = document.getElementById('recorte-vivo');
+  if (!badge) return;
+  const n = X.recorte(publicaciones, sel).length;
+  const total = publicaciones.length;
+  const activo = X.hayRecorte(sel);
+  badge.hidden = !activo;
+  if (activo) {
+    badge.innerHTML = `Recorte <b>${c.nf.format(n)}</b> de ${c.nf.format(total)} publicaciones`;
+  }
+}
+
+/* Selector de año en la barra de vigencia. Al elegir un año se filtra el
+   explorador de la página de inmediato (mismo recorte que tocar el chip de
+   año en los controles). Se rellena con los años reales del corpus y se
+   preselecciona el año activo, si lo hay; en una página sin explorador nunca
+   se llama y el select queda oculto.
+
+   El `<select>` es un elemento estable de la barra común, así que el escucha
+   se engancha UNA vez y el contenido se redibuja en cada repintado — volver a
+   engancharlo a cada `pintar` acumularía manejadores. `actual()` devuelve el
+   recorte vigente en cada momento y `cambiar(s)` lo sustituye y repinta. */
+function montarSelectorAnio(publicaciones, actual, cambiar) {
+  const env = document.getElementById('recorte-anio-env');
+  const selAnio = document.getElementById('recorte-anio');
+  if (!env || !selAnio) return;
+  selAnio.addEventListener('change', () => {
+    const v = selAnio.value;
+    const s = { ...actual(), anio: undefined };
+    if (v) s.anio = [v];
+    cambiar(s);
+  });
+  redibujarSelectorAnio(publicaciones, actual(), selAnio, env);
+}
+
+/* Refresca las opciones del selector y el valor activo tras un repintado. */
+function redibujarSelectorAnio(publicaciones, sel, selAnio, env) {
+  if (!selAnio || !env) return;
+  const años = X.facetas(publicaciones, sel, 'anio');
+  const lista = [...años.keys()]
+    .filter(a => a !== 'Sin dato declarado')
+    .sort((a, b) => Number(b) - Number(a));
+  if (lista.length < 2) { env.hidden = true; return; }
+  env.hidden = false;
+  const activo = (sel.anio || [])[0] || '';
+  selAnio.innerHTML = '<option value="">Todo el periodo</option>'
+    + lista.map(a => `<option value="${a}"${a === activo ? ' selected' : ''}>${a}</option>`).join('');
+}
+
+/* Mini-foco de la portada: unos atajos de un toque para entrar al explorador
+   con un recorte ya aplicado, sin pasar por los filtros. No duplica los
+   controles: son entradas rápidas, no un segundo panel de filtrado. Si hay un
+   recorte activo, la misma fila ofrece «Ver todo» para deshacerlo.
+
+   El clic se delega en el contenedor estático `#minifoco`, así que el escucha
+   se engancha una vez y la fila se redibuja en cada repintado. */
+function montarMiniFoco(publicaciones, actual, cambiar, claveSeccion) {
+  const cont = document.getElementById('minifoco');
+  if (!cont || claveSeccion) return;
+  cont.addEventListener('click', e => {
+    const b = e.target.closest('.foco-boton');
+    if (!b) return;
+    const f = b.dataset.foco;
+    const s = { ...actual(), anio: undefined };
+    if (f !== 'todo') s.anio = [f.split(':')[1]];
+    cambiar(s);
+  });
+  redibujarMiniFoco(publicaciones, actual(), cont);
+}
+
+/* Refresca los botones del mini-foco tras un repintado. */
+function redibujarMiniFoco(publicaciones, sel, cont) {
+  if (!cont) return;
+  const años = X.facetas(publicaciones, sel, 'anio');
+  const ultimo = [...años.keys()]
+    .filter(a => a !== 'Sin dato declarado')
+    .sort((a, b) => Number(b) - Number(a))[0];
+  const activo = X.hayRecorte(sel);
+  const botones = [];
+  if (ultimo) botones.push(
+    `<button type="button" class="foco-boton" data-foco="anio:${ultimo}">Publicaciones ${ultimo}</button>`);
+  if (activo) botones.push(
+    `<button type="button" class="foco-boton foco-limpiar" data-foco="todo">Ver todo</button>`);
+  cont.innerHTML = botones.length
+    ? `<div class="minifoco-bar"><span class="minifoco-titulo">Exploración rápida</span>${
+        botones.join('')}</div>` : '';
+}
+
 async function montarExplorador(claveSeccion) {
   const cabecera = document.getElementById('titular');
   const zonas = {
@@ -103,6 +196,10 @@ async function montarExplorador(claveSeccion) {
     zonas.estado.innerHTML = partes.estado;
     zonas.controles.innerHTML = partes.controles;
     zonas.cifras.innerHTML = partes.cifras;
+    actualizarRecorteVivo(publicaciones, sel);
+    redibujarSelectorAnio(publicaciones, sel,
+      document.getElementById('recorte-anio'), document.getElementById('recorte-anio-env'));
+    redibujarMiniFoco(publicaciones, sel, document.getElementById('minifoco'));
     // Los cortes se repintan DENTRO de la transición: hay que medir la
     // geometría antes y después del cambio, y el orden sólo se garantiza si el
     // repintado ocurre en medio.
@@ -131,6 +228,15 @@ async function montarExplorador(claveSeccion) {
     X.escribirURL(sel, !nuevaEntrada);
     if (claveSeccion) scrollSpy(document.getElementById('contenido'));
   }
+
+  // El selector de año de la barra y el mini-foco de la portada no guardan el
+  // recorte ellos mismos: aplican un recorte nuevo a través de este cierre,
+  // que es el único dueño de `sel` y del repintado. `actual()` siempre devuelve
+  // el recorte vigente, así que el handler nunca trabaja con uno anticuado.
+  const actual = () => sel;
+  const cambiar = nuevo => { sel = nuevo; pintar({ nuevaEntrada: true }); };
+  montarSelectorAnio(publicaciones, actual, cambiar);
+  montarMiniFoco(publicaciones, actual, cambiar, claveSeccion);
 
   // Un solo escucha delegado para los chips y para el botón de limpiar: los
   // controles se repintan enteros a cada cambio, así que enganchar escuchas a
@@ -266,6 +372,7 @@ async function publicaciones() {
 
     if (!soloTabla) {
       zonas.estado.innerHTML = VX.estado(res.length, pubs.length, sel);
+      actualizarRecorteVivo(pubs, sel);
       // El buscador se repinta con el resto, así que hay que devolverle el
       // foco y el cursor: si no, escribir una letra lo expulsa del campo.
       const antes = document.getElementById('q');
