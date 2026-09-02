@@ -70,7 +70,8 @@ async function montarExplorador(claveSeccion) {
     const meta = await c.cargar('meta.json');
     if (cabecera) {
       cabecera.innerHTML = claveSeccion
-        ? VX.cabeceraSeccion(claveSeccion, document.title.split('·')[0].trim())
+        ? VX.cabeceraSeccion(claveSeccion, document.title.split('·')[0].trim(),
+            (await c.cargar('ejes.json')).ejes[claveSeccion])
         : VX.cabecera(meta);
     }
     const lectura = document.getElementById('lectura');

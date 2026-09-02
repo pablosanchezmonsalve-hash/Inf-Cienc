@@ -253,11 +253,17 @@ export function explorador(pubs, sel, proc, jerarquia) {
 /* Cada sección declara SUS cortes. La forma la fija la relación del dato, no
    la costumbre: una serie anual va en vertical, un ranking largo en
    horizontal, unos umbrales anidados en acumulada y un total repartido en
-   proporcional. */
+   proporcional.
+
+   El panel «qué responde / qué NO responde» de cada sección NO vive aquí:
+   antes cada clave tenía su propio `pregunta`/`noResponde` copiado a mano
+   desde `docs/EJES.md`, y las dos copias ya habían empezado a divergir
+   (verificado: el "no responde" de producción decía algo distinto en cada
+   lado). `cabeceraSeccion()` lee `ejes.json` —el mismo artefacto que
+   `04_glossary.py` genera y verifica contra los denominadores reales de
+   cada indicador— en vez de repetir el texto. */
 export const SECCIONES = {
   produccion: {
-    pregunta: 'Cuánto se publicó, de qué tipo y desde qué unidad.',
-    noResponde: 'El volumen no mide calidad ni esfuerzo: cuenta documentos indexados.',
     cortes: [
       { cod: 'P-02', campo: 'anio',   titulo: 'Publicaciones por año',        forma: 'barrasV' },
       { cod: 'P-03', campo: 'tipo',   titulo: 'Tipo documental',              forma: 'barrasH' },
@@ -272,8 +278,6 @@ export const SECCIONES = {
     ],
   },
   impacto: {
-    pregunta: 'Cuántas citas recibió lo publicado y cómo se sitúa frente al mundo.',
-    noResponde: 'Las citas miden atención recibida, no calidad ni utilidad social.',
     cortes: [
       { cod: 'I-01', campo: 'citas',  titulo: 'Citas por año de publicación', forma: 'suma-anio',
         aviso: 'Las barras cuentan las citas recibidas por lo publicado en cada año, no la actividad de ese año. Un año reciente tuvo menos tiempo para acumular citas.' },
@@ -284,8 +288,6 @@ export const SECCIONES = {
     ],
   },
   colaboracion: {
-    pregunta: 'Con quién se publicó y en qué tamaño de equipo.',
-    noResponde: 'Colaborar no es por sí mismo mejor: describe una forma de trabajo, no un logro.',
     cortes: [
       { cod: 'C-01', campo: 'colaboracion',   titulo: 'Nacional o internacional', forma: 'barrasH' },
       { cod: 'C-03', campo: 'paises',         titulo: 'Países colaboradores',     forma: 'barrasH', tope: 15 },
@@ -295,8 +297,6 @@ export const SECCIONES = {
     ],
   },
   tematica: {
-    pregunta: 'En qué áreas y sobre qué objetivos se publicó.',
-    noResponde: 'La categoría de la revista no es el tema exacto del artículo.',
     cortes: [
       { cod: 'T-05', campo: 'qs_area', titulo: 'Áreas QS',                    forma: 'barrasH' },
       { cod: 'T-01', campo: 'asjc',    titulo: 'Áreas temáticas ASJC',        forma: 'barrasH', tope: 20 },
@@ -543,16 +543,21 @@ export function indice(clave) {
   </nav>`;
 }
 
-/** La cabecera de una sección: qué responde y qué NO responde. */
-export function cabeceraSeccion(clave, titulo) {
-  const s = SECCIONES[clave];
+/** La cabecera de una sección: qué responde y qué NO responde.
+
+    `eje` es la entrada de `ejes.json` para esta clave (`{titulo, responde,
+    no_responde, sobre_que}`) — la misma fuente que `docs/EJES.md` declara y
+    que `04_glossary.py` verifica contra los denominadores reales de cada
+    indicador antes de publicarla. Sin `ejes.json` cargado (o sin panel para
+    esta clave) se omite el bloque en vez de inventar un texto. */
+export function cabeceraSeccion(clave, titulo, eje) {
   return `<div class="portada-id">
     <h1>${c.escapar(titulo)}</h1>
-    <p class="portada-sub">${c.escapar(s ? s.pregunta : '')}</p>
+    <p class="portada-sub">${c.escapar(eje ? eje.responde : '')}</p>
   </div>
-  ${s ? `<details class="metodo portada-metodo">
+  ${eje ? `<details class="metodo portada-metodo">
     <summary>Qué NO dice esta sección</summary>
-    <div class="metodo-cuerpo"><p>${c.escapar(s.noResponde)}</p></div>
+    <div class="metodo-cuerpo"><p>${c.escapar(eje.no_responde)}</p></div>
   </details>` : ''}`;
 }
 

@@ -67,6 +67,7 @@ async function main() {
   // pre-renderizado y el que se repinta al filtrar no pueden divergir.
   const proc = vx.procedencias(series, meta);
   const { kpis } = await leerJSON('kpis.json');
+  const { ejes } = await leerJSON('ejes.json');
   const { publicaciones } = await leerJSON('publications.json');
   const catalogo = await leerJSON('catalogo.json');
   // Sólo lo usa C-05 (red de coautoría); el mismo mapa que arma el navegador
@@ -127,7 +128,7 @@ async function main() {
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
       const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
       const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia);
-      html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo), a);
+      html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo, ejes[clave]), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);
       html = rellenar(html, 'controles', sec.controles, a);
       html = rellenar(html, 'cifras', sec.cifras, a);

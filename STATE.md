@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `644ec74` · Auditoría integral: corrige una contradicción de identidad ORCID, un b
+Último commit: `bdef2ef` · Corrige una cifra viva desactualizada en config/indicators.yml (AU-03:
 Snapshot: 2026-09-02
 
 ---
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 409
+## Decisiones tomadas: 410
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

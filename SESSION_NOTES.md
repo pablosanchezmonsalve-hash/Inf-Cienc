@@ -7789,3 +7789,70 @@ declara playwright como única dependencia, correctamente marcada
 
 `python3 src/build/build_all.py` + `06_assemble_site.py` + `node
 src/verify/run_all.mjs`: limpio de nuevo tras este ajuste.
+
+## Cierre: ejes.json deja de duplicarse — SECCIONES lee la fuente en vez de llevar su propia copia
+
+### Contexto
+
+El cierre anterior dejó declarada, sin tocar, la duplicación entre
+`docs/EJES.md`/`ejes.json` (generado y verificado por `04_glossary.py`
+contra los denominadores reales de cada indicador) y el texto
+`pregunta`/`noResponde` que `vista_explorador.js`'s `SECCIONES` llevaba
+copiado a mano — ya divergido en al menos un caso confirmado (producción).
+El usuario, consultado explícitamente entre las dos direcciones posibles
+(hacer que `SECCIONES` lea `ejes.json`, o retirar el paso de build que ya
+no consumía nadie), eligió la primera: una sola fuente.
+
+### Qué se hizo
+
+`cabeceraSeccion(clave, titulo, eje)` (`vista_explorador.js`) gana un
+tercer parámetro —la entrada de `ejes.json` para esa clave— y usa
+`eje.responde`/`eje.no_responde` en vez de `SECCIONES[clave].pregunta`/
+`.noResponde`, que se retiraron de las cuatro entradas de `SECCIONES`
+(producción, impacto, colaboración, temática). Sin `eje` (archivo no
+cargado, o clave sin panel) el bloque se omite, igual que antes.
+
+Dos llamadores, mismo criterio en los dos:
+- `src/build/prerender.mjs` vuelve a cargar `ejes.json` (se había retirado
+  en el cierre anterior porque su único consumidor, la rama `modulos`
+  muerta, ya no existía) y pasa `ejes[clave]`.
+- `web/assets/js/paginas.js` lo pide con `c.cargar('ejes.json')` en la
+  única rama donde `cabeceraSeccion` corre en el navegador (páginas sin
+  pre-renderizar — hoy ninguna de las cuatro de sección cae ahí en
+  producción, pero el camino queda correcto si alguna vez lo hace).
+
+Verificado leyendo el HTML construido, no asumido: `dist/produccion.html`
+pasó de mostrar el texto corto ("El volumen no mide calidad ni esfuerzo:
+cuenta documentos indexados.") al texto completo de `docs/EJES.md` ("Qué
+tan bueno es lo publicado. El volumen es una medida de actividad
+indexada... la comparación entre ellas mide entonces la cobertura de la
+base tanto como la actividad de las personas."). `04_glossary.py`'s
+`verificar_denominadores()` sigue pasando sin cambios: no dependía de
+`cabeceraSeccion`, sólo del atributo `data-indicadores` en el HTML.
+
+### Verificación
+
+`python3 src/build/build_all.py` + `06_assemble_site.py` (11 páginas, sin
+avisos) + `node src/verify/run_all.mjs` (6/6 en verde, incluidos
+`flujos.mjs` con 0 excepciones JS en todo el recorrido).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-410 | `cabeceraSeccion()` lee el panel «responde/no responde» de `ejes.json`, y `SECCIONES` deja de llevar su propia copia | Las dos copias ya habían divergido (verificado); consultado explícitamente con el usuario entre esta opción y retirar `ejes.json`, eligió una sola fuente |
+
+### Archivos modificados
+
+```
+web/assets/js/vista_explorador.js   cabeceraSeccion(clave, titulo, eje); SECCIONES sin pregunta/noResponde
+src/build/prerender.mjs             vuelve a cargar ejes.json, lo pasa a cabeceraSeccion
+web/assets/js/paginas.js            pide ejes.json en la rama sin pre-renderizar
+```
+
+### Próximo paso recomendado
+
+Ninguno de código. Sigue pendiente, por elección explícita del usuario:
+revisión caso por caso de los 129 pendientes de identidad
+(`internal/revision_identidad.html`) — empieza en el próximo cierre de
+esta misma sesión.
