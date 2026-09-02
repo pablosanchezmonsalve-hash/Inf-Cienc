@@ -19,7 +19,7 @@ lugar.
 
 | # | Pendiente | Desbloquea | Origen |
 |---|---|---|---|
-| **V2-01** | Subir la cobertura de ORCID desde el 38,8 % actual, confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
+| **V2-01** | Subir la cobertura de ORCID desde el 51,1 % actual (277 de 542), confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
 | **V2-02** | ~~Resolver los grupos de variantes de nombre que siguen pendientes~~ | `C-05` red de coautoría; recuento real de personas | T-03 (cerrado, 2026-08-26) |
 | **V2-03** | Revisión humana de los 20 identificadores fragmentados | `C-07` liderazgo autoral | T-04 |
 | **V2-04** | Validar institucionalmente el vocabulario de unidades | Retirar la advertencia destacada de `P-07` | T-02 |
@@ -33,16 +33,17 @@ afirmaciones caducaron:
 
 - **La vía Crossref ya se recorrió.** `T-01` se cerró el 2026-08-01 con 174
   firmas, y la ampliación desde el registro más las decisiones humanas la
-  dejaron en **240 asignaciones sobre 589 formas de firma sin consolidar**, que
-  son **216 de 556 entidades publicadas (38,8 %)**. El 100 % no es alcanzable
-  sin inventar datos: el argumento está en `docs/ORCID_COVERAGE.md` §5 —sus
-  cifras de portada son anteriores a la revisión humana, el razonamiento no—.
+  dejaron en **322 asignaciones sobre 589 formas de firma sin consolidar**, que
+  son **277 de 542 entidades publicadas (51,1 %)**. El 100 % no es alcanzable
+  sin inventar datos: el argumento está en `docs/ORCID_COVERAGE.md` §5.
 - **La consolidación no esperó al ORCID.** De los 110 casos que `make revision`
   puso delante de una persona —repartidos en cuatro colas—, 52 se resolvieron:
   51 «misma persona» y 1 «personas distintas». Su cierre transitivo dejó **63
   formas de firma convertidas en 30 personas**
-  (`config/identidades_consolidadas.yml`). El camino fue humano y caso por caso,
-  que es justo lo que `D-08` exige y lo que este párrafo daba por imposible.
+  (`config/identidades_consolidadas.yml`); una consolidación posterior
+  (2026-09-01) llevó la base publicada a **542 entidades**. El camino fue humano
+  y caso por caso, que es justo lo que `D-08` exige y lo que este párrafo daba
+  por imposible.
 
 No confundir dos recuentos que coinciden en el número: la cola de variantes de
 nombre tiene **51 grupos** (`T-03`, 123 filas en `internal/ambiguities_authors.csv`),

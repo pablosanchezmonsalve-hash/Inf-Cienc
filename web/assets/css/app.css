@@ -15,58 +15,50 @@
    ────────────────────────────────────────────────────────────────────────────
    NOTA DE IMPLEMENTACIÓN · de dónde sale este sistema cromático
 
-   La identidad es ROJA por decisión del proyecto. NO es el rojo institucional
-   oficial de la Universidad Finis Terrae: no se pudo verificar su valor exacto
-   (finis.cl y los directorios de marca respondieron 403), y ANTE LA DUDA NO SE
-   INVENTÓ. Los tonos de aquí están DISEÑADOS POR MEDICIÓN, no copiados. El día
-   que exista el hex oficial, se cambia --marca y sus derivados: son tokens.
+   La identidad es VINO/BURDEOS + CHAMPÁN (paleta H), elegida por el usuario en
+   una comparativa de paletas y aplicada de forma integral: marca, dato y
+   advertencia cambiaron a la vez, no sólo la cabecera. NO es el rojo
+   institucional oficial de la Universidad Finis Terrae: no se pudo verificar su
+   valor exacto (finis.cl y los directorios de marca respondieron 403), y ANTE
+   LA DUDA NO SE INVENTÓ una pretensión oficial. Los tonos de aquí están
+   DISEÑADOS POR MEDICIÓN, no copiados. El día que exista el hex oficial, se
+   cambia --marca y sus derivados: son tokens.
 
    Ningún color se eligió por gusto. Cada uno despeja un umbral comprobable, y
-   la comprobación se corrió sobre los DOS temas antes de escribirla aquí:
+   la comprobación se corrió sobre los DOS temas con `src/design/validar_paleta.py`.
+   Ese validador LEE los tokens de esta hoja: no se copian números aquí para no
+   repetir la fotografía que se desactualiza en silencio. Estado de hoy: el
+   validador termina en «SISTEMA CROMÁTICO VÁLIDO», con 0 fallos. Los rediseños
+   de paleta se corrigen ajustando los tokens y re-corriendo el validador; si se
+   decide dejar de afirmar una cifra, se deja de afirmar también aquí antes que
+   dejar un número viejo.
 
-     token                fondo            claro    oscuro   piso
-     --tinta              --superficie     18,54    15,57    4,5   (WCAG 1.4.3)
-     --tinta-2            --superficie      8,28     8,47    4,5
-     --tinta-3            --superficie-2    5,73     5,64    4,5
-     --cifra              --superficie      9,10     8,16    3,0   (texto grande)
-     --accion             --superficie      7,67     7,88    4,5
-     --accion             --superficie-2    6,71     7,26    4,5
-     --serie-1            --superficie      7,67     5,48    3,0   (WCAG 1.4.11)
-     --sin-dato           --superficie      3,90     3,71    3,0
-     --ord-1              --superficie     14,80    12,33    3,0
-     --ord-2              --superficie      9,81     7,95    3,0
-     --ord-3              --superficie      6,38     5,06    3,0
-     --ord-4              --superficie      3,53     3,17    3,0
-     --marca-tinta        --marca           8,26    10,29    4,5
-     blanco               --marca          10,88    17,73    4,5
-     --aviso-tinta        --aviso-fondo     8,74    11,75    4,5
-     --aviso-tinta-graf.  --superficie      6,48     8,91    4,5
+   LAS DOS CONDICIONES QUE EL CONTRASTE SOLO NO CUBRE:
 
-   Y dos condiciones que el contraste solo no cubre:
+   SEPARACIÓN DATO ↔ ADVERTENCIA. El dato es BORDEAUX (cálido) y la advertencia
+     metodológica es VERDE MONEDA (frío) — la familia complementaria. El
+     ámbar, también cálido, quedaba a ΔE 17,9 del bordeaux bajo el piso de 20,
+     así que la advertencia se movió al verde. Medido en OKLab entre
+     --serie-1 y --aviso-borde, el par que de verdad se dibuja junto —barra de
+     dato contra línea de referencia—: ΔE 26,0 en claro y 22,2 en oscuro, sobre
+     un piso de 20. Lo midió el validador, que lee los tokens en vez de creerse
+     una tabla.
 
-   SEPARACIÓN DATO ↔ ADVERTENCIA. El dato es rojo y la advertencia metodológica
-     es ámbar. Dos avisos contiguos en la misma familia cálida se confundirían.
-     Medido en OKLab entre --serie-1 y --aviso-borde, que es el par que de
-     verdad se dibuja junto —barra de dato contra línea de referencia—:
-     ΔE 25,1 en claro y 24,1 en oscuro, sobre un piso de 20.
+   RAMPA ORDINAL (Q1–Q4). Escala ORDENADA, así que un solo tono (bordeaux) en
+     cuatro pasos con luminosidad monótona. En claro sube (Q1 más oscuro, la
+     carga menor destaca); en oscuro baja (Q1 más claro), para que el paso
+     mínimo quede sobre el piso. Paso mínimo ΔE 8,1 en claro y 11,3 en oscuro,
+     cada paso ≥ 3:1 sobre la superficie, sobre un piso de 8: cuatro escalones
+     que se distinguen incluso impresos en gris. Cuatro tonos distintos habrían
+     afirmado que Q1 y Q4 no tienen relación entre sí, cuando son posiciones de
+     una misma escala.
 
-     Una versión anterior de esta nota decía 28,6 y 21,2. Estaban medidas contra
-     #d9a520, que era --aviso-tinta-grafico de la paleta TEAL anterior y ya no
-     está en la hoja. Con el valor real el oscuro daba 17,9 y NO cumplía. Lo
-     encontró src/design/validar_paleta.py, que lee los tokens de la hoja en vez
-     de creerse una tabla; se corrigió subiendo el ámbar oscuro.
-
-   RAMPA ORDINAL (Q1–Q4). Escala ORDENADA, así que un solo tono en cuatro pasos
-     con luminosidad monótona. Paso mínimo ΔE 10,5 en claro y 11,3 en oscuro,
-     sobre un piso de 8: cuatro escalones que se distinguen incluso impresos en
-     gris. Cuatro tonos distintos habrían afirmado que Q1 y Q4 no tienen
-     relación entre sí, cuando son posiciones de una misma escala.
-
-   SUPERFICIE OSCURA CÁLIDA. El tema oscuro pasó de pizarra fría (#12222a) a
-     pizarra cálida (#171214). Un rojo sobre un fondo azulado se lee sucio: el
-     fondo tira del tono al magenta. No es una preferencia, es el mismo motivo
-     por el que las superficies claras están teñidas hacia la familia de la
-     marca en lugar de ser grises neutros.
+   SUPERFICIE OSCURA CÁLIDA. El tema oscuro es vino profundo (#17080a), no una
+     pizarra fría. Un rojo sobre un fondo azulado se lee sucio: el fondo tira
+     del tono al magenta. Con el dato en bordeaux, la superficie debe poder
+     sostenerlo sin tirar del matiz — el mismo motivo por el que las superficies
+     claras están teñidas hacia la familia de la marca (champán) en lugar de ser
+     grises neutros.
 
    UNA SOLA DECLARACIÓN POR TOKEN. Antes la paleta oscura estaba escrita tres
      veces —en el media query, en el selector explícito y en los comentarios— y
@@ -88,43 +80,44 @@
      que light-dark() consulta. */
   color-scheme: light dark;
 
-  /* ---- Superficies. Teñidas con Peach Glow al 6–10 %; en oscuro, Ink Black. ---- */
-  --plano:        light-dark(#f6efe6, #041417);
-  --superficie:   light-dark(#fffcf8, #0d2a2f);
-  --superficie-2: light-dark(#f7efe5, #113236);
+  /* ---- Superficies. Teñidas con champán al 6–10 %; en oscuro, vino profundo. ---- */
+  --plano:        light-dark(#f7efe6, #150507);
+  --superficie:   light-dark(#fdf6ef, #17080a);
+  --superficie-2: light-dark(#f5e7da, #1f0d10);
 
   /* Segundo suelo de banda. Es un TOKEN y no un valor suelto para que
      validar_paleta.py lo mida: las cifras que lo justifican están en la regla
      de .banda-papel-2, y una cifra que sólo vive en un comentario deja de ser
      cierta en silencio. */
-  --banda-papel-2: light-dark(#e1e7e4, #113236);
+  --banda-papel-2: light-dark(#efe2d2, #1f0d10);
 
-  /* ---- Tinta. Tres niveles, todos derivados del rojo de la marca. ---- */
-  --tinta:   light-dark(#071e22, #eef1ee);
-  --tinta-2: light-dark(#33484a, #b9c6c3);
-  --tinta-3: light-dark(#516365, #93a3a1);
+  /* ---- Tinta. Tres niveles, todos derivados del vino de la marca. ---- */
+  --tinta:   light-dark(#241014, #f0e2d0);
+  --tinta-2: light-dark(#4a3636, #d4c2b6);
+  --tinta-3: light-dark(#5a4646, #b6a398);
 
-  --linea:        light-dark(#e8ddce, #1c4045);
-  --linea-fuerte: light-dark(#cbbca9, #2c5459);
+  --linea:        light-dark(#ebd9c6, #3a2026);
+  --linea-fuerte: light-dark(#cbb0a0, #4d2b31);
 
-  /* ---- Marca. Identidad institucional. Nunca codifica un dato. ---- */
-  --marca:       light-dark(#071e22, #041417);
-  --marca-honda: light-dark(#041417, #020c0e);
-  --marca-alta:  light-dark(#1d7874, #45b0aa);
-  --marca-tinta: light-dark(#f4c095, #f4c095);
+  /* ---- Marca. Identidad institucional. Nunca codifica un dato. Paleta H:
+     vino / burdeos + champán (elegida por el usuario en comparativa). ---- */
+  --marca:       light-dark(#2c0c12, #180609);
+  --marca-honda: light-dark(#120405, #0a0304);
+  --marca-alta:  light-dark(#a84455, #e0a0a8);
+  --marca-tinta: light-dark(#f0ddca, #f0ddca);
 
   /* Tinta de las cifras grandes. Existe aparte de --marca porque --marca
      cambia de OFICIO entre temas: en claro es tinta, en oscuro es la
      superficie de la cabecera. Usarla para el texto de un KPI funcionaba en
      claro y en oscuro pintaba la cifra a 1,05:1, o sea invisible. Este token
      es tinta en los dos temas y sólo eso. */
-  --cifra: light-dark(#12514e, #f4c095);
+  --cifra: light-dark(#7a2028, #f0ddca);
 
   /* ---- Acción. Estado interactivo. Tampoco codifica un dato. ---- */
-  --accion:        light-dark(#145956, #f4c095);
-  --accion-viva:   light-dark(#1d7874, #f4c095);
-  --accion-suave:  light-dark(#e4f0ee, #12333a);
-  --accion-anillo: light-dark(rgba(29, 120, 116, .34), rgba(244, 192, 149, .38));
+  --accion:        light-dark(#8a2430, #f0ddca);
+  --accion-viva:   light-dark(#a84455, #f0ddca);
+  --accion-suave:  light-dark(#f6e4e4, #2a1016);
+  --accion-anillo: light-dark(rgba(168, 68, 85, .34), rgba(244, 221, 202, .38));
 
   /* ---- Series categóricas ----
           MEDIDO: de las seis ranuras, el sitio dibuja DOS. El anillo de
@@ -153,38 +146,42 @@
 
           La sexta ranura era carmín. Con la marca en rojo, un carmín a dos
           pasos de --serie-1 es una trampa a la espera: se cambió por azul. ---- */
-  --serie-1: light-dark(#1d7874, #45b0aa);   /* Deep Ocean · el dato, teal en ambos temas */
-  --serie-2: light-dark(#071e22, #f4c095);   /* Ink Black / Peach Glow · EN USO (anillo C-01) */
+  --serie-1: light-dark(#8a2430, #e0a0a8);   /* bordeaux · el dato, vino en ambos temas */
+  --serie-2: light-dark(#c06070, #b24a5a);   /* rosa vivo / rosa profundo · EN USO (anillo C-01) */
   --serie-3: light-dark(#6b4bbd, #a48ae8);   /* violeta   · RESERVADA, sin validar */
-  --serie-4: light-dark(#1f7d4f, #4fbb85);   /* verde     · RESERVADA, sin validar */
+  --serie-4: light-dark(#2e7d32, #5a9e5f);   /* verde     · RESERVADA, sin validar */
   --serie-5: light-dark(#8a5a06, #d09a2a);   /* ámbar     · RESERVADA, sin validar */
   --serie-6: light-dark(#1c5fa8, #6fa8e8);   /* azul      · RESERVADA, sin validar */
 
-  /* ---- Rampa ordinal. Un solo tono, cuatro pasos, luminosidad monótona. ---- */
-  --ord-1: light-dark(#04262a, #cfeae5);
-  --ord-2: light-dark(#0f4e4b, #93cdc6);
-  --ord-3: light-dark(#1d7874, #6ab4ad);
-  --ord-4: light-dark(#469b93, #469690);
+  /* ---- Rampa ordinal. Un solo tono (bordeaux), cuatro pasos, luminosidad
+          monótona. En claro sube (Q1 más oscuro); en oscuro baja (Q1 más
+          claro), para que Q1 —la carga menor— siempre destaque sobre el suelo
+          y el paso mínimo quede sobre el piso de ΔE 8. Medidas por
+          validar_paleta.py. ---- */
+  --ord-1: light-dark(#5c1f29, #f8dde0);
+  --ord-2: light-dark(#8c3845, #ebaab4);
+  --ord-3: light-dark(#a6505d, #cf828e);
+  --ord-4: light-dark(#bf6977, #9d4a56);
 
   /* ---- Ausencia de dato: gris, siempre (decisión D-09). ---- */
   --sin-dato: light-dark(#87807a, #7d8886);
 
   /* ---- Cromo del gráfico: recesivo por definición. ---- */
-  --red: light-dark(#efe6d8, #123033);
-  --eje: light-dark(#cbbca9, #2c5459);
+  --red: light-dark(#f2e6da, #1f1013);
+  --eje: light-dark(#d0beb0, #4a2b31);
 
-  /* ---- Advertencia metodológica. Ámbar, fuera de la familia del dato. ---- */
-  --aviso-fondo: light-dark(#fdefdc, #2e2210);
-  /* El ámbar OSCURO se subió de #c8901a a #f0b429. El valor anterior venía de
-     la paleta teal y sobrevivió al cambio de identidad sin que nadie lo mirara:
-     contra un dato teal la separación sobraba, contra un dato ROJO caía a
-     ΔE 17,9, bajo el piso de 20 que este mismo proyecto declara. Lo encontró
-     `src/design/validar_paleta.py`, no una revisión visual. Ahora ΔE 24,1. */
-  --aviso-borde: light-dark(#c07a2a, #e0a445);
-  --aviso-tinta: light-dark(#6b3d10, #f0cf9c);
-  /* El ámbar del trazo (--aviso-borde) no llega a 4,5:1 como texto. La línea de
-     referencia puede tenerlo; su ETIQUETA, que dice el promedio mundial, no. */
-  --aviso-tinta-grafico: light-dark(#8a5518, #e0a445);
+  /* ---- Advertencia metodológica. Verdes MONEDA fríos, fuera de la familia
+          cálida del dato. Con el dato en bordeaux (cálido), el ámbar —también
+          cálido— caía a ΔE 17,9 bajo el piso de 20. Se mueve la advertencia a
+          la familia fría complementaria: verde moneda, ΔE ≥ 20 frente al dato
+          rosa en los dos temas. Lo midió `src/design/validar_paleta.py`. ---- */
+  --aviso-fondo: light-dark(#e9f1e0, #12210e);
+  --aviso-borde: light-dark(#2e7d32, #5a9e5f);
+  --aviso-tinta: light-dark(#1d4a1e, #bcdbb0);
+  /* La línea de referencia puede llevar el trazo (--aviso-borde); su ETIQUETA,
+     que dice el promedio mundial, no — ese verde claro no llega a 4,5:1 como
+     texto. Este token sí. */
+  --aviso-tinta-grafico: light-dark(#1f5d24, #5a9e5f);
 
   /* ---- Bento / módulos premium (D-327, decidido) ----
           Acento nuevo para el tablero, no una sustitución de la identidad
@@ -374,21 +371,31 @@ p:last-child { margin-bottom: 0; }
   min-width: 0; text-decoration: none;
 }
 .marca:hover { text-decoration: none; }
+/* Escudo institucional. El acento champán en borde y ángulo le da el toque de
+   marca; la sombra afina con el fondo de la cabecera (nunca negro puro). */
 .marca-sigla {
   flex: none; display: grid; place-items: center;
-  width: 2.15rem; height: 2.15rem; border-radius: var(--radio-s);
-  background: color-mix(in srgb, #fff 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--marca-tinta) 32%, transparent);
+  width: 2.35rem; height: 2.35rem; border-radius: var(--radio-s);
+  background: color-mix(in srgb, var(--marca-tinta) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--marca-tinta) 55%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 10%, transparent);
   font: 800 var(--t-xs)/1 var(--f-ui); letter-spacing: .04em;
 }
 .marca-txt { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
-.marca-txt strong { font-size: .95rem; font-weight: 650; letter-spacing: -.008em; }
+.marca-txt strong { font-size: 1rem; font-weight: 700; letter-spacing: -.01em; }
 .marca-txt > span {
   color: var(--marca-tinta); font-size: var(--t-xs); font-weight: 550;
-  letter-spacing: .03em; text-transform: uppercase;
+  letter-spacing: .04em; text-transform: uppercase;
 }
+/* Hover de la marca: el escudo «respira» y la barra de acento aparece. Pequeña
+   micro-interacción que afirma que toda la cabecera es navegable de una vez. */
+.marca { transition: gap .15s; }
+.marca:hover .marca-sigla { border-color: var(--marca-tinta); }
+.marca:hover { gap: calc(var(--e3) + 2px); }
 
-/* Selector de tema: tres estados explícitos, el primero sigue al sistema. */
+/* Selector de tema: tres estados explícitos, el primero sigue al sistema. El
+   estado activo vuelca al champán de marca (color de la identidad) en lugar de
+   al blanco neutro, para que el gesto se lea como parte de la marca. */
 .tema {
   display: inline-flex; gap: 2px; padding: 3px;
   background: color-mix(in srgb, #fff 9%, transparent);
@@ -400,33 +407,79 @@ p:last-child { margin-bottom: 0; }
   font: 600 var(--t-xs)/1 var(--f-ui); letter-spacing: .01em;
   padding: .34rem .62rem; border-radius: var(--radio-pastilla);
   display: inline-flex; align-items: center; gap: .3rem;
-  transition: background .14s, color .14s;
+  transition: background .14s, color .14s, box-shadow .14s;
 }
 .tema button:hover { color: #fff; background: color-mix(in srgb, #fff 14%, transparent); }
-.tema button[aria-pressed="true"] { background: #fff; color: var(--marca); }
+.tema button[aria-pressed="true"] {
+  background: var(--marca-tinta); color: var(--marca);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--marca-tinta) 70%, transparent);
+}
 .tema svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.9; }
 
 /* Navegación: subrayado activo en vez de pestaña rellena. La pestaña rellena
    dependía de que el fondo de la página fuera el mismo color; con la cabecera
    fija ese truco deja de funcionar en cuanto la página se desplaza. */
+
+/* Conmutador del menú. Sólo se muestra en los anchos donde el nav se pliega;
+   en banda ancha queda oculto (ver media query abajo). */
+.nav-toggle {
+  display: inline-flex; align-items: center; gap: .35rem;
+  border: 1px solid color-mix(in srgb, #fff 30%, transparent);
+  background: color-mix(in srgb, #fff 10%, transparent);
+  color: #fff; font: 600 var(--t-s)/1 var(--f-ui);
+  padding: .45rem .7rem; border-radius: var(--radio-s); cursor: pointer;
+}
+.nav-toggle:hover { background: color-mix(in srgb, #fff 18%, transparent); }
+
 .nav {
-  display: flex; gap: var(--e1); margin-top: var(--e3);
-  overflow-x: auto; scrollbar-width: none;
+  display: none; /* colapsado por defecto; se abre con .abierto o en banda ancha */
+  flex-direction: column; gap: calc(var(--e1) * 0.75); margin-top: var(--e3);
+  padding-bottom: var(--e2);
 }
-.nav::-webkit-scrollbar { display: none; }
+.nav.abierto { display: flex; }
+.nav-grupo-nombre {
+  display: block; font-size: var(--t-xs); font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--marca-tinta);
+  padding: .15rem .2rem .3rem;
+}
+.nav-grupo-enlaces {
+  display: flex; flex-wrap: wrap; gap: 0 var(--e2);
+  border-top: 1px solid color-mix(in srgb, #fff 12%, transparent);
+  padding-top: .25rem;
+}
 .nav a {
-  padding: .5rem .7rem .62rem; text-decoration: none; white-space: nowrap;
-  font-size: var(--t-m); font-weight: 550; letter-spacing: -.004em;
-  color: var(--marca-tinta); border-radius: var(--radio-s) var(--radio-s) 0 0;
-  border-bottom: 3px solid transparent;
-  transition: background .14s, color .14s, border-color .14s;
+  position: relative; padding: .5rem .4rem .5rem; text-decoration: none;
+  white-space: nowrap; font-size: var(--t-m); font-weight: 550;
+  letter-spacing: -.004em; color: var(--marca-tinta); border-radius: var(--radio-s);
+  transition: color .14s, background .14s;
 }
-.nav a:hover {
-  background: color-mix(in srgb, #fff 12%, transparent);
-  color: #fff; text-decoration: none;
+/* Subrayado de acento que crece desde el centro: el enlace «se carga» al pasar
+   por encima. Es el mismo gesto del producto, en el navegador. */
+.nav a::after {
+  content: ""; position: absolute; left: 50%; bottom: 2px;
+  width: 0; height: 3px; border-radius: 2px; transform: translateX(-50%);
+  background: var(--marca-tinta);
+  transition: width .16s ease;
 }
-.nav a[aria-current="page"] {
-  color: #fff; font-weight: 700; border-bottom-color: #fff;
+.nav a:hover { background: color-mix(in srgb, #fff 12%, transparent); color: #fff; }
+.nav a:hover::after { width: calc(100% - .7rem); }
+.nav a[aria-current="page"] { color: #fff; font-weight: 700; }
+.nav a[aria-current="page"]::after { width: calc(100% - .7rem); background: var(--marca-tinta); }
+
+/* En banda ancha la navegación va en una sola fila y el conmutador desaparece. */
+@media (min-width: 900px) {
+  .nav-toggle { display: none; }
+  .nav { display: flex; flex-direction: row; align-items: flex-start; overflow-x: auto; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-grupo { display: flex; }
+  .nav-grupo-nombre { display: none; }
+  .nav-grupo-enlaces {
+    display: flex; gap: var(--e1); border-top: 0; padding-top: 0;
+  }
+  .nav a {
+    padding: .5rem .7rem .62rem; background: none;
+    border-radius: var(--radio-s) var(--radio-s) 0 0;
+  }
 }
 
 /* Barra de vigencia: persistente en todas las páginas, para que una captura de
@@ -446,7 +499,107 @@ p:last-child { margin-bottom: 0; }
   width: 1px; height: .95em; background: var(--linea-fuerte);
   margin: 0 calc(var(--e2) * -1);
 }
-.vigencia-guia { margin-left: auto; font-weight: 600; }
+.vigencia-guia { margin-left: auto; font-weight: 600; color: var(--accion); }
+.vigencia-guia:hover { color: var(--accion-viva); text-decoration: underline; }
+
+/* Fichas de vigencia interactivas. Cada urna (Fuente / Ventana / Citas al) es
+   un <details> que, al pulsarse, despliega una aclaración de una línea. El
+   explicador no depende de JS: el elemento <summary>+<details> es nativo y
+   funciona por teclado y en móvil. La flecha de open es la única decoración. */
+.v-chip { position: relative; display: inline-flex; align-items: baseline; }
+.v-chip summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center;
+  gap: .35rem; padding: .22rem .55rem; border-radius: var(--radio-pastilla);
+  border: 1px solid var(--linea); background: var(--superficie);
+  transition: border-color .14s, color .14s;
+}
+.v-chip summary::-webkit-details-marker { display: none; }
+.v-chip summary::after {
+  content: ""; width: .45rem; height: .45rem; flex: 0 0 auto; box-sizing: border-box;
+  border: solid currentColor; border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg); margin-top: -.18rem; opacity: .55;
+  transition: transform .15s;
+}
+.v-chip[open] summary::after { transform: rotate(-135deg); margin-top: .18rem; }
+.v-chip summary:hover, .v-chip[open] summary { border-color: var(--accion); color: var(--tinta-3); }
+.v-chip summary:focus-visible,
+.v-chip[open] summary:focus-visible { outline: 2px solid var(--accion); outline-offset: 2px; }
+.v-chip[open] p {
+  position: absolute; z-index: 30; top: calc(100% + .45rem); left: 0;
+  width: clamp(16rem, 22rem, 34rem);
+  margin: 0; padding: .6rem .75rem; border-radius: var(--radio-s);
+  background: var(--superficie); color: var(--tinta);
+  border: 1px solid var(--linea); box-shadow: var(--sombra-2);
+  font-size: var(--t-s); line-height: 1.45;
+}
+.v-chip summary:focus-visible { outline: 2px solid var(--accion); outline-offset: 2px; }
+
+/* Estado del recorte en la barra: pulsa en vivo mientras el explorador filtra.
+   Vive en la barra de vigencia (todas las páginas) pero sólo se rellena y se
+   enseña desde el explorador; en el resto queda oculto por el atributo hidden.
+   Es una "cifra en vivo" del informativo: primero lectura, después peso. */
+.recorte-vivo {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .15rem .6rem; border-radius: var(--radio-pastilla);
+  border: 1px solid var(--accion);
+  color: var(--accion); background: transparent;
+  font-size: var(--t-s); font-weight: 600; white-space: nowrap;
+}
+.recorte-vivo[hidden] { display: none; }
+.recorte-vivo b { color: var(--accion); font-weight: 750; }
+
+/* Selector de año en la barra. Sólo se enseña en las páginas explorador, que
+   es quienes lo rellenan con los años reales del corpus; en el resto queda
+   oculto por el atributo hidden y por esta regla (`hidden` ya lo esconde, esto
+   es red de seguridad por si `hidden` se ignora). */
+.v-anio[hidden] { display: none; }
+.v-anio select {
+  font: 600 var(--t-s)/1 var(--f-ui); color: var(--tinta-2);
+  background: var(--superficie); border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s); padding: .2rem .4rem; cursor: pointer;
+}
+
+/* Mini-foco de la portada: una fila de atajos de un toque para entrar al
+   explorador con un recorte aplicado. Va justo bajo el titular, antes del
+   estado del recorte. Botón de texto: el color del enlace es la única pista,
+   y el filete del foco al pasar por encima devuelve el acierto visual. */
+.minifoco { margin-bottom: var(--e4); }
+.minifoco-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--e2);
+  padding: var(--e2) var(--e3); border: 1px solid var(--linea);
+  border-radius: var(--radio); background: var(--superficie);
+}
+.minifoco-titulo {
+  font-size: var(--t-xs); font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--tinta-3); margin-right: var(--e1);
+}
+.foco-boton {
+  border: 0; background: none; cursor: pointer; padding: .3rem .5rem;
+  font: 600 var(--t-s)/1 var(--f-ui); color: var(--accion);
+  border-radius: var(--radio-s); text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+.foco-boton:hover { background: var(--superficie-2); border-bottom-color: var(--accion); }
+.foco-boton:focus-visible { outline: 2px solid var(--accion); outline-offset: 2px; }
+.foco-limpiar { color: var(--tinta-2); }
+.foco-limpiar:hover { color: var(--tinta-3); border-bottom-color: var(--linea-fuerte); }
+
+/* Migas de posición en la barra de vigencia: dicen dónde está el lector y dan
+   una vuelta fija a la portada. En la portada misma «Portada → Portada» es
+   redundante, por eso la etiqueta y el separador se suprimen ahí. Clase propia
+   (`.v-migas`) para no chocar con `.migas` — el breadcrumb de contenido de las
+   secciones, línea 508 —. */
+.v-migas {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: var(--t-s); font-weight: 600; color: var(--tinta-3);
+  margin: 0;
+}
+.v-migas a { color: var(--accion); text-decoration: none; }
+.v-migas a:hover { text-decoration: underline; }
+.v-migas .migas-sep { color: var(--linea-fuerte); }
+.v-migas .migas-actual { color: var(--tinta-3); }
+body[data-pagina="portada"] .v-migas .migas-actual { display: none; }
+body[data-pagina="portada"] .v-migas .migas-sep { display: none; }
 
 main { padding: var(--e5) 0 var(--e8); }
 .intro { color: var(--tinta-2); max-width: 66ch; font-size: var(--t-l); margin-top: var(--e2); }
@@ -531,9 +684,9 @@ main { padding: var(--e5) 0 var(--e8); }
 
    QUÉ ADMITE CADA SUELO (medido; ver la lámina «Sistema de bandas»):
      papel · papel-2 · contraste  admiten todo, incluidas figuras y ausencia.
-     énfasis (Peach)              SÓLO titular y prosa: sobre él el color del
-                                  dato cae a 3,21:1 y la marca de ausencia a
-                                  2,35:1. Por eso el cierre no lleva figuras.
+     énfasis (champán / vino)     SÓLO titular y prosa: es la banda de la marca,
+                                  dedicada al cierre, y no recibe figuras.
+                                  Cada suelo se mide con validar_paleta.py.
 
    La banda de contraste REDEFINE los tokens en su propio ámbito. Así los
    módulos, gráficos y sellos que caen dentro se adaptan solos: no hay una
@@ -541,71 +694,63 @@ main { padding: var(--e5) 0 var(--e8); }
 .banda { padding: var(--e7) 0; }
 .banda + .banda { padding-top: var(--e7); }
 .banda-papel    { background: var(--plano); }
-.banda-enfasis  { background: light-dark(#f4c095, #2e2210); }
+.banda-enfasis  { background: light-dark(#f0ddca, #180609); }
 
 /* El segundo papel NO puede ser --superficie-2. Ese token es un tinte que se
    aplica ENCIMA del blanco de tarjeta (chips, cabeceras de tabla, hover) y en
-   tema claro vale #f7efe5, que contra el papel #f6efe6 mide ΔE OKLab 0,18 y
-   1,00:1: el mismo color. La alternancia sólo funcionaba en oscuro, y en claro
-   dejaba 6rem de aire entre dos bandas sin nada que explicara el corte.
+   tema claro se acerca al papel sin separación útil: la alternancia sólo
+   funcionaba en oscuro, y en claro dejaba aire entre dos bandas sin que nada
+   explicara el corte.
 
-   Este suelo tiene valor propio y es FRÍO, no un peach más oscuro. La razón es
-   medida: oscurecer el papel hacia el peach rompe la marca de ausencia
-   (--sin-dato cae bajo 3:1 pasado #dbe3df) y además lo acercaba al Peach del
-   cierre. Un papel frío se separa del papel cálido y del cierre a la vez.
-
-   #e1e7e4 es el límite útil: ΔE 3,63 contra el papel, y todos los pisos con
-   holgura —sin-dato 3,10:1, tinta-3 5,04:1, serie-1 4,20:1—. Un paso más
-   (#dbe3df) da ΔE 4,97 pero deja la ausencia en 2,98:1, o sea la rompe. */
+   Este suelo tiene valor propio, teñido champán (en la paleta cálida H). Lo que
+   lo fija no es un gusto sino un techo medido: tiene que sostener la ausencia
+   (--sin-dato ≥ 3:1) con el dato en bordeaux encima. Ese suelo lo mide
+   src/design/validar_paleta.py contra --tinta, --tinta-3, --accion, --serie-1
+   y --sin-dato; si se oscurece un paso de más, la ausencia cae bajo 3:1. El
+   validador es el juez, no esta nota. */
 .banda-papel-2  { background: var(--banda-papel-2); }
 
-/* El borde de ese suelo mide 1,10:1 en claro: es real, pero no alcanza para
-   sostener solo un corte de sección. En oscuro no hace falta —#041417 contra
-   #113236 da ΔE 11,75—, así que la costura existe sólo donde el papel no
-   puede separarse más. */
+/* El borde de ese suelo mide poco en claro: es real, pero no alcanza para
+   sostener solo un corte de sección. En oscuro no hace falta —vino profundo
+   contra vino-2 da suficiente ΔE—, así que la costura existe sólo donde el
+   papel no puede separarse más. */
 .banda-papel + .banda-papel-2,
-.banda-papel-2 + .banda-papel { border-top: 1px solid light-dark(#cbbca9, transparent); }
+.banda-papel-2 + .banda-papel { border-top: 1px solid light-dark(#d0b89f, transparent); }
 
-/* Sobre Peach, --tinta-3 no llega a 4,5:1. Se sube al valor de --tinta-2 para
-   que un metadato que se cuele siga siendo legible en vez de fallar en
-   silencio. */
-.banda-enfasis { --tinta-3: light-dark(#59677a, #93a1b3); }
+/* Con la banda de énfasis en champán claro, el --tinta-3 global (#5a4646) ya
+   mide 6,63:1 y no hace falta subirlo: el solo subido rompía el ritmo del
+   metadato. En oscuro, sobre vino profundo, también pasa. */
 
 .banda-contraste {
-  background: light-dark(#071e22, #113236);
-  --superficie:   light-dark(#0d2a2f, #17393d);
-  --superficie-2: light-dark(#113236, #1c4045);
-  --plano:        light-dark(#071e22, #113236);
-  --tinta:        #eef1ee;
-  --tinta-2:      #b9c6c3;
+  background: light-dark(#180609, #180609);
+  --superficie:   light-dark(#200b0e, #200b0e);
+  --superficie-2: light-dark(#2a1014, #2a1014);
+  --plano:        light-dark(#180609, #180609);
+  --tinta:        #f0e2d0;
+  --tinta-2:      #d4c2b6;
   /* Más claro que el --tinta-3 global: dentro de la banda, --superficie-2 sube
      en el tema oscuro y el chip de código caía a 4,28:1. Medido contra los
      cuatro fondos que la banda puede presentar. */
-  --tinta-3:      #a1b0ae;
-  --linea:        light-dark(#1c4045, #2c5459);
-  --linea-fuerte: light-dark(#2c5459, #3a666b);
-  --serie-1:      #45b0aa;
-  --serie-2:      #f4c095;
+  --tinta-3:      #bfae9f;
+  --linea:        light-dark(#3a2026, #3a2026);
+  --linea-fuerte: light-dark(#4d2b31, #4d2b31);
+  --serie-1:      #e0a0a8;
+  --serie-2:      #b24a5a;
   --sin-dato:     #7d8886;
-  /* La rampa ordinal y la tinta del botón faltaban. Como la banda es oscura en
-     LOS DOS temas, en claro conservaban su valor claro y caían encima de un
-     suelo oscuro: --ord-1 medía 1,06:1, o sea invisible, y la tinta del botón
-     1,64:1 sobre el Peach. Toman el valor oscuro, que ya está validado.
-     Lo encontró validar_paleta.py al empezar a medir este ámbito. */
-  --ord-1:        #cfeae5;
-  --ord-2:        #93cdc6;
-  --ord-3:        #6ab4ad;
-  --ord-4:        #469690;
-  --boton-tinta:  #171214;
-  --accion:       #f4c095;
-  --accion-viva:  #f4c095;
-  --cifra:        #f4c095;
-  --red:          light-dark(#123033, #1a3d41);
-  --eje:          light-dark(#2c5459, #3a666b);
-  --aviso-fondo:  #2e2210;
-  --aviso-borde:  #e0a445;
-  --aviso-tinta:  #f0cf9c;
-  --aviso-tinta-grafico: #e0a445;
+  --ord-1:        #f8dde0;
+  --ord-2:        #ebaab4;
+  --ord-3:        #cf828e;
+  --ord-4:        #9d4a56;
+  --boton-tinta:  #2c0c12;
+  --accion:       #f0ddca;
+  --accion-viva:  #f0ddca;
+  --cifra:        #f0ddca;
+  --red:          #1f1013;
+  --eje:          #4a2b31;
+  --aviso-fondo:  #12210e;
+  --aviso-borde:  #5a9e5f;
+  --aviso-tinta:  #bcdbb0;
+  --aviso-tinta-grafico: #5a9e5f;
   color: var(--tinta);
 }
 
@@ -1244,9 +1389,10 @@ svg.chart.red-svg text.aislados-titulo {
 }
 
 /* ---- Marca del valor esperado, en barras horizontales ----
-   Un trazo vertical sobre la barra, en el ámbar de las referencias: el mismo
-   color que la línea del promedio mundial en I-04, porque dicen lo mismo —esto
-   es lo que cabría esperar— y aprenderlo una vez debe servir en todo el sitio. */
+   Un trazo vertical sobre la barra, en el verde-moneda de las referencias: el
+   mismo color que la línea del promedio mundial en I-04, porque dicen lo mismo
+   —esto es lo que cabría esperar— y aprenderlo una vez debe servir en todo el
+   sitio. */
 svg.chart .esperado {
   stroke: var(--aviso-borde); stroke-width: 2.2; stroke-linecap: round;
 }
@@ -1436,7 +1582,8 @@ svg.chart .trama { pointer-events: none; }
 
 @media print {
   .cabecera, .tema, .filtros, .paginacion, .salto-contenido,
-  .rail, .vigencia-guia, .descargar, .ayuda, .tooltip { display: none; }
+  .rail, .vigencia-guia, .descargar, .ayuda, .tooltip, .nav-toggle,
+  .v-migas, .v-chip, .recorte-vivo, .v-anio, .minifoco { display: none; }
   body { background: #fff; }
   .disposicion { display: block; }
   .modulo, .kpi, .tabla-envoltura { box-shadow: none; border-color: #999; break-inside: avoid; }
@@ -1687,9 +1834,9 @@ svg.chart .trama { pointer-events: none; }
    vigencia, pero un rango no dice lo que un lector necesita saber: que lo
    posterior NO está. Alguien que abra esto en 2026 puede leerlo como el estado
    actual de la producción, y esa lectura no la corrige un rango.
-   Va en ámbar, que es la familia de la advertencia metodológica y está fuera de
-   la del dato — y visible, no dentro del desplegable: una advertencia detrás de
-   un clic es una advertencia que nadie lee. */
+   Va en verde-moneda, que es la familia de la advertencia metodológica y está
+   fuera de la del dato — y visible, no dentro del desplegable: una advertencia
+   detrás de un clic es una advertencia que nadie lee. */
 .ventana-cierre {
   margin: var(--e3) 0 0; max-width: 62ch;
   font-size: var(--t-s); line-height: 1.55; color: var(--aviso-tinta);

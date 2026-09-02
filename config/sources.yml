@@ -220,7 +220,8 @@ fuentes:
       - nombres_registrados_para_contrastar_la_deteccion
     salida: "data/enriched/ror_institucion.json"
     fecha_corte: null
-    ejecutada: false             # V2-20: el conector existe, la consulta no se ha corrido
+    ejecutada: true              # V2-20: consulta corrida el 2026-08-25 (ver data/enriched/ror_institucion.json)
+    fecha_ejecucion: "2026-08-25"
     nota: >-
       No aporta ningún dato del corpus ni ningún indicador: aporta identidad de
       la institución y un vocabulario público contra el que contrastar el
@@ -239,7 +240,8 @@ fuentes:
       - contraste_del_recuento_frente_al_universo_declarado
     salida: "data/enriched/scopus_api_consulta.json"
     fecha_corte: null
-    ejecutada: false             # el conector existe, la consulta no se ha corrido
+    ejecutada: true              # T-06: conector probado de punta a punta el 2026-08-26 (ver data/enriched/scopus_api_consulta.json; el resultado también figura en `verificacion_api` de scopus_export).
+    fecha_ejecucion: "2026-08-26"
     nota: >-
       NO reemplaza scopus_export ni el universo publicado (823, D-16): la
       Scopus Search API no declara una fecha "actualizado al" propia, así que
@@ -262,7 +264,8 @@ fuentes:
       - brecha_de_cobertura_frente_al_universo
     salida: "data/enriched/authors_orcid.csv, internal/openalex_*.csv"
     fecha_corte: null
-    ejecutada: false             # V2-19: el conector existe, la consulta no se ha corrido
+    ejecutada: true              # V2-19/V2-26: connectors corridos el 2026-08-26 (ver internal/openalex_*.csv y las +80 asignaciones nuevas). Contraresta la nota: no es una segunda fuente independiente de ORCID.
+    fecha_ejecucion: "2026-08-26"
     nota: >-
       NO es una segunda fuente independiente de ORCID: OpenAlex ingiere
       Crossref, de modo que coincidir con él no confirma nada que no

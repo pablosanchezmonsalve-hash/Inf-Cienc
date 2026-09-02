@@ -19,7 +19,7 @@ supuesta.
 | Afiliación UFT | ✅ 589/589 | matching | — |
 | Unidad académica | ⚠️ 353/589 (60 %) | inferida | «No determinada» |
 | Scopus Author ID | ✅ 575/589 (97,6 %) | Scopus | «No resuelto» + explicación |
-| **ORCID** | ⚠️ **216/556 (38,8 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
+| **ORCID** | ✅ **277/542 (51,1 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
 | Otros identificadores | ❌ 0/589 | — | Sección oculta si no hay ninguno |
 
 ### Indicadores
