@@ -5884,12 +5884,14 @@ Facultad no rellena ese campo en todas las entradas.
 
 ### Pendientes (sin bloqueo)
 
+- **Los 68 DOIs fuera del universo quedan como insumo documentado** (`internal/
+  facultad_medicina_fuera_universo.md`), **no** se incorporen a una cola de
+  revisión nueva. Decisión del usuario **D-347**: ya existe la vía de revisión
+  de cobertura (`internal/revision_cobertura_openalex.html`, V2-26) y la de
+  identidad (`internal/revision_identidad.html`); el desglose de la Facultad no
+  entra en ninguna como entrada nueva — es referencia de contraste.
 - **`AGENTS.md` sin trackear** (intencional, igual que antes): no forma parte de
   estos fixes. Decidir si entra al repo o se queda fuera.
-- **Revisión humana de los 34 dentro de ventana**: ojo con duplicados y
-  correcciones/corrigendum dentro de tu propia lista (`10.1007/s12565-025-00855-0`
-  y `10.1038/s41380` aparecen 2×; entradas 31-32 y 52 son Correction/
-  Corrigendum). No automatizar (D-08).
 - **Emparejamiento "Autor/a UFT" con la identidad** (D-344): normalizador real
   de `matching_rules.yml`, tarea aparte.
 - **Nota de entorno**: pandas 3.0.5 fuera del pin `pandas>=2.0,<3.0`; prerrequisito
@@ -5900,6 +5902,5 @@ Facultad no rellena ese campo en todas las entradas.
 
 ### Próximo paso recomendado
 
-Decidir con el usuario si `AGENTS.md` se versiona y si los 34 DOIs dentro de
-ventana merecen la misma herramienta de revisión que OpenAlex (cruzar contra
-Crossref por DOI, listado para una persona) o basta el cruce para el contraste.
+Decidir con el usuario si `AGENTS.md` se versiona. El contraste de la Facultad
+quedó cerrado como insumo documentado (D-347).
