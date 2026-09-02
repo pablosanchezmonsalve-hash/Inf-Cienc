@@ -6472,3 +6472,503 @@ casos de CIDOC, CIPEF y Formación General.
 El usuario revisa la cola con el contexto nuevo. Si encuentra que alguna
 nota está mal, se corrige puntualmente — no requiere reabrir todo el
 diseño.
+
+---
+
+## Nota de fusión (2026-09-02)
+
+Lo que sigue de aquí en adelante, hasta la próxima nota de fusión, es el
+registro de una **sesión paralela** que trabajó directamente sobre `main`
+mientras esta rama (`claude/state-review-next-steps-wzzq0h`) avanzaba por
+separado. Se fusionó por decisión explícita del usuario tras comparar
+ambas ramas: sólo hubo una contradicción real de identidad (Arroyo A.,
+resuelta a favor de la evidencia cruzada de esta rama) y cero conflictos
+de consolidación de identidad — el resto es trabajo complementario, sin
+solaparse. Detalle completo en la entrada de cierre correspondiente más
+abajo, después de todo este bloque.
+
+## Cierre · Revisión humana de identidad exportada hoy, encontrada y aplicada
+
+El usuario pidió revisar si había datos actualizados que afectaran el
+trabajo ya hecho antes de seguir. `git fetch` confirmó que `main` no había
+divergido (0 commits de diferencia en ambos sentidos) — nada nuevo por
+ese lado. Pero en `Descargas` apareció `identity_decisions (2).csv`,
+exportado **hoy** desde `internal/revision_identidad.html`: 188 filas
+contra las 141 ya comiteadas, con 43 casos existentes cambiados de
+veredicto además de 82 casos nuevos (52 seguían pendientes, 30 ya
+decididos). Trabajo de revisión humana real, sin aplicar.
+
+Aplicado siguiendo el flujo ya establecido, sin atajos: `merge_decisions.py`
+(fusiona, no sobrescribe — 141 vigentes + 188 nuevas → 223, con 35 casos
+huérfanos preservados que ya no están en la cola viva pero siguen
+decididos), luego `apply_decisions.py --dry-run` para revisar antes de
+escribir nada, y sólo después `apply_decisions.py` de verdad.
+
+### Resultado de la aplicación
+
+34 grupos de identidad consolidados (77 formas de firma, incluida
+`Henriquez-Olguin C.` / `Henríquez-Olguín C.` — el mismo autor que ya
+había aparecido en el top de citación de la revisión de cobertura
+OpenAlex de esta sesión, ahora del lado del corpus interno). 4 firmas
+descartadas por fragmento. 37 asignaciones de ORCID confirmadas, **14
+retiradas** —asignaciones que la revisión humana encontró incorrectas, no
+sólo confirmaciones—. Cobertura de ORCID: 322 → 308 asignaciones que el
+build usará; baja porque se corrigen errores, no porque se pierda
+cobertura real.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-336 | Se buscó activamente en `Descargas` una exportación de revisión sin aplicar en vez de asumir que "revisar datos actualizados" sólo significaba `git fetch` | El pedido explícito de la sesión anterior fue *"revisa cualquier dato actualizado que pueda afectar el trabajo realizado"* — el trabajo de identidad consolidada afecta directamente `authors.json`/`hierarchy.json`, que son insumo del treemap recién hecho reactivo esta misma sesión |
+| D-337 | Los 14 retiros de ORCID se aplicaron sin pedir confirmación caso por caso | Ya venían de una decisión humana explícita en la exportación (`orcid_incorrecto`), no de una heurística nueva — `apply_decisions.py` sólo traduce un veredicto ya dado a los artefactos que el build consume |
+
+### Verificación
+
+Auditoría completa (0 bloqueantes). `build_all.py` (compuerta: 0 fallas,
+542 fichas de autor, subió de 538 por la reconsolidación). `06_assemble_site.py`
+(10 páginas). `node src/verify/run_all.mjs` completo — 6 bloques, 0 fallos —
+corrido DESPUÉS de aplicar y reconstruir.
+
+### Archivos creados o modificados
+
+```
+internal/identity_decisions.csv        141 -> 223 filas (fusión, no reemplazo)
+config/identidades_consolidadas.yml    34 grupos nuevos/actualizados (77 formas de firma)
+config/firmas_e09_resueltas.yml        4 descartadas
+config/orcid_revisado.yml              37 confirmadas, 14 retiradas, 6 sin registro
+docs/BUILD_VERIFICATION.md             regenerado (542 fichas de autor)
+```
+
+### Ambigüedades abiertas
+
+Las de siempre, sin cambios: `T-06`, `T-19` en su techo. Quedan 100
+decisiones pendientes en `internal/identity_decisions.csv` (de 223) para
+una próxima ronda de revisión.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Si aparece otra exportación de
+`revisar-identidad.ps1`/`revision_identidad.html` en Descargas, el mismo
+flujo (`merge_decisions.py` → `apply_decisions.py --dry-run` →
+`apply_decisions.py` → reconstruir → verificar) se repite igual.
+
+---
+
+## Cierre · Auditoría de 7 frentes y corrección de consistencia documental (2026-09-01)
+
+El usuario pidió auditar el repositorio a fondo ("completa, ahora") con una
+metodología de 7 frentes y evidencia, e incorporar habilidades de experto según
+lo requiriera el desafío. Se reconstruyó el pipeline desde cero y se verificó
+contra la **verdad ejecutable**, no contra lo que la memoria de sesión
+recordaba. Frentes B (pipeline), C (capas), D (replicabilidad), E (metodología)
+y F (repo/CI) quedaron en verde. Los hallazgos reales fueron de **consistencia
+documental** — cifras que quedaron atrás de la última consolidación.
+
+### Hallazgos de cifras obsoletas y su corrección
+
+La consolidación de identidad del 2026-09-01 llevó la base publicada de 556 a
+**542 entidades** y la cobertura de ORCID de 216/556 a **277/542 (51,1 %)**.
+Varios documentos y una advertencia servida seguían citando la base vieja:
+
+1. **`config/sources.yml`**: `ror_api`/`scopus_api`/`openalex_api` decían
+   `ejecutada: false` cuando los artefactos enriquecidos existen
+   (`ror_institucion.json`, `scopus_api_consulta.json`, `authors_orcid.csv`).
+   El flag era un metadato que dejó de sincronizarse con la evidencia.
+   Corregido a `true` con `fecha_ejecucion` real (ror 2026-08-25; scopus y
+   openalex 2026-08-26), alineado con las fechas de los artefactos y de
+   T-06/V2-19/V2-26.
+2. **`docs/ORCID_COVERAGE.md`**: §2-bis y §3 reescritos sobre la base 277/542,
+   con las etiquetas reales de las fichas (`verificado` 155, `declarado por el
+   titular` 41, `confirmado por revisión` 17, `comprobado a mano` 22, `no
+   verificable` 20, `sin confirmar` 22) y la distribución por rango de
+   publicaciones (1 pub 38,9 % → 10+ 100 %). El aviso de base y el §4 dejaron
+   de citar 556/216; contextos cronológicos que nombran 556 quedan como
+   historia. **69,2 %** (no 69,6) de las entidades tienen una sola publicación.
+3. **`STATE.md`**: regenerado con `snapshot.py` (no a mano). Sigue declarando
+   «113 casos / 6 pendientes», que es la cuenta de la última corrida de `make
+   revision` (puertas como `openalex_*` no se cuentan ahí); la tabla de colas
+   sí refleja las 10 colas reales. No se reconcilió la diferencia entre esa
+   lista de 113 y el ~450 total de PENDIENTE_REVISION_HUMANA en `internal/`
+   porque es la definición de ese campo —ver mejora abajo.
+4. **`docs/INDICATORS.md`** (P-06) y **`docs/V2_BACKLOG.md`** (V2-01 y el
+   párrafo de la vía Crossref) y **`docs/AUTHOR_PROFILE.md`**: actualizados a
+   base 542/277 (322 asignaciones sobre firmas sin consolidar). P-06 conserva
+   una nota al pie que distingue la decisión histórica de la base vigente.
+5. **`config/indicators.yml` `AU-03.advertencia`** — el único hallazgo que era
+   una **figura servida**: decía «466 de las 556 entidades tienen h≤1» (84 %),
+   cifra que no se puede re-derivar: hoy el h-index sólo se computa para las
+   **50 entidades interpretables** (n≥5) y de ellas sólo **4 tienen h≤1**. La
+   advertencia citaba una visión del indicador (h computado para todas) que
+   contradice al built real (`03_authors.py`: sólo muestra h cuando la muestra
+   es legible). Reescribí la advertencia para describir lo que el sitio
+   realmente hace, anclado en los 50/542 reales, en vez de inventar un 466
+   equivalente.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-338 | Los flags `ejecutada: false` de las 3 APIs en `sources.yml` se cambian a `true` con fecha de ejecución, en vez de borrar el campo | El campo ya existía para las 3; dejarlo en `false` engañaría a una próxima sesión a reconsultar APIs o creer inexistentes los artefactos enriquecidos. `crossref_api`/`orcid_api` se dejan sin flag (así están hoy) |
+| D-339 | La advertencia de AU-03 no se «porta» a 542 multiplicando 466, se reescribe para describir el gate real (`n≥5`, 50 de 542) | `CLAUDE.md` prohíbe inventar cifras. El 466/556 (84 %) implica computar h para todas las entidades, lo que contradice `03_authors.py` («sólo cuando la muestra lo hace mínimamente legible»). La frase honesta y derivable es la del gate |
+| D-340 | `config/indicators.yml` (AU-03) es la fuente de lo publicado; el número de `indicator_feasibility.py` (497 de 589) es la nota interna de la factibilidad y se deja | La factibilidad describe la decisión del analista de no publicar por falta de discriminación sobre firmas sin consolidar; cambiarlo exigiría re-correr el análisis con criterio nuevo, no una doc-fix |
+
+### Mejora detectada, no aplicada
+
+`STATE.md` «113 casos / 6 pendientes» (transición de `make revision`) y el
+~450 pendientes de `internal/*` son dos cuentas que un futuro lector puede
+confundir. `snapshot.py` podría aclarar que la línea de 113 se refiere a las
+cuatro colas de identidad que `make revision` consolida, distinguiéndolas del
+total de PENDIENTE_REVISION_HUMANA de `openalex_cobertura`/`orcid_hallazgos`.
+Queda como mejora de la vista derivada, no un error de datos.
+
+### Verificación
+
+Reconstruido de punta a punta DESPUÉS de los cambios: `src/audit/run_all.py`
+(0 bloqueantes), `build_all.py` (compuerta 0 fallas, 542 fichas),
+`06_assemble_site.py` (10 páginas), y la advertencia servida confirmada en
+`dist/data/catalogo.json` (`AU-03` con el texto nuevo y `n≥5, 50 de las 542`).
+`grep "466 de las 556" dist/` y `data/processed/` → vacío. YAML de
+`sources.yml`/`indicators.yml` válido.
+
+### Notas de entorno (no de repo)
+
+- **pandas**: esta máquina tiene **3.0.5** instalado, fuera del pin
+  `pandas>=2.0,<3.0` de `requirements.txt`. El build corrió bien en 3.0.5,
+  pero `make instalar` con `requirements.txt` instalará una versión menor. No
+  rompe, es una diferencia de ambiente entre máquinas.
+- **Playwright/Chromium**: `node src/verify/run_all.mjs` exige el navegador ya
+  descargado (`npx playwright install chromium`); el Makefile `verificar` lo
+  asume instalado y CI lo descarga. Una falla de browser NO es una falla de
+  verificación del sitio. El `package.json` queda como dev-dependency, sitio
+  sin dependencias runtime.
+
+### Archivos creados o modificados
+
+```
+config/sources.yml               flags ejecutada + fecha_ejecucion (ror/scopus/openalex)
+config/indicators.yml            AU-03.advertencia reescrita (gate real, no 466/556)
+docs/ORCID_COVERAGE.md           277/542 + etiquetas reales + distribución por rango
+docs/INDICATORS.md               P-06 nota de consolidación 2026-09-01
+docs/V2_BACKLOG.md               V2-01 y vía Crossref a 277/542
+docs/AUTHOR_PROFILE.md           ORCID 277/542 (51,1 %)
+STATE.md                         regenerado con snapshot.py (no a mano)
+docs/VALIDATION_REPORT.md        regenerado por auditoría
+SESSION_NOTES.md                 este cierre
+```
+
+### Ambigüedades abiertas
+
+Ninguna nueva. Las de siempre: `T-06` en su techo, `T-19` corriendo por cron
+mensual, y las colas humanas de `internal/` sin revisar (414 cobertura, 56
+`orcid_hallazgos`). El STATE sigue declarando 113/6 por definición de `make
+revision` — mejora propuesta arriba, no aplicada.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Si se quiere, aplicar la mejora de
+`snapshot.py` para distinguir las dos cuentas de pendientes (identidad vs.
+cobertura), y decidir si `.gitignore`/`requirements.txt` deben tolerar pandas
+3.x alguna vez.
+
+---
+
+## Cierre · V2-27: recuperación y almacenamiento de las publicaciones del sitio de la Facultad de Medicina
+
+El usuario compartió `https://facultadmedicina.finis.cl/investigacion-y-postgrado/publicaciones/`
+y pidió «recuperar la información» y almacenarla, tras pedir primero el método.
+
+### El método investigado
+
+El sitio es **WordPress**. La API REST (`/wp-json`) está abierta, pero **no hay
+un custom post type de publicaciones** (el endpoint `/publicacion` da 404; los
+`types` listan sólo los estándar de WordPress). Todo el contenido vive como
+HTML incrustado en el `content` de **la página** `publicaciones`
+(id 10009) — la respuesta de
+`/wp-json/wp/v2/pages?slug=publicaciones&_fields=content` pesó ~950 KB e incluye
+los 609 registros completos. Conclusión de la investigación de la vía: **la API
+REST de la página es la fuente correcta**, en una sola respuesta, sin paginar.
+
+### Qué se construyó
+
+`src/enrich/facultad_medicina_publicaciones.py`: baja la página vía `wp-json`,
+parsea cada `<div class="sima-pub-item">` (badge índice, badge año, `<h4>`
+título, `<dl>` con Primer autor / Autor/a correspondencia / Autor/a UFT, enlace
+"Ver DOI"), deduce la sección del `<h2>` previo, normaliza el DOI a minúsculas
+y lo cruza contra `data/interim/publications_universe.csv`. Modos: `--test`
+(parsa una muestra local guardada, sin red), `--sin-red` (usa la muestra) y el
+modo por defecto (consulta la red).
+
+### Resultado de la corrida real
+
+- **609 registros** → 347 con DOI → **279 en el universo Scopus**.
+- Por sección: Medicina 554 (por año), Nutrición y Dietética 34, Libros 11,
+  Enfermería 10.
+- Medicina por año: 2025=136, 2024=114, 2023=75, 2021=66, 2020=29, 2019=32,
+  2018=26, 2017=23, 2016=20, 2015=15, 2022=9, 2014=6, 2013=3 — coincide
+  exactamente con los encabezados de la página.
+- Libros y buena parte de Enfermería/Nutrición **no traen DOI** (listados
+  textuales/obras editoriales), por eso el cruce sólo aplica casi en su
+  totalidad al bloque de Medicina (278 de 343 con DOI en universo).
+- **60 DOIs están repetidos** dentro de la página (el sitio lista varias
+  publicaciones dos veces, p. ej. Pharmacogenomics como #026 y #027) — observación
+  de calidad de la fuente, no un bug del parser; los registros se guardan crudos
+  y quien consuma decide deduplicar.
+
+### Almacenamiento (por capa)
+
+```
+data/enriched/facultad_medicina_publicaciones.json   registros estructurados (capa de datos externos)
+internal/facultad_medicina_cruce.csv                 cruce contra el universo markado (capa interna)
+src/enrich/facultad_medicina_publicaciones.py        extractor
+```
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-341 | El resultado se guarda como **referencia de contraste**, no como entrada de un corpus | `D-314`: confirmar que una obra es producción real UFT no la convierte en parte del universo — ampliarlo es una decisión de alcance aparte. Este cruce sólo clasifica en-universo / fuera, igual que la revisión de cobertura OpenAlex |
+| D-342 | `data/enriched/` (JSON) + `internal/` (CSV de cruce) en vez de `data/processed/` | No es un artefacto del pipeline (`STEPS` no lo consume): es fuente externa ingerida para contraste. El JSON estructurado va con los otros enriquecimientos externos (`authors_orcid.csv`, `scopus_api_consulta.json`); el CSV de cruce, a la capa interna |
+| D-343 | No se deduplica en el extractor; se guardan los 609 registros crudos | El sitio lista duplicados; borrarlos en el extractor ocultaría un dato de la fuente y forzaría una decisión (cuál queda) que no le toca a la ingesta decidir |
+
+### Verificación
+
+`--test` con la muestra local: 609 registros, campos correctos en un registro
+conocido por DOI, secciones Enfermería/Libros/Nutrición detectadas (sin red).
+Corrida real de red: misma cuenta 609/347/279. `pd.read_csv` del cruce línea a
+línea: coincide el `eid_scopus` con el universo.
+
+### Ambigüedades abiertas
+
+- Los 60 DOIs duplicados de la fuente: sin decidir cuál queda (D-343).
+- Los 68 registros con DOI que **no** están en el universo (347 − 279) son
+  candidatos a revisión de cobertura (producción real UFT fuera de Scopus o
+  error del listado) — podría enriquecerse igual que `V2-26` si se decide
+  mirarlos: es producción propia de la Facultad declarada por sí misma.
+- Las de siempre: `T-06`, `T-19`.
+
+### Próximo paso recomendado
+
+Decidir si los 68 con DOI fuera del universo merecen la misma herramienta de
+revisión que OpenAlex (cruzar contra Crossref por DOI, listado para una persona),
+o si el cruce ya aporta suficiente para el contraste que se buscaba.
+
+---
+
+## Sesión 2026-09-01 (tarde) — Cierre de tramo
+
+Continuación de la sesión anterior y de V2-27. Retomé con un contexto
+reconstruido y verifiqué primero `git status` y el estado del pipeline
+(sin trabajo colgando).
+
+### Cierre · V2-27 (publicaciones de la Facultad de Medicina)
+
+**Arreglo del `--test` roto.** El extractor tenía un modo `--sin-red`/`--test`
+que dependía de un archivo temporal `_sample.html` (raíz del repo) que había
+borrado en la limpieza. Refactoricé `facultad_medicina_publicaciones.py`:
+
+- Quite la dependencia de `SAMPLE` (archivo en disco) y el flag `--sin-red`.
+- Incrusté un **fixture mínimo inline** (`FIXTURE`) que reproduce el marcado
+  real (badges, `<h4>`, `<dl>`, "Ver DOI") para que `--test` sea hermético y
+  sin red, acorde a la convención del proyecto.
+- Corregí el mapeo de sección: los encabezados de grupo por año
+  (`"2025: 136 publicaciones"`) ahora se resuelven a **Escuela de Medicina**
+  vía `_seccion_de_encabezado`, no a su etiqueta literal. Re-verificado la
+  corrida real: **609/347/279** sin cambios de conteo; secciones correctas
+  (Medicina 554, Nutrición 34, Libros 11, Enfermería 10).
+
+**Respuesta al usuario** sobre método y facultades:
+- Método: no fue scrape del HTML renderizado, sino la **API REST de WordPress**
+  (`/wp-json/wp/v2/pages?slug=publicaciones`). Verifiqué que **no hay** custom
+  post type de publicaciones (`/publicacion` → 404); todo vive en el `content`
+  de la página (id 10009).
+- Facultades: es solo la **Facultad de Medicina y Salud**, con **escuelas**
+  dentro (Medicina, Enfermería, Nutrición y Dietética, y Libros). El resto de
+  facultades de la UFT no está en esta página.
+
+### Cierre · V2-28 (desglose de los 68 "fuera del universo")
+
+Ante la pregunta de "cómo serviría esta información", propuse el contraste de
+cobertura y generé `internal/facultad_medicina_fuera_universo.md`.
+
+**Hallazgo sobre nombres.** Al intentar cruzar "Autor/a UFT" con la identidad
+consolidada (`authors.json`) salió que los **formatos no coinciden**: la Facultad
+usa `Sócrates Aedo`; el proyecto usa la forma invertida de Scopus `Aedo S.`.
+Un solape de tokens da falsos negativos (no fiabilidad). Decisión **D-344**:
+no afirmar correspondencia; mostrar el campo tal cual lo declara la Facultad.
+Un emparejamiento real requiere el normalizador de `matching_rules.yml`
+(maquinaria V2-19), tarea aparte.
+
+**Solo 16 de 68** registros fuera de universo declaran "Autor/a UFT" — la
+Facultad no rellena ese campo en todas las entradas.
+
+**Decisiones del reporte (D-345, D-346):**
+- Preferí **tabla plana** ordenada por año (decisión explícita del usuario,
+  no agrupar por subtítulos; tenía ofrecida la opción de agrupar por año).
+- Los 34 dentro de ventana (2023-2025) son los candidatos plausibles de
+  cobertura; 31 fuera de ventana; 3 sin año. Se marcó columna "Fuera de ventana".
+
+### Works / commits de este tramo
+
+| Commit | Contenido |
+|---|---|
+| `08ca769` (antes) | 6 fixes de auditoría documental (bases 542/277, flags de API, AU-03). Push a `origin/main`. |
+| `e0eb798` | V2-27: extractor + JSON (609) + CSV cruce + cierre de sesión en SESSION_NOTES. Push. |
+| `e89e58a` | V2-28: desglose de 68 DOIs fuera de universo. Push `e0eb798..e89e58a`. |
+
+### Pendientes (sin bloqueo)
+
+- **Los 68 DOIs fuera del universo quedan como insumo documentado** (`internal/
+  facultad_medicina_fuera_universo.md`), **no** se incorporen a una cola de
+  revisión nueva. Decisión del usuario **D-347**: ya existe la vía de revisión
+  de cobertura (`internal/revision_cobertura_openalex.html`, V2-26) y la de
+  identidad (`internal/revision_identidad.html`); el desglose de la Facultad no
+  entra en ninguna como entrada nueva — es referencia de contraste.
+- **`AGENTS.md` sin trackear** (intencional, igual que antes): no forma parte de
+  estos fixes. Decidir si entra al repo o se queda fuera.
+- **Emparejamiento "Autor/a UFT" con la identidad** (D-344): normalizador real
+  de `matching_rules.yml`, tarea aparte.
+- **Nota de entorno**: pandas 3.0.5 fuera del pin `pandas>=2.0,<3.0`; prerrequisito
+  `npx playwright install chromium`. Ya consignado en sesión previa.
+- Las de siempre: `T-06`, `T-19`.
+- El `git push` muestra "RemoteException"/"NativeCommandError" en PowerShell por
+  canal stderr de git: es esperado, no un error.
+
+### Próximo paso recomendado
+
+Decidir con el usuario si `AGENTS.md` se versiona. El contraste de la Facultad
+quedó cerrado como insumo documentado (D-347).
+
+## Cierre: fusión de `origin/main` (sesión paralela) y un bug real de idempotencia expuesto al fusionar
+
+### Contexto
+
+El usuario preguntó por `internal/facultad_medicina_fuera_universo.md`, un
+archivo que no estaba en esta rama. Se encontró en `origin/main`: una
+sesión paralela había trabajado directamente ahí mientras esta rama
+avanzaba por separado — incluyendo su propia tanda de identidad (34
+grupos consolidados, 14 ORCID retirados) y el cruce de la Facultad de
+Medicina. El usuario pidió revisar el solapamiento real antes de seguir,
+y luego autorizó la fusión.
+
+### El análisis de solapamiento (antes de tocar nada)
+
+Comparación fila por fila de `internal/identity_decisions.csv` entre las
+dos ramas contra su ancestro común (`git merge-base`):
+- 125 firmas con alguna decisión en ambas ramas.
+- **1 sola contradicción real de ORCID**: `Arroyo A.` — `main` decía
+  `orcid_correcto` (probablemente de una tanda temprana, antes de que
+  existieran los conectores DSpace/autoarchivo que expusieron el
+  problema); esta rama decía `orcid_incorrecto` con reasignación, con la
+  evidencia cruzada construida junto al usuario. El usuario autorizó
+  mantener la resolución de esta rama.
+- **0 conflictos** de consolidación de identidad (`misma`/`distintas`):
+  37 pares donde ambas ramas coinciden de forma independiente, ninguno
+  donde una diga "misma" y la otra "distintas".
+- El resto del solapamiento es progreso, no contradicción: la misma cola,
+  con esta rama más avanzada en la mayoría de los casos compartidos.
+
+`git merge-tree --write-tree` confirmó 7 archivos con conflicto textual,
+pero 6 son generados (`STATE.md`, `docs/DECISIONS.md`,
+`docs/BUILD_VERIFICATION.md`, `config/orcid_revisado.yml`,
+`config/identidades_consolidadas.yml`) — se resuelven regenerándolos, no
+fusionándolos a mano. Sólo `SESSION_NOTES.md` (narrativo) e
+`internal/identity_decisions.csv` (el propio Arroyo A.) necesitaban
+juicio real.
+
+### La fusión
+
+`internal/identity_decisions.csv`: unión de las filas de ambas ramas por
+`caso_id`; donde el mismo `caso_id` difiere, gana la fila NO pendiente
+(progreso), y `ver-Arroyo A.` se resolvió explícitamente a favor de esta
+rama por instrucción del usuario. 419 filas resultantes.
+
+`SESSION_NOTES.md`: las dos ramas comparten exactamente las primeras 5554
+líneas con su ancestro común (verificado por diff, no asumido) — empalme
+lineal limpio: base + lo añadido por esta rama + lo añadido por `main`,
+con una nota explícita marcando dónde empieza el contenido de la sesión
+paralela, para que quede claro su origen a quien lea esto después.
+
+Los cinco archivos generados se resolvieron trivialmente (`--ours`, ya
+que su contenido real llega de re-ejecutar los scripts) y luego se
+regeneraron de verdad: `apply_decisions.py`, `dspace_inventario.py`,
+`autoarchivo_uft.py`, `build_review.py`, `build_all.py`,
+`src/state/snapshot.py`.
+
+### El bug real que expuso la fusión: `apply_decisions.py` no era idempotente
+
+Al reconstruir tras la fusión, `Arroyo A.` apareció con `orcid: null` en
+`authors.json` — la ficha entera sin ORCID, no el valor viejo ni el
+nuevo. Se rastreó hasta `config/orcid_revisado.yml`: la entrada
+`retiradas` para Arroyo A. tenía **el ORCID nuevo y correcto**
+(`0000-0002-6248-9257`) marcado como el que se retira, no el original
+mal asociado. `03_authors.py` filtraba correctamente esa fila —tal como
+está diseñado— pero la fila que filtraba era la única correcta que
+quedaba.
+
+Causa raíz: `veredictos_orcid()` calcula "vigente" leyendo
+`data/enriched/authors_orcid.csv` en disco AL INICIO de cada corrida.
+Esta rama ya había aplicado con éxito la retirada-y-reemplazo de Arroyo
+A. en una corrida anterior (antes de la fusión), así que el disco ya
+tenía el ORCID NUEVO como vigente. `identity_decisions.csv` sigue
+trayendo la fila `orcid_incorrecto` original — nunca se borra, es
+historial — así que al volver a correr `apply_decisions.py` (esta vez
+disparado por la fusión, que reconstruye todo desde cero) el código leyó
+"lo vigente hoy" (el reemplazo correcto) y lo marcó como "lo que hay que
+retirar", pensando que seguía siendo el error original. Es la cuarta
+variación de la misma familia de bug de esta sesión (retirar-y-reemplazar
+en una sola corrida, ya corregido dos veces antes) — pero esta vez no
+era dentro de una corrida, era ENTRE corridas: reaplicar la misma
+decisión después de que ya había surtido efecto.
+
+Corregido en `veredictos_orcid()`: antes de marcar una firma como
+retirada, se comprueba si el valor "vigente" ya coincide con lo que la
+MISMA tanda de decisiones está proponiendo como reemplazo
+(`orcid_encontrado`) — si coincide, el retiro ya está aplicado y no se
+repite; se registra un aviso, no un error. Caso de prueba nuevo en
+`apply_decisions.py --test` que reproduce exactamente el escenario de
+fusión (VIG ya con el valor de reemplazo).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-361 | La rama se fusiona con `origin/main`; `Arroyo A.` se resuelve a favor de la evidencia cruzada de esta rama | Única contradicción real de identidad entre las dos ramas; decisión explícita del usuario tras ver el análisis de solapamiento |
+| D-362 | `veredictos_orcid()` no retira una asignación cuando "lo vigente" ya coincide con el reemplazo que la misma tanda propone | Sin esto, reaplicar una decisión de retirar-y-reemplazar YA aplicada en una corrida anterior borra el reemplazo correcto pensando que sigue siendo el error original — encontrado al fusionar dos ramas que habían aplicado la misma decisión por separado |
+
+### Verificación
+
+`apply_decisions.py --test` (40/40, incluye el caso nuevo),
+`dspace_inventario.py --test`, `autoarchivo_uft.py --test`,
+`build_all.py` (compuerta 0 fallas), `node src/verify/run_all.mjs`
+(6/6). Se comprobó manualmente en `authors.json` que Arroyo A. quedó con
+`orcid: "0000-0002-6248-9257"`, confianza alta, etiqueta "encontrado por
+revisión" — y que ninguna otra firma quedó con `orcid: null` de forma
+espuria (se revisaron las 264 fichas sin ORCID: todas legítimamente sin
+asignación, ninguna filtrada por error).
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv     fusión de ambas ramas, 419 filas
+SESSION_NOTES.md                    empalme lineal + nota de fusión
+src/review/apply_decisions.py       fix de idempotencia + 1 caso de prueba
+config/orcid_revisado.yml,
+config/identidades_consolidadas.yml,
+data/enriched/authors_orcid.csv     regenerados tras la fusión
++ todo lo que main aportó: AGENTS.md, facultad_medicina_*,
+  src/enrich/facultad_medicina_publicaciones.py, fixes de auditoría
+```
+
+### Ambigüedades abiertas
+
+- Las de siempre, más lo que main dejó pendiente: decidir si `AGENTS.md`
+  se versiona (ya resuelto en un commit posterior de main, «sí»), y el
+  emparejamiento "Autor/a UFT" de la Facultad de Medicina con la
+  identidad consolidada (D-344, tarea aparte).
+
+### Próximo paso recomendado
+
+Push de la fusión. Reportar al usuario el resultado, incluyendo el bug
+de idempotencia encontrado y corregido — no estaba buscándolo, lo
+expuso la propia fusión.

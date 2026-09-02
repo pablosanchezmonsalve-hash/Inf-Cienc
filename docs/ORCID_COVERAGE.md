@@ -3,11 +3,12 @@
 **Capa:** pública · **Pendientes que ataca:** `T-19` y la pregunta de cuánta
 cobertura es alcanzable
 
-> **Las cifras van sobre la base publicada: 556 entidades de autor**, que son las
-> 589 formas de firma de la fuente con 63 ya fusionadas en 30 personas por
-> revisión humana. Este documento se escribió antes de esa revisión y durante un
-> tiempo siguió publicando 222 de 589 —una base que ya no existía— mientras el
-> sitio servía otra. Corregido el 2026-08-18; si vuelve a divergir, manda
+> **Las cifras van sobre la base publicada: 542 entidades de autor**, que son las
+> 589 formas de firma de la fuente con las variantes ya fusionadas por revisión
+> humana (77 formas en 34 personas en la consolidación vigente; la última
+> revisión de identidad del 2026-09-01 llevó la base publicada a 542). Este
+> documento se escribió sobre la base anterior (556) y se actualizó el
+> 2026-09-01 a la base que sirve el sitio; si vuelve a divergir, manda
 > `STATE.md`, que se deriva del repositorio.
 
 ---
@@ -43,8 +44,8 @@ completa consultó los 804 DOI del corpus y encoló 2 desacuerdos entre Crossref
 el registro, sin resolverlos.
 
 Después vino la revisión humana, que consolidó variantes y confirmó candidatos
-por afiliación. **Sobre la base que hoy publica el sitio la cobertura es de 216
-de 556 entidades (38,8 %)**, y son 240 asignaciones si se cuentan sobre las
+por afiliación. **Sobre la base que hoy publica el sitio la cobertura es de 277
+de 542 entidades (51,1 %)**, y son 322 asignaciones si se cuentan sobre las
 formas de firma sin consolidar. Las dos cifras son ciertas y miden poblaciones
 distintas; citar una donde corresponde la otra es el error que este proyecto
 persigue.
@@ -81,19 +82,22 @@ Los recuentos agregados se cuentan por esa etiqueta y no por el veredicto, para
 que el número de verificaciones independientes no se infle con comprobaciones
 circulares:
 
-Sobre las **216 entidades con ORCID** de la base publicada:
+Sobre las **277 entidades con ORCID** de la base publicada:
 
 | Etiqueta en la ficha | Entidades |
 |---|---:|
-| `verificado` — dos fuentes independientes coinciden | 139 |
-| `declarado por el titular` — una sola fuente, el titular | 43 |
-| `no verificable` — sin obras con DOI que contrastar | 16 |
-| `confirmado por revisión` — una persona lo comprobó en `make revision` | 15 |
-| `sin confirmar` — pendiente de revisión humana | 3 |
+| `verificado` — dos fuentes independientes coinciden | 155 |
+| `declarado por el titular` — una sola fuente, el titular | 41 |
+| `confirmado por revisión` — una persona lo comprobó en `make revision` | 17 |
+| `comprobado a mano` — verificado manualmente en el registro | 22 |
+| `no verificable` — sin obras con DOI que contrastar | 20 |
+| `sin confirmar` — pendiente de revisión humana | 22 |
 
 La cuarta etiqueta no existía cuando se escribió este documento: la trajo la
 revisión humana de identidad, y es la única que no depende de una fuente
-automática.
+automática. Las dos últimas (`comprobado a mano` y `sin confirmar`) llegaron
+con las listas de revisión del 2026-08-19 y se mantienen al consolidar la
+identidad; `sin confirmar` queda para las que aún esperan una persona.
 
 ---
 
@@ -104,18 +108,18 @@ dominado por firmas de una sola publicación:
 
 | Publicaciones de la entidad | Entidades | Con ORCID | Cobertura |
 |---|---:|---:|---:|
-| 1 | 387 | 105 | 27,1 % |
-| 2 | 74 | 38 | 51,4 % |
-| 3–4 | 46 | 31 | 67,4 % |
-| 5–9 | 31 | 25 | 80,6 % |
-| 10 o más | 18 | 17 | **94,4 %** |
+| 1 | 375 | 146 | 38,9 % |
+| 2 | 74 | 50 | 67,6 % |
+| 3–4 | 43 | 35 | 81,4 % |
+| 5–9 | 31 | 27 | 87,1 % |
+| 10 o más | 19 | 19 | **100 %** |
 
-**69,6 % de las entidades tienen una sola publicación.** Una entidad con una
+**69,2 % de las entidades tienen una sola publicación.** Una entidad con una
 publicación tiene exactamente una oportunidad de ser encontrada: si su ORCID no
 aparece en ese único DOI, no hay una segunda vía por la que pueda aparecer.
-Entre quienes tienen diez o más, la cobertura es del 94,4 %: **entre los autores
-con obra sostenida en la ventana, la cobertura casi está completa**, y lo que
-falta se concentra en la cola de entidades con una sola publicación.
+Entre quienes tienen diez o más, la cobertura es del **100 %**: **entre los autores
+con obra sostenida en la ventana, la cobertura está completa**, y lo que falta
+se concentra en la cola de entidades con una sola publicación.
 
 La forma de la distribución no cambió con la consolidación —sigue dominada por
 la cola de una publicación— pero las cifras sí: fusionar variantes junta las
@@ -131,25 +135,26 @@ que no publica.
 
 ## 4. Lo que el 100 % exigiría
 
-Para que las 556 tuvieran ORCID harían falta las cuatro cosas a la vez:
+Para que las 542 tuvieran ORCID harían falta las cuatro cosas a la vez:
 
-1. que las 556 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
+1. que las 542 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
 2. que su registro sea **público** —puede configurarse como privado—;
 3. que alguna fuente **conecte** ese ORCID con alguna de sus publicaciones de
    este corpus, o que la persona declare la universidad;
 4. que el nombre permita distinguirla de sus homónimos.
 
 Las cuatro se cumplen para una parte de los autores y no para el resto. Escribir
-556 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
+542 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
 las reglas del proyecto: *«No inventes datos, columnas, métricas, relaciones ni
 resultados»*.
 
-**Y 556 entidades tampoco son 556 personas.** Una revisión humana ya fusionó 63
-formas de firma en 30 personas, pero quedan 31 grupos de variantes y 20 perfiles
-fragmentados sin resolver (`T-03`, `T-04`), y cuatro firmas que probablemente no
-sean personas sino fragmentos de cadena de afiliación (`E-09`). Una cobertura del
-«100 % de los autores» ni siquiera está bien definida mientras no se sepa cuántos
-autores hay — y esa cifra sólo baja según se resuelve la cola, nunca sube.
+**Y 542 entidades tampoco son 542 personas.** Una revisión humana ya fusionó
+variantes (77 formas en 34 personas en la consolidación vigente), pero quedan
+grupos de variantes y perfiles fragmentados sin resolver (`T-03`, `T-04`), y
+cuatro firmas que probablemente no sean personas sino fragmentos de cadena de
+afiliación (`E-09`). Una cobertura del «100 % de los autores» ni siquiera está
+bien definida mientras no se sepa cuántos autores hay — y esa cifra sólo baja
+según se resuelve la cola, nunca sube.
 
 ---
 

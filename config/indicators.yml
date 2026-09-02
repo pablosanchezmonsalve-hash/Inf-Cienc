@@ -150,7 +150,7 @@ indicadores:
   AU-03: {nombre: "h-index en ventana 2023-2025", categoria: impacto, publicar: true,
           solo_en: ficha_autor, n_minimo: 5, confiabilidad: baja,
           advertencia_destacada: true,
-         advertencia: "No es el h-index de carrera. Con 3 años de ventana, 466 de las 556 entidades de autor publicadas tienen h menor o igual a 1."}
+         advertencia: "No es el h-index de carrera. Ventana 2023-2025; sólo se muestra cuando la muestra lo hace mínimamente legible (n≥5, 50 de las 542 entidades publicadas)."}
   AU-06: {nombre: "Evolución temporal por autor", categoria: descriptivo, publicar: true,
           solo_en: ficha_autor, confiabilidad: media,
           advertencia: "Tres puntos: se presenta como barras, no como línea de tendencia."}
