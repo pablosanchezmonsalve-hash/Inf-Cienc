@@ -5818,3 +5818,88 @@ línea: coincide el `eid_scopus` con el universo.
 Decidir si los 68 con DOI fuera del universo merecen la misma herramienta de
 revisión que OpenAlex (cruzar contra Crossref por DOI, listado para una persona),
 o si el cruce ya aporta suficiente para el contraste que se buscaba.
+
+---
+
+## Sesión 2026-09-01 (tarde) — Cierre de tramo
+
+Continuación de la sesión anterior y de V2-27. Retomé con un contexto
+reconstruido y verifiqué primero `git status` y el estado del pipeline
+(sin trabajo colgando).
+
+### Cierre · V2-27 (publicaciones de la Facultad de Medicina)
+
+**Arreglo del `--test` roto.** El extractor tenía un modo `--sin-red`/`--test`
+que dependía de un archivo temporal `_sample.html` (raíz del repo) que había
+borrado en la limpieza. Refactoricé `facultad_medicina_publicaciones.py`:
+
+- Quite la dependencia de `SAMPLE` (archivo en disco) y el flag `--sin-red`.
+- Incrusté un **fixture mínimo inline** (`FIXTURE`) que reproduce el marcado
+  real (badges, `<h4>`, `<dl>`, "Ver DOI") para que `--test` sea hermético y
+  sin red, acorde a la convención del proyecto.
+- Corregí el mapeo de sección: los encabezados de grupo por año
+  (`"2025: 136 publicaciones"`) ahora se resuelven a **Escuela de Medicina**
+  vía `_seccion_de_encabezado`, no a su etiqueta literal. Re-verificado la
+  corrida real: **609/347/279** sin cambios de conteo; secciones correctas
+  (Medicina 554, Nutrición 34, Libros 11, Enfermería 10).
+
+**Respuesta al usuario** sobre método y facultades:
+- Método: no fue scrape del HTML renderizado, sino la **API REST de WordPress**
+  (`/wp-json/wp/v2/pages?slug=publicaciones`). Verifiqué que **no hay** custom
+  post type de publicaciones (`/publicacion` → 404); todo vive en el `content`
+  de la página (id 10009).
+- Facultades: es solo la **Facultad de Medicina y Salud**, con **escuelas**
+  dentro (Medicina, Enfermería, Nutrición y Dietética, y Libros). El resto de
+  facultades de la UFT no está en esta página.
+
+### Cierre · V2-28 (desglose de los 68 "fuera del universo")
+
+Ante la pregunta de "cómo serviría esta información", propuse el contraste de
+cobertura y generé `internal/facultad_medicina_fuera_universo.md`.
+
+**Hallazgo sobre nombres.** Al intentar cruzar "Autor/a UFT" con la identidad
+consolidada (`authors.json`) salió que los **formatos no coinciden**: la Facultad
+usa `Sócrates Aedo`; el proyecto usa la forma invertida de Scopus `Aedo S.`.
+Un solape de tokens da falsos negativos (no fiabilidad). Decisión **D-344**:
+no afirmar correspondencia; mostrar el campo tal cual lo declara la Facultad.
+Un emparejamiento real requiere el normalizador de `matching_rules.yml`
+(maquinaria V2-19), tarea aparte.
+
+**Solo 16 de 68** registros fuera de universo declaran "Autor/a UFT" — la
+Facultad no rellena ese campo en todas las entradas.
+
+**Decisiones del reporte (D-345, D-346):**
+- Preferí **tabla plana** ordenada por año (decisión explícita del usuario,
+  no agrupar por subtítulos; tenía ofrecida la opción de agrupar por año).
+- Los 34 dentro de ventana (2023-2025) son los candidatos plausibles de
+  cobertura; 31 fuera de ventana; 3 sin año. Se marcó columna "Fuera de ventana".
+
+### Works / commits de este tramo
+
+| Commit | Contenido |
+|---|---|
+| `08ca769` (antes) | 6 fixes de auditoría documental (bases 542/277, flags de API, AU-03). Push a `origin/main`. |
+| `e0eb798` | V2-27: extractor + JSON (609) + CSV cruce + cierre de sesión en SESSION_NOTES. Push. |
+| `e89e58a` | V2-28: desglose de 68 DOIs fuera de universo. Push `e0eb798..e89e58a`. |
+
+### Pendientes (sin bloqueo)
+
+- **`AGENTS.md` sin trackear** (intencional, igual que antes): no forma parte de
+  estos fixes. Decidir si entra al repo o se queda fuera.
+- **Revisión humana de los 34 dentro de ventana**: ojo con duplicados y
+  correcciones/corrigendum dentro de tu propia lista (`10.1007/s12565-025-00855-0`
+  y `10.1038/s41380` aparecen 2×; entradas 31-32 y 52 son Correction/
+  Corrigendum). No automatizar (D-08).
+- **Emparejamiento "Autor/a UFT" con la identidad** (D-344): normalizador real
+  de `matching_rules.yml`, tarea aparte.
+- **Nota de entorno**: pandas 3.0.5 fuera del pin `pandas>=2.0,<3.0`; prerrequisito
+  `npx playwright install chromium`. Ya consignado en sesión previa.
+- Las de siempre: `T-06`, `T-19`.
+- El `git push` muestra "RemoteException"/"NativeCommandError" en PowerShell por
+  canal stderr de git: es esperado, no un error.
+
+### Próximo paso recomendado
+
+Decidir con el usuario si `AGENTS.md` se versiona y si los 34 DOIs dentro de
+ventana merecen la misma herramienta de revisión que OpenAlex (cruzar contra
+Crossref por DOI, listado para una persona) o basta el cruce para el contraste.
