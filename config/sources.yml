@@ -419,3 +419,46 @@ fuentes:
       fuente y forzaría una decisión que no le toca a la ingesta" — la
       deduplicación por DOI ocurre en el consumidor,
       `src/build/09_produccion_declarada.py`.
+
+  scopus_author_search:
+    nombre: "Scopus Author Search — directorio de autores por afiliación institucional"
+    tipo: "archivo"
+    archivo: "data/raw/Scopus_Author_Search_UFT.csv"
+    formato: "csv"
+    encoding: "utf-8-sig"
+    conector: "src/enrich/scopus_author_search.py"
+    rol: "verificación y candidatos de identidad — capa interna, nunca decide (D-08)"
+    aporta:
+      - candidatos_de_nombre_con_multiples_scopus_author_id
+      - contraste_de_orcid_declarado_directamente_por_scopus
+    salida: >-
+      internal/scopus_author_search_multiples_id.csv,
+      internal/scopus_author_search_orcid.csv
+    fecha_corte: null                # no aplica: es un directorio de autores, no un export de producción
+    fecha_entrega: "2026-09-02"      # fecha en que el usuario entregó el archivo
+    n_registros_leido: 812
+    entregado_por: "responsable del proyecto (sesión 2026-09-02)"
+    nota: >-
+      DISTINTO de `scopus_export`: aquél es el export nativo de
+      publicaciones (823 filas, ventana 2023-2025 declarada); éste es el
+      directorio de AUTORES que Scopus Author Search asocia a la
+      afiliación "Universidad Finis Terrae", sin ventana temporal —
+      confirmado con el usuario: "búsqueda por afiliación", sin filtro de
+      año. El "Number of Documents" de cada perfil es el que ve Scopus
+      Author Search (alcance completo del perfil), NO el número de
+      publicaciones de ese autor dentro del corpus de este proyecto — los
+      dos nunca se mezclan sin decirlo.
+
+      Verificado antes de construir el conector: el detector automático de
+      "un nombre con más de un Scopus Author ID" (`P-04`,
+      `src/audit/04_author_population.py`) sólo ve fragmentación cuando
+      ambos identificadores aparecen, DENTRO del corpus de 823
+      publicaciones, bajo la misma cadena de nombre exacta — no puede ver
+      un identificador cuyas publicaciones caen fuera del corpus ni
+      conectar dos identificadores bajo grafías distintas del mismo
+      nombre. Esta fuente sí los ve, porque Scopus ya agrupó por
+      identificador antes de exportar (3 casos nuevos encontrados así, no
+      detectables antes: "Esis Villarroel, Ivette S." — un segundo perfil
+      con 14 documentos invisible al detector; "Cabello, José Miguel";
+      "Caffarena, Paula" — con un identificador que en el corpus aparece
+      bajo "Barcenilla, Paula Caffarena", apellidos en otro orden).

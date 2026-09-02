@@ -8595,3 +8595,132 @@ Ninguna nueva.
 ### Próximo paso recomendado
 
 Ninguna acción de código pendiente.
+
+---
+
+## Cierre: Scopus Author Search — evidencia de identidad que el detector automático no podía ver
+
+### Contexto
+
+El usuario bajó de Scopus/SciVal un documento nuevo: **Scopus Author
+Search por afiliación "Universidad Finis Terrae"** (812 perfiles de autor,
+entregado hoy). Antes de decir para qué servía, se leyó el archivo real —
+no se especuló sobre su estructura. Confirmado con el usuario: búsqueda
+por afiliación institucional, sin ventana de años. Pidió avanzar con dos
+cosas: (1) registrar la fuente y construir lo necesario para aprovecharla,
+(2) cruzar el ORCID que trae contra lo que el proyecto ya tiene asignado.
+
+### El hallazgo que justificó construir algo, no sólo archivar el CSV
+
+Antes de escribir código se verificó, caso por caso, si esta fuente
+aportaba algo que el proyecto no pudiera ya calcular solo. La regla `P-04`
+(`04_author_population.py`) ya detecta "un nombre con más de un Scopus
+Author ID" — pero SÓLO cuando ambos identificadores aparecen, dentro del
+corpus de 823 publicaciones, bajo la misma cadena de nombre exacta.
+Verificado con casos reales:
+
+- **"Esis Villarroel, Ivette S."**: Scopus Author Search lista dos
+  perfiles — uno con 1 documento (el que sí está en el corpus, Facultad de
+  Derecho) y otro con **14 documentos y ORCID propio**, que no aparece en
+  el corpus en ninguna forma. Un segundo perfil completo, invisible al
+  detector automático porque ninguna de esas 14 publicaciones cae dentro
+  del corpus 2023-2025.
+- **"Caffarena, Paula"**: sus dos identificadores SÍ están ambos en el
+  corpus — pero uno bajo "Caffarena, Paula" y el otro bajo "Barcenilla,
+  Paula Caffarena" (apellidos en otro orden). El detector agrupa por
+  cadena de nombre exacta, así que nunca los conectó.
+- **"Cabello, José Miguel"**: mismo patrón que Esis Villarroel — un
+  identificador con 4 documentos ausente del corpus.
+
+Los otros 4 nombres repetidos en la fuente (Moya Patricia, Hartmann
+Schatloff Dan, Quezada Mauricio, Torres Keila) ya estaban en
+`internal/ambiguities_authors.csv` — la fuente los confirma de forma
+independiente, no aporta dato nuevo ahí.
+
+### Qué se construyó
+
+`data/raw/Scopus_Author_Search_UFT.csv` (el archivo, versionado) y
+`config/sources.yml` → `scopus_author_search` (entregado 2026-09-02, sin
+ventana temporal declarada — se documenta explícitamente para no
+confundir el "N° de documentos" de cada perfil, que es el que ve Scopus
+Author Search, con el número de publicaciones de ese autor dentro del
+corpus del proyecto).
+
+Nuevo conector `src/enrich/scopus_author_search.py`, capa interna, nunca
+decide (D-08). Reutiliza la misma extracción que `04_author_population.py`
+(`scopus_id_map()`, regex `r"(.+?)\s+\((\d+)\)$"` sobre `Author full
+names`) y la misma conversión "Apellido, Nombre" → "Apellido N." que
+`_firma_corta()`/`_firma_corta_p04` — copiadas, no importadas: el módulo
+de origen empieza con un dígito y no es importable, mismo motivo ya
+documentado en `build_review.py` para la misma función. Produce:
+
+- `internal/scopus_author_search_multiples_id.csv`: 7 candidatos con 2+
+  Scopus Author ID (4 ya conocidos, 3 nuevos), cada uno con el detalle de
+  qué dice Scopus de cada identificador, si está en el corpus, con
+  cuántas publicaciones, y bajo qué otro nombre si corresponde.
+- `internal/scopus_author_search_orcid.csv`: contraste de los 50 ORCID que
+  trae la fuente contra `data/enriched/authors_orcid.csv` — **26
+  coinciden, 0 contradicen, 1 es nuevo** (firma UFT ya conocida, sin ORCID
+  asignado: "Bastías, Jaime"), **23** son firmas que Scopus asocia a la
+  afiliación pero que la población UFT del proyecto no reconoce (fuera de
+  ventana, u homonimia — no se investigó más sin evidencia adicional).
+
+### Verificación
+
+`python3 src/enrich/scopus_author_search.py --test`: 14/14 comprobaciones
+(extracción de Scopus Author ID, mapa inverso ID→nombres, conteo de
+publicaciones por ID, agrupación de candidatos con 2+ ID, detección de
+nombre bajo otra grafía, marca de "ya conocido", y las cuatro resoluciones
+del contraste de ORCID: coincide/contradice/nuevo/sin_firma_uft). Corrida
+real: cifras iguales a las verificadas a mano antes de escribir el
+conector (7 candidatos, 3 nuevos; 50 ORCID evaluados, 0 contradicciones).
+`python3 src/audit/run_all.py`: sin cambios (29/30, misma falla
+preexistente E-06). Este cierre no toca ningún build step ni artefacto
+publicado — es capa interna, igual que `dspace_inventario.py`/
+`autoarchivo_uft.py`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-427 | Se construye un conector nuevo en vez de sólo archivar el CSV | Verificado antes de decidir: el detector automático `P-04` estructuralmente no puede ver fragmentación cuando un identificador no tiene publicaciones en el corpus, ni conectar identificadores bajo grafías distintas del mismo nombre — esta fuente sí, porque Scopus ya agrupó por identificador antes de exportar (3 casos reales, no hipotéticos, encontrados así) |
+| D-428 | Los candidatos de "múltiples Scopus ID" y el contraste de ORCID se publican como cola de revisión interna, nunca como resolución automática | Mismo principio D-08 que ya rige DSpace, autoarchivo y Crossref: "puede ser perfil fragmentado o puede ser homonimia" no lo decide una máquina |
+| D-429 | El "N° de documentos" de Scopus Author Search se declara explícitamente distinto del recuento de publicaciones del corpus, en todo lugar donde aparecen juntos | La fuente no tiene ventana temporal ni filtro de afiliación por publicación individual — mezclar los dos números sin decirlo habría sido presentar cosas no comparables como si lo fueran, exactamente lo que este proyecto evita |
+
+### Archivos modificados
+
+```
+data/raw/Scopus_Author_Search_UFT.csv       nuevo — archivo entregado por el usuario
+src/enrich/scopus_author_search.py          nuevo — conector, --test (14 casos)
+internal/scopus_author_search_multiples_id.csv   nuevo — salida real
+internal/scopus_author_search_orcid.csv          nuevo — salida real
+config/sources.yml                          scopus_author_search
+docs/FUENTES_Y_APIS.md                      §2.9 nueva
+STATE.md, docs/DECISIONS.md                 regenerados
+```
+
+### Supuestos descartados
+
+- Que el "N° de documentos" de cada perfil correspondía al corpus del
+  proyecto: descartado explícitamente — es el conteo de Scopus Author
+  Search, sobre todo el perfil, sin ventana ni afiliación-por-publicación.
+- Que un nombre repetido en la fuente con dos Scopus Author ID era
+  automáticamente la misma persona: se mantiene el mismo principio que
+  `P-04` — homonimia y perfil fragmentado quedan igual de abiertos, la
+  fuente no decide entre ellos.
+
+### Ambigüedades abiertas
+
+- Los 3 candidatos nuevos (Esis Villarroel, Caffarena, Cabello) quedan sin
+  resolver — evidencia para revisión humana, no una fusión de identidad.
+- Las 23 firmas "sin_firma_uft_en_el_proyecto" no se investigaron: podrían
+  ser autores reales fuera de la ventana 2023-2025, homónimos, o casos que
+  la extracción del proyecto no capturó por otra razón — no se asumió
+  ninguna de las tres sin evidencia adicional.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. Si se quiere, alguien puede revisar
+`internal/scopus_author_search_multiples_id.csv` caso por caso y aplicar
+una decisión (mismo mecanismo que la cola de identidad existente) para
+los 3 candidatos nuevos.
