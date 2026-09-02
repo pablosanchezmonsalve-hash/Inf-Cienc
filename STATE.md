@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `8a4b8f7` · Revisa caso por caso el hallazgo de "Varios Scopus ID": 9 confirmados 
+Último commit: `ddadf8a` · Publica "Producción ampliada": corpus paralelo declarado por las Facul
 Snapshot: 2026-09-02
 
 ---
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 398
+## Decisiones tomadas: 400
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
@@ -114,6 +114,7 @@ Abrir sólo lo que responde la pregunta que se tiene:
 | Cómo adaptarlo a otra institución | `docs/REPLICATION.md` |
 | Cómo recuperar ORCID | `docs/ORCID_GUIDE.md` |
 | Qué falta para la V2 | `docs/V2_BACKLOG.md` |
+| Cómo tratar una fuente fuera de Scopus | `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` |
 | Historia de cada sesión | `SESSION_NOTES.md` |
 
 ---
