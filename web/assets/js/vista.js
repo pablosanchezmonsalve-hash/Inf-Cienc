@@ -204,6 +204,13 @@ export function produccionDeclarada(datos) {
       ${secundario ? `<span class="secundario">${c.escapar(secundario)}</span>` : ''}
     </div>`;
 
+  // Fila «Facultad · año · N», compartida por las tablas de PD-01 y PD-03
+  // (las dos únicas fuentes que agregan a este nivel; PD-02 no tiene
+  // Facultad y usa su propia fila, sólo año).
+  const filaFacultadAnio = (r) => `
+    <tr><td>${c.escapar(r.facultad)}</td><td>${r.anio}</td>
+      <td>${c.nf.format(r.n)}</td></tr>`;
+
   const totalHTML = total ? `
     <div class="kpis">${kpi(
       total.en_ventana, `Producción total fuera de Scopus, ${ventana.inicio}-${ventana.fin}`,
@@ -229,16 +236,12 @@ export function produccionDeclarada(datos) {
         'la cifra que entra al total combinado de arriba'),
     ].join('');
 
-    const filaTabla = (r) => `
-      <tr><td>${c.escapar(r.facultad)}</td><td>${r.anio}</td>
-        <td>${c.nf.format(r.n)}</td></tr>`;
-
     const tabla = filas.length ? `
       <div class="tabla-envoltura tabla-datos">
         <table>
           <thead><tr><th scope="col">Facultad</th><th scope="col">Año</th>
             <th scope="col">Publicaciones declaradas</th></tr></thead>
-          <tbody>${filas.map(filaTabla).join('')}</tbody>
+          <tbody>${filas.map(filaFacultadAnio).join('')}</tbody>
         </table>
       </div>` : `
       <p class="nota">Ninguna publicación declarada cae dentro de la ventana
@@ -332,16 +335,12 @@ export function produccionDeclarada(datos) {
         'unidad declarada en bruto: NO se cuenta por Facultad, ver la lista abajo'),
     ].join('');
 
-    const filaTabla = (r2) => `
-      <tr><td>${c.escapar(r2.facultad)}</td><td>${r2.anio}</td>
-        <td>${c.nf.format(r2.n)}</td></tr>`;
-
     const tabla = aa.por_facultad_anio.length ? `
       <div class="tabla-envoltura tabla-datos">
         <table>
           <thead><tr><th scope="col">Facultad</th><th scope="col">Año</th>
             <th scope="col">Publicaciones autoarchivadas</th></tr></thead>
-          <tbody>${aa.por_facultad_anio.map(filaTabla).join('')}</tbody>
+          <tbody>${aa.por_facultad_anio.map(filaFacultadAnio).join('')}</tbody>
         </table>
       </div>` : `
       <p class="nota">Ninguna publicación con Facultad validada cae dentro

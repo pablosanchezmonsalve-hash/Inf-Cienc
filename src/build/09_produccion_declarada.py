@@ -155,6 +155,29 @@ def _anio_valido(r: dict, inicio: int, fin: int) -> str:
     return "en_ventana" if inicio <= int(crudo) <= fin else "fuera_de_ventana"
 
 
+def _particionar_por_ventana(registros: list[dict], inicio: int, fin: int
+                              ) -> tuple[list[dict], list[dict], list[dict]]:
+    """(en_ventana, fuera_de_ventana, sin_anio) — una sola pasada, reutilizada
+    por PD-01/PD-02/PD-03: las tres fuentes separan su recuento principal de
+    lo que queda fuera de la ventana temporal exactamente de la misma forma,
+    aunque el resto de su procesamiento difiera."""
+    por_ventana = defaultdict(list)
+    for r in registros:
+        por_ventana[_anio_valido(r, inicio, fin)].append(r)
+    return por_ventana["en_ventana"], por_ventana["fuera_de_ventana"], por_ventana["sin_anio"]
+
+
+def _por_facultad_anio(registros: list[dict]) -> list[dict]:
+    """Cuenta por (facultad, año) y devuelve la lista ordenada {facultad,
+    anio, n} — la tabla principal de PD-01 y PD-03 (PD-02 no tiene facultad
+    y agrega sólo por año, así que no comparte este helper)."""
+    conteo = Counter((r["facultad"], int(r["anio"])) for r in registros)
+    return sorted(
+        ({"facultad": f, "anio": a, "n": n} for (f, a), n in conteo.items()),
+        key=lambda x: (x["facultad"], x["anio"]),
+    )
+
+
 OPENALEX_COBERTURA = b.ROOT / "internal" / "openalex_cobertura.csv"
 
 
@@ -210,23 +233,8 @@ def main() -> None:
     en_universo = [r for r in deduplicados if r.get("en_universo_scopus")]
     fuera_del_universo = [r for r in deduplicados if not r.get("en_universo_scopus")]
 
-    por_ventana = defaultdict(list)
-    for r in fuera_del_universo:
-        por_ventana[_anio_valido(r, inicio, fin)].append(r)
-    en_ventana = por_ventana["en_ventana"]
-    fuera_de_ventana = por_ventana["fuera_de_ventana"]
-    sin_anio = por_ventana["sin_anio"]
-
-    conteo_principal = Counter(
-        (r["facultad"], int(r["anio"])) for r in en_ventana
-    )
-    por_facultad_anio = sorted(
-        (
-            {"facultad": facultad, "anio": anio, "n": n}
-            for (facultad, anio), n in conteo_principal.items()
-        ),
-        key=lambda x: (x["facultad"], x["anio"]),
-    )
+    en_ventana, fuera_de_ventana, sin_anio = _particionar_por_ventana(fuera_del_universo, inicio, fin)
+    por_facultad_anio = _por_facultad_anio(en_ventana)
 
     conteo_fuera = Counter(r["facultad"] for r in fuera_de_ventana)
     conteo_sin_anio = Counter(r["facultad"] for r in sin_anio)
@@ -262,12 +270,7 @@ def main() -> None:
     pendientes_oa = sum(1 for r in filas_oa if r.get("resolucion") == "PENDIENTE_REVISION_HUMANA")
     descartadas_oa = sum(1 for r in filas_oa if (r.get("resolucion") or "").startswith("DESCARTADO"))
 
-    por_ventana_oa = defaultdict(list)
-    for r in confirmadas_oa:
-        por_ventana_oa[_anio_valido(r, inicio, fin)].append(r)
-    oa_en_ventana = por_ventana_oa["en_ventana"]
-    oa_fuera_de_ventana = por_ventana_oa["fuera_de_ventana"]
-    oa_sin_anio = por_ventana_oa["sin_anio"]
+    oa_en_ventana, oa_fuera_de_ventana, oa_sin_anio = _particionar_por_ventana(confirmadas_oa, inicio, fin)
 
     conteo_oa_por_anio = Counter(int(r["anio"]) for r in oa_en_ventana)
     oa_por_anio = sorted(
@@ -320,22 +323,13 @@ def main() -> None:
     en_universo_aa = [r for r in dedup_aa if r.get("en_universo_scopus")]
     fuera_del_universo_aa = [r for r in dedup_aa if not r.get("en_universo_scopus")]
 
-    por_ventana_aa = defaultdict(list)
-    for r in fuera_del_universo_aa:
-        por_ventana_aa[_anio_valido(r, inicio, fin)].append(r)
-    aa_en_ventana = por_ventana_aa["en_ventana"]
-    aa_fuera_de_ventana = por_ventana_aa["fuera_de_ventana"]
-    aa_sin_anio = por_ventana_aa["sin_anio"]
+    aa_en_ventana, aa_fuera_de_ventana, aa_sin_anio = _particionar_por_ventana(fuera_del_universo_aa, inicio, fin)
 
     aa_en_ventana_con_facultad = [r for r in aa_en_ventana if r.get("facultad")]
     aa_en_ventana_sin_facultad = [r for r in aa_en_ventana if not r.get("facultad")]
     fuera_universo_con_facultad_aa = [r for r in fuera_del_universo_aa if r.get("facultad")]
 
-    conteo_aa = Counter((r["facultad"], int(r["anio"])) for r in aa_en_ventana_con_facultad)
-    aa_por_facultad_anio = sorted(
-        ({"facultad": f, "anio": a, "n": n} for (f, a), n in conteo_aa.items()),
-        key=lambda x: (x["facultad"], x["anio"]),
-    )
+    aa_por_facultad_anio = _por_facultad_anio(aa_en_ventana_con_facultad)
 
     conteo_sin_mapeo = Counter(r["unidad_declarada"] for r in aa_en_ventana_sin_facultad)
     aa_unidades_sin_mapeo = sorted(
