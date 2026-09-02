@@ -5990,3 +5990,56 @@ Decisiones de integración:
 ### Próximo paso recomendado
 Revisar con el usuario las capturas (`explorer _cap_*.png`), confirmar el
 criterio visual, y hacer commit + push del refinement UX de la parte superior.
+
+---
+## Sesión 2026-09-01 (tarde) — Paleta H (vino + champán), cambio integral de identidad
+
+### Decisión (usuario)
+- Elegida la paleta **H · Vino/burdeos + champán** de la comparativa, y se pidió
+  tomarla **íntegra** ("aunque cueste más tokens"): marca, dato y advertencia a
+  la vez, no sólo la cabecera.
+- Comparativa servida en vivo (http://localhost:8100/paletas.html, 8 candidatas,
+  claro/oscuro) generada con la skill `brand-palette` (creada en
+  `~/.claude/skills/brand-palette/`).
+
+### Qué se cambió (solo `web/assets/css/app.css`, tokens + comentarios)
+- **Marca/superficies/tinta → cálidas**: `--marca` vino `#2c0c12`, superficies
+  hueso/champán en claro y vino profundo en oscuro, tinta champán, `--marca-tinta`
+  champán `#f0ddca`, `--accion` vino `#8a2430`. Se re-tocó también el
+  `.banda-contraste` y `.banda-enfasis` (son ámbitos oscuros que redefinen tokens).
+- **Dato → bordeaux (cálido)**: `--serie-1` `#8a2430`/`--serie-2` `#c06070`,
+  rampa ordinal `--ord-1..4` en bordeaux (claro sube, oscuro baja para legibilidad).
+- **Advertencia → verde-moneda (frío)**: con el dato en bordeaux, el viejo ámbar
+  (cálido) quedaba a ΔE 17,9 < 20; se movió a `--aviso-*` verde moneda
+  (`#2e7d32`/`#5a9e5f`…), que separa el dato (ΔE 26,0 claro / 22,2 oscuro).
+- Comentarios actualizados: se sustituyeron las tablas/afirmaciones viejas
+  (teal, Deep Ocean, Peach, ámbar) que habían quedado como "fotografía" por la
+  referencia al validador como juez; se conservó la identidad institucional como
+  "rojo no oficial verificado".
+
+### Verificación (evidencia)
+- `py src/design/validar_paleta.py` → **SISTEMA CROMÁTICO VÁLIDO** (0 fallos.
+  Incluye: contraste AA por token en claro/oscuro, ΔE dato↔advertencia ≥20,
+  rampa ΔE ≥8 y monótona, par categórico bajo protanopía/deuteranopía/tritanopía).
+- `py src/build/06_assemble_site.py` → build OK (10 páginas, capa interna no
+  incluida).
+- `node src/verify/run_all.mjs dist` → **VERIFICACIÓN COMPLETA · sin fallos**
+  (contraste, estructura, flujos, responsive, higiene, peso).
+- Sonda de color Playwright (`color.mjs`): cabecera vino `rgb(168,68,85)`,
+  acentos champán `rgb(240,221,202)`, chip hueso `rgb(253,246,239)`, vigencia-
+  guía vino `rgb(138,36,48)`. El dato bordeaux/verde-moneda los confirma la
+  captura de impacto.
+
+### Archivos tocados
+- `web/assets/css/app.css` (tokens + comentarios; sin hardcodear hex en JS — el
+  JS usa variables CSS, verificado por grep: 0 hex en `web/assets/js/`).
+- `SESSION_NOTES.md` (esta entrada).
+
+### Capturas regeneradas
+- `_rev_portada.png` (254 KB) y `_rev_impacto.png` (356 KB) en raíz del repo
+  (viewport 1440, fullPage, servidor `dist/`).
+
+### Pendiente
+- Commit + push de la paleta H (aún sin commitear sobre `23d102e`).
+- Nota operativa: `dist/`, `data/processed/` son derivados no versionados; el
+  servidor 8000 (PID 2440) sirve `dist/` ya reconstruido.
