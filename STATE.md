@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `507b8f0` · Fusiona 72 decisiones históricas que la exportación del navegador habí
+Último commit: `d414a73` · Fusiona la revisión de identidad y las fuentes institucionales en main
 Snapshot: 2026-09-01
 
 ---
@@ -80,7 +80,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 373
+## Decisiones tomadas: 375
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
