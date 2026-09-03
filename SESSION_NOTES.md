@@ -9936,3 +9936,113 @@ fijo en `autores.html`, `task_596c1939`, sin ejecutar).
 Ninguna acción de código pendiente. El sitio está desplegado, verificado
 por CI y por revisión visual directa, y `main`/esta rama están
 sincronizadas. Sesión cerrada.
+
+## Addendum: reconciliación con PR #39 al empujar el cierre a `main`
+
+### Contexto
+
+Al empujar el commit de cierre anterior (`6e866e0`) también a `main` —
+siguiendo el mismo patrón de sincronización que el resto de la sesión—,
+`git fetch origin main` mostró que `origin/main` ya no estaba en
+`1150920`: había avanzado a `b6ea061`, un merge commit (PR #39,
+`claude/pensive-tesla-81t44z`) que no se originó en esta sesión ni en
+esta rama.
+
+### Qué se hizo
+
+Se inspeccionó el contenido antes de tocar nada, en vez de asumir
+cualquier cosa sobre su origen o forzar un push. El diff (`git diff
+1150920 origin/main`) mostró exactamente 2 archivos, ambos coherentes con
+el hallazgo "al margen" que había quedado como sugerencia sin ejecutar
+(`task_596c1939`, tooltip ORCID codificado a "Crossref" en la tabla de
+autores):
+
+- `src/build/03_authors.py`: agrega `"orcid_estado": estado_orcid(nombre,
+  fuente_orcid)` al JSON publicado de un segundo bloque de autores (la
+  función `estado_orcid` y su uso en el primer bloque ya existían).
+- `web/assets/js/paginas.js`: el `title` del tooltip pasa de fijo
+  `"ORCID recuperado desde Crossref · confianza ..."` a `` `ORCID:
+  ${c.escapar(a.orcid_estado)} · confianza ...` ``, usando el campo nuevo.
+
+Es exactamente el fix correcto para el bug reportado: alguien —no esta
+sesión— tomó la sugerencia en algún momento y la resolvió por su cuenta,
+en paralelo. Se verificó sintaxis de ambos archivos y que
+`orcid_estado` esté referenciado correctamente antes de aceptar el
+merge.
+
+Como los archivos tocados por `origin/main` (`03_authors.py`,
+`paginas.js`) no se solapan con los del cierre de esta rama
+(`SESSION_NOTES.md`, `STATE.md`, `docs/DECISIONS.md`), el merge
+(`git merge origin/main`, sin `--ff-only` porque las dos ramas habían
+divergido de verdad) resolvió sin conflictos. Se empujó el resultado
+(`c86075e`) a `origin/main`.
+
+Se intentó retirar la sugerencia `task_596c1939` con `dismiss_task`; la
+herramienta respondió que ya había sido iniciada por el usuario y por
+tanto no admite retiro — confirma independientemente que el fix vino de
+esa sugerencia siendo tomada, no de una coincidencia.
+
+### Verificación
+
+- `python3 -c "import ast; ast.parse(...)"` sobre `03_authors.py`: sin
+  errores de sintaxis.
+- Verificación de texto de que `paginas.js` referencia `orcid_estado`.
+- `git diff --quiet` tras el merge: limpio, nada sin commitear.
+- `git push origin main`: `b6ea061..c86075e main -> main`, sin rechazo.
+
+No se corrió el pipeline de build completo para este addendum — el
+cambio no es de esta sesión, ya llegó revisado y fusionado vía su propio
+PR (#39), y el diff es mínimo y de sintaxis verificable. Si hiciera falta
+una verificación de build end-to-end sobre este fix específico, queda
+pendiente (ver "Próximo paso recomendado").
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-455 | Ante una `origin/main` que avanzó de forma inesperada, se inspecciona el diff completo antes de fusionar o empujar nada | Evita tanto perder trabajo ajeno (pisándolo) como aceptar a ciegas algo no verificado; en este caso el diff era pequeño y se pudo leer entero |
+| D-456 | Se hace un merge commit normal (no fast-forward) entre esta rama y `origin/main`, en vez de forzar o descartar cualquiera de los dos lados | Las ramas habían divergido de verdad (cada una con commits que la otra no tenía) — un fast-forward ya no aplicaba, y los archivos no se solapaban, así que un merge commit es la operación mínima que conserva ambos lados |
+
+### Archivos modificados
+
+```
+(ninguno de código nuevo en esta sesión — se fusionó c86075e, que trae
+ src/build/03_authors.py y web/assets/js/paginas.js de PR #39)
+SESSION_NOTES.md   (este addendum)
+```
+
+### Supuestos descartados
+
+- Que `origin/main` seguiría en el mismo commit que la última vez que se
+  revisó: se volvió a hacer `git fetch` justo antes de empujar, como
+  indica la práctica ya establecida en esta sesión, y eso fue lo que
+  reveló la divergencia.
+- Que la divergencia ameritaba forzar el push de esta rama por encima:
+  se leyó el contenido ajeno primero; resultó ser trabajo legítimo y se
+  conservó vía merge.
+
+### Ambigüedades abiertas
+
+Del cierre anterior, sólo queda uno de los dos hallazgos "al margen": el
+tooltip ORCID (`task_596c1939`) ya está resuelto por PR #39 y fusionado
+a `main`. Sigue pendiente únicamente Fortuny como candidato de "Varios
+Scopus ID" (en la cola, esperando revisión humana).
+
+No se investigó quién ni cómo generó el PR #39 (otra sesión, otra
+persona, u otra corrida) — no era necesario para reconciliar el estado
+del repositorio, y esta nota no debe leerse como una atribución
+verificada del autor del fix.
+
+### Próximo paso recomendado
+
+`main` y `claude/state-review-next-steps-wzzq0h` divergen ahora en un
+commit: `main` tiene el merge `c86075e` (con el fix de PR #39) que esta
+rama no tiene. Dado que esta rama ya cumplió su propósito (todo el
+trabajo de identidad/conectores/CI de esta sesión ya está en `main`), no
+se sincronizó ese último commit hacia acá — no hace falta para nada
+pendiente en esta rama. Si una sesión futura retoma esta rama, conviene
+traer `main` primero (`git merge origin/main` o similar) antes de seguir
+trabajando, para no perder de vista el fix del tooltip.
+
+Sitio, CI y ambas ramas en un estado consistente y verificado. Sesión
+cerrada.
