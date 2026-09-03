@@ -219,12 +219,22 @@ simplemente no tiene — no hay evidencia para decidir cuál.</p>
 </div>
 
 <div class="flag">
-  <strong>(2) Sin resolver:</strong> "Fortuny, Esteban Fortuny" no encaja en el patrón de
-  apellido compuesto, pero su ORCID coincide exacto con "Fortuny E." ya asignado en el proyecto
-  — bajo un Auth-ID <strong>distinto</strong> (59254638800 en el corpus, frente a 57203373183
-  en Scopus Author Search). Es fragmentación de perfil Scopus, el mismo fenómeno de "Varios
-  Scopus ID" ya revisado para Moya/Hartmann/Quezada/Torres — no se aplicó ninguna decisión,
-  queda pendiente.
+  <strong>(2) Entrado a la cola de "Varios Scopus ID" (2026-09-03):</strong> "Fortuny, Esteban
+  Fortuny" no encaja en el patrón de apellido compuesto, pero su ORCID coincide exacto con
+  "Fortuny E." ya asignado en el proyecto — bajo un Auth-ID <strong>distinto</strong>
+  (59254638800 en el corpus, frente a 57203373183 en Scopus Author Search). Es fragmentación de
+  perfil Scopus, el mismo fenómeno ya revisado para Moya/Hartmann/Quezada/Torres — pero esta vez
+  invisible al detector que los encontró a ellos (agrupa por nombre EXACTO dentro de esta misma
+  fuente; "Fortuny, Esteban" y "Fortuny, Esteban Fortuny" no comparten nombre en ninguna fuente,
+  sólo el ORCID). Se agregó <code>candidatos_fragmentacion_orcid()</code> a
+  <code>scopus_author_search.py</code> para que esta clase de evidencia quede en la misma cola de
+  forma reproducible, no sólo anotada aquí — ahora es el 8º candidato en
+  <code>internal/scopus_author_search_multiples_id.csv</code>, <code>PENDIENTE_REVISION_HUMANA</code>.
+  Evidencia a favor: ORCID <code>0000-0002-0864-5669</code> declarado por el propio titular en el
+  registro de ORCID (fuente de la asignación existente) y confirmado, independientemente, por
+  Scopus Author Search — mismo nombre completo, mismo campo (Medicine/salud), coherente con la
+  publicación del corpus. No se aplicó ninguna decisión: queda pendiente de que alguien la
+  autorice.
 </div>
 
 <div class="footer">
