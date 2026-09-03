@@ -12,9 +12,9 @@
 # sin_registro  alguien buscó en el registro y no encontró a esta
 #               persona. No es lo mismo que «nadie ha mirado».
 #
-# Aplicado: 2026-09-01
+# Aplicado: 2026-09-03
 
-fecha_de_aplicacion: 2026-09-01
+fecha_de_aplicacion: 2026-09-03
 
 confirmadas:
   - firma: Abara J.F.
@@ -194,7 +194,7 @@ confirmadas:
 
 retiradas:
   - firma: Arroyo A.
-    orcid: 0000-0003-0157-5175
+    orcid: 0000-0002-6248-9257
     nota: ''
   - firma: Bencina Matus F.
     orcid: 0000-0002-7490-514X
