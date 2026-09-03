@@ -9039,3 +9039,95 @@ Si se quiere avanzar el hallazgo de Amarouch, consolidar sus tres firmas
 que ya se hizo para Esis Villarroel. Si se quiere avanzar el de Fortuny,
 tratarlo como un candidato más de "Varios Scopus ID" — mismo mecanismo que
 Moya/Hartmann/Quezada/Torres.
+
+## Cierre: consolidación de las tres firmas de Amarouch (2026-09-03, mismo día)
+
+### Contexto
+
+El usuario pidió consolidar el hallazgo de Amarouch del cierre anterior:
+tres firmas del proyecto ("Amarouch García I.", "García I.A.", "Amarouch I.")
+que Scopus Author Search confirmó como un solo Scopus Author ID
+(57339772200), sin fusionar entre sí en la población del proyecto.
+
+### Qué se hizo
+
+A diferencia de las decisiones anteriores de esta línea de trabajo (que
+sólo tocaban archivos internos de `scopus_author_search.py`), consolidar
+firmas de verdad —que se fusionen en una sola ficha pública, con sus
+publicaciones sumadas— tiene un mecanismo propio y único en el proyecto
+(D-08: "el pipeline nunca lo hace por heurística"):
+`internal/identity_decisions.csv` (decisión humana) →
+`src/review/apply_decisions.py` (aplica) →
+`config/identidades_consolidadas.yml` (lo que el build consume). Se usó
+ese mecanismo, no uno nuevo: se agregó una fila
+(`caso_id=sas-amarouch, cola=Variantes de nombre, veredicto=misma`) con
+las tres firmas separadas por `|` y la evidencia completa en la nota, y
+se corrió `apply_decisions.py`.
+
+Antes de aplicar de verdad se verificó con `--dry-run` y con una
+inspección directa de `grupos_de_identidad()` que las tres firmas forman
+un solo grupo sin contradicciones y que la forma canónica resultante
+("Amarouch García I.", por ser la más larga a igualdad de frecuencia y
+diacríticos) es la esperada.
+
+Al aplicar, el resumen impreso mostró "22 asignaciones nuevas" y "138
+ORCID confirmados", números mucho mayores que lo que este único cambio
+explicaría — el script recalcula TODO `identity_decisions.csv` en cada
+corrida, no sólo la fila agregada. Se verificó con cuidado antes de
+continuar: `git diff` sobre `data/enriched/authors_orcid.csv` después de
+la corrida da vacío — el archivo se reescribió pero con contenido
+byte-idéntico al ya commiteado. Es el comportamiento esperado, no un
+efecto colateral: esas 22/138 cifras son el CÁLCULO COMPLETO recomputado
+desde cero sobre decisiones que ya estaban aplicadas de sesiones
+anteriores; sólo cambió lo que de verdad era nuevo (el grupo de
+Amarouch). `config/firmas_e09_resueltas.yml` y `config/orcid_revisado.yml`
+también se reescribieron con sólo la fecha cambiada, sin contenido nuevo.
+
+### Verificación
+
+`python3 src/review/apply_decisions.py --test`: 18/18 casos OK, sin
+cambios. `--dry-run` antes de aplicar: previó exactamente el grupo
+esperado (38 grupos, +1). `python3 src/build/build_all.py`: build 05 en
+0 fallas; fichas de autor 538 → 536 (-2, exactamente lo esperado al
+fusionar 3 firmas en 1). Verificado directo sobre
+`data/processed/authors.json`: la ficha consolidada "Amarouch García I."
+trae `n_publicaciones: 3` (1+1+1), ORCID `0000-0003-2444-8179` a
+confianza alta, y `variantes_consolidadas` lista las tres firmas
+originales. `python3 src/audit/run_all.py`: 29/30, misma falla
+preexistente E-06.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-437 | La consolidación se aplica por `internal/identity_decisions.csv` + `apply_decisions.py`, no por un archivo nuevo | Es el único mecanismo del proyecto que fusiona firmas en la capa pública (D-08); usar otro habría creado una segunda vía para el mismo efecto |
+| D-438 | Se verificó `git diff` sobre `authors_orcid.csv` antes de confiar en el resumen impreso por el script | El resumen ("22 nuevas", "138 confirmados") por sí solo sugería un efecto mucho mayor al esperado; sólo comparando el archivo resultante contra lo ya commiteado se confirmó que era recómputo idempotente, no un cambio real no solicitado |
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv              +1 fila (sas-amarouch, misma)
+config/identidades_consolidadas.yml           regenerado — 38 grupos (+1)
+config/firmas_e09_resueltas.yml               regenerado — sólo fecha
+config/orcid_revisado.yml                     regenerado — sólo fecha
+internal/scopus_author_search_listado.html    nota de Amarouch actualizada a "resuelto"
+STATE.md, docs/DECISIONS.md                   regenerados
+```
+
+### Supuestos descartados
+
+- Que las 22/138 cifras del resumen indicaban un efecto no solicitado
+  sobre `authors_orcid.csv`: descartado tras verificar `git diff` — el
+  contenido resultante es idéntico al ya commiteado; el número refleja
+  cómo se calcula el archivo, no cuánto cambió.
+
+### Ambigüedades abiertas
+
+Ninguna nueva. El hallazgo de Fortuny (Auth-ID fragmentado, mismo ORCID)
+sigue pendiente, sin tocar.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente en esta línea de trabajo. Si se quiere
+avanzar el hallazgo de Fortuny, tratarlo como un candidato más de "Varios
+Scopus ID" — mismo mecanismo que Moya/Hartmann/Quezada/Torres.
