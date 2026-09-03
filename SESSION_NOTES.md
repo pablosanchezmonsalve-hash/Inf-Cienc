@@ -9773,3 +9773,66 @@ un archivo versionado (`config/matching_rules.yml`).
 ### Próximo paso recomendado
 
 Decidir con el usuario si corregir el hallazgo del token de GitHub.
+
+## Cierre: el token de GitHub sale del archivo versionado
+
+### Contexto
+
+El usuario pidió corregir el último hallazgo de la revisión de
+`origin/main`: `github_orcid.py` documentaba y leía el token desde
+`config/matching_rules.yml` bajo `enriquecimiento_externo.github.token`
+— un archivo del repositorio, versionado y sin ignorar. Quien siguiera
+esa instrucción al pie de la letra habría comiteado una credencial real.
+
+### Qué se hizo
+
+Se cambió a variable de entorno (`GITHUB_ORCID_TOKEN`), mismo criterio
+que ya siguen `orcid_api.py`/`orcid_expand.py` con sus propias
+credenciales de ORCID — se agregó `credenciales()` como función propia,
+calcada de la de `orcid_api.py`, con la diferencia de que la ausencia de
+token no detiene el script (esta fuente es opcional por diseño, se
+informa y termina en 0, no se aborta). El mensaje cuando falta el token
+ahora trae la instrucción de exportarlo (bash y PowerShell), igual que
+`orcid_api.py`. Verificado que `config/matching_rules.yml` no tenía
+ningún valor real bajo esa clave (nunca se comiteó una credencial) — no
+hubo nada que revocar, sólo la instrucción que apuntaba mal.
+
+De paso, en la misma función que se estaba tocando, se corrigió un
+artefacto de generación real encontrado en la revisión anterior:
+caracteres chinos sueltos en medio de una oración en español
+("... con 搜索 por ORCID en campos de perfil.") — visible sólo cuando el
+script corre con token configurado, nunca ejercido hasta ahora porque
+nadie tenía uno.
+
+### Verificación
+
+`python3 src/enrich/github_orcid.py --test`: 4/4, sin cambios (la lógica
+de extracción de ORCID del bio no se tocó). Corrida real, las dos rutas:
+sin `GITHUB_ORCID_TOKEN` en el entorno, imprime las instrucciones y
+termina en 0; con uno (falso, de prueba), imprime "Token de GitHub:
+configurado" y el texto ahora en español correcto, también termina en 0.
+`grep` de "matching_rules" y del carácter chino en el archivo: cero
+coincidencias en ambos casos. `python3 src/audit/run_all.py`: sin
+cambios.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-450 | El token pasa a variable de entorno, no a `matching_rules.yml` con instrucciones de "no lo comitee" | Es el mismo criterio que ya rige las credenciales de ORCID en este proyecto: nunca en un archivo del repositorio, sin excepciones ni advertencias que dependan de que alguien las lea |
+| D-451 | Se corrige el texto en chino de la misma función, en el mismo cierre | Es la misma línea de código que se estaba tocando por el hallazgo del token; separarlo en un cierre aparte habría sido más ceremonia que la corrección amerita |
+
+### Archivos modificados
+
+```
+src/enrich/github_orcid.py    token vía GITHUB_ORCID_TOKEN, credenciales(), texto en chino corregido
+```
+
+### Ambigüedades abiertas
+
+Ninguna. Los cuatro hallazgos de la revisión de `origin/main` quedan
+todos corregidos.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente en esta línea de trabajo.
