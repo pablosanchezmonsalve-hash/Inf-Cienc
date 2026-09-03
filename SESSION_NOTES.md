@@ -8935,3 +8935,107 @@ no como ambigüedad de este cierre.
 Ninguna acción de código pendiente en esta línea de trabajo. El bug del
 tooltip de `autores.html` queda disponible como tarea aparte
 (`task_596c1939`) si se quiere corregir.
+
+## Cierre: las otras 22 filas del contraste de ORCID (2026-09-03, mismo día)
+
+### Contexto
+
+El usuario pidió revisar si las 22 filas restantes de "sin_firma_uft_en_el_
+proyecto" (después de confirmar "Fernández Abara") compartían el mismo
+patrón de apellido compuesto. Se revisaron con el mismo método —Auth-ID
+exacto de Scopus Author Search en el corpus, por posición de autor, contra
+el ORCID ya asignado a la firma resultante— y el usuario autorizó aplicar
+el mismo tratamiento a lo que se encontrara.
+
+### Qué se encontró
+
+Un primer cruce por Auth-ID sin discriminar posición de autor dio
+resultados ruidosos en publicaciones con varios coautores UFT (el mismo
+EID mapeaba a firmas equivocadas). Se corrigió cruzando por
+`(eid, posicion_autor)` contra `matching_log.csv`, que sí distingue cada
+coautor dentro de un mismo EID.
+
+Con el cruce correcto: **11 de las 22 comparten el mismo patrón** —mismo
+Auth-ID presente en el corpus del proyecto en la posición correcta, mismo
+ORCID ya asignado a la firma resultante, desde una fuente independiente de
+Scopus Author Search—: Andrade→Kobayashi M.A., Ayala Munita→Ayala M.,
+Amarouch García→Amarouch García I./García I.A. (dos firmas, ver abajo),
+Bustos Arriagada→Bustos-Arriagada E., Díaz→Diaz F./Díaz F., Letelier
+Widow→Letelier Widow G., Mardones Falcone→Mardones-Falcone G.,
+Phillips→Letelier J.P., Santibañez→Santibáñez D., Simón→Simón L.,
+Zambrano-Matamala→Zambrano C. Las variantes del patrón: apellido compuesto
+truncado (igual que Fernández Abara), espacio vs. guion, tilde presente o
+ausente, e inicial de más en el nombre de pila.
+
+**11 de las 22 no muestran ninguna señal** —ni el Auth-ID aparece en el
+corpus bajo ninguna posición, ni su ORCID coincide con ninguna firma ya
+asignada—: Barros, Bolt, Bugueño, Cortés, Fortuny, Fuentes Anabalón,
+Lehmann, Letelier (Rene F.), Opitz, Saldías, Sanhueza. Quedan igual que
+estaban — sin evidencia para decidir nada.
+
+**Dos hallazgos al margen, no resueltos:**
+- "Amarouch García, Ismael Amarouch" confirmó el mismo Auth-ID bajo *dos*
+  firmas del proyecto sin consolidar entre sí ("Amarouch García I." y
+  "García I.A.", más una tercera, "Amarouch I.", sin ORCID) — inconsistencia
+  interna previa a este documento, no introducida por él.
+- "Fortuny, Esteban Fortuny" no encaja en el patrón de apellido compuesto,
+  pero su ORCID coincide exacto con "Fortuny E." ya asignado en el
+  proyecto, bajo un Auth-ID **distinto** (59254638800 en el corpus vs.
+  57203373183 en Scopus Author Search) — es fragmentación de perfil
+  Scopus (el mismo fenómeno de "Varios Scopus ID" ya revisado para
+  Moya/Hartmann/Quezada/Torres), no el patrón de esta revisión.
+
+### Qué se aplicó
+
+`internal/scopus_author_search_listado.html`: las 11 filas confirmadas se
+marcan igual que Fernández Abara, con el emparejamiento y el motivo
+específico; los dos hallazgos al margen quedan anotados sin resolver.
+
+`data/enriched/authors_orcid.csv`: confianza subida de "media" a "alta"
+para las 6 firmas que estaban en "media" — Amarouch García I., García
+I.A., Ayala M., Mardones-Falcone G., Letelier J.P., Zambrano C. Las otras
+cinco firmas confirmadas ya estaban en "alta" por otra vía, sin cambio.
+
+### Verificación
+
+`python3 src/build/build_all.py`: build 05 en 0 fallas. Verificado
+directamente sobre `data/processed/authors.json` (no vía `git diff`, que
+siempre da vacío en `data/processed/` por estar en `.gitignore`): las 6
+firmas bumpeadas muestran `"orcid_confianza":"alta"` en la salida real.
+`python3 src/audit/run_all.py`: sin cambios, misma falla preexistente E-06.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-434 | El cruce se hace por `(eid, posicion_autor)`, no por Auth-ID solo | Un Auth-ID que aparece en un EID con varios coautores UFT puede emparejarse con la firma equivocada si no se usa la posición — se detectó y corrigió antes de reportar resultados |
+| D-435 | Las 11 confirmaciones se aplican en un solo lote, con el mismo criterio ya usado para Fernández Abara | Cada una cumple el mismo umbral (Auth-ID exacto + ORCID idéntico desde fuente independiente); tratarlas una por una no habría cambiado el criterio, sólo el ritmo |
+| D-436 | Los dos hallazgos al margen (Amarouch con dos firmas sin consolidar, Fortuny con Auth-ID fragmentado) se documentan sin resolver | Ninguno de los dos es el patrón de esta revisión (apellido compuesto); resolverlos ahora habría sido ampliar el alcance sin la misma evidencia ya reunida para los otros casos |
+
+### Archivos modificados
+
+```
+internal/scopus_author_search_listado.html   11 filas más marcadas confirmado + 2 notas al margen
+data/enriched/authors_orcid.csv              6 firmas: confianza media → alta
+STATE.md, docs/DECISIONS.md                  regenerados
+```
+
+### Supuestos descartados
+
+- Que el primer cruce (por Auth-ID sin posición) era suficiente: descartado
+  al ver resultados inconsistentes en EID con varios coautores UFT — se
+  corrigió antes de reportar nada al usuario.
+
+### Ambigüedades abiertas
+
+- Los dos hallazgos al margen (Amarouch, Fortuny) quedan sin resolver —
+  ver arriba.
+- Las 11 firmas sin ninguna señal permanecen sin investigar caso por caso.
+
+### Próximo paso recomendado
+
+Si se quiere avanzar el hallazgo de Amarouch, consolidar sus tres firmas
+("Amarouch García I.", "García I.A.", "Amarouch I.") bajo una sola, igual
+que ya se hizo para Esis Villarroel. Si se quiere avanzar el de Fortuny,
+tratarlo como un candidato más de "Varios Scopus ID" — mismo mecanismo que
+Moya/Hartmann/Quezada/Torres.
