@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ec7d88f` · Resuelve el pendiente de Fortuny en la cola de Varios Scopus ID
+Último commit: `f7adf3a` · Resuelve el pendiente de Moya, Patricia en la cola de Varios Scopus ID
 Snapshot: 2026-09-03
 
 ---
@@ -43,7 +43,7 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **87 formas de firma eran 38 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+Las cifras de autor van en dos bases porque una revisión humana declaró que **94 formas de firma eran 39 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
 ---
 
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 460
+## Decisiones tomadas: 463
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

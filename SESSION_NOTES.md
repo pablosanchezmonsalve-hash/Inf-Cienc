@@ -10310,3 +10310,184 @@ antes del detector actual) pero siguen `PENDIENTE_REVISION_HUMANA` en
 inconsistencia entre colas que se acaba de corregir para Moya, sin
 resolver todavía para esos tres. Sería el siguiente candidato natural si
 se sigue con esta cola.
+
+## Cierre: fusión de firmas por convergencia de ORCID no consolidada ("Tier A")
+
+### Contexto
+
+El usuario preguntó cuántos autores afiliados tiene UFT 2023-2025 (589
+formas / 536 entidades consolidadas), y a partir de ahí pidió un listado
+de posibles autores fusionables para aprobar. En vez de limitarme a las
+colas ya trabajadas esta sesión (Varios Scopus ID, Variantes de nombre
+pendientes — 0 en la herramienta de revisión), se buscó una fuente nueva:
+firmas que comparten el mismo ORCID en `data/enriched/authors_orcid.csv`
+sin estar fusionadas en `config/identidades_consolidadas.yml`. El cruce
+(agrupando por ORCID, descartando grupos ya totalmente consolidados, y
+verificando cada uno contra `internal/matching_log.csv` para confirmar
+apariciones reales en el corpus y coincidencia de unidad académica)
+encontró 22 grupos. Se presentaron en tres niveles (Tier A: variante
+ortográfica/de forma con evidencia adicional; Tier B: apellido compuesto
+truncado sin verificar; Tier C: sin patrón claro) y el usuario pidió
+aplicar el Tier A (8 grupos).
+
+### Qué se hizo
+
+Antes de escribir las 8 decisiones se revisó la fuerza real de cada una
+—no sólo la similitud de cadena— y se detectaron dos problemas que
+cambiaron el alcance de lo aplicado:
+
+1. **2 de los 8 (Gómez G./Gómez G.G., Macho R.A.M./Macho R.M.) tenían
+   evidencia más débil que el resto**: en ambos casos, las dos firmas del
+   par comparten el mismo ORCID por la MISMA fuente no independiente
+   (OpenAlex las dos — ver la advertencia ya documentada en
+   `docs/FUENTES_Y_APIS.md` §3.1 sobre que OpenAlex ingiere Crossref y no
+   cuenta como segunda fuente), sin ninguna unidad académica que corrobore
+   en el corpus. Se comunicó esto al usuario antes de aplicar nada; quedan
+   fuera de esta fusión.
+2. **Al preparar las notas de los 6 restantes, se encontró que 3 ya tenían
+   una fusión PARCIAL decidida previamente** que mis notas originales no
+   reflejaban (afirmaban «nunca antes decidido»): `p03-nunezlisboa`
+   (2026-08-26, 2 de 5 formas), `p03-moyanodavila` (2026-08-05) +
+   `orcid-0000-0002-6357-3469` (2026-09-01, juntas cubrían 3 de 4 formas),
+   `p03-martinezmardones` (2026-08-26, 2 de 4 formas). Se corrigieron las
+   tres notas para decir exactamente qué ya estaba fusionado y qué se
+   agregaba de nuevo, antes de aplicar — no se dejó una nota inexacta en
+   un archivo de registro auditado.
+3. **Al correr `apply_decisions.py --dry-run`, un chequeo cruzado contra
+   `config/orcid_revisado.yml` (la lista `retiradas`, que registra qué
+   ORCID el pipeline dejará de usar por decisiones previas de tipo
+   `orcid_incorrecto`) encontró que 2 de los 6 grupos usaban como base
+   exactamente un ORCID ya retirado**:
+   - `Vasquez F.` tiene su ORCID (`0000-0003-1769-3969`, el mismo que
+     comparte con `Vásquez F.`) marcado `orcid_incorrecto` por una
+     decisión previa (`noverif-Vasquez F.`, cola "ORCID no verificable",
+     2026-08-26). La fusión propuesta se apoyaba precisamente en ese
+     ORCID compartido — con la base inválida, la evidencia desaparece.
+     **Se retiró del todo, no se aplicó.**
+   - El grupo Moyano/Dávila tiene el mismo problema en 2 de sus 4 formas:
+     `Moyano Davila C.` y `Moyano Dávila C.` tienen su ORCID
+     (`0000-0002-6357-3469`) marcado `orcid_incorrecto` (2026-08-26) —
+     pero ese mismo ORCID YA estaba siendo usado por dos decisiones de
+     fusión más recientes y todavía vigentes (`p03-moyanodavila`,
+     2026-08-05, y `orcid-0000-0002-6357-3469`, cola "ORCID compartido",
+     2026-09-01). Es una **contradicción preexistente en el propio
+     historial de decisiones del proyecto**, de antes de esta sesión, que
+     no se investigó a fondo (no hay nota en ninguna de las decisiones
+     involucradas, ni rastro en `SESSION_NOTES.md` de por qué se marcó
+     incorrecto ese ORCID). No se resolvió por mi cuenta: **se retiró mi
+     adición** (la cuarta forma, `Dávila C.M.`, que habría profundizado la
+     contradicción sin aportar nada a resolverla) **y se deja la
+     contradicción existente declarada, sin tocar**, como ambigüedad
+     abierta para que la resuelva una persona.
+
+Con eso, se aplicaron finalmente **4 de los 8** grupos originales del
+Tier A:
+
+| Grupo | Formas fusionadas | Evidencia |
+|---|---|---|
+| `orcidconv-nunezlisboa` | 5 (2 ya fusionadas + 3 nuevas) | Mismo ORCID por dos linajes de fuente independientes (ORCID declarado + Crossref), misma unidad (Facultad de Medicina y Salud) en las 5 |
+| `orcidconv-yanine` | 2 (nuevo grupo) | Mismo ORCID por dos linajes independientes (Crossref + ORCID declarado), ambas ya `orcid_correcto` confirmado por separado (2026-09-01), misma unidad (Facultad de Ingeniería) |
+| `orcidconv-martinezmardones` | 4 (2 ya fusionadas + 2 nuevas) | Mismo ORCID, 3 de 4 ya `orcid_correcto` confirmadas por separado, misma unidad donde hay dato (Facultad de Medicina y Salud) |
+| `orcidconv-busquets` | 2 (nuevo grupo) | Mismo ORCID; una de las dos ya tenía revisión humana previa (candidato por afiliación, confianza alta) |
+
+### Verificación
+
+- `apply_decisions.py --dry-run` corrido dos veces: una tras escribir las
+  6 notas corregidas (sin avisos de contradicción sobre los grupos
+  nuevos), otra tras retirar Vasquez y Moyano (39 grupos, 94 formas —
+  antes 38/87).
+- Se cruzaron programáticamente los 6 grupos candidatos contra las listas
+  `confirmadas`/`retiradas`/`sin_registro` de `config/orcid_revisado.yml`
+  antes de la corrida real, no después — así se encontró el problema de
+  Vasquez/Moyano antes de escribir nada en `identidades_consolidadas.yml`.
+- Tras aplicar de verdad: `git diff --stat` confirma que sólo cambió
+  `config/identidades_consolidadas.yml` (los otros tres artefactos que
+  genera `apply_decisions.py` — `orcid_revisado.yml`,
+  `firmas_e09_resueltas.yml`, `authors_orcid.csv` — no cambiaron, porque
+  estas 4 decisiones son puras fusiones de nombre, no tocan asignación de
+  ORCID). Se inspeccionó el YAML resultante grupo por grupo: los 4 grupos
+  nuevos/ampliados tienen exactamente las formas esperadas, ninguna con
+  Vasquez ni con la cuarta forma de Moyano.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-461 | Se retira `orcidconv-vasquez` de la aplicación, pese a la instrucción de aplicar todo el Tier A | Su única evidencia (ORCID compartido) está construida sobre un ORCID que una decisión previa (2026-08-26) ya calificó de incorrecto para esa firma; aplicar hubiera fusionado dos personas con una base ya invalidada |
+| D-462 | Se retira la adición de «Dávila C.M.» al grupo Moyano, pero NO se toca el grupo ya existente (3 formas) que comparte el mismo problema | El grupo ya existente es una decisión previa vigente, tomada por una persona en su momento; no me corresponde deshacerla por mi cuenta al notar la contradicción — se declara la contradicción, no se resuelve unilateralmente (regla del proyecto sobre ambigüedades) |
+| D-463 | Se corrigen 3 notas antes de aplicar, en vez de dejarlas con la afirmación inexacta «nunca antes decidido» | Es un archivo de registro auditado (`internal/identity_decisions.csv`); una nota que dice algo falso sobre el estado previo del caso es un error de integridad de datos, no un detalle menor |
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv       + 4 decisiones aplicadas (nunezlisboa, yanine, martinezmardones, busquets)
+config/identidades_consolidadas.yml   38→39 grupos, 87→94 formas
+SESSION_NOTES.md, STATE.md, docs/DECISIONS.md   este cierre
+```
+
+Nota: `config/orcid_revisado.yml`, `config/firmas_e09_resueltas.yml` y
+`data/enriched/authors_orcid.csv` NO cambiaron (verificado con `git diff`),
+pese a que `apply_decisions.py` los regenera en cada corrida — su
+contenido resultante es idéntico al de antes de esta sesión de fusiones.
+
+### Supuestos descartados
+
+- Que las 8 firmas del Tier A tenían todas evidencia equivalente porque
+  compartían un ORCID: no era cierto — 2 tenían fuente única no
+  independiente sin corroboración (Gómez, Macho), y 2 más tenían el ORCID
+  compartido directamente invalidado por una decisión previa (Vasquez, y
+  parcialmente Moyano). Aplicar sin este chequeo habría escrito fusiones
+  con una base de evidencia falsa en un archivo que el proyecto trata como
+  registro auditado.
+- Que la instrucción «Aplica Tier A» obligaba a aplicar las 8 tal como se
+  presentaron: se interpretó como autorización sobre el TIPO de fusión
+  (evidencia de ORCID + coherencia de forma/unidad), no como una orden de
+  escribir decisiones concretas sin volver a mirar la evidencia una vez
+  redactada — la instrucción no pudo prever el hallazgo de una
+  contradicción con `orcid_revisado.yml`, que sólo apareció al preparar la
+  aplicación real.
+
+### Ambigüedades abiertas
+
+**Nueva, importante:** el grupo Moyano (`Moyano C.` / `Moyano Davila C.` /
+`Moyano Dávila C.`, ORCID `0000-0002-6357-3469`) tiene una contradicción
+sin resolver en el propio historial del proyecto: una decisión de
+2026-08-26 (`noverif-Moyano Davila C.`, `noverif-Moyano Dávila C.`, cola
+"ORCID no verificable") calificó ese ORCID de incorrecto para esas dos
+firmas, pero dos decisiones de fusión posteriores y vigentes
+(`p03-moyanodavila`, 2026-08-05 — anterior en fecha pero no revocada; y
+`orcid-0000-0002-6357-3469`, cola "ORCID compartido", 2026-09-01 —
+posterior) siguen usando ese mismo ORCID como base para fusionar a estas
+personas. Ninguna de las decisiones en conflicto tiene nota que explique
+el porqué, y no hay rastro en `SESSION_NOTES.md`. No se investigó más ni
+se resolvió — queda declarada para que una persona decida cuál veredicto
+prevalece.
+
+Siguen abiertos, sin tocar en este cierre: Tier B (13 grupos, patrón de
+apellido compuesto truncado, sin la verificación de posición que sí se
+hizo para casos anteriores como Fernández Abara); Tier C (Bilicic
+D./Ubierna D.B.B., sin patrón claro); Gómez G./Gómez G.G. y Macho
+R.A.M./Macho R.M. del propio Tier A, retirados por evidencia insuficiente
+más que por contradicción.
+
+**Cifra pública desactualizada:** la fila "Entidades de autor publicadas"
+de `STATE.md` (536) viene de `data/processed/authors.json`
+(`data/processed/` es artefacto de build, gitignored) y NO se recalculó
+con esta fusión — `snapshot.py` no reconstruye el sitio, sólo lee lo que
+ya existe. Con 94 formas / 39 grupos la cifra real tras un build sería
+589 − 94 + 39 − 4 = **530**, no 536. La fila de texto ("87 formas... 38
+personas" → "94 formas... 39 personas") sí se actualizó porque viene
+directo de `identidades_consolidadas.yml`. No se corrió el pipeline de
+build en este cierre — sigue pendiente.
+
+### Próximo paso recomendado
+
+Si se quiere que el recuento público (536→530) y las fichas de autor
+reflejen estas 4 fusiones, hace falta correr el pipeline de build
+(`python3 src/build/build_all.py` o `make sitio`) y, si se despliega,
+repetir el ciclo de verificación ya establecido esta sesión (CI, revisión
+visual). Como siguiente ronda de identidad: resolver la contradicción de
+Moyano (ambigüedad abierta arriba) antes de decidir si agregar «Dávila
+C.M.»; o pedir la verificación de posición del Tier B, el mismo método
+que ya se usó para Fernández Abara/Amarouch/Fortuny, para elevarlo a un
+nivel de evidencia aplicable.
