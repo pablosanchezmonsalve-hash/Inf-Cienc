@@ -48,3 +48,9 @@ design/informe/*.html
 # una cuenta y una máquina, no del proyecto: `build_review.py` funciona sin él
 # y entonces enlaza al archivo local, que es el comportamiento por defecto.
 internal/enlace_herramienta.txt
+
+# Corridas aisladas del fork runner (informes/_fork_runner.py): caches y salidas
+# derivadas de ejecutar conectores ORCID en sandbox. Se regeneran con cada
+# corrida, como data/cache/. Se versionan solo los scripts y docs de informes/,
+# no el contenido de run/.
+informes/run/
