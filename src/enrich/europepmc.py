@@ -94,12 +94,19 @@ def extraer(data: dict) -> dict:
             autores_vistos.add(nombre)
 
             tokens = nombre.split()
-            # "Diaz M" = Surname Initial (academic citation format)
-            # Multi-char tokens are surnames, single-char are initials
-            apellidos = [t for t in tokens if len(t) > 1]
-            iniciales = [t for t in tokens if len(t) == 1]
-            apellido = " ".join(apellidos) if apellidos else tokens[0] if tokens else ""
-            inicial = iniciales[0] if iniciales else ""
+            # "Diaz M" / "Smith AB" = Surname Initial(s) (academic citation
+            # format). El bloque de iniciales es el ÚLTIMO token, TODO en
+            # mayúsculas — puede tener más de una letra ("AB" = A. B.).
+            # Asumir que sólo un token de una letra es inicial perdía casos
+            # así enteros como apellido ("Smith AB" -> family "Smith AB",
+            # given ""): el apellido de la fuente nunca viene en mayúsculas,
+            # así que ese último token siempre es el bloque de iniciales.
+            if len(tokens) > 1 and tokens[-1].isalpha() and tokens[-1].isupper():
+                apellido = " ".join(tokens[:-1])
+                inicial = tokens[-1]
+            else:
+                apellido = " ".join(tokens)
+                inicial = ""
 
             autores.append({
                 "family": apellido,
@@ -188,6 +195,33 @@ def autotest() -> int:
     # Una lista vacía es un resultado legítimo: «este DOI no está en Europe PMC».
     d_vacio = extraer({"resultList": {"result": []}})
     caso("result vacío es válido y no produce autores", d_vacio["autores"] == [], d_vacio)
+
+    # Bug real: un bloque de DOS iniciales ("AB") se perdía entero como
+    # apellido porque sólo un token de una letra se reconocía como inicial.
+    d_dos = extraer({"resultList": {"result": [
+        {"authorString": "Smith AB, Diaz M", "orcid": ""}]}})
+    caso("apellido con bloque de dos iniciales se separa bien",
+         d_dos["autores"][0]["family"] == "Smith"
+         and d_dos["autores"][0]["given"] == "AB", d_dos)
+    caso("un autor normal en la misma cadena no se rompe",
+         d_dos["autores"][1]["family"] == "Diaz"
+         and d_dos["autores"][1]["given"] == "M", d_dos)
+
+    # Apellido compuesto con guion: el guion no debe confundirse con el
+    # bloque de iniciales.
+    d_guion = extraer({"resultList": {"result": [
+        {"authorString": "Smith-Jones AB", "orcid": ""}]}})
+    caso("apellido con guion conserva el guion y separa las iniciales",
+         d_guion["autores"][0]["family"] == "Smith-Jones"
+         and d_guion["autores"][0]["given"] == "AB", d_guion)
+
+    # Un solo token en mayúsculas (sin apellido separado) no debe vaciar
+    # el apellido: sin guarda de longitud, "family" quedaría "".
+    d_solo = extraer({"resultList": {"result": [
+        {"authorString": "M", "orcid": ""}]}})
+    caso("un solo token no deja el apellido vacío",
+         d_solo["autores"][0]["family"] == "M"
+         and d_solo["autores"][0]["given"] == "", d_solo)
 
     m = emparejar(["Diaz M."], d["autores"])
     caso("la forma extraída alimenta a emparejar",
