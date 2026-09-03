@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `0102784` · Consolidar las tres firmas de Amarouch en una sola identidad
+Último commit: `e5393cb` · Agregar candidatos_fragmentacion_orcid(): Fortuny entra a la cola de V
 Snapshot: 2026-09-03
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 441
+## Decisiones tomadas: 445
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

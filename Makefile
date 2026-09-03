@@ -98,6 +98,18 @@ scopus:
 orcid-afiliacion:
 	python3 src/enrich/orcid_afiliacion.py
 
+# Enriquecimiento de ORCID desde fuentes de datos no tradicionales (V2-XX):
+# DataCite (datasets), Europe PMC (acceso abierto biomédico) y Zenodo (CERN).
+# Son APIs públicas sin autenticación. NO ejecuta GitHub: requiere token y
+# queda documentado en src/enrich/github_orcid.py. Estas fuentes SÍ son
+# independientes (no ingieren Crossref como OpenAlex), así que una coincidencia
+# aquí cuenta como confirmación de una asignación vigente.
+# En Windows:  py src\enrich\datacite.py  |  py src\enrich\europepmc.py  |  py src\enrich\zenodo.py
+orcid-datos:
+	python3 src/enrich/datacite.py
+	python3 src/enrich/europepmc.py
+	python3 src/enrich/zenodo.py
+
 # El informe institucional en PDF, desde el sitio ya construido. Usa la MISMA
 # hoja de impresión que el botón «Descargar informe» de la interfaz: un origen,
 # dos consumidores. Exige Playwright y Chromium, como `make verificar`.

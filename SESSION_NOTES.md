@@ -9237,3 +9237,370 @@ campo temático) pero sin decisión aplicada.
 Si se quiere decidir el caso de Fortuny, el mismo mecanismo de los otros
 7: una fila en `internal/scopus_author_search_decisiones.csv` +
 `apply_scopus_author_decisions.py`.
+
+---
+
+## Fusión con `origin/main` (2026-09-03): narrativa de la rama paralela de UX/mapas/paleta
+
+Lo que sigue es la parte de `SESSION_NOTES.md` en `origin/main` (commit
+`8f6d2bf`) que no tenía equivalente en esta rama — un hilo de trabajo
+paralelo sobre la cabecera del sitio, los mapas de producción y la paleta
+de color, hecho en otra sesión el 2026-09-01. El resto del historial de
+`origin/main` (identidad, DSpace, ORCID) ya estaba cubierto aquí, a veces
+de forma más completa — se verificó sección por sección antes de fusionar
+y no se perdió nada de ninguno de los dos lados. Ver el cierre "fusión de
+`origin/main` (sesión paralela)..." para el detalle de esa verificación.
+
+## Sesión 2026-09-01 (noche) - Interactividad de la parte superior
+
+Contexto: el usuario declaró *"No me gusta la parte superior del sitio. Es poco
+interactiva"* (cabecera + barra de vigencia). Se aplicó criterio UX de fuentes
+confiables (USWDS, GOV.UK, RSS, NN/g): claridad > decoración, menos carga
+cognitiva, accesibilidad WCAG 2.2, progressive enhancement, feedback de estado
+visible. Objetivo: **usuario final del informe**.
+
+### Hallazgo estructural clave
+El header, la barra de vigencia y el pie **no son HTML por página**: los genera
+la función _sin DOM_ `cromo(meta, paginaActual)` en `web/assets/js/core.js`,
+compartida por los 10 HTML y usada por el pre-renderizador (Node) y por la
+hidratación (navegador). Mejorar la parte superior es tocar **un solo
+cuerpo de código** (core.js + app.css + paginas.js) que ya conoce
+`paginaActual` y `meta` — no hay 10 copias que sincronizar.
+
+### Mejoras implementadas (todas en `web/`, ninguna toca fuentes/de datos)
+1. **Nav agrupado por sección + colapsable.** `NAV_GRUPOS` (Informe / Datos /
+   Sobre este informe) con `navHtml()`. En banda ancha (≥900px) una sola fila sin
+   rótulos; en móvil/tablet se pliega tras un botón hamburguesa `.nav-toggle`
+   con `aria-expanded` y cierre al elegir sección. `overflow-x: auto`
+   eliminado → adiós doble barra de scroll interna.
+2. **Migas de posición en la barra.** `.v-migas` (Portada · {página}); en la
+   portada se suprime el par redundante («Portada → Portada») con CSS por
+   `data-pagina="portada"`. Clase propia para no chocar con el breadcrumb de
+   contenido de secciones (`.migas`, línea 508). No se duplica el H1: cada
+   página ya tiene uno propio (WCAG: no crear segundo H1 ni saltar niveles).
+3. **Chips de vigencia interactivos.** `Fuente` / `Ventana` / `Citas al` pasan
+   de texto plano a `<details class="v-chip">` nativo: despliegan un panel
+   explicativo de una línea, accesible por teclado y por móvil, sin JS.
+4. **Badge de recorte en vivo.** `.recorte-vivo` en la barra (slot oculto por
+   defecto). `paginas.js: actualizarRecorteVivo()` lo enciende al filtrar y lo
+   apaga al limpiar; vive en la barra de todas las páginas pero sólo se
+   rellena desde el explorador. Verificado: «Recorte 319 de 823 publicaciones».
+5. **Selector de año en la barra.** `.v-anio` (`<select id="recorte-anio">`),
+   oculto salvo en páginas explorador, que `montarSelectorAnio()` rellena con
+   los años reales del corpus y preselecciona el activo; al cambiar aplica el
+   recorte (mismo filtro que tocar el chip de año).
+6. **Mini-foco en portada.** Atajos de un toque `#minifoco` (Exploración
+   rápida): «Publicaciones {último año}» y «Ver todo» cuando hay recorte.
+   No duplican los filtros: son entradas rápidas que aplican el recorte vía el
+   cierre `fijar` (único dueño de `sel` y del repintado).
+
+Decisiones de integración:
+- El `<select>` del año y el `#minifoco` son **elementos estables**: el escucha
+  se engancha una vez (`.addEventListener`) y el contenido se redibuja con
+  `redibujarSelectorAnio()`/`redibujarMiniFoco()` en cada `pintar()`, evitando
+  manejadores acumulados.
+- `actual()`/`cambiar()` devuelven el recorte vigente en cada momento, para que
+  el handler nunca trabaje con un `sel` anticuado tras varios repintados.
+- Progressive enhancement íntegro: sin JS el `<details>` y las migas se leen
+  igual; el badge/select/mini-foco quedan `hidden`.
+- Print: `.nav-toggle`, `.v-migas`, `.v-chip`, `.recorte-vivo`, `.v-anio`,
+  `.minifoco` entran en la regla `@media print { display:none }`.
+
+### Verificación
+- `py src/build/06_assemble_site.py` → 10 páginas pre-renderizadas, capa interna
+  no incluida (verificado), peso 3548 KB.
+- `node src/verify/run_all.mjs dist` → **completa sin fallos** (contraste 0,
+  estructura 0, flujos 0 excepciones JS, responsive 0px desborde, higiene sin
+  fallos, peso dentro de techo).
+- Sonda Playwright dirigida (servidor persistente Node, puerto 8852) confirmó
+  en runtime: 3 grupos de nav, hamburguesa oculta en escritorio y `flex` +
+  abre+`aria-expanded` en móvil 480px, miga «Portada» en índice, chip
+  «Fuente Scopus · SciVal» con panel, `<select>` con 4 años poblado, mini-foco
+  visible, badge oculto sin filtro y **badge «Recorte 319 de 823» tras pulsar
+  el mini-foco**, botón «Ver todo» al haber recorte.
+- Capturas regeneradas (PNG, raíz repo, viewport 1440, fullPage): `_cap_*.png`
+  (9 páginas) + `_cap_index_recorte.png`. Ojo operativo: las capturas al
+  principio salieron en blanco porque el servidor de captura apuntaba a la raíz
+  del repo en vez de `dist/` (el `.html` no está en la raíz); se corrigió el
+  `root` del servidor. Servidor persistente en script Node, no `Start-Job`.
+
+### Pendientes (sin bloqueo)
+- `_cap_autor.png` es de una corrida anterior (90 KB); la ficha autor no se
+  volvió a capturar en esta pasada (no listada). Regenerarla si se quiere.
+- Decidido con el usuario: se implementaron **ambas** mejoras restantes
+  (selector de año + mini-foco). No queda ninguno de los 6 TODOs originales
+  abierto; solo queda cerrar con commit.
+- SESSION_NOTES del cierre de tramo previo (V2-28) ya documenta los 68 DOIs
+  como insumo documentado (D-346/D-347).
+
+### Próximo paso recomendado
+Revisar con el usuario las capturas (`explorer _cap_*.png`), confirmar el
+criterio visual, y hacer commit + push del refinement UX de la parte superior.
+
+---
+## Sesión 2026-09-01 (tarde) — Paleta H (vino + champán), cambio integral de identidad
+
+### Decisión (usuario)
+- Elegida la paleta **H · Vino/burdeos + champán** de la comparativa, y se pidió
+  tomarla **íntegra** ("aunque cueste más tokens"): marca, dato y advertencia a
+  la vez, no sólo la cabecera.
+- Comparativa servida en vivo (http://localhost:8100/paletas.html, 8 candidatas,
+  claro/oscuro) generada con la skill `brand-palette` (creada en
+  `~/.claude/skills/brand-palette/`).
+
+### Qué se cambió (solo `web/assets/css/app.css`, tokens + comentarios)
+- **Marca/superficies/tinta → cálidas**: `--marca` vino `#2c0c12`, superficies
+  hueso/champán en claro y vino profundo en oscuro, tinta champán, `--marca-tinta`
+  champán `#f0ddca`, `--accion` vino `#8a2430`. Se re-tocó también el
+  `.banda-contraste` y `.banda-enfasis` (son ámbitos oscuros que redefinen tokens).
+- **Dato → bordeaux (cálido)**: `--serie-1` `#8a2430`/`--serie-2` `#c06070`,
+  rampa ordinal `--ord-1..4` en bordeaux (claro sube, oscuro baja para legibilidad).
+- **Advertencia → verde-moneda (frío)**: con el dato en bordeaux, el viejo ámbar
+  (cálido) quedaba a ΔE 17,9 < 20; se movió a `--aviso-*` verde moneda
+  (`#2e7d32`/`#5a9e5f`…), que separa el dato (ΔE 26,0 claro / 22,2 oscuro).
+- Comentarios actualizados: se sustituyeron las tablas/afirmaciones viejas
+  (teal, Deep Ocean, Peach, ámbar) que habían quedado como "fotografía" por la
+  referencia al validador como juez; se conservó la identidad institucional como
+  "rojo no oficial verificado".
+
+### Verificación (evidencia)
+- `py src/design/validar_paleta.py` → **SISTEMA CROMÁTICO VÁLIDO** (0 fallos.
+  Incluye: contraste AA por token en claro/oscuro, ΔE dato↔advertencia ≥20,
+  rampa ΔE ≥8 y monótona, par categórico bajo protanopía/deuteranopía/tritanopía).
+- `py src/build/06_assemble_site.py` → build OK (10 páginas, capa interna no
+  incluida).
+- `node src/verify/run_all.mjs dist` → **VERIFICACIÓN COMPLETA · sin fallos**
+  (contraste, estructura, flujos, responsive, higiene, peso).
+- Sonda de color Playwright (`color.mjs`): cabecera vino `rgb(168,68,85)`,
+  acentos champán `rgb(240,221,202)`, chip hueso `rgb(253,246,239)`, vigencia-
+  guía vino `rgb(138,36,48)`. El dato bordeaux/verde-moneda los confirma la
+  captura de impacto.
+
+### Archivos tocados
+- `web/assets/css/app.css` (tokens + comentarios; sin hardcodear hex en JS — el
+  JS usa variables CSS, verificado por grep: 0 hex en `web/assets/js/`).
+- `SESSION_NOTES.md` (esta entrada).
+
+### Capturas regeneradas
+- `_rev_portada.png` (254 KB) y `_rev_impacto.png` (356 KB) en raíz del repo
+  (viewport 1440, fullPage, servidor `dist/`).
+
+### Pendiente
+- Commit + push de la paleta H (aún sin commitear sobre `23d102e`).
+- Nota operativa: `dist/`, `data/processed/` son derivados no versionados; el
+  servidor 8000 (PID 2440) sirve `dist/` ya reconstruido.
+
+## Sesión 2026-09-01 (noche) - Fix visual del heatmap de Producción
+
+### Síntoma
+El usuario reportó "los gráficos y mapas" de Producción rotos visualmente tras
+la paleta H. Causa raíz: en H, `--accion-viva` dejó de ser teal (color de dato
+fuerte) y pasó a **champán claro** `#f0ddca`; el heatmap lo usaba como relleno
+de magnitud → **champán sobre papel champán = invisible (1,16:1)**, además
+diluido por `fill-opacity` (0,06–0,94).
+
+### Cambio
+- `web/assets/js/visualizations/heatmap.js` (línea 91): `fill="var(--accion-viva)"`
+  → `fill="var(--serie-1)"` (bordeaux del dato). `es-clara`/texto intactos.
+- Comentario de cabecera (líneas 14-18) actualizado para no citar el token viejo.
+
+### Verificación
+- Pixel-sampling del `.heatmap-svg` renderizado: celdas bordeaux (p. ej.
+  `#91313b`, `#a5555d`, `#b06b71`) sobre papel champán; gradiente de intensidad
+  legible. Treemap: etiquetas claras `#fdf6ef` confirmadas (contraste 4,99:1).
+- Contraste del texto del heatmap: bordeaux claro→texto vino ok; bordeaux
+  intenso→ texto claro (`es-clara`) ok. Umbral `es-clara` intacto.
+- `py src/build/06_assemble_site.py` OK; `node src/verify/run_all.mjs dist` →
+  **VERIFICACIÓN COMPLETA · sin fallos**.
+
+### Capturas
+- `_rev_produccion.png` regenerada (416 KB, fullPage, servidor `dist/`).
+
+### Pendiente
+- Commit (aún sin commitear) de `web/assets/js/visualizations/heatmap.js`.
+- Nota: previewl del foco en la red (`core.js:830`, anillo `--accion-viva`
+  champán) queda como acento; no es fallo WCAG y no se tocó.
+- Confirmación visual del usuario sobre el heatmap corregido.
+
+## Sesión 2026-09-01 (noche) - Mejoras de UX/comprensión en los mapas de Producción
+
+### Cambios
+- **Heatmap** (`web/assets/js/visualizations/heatmap.js`): umbral `es-clara` de
+  `intensidad > 0.55` → `> 0.66`. Antes la cifra cambiaba a texto claro en la
+  franja op 0,54 (contraste de luz sólo 2,84:1); con el nuevo cruce el texto
+  oscuro cubre las celdas claras y el claro las oscuras, minimizando la banda
+  donde ninguno llegaba a 4,5:1 (la rampa bordeaux-alpha pasa por un centro
+  "embarrado" irreducible entre op 0,64-0,72; ambos colores ≥3,7:1 ahí).
+- **Heatmap**: nueva **leyenda de escala** dentro del SVG (`renderLegend`):
+  barra de 4 pastillas (op 0,06→0,94) con marcas 0 / mitad / máximo (real).
+  Comparte la escala raíz cuadrada de las celdas.
+- **Treemap** (`web/assets/js/visualizations/treemap.js`): nueva leyenda bajo
+  las migas con las 4 pastillas `ord-*` + gris `--sin-dato`, y texto que aclara
+  que el tono identifica la celda (no codifica magnitud) y que gris = sin datos.
+
+### CSS (token-only, en `modern-ui.css`)
+- `.heatmap-leyenda`, `.heatmap-ley-guia`, `.heatmap-ley-titulo`,
+  `.heatmap-ley-marca`, `.treemap-leyenda`, `.treemap-ley-titulo`,
+  `.treemap-ley-mostrar`, `.treemap-ley-sin`, `.treemap-ley-rotulo`.
+  Sólo referencias a tokens de `app.css`; sin hex propios.
+
+### Verificación
+- `node src/verify/run_all.mjs dist` → **sin fallos** (responsivo, higiene,
+  contraste, peso).
+- Sonda DOM: leyenda del heatmap con marcas 0/17/34 (máx real 34), pastillas
+  op 0,06→0,94; leyenda del treemap con 5 muestras; **desborde X = 0**.
+- `_rev_produccion.png` regenerada (422 KB).
+
+### Archivos tocados
+`web/assets/js/visualizations/heatmap.js`, `treemap.js`, `web/assets/css/modern-ui.css`,
+`SESSION_NOTES.md`.
+
+### Pendiente
+- Commit (aún sin commitear) de los 3 archivos de código + SESSION_NOTES.md.
+- Confirmación visual del usuario de que tanto leyendas como el heatmap corregido
+  se ven bien en claro y en oscuro.
+
+## Cierre: fusión de `origin/main` (sesión paralela) y un bug real de idempotencia expuesto al fusionar
+
+### Contexto
+
+El usuario pidió revisar un listado de trabajo real en `origin/main`
+(commit `8f6d2bf`) — conectores ORCID nuevos (DataCite, Europe PMC,
+Zenodo, GitHub), una herramienta `informes/` con ejecución aislada, y la
+identidad de Carlos Henríquez-Olguín consolidada. Verificado contra el
+repositorio real (no se asumió el listado): existe, y esta rama
+(`claude/state-review-next-steps-wzzq0h`) y `origin/main` habían
+divergido — 22 commits propios, 12 de main, desde un ancestro común
+(`61de666`), con 33 archivos tocados en ambos lados. El usuario pidió
+resolver la divergencia antes de tocar cualquier otra cosa del listado.
+
+### Cómo se resolvió cada archivo en conflicto
+
+`git merge origin/main` marcó 10 archivos en conflicto real y auto-fusionó
+el resto (incluidos `data/enriched/authors_orcid.csv`, `03_authors.py`,
+`apply_decisions.py` y varios más — verificado con `git diff --quiet`
+contra ambos lados antes de confiar en el auto-merge, no se asumió).
+
+- **`internal/identity_decisions.csv`** (fuente de verdad, no
+  regenerable): de 67 filas con contenido distinto entre ramas, 65 eran
+  el mismo patrón — esta rama las tenía resueltas, main las tenía
+  `pendiente` sin nota — y se resolvieron a favor de esta rama sin
+  pérdida (main no aportaba nada ahí). Las 2 restantes exigieron leer la
+  evidencia de cada lado, no un criterio mecánico:
+  - **Henríquez-Olguín** (`p03-henriquezolguin`): esta rama la tenía
+    `pendiente` sin tocar desde 2026-08-05; main la resolvió `misma` el
+    2026-09-03 con evidencia real (ORCID y Scopus Author ID compartidos).
+    Se tomó la de main.
+  - **Moya, Patricia** (`p04-Moya, Patricia`): aquí el patrón se invertía
+    — main la tenía `misma` desde 2026-08-26 SIN firmas ni nota (fila
+    vacía), y esta rama la tenía `pendiente` desde 2026-09-02 con un
+    análisis explícito de por qué NO se confirma (dispersión temática
+    real entre las publicaciones de un mismo Auth-ID: atención de
+    urgencia por ideación suicida vs. caries en preescolares). Se
+    mantuvo el `pendiente` de esta rama — la evidencia posterior y más
+    completa pesa más que un veredicto sin respaldo, sea de la rama que
+    sea.
+- **`config/identidades_consolidadas.yml`, `orcid_revisado.yml`,
+  `firmas_e09_resueltas.yml`**: los tres se declaran "GENERADO... no
+  editar a mano" — se descartó el contenido en conflicto y se
+  regeneraron con `apply_decisions.py` sobre el `identity_decisions.csv`
+  ya fusionado.
+- **`internal/revision_identidad.html`, `pendientes_consolidacion.{html,md}`**:
+  mismo criterio — regenerados con `build_review.py`, no fusionados a mano.
+- **`SESSION_NOTES.md`**: comparar los 103 títulos de sección de esta
+  rama contra los 86 de main mostró que sólo 4 eran exclusivos de main
+  (un hilo de trabajo paralelo de UX/mapas/paleta, 2026-09-01) — el
+  resto de las secciones de main YA estaban en esta rama, a veces con
+  detalle que a la copia de main le faltaba (verificado con `diff` línea
+  a línea en cada bloque de conflicto antes de resolver, no se asumió
+  por la posición del marcador). Se conservó el contenido de esta rama
+  completo y se agregaron al final las 4 secciones exclusivas de main,
+  con una nota explicando la fusión.
+- **`STATE.md`, `docs/DECISIONS.md`, `docs/BUILD_VERIFICATION.md`**:
+  regenerados (`snapshot.py`, build), no fusionados.
+- **`docs/FUENTES_Y_APIS.md`**: el merge automático de git dejó dos
+  secciones "### 2.2" (la nueva de DataCite/EuropePMC/Zenodo choca con
+  la ya existente de ORCID) — renombrada a "2.1 ter", siguiendo la
+  convención "bis" que el propio documento ya usaba.
+
+### El hallazgo de idempotencia
+
+Al correr `apply_decisions.py` tras fusionar `identity_decisions.csv`, el
+resumen impreso mostró "22 asignaciones nuevas, 138 confirmadas" — cifras
+que ya se habían visto y verificado como recómputo idempotente en un
+cierre anterior de esta misma rama (sesión de hoy). Se confirmó de nuevo
+con `git diff --quiet` sobre `authors_orcid.csv`: sin cambios reales.
+
+### Verificación
+
+`git status` sin archivos sin trackear ni marcadores de conflicto
+restantes. `grep` de `D-[0-9]+` en `SESSION_NOTES.md` fusionado: sin
+números duplicados. `python3 src/audit/run_all.py`: 29/30, misma falla
+preexistente E-06, sin fallas nuevas. `python3 src/build/build_all.py`:
+0 fallas en la compuerta pública/interna; 536 fichas de autor, igual que
+antes de fusionar (Henríquez-Olguín ya estaba consolidado por
+equivalencia ortográfica en esta rama; el cambio es sólo su `origen`,
+de "ortografica" a "humana" — no cambia el recuento). `git diff --quiet`
+sobre `data/enriched/authors_orcid.csv`, `config/firmas_e09_resueltas.yml`
+y los archivos `data/raw/Inventario_*` contra ambas ramas: contenido ya
+resuelto por el auto-merge de git, sin pérdida verificada en ningún
+sentido (ni de main hacia acá, ni de esta rama hacia main).
+`python3 src/build/06_assemble_site.py`: 11 páginas, capa interna no
+incluida. `node src/verify/run_all.mjs`: corrido en segundo plano —
+pendiente confirmar el resultado antes de dar el cierre por completo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-442 | Se prefiere "esta rama" sobre "main" en 65 de los 67 conflictos de `identity_decisions.csv` sin revisar caso por caso, y se revisan a mano únicamente los 2 donde ambos lados tenían un veredicto real | En 65 casos main sólo tenía la fila en blanco (`pendiente` sin nota): no hay decisión de main que perder. Revisar los 2 restantes uno por uno, en vez de aplicar "el más reciente gana" o "main gana" mecánicamente, es lo que expuso que Moya, Patricia necesitaba el criterio opuesto al de Henríquez-Olguín |
+| D-443 | Se mantiene "pendiente" para Moya, Patricia pese a que main la tenía "misma" | El veredicto de main no traía evidencia (fila vacía); el de esta rama sí, y es evidencia EN CONTRA de la fusión (dispersión temática real entre las publicaciones del mismo Auth-ID) — aceptar "misma" solo porque main lo tenía habría publicado una fusión que la propia evidencia de esta rama contradice |
+| D-444 | Los archivos "GENERADO... no editar a mano" (`identidades_consolidadas.yml`, `orcid_revisado.yml`, `firmas_e09_resueltas.yml`, `revision_identidad.html`, `pendientes_consolidacion.*`, `STATE.md`, `docs/DECISIONS.md`, `docs/BUILD_VERIFICATION.md`) se regeneran desde su fuente fusionada, nunca se resuelven a mano | Fusionar YAML o HTML generado a mano arriesga producir algo que ninguno de los dos scripts que lo leen (`common_build.py`, `03_authors.py`) reconocería como válido; regenerar desde la fuente ya fusionada es la única forma de garantizar que el resultado es exactamente lo que el pipeline produciría |
+| D-445 | `SESSION_NOTES.md` se resuelve comparando títulos de sección completos entre ambas ramas, no aceptando el marcador de conflicto de git tal cual | Varios bloques de conflicto resultaron ser el MISMO contenido reposicionado por ediciones cercanas (mismo texto, distinto número de decisión) — aceptar el marcador de git sin verificar habría duplicado media docena de cierres ya presentes en esta rama |
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv               fusionado — 2 casos revisados a mano, 65 automáticos
+config/identidades_consolidadas.yml            regenerado
+config/orcid_revisado.yml                      regenerado (sin cambio real)
+internal/revision_identidad.html               regenerado
+internal/pendientes_consolidacion.{html,md}    regenerado
+SESSION_NOTES.md                               fusionado — 4 secciones de main agregadas al final
+STATE.md, docs/DECISIONS.md                    regenerados
+docs/BUILD_VERIFICATION.md                     regenerado (build)
+docs/FUENTES_Y_APIS.md                         "2.2" duplicada -> "2.1 ter"
+Makefile, .gitignore, web/*, data/enriched/authors_orcid.csv,
+config/sources.yml, src/build/03_authors.py, src/review/*, etc.
+                                                auto-fusionados por git,
+                                                verificados sin pérdida
+src/enrich/{datacite,europepmc,zenodo,github_orcid}.py,
+informes/*, internal/zenodo_log.csv            nuevos, de main, sin cambios
+```
+
+### Supuestos descartados
+
+- Que "el veredicto más reciente gana" o "main gana los conflictos
+  reales" era un criterio seguro: descartado en el caso de Moya,
+  Patricia — main era el veredicto MÁS ANTIGUO (2026-08-26) y sin
+  ninguna evidencia, frente a uno más reciente (2026-09-02) y
+  explícitamente razonado en esta rama.
+- Que las cifras "22 nuevas / 138 confirmadas" de `apply_decisions.py`
+  indicaban que el merge había introducido cambios reales en
+  `authors_orcid.csv`: descartado con `git diff --quiet` — es el mismo
+  recómputo idempotente ya verificado en un cierre anterior de hoy.
+
+### Ambigüedades abiertas
+
+Ninguna nueva sobre la fusión en sí. Los hallazgos de la revisión de
+`origin/main` (bug de parseo en `europepmc.py`, dependencia `rich` no
+declarada, el conector de red que no se ejecuta con `--test` en CI, el
+token de GitHub documentado hacia un archivo versionado) siguen sin
+corregir — el usuario pidió resolver la divergencia primero.
+
+### Próximo paso recomendado
+
+Confirmar el resultado de `node src/verify/run_all.mjs` (corriendo en
+segundo plano al cerrar esta nota). Si sale limpio, comitear la fusión y
+empujar. Después, decidir con el usuario cuál de los hallazgos de la
+revisión de `origin/main` corregir primero.

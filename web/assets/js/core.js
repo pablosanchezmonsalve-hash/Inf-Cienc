@@ -94,18 +94,50 @@ export const PAGINAS = [
   ['metodologia.html', 'Metodología'],
 ];
 
-/** Cromo de la página —cabecera, barra de vigencia y pie— como HTML puro.
+/* Navegación agrupada en secciones. Cada grupo agrega un rótulo corto que sólo
+   se muestra en el menú colapsado (móvil/tablet); en banda ancha los dos
+   grupos de la izquierda (Informe / Datos) se tratan como uno y no se rotulan,
+   para no meter más ruido del que se quita. */
+export const NAV_GRUPOS = [
+  {
+    nombre: 'Informe',
+    paginas: ['index.html', 'produccion.html', 'impacto.html', 'colaboracion.html', 'tematica.html'],
+  },
+  {
+    nombre: 'Datos',
+    paginas: ['autores.html', 'publicaciones.html'],
+  },
+  {
+    nombre: 'Sobre este informe',
+    paginas: ['indicadores.html', 'metodologia.html'],
+  },
+];
 
-    Es una FUNCIÓN SIN DOM a propósito: el pre-renderizador la ejecuta en Node
-    durante el build y el navegador la ejecuta al hidratar. Un solo cuerpo de
-    código produce las dos versiones, así que no pueden divergir.
+/** El nav completo marcado por grupo. En banda ancha los grupos se funden en
+    una sola fila (sin rótulos); el rótulo de grupo aparece sólo cuando el menú
+    se colapsa. `paginaActual` decide el aria-current. */
+export function navHtml(paginaActual) {
+  return NAV_GRUPOS.map(g => `<div class="nav-grupo">
+    <span class="nav-grupo-nombre">${g.nombre}</span>
+    <span class="nav-grupo-enlaces">${g.paginas.map(href => {
+      const [, txt] = PAGINAS.find(([h]) => h === href) || [];
+      return `<a href="${href}"${href === paginaActual ? ' aria-current="page"' : ''}>${txt}</a>`;
+    }).join('')}</span>
+  </div>`).join('');
+}
 
-    `tema` se pasa explícito en vez de leerse de localStorage porque en el build
-    no hay localStorage. El pre-render emite 'auto' y el navegador corrige el
-    botón activo en cuanto arranca. */
+/** Nombre legible de la página actual (para el rótulo de posición y las
+    migas). Del `PAGINAS` ordenado, con una excepción para `autor.html` — la
+    ficha de un autor, cuya etiqueta no puede saberse de antemano. */
+function nombrePagina(href) {
+  const hit = PAGINAS.find(([h]) => h === href);
+  if (hit) return hit[1];
+  return href === 'autor.html' ? 'Ficha de autor' : '';
+}
+
 export function cromo(meta, paginaActual, tema = 'auto') {
-  const nav = PAGINAS.map(([href, txt]) =>
-    `<a href="${href}"${href === paginaActual ? ' aria-current="page"' : ''}>${txt}</a>`).join('');
+  const nav = navHtml(paginaActual);
+  const actual = nombrePagina(paginaActual);
 
   const selectorTema = `<div class="tema" role="group" aria-label="Tema de color">${
     TEMAS.map(([id, txt, d]) => `<button type="button" data-tema="${id}"
@@ -125,17 +157,44 @@ export function cromo(meta, paginaActual, tema = 'auto') {
           </span>
         </a>
         ${selectorTema}
+        <button type="button" class="nav-toggle" aria-expanded="false"
+          aria-controls="menu-nav" aria-label="Abrir menú de secciones">
+          <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"
+            fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <span>Secciones</span>
+        </button>
       </div>
-      <nav class="nav" aria-label="Secciones">${nav}</nav>
+      <nav class="nav" id="menu-nav" aria-label="Secciones">${nav}</nav>
     </div>`,
 
     vigencia: `
     <div class="contenedor">
-      <span><b>Fuente</b> ${escapar(meta.fuentes.join(' · '))}</span>
+      <nav class="v-migas" aria-label="Ruta de posición">
+        <a href="index.html">Portada</a>
+        <span class="migas-sep" aria-hidden="true">·</span>
+        <span class="migas-actual" aria-current="page">${escapar(actual || 'Inicio')}</span>
+      </nav>
       <span class="sep" aria-hidden="true"></span>
-      <span><b>Ventana</b> ${meta.ventana.inicio}–${meta.ventana.fin}</span>
+      <details class="v-chip">
+        <summary>Fuente <b>${escapar(meta.fuentes.join(' · '))}</b></summary>
+        <p>Bases de datos institucionales consultadas para el universo de publicaciones del informe.</p>
+      </details>
       <span class="sep" aria-hidden="true"></span>
-      <span><b>Citas al</b> ${escapar(meta.fecha_corte_citas)}</span>
+      <details class="v-chip">
+        <summary>Ventana <b>${meta.ventana.inicio}–${meta.ventana.fin}</b></summary>
+        <p>Fechas de publicación consideradas como universo del informe. Fuera de este periodo un trabajo no aparece.</p>
+      </details>
+      <span class="sep" aria-hidden="true"></span>
+      <details class="v-chip">
+        <summary>Citas al <b>${escapar(meta.fecha_corte_citas)}</b></summary>
+        <p>Fecha en que se congelaron el recuento de citas y las métricas derivadas.</p>
+      </details>
+      <span class="recorte-vivo" id="recorte-vivo" hidden></span>
+      <label class="v-anio" id="recorte-anio-env" hidden>
+        <span class="solo-lectores">Filtrar por año</span>
+        <select id="recorte-anio" aria-label="Filtrar por año de publicación"></select>
+      </label>
       <button type="button" class="descargar" id="descargar-informe"
         title="Abre el diálogo de impresión del navegador; elija «Guardar como PDF»">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
@@ -180,6 +239,28 @@ export async function montarCabecera(paginaActual) {
 
   document.querySelectorAll('.tema button').forEach(b =>
     b.addEventListener('click', () => aplicarTema(b.dataset.tema)));
+
+  /* Menú de navegación colapsable: en móvil/tablet el nav se pliega bajo un
+     conmutador y se despliega al pulsarlo. El conmutador sólo se ve donde hace
+     falta (CSS); en banda ancha queda oculto y este escucha no estorba. */
+  const toggle = document.querySelector('.nav-toggle');
+  const nav = document.getElementById('menu-nav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      const abierto = nav.classList.toggle('abierto');
+      toggle.setAttribute('aria-expanded', String(abierto));
+      toggle.setAttribute('aria-label',
+        abierto ? 'Cerrar menú de secciones' : 'Abrir menú de secciones');
+    });
+    // Elegir una sección cierra el menú (en pantallas donde el nav se pliega).
+    nav.addEventListener('click', e => {
+      if (e.target.closest('a')) {
+        nav.classList.remove('abierto');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Abrir menú de secciones');
+      }
+    });
+  }
 
   /* Descargar el informe. Es `print()` a propósito y no una librería de PDF:
      el navegador ya sabe paginar, embeber tipografías y producir texto

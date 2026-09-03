@@ -127,7 +127,7 @@ grupos:
       - 'Hasbun P.'   # 3 publicaciones
       - 'Hasbún P.'   # 2 publicaciones
   - canonica: 'Henríquez-Olguín C.'
-    origen: ortografica
+    origen: humana
     variantes:
       - 'Henriquez-Olguin C.'   # 6 publicaciones
       - 'Henriquez-Olguín C.'   # 4 publicaciones
