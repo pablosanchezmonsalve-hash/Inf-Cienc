@@ -101,6 +101,23 @@ jobs:
       - name: Verificar la lógica de contraste con el inventario de autoarchivo
         run: python3 src/enrich/autoarchivo_uft.py --test
 
+      # Los tres conectores de fuentes no tradicionales y el de GitHub —éste
+      # inactivo sin token, pero su extracción de ORCID desde el bio sí se
+      # comprueba, igual que ROR más abajo— por la misma razón que todo lo
+      # demás en este bloque: deciden qué ORCID se atribuye a qué persona, y
+      # quedaron sin ninguna prueba que corriera en CI.
+      - name: Verificar la lógica de DataCite
+        run: python3 src/enrich/datacite.py --test
+
+      - name: Verificar la lógica de Europe PMC
+        run: python3 src/enrich/europepmc.py --test
+
+      - name: Verificar la lógica de Zenodo
+        run: python3 src/enrich/zenodo.py --test
+
+      - name: Verificar la lógica de GitHub
+        run: python3 src/enrich/github_orcid.py --test
+
       # La consulta a ROR no corre en CI —sale a red— pero su extracción sí se
       # comprueba: es la parte que puede romperse en silencio si la API cambia
       # de forma, y la que decidiría mal qué organización es la institución.

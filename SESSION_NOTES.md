@@ -9725,3 +9725,51 @@ Decidir con el usuario cuál de los dos hallazgos restantes corregir a
 continuación. Si en algún momento se quiere refrescar
 `informe_autores.md`/`autores_consolidado.csv` con los datos vigentes,
 basta con volver a correr `python3 informes/_consolidar_autores.py`.
+
+## Cierre: los 4 conectores ORCID nuevos entran a CI
+
+### Contexto
+
+El usuario pidió corregir el tercer hallazgo de la revisión de
+`origin/main`: `.github/workflows/deploy.yml` no ejercía `--test` para
+`datacite.py`, `europepmc.py`, `zenodo.py` ni `github_orcid.py` —
+rompía el patrón que el propio workflow sigue con todo lo demás en
+`src/enrich/` (cada conector que decide qué ORCID se atribuye a quién
+tiene su paso de `--test`, `orcid_afiliacion.py` incluido).
+
+### Qué se hizo
+
+Se agregaron los 4 pasos, en el mismo bloque donde ya están
+`orcid_expand.py`/`orcid_afiliacion.py`/`dspace_inventario.py`/
+`autoarchivo_uft.py`, justo antes del comentario que explica por qué
+ROR no corre su consulta real en CI pero sí su lógica de extracción —
+`github_orcid.py` sigue exactamente ese mismo patrón: inactivo sin
+token, pero su función de extraer ORCID del bio se comprueba igual.
+
+### Verificación
+
+`python3 -c "import yaml; yaml.safe_load(...)"`: el YAML sigue siendo
+válido. Los 4 `--test` corridos a mano, uno por uno: los cuatro pasan
+limpio — son exactamente los mismos comandos que CI va a ejecutar, no
+una aproximación. `python3 src/audit/run_all.py`: sin cambios.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-449 | Los 4 pasos nuevos se insertan junto a los otros conectores de identidad/ORCID, no al final del bloque | Mantiene el agrupamiento temático que el workflow ya tenía (ORCID/identidad primero, ROR y OpenAlex después) en vez de una lista sin orden aparente |
+
+### Archivos modificados
+
+```
+.github/workflows/deploy.yml    4 pasos --test nuevos (DataCite, Europe PMC, Zenodo, GitHub)
+```
+
+### Ambigüedades abiertas
+
+Ninguna nueva. Sigue sin corregir: el token de GitHub documentado hacia
+un archivo versionado (`config/matching_rules.yml`).
+
+### Próximo paso recomendado
+
+Decidir con el usuario si corregir el hallazgo del token de GitHub.
