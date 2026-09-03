@@ -10164,3 +10164,149 @@ seguir con la revisión de identidad, las colas más grandes siguen siendo
 "Candidato de unidad académica por autoarchivo" (29) y "ORCID no
 verificable" (22) en `internal/pendientes_consolidacion.md`, o cualquiera
 de los 6 restantes en `scopus_author_search_multiples_id.csv`.
+
+## Cierre: se resuelve el pendiente de Moya, Patricia en la cola de "Varios Scopus ID"
+
+### Contexto
+
+El usuario pidió seguir con "Moya, Patricia", el único caso que quedaba
+`pendiente` en `internal/identity_decisions.csv` bajo la cola "Varios
+Scopus ID" (`p04-Moya, Patricia`, decidido `pendiente` el 2026-09-02): el
+Auth-ID 57767862900 firma tanto «atención de urgencia por ideación
+suicida» (Salud Pública) como «determinantes de caries en preescolares»
+(Facultad de Odontología) — dos temas que entonces parecían demasiado
+distintos bajo un mismo identificador para cumplir el umbral de evidencia
+dispositiva del proyecto, más que en los otros 9 casos revisados junto a
+este en su momento.
+
+### Qué se hizo
+
+Se reunió evidencia local que no se había cruzado antes:
+
+1. El ORCID de "Moya P." (`0000-0002-8442-2571`) ya estaba confirmado por
+   otra vía, independiente de este caso: `ver-Moya P.`, cola "ORCID sin
+   confirmar", 2026-09-01 — acuerdo entre repositorio institucional e
+   inventario de autoarchivo, 3 publicaciones cruzadas cada uno.
+2. Se buscó ese ORCID directamente en `data/raw/Inventario_Repositorio_
+   Institucional_UFT.csv` (24 registros bajo "Moya, Patricia" o variantes
+   cercanas). El campo `dc.contributor.orcid` —el campo limpio de un solo
+   valor, no la lista mezclada de `dc.identifier.orcid`— lo declara
+   directamente sobre "Atención de urgencia por ideación suicida en
+   Chile": exactamente la publicación que generaba la duda, y coincide con
+   el DOI y el Auth-ID (57767862900) del registro en el corpus Scopus.
+3. Se cruzó `internal/matching_log.csv` para ver la afiliación declarada
+   exacta de cada aparición de "Moya P." en el corpus: una de las dos
+   publicaciones bajo 57767862900 (EID 2-s2.0-105024529012, que en
+   realidad es la de bibliometría de ansiedad, firmada por Auth-ID
+   60235456000 — se verificó el emparejamiento EID↔Auth-ID contra el
+   export nativo de Scopus, no se asumió) declara "Salud Pública, Facultad
+   de Odontología, Universidad Finís Terrae" — una unidad de salud pública
+   **dentro** de la Facultad de Odontología. Esto reconcilia exactamente
+   la tensión que dejó el caso pendiente: no son dos campos distintos, es
+   un perfil de salud pública aplicada a la práctica odontológica.
+4. El export nativo de Scopus (`Authors with affiliations`) confirmó lo
+   mismo para el Auth-ID 60235456000: "Observatorio en Salud Pública Oral,
+   Facultad de Odontología, Universidad Finís Terrae".
+5. `data/raw/Scopus_Author_Search_UFT.csv` declara el mismo nombre
+   completo exacto, "Moya, Patricia", para ambos Auth-ID, con área
+   temática superpuesta ("Dentistry" en los dos; el 57767862900 agrega
+   "Medicine").
+
+Con esa evidencia se revirtió el veredicto:
+
+- `internal/identity_decisions.csv`: caso `p04-Moya, Patricia` de
+  `pendiente` a `misma`, nota reescrita con la evidencia nueva, fecha
+  actualizada a 2026-09-03.
+- `internal/scopus_author_search_decisiones.csv`: se agregó una fila
+  equivalente para "Moya, Patricia" (`misma`), para no dejar las dos colas
+  diciendo cosas distintas — la confusión de la respuesta anterior sobre
+  cuál pendiente era cuál ya mostró el costo de no mantenerlas coherentes.
+- Se aplicaron ambas: `apply_decisions.py` y
+  `apply_scopus_author_decisions.py`.
+- Se regeneró `internal/pendientes_consolidacion.{md,html}` y
+  `internal/revision_identidad.html` con `src/review/build_review.py`
+  (herramienta declarada "GENERADO, no editar a mano").
+- Se actualizó `internal/scopus_author_search_listado.html` (fila de Moya
+  en la tabla de "ya conocidos", más una nota nueva (3) con el detalle
+  completo) y el conteo de `docs/FUENTES_Y_APIS.md` §2.9 (2→3
+  confirmados, 6→5 pendientes).
+
+### Verificación
+
+- `apply_decisions.py --dry-run` antes de aplicar: sin avisos de
+  contradicción, sin cambio en "grupos consolidados" (38, igual que
+  antes) — confirma la hipótesis de que la firma "Moya P." es un grupo de
+  una sola forma en `firmas_de()`, así que esta decisión no fusiona nada
+  nuevo, sólo confirma que el segundo Auth-ID no es una persona distinta.
+- Tras aplicar de verdad, `git diff` sobre `config/identidades_
+  consolidadas.yml`, `config/orcid_revisado.yml`,
+  `config/firmas_e09_resueltas.yml` y `data/enriched/authors_orcid.csv`
+  salió vacío — verificado explícitamente, no asumido: esta decisión no
+  cambia ningún artefacto que el build consuma, sólo la capa interna de
+  evidencia.
+- `apply_scopus_author_decisions.py --dry-run` mostró exactamente 1 cambio
+  (Moya) antes de aplicar.
+- `build_review.py` recalculó 290 casos, 208 decididos, 82 pendientes
+  (antes: 207/83) — baja en 1, como corresponde.
+- Se confirmó con un `grep` dirigido que la sección "Varios Scopus ID" de
+  `pendientes_consolidacion.md` desapareció del todo (quedó en 0
+  pendientes entre las dos colas combinadas).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-459 | Se revierte el veredicto `pendiente` de `p04-Moya, Patricia` a `misma` | Evidencia nueva (ORCID declarado directamente sobre la publicación en disputa, en el repositorio institucional; unidad de salud pública dentro de la propia Facultad de Odontología en ambos Auth-ID) supera el umbral de evidencia dispositiva que dejó el caso pendiente el 2026-09-02; no es una decisión tomada por rutina ni por analogía con los otros casos, es evidencia directa sobre este caso específico |
+| D-460 | Se mantienen sincronizadas `identity_decisions.csv` y `scopus_author_search_decisiones.csv` para el mismo caso, en vez de decidir sólo en una | La sesión anterior ya mostró el costo de que las dos colas divergieran silenciosamente (la confusión Fortuny/Moya en la respuesta al usuario); duplicar el registro es más barato que dejarlas incoherentes otra vez |
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv                   p04-Moya: pendiente → misma
+internal/scopus_author_search_decisiones.csv       + fila Moya (misma)
+internal/scopus_author_search_multiples_id.csv     resolucion actualizada
+internal/scopus_author_search_listado.html         fila Moya + nota (3)
+internal/pendientes_consolidacion.md, .html        regenerados (build_review.py)
+internal/revision_identidad.html                   regenerado (build_review.py)
+docs/FUENTES_Y_APIS.md                             §2.9: 2→3 confirmados, 6→5 pendientes
+SESSION_NOTES.md, STATE.md, docs/DECISIONS.md      este cierre
+```
+
+Sin cambios en `config/identidades_consolidadas.yml`, `config/orcid_
+revisado.yml`, `config/firmas_e09_resueltas.yml` ni
+`data/enriched/authors_orcid.csv` — verificado, no sólo esperado.
+
+### Supuestos descartados
+
+- Que la evidencia de "unidad exacta y mismo tema" (el criterio usado
+  para Castillo/Hartmann/Quezada/Torres) era necesaria para este caso: se
+  usó evidencia más directa y más fuerte (ORCID declarado sobre la
+  publicación puntual en disputa, desde una fuente independiente), no la
+  misma plantilla aplicada mecánicamente.
+- Que revertir un veredicto `pendiente` anterior requería descartar la
+  duda original como un error: no lo era — la dispersión temática
+  observada en 2026-09-02 era real y razonable de cuestionar; lo que
+  cambió es que apareció evidencia nueva, no que la duda original fuera
+  infundada.
+
+### Ambigüedades abiertas
+
+Las mismas que dejó el cierre de Fortuny, sin cambios: si esta cola
+("Varios Scopus ID") debería subir la confianza del ORCID en
+`authors_orcid.csv` al confirmarse (no se hizo aquí tampoco, siguiendo el
+mismo precedente que Esis Villarroel y Fortuny).
+
+Siguen pendientes, sin tocar en este cierre: los 5 casos restantes de
+"Varios Scopus ID" (Cabello, Caffarena, Hartmann Schatloff, Quezada,
+Torres) y los 82 casos de `internal/pendientes_consolidacion.md`.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente sobre Moya — cerrado. De los 5 casos
+restantes en esta cola, Hartmann Schatloff, Quezada y Torres ya tenían
+`misma` en una generación anterior de `identity_decisions.csv` (2026-09-02,
+antes del detector actual) pero siguen `PENDIENTE_REVISION_HUMANA` en
+`scopus_author_search_multiples_id.csv` — la misma clase de
+inconsistencia entre colas que se acaba de corregir para Moya, sin
+resolver todavía para esos tres. Sería el siguiente candidato natural si
+se sigue con esta cola.

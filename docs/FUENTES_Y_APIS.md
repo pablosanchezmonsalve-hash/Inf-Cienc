@@ -364,13 +364,15 @@ el corpus y contra `internal/ambiguities_authors.csv`, y produce:
   documentos). El primer detector agrupa por nombre exacto dentro de esta
   misma fuente y no puede ver esto.
 
-  Revisión humana al 2026-09-03: **2 confirmados** ("Esis Villarroel,
-  Ivette S.", "Fortuny, Esteban Fortuny" — convergencia de ORCID entre dos
-  fuentes independientes en ambos casos), **6 pendientes** (Cabello,
-  Caffarena, Hartmann Schatloff, Moya Patricia, Quezada, Torres — sin
-  evidencia suficiente todavía, o con evidencia en contra en el caso de
-  Caffarena). Decisiones en `internal/scopus_author_search_decisiones.csv`,
-  aplicadas con `apply_scopus_author_decisions.py`.
+  Revisión humana al 2026-09-03: **3 confirmados** ("Esis Villarroel,
+  Ivette S.", "Fortuny, Esteban Fortuny", "Moya, Patricia" — convergencia
+  de ORCID entre dos o más fuentes independientes en los tres casos; el de
+  Moya revierte un veredicto `pendiente` del 2026-09-02, también reflejado
+  en `internal/identity_decisions.csv`), **5 pendientes** (Cabello,
+  Caffarena, Hartmann Schatloff, Quezada, Torres — sin evidencia suficiente
+  todavía, o con evidencia en contra en el caso de Caffarena). Decisiones
+  en `internal/scopus_author_search_decisiones.csv`, aplicadas con
+  `apply_scopus_author_decisions.py`.
 - `internal/scopus_author_search_orcid.csv` — contraste del ORCID que
   Scopus declara en el perfil del autor (tercera fuente independiente,
   además de Crossref y el registro público de ORCID) contra
