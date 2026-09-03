@@ -36,6 +36,18 @@ QUÉ RESUELVE
        ahí, bajo qué nombre, con cuántas publicaciones?) y contra
        `internal/ambiguities_authors.csv` (¿ya estaba conocido, o es nuevo?).
 
+       Un segundo detector (`candidatos_fragmentacion_orcid`, agregado
+       2026-09-03) cubre lo que el primero tampoco ve: dos identificadores
+       que NO comparten nombre en ninguna de las dos fuentes, y sólo se
+       conectan por compartir el mismo ORCID. Caso real que lo motivó:
+       "Fortuny, Esteban Fortuny" (esta fuente, Auth-ID 57203373183)
+       comparte ORCID con "Fortuny E." (el corpus del proyecto, Auth-ID
+       59254638800) — ningún nombre en común entre las dos filas, así que
+       `candidatos_multiples_id` —que agrupa por nombre exacto dentro de
+       esta misma fuente— no podía verlo. Sus candidatos viajan en el mismo
+       CSV y la misma cola de revisión: es la misma pregunta ("¿perfil
+       Scopus fragmentado?"), sólo cambia de dónde sale la evidencia.
+
     2. `internal/scopus_author_search_orcid.csv` — contraste de los ORCID
        que trae esta fuente (50 de 812 filas) contra
        `data/enriched/authors_orcid.csv`. Tercera fuente independiente de
@@ -179,6 +191,38 @@ def publicaciones_por_id(scopus: pd.DataFrame) -> dict[str, int]:
     return out
 
 
+def auth_ids_por_firma(scopus: pd.DataFrame, matching_log: pd.DataFrame) -> dict[str, set[str]]:
+    """Firma resuelta del proyecto -> {Scopus Author ID} que le corresponde en
+    el corpus, por POSICIÓN de autor dentro de cada EID — no por nombre solo.
+
+    Un EID con varios coautores UFT mezclaría el identificador de uno con la
+    firma de otro si se buscara sólo por nombre: "Author full names" trae a
+    TODOS los autores de la publicación en una sola cadena. Bug real,
+    encontrado y corregido en la revisión de 2026-09-03 (candidatos "Bustos
+    Arriagada"/"Simón"/"Santibañez" daban resultados cruzados hasta que se
+    cruzó por `posicion_autor`) antes de reportar nada — se corrige aquí de
+    la misma forma, no sólo a mano."""
+    eid_posiciones: dict[str, dict[int, str]] = {}
+    for eid, full in zip(scopus["EID"], scopus["Author full names"].fillna("")):
+        pos_a_id = {}
+        for i, parte in enumerate(full.split("; "), start=1):
+            m = _RE_AUTOR_ID.match(parte.strip())
+            if m:
+                pos_a_id[i] = m.group(2)
+        eid_posiciones[eid] = pos_a_id
+
+    out: dict[str, set[str]] = defaultdict(set)
+    for _, r in matching_log.iterrows():
+        try:
+            pos = int(r["posicion_autor"])
+        except (TypeError, ValueError):
+            continue
+        sid = eid_posiciones.get(r["eid"], {}).get(pos)
+        if sid:
+            out[r["nombre_en_fuente"]].add(sid)
+    return out
+
+
 # --------------------------------------------------------------------------- #
 # 1. Nombres con más de un Scopus Author ID
 # --------------------------------------------------------------------------- #
@@ -220,6 +264,65 @@ def candidatos_multiples_id(filas_fuente: list[dict], ids_por_nombre: dict[str, 
                      "igual que la regla P-04 del proyecto (D-08)."),
             # Por defecto, pendiente: la decide una persona
             # (apply_scopus_author_decisions.py la actualiza, nunca este script).
+            "resolucion": "PENDIENTE_REVISION_HUMANA",
+            "nota_resolucion": "",
+        })
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# 1b. Fragmentación visible sólo por ORCID cruzado — nombre distinto en cada
+#     fuente, así que candidatos_multiples_id() (agrupa por nombre EXACTO
+#     dentro de esta misma fuente) estructuralmente no puede verla. Caso real
+#     que la motivó: "Fortuny, Esteban Fortuny" (Scopus Author Search,
+#     Auth-ID 57203373183) comparte ORCID con "Fortuny E." (el corpus del
+#     proyecto, Auth-ID 59254638800) — mismo ORCID, ningún nombre en común.
+# --------------------------------------------------------------------------- #
+
+def candidatos_fragmentacion_orcid(filas_fuente: list[dict], orcid_proyecto: dict[str, str],
+                                   auth_ids_por_firma_map: dict[str, set[str]],
+                                   nombres_ya_cubiertos: set[str] = frozenset()) -> list[dict]:
+    """El mismo ORCID bajo un Scopus Author ID de esta fuente y bajo un Scopus
+    Author ID DISTINTO ya asociado, en el corpus del proyecto, a una firma con
+    ese mismo ORCID. Salida con las mismas columnas que candidatos_multiples_id
+    para que viajen en la misma cola de revisión — es el mismo tipo de
+    pregunta ("¿es un perfil Scopus fragmentado?"), sólo que la evidencia que
+    lo trae es distinta.
+
+    `nombres_ya_cubiertos` son los nombres que candidatos_multiples_id() ya
+    reportó: cuando ese nombre tiene 2+ Auth-ID EN ESTA MISMA FUENTE, el cruce
+    por ORCID contra el corpus casi siempre redescubre el mismo par —pasó con
+    "Esis Villarroel, Ivette S." una vez que tuvo ORCID asignado— y duplicar
+    la fila rompería la unicidad de `nombre_scopus` de la que depende
+    apply_scopus_author_decisions.py para aplicar un veredicto."""
+    firma_por_orcid = {orcid: firma for firma, orcid in orcid_proyecto.items() if orcid}
+
+    out = []
+    for f in filas_fuente:
+        if not f["orcid"] or not f["auth_id"] or f["nombre"] in nombres_ya_cubiertos:
+            continue
+        firma = firma_por_orcid.get(f["orcid"])
+        if not firma:
+            continue
+        ids_conocidos = auth_ids_por_firma_map.get(firma, set())
+        if not ids_conocidos or f["auth_id"] in ids_conocidos:
+            continue
+        ids_todos = sorted(ids_conocidos | {f["auth_id"]})
+        out.append({
+            "nombre_scopus": f["nombre"],
+            "n_ids": len(ids_todos),
+            "auth_ids": " | ".join(ids_todos),
+            "ya_conocido_en_ambiguities": False,
+            "detalle": (f"{f['auth_id']} (Scopus Author Search: {f['n_documentos']} docs"
+                        + (f", ORCID {f['orcid']}" if f["orcid"] else "") + ") || "
+                        + " / ".join(sorted(ids_conocidos))
+                        + f" (corpus del proyecto, bajo la firma '{firma}', mismo ORCID {f['orcid']})"),
+            "nota": ("Detectado por convergencia de ORCID entre Scopus Author Search y el "
+                     "corpus del proyecto — no por nombre repetido en esta fuente, a diferencia "
+                     "de los demás candidatos de esta cola. Puede ser un perfil Scopus "
+                     "fragmentado (misma persona, dos identificadores) o coincidencia de "
+                     "ORCID — esta fuente no lo decide, igual que la regla P-04 del "
+                     "proyecto (D-08)."),
             "resolucion": "PENDIENTE_REVISION_HUMANA",
             "nota_resolucion": "",
         })
@@ -282,6 +385,12 @@ def _orcid_proyecto() -> dict[str, str]:
     return dict(zip(df["nombre_en_fuente"], df["orcid"]))
 
 
+def _matching_log() -> pd.DataFrame:
+    if not MATCHING_LOG.exists():
+        return pd.DataFrame(columns=["eid", "posicion_autor", "nombre_en_fuente"])
+    return pd.read_csv(MATCHING_LOG, dtype=str)
+
+
 def run() -> tuple[list[dict], list[dict]]:
     filas_fuente = leer_fuente()
     scopus = pd.read_csv(RAW_SCOPUS, encoding=c.SOURCES["scopus_export"]["encoding"],
@@ -289,11 +398,15 @@ def run() -> tuple[list[dict], list[dict]]:
     ids_por_nombre = scopus_id_map(scopus)
     ids_reverso = ids_reverse_map(ids_por_nombre)
     pubs_por_id = publicaciones_por_id(scopus)
+    orcid_proyecto = _orcid_proyecto()
 
     multiples_id = candidatos_multiples_id(
         filas_fuente, ids_por_nombre, ids_reverso, pubs_por_id, _clave_conocida_p04())
-    orcid = contraste_orcid(filas_fuente, _firmas_uft(), _orcid_proyecto())
-    return multiples_id, orcid
+    fragmentacion = candidatos_fragmentacion_orcid(
+        filas_fuente, orcid_proyecto, auth_ids_por_firma(scopus, _matching_log()),
+        {r["nombre_scopus"] for r in multiples_id})
+    orcid = contraste_orcid(filas_fuente, _firmas_uft(), orcid_proyecto)
+    return multiples_id + fragmentacion, orcid
 
 
 def _guardar(multiples_id: list[dict], orcid: list[dict]) -> None:
@@ -301,8 +414,11 @@ def _guardar(multiples_id: list[dict], orcid: list[dict]) -> None:
     c.write_internal(pd.DataFrame(orcid), "scopus_author_search_orcid.csv")
 
     nuevos = sum(1 for r in multiples_id if not r["ya_conocido_en_ambiguities"])
-    print(f"nombres con 2+ Scopus Author ID : {len(multiples_id)}"
-          f" ({nuevos} nuevos, {len(multiples_id) - nuevos} ya conocidos en ambiguities_authors.csv)")
+    por_orcid = sum(1 for r in multiples_id if "convergencia de ORCID" in r["nota"])
+    print(f"candidatos de identidad fragmentada : {len(multiples_id)}"
+          f" ({nuevos} nuevos, {len(multiples_id) - nuevos} ya conocidos en ambiguities_authors.csv;"
+          f" {por_orcid} por convergencia de ORCID entre fuentes, "
+          f"{len(multiples_id) - por_orcid} por nombre repetido en esta fuente)")
 
     por_res = defaultdict(int)
     for r in orcid:
@@ -364,6 +480,57 @@ def autotest() -> int:
     cand_conocido = candidatos_multiples_id(filas_fuente, ids2, rev2, pubs2, {"Soto, Marta"})
     caso("ya_conocido_en_ambiguities se marca cuando la clave ya existe",
          cand_conocido[0]["ya_conocido_en_ambiguities"] is True)
+
+    # auth_ids_por_firma: por posición de autor, no por nombre solo — un EID
+    # con dos coautores UFT no puede mezclar el ID de uno con la firma del
+    # otro (caso real: "Bustos Arriagada, Edson" daba resultados cruzados
+    # hasta que se cruzó por posición, 2026-09-03).
+    scopus3 = pd.DataFrame({
+        "EID": ["e1", "e1", "e2"],
+        "Author full names": [
+            "Uno, A. (111); Dos, B. (222)",
+            "Uno, A. (111); Dos, B. (222)",
+            "Tres, C. (333)",
+        ],
+    })
+    ml3 = pd.DataFrame([
+        {"eid": "e1", "posicion_autor": "1", "nombre_en_fuente": "Uno A."},
+        {"eid": "e1", "posicion_autor": "2", "nombre_en_fuente": "Dos B."},
+        {"eid": "e2", "posicion_autor": "1", "nombre_en_fuente": "Tres C."},
+    ])
+    aidf = auth_ids_por_firma(scopus3, ml3)
+    caso("auth_ids_por_firma no mezcla coautores del mismo EID",
+         aidf["Uno A."] == {"111"} and aidf["Dos B."] == {"222"} and aidf["Tres C."] == {"333"}, aidf)
+
+    # candidatos_fragmentacion_orcid: mismo patrón que motivó su existencia
+    # ("Fortuny, Esteban Fortuny" en Scopus Author Search comparte ORCID con
+    # "Fortuny E." del corpus, bajo un Scopus Author ID distinto).
+    filas_frag = [
+        {"nombre": "Cuatro, D. Cuatro", "auth_id": "444", "n_documentos": "2", "areas": [], "orcid": "0000-0001-1111-222X"},
+        {"nombre": "Cinco, E.", "auth_id": "555", "n_documentos": "1", "areas": [], "orcid": ""},
+    ]
+    orcid_proy3 = {"Cuatro D.": "0000-0001-1111-222X"}
+    aidf3 = {"Cuatro D.": {"999"}}
+    frag = candidatos_fragmentacion_orcid(filas_frag, orcid_proy3, aidf3)
+    caso("detecta el mismo ORCID bajo un Auth-ID distinto al ya conocido",
+         len(frag) == 1 and frag[0]["nombre_scopus"] == "Cuatro, D. Cuatro"
+         and frag[0]["auth_ids"] == "444 | 999", frag)
+    caso("candidato de fragmentación por ORCID no se marca ya_conocido_en_ambiguities",
+         frag[0]["ya_conocido_en_ambiguities"] is False, frag)
+
+    caso("mismo Auth-ID ya conocido no se reporta (no es fragmentación)",
+         len(candidatos_fragmentacion_orcid(
+             [{"nombre": "Cuatro, D.", "auth_id": "999", "n_documentos": "1", "areas": [], "orcid": "0000-0001-1111-222X"}],
+             orcid_proy3, aidf3)) == 0)
+    caso("ORCID sin firma ya conocida en el proyecto no se reporta",
+         len(candidatos_fragmentacion_orcid(
+             [{"nombre": "Nadie, N.", "auth_id": "1", "n_documentos": "1", "areas": [], "orcid": "0000-0009-9999-999X"}],
+             orcid_proy3, aidf3)) == 0)
+    caso("firma ya conocida sin ningún Auth-ID propio en el corpus no se reporta (sin evidencia)",
+         len(candidatos_fragmentacion_orcid(filas_frag, orcid_proy3, {})) == 0)
+    caso("un nombre que candidatos_multiples_id ya reportó no se duplica aquí",
+         len(candidatos_fragmentacion_orcid(filas_frag, orcid_proy3, aidf3,
+                                            {"Cuatro, D. Cuatro"})) == 0)
 
     # Contraste de ORCID
     orcid_rows = [

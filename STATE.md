@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `fdf8816` · Confirmar 11 firmas más del patrón de apellido compuesto en Scopus Aut
+Último commit: `0102784` · Consolidar las tres firmas de Amarouch en una sola identidad
 Snapshot: 2026-09-03
 
 ---
@@ -66,7 +66,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_conflicts.csv` | 1 |
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
-| `internal/scopus_author_search_multiples_id.csv` | 7 |
+| `internal/scopus_author_search_multiples_id.csv` | 8 |
 | `internal/scopus_author_search_orcid.csv` | 50 |
 
 `make revision` reúne estas colas en 290 casos, de los que **83 siguen pendientes**: 207 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 438
+## Decisiones tomadas: 441
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

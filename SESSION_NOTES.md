@@ -9131,3 +9131,109 @@ sigue pendiente, sin tocar.
 Ninguna acción de código pendiente en esta línea de trabajo. Si se quiere
 avanzar el hallazgo de Fortuny, tratarlo como un candidato más de "Varios
 Scopus ID" — mismo mecanismo que Moya/Hartmann/Quezada/Torres.
+
+## Cierre: Fortuny como candidato durable de "Varios Scopus ID" (2026-09-03, mismo día)
+
+### Contexto
+
+El usuario pidió tratar el hallazgo de Fortuny (del cierre anterior) como
+un candidato más de la cola "Varios Scopus ID" — la misma que ya trae
+Moya/Hartmann/Quezada/Torres/Esis Villarroel/Caffarena/Cabello.
+
+### Por qué no bastaba con agregar una fila a mano
+
+`internal/scopus_author_search_multiples_id.csv` lo regenera por completo
+`scopus_author_search.py` en cada corrida (mismo patrón que
+`ambiguities_authors.csv` — no es editable a mano, D-08 otra vez). El
+detector que encontró a los otros 7 (`candidatos_multiples_id`) agrupa por
+NOMBRE EXACTO dentro de la propia fuente Scopus Author Search — y el caso
+de Fortuny no comparte nombre en ninguna fuente ("Fortuny, Esteban" en el
+corpus vs. "Fortuny, Esteban Fortuny" en Scopus Author Search): sólo se
+conecta por el ORCID. Una fila agregada a mano habría desaparecido en la
+siguiente corrida del conector, sin aviso.
+
+### Qué se hizo
+
+Se agregó un segundo detector, `candidatos_fragmentacion_orcid()`, a
+`src/enrich/scopus_author_search.py`: busca, para cada fila de Scopus
+Author Search con ORCID, si ese ORCID ya está asignado en el proyecto a
+una firma cuyo Auth-ID en el corpus —calculado por posición de autor vía
+la función nueva `auth_ids_por_firma()`, mismo cuidado que el resto de
+esta revisión (ver el cierre de "las otras 22 filas")— es DISTINTO al
+Auth-ID que trae Scopus Author Search. Su salida usa las mismas columnas
+que `candidatos_multiples_id()` para viajar en la misma cola y el mismo
+mecanismo de decisión (`apply_scopus_author_decisions.py`, sin cambios).
+
+Al conectar los dos detectores apareció una duplicación real: "Esis
+Villarroel, Ivette S." —ya confirmada en un cierre anterior— quedó
+detectada TAMBIÉN por el nuevo detector, porque ahora tiene ORCID
+asignado y ese ORCID converge con su propio Auth-ID del corpus. Dos filas
+con el mismo `nombre_scopus` habrían roto la unicidad de la que depende
+`apply_scopus_author_decisions.py` (indexa por nombre; con dos filas
+iguales sólo actualiza la última). Se corrigió pasándole al segundo
+detector los nombres que el primero ya cubrió, para que no los repita —
+no una excepción para Esis Villarroel, una regla general: cualquier
+nombre que el primer detector ya explica no necesita una segunda fila.
+
+Al volver a correr el conector, `scopus_author_search_multiples_id.csv`
+se regeneró completo y perdió las decisiones ya aplicadas (Esis
+Villarroel vuelta a "pendiente") — es el comportamiento esperado del
+archivo (se regenera, no se edita), así que se volvió a correr
+`apply_scopus_author_decisions.py` con el mismo
+`scopus_author_search_decisiones.csv` de antes para restaurarlas.
+
+### Verificación
+
+`python3 src/enrich/scopus_author_search.py --test`: 21/21 (6 casos
+nuevos: `auth_ids_por_firma` no mezcla coautores del mismo EID, detecta
+el ORCID cruzado, no marca `ya_conocido_en_ambiguities`, no reporta sin
+evidencia en tres formas distintas, no duplica un nombre que el otro
+detector ya cubrió). Corrida real: 8 candidatos (7 de antes + Fortuny),
+sin duplicados, Fortuny con `auth_ids` "57203373183 | 59254638800"
+—exactamente lo encontrado a mano en el cierre anterior—.
+`apply_scopus_author_decisions.py --dry-run` antes de reaplicar: previó
+exactamente los 3 cambios esperados (Esis Villarroel restaurada,
+Caffarena/Cabello re-anotadas). `python3 src/audit/run_all.py` y
+`python3 src/build/build_all.py`: sin fallas nuevas, `git status` sobre
+`data/enriched/` y `config/` vacío — este cierre tampoco toca la capa
+pública.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-439 | Se agrega un detector nuevo al conector en vez de una fila a mano | El archivo de candidatos se regenera por completo en cada corrida; una fila a mano desaparecería sin aviso en la siguiente ejecución |
+| D-440 | El detector nuevo excluye los nombres que el detector existente ya reportó | Sin la exclusión, un nombre con ORCID asignado y también con 2+ Auth-ID en la misma fuente (caso real: Esis Villarroel) se duplicaría, rompiendo la unicidad de `nombre_scopus` que usa `apply_scopus_author_decisions.py` para indexar |
+| D-441 | El candidato Fortuny entra a la cola como PENDIENTE_REVISION_HUMANA, sin decisión aplicada | Consistente con cómo entraron los otros 7: la cola registra evidencia, decidir es un paso aparte que alguien autoriza explícitamente |
+
+### Archivos modificados
+
+```
+src/enrich/scopus_author_search.py                +auth_ids_por_firma(), +candidatos_fragmentacion_orcid(), 7 casos de prueba nuevos
+internal/scopus_author_search_multiples_id.csv     regenerado — 8 candidatos (Fortuny nuevo), decisiones previas reaplicadas
+internal/scopus_author_search_listado.html         nota de Fortuny actualizada
+STATE.md, docs/DECISIONS.md                        regenerados
+```
+
+### Supuestos descartados
+
+- Que bastaba con una fila agregada a mano en `scopus_author_search_multiples_id.csv`:
+  descartado — el archivo es 100% regenerado, no editable (mismo principio
+  que `ambiguities_authors.csv`).
+- Que la duplicación de Esis Villarroel al conectar los dos detectores era
+  un caso aislado a ignorar: descartado — es la consecuencia esperada de
+  tener dos detectores independientes sobre las mismas personas a medida
+  que se les asignan ORCID; se corrigió con una regla general, no con una
+  excepción puntual.
+
+### Ambigüedades abiertas
+
+Fortuny queda pendiente — evidencia a favor (ORCID declarado por el
+titular, corroborado independientemente por Scopus Author Search, mismo
+campo temático) pero sin decisión aplicada.
+
+### Próximo paso recomendado
+
+Si se quiere decidir el caso de Fortuny, el mismo mecanismo de los otros
+7: una fila en `internal/scopus_author_search_decisiones.csv` +
+`apply_scopus_author_decisions.py`.
