@@ -9604,3 +9604,65 @@ Confirmar el resultado de `node src/verify/run_all.mjs` (corriendo en
 segundo plano al cerrar esta nota). Si sale limpio, comitear la fusión y
 empujar. Después, decidir con el usuario cuál de los hallazgos de la
 revisión de `origin/main` corregir primero.
+
+## Cierre: corrige el parseo de iniciales dobles en europepmc.py
+
+### Contexto
+
+`node src/verify/run_all.mjs` terminó limpio (6/6) tras la fusión; se
+comiteó y empujó. El usuario pidió corregir el primer hallazgo de la
+revisión de `origin/main`: `extraer()` en `src/enrich/europepmc.py`
+perdía el apellido entero cuando el bloque de iniciales tenía más de una
+letra — verificado antes de tocar nada: `"Smith AB"` daba
+`family="Smith AB", given=""` en vez de `family="Smith", given="AB"`,
+porque el código sólo reconocía como inicial un token de UNA letra.
+
+### Qué se corrigió
+
+El criterio pasa de "¿es de una sola letra?" a "¿es el ÚLTIMO token, y
+está TODO en mayúsculas?" — el apellido de la fuente nunca viene en
+mayúsculas, así que ese token siempre es el bloque de iniciales,
+independientemente de cuántas letras tenga. Se conserva una guarda para
+un solo token (sin apellido separado): sin ella, `family` quedaría vacío.
+
+Se verificó además, antes de dar la corrección por completa, que
+`clave_crossref()` (`orcid_crossref.py`) sólo usa la PRIMERA letra de
+`given` para emparejar — el mismo criterio "apellido + primera inicial"
+de todo el proyecto — así que el bug real y con impacto era sólo en
+`family`; `given` con más de una letra no cambiaba nada aguas abajo, pero
+se corrige igual porque es lo que la fuente realmente declara.
+
+### Verificación
+
+`python3 src/enrich/europepmc.py --test`: 10/10 (4 casos nuevos: bloque
+de dos iniciales se separa bien, un autor normal en la misma cadena no
+se rompe, apellido con guion no se confunde con el bloque de iniciales,
+un solo token no deja el apellido vacío). Verificado a mano, antes y
+después: `emparejar(["Smith A.B."], ...)` no encontraba nada antes de la
+corrección y encuentra `match: apellido+inicial` después. `python3
+src/audit/run_all.py`: sin cambios, mismo resultado de siempre.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-446 | El criterio de "es inicial" pasa de "un token de una letra" a "el último token, todo en mayúsculas" | El apellido de Europe PMC nunca viene en mayúsculas; un bloque de dos o más iniciales ("AB") es indistinguible de un apellido corto sólo por longitud, pero sí por mayúsculas — es la señal que realmente distingue los dos casos en esta fuente |
+
+### Archivos modificados
+
+```
+src/enrich/europepmc.py    extraer(): criterio de iniciales corregido, 4 casos de prueba nuevos
+```
+
+### Ambigüedades abiertas
+
+Ninguna nueva. Siguen sin corregir los otros hallazgos de la revisión de
+`origin/main`: la dependencia `rich` no declarada en
+`informes/_consolidar_autores.py`, los 4 conectores ORCID sin `--test`
+en CI, y el token de GitHub documentado hacia un archivo versionado
+(`config/matching_rules.yml`).
+
+### Próximo paso recomendado
+
+Decidir con el usuario cuál de los hallazgos restantes corregir a
+continuación.
