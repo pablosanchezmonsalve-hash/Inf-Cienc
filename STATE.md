@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `7fa3deb` · Aplicar decisiones de Scopus Author Search y entregar listado HTML
+Último commit: `c185db2` · Confirmar Fernández Abara = Abara J.F. y subir confianza de su ORCID
 Snapshot: 2026-09-03
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 433
+## Decisiones tomadas: 436
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

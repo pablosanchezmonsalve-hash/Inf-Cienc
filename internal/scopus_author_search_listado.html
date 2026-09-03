@@ -117,13 +117,16 @@ estos casos decide nada por sí solo (D-08) — es evidencia para revisión huma
   </tbody>
 </table>
 
-<h2>Contraste de ORCID — sin firma UFT reconocida en el proyecto (23, 1 ya confirmado)</h2>
+<h2>Contraste de ORCID — sin firma UFT reconocida en el proyecto (23, 12 ya confirmados)</h2>
 <p style="font-size:.9rem;color:#57606a">Scopus Author Search los asocia a la afiliación, pero
-la población UFT del proyecto (extraída del corpus 2023-2025) no tiene una firma equivalente.
-Puede ser: producción fuera de la ventana temporal, homonimia, o una diferencia de cómo se
-parseó el apellido entre las dos fuentes. De las 23, una ("Fernández Abara") ya se confirmó
-como equivalente a una firma existente — ver más abajo; las 22 restantes no se investigaron
-caso por caso.</p>
+la población UFT del proyecto (extraída del corpus 2023-2025) no tenía, a primera vista, una
+firma equivalente. De las 23, doce ya se confirmaron como equivalentes a una firma existente
+(2026-09-03, mismo método que "Fernández Abara": Auth-ID exacto en el corpus por posición de
+autor + mismo ORCID ya asignado por una fuente independiente) — ver abajo. Las 11 restantes se
+revisaron con el mismo método y no mostraron ninguna señal: ni el Auth-ID de Scopus Author
+Search aparece en el corpus del proyecto, ni su ORCID coincide con ninguna firma ya asignada.
+Pueden ser producción fuera de la ventana temporal, homónimos, o autores que el proyecto
+simplemente no tiene — no hay evidencia para decidir cuál.</p>
 
 <div class="flag confirmado">
   <strong>Confirmado (2026-09-03), no por el cruce automático:</strong>
@@ -143,34 +146,80 @@ caso por caso.</p>
   respaldo independiente adicional.
 </div>
 
+<div class="flag confirmado">
+  <strong>Otras 11 confirmadas con el mismo método (2026-09-03):</strong> se revisaron las 22
+  filas restantes buscando el Auth-ID exacto de Scopus Author Search en el corpus, por posición
+  de autor, y comparando el ORCID ya asignado a la firma resultante. Once mostraron el mismo
+  patrón que Fernández Abara — Auth-ID presente y ORCID idéntico, desde una fuente independiente
+  de Scopus Author Search:
+  <ul style="margin:.5rem 0 0;padding-left:1.2rem">
+    <li><b>Andrade, Megumi Andrade</b> = Kobayashi M.A. — apellido compuesto, el corpus usa el
+      otro segmento como apellido</li>
+    <li><b>Ayala Munita, Matías León</b> = Ayala M. — apellido compuesto truncado</li>
+    <li><b>Amarouch García, Ismael Amarouch</b> = Amarouch García I. <i>y</i> García I.A. — el
+      propio proyecto ya tenía este Auth-ID resuelto bajo dos firmas propias sin consolidar
+      (más una tercera, "Amarouch I.", sin ORCID); no es algo que introduce este documento</li>
+    <li><b>Bustos Arriagada, Edson</b> = Bustos-Arriagada E. — espacio vs. guion</li>
+    <li><b>Díaz, F. R.</b> = Diaz F. / Díaz F. — variante con/sin tilde</li>
+    <li><b>Letelier Widow, Gonzalo Letelier</b> = Letelier Widow G. — la fuente repite
+      "Letelier" en el nombre de pila</li>
+    <li><b>Mardones Falcone, Gonzalo</b> = Mardones-Falcone G. — espacio vs. guion</li>
+    <li><b>Phillips, Jaime Phillips</b> = Letelier J.P. — mismo patrón que Letelier Widow: la
+      fuente repite un segmento del nombre ("Jaime Phillips") y el apellido real, "Letelier",
+      es el otro segmento</li>
+    <li><b>Santibañez, David P.</b> = Santibáñez D. — variante con/sin tilde</li>
+    <li><b>Simón, Layla Y.</b> = Simón L. — inicial de segundo nombre de más en la fuente</li>
+    <li><b>Zambrano-Matamala, Carolina Del C.</b> = Zambrano C. — apellido compuesto truncado
+      + nombre de más</li>
+  </ul>
+  Confianza subida de "media" a "alta" en <code>authors_orcid.csv</code> para las seis firmas
+  que estaban en "media": Amarouch García I., García I.A., Ayala M., Mardones-Falcone G.,
+  Letelier J.P., Zambrano C. Las otras cinco ya estaban en "alta" por otra vía, sin cambio.
+  Las 11 filas restantes de esta tabla (marcadas sin fondo) se revisaron con el mismo método y
+  no mostraron ninguna señal — quedan igual que antes.
+</div>
+
 <table>
   <thead><tr><th>Nombre (Scopus)</th><th>Firma corta</th><th>ORCID (Scopus Author Search)</th></tr></thead>
   <tbody>
-    <tr><td>Amarouch García, Ismael Amarouch</td><td>Amarouch García I.A.</td><td><code>0000-0003-2444-8179</code></td></tr>
-    <tr><td>Andrade, Megumi Andrade</td><td>Andrade M.A.</td><td><code>0000-0002-6004-1301</code></td></tr>
-    <tr><td>Ayala Munita, Matías León</td><td>Ayala Munita M.L.</td><td><code>0000-0002-9372-1645</code></td></tr>
+    <tr style="background:#dafbe1"><td>Amarouch García, Ismael Amarouch</td><td>Amarouch García I.A.</td><td><code>0000-0003-2444-8179</code> — confirmado = "Amarouch García I." / "García I.A."</td></tr>
+    <tr style="background:#dafbe1"><td>Andrade, Megumi Andrade</td><td>Andrade M.A.</td><td><code>0000-0002-6004-1301</code> — confirmado = "Kobayashi M.A."</td></tr>
+    <tr style="background:#dafbe1"><td>Ayala Munita, Matías León</td><td>Ayala Munita M.L.</td><td><code>0000-0002-9372-1645</code> — confirmado = "Ayala M."</td></tr>
     <tr><td>Barros, Joaquín Reyes</td><td>Barros J.R.</td><td><code>0000-0002-0665-6452</code></td></tr>
     <tr><td>Bolt, Alfredo</td><td>Bolt A.</td><td><code>0000-0003-1901-9804</code></td></tr>
     <tr><td>Bugueño, Rodrigo Andrés Poyanco</td><td>Bugueño R.A.P.</td><td><code>0000-0001-7767-6760</code></td></tr>
-    <tr><td>Bustos Arriagada, Edson</td><td>Bustos Arriagada E.</td><td><code>0000-0003-4698-1425</code></td></tr>
+    <tr style="background:#dafbe1"><td>Bustos Arriagada, Edson</td><td>Bustos Arriagada E.</td><td><code>0000-0003-4698-1425</code> — confirmado = "Bustos-Arriagada E."</td></tr>
     <tr><td>Cortés, Pablo</td><td>Cortés P.</td><td><code>0000-0003-3076-0804</code></td></tr>
-    <tr><td>Díaz, F. R.</td><td>Díaz F.R.</td><td><code>0000-0003-4763-074X</code></td></tr>
+    <tr style="background:#dafbe1"><td>Díaz, F. R.</td><td>Díaz F.R.</td><td><code>0000-0003-4763-074X</code> — confirmado = "Diaz F." / "Díaz F."</td></tr>
     <tr style="background:#dafbe1"><td>Fernández Abara, Joaquín Fernández</td><td>Fernández Abara J.F.</td><td><code>0000-0001-8190-2361</code> — confirmado = "Abara J.F."</td></tr>
-    <tr><td>Fortuny, Esteban Fortuny</td><td>Fortuny E.F.</td><td><code>0000-0002-0864-5669</code></td></tr>
+    <tr><td>Fortuny, Esteban Fortuny</td><td>Fortuny E.F.</td><td><code>0000-0002-0864-5669</code> — no encaja este patrón, pero ver nota aparte sobre "Fortuny E." más abajo</td></tr>
     <tr><td>Fuentes Anabalón, Edgardo</td><td>Fuentes Anabalón E.</td><td><code>0000-0001-9656-3163</code></td></tr>
     <tr><td>Lehmann, Rodrigo Barcia</td><td>Lehmann R.B.</td><td><code>0000-0003-1021-446X</code></td></tr>
-    <tr><td>Letelier Widow, Gonzalo Letelier</td><td>Letelier Widow G.L.</td><td><code>0000-0002-1625-2216</code></td></tr>
+    <tr style="background:#dafbe1"><td>Letelier Widow, Gonzalo Letelier</td><td>Letelier Widow G.L.</td><td><code>0000-0002-1625-2216</code> — confirmado = "Letelier Widow G."</td></tr>
     <tr><td>Letelier, Rene F.</td><td>Letelier R.F.</td><td><code>0000-0002-1571-460X</code></td></tr>
-    <tr><td>Mardones Falcone, Gonzalo</td><td>Mardones Falcone G.</td><td><code>0000-0003-3943-8731</code></td></tr>
+    <tr style="background:#dafbe1"><td>Mardones Falcone, Gonzalo</td><td>Mardones Falcone G.</td><td><code>0000-0003-3943-8731</code> — confirmado = "Mardones-Falcone G."</td></tr>
     <tr><td>Opitz, Tania</td><td>Opitz T.</td><td><code>0000-0001-9639-4267</code></td></tr>
-    <tr><td>Phillips, Jaime Phillips</td><td>Phillips J.P.</td><td><code>0000-0002-4054-3187</code></td></tr>
+    <tr style="background:#dafbe1"><td>Phillips, Jaime Phillips</td><td>Phillips J.P.</td><td><code>0000-0002-4054-3187</code> — confirmado = "Letelier J.P."</td></tr>
     <tr><td>Saldías, Ignacio Chuecas</td><td>Saldías I.C.</td><td><code>0000-0002-9558-2685</code></td></tr>
     <tr><td>Sanhueza, María Carolina</td><td>Sanhueza M.C.</td><td><code>0000-0003-3705-1613</code></td></tr>
-    <tr><td>Santibañez, David P.</td><td>Santibañez D.P.</td><td><code>0000-0001-7840-9138</code></td></tr>
-    <tr><td>Simón, Layla Y.</td><td>Simón L.Y.</td><td><code>0000-0002-0130-3519</code></td></tr>
-    <tr><td>Zambrano-Matamala, Carolina Del C.</td><td>Zambrano-Matamala C.D.C.</td><td><code>0000-0002-9538-1816</code></td></tr>
+    <tr style="background:#dafbe1"><td>Santibañez, David P.</td><td>Santibañez D.P.</td><td><code>0000-0001-7840-9138</code> — confirmado = "Santibáñez D."</td></tr>
+    <tr style="background:#dafbe1"><td>Simón, Layla Y.</td><td>Simón L.Y.</td><td><code>0000-0002-0130-3519</code> — confirmado = "Simón L."</td></tr>
+    <tr style="background:#dafbe1"><td>Zambrano-Matamala, Carolina Del C.</td><td>Zambrano-Matamala C.D.C.</td><td><code>0000-0002-9538-1816</code> — confirmado = "Zambrano C."</td></tr>
   </tbody>
 </table>
+
+<div class="flag">
+  <strong>Dos hallazgos al margen, sin resolver:</strong>
+  (1) "Amarouch García, Ismael Amarouch" resultó confirmar el mismo Auth-ID bajo <em>dos</em>
+  firmas del proyecto sin consolidar entre sí ("Amarouch García I." y "García I.A.", más una
+  tercera, "Amarouch I.", sin ORCID) — es una inconsistencia interna previa a este documento, no
+  algo que Scopus Author Search introduce; queda para revisión aparte, no se tocó aquí.
+  (2) "Fortuny, Esteban Fortuny" no encaja en el patrón de apellido compuesto, pero su ORCID
+  coincide exacto con "Fortuny E." ya asignado en el proyecto — bajo un Auth-ID
+  <strong>distinto</strong> (59254638800 en el corpus, frente a 57203373183 en Scopus Author
+  Search). Es fragmentación de perfil Scopus, el mismo fenómeno de "Varios Scopus ID" ya
+  revisado para Moya/Hartmann/Quezada/Torres — no se aplicó ninguna decisión, queda pendiente.
+</div>
 
 <div class="footer">
   Generado a mano a partir de <code>internal/scopus_author_search_multiples_id.csv</code> y
