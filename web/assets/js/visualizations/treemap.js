@@ -283,9 +283,20 @@ export function montarTreemap(contenedor, arbolRaiz) {
 
   const migas = document.createElement('div');
   migas.className = 'treemap-migas';
+  const leyenda = document.createElement('div');
+  leyenda.className = 'treemap-leyenda';
+  // El color en este treemap es una paleta de ORDEN (identidad por etiqueta),
+  // no una magnitud: por eso la leyenda no promete "más oscuro = más", sólo
+  // aclara el gris de "sin dato" y que el tono alterna entre celdas para
+  // ayudar a la vista a separarlas. Cambia con el nivel (facultad/escuela).
+  leyenda.innerHTML =
+    `<span class="treemap-ley-titulo">Tono</span>` +
+    RAMPA.map(t => `<span class="treemap-ley-mostrar" style="background:${t}"></span>`).join('') +
+    `<span class="treemap-ley-mostrar treemap-ley-sin" style="background:var(--sin-dato)"></span>` +
+    `<span class="treemap-ley-rotulo">identifica la celda · gris = sin datos</span>`;
   const lienzo = document.createElement('div');
   lienzo.className = 'treemap-lienzo';
-  contenedor.replaceChildren(migas, lienzo);
+  contenedor.replaceChildren(migas, leyenda, lienzo);
 
   function pintarMigas() {
     migas.innerHTML = pila.map((paso, i) => {

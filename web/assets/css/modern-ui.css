@@ -139,6 +139,23 @@
   stroke-linejoin: round;
   opacity: .85;
 }
+.treemap-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem;
+  font-size: var(--t-s);
+  color: var(--tinta-2);
+}
+.treemap-ley-titulo { font-weight: 600; }
+.treemap-ley-mostrar {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--linea);
+}
+.treemap-ley-sin { background: var(--sin-dato) !important; }
+.treemap-ley-rotulo { color: var(--tinta-2); }
 
 /* ═══════════════════════════════════ Heatmap ══════════════════════════ */
 
@@ -169,6 +186,14 @@
   stroke: var(--accion);
   stroke-width: 2;
 }
+.heatmap-leyenda {
+  fill: var(--tinta-2);
+  font-size: 11px;
+  font-variant-numeric: var(--num-tabular);
+}
+.heatmap-ley-guia { stroke: var(--tinta-3); stroke-width: 1; }
+.heatmap-ley-titulo { fill: var(--tinta-2); }
+.heatmap-ley-marca { fill: var(--tinta-2); }
 .heatmap-vacio {
   color: var(--tinta-2);
   font-size: var(--t-s);
