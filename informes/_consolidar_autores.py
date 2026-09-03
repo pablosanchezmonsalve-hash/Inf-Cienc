@@ -13,9 +13,6 @@ import sys
 from pathlib import Path
 
 import yaml
-from rich import print as rprint
-from rich.console import Console
-from rich.table import Table
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -164,10 +161,7 @@ def main() -> int:
         w.writerows(filas)
 
     # ---- consola ----
-    console = Console()
-    t = Table(title="Autores: cobertura de datos")
-    t.add_column("Indicador")
-    t.add_column("Valor", justify="right")
+    print("\nAutores: cobertura de datos")
     for k, v in [
         ("Formas de firma", len(filas)),
         ("Con unidad", con_unidad),
@@ -176,11 +170,10 @@ def main() -> int:
         ("Grupos de identidad", n_grupos),
         ("Fuera del universo (OpenAlex)", len(cob)),
     ]:
-        t.add_row(k, str(v))
-    console.print(t)
+        print(f"  {k:32s}: {v}")
 
-    rprint(f"\n[green]Informe:[/green] {out / 'informe_autores.md'}")
-    rprint(f"[green]Tabla:[/green] {out / 'autores_consolidado.csv'}")
+    print(f"\n  Informe : {out / 'informe_autores.md'}")
+    print(f"  Tabla   : {out / 'autores_consolidado.csv'}")
     return 0
 
 
