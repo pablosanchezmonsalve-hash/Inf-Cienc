@@ -10046,3 +10046,121 @@ trabajando, para no perder de vista el fix del tooltip.
 
 Sitio, CI y ambas ramas en un estado consistente y verificado. Sesión
 cerrada.
+
+## Cierre: se resuelve el pendiente de Fortuny en la cola de "Varios Scopus ID"
+
+### Contexto
+
+El usuario pidió un balance de las revisiones de identidad. Al revisarlo
+se detectó y corrigió una imprecisión propia: la cifra "Varios Scopus ID:
+1 pendiente" que se había reportado como si fuera Fortuny en realidad
+correspondía a "Moya, Patricia" — son dos colas distintas que comparten
+nombre de categoría pero no de mecanismo. `internal/pendientes_consolidacion.md`
+(los "290 casos / 83 pendientes") se genera sólo de
+`internal/identity_decisions.csv`, y Fortuny nunca entró ahí: vive
+exclusivamente en `internal/scopus_author_search_multiples_id.csv`, la
+cola nueva que produce `candidatos_fragmentacion_orcid()`
+(`src/enrich/scopus_author_search.py`, agregado el 2026-09-03). El
+usuario pidió entonces cerrar ese pendiente puntual.
+
+### Qué se hizo
+
+Se siguió el mecanismo vigente de esa cola —no `identity_decisions.csv` +
+`apply_decisions.py`, que es el canal usado para "Varios Scopus ID" en una
+generación anterior de esta misma cola (los casos `p04-*`, ya resueltos en
+su momento) pero no el que se usó esta sesión para los candidatos nuevos
+("Esis Villarroel, Ivette S.", agregada el 2026-09-02, siguió el otro
+canal—:
+
+1. Se agregó una fila para "Fortuny, Esteban Fortuny" en
+   `internal/scopus_author_search_decisiones.csv` con veredicto `misma` y
+   la evidencia: el ORCID `0000-0002-0864-5669` que el proyecto ya tenía
+   asignado a "Fortuny E." (declarado por el propio titular) coincide,
+   confirmado de forma independiente, con el que Scopus Author Search
+   asigna al perfil "Fortuny, Esteban Fortuny" (Auth-ID distinto, 3
+   documentos, mismo campo Medicine/salud) — mismo patrón de convergencia
+   de ORCID entre dos fuentes independientes ya usado para confirmar a
+   Esis Villarroel en esta cola.
+2. Se corrió `python3 src/review/apply_scopus_author_decisions.py
+   --dry-run` (1 cambio, sólo Fortuny) y luego sin `--dry-run`: la columna
+   `resolucion` de su fila en `scopus_author_search_multiples_id.csv` pasó
+   de `PENDIENTE_REVISION_HUMANA` a `CONFIRMADO_MISMA_PERSONA`.
+3. Se actualizó la nota (2) de `internal/scopus_author_search_listado.html`
+   de "Entrado a la cola" (naranja) a "Resuelto" (verde), documentando el
+   mecanismo de aplicación y dejando explícito que la confianza del ORCID
+   en `data/enriched/authors_orcid.csv` NO se tocó (sigue en "media").
+4. Se corrigió `docs/FUENTES_Y_APIS.md` §2.9: decía "7 nombres" en la cola
+   cuando ya eran 8 desde que se agregó Fortuny (2026-09-03) y no mencionaba
+   el segundo detector ni el estado de revisión. Ahora dice 8, describe
+   `candidatos_fragmentacion_orcid()` y resume el estado real: 2
+   confirmados, 6 pendientes.
+
+Esta resolución no cambia ninguna firma del proyecto ni ninguna cifra
+pública: "Fortuny E." ya era una única firma en el corpus; lo que se
+confirmó es que el Auth-ID adicional que ve Scopus Author Search
+corresponde a la misma persona, no a una homonimia. Es puramente capa
+interna (evidencia de identidad, D-08).
+
+### Verificación
+
+- `apply_scopus_author_decisions.py --dry-run` mostró exactamente 1
+  cambio (Fortuny) antes de aplicar — ninguno de los otros 6 pendientes se
+  tocó.
+- Tras aplicar, se releyó `scopus_author_search_multiples_id.csv` completo
+  y se confirmó que sólo la fila de Fortuny cambió de `resolucion`.
+- Se verificó que este conector no está encadenado en ningún pipeline
+  automático (`Makefile`, `.github/workflows/`, `config/sources.yml` sólo
+  lo referencia como conector manual) — la resolución no corre riesgo de
+  perderse en la próxima corrida de CI, a diferencia del bug ya documentado
+  antes en esta sesión (regenerar el conector a mano sí resetea la cola;
+  correr `--test` en CI no).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-457 | Fortuny se resuelve por `scopus_author_search_decisiones.csv` + `apply_scopus_author_decisions.py`, no por `identity_decisions.csv` | Es el mecanismo que esta sesión ya usó para el resto de los candidatos nuevos de esta misma cola (Esis Villarroel); usar el otro canal habría creado dos registros de la misma decisión en dos archivos, sin necesidad |
+| D-458 | No se sube la confianza del ORCID de "Fortuny E." en `authors_orcid.csv` al resolver este pendiente | Sigue el precedente literal ya sentado para "Esis Villarroel" en esta misma cola esta sesión (tampoco se subió la suya); cambiar el criterio sólo para Fortuny sería inconsistente sin una razón declarada — se deja como ambigüedad abierta en vez de decidirlo por mi cuenta |
+
+### Archivos modificados
+
+```
+internal/scopus_author_search_decisiones.csv    + fila Fortuny (misma)
+internal/scopus_author_search_multiples_id.csv  resolucion actualizada
+internal/scopus_author_search_listado.html      nota (2): pendiente → resuelto
+docs/FUENTES_Y_APIS.md                          §2.9: 7→8 nombres, detector nuevo, estado real
+SESSION_NOTES.md, STATE.md, docs/DECISIONS.md   este cierre
+```
+
+### Supuestos descartados
+
+- Que el "Varios Scopus ID: 1 pendiente" reportado en la respuesta anterior
+  era Fortuny: era Moya, Patricia. Se corrige explícitamente aquí en vez de
+  dejar la afirmación anterior sin corregir.
+- Que resolver este pendiente debía también subir la confianza del ORCID
+  en `authors_orcid.csv` (por analogía con las 12 confirmaciones de
+  apellido compuesto de antes en la sesión): se decidió NO hacerlo, para
+  no romper la consistencia con "Esis Villarroel", que se resolvió sin ese
+  paso.
+
+### Ambigüedades abiertas
+
+Si las confirmaciones de esta cola ("Varios Scopus ID") deberían subir la
+confianza del ORCID en `authors_orcid.csv` cuando la evidencia es
+convergencia de ORCID entre dos fuentes independientes — el mismo tipo de
+evidencia que sí subió la confianza en la cola de apellido compuesto. Hoy
+el comportamiento es inconsistente entre colas (una sube, la otra no) y
+nadie lo ha decidido explícitamente; afecta también a "Esis Villarroel",
+ya resuelta antes de este cierre.
+
+Siguen pendientes, sin cambios en este cierre: los 6 casos restantes de
+"Varios Scopus ID" (Cabello, Caffarena, Hartmann Schatloff, Moya Patricia,
+Quezada, Torres) y los 83 casos de `internal/pendientes_consolidacion.md`.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente sobre Fortuny — cerrado. Si se quiere
+seguir con la revisión de identidad, las colas más grandes siguen siendo
+"Candidato de unidad académica por autoarchivo" (29) y "ORCID no
+verificable" (22) en `internal/pendientes_consolidacion.md`, o cualquiera
+de los 6 restantes en `scopus_author_search_multiples_id.csv`.
