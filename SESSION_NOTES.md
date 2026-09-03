@@ -8840,3 +8840,98 @@ de fusionar. Si se quiere generalizar la detección de apellidos
 compuestos en `contraste_orcid()`, primero revisar las otras 22 filas a
 mano para ver cuántas comparten el patrón — no vale la pena generalizar
 el código para un caso.
+
+## Cierre: confirmación de "Fernández Abara" y ajuste de confianza (2026-09-03)
+
+### Contexto
+
+El usuario pidió confirmar el hallazgo D-431 contra Crossref u OpenAlex
+por DOI, tal como quedó recomendado en el cierre anterior.
+
+### Qué se hizo
+
+La consulta en vivo a Crossref y OpenAlex está bloqueada por política de
+red en este entorno (verificado: ambas devuelven 403 en el proxy de
+salida — `curl` a `api.crossref.org` y `api.openalex.org`, mismo bloqueo
+ya conocido de `crossref_financiamiento.py`). No se simuló ninguna
+respuesta.
+
+En su lugar, se rastreó el DOI de la publicación de "Abara J.F." en el
+propio corpus (EID `2-s2.0-105034655965`, DOI
+`10.38178/07183089/1211230605`) y se encontró que el campo "Author full
+names" de ese registro ya trae **el mismo Scopus Author ID**
+(57190811072) que Scopus Author Search asigna a "Fernández Abara,
+Joaquín Fernández" — es Scopus, en dos productos distintos, resolviendo
+el mismo perfil. Sumado a que `authors_orcid.csv` ya tenía asignado a
+"Abara J.F." el mismo ORCID (`0000-0001-8190-2361`) **vía OpenAlex**, una
+fuente independiente de Scopus Author Search, y a que el correo de
+correspondencia del artículo es `jfernandez@uft.cl`, quedan tres señales
+independientes convergiendo — el mismo umbral que confirmó a Esis
+Villarroel. No se necesitó la llamada en vivo porque la corroboración ya
+estaba en datos que el proyecto había producido en una sesión anterior.
+
+Con la confirmación, se actualizaron las dos cosas que el usuario pidió:
+- `internal/scopus_author_search_listado.html`: la nota pasó de "hallazgo
+  sin confirmar" a "confirmado", con las tres señales listadas.
+- `data/enriched/authors_orcid.csv`: `confianza` de "Abara J.F." subida de
+  "media" a "alta" — mismo criterio que ya usan otras filas "alta" con
+  respaldo humano o cruzado. `fuente` se dejó igual ("OpenAlex"): ese
+  campo dice de dónde salió el ORCID, no cuánta corroboración tiene
+  después; la corroboración es lo que ya dice `confianza`.
+
+### Verificación
+
+`python3 src/build/build_all.py`: build 05 sigue en 0 fallas. Como
+`data/processed/` está en `.gitignore` (confirmado con
+`git check-ignore`), un `git diff` ahí siempre da vacío — no es
+verificación válida de impacto público; se verificó directamente sobre
+el JSON generado: `data/processed/authors.json` y
+`data/processed/author/abara-j-f.json` muestran `"orcid_confianza":"alta"`
+para Abara J.F., como se esperaba.
+
+Al verificar el efecto real en el sitio se encontró un bug preexistente,
+sin relación con este cambio: la tabla de `autores.html`
+(`web/assets/js/paginas.js`, función `autores()`) muestra en el tooltip
+del ORCID el texto fijo "ORCID recuperado desde Crossref · confianza
+X" para **toda** fila con ORCID, sin importar la fuente real — 154 de
+~328 filas con ORCID tienen una fuente distinta de Crossref (79
+OpenAlex, 48 ORCID declarado por el titular, 27 revisión humana), así
+que el tooltip les atribuye mal el origen. La ficha individual de cada
+autor sí usa el texto correcto (`orcid_estado`, calculado en
+`03_authors.py`); sólo la tabla del directorio tiene el texto fijo. No se
+corrigió aquí — no formaba parte de lo pedido y toca un componente
+compartido por las 538 fichas — se dejó como sugerencia de tarea aparte
+(`task_596c1939`).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-432 | Se confirma "Fernández Abara, Joaquín Fernández" = "Abara J.F." sin la llamada en vivo a Crossref/OpenAlex que se había recomendado | Ya existía corroboración independiente suficiente en datos que el proyecto ya tenía (OpenAlex, de una sesión anterior) — repetir la consulta no habría cambiado la conclusión, y la red está bloqueada de todas formas |
+| D-433 | El bug del tooltip fijo en `autores.html` se reporta como tarea aparte en vez de corregirse en este cambio | Fuera del alcance de lo pedido (confirmar un hallazgo y actualizar dos archivos puntuales); corregirlo toca un componente compartido por las 538 fichas del directorio, no sólo la de Abara |
+
+### Archivos modificados
+
+```
+internal/scopus_author_search_listado.html   nota actualizada a "confirmado"
+data/enriched/authors_orcid.csv              Abara J.F.: confianza media → alta
+STATE.md, docs/DECISIONS.md                  regenerados
+```
+
+### Supuestos descartados
+
+- Que hacía falta reintentar la consulta a Crossref/OpenAlex antes de dar
+  el hallazgo por confirmado: descartado — la corroboración por ORCID ya
+  existía en `authors_orcid.csv` desde una fuente independiente
+  (OpenAlex), y repetirla no habría añadido evidencia nueva.
+
+### Ambigüedades abiertas
+
+Ninguna nueva. El bug del tooltip queda documentado como tarea aparte,
+no como ambigüedad de este cierre.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente en esta línea de trabajo. El bug del
+tooltip de `autores.html` queda disponible como tarea aparte
+(`task_596c1939`) si se quiere corregir.
