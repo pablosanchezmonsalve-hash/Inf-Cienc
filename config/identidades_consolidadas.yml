@@ -21,8 +21,8 @@
 # Se elige así y no por longitud porque el desempate alfabético
 # publicaba la variante sin tilde teniendo la variante con tilde.
 #
-# Decisiones leídas: 334 · grupos consolidados: 34
-# Fecha de la revisión: 2026-09-01
+# Decisiones leídas: 335 · grupos consolidados: 35
+# Fecha de la revisión: 2026-09-03
 
 grupos:
   - canonica: 'Arenas-Massa Á.'
@@ -114,6 +114,13 @@ grupos:
     variantes:
       - 'Hasbun P.'   # 3 publicaciones
       - 'Hasbún P.'   # 2 publicaciones
+  - canonica: 'Henríquez-Olguín C.'
+    origen: humana
+    variantes:
+      - 'Henriquez-Olguin C.'   # 6 publicaciones
+      - 'Henriquez-Olguín C.'   # 4 publicaciones
+      - 'Henríquez-Olguin C.'   # 1 publicaciones
+      - 'Henríquez-Olguín C.'   # 5 publicaciones
   - canonica: 'Jiménez A.G.'
     origen: humana
     variantes:
