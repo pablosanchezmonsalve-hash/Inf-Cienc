@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `3df26d6` · Merge origin/main: conectores ORCID, informes/, e identidad de Henríqu
+Último commit: `f7397a1` · Corrige el parseo de iniciales dobles en europepmc.py
 Snapshot: 2026-09-03
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 446
+## Decisiones tomadas: 448
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

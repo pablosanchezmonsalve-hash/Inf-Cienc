@@ -9666,3 +9666,62 @@ en CI, y el token de GitHub documentado hacia un archivo versionado
 
 Decidir con el usuario cuál de los hallazgos restantes corregir a
 continuación.
+
+## Cierre: quita la dependencia no declarada de `rich`
+
+### Contexto
+
+El usuario pidió corregir el segundo hallazgo de la revisión de
+`origin/main`: `informes/_consolidar_autores.py` importaba `rich`
+(`from rich import print`, `Console`, `Table`) sin que el paquete
+estuviera en `requirements.txt` — reventaría con `ModuleNotFoundError`
+en cualquier máquina que sólo siguiera el setup documentado.
+
+### Por qué se quitó la dependencia en vez de declararla
+
+`rich` sólo se usaba para el resumen final por consola (una tabla y dos
+líneas de texto en color) — el trabajo real del script (leer las
+fuentes, escribir `informe_autores.md` y `autores_consolidado.csv`) no
+la necesitaba. Agregarla a `requirements.txt` habría sido la corrección
+más corta, pero introduce una dependencia nueva al proyecto por un
+`print` bonito, contra el criterio que el propio `requirements.txt` ya
+declara (versiones acotadas, sólo lo estrictamente necesario, `rich` no
+figura en ningún otro script de los ~40 que tiene `src/enrich/` y
+`src/review/`). Se reemplazó por `print()` plano con el mismo formato
+que usa el resto del proyecto (`f"  {etiqueta:32s}: {valor}"`).
+
+### Verificación
+
+Sintaxis verificada (`ast.parse`). Corrida real contra los datos vigentes
+del repositorio: mismo resumen de siempre (589 formas de firma, 328 con
+ORCID, 38 grupos de identidad), sin errores. `grep` de `import rich` /
+`from rich` en todo el proyecto: cero coincidencias. `informe_autores.md`
+y `autores_consolidado.csv` se regeneraron al probar el script —se
+revirtieron antes de comitear: refrescarlos es una decisión aparte,
+no lo que se pidió acá. `python3 src/audit/run_all.py`: sin cambios.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-447 | Se quita `rich` en vez de declararla en `requirements.txt` | Sólo formateaba el resumen de consola, no el trabajo real del script; el proyecto no usa `rich` en ningún otro lugar, y `requirements.txt` declara explícitamente el criterio de no agregar dependencias más allá de lo necesario |
+| D-448 | No se comitean los `informe_autores.md`/`autores_consolidado.csv` regenerados al probar el arreglo | Refrescarlos con los datos vigentes del repositorio es útil pero es otra tarea, no la que se pidió; comitearlos de paso habría mezclado un cambio de código con 2000+ líneas de datos regenerados sin que nadie lo pidiera |
+
+### Archivos modificados
+
+```
+informes/_consolidar_autores.py    quita rich, usa print() plano
+```
+
+### Ambigüedades abiertas
+
+Ninguna nueva. Siguen sin corregir: los 4 conectores ORCID sin `--test`
+en CI, y el token de GitHub documentado hacia un archivo versionado
+(`config/matching_rules.yml`).
+
+### Próximo paso recomendado
+
+Decidir con el usuario cuál de los dos hallazgos restantes corregir a
+continuación. Si en algún momento se quiere refrescar
+`informe_autores.md`/`autores_consolidado.csv` con los datos vigentes,
+basta con volver a correr `python3 informes/_consolidar_autores.py`.
