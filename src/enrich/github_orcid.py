@@ -25,15 +25,18 @@ Salidas:
     data/cache/github/*.json         respuestas cacheadas (no versionadas)
 
 NOTA: GitHub no permite buscar "ORCID in:bio" sin autenticación. Este script
-solo funciona si se provee un token de GitHub en config/matching_rules.yml bajo
-`enriquecimiento_externo.github.token`. Sin token, el script reporta que no
-hay credenciales disponibles y termina sin error.
+solo funciona si se provee un token en la variable de entorno
+`GITHUB_ORCID_TOKEN` — nunca en un archivo del repositorio, mismo criterio
+que ya siguen orcid_api.py/orcid_expand.py con sus propias credenciales. Sin
+token, el script reporta que no hay credenciales disponibles y termina sin
+error.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -115,6 +118,18 @@ def _extraer_orcid_de_bio(bio: str) -> str | None:
     return m.group(1) if m else None
 
 
+def credenciales() -> str | None:
+    """Token de acceso, del entorno. Nunca de un archivo versionado.
+
+    A diferencia de orcid_api.py, la ausencia de token no detiene el
+    script con un error: esta fuente es opcional y está documentada como
+    inactiva por defecto (ver el docstring del módulo). Su ausencia se
+    informa y el script termina en 0.
+    """
+    tok = os.environ.get("GITHUB_ORCID_TOKEN")
+    return tok.strip() if tok else None
+
+
 # ────────────────────────────────────────────────────────────────── autotest
 
 def autotest() -> int:
@@ -152,16 +167,14 @@ def main() -> int:
         return autotest()
 
     # GitHub requiere autenticación para búsquedas amplias
-    try:
-        cfg = c.load_config("matching_rules.yml")
-        token = (cfg.get("enriquecimiento_externo") or {}).get("github", {}).get("token")
-    except Exception:
-        token = None
+    token = credenciales()
 
     if not token:
         print("\n  GitHub sin token de autenticación.")
-        print("  Para habilitar: agregue enriquecimiento_externo.github.token")
-        print("  en config/matching_rules.yml.")
+        print("  Para habilitar, exporte GITHUB_ORCID_TOKEN antes de ejecutar")
+        print("  — nunca en un archivo del repositorio:\n")
+        print("       export GITHUB_ORCID_TOKEN='ghp_xxxxxxxxxxxxxxxxxxxx'\n")
+        print("     (En PowerShell:  $env:GITHUB_ORCID_TOKEN = 'ghp_...')\n")
         print("  Sin token, la búsqueda por ORCID en bio no está disponible.")
         print("  El script termina sin error.")
         return 0
@@ -172,7 +185,7 @@ def main() -> int:
     print("  o scraping de perfiles individuales. La REST API no soporta")
     print("  búsqueda por contenido de bio sin autenticación completa.")
     print("\n  Para ampliar: considerar usar la GitHub GraphQL API con")
-    print(" 搜索 por ORCID en campos de perfil.")
+    print("  búsqueda por ORCID en campos de perfil.")
     return 0
 
 

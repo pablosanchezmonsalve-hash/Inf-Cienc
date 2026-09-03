@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `9a0bb03` · Quita la dependencia no declarada de rich en informes/_consolidar_auto
+Último commit: `d8c46e2` · Agrega --test de DataCite, Europe PMC, Zenodo y GitHub a CI
 Snapshot: 2026-09-03
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 449
+## Decisiones tomadas: 451
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
