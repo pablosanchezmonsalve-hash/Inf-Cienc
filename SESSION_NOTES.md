@@ -9836,3 +9836,103 @@ todos corregidos.
 ### Próximo paso recomendado
 
 Ninguna acción de código pendiente en esta línea de trabajo.
+
+## Cierre de sesión: fusión a `main`, despliegue confirmado, sitio verificado en navegador
+
+### Contexto
+
+Con los cuatro hallazgos de la revisión de `origin/main` ya corregidos,
+el usuario pidió fusionar esta rama a `main`, luego confirmar que el
+despliegue terminara bien, y por último revisar que el sitio se viera
+bien en un navegador real. Cierre de la sesión completa de hoy
+(2026-09-03): Scopus Author Search, la fusión con el trabajo paralelo de
+`origin/main`, los cuatro hallazgos de esa revisión, y esto.
+
+### Qué se hizo
+
+**Fusión a `main`**: `origin/main` no había avanzado desde que se trajo a
+esta rama más temprano (seguía en `8f6d2bf`), así que fue un
+fast-forward limpio — `main` pasó a `1150920`, el mismo commit que esta
+rama, sin fusión nueva ni conflictos. Antes de empujar se corrieron
+auditoría y build una vez más sobre el estado final; ambos en 0 fallas.
+`git push origin main` sin objeciones — un solo push, sin force.
+
+**Confirmación del despliegue** (`.github/workflows/deploy.yml`, run
+#118, `33800447345`): se monitoreó por la API de GitHub Actions en vez
+de asumir que un push exitoso implica un despliegue exitoso. Hubo un
+susto real a mitad de camino: varias consultas seguidas mostraron el
+paso "Verificar el sitio construido" en `in_progress` durante más de 10
+minutos, contra un baseline de 1m16s de la corrida exitosa anterior —
+suficiente para sospechar un cuelgue genuino, no sólo un runner lento, y
+se le dijo así al usuario en vez de seguir esperando en silencio. La
+siguiente consulta mostró que en realidad ya había terminado en 1m45s
+—las consultas anteriores cayeron en una ventana de latencia de la propia
+API, no un cuelgue real— y que el job `desplegar`
+(`actions/deploy-pages@v4`) también había corrido y terminado limpio.
+Los 4 pasos `--test` agregados hoy (DataCite, Europe PMC, Zenodo,
+GitHub) corrieron en CI por primera vez y pasaron los cuatro. Duración
+total del workflow: 3m20s, sin incidentes reales.
+
+**Verificación visual en navegador**: la URL pública (`github.io`) está
+bloqueada por la política de red de este entorno — confirmado con
+`curl`, no asumido. En su lugar se reconstruyó `dist/` en local desde el
+mismo commit exacto que quedó desplegado (`1150920`) — son los mismos
+archivos que Pages sirve, sin modificar — y se recorrieron con
+Playwright (Chromium preinstalado, `executablePath` explícito, sin
+`playwright install`) las 10 páginas del sitio más una ficha de autor,
+en tema claro y oscuro: 21 cargas, todas HTTP 200 con contenido real,
+cero errores de consola y cero fallos de red. Inspección visual de
+varias capturas: la portada, el directorio de autores (confirma
+Henríquez-Olguín ya consolidado, "87 se fusionaron en 38 personas"), una
+ficha de autor completa, la página de producción ampliada, y
+`indicadores.html` —confirmando que el bug del índice lateral corregido
+antes en esta sesión sigue arreglado—. Se enviaron cuatro capturas al
+usuario.
+
+### Verificación
+
+Ya documentada arriba en cada bloque: auditoría y build en 0 fallas
+antes del push; el propio workflow de CI como verificación independiente
+(30 reglas de auditoría, 21 autopruebas de conectores incluidas las 4
+nuevas, verificación de capa pública/interna, `src/verify/run_all.mjs`
+completo); y la revisión con navegador real como una cuarta capa,
+independiente de las tres anteriores, sobre los artefactos exactos que
+quedaron públicos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-452 | La fusión a `main` se hace por fast-forward, no por un merge commit nuevo | `main` no había avanzado desde que se trajo a esta rama; un fast-forward es la operación más simple que logra el mismo resultado, sin historia adicional que explicar |
+| D-453 | Se le avisa al usuario que el despliegue parece colgado en vez de seguir monitoreando en silencio, aun cuando después resultó ser una falsa alarma | Diez minutos contra un minuto de baseline es una señal real, no ruido — la alternativa (esperar sin decir nada, posiblemente durante horas si de verdad estaba colgado) es peor que una alarma que termina siendo falsa |
+| D-454 | La revisión visual se hace sobre `dist/` reconstruido en local, no sobre la URL pública | La URL pública está bloqueada por la política de red de este entorno (verificado con `curl`, no asumido); `dist/` reconstruido desde el mismo commit es exactamente lo que Pages sirve, sin modificar, así que la verificación es igual de válida |
+
+### Archivos modificados
+
+```
+(ninguno — sesión de verificación, no de código)
+```
+
+### Supuestos descartados
+
+- Que un push exitoso a `main` implica un despliegue exitoso: se verificó
+  el workflow de principio a fin en vez de asumirlo.
+- Que 10+ minutos de "in_progress" en un paso con baseline de 1m16s era
+  sólo lentitud del runner: se trató como sospecha real de cuelgue y se
+  le avisó al usuario, aunque la siguiente consulta mostró que ya había
+  terminado.
+- Que no poder abrir la URL pública era motivo para omitir la revisión
+  visual: se reconstruyó el mismo artefacto en local en su lugar.
+
+### Ambigüedades abiertas
+
+Ninguna sobre este cierre. Quedan, de cierres anteriores, sin resolver:
+los dos hallazgos "al margen" de Scopus Author Search (Fortuny como
+candidato de Varios Scopus ID pendiente de decisión; el bug del tooltip
+fijo en `autores.html`, `task_596c1939`, sin ejecutar).
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente. El sitio está desplegado, verificado
+por CI y por revisión visual directa, y `main`/esta rama están
+sincronizadas. Sesión cerrada.
