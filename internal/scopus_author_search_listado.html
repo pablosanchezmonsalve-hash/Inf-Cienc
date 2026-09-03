@@ -156,9 +156,9 @@ simplemente no tiene — no hay evidencia para decidir cuál.</p>
     <li><b>Andrade, Megumi Andrade</b> = Kobayashi M.A. — apellido compuesto, el corpus usa el
       otro segmento como apellido</li>
     <li><b>Ayala Munita, Matías León</b> = Ayala M. — apellido compuesto truncado</li>
-    <li><b>Amarouch García, Ismael Amarouch</b> = Amarouch García I. <i>y</i> García I.A. — el
-      propio proyecto ya tenía este Auth-ID resuelto bajo dos firmas propias sin consolidar
-      (más una tercera, "Amarouch I.", sin ORCID); no es algo que introduce este documento</li>
+    <li><b>Amarouch García, Ismael Amarouch</b> = Amarouch García I. / García I.A. / Amarouch I.
+      — el propio proyecto ya tenía este Auth-ID resuelto bajo tres firmas propias sin
+      consolidar; las tres se fusionaron en una sola identidad (ver nota abajo)</li>
     <li><b>Bustos Arriagada, Edson</b> = Bustos-Arriagada E. — espacio vs. guion</li>
     <li><b>Díaz, F. R.</b> = Diaz F. / Díaz F. — variante con/sin tilde</li>
     <li><b>Letelier Widow, Gonzalo Letelier</b> = Letelier Widow G. — la fuente repite
@@ -182,7 +182,7 @@ simplemente no tiene — no hay evidencia para decidir cuál.</p>
 <table>
   <thead><tr><th>Nombre (Scopus)</th><th>Firma corta</th><th>ORCID (Scopus Author Search)</th></tr></thead>
   <tbody>
-    <tr style="background:#dafbe1"><td>Amarouch García, Ismael Amarouch</td><td>Amarouch García I.A.</td><td><code>0000-0003-2444-8179</code> — confirmado = "Amarouch García I." / "García I.A."</td></tr>
+    <tr style="background:#dafbe1"><td>Amarouch García, Ismael Amarouch</td><td>Amarouch García I.A.</td><td><code>0000-0003-2444-8179</code> — confirmado y consolidado en una sola ficha: "Amarouch García I."</td></tr>
     <tr style="background:#dafbe1"><td>Andrade, Megumi Andrade</td><td>Andrade M.A.</td><td><code>0000-0002-6004-1301</code> — confirmado = "Kobayashi M.A."</td></tr>
     <tr style="background:#dafbe1"><td>Ayala Munita, Matías León</td><td>Ayala Munita M.L.</td><td><code>0000-0002-9372-1645</code> — confirmado = "Ayala M."</td></tr>
     <tr><td>Barros, Joaquín Reyes</td><td>Barros J.R.</td><td><code>0000-0002-0665-6452</code></td></tr>
@@ -208,17 +208,23 @@ simplemente no tiene — no hay evidencia para decidir cuál.</p>
   </tbody>
 </table>
 
+<div class="flag confirmado">
+  <strong>(1) Resuelto (2026-09-03):</strong> "Amarouch García, Ismael Amarouch" confirmó el
+  mismo Auth-ID (57339772200) bajo <em>tres</em> firmas del proyecto sin consolidar entre sí
+  ("Amarouch García I.", "García I.A." y "Amarouch I."). Se consolidaron en una sola identidad
+  vía <code>internal/identity_decisions.csv</code> (caso <code>sas-amarouch</code>) +
+  <code>src/review/apply_decisions.py</code> — el mismo mecanismo del proyecto para toda fusión
+  de firmas (D-08: nunca por heurística). Forma canónica resultante: "Amarouch García I." (3
+  publicaciones combinadas, ORCID <code>0000-0003-2444-8179</code> a confianza alta).
+</div>
+
 <div class="flag">
-  <strong>Dos hallazgos al margen, sin resolver:</strong>
-  (1) "Amarouch García, Ismael Amarouch" resultó confirmar el mismo Auth-ID bajo <em>dos</em>
-  firmas del proyecto sin consolidar entre sí ("Amarouch García I." y "García I.A.", más una
-  tercera, "Amarouch I.", sin ORCID) — es una inconsistencia interna previa a este documento, no
-  algo que Scopus Author Search introduce; queda para revisión aparte, no se tocó aquí.
-  (2) "Fortuny, Esteban Fortuny" no encaja en el patrón de apellido compuesto, pero su ORCID
-  coincide exacto con "Fortuny E." ya asignado en el proyecto — bajo un Auth-ID
-  <strong>distinto</strong> (59254638800 en el corpus, frente a 57203373183 en Scopus Author
-  Search). Es fragmentación de perfil Scopus, el mismo fenómeno de "Varios Scopus ID" ya
-  revisado para Moya/Hartmann/Quezada/Torres — no se aplicó ninguna decisión, queda pendiente.
+  <strong>(2) Sin resolver:</strong> "Fortuny, Esteban Fortuny" no encaja en el patrón de
+  apellido compuesto, pero su ORCID coincide exacto con "Fortuny E." ya asignado en el proyecto
+  — bajo un Auth-ID <strong>distinto</strong> (59254638800 en el corpus, frente a 57203373183
+  en Scopus Author Search). Es fragmentación de perfil Scopus, el mismo fenómeno de "Varios
+  Scopus ID" ya revisado para Moya/Hartmann/Quezada/Torres — no se aplicó ninguna decisión,
+  queda pendiente.
 </div>
 
 <div class="footer">
