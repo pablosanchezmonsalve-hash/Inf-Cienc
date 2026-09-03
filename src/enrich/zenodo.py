@@ -106,8 +106,13 @@ def _cache_path(doi: str) -> Path:
     return CACHE / (re.sub(r"[^a-zA-Z0-9]+", "_", doi)[:120] + ".json")
 
 
-def consultar(doi: str, pausa: float = 0.12) -> dict | None:
-    """Un DOI por consulta. Cachea en disco."""
+def consultar(doi: str, pausa: float = 1.2) -> dict | None:
+    """Un DOI por consulta. Cachea en disco.
+
+    La pausa por defecto es 1.2 s porque Zenodo aplica rate limiting estricto
+    (HTTP 429) a consultas anónimas más frecuentes que ~1/s. Sin cabeceras de
+    API key, respetar ese ritmo es la única forma fiable de completar el corpus.
+    """
     path = _cache_path(doi)
     if path.exists():
         raw = path.read_text(encoding="utf-8")

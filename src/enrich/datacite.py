@@ -61,6 +61,30 @@ class ContratoDesconocido(Exception):
     """La respuesta no tiene la forma esperada."""
 
 
+def _id_orcid(name_identifiers) -> str:
+    """Extrae el ORCID de un campo `nameIdentifiers` de DataCite.
+
+    DataCite lo devuelve como una LISTA de dicts, cada uno con `name` y
+    `nameIdentifier` (un nombre de esquema distinto puede compartir la lista).
+    Algunas respuestas lo dan como dict si hay un único identificador. Se manejan
+    ambas formas.
+    """
+    if isinstance(name_identifiers, dict):
+        items = [name_identifiers]
+    elif isinstance(name_identifiers, list):
+        items = name_identifiers
+    else:
+        items = []
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        scheme = str(it.get("nameIdentifierScheme") or "").upper()
+        raw = str(it.get("nameIdentifier") or "")
+        if "ORCID" in scheme or "orcid.org" in raw:
+            return raw.rstrip("/").split("/")[-1]
+    return ""
+
+
 # ────────────────────────────────────────────────── extracción de la respuesta
 
 def extraer(data: dict) -> dict:
@@ -82,14 +106,7 @@ def extraer(data: dict) -> dict:
 
     for c_item in creators:
         nombre = (c_item.get("name") or "").strip()
-        orcid_url = (c_item.get("nameIdentifiers") or {}).get(
-            "nameIdentifier", {}
-        )
-        if isinstance(orcid_url, dict):
-            orcid_url = orcid_url.get("nameIdentifier", "")
-        orcid = ""
-        if "orcid.org" in str(orcid_url):
-            orcid = str(orcid_url).rstrip("/").split("/")[-1]
+        orcid = _id_orcid(c_item.get("nameIdentifiers"))
 
         if nombre:
             partes = nombre.split()
@@ -104,14 +121,7 @@ def extraer(data: dict) -> dict:
         if role not in ("Researcher", "ContactPerson", "HostingInstitution"):
             continue
         nombre = (cont.get("name") or "").strip()
-        orcid_url = (cont.get("nameIdentifiers") or {}).get(
-            "nameIdentifier", {}
-        )
-        if isinstance(orcid_url, dict):
-            orcid_url = orcid_url.get("nameIdentifier", "")
-        orcid = ""
-        if "orcid.org" in str(orcid_url):
-            orcid = str(orcid_url).rstrip("/").split("/")[-1]
+        orcid = _id_orcid(cont.get("nameIdentifiers"))
 
         if nombre:
             partes = nombre.split()
@@ -169,30 +179,30 @@ DATACITE_EJEMPLO = {
             "creators": [
                 {
                     "name": "Marcela Diaz",
-                    "nameIdentifiers": {
-                        "nameIdentifier": {
+                    "nameIdentifiers": [
+                        {
                             "nameIdentifierScheme": "ORCID",
                             "nameIdentifier": "https://orcid.org/0000-0002-1825-0097",
                         }
-                    },
+                    ],
                 },
-                {"name": "Juan Perez", "nameIdentifiers": {}},
+                {"name": "Juan Perez", "nameIdentifiers": []},
             ],
             "contributors": [
                 {
                     "name": "Ana Test",
                     "contributorType": "Researcher",
-                    "nameIdentifiers": {
-                        "nameIdentifier": {
+                    "nameIdentifiers": [
+                        {
                             "nameIdentifierScheme": "ORCID",
                             "nameIdentifier": "https://orcid.org/0000-0001-1111-1111",
                         }
-                    },
+                    ],
                 },
                 {
                     "name": "Editor X",
                     "contributorType": "Editor",
-                    "nameIdentifiers": {},
+                    "nameIdentifiers": [],
                 },
             ],
         },
@@ -205,6 +215,20 @@ def autotest() -> int:
 
     def caso(n, ok, obs=None):
         casos.append((n, ok, obs))
+
+    # El helper maneja tanto lista como dict de nameIdentifiers.
+    caso("lista de nameIdentifiers: extrae ORCID",
+         _id_orcid([{"nameIdentifierScheme": "ORCID",
+                     "nameIdentifier": "https://orcid.org/0000-0002-1825-0097"}])
+         == "0000-0002-1825-0097")
+    caso("dict de nameIdentifiers: extrae ORCID",
+         _id_orcid({"nameIdentifierScheme": "ORCID",
+                    "nameIdentifier": "https://orcid.org/0000-0002-1825-0097"})
+         == "0000-0002-1825-0097")
+    caso("sin scheme ORCID ni URL orcid: no extrae",
+         _id_orcid([{"nameIdentifierScheme": "ISNI",
+                     "nameIdentifier": "0000-0000-0000-0000"}]) == "")
+    caso("lista vacía: no extrae", _id_orcid([]) == "")
 
     d = extraer(DATACITE_EJEMPLO)
     caso("extrae creadores con ORCID",
