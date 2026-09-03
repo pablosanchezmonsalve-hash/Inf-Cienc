@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `c86075e` · Merge origin/main: incorpora el fix del tooltip ORCID (PR #39)
+Último commit: `4d23df6` · Addendum de cierre: reconciliación con PR #39 (fix del tooltip ORCID)
 Snapshot: 2026-09-03
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 456
+## Decisiones tomadas: 458
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
