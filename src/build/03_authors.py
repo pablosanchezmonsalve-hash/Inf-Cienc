@@ -450,6 +450,7 @@ def main() -> None:
             # y esconderlo en el detalle obliga a abrir 589 fichas para usarlo.
             "orcid": (orcid_map.get(nombre) or {}).get("orcid"),
             "orcid_confianza": (orcid_map.get(nombre) or {}).get("confianza"),
+            "orcid_estado": estado_orcid(nombre, fuente_orcid),
             "orcid_veredicto": veredicto,
             "orcid_veredicto_etiqueta": etiqueta,
             "orcid_veredicto_clase": clase,

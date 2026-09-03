@@ -574,7 +574,7 @@ async function autores() {
       <td>${a.orcid
         ? `<a class="etiqueta-en-linea etiqueta-orcid" href="https://orcid.org/${c.escapar(a.orcid)}"
              target="_blank" rel="noopener"
-             title="ORCID recuperado desde Crossref · confianza ${c.escapar(a.orcid_confianza || '')}"
+             title="ORCID: ${c.escapar(a.orcid_estado)} · confianza ${c.escapar(a.orcid_confianza || '')}"
              >${c.escapar(a.orcid)}</a>`
           // Se marca todo lo que NO sea una verificación independiente. Las
           // verificadas son la norma y etiquetarlas sería ruido; el resto dice
