@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head data-titulo="Fuentes externas — Informe Bibliométrico"
+      data-descripcion="Publicaciones con autores afiliados a la UFT recuperadas de fuentes institucionales fuera del corpus Scopus/SciVal."></head>
+<body data-pagina="fuentesexternas">
+<a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+<header class="cabecera" id="cabecera"></header>
+<div class="vigencia" id="vigencia"></div>
+<main id="contenido" class="contenedor">
+  <header class="portada-cabecera">
+    <div class="portada-id">
+      <h1>Fuentes externas al corpus Scopus</h1>
+      <p class="portada-sub">Publicaciones con autores afiliados a la UFT recuperadas de fuentes institucionales no indexadas en Scopus/SciVal.</p>
+    </div>
+  </header>
+
+  <div class="nota-destacada" id="aviso-fuentes"></div>
+
+  <div class="kpis" id="kpis-fuentes"></div>
+
+  <div id="estado-recorte"></div>
+
+  <div class="explorador">
+    <aside class="explorador-panel" aria-label="Filtros">
+      <h2 class="solo-lectores">Filtrar las publicaciones</h2>
+      <div id="controles"></div>
+    </aside>
+
+    <div class="explorador-resultado">
+      <div class="acciones-tabla">
+        <span id="estado-seleccion" class="nota" aria-live="polite"></span>
+        <button class="boton boton-primario" id="exportar">Exportar CSV</button>
+      </div>
+      <div class="tabla-envoltura"><table>
+    <thead><tr>
+      <th scope="col">Año</th><th scope="col">Título y autor UFT</th><th scope="col">Fuente</th>
+      <th scope="col">Tipo</th></tr></thead>
+    <tbody id="tabla-cuerpo"></tbody></table></div>
+      <div class="paginacion" id="paginacion"></div>
+    </div>
+  </div>
+
+  <section class="modulo" id="seccion-autores">
+    <header><h2>Autores UFT en fuentes externas</h2></header>
+    <div class="tabla-envoltura"><table>
+      <thead><tr>
+        <th scope="col" data-orden="nombre">Autor</th>
+        <th scope="col" class="num" data-orden="obras_facultad_medicina">Fac. Medicina</th>
+        <th scope="col" class="num" data-orden="obras_dspace">DSpace</th>
+        <th scope="col" class="num" data-orden="obras_autoarchivo">Autoarchivo</th>
+        <th scope="col" class="num" data-orden="total">Total</th>
+      </tr></thead>
+      <tbody id="tabla-autores"></tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="pie" id="pie"></footer>
+<script type="module" src="assets/js/paginas.js"></script>
+</body>
+</html>

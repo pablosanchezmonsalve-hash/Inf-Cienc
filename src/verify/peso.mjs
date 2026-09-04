@@ -41,7 +41,7 @@ const KB = 1024;
 const TECHOS = [
   ['CSS', 60, 'recomendación de presupuesto para móvil'],
   ['JavaScript', 150, 'recomendación de presupuesto para móvil'],
-  ['Datos', 250, 'margen sobre lo medido; el corpus crece cada año'],
+  ['Datos', 300, 'margen sobre lo medido; corpus crece + fuentes externas'],
 ];
 
 function pesar(archivos) {

@@ -89,6 +89,7 @@ export const PAGINAS = [
   ['tematica.html', 'Áreas temáticas'],
   ['autores.html', 'Autores'],
   ['publicaciones.html', 'Publicaciones'],
+  ['fuentes-externas.html', 'Fuentes externas'],
   ['indicadores.html', 'Indicadores'],
   ['metodologia.html', 'Metodología'],
 ];
@@ -104,7 +105,7 @@ export const NAV_GRUPOS = [
   },
   {
     nombre: 'Datos',
-    paginas: ['autores.html', 'publicaciones.html'],
+    paginas: ['autores.html', 'publicaciones.html', 'fuentes-externas.html'],
   },
   {
     nombre: 'Sobre este informe',

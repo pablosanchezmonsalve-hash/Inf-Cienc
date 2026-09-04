@@ -202,6 +202,34 @@ async function main() {
       html = rellenar(html, 'modulos',
         v.paginaModulos(codigos, series, ejes[clave], await leerJSON('catalogo.json')), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    } else if (tipo === 'fuentesexternas') {
+      const a = [];
+      try {
+        const fe = await leerJSON('fuentes_externas.json');
+        const { meta: fm, resumen, publicaciones: fp, autores: fa } = fe;
+        html = rellenar(html, 'aviso-fuentes',
+          `<b>Sobre este listado</b> ${c.escapar(fm.advertencia)}`, a);
+        html = rellenar(html, 'kpis-fuentes',
+          `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_publicaciones)}</div><div class="etiqueta">Publicaciones fuera de Scopus</div></article>`
+          + `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_autores)}</div><div class="etiqueta">Autores UFT</div></article>`
+          + `<article class="kpi"><div class="valor">${c.nf.format(fm.universo_scopus_dois)}</div><div class="etiqueta">DOIs en universo Scopus</div></article>`, a);
+        // Primera página de la tabla (50 filas), suficiente para sin-JS.
+        const pag = fp.slice(0, 50);
+        const tablaHtml = pag.map(p => `<tr><td>${p.anio || ''}</td>`
+          + `<td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>` : c.escapar(p.titulo)}<br><span class="nota">${c.escapar(p.autor_uft)}</span></td>`
+          + `<td>${c.escapar(p.fuente)}</td><td>${c.escapar(p.tipo)}</td></tr>`).join('');
+        html = rellenar(html, 'tabla-cuerpo', tablaHtml, a);
+        // Autores
+        const autoresHtml = fa.map(au => `<tr><td>${c.escapar(au.nombre)}</td>`
+          + `<td class="num">${au.obras_facultad_medicina || ''}</td>`
+          + `<td class="num">${au.obras_dspace || ''}</td>`
+          + `<td class="num">${au.obras_autoarchivo || ''}</td>`
+          + `<td class="num">${au.total}</td></tr>`).join('');
+        html = rellenar(html, 'tabla-autores', autoresHtml, a);
+      } catch (e) {
+        console.error(`  fuentes-externas.html: sin datos fuentes_externas.json (${e.message})`);
+      }
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     }
 
     if (html.length !== antes) { await writeFile(ruta, html, 'utf8'); total++; }

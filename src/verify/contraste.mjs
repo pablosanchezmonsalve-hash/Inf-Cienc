@@ -21,7 +21,7 @@ import { abrir } from './navegador.mjs';
 
 const PORT = process.env.PUERTO || 8841;
 const PAGINAS = ['index', 'produccion', 'impacto', 'colaboracion', 'tematica',
-  'autores', 'publicaciones', 'indicadores', 'metodologia', 'autor'];
+  'autores', 'publicaciones', 'fuentes-externas', 'indicadores', 'metodologia', 'autor'];
 
 const medir = () => {
   const lin = c => (c /= 255, c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4);
