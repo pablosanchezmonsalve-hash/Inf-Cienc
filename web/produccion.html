@@ -37,7 +37,14 @@
            autor×publicación —un criterio distinto al resto de la página—
            vía construirArbol() en visualizations/treemap.js, verificado
            línea a línea contra 07_hierarchy.py; ver la nota cruzada de
-           más abajo. -->
+           más abajo.
+
+           Viven DENTRO de .explorador-resultado, en la columna derecha del
+           explorador: así el panel de filtros (sticky a la izquierda) NUNCA
+           los tapa al hacer scroll. Se probó sacarlos a ancho completo
+           (~1172px) pero el mapa invadía la columna del panel sticky y éste,
+           al scrollear, tapaba la parte izquierda del mapa ("choca con los
+           filtros"). Se vuelve a la columna derecha (~872px). -->
       <h2 class="titulo-seccion">Jerarquía y temáticas</h2>
       <div class="bento-grid">
         <div class="bento-card bento-ancha">

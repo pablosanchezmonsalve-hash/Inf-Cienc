@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `c70662e` · Zenodo: la plantilla no se pudo verificar, así que la corrida la resue
+Último commit: `61fb194` · Asistente de purga: cuatro defectos corregidos, verificados en laborat
 Snapshot: 2026-09-04
 
 ---
