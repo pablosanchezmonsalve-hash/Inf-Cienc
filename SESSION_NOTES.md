@@ -10675,3 +10675,185 @@ Ninguna acción de código pendiente de este cierre específico. El
 inventario completo de trabajo pendiente del proyecto —agregando lo que
 esta auditoría no tocó— se entrega en la respuesta al usuario, no aquí,
 porque así se pidió explícitamente.
+
+## Cierre: se ejecuta todo el trabajo de identidad que era posible sin red externa
+
+### Contexto
+
+El usuario preguntó, del trabajo pendiente que dejó la auditoría anterior,
+qué podía hacer yo mismo sin depender de credenciales, acceso
+institucional o una decisión que no me corresponde. Tras listar lo que sí
+podía hacer (Tier B, Tier C, sincronizar Hartmann/Quezada/Torres,
+revisar Gómez/Macho, investigar la contradicción de Moya, la ambigüedad
+de `docs/INDICATORS.md`), pidió llevarlo todo adelante.
+
+### Qué se hizo
+
+1. **Sincronizar Hartmann Schatloff/Quezada/Torres** en
+   `internal/scopus_author_search_multiples_id.csv`: ya tenían veredicto
+   `misma` desde 2026-09-02 en `identity_decisions.csv`, nunca aplicado a
+   esta cola más nueva. Mismo mecanismo que Fortuny/Moya. De la cola
+   "Varios Scopus ID" sólo quedan pendientes Cabello y Caffarena (sin
+   evidencia local suficiente para ninguno de los dos).
+
+2. **Tier B (13 grupos)**: antes de escribir cualquier nota se corrió
+   `auth_ids_por_firma()` (`src/enrich/scopus_author_search.py`) sobre
+   cada par/trío para ver si comparten Auth-ID de Scopus por posición —el
+   mismo cruce que resolvió Fernández Abara. Resultado: 5 grupos comparten
+   el mismo Auth-ID en TODAS sus formas (silva, casalshill, crisostomo,
+   prieto, benites) — evidencia máxima, es el mismo perfil de autor en
+   Scopus. Los demás tienen al menos un miembro con Auth-ID distinto, pero
+   ninguno sin corroboración: `matching_log.csv` mostró coherencia de
+   unidad/afiliación total en cada uno (mismo centro de investigación
+   exacto, misma combinación de afiliaciones inusual, o coautoría
+   compartida con otro miembro ya confirmado del lote — Benites M.H. y
+   Van Sint Jan N. resultaron ser parte del mismo equipo de Medicina
+   Intensiva que Ferre A., coautores en los mismos EID exactos). Los 13 se
+   verificaron contra `config/orcid_revisado.yml` (lista `retiradas`)
+   antes de escribir nada: 0 conflictos.
+
+3. **Tier C (Bilicic D. / Ubierna D.B.B.)**: no tenía ningún segmento de
+   apellido en común, por eso había quedado sin clasificar. El nombre
+   completo del export nativo de Scopus lo resuelve: un registro declara
+   «Ubierna, Daniza Belén Bilicic» — el mismo nombre de pila exacto
+   («Daniza») que el otro registro («Bilicic, Daniza»). Apellido compuesto
+   partido de forma distinta por Scopus, mismo patrón que Letelier
+   Widow/Jaime Phillips confirmado antes en esta sesión.
+
+4. **Gómez G./Gómez G.G. y Macho R.A.M./Macho R.M.**: en la revisión
+   anterior (Tier A) quedaron retenidos por evidencia débil (ORCID de
+   fuente única no independiente, sin corroboración de unidad). Al
+   correr el mismo cruce por Auth-ID que sí se había hecho para el Tier B,
+   se encontró que AMBOS pares comparten el mismo Auth-ID de Scopus —
+   evidencia máxima que no depende del ORCID en absoluto. Corrección sobre
+   mi propia evaluación anterior: no era evidencia débil, era una
+   verificación incompleta (nunca se había hecho el cruce por posición
+   para estos dos). Al escribir la decisión de «Gómez» se encontró además
+   que el ORCID que ambas firmas tenían asignado (0000-0001-5193-2738) ya
+   estaba en la lista de `retiradas` de `config/orcid_revisado.yml` —una
+   decisión previa e independiente en cada firma (2026-09-01) lo había
+   calificado de incorrecto para las dos. Se escribió la nota SIN usar ese
+   ORCID como respaldo, apoyándose sólo en el Auth-ID: la fusión de firmas
+   no depende de qué ORCID tenga o no asignado el pipeline.
+
+5. **Contradicción de Moya/Moyano** (declarada en un cierre anterior sin
+   resolver): se buscó el ORCID en disputa (0000-0002-6357-3469) en
+   `data/raw/Inventario_Repositorio_Institucional_UFT.csv` y apareció en 2
+   registros, cada uno con un único autor («Moyano Dávila, Camila») y un
+   único ORCID declarado sin ambigüedad — evidencia nueva a favor de que
+   el ORCID SÍ es correcto, en tensión con el veredicto `orcid_incorrecto`
+   de 2026-08-26 (sin nota que explique por qué). **No se aplicó**: se
+   verificó que `apply_decisions.py` está diseñado para DETENERSE (no
+   desempatar) si una misma firma queda con veredictos `orcid_correcto` y
+   `orcid_incorrecto` a la vez a través de dos filas de
+   `identity_decisions.csv` (`veredictos_orcid()`, "no se desempata: se
+   detiene"). Agregar una decisión nueva sin tocar la vieja habría roto la
+   aplicación de TODAS las decisiones, no sólo ésta. Se documenta la
+   evidencia nueva para que una persona la use; no se fuerza una
+   resolución.
+
+6. **Ambigüedad de `docs/INDICATORS.md`** (el párrafo que decía "el total
+   es 28" sin cuadrar con la tabla): se rastreó con `git log -S` y
+   `git blame`. El commit `d68ae5c` (2026-09-01) escribió tabla y prosa
+   coherentes en 28. Una auditoría paralela (`644ec74`) subió la tabla a
+   29 sin tocar la prosa — ahí nació la desincronía. Mi propia auditoría
+   la subió después a 31. Se corrigió sin volver a hardcodear un número
+   que ya se desincronizó dos veces: la prosa ahora remite a la cifra de
+   la tabla en vez de repetirla. De paso se encontró que "5 llevan
+   advertencia destacada" también estaba desactualizado (ya son 8: se
+   sumaron PD-01/PD-02/PD-03 sin actualizar esta lista).
+
+7. Tras aplicar las 16 fusiones nuevas (13 Tier B + Bilicic/Ubierna +
+   Gómez + Macho), se corrió el pipeline de build completo
+   (`build_all.py`, `06_assemble_site.py`, `node src/verify/run_all.mjs`)
+   para obtener la cifra real (513 entidades, antes 530) y se propagó a
+   los mismos 9 documentos corregidos en el cierre anterior, con el mismo
+   cuidado de no tocar las menciones que miden otra cosa (n<5, snapshots
+   fechados). Se recalculó también la tabla de cobertura ORCID por tramo
+   de publicaciones en `docs/ORCID_COVERAGE.md` (estaba desactualizada
+   desde antes de esta sesión: sumaba 542, no 530).
+
+### Verificación
+
+- `auth_ids_por_firma()` corrido para los 15 grupos (13 Tier B + Gómez +
+  Macho) antes de escribir cualquier nota, no después.
+- Cruce contra `config/orcid_revisado.yml` (`retiradas`) para los 16
+  grupos aplicados: 1 conflicto real (Gómez), resuelto reescribiendo la
+  nota para no depender del ORCID en disputa.
+- `apply_decisions.py --dry-run` corrido después de cada tanda antes de
+  aplicar de verdad; sin avisos de contradicción nuevos en ninguna
+  corrida.
+- `git diff --stat` sobre `config/orcid_revisado.yml` y
+  `config/firmas_e09_resueltas.yml` tras aplicar: sólo cambió la fecha de
+  cabecera, no el contenido — confirma que estas 16 fusiones no tocan
+  ninguna asignación de ORCID, sólo agrupan formas de firma.
+- Build completo + `node src/verify/run_all.mjs` (6/6 en verde) corridos
+  sobre el estado final antes de dar por buena la cifra de 513.
+- Enlaces Markdown reverificados tras todas las ediciones: 0 rotos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-467 | Se aplican 13 fusiones nuevas (Tier B) usando el cruce por Auth-ID de Scopus por posición como evidencia principal, no la coincidencia ortográfica | Es el mismo método ya validado esta sesión para Fernández Abara; da evidencia máxima cuando el Auth-ID coincide, y sigue siendo sólida cuando no coincide pero hay coherencia de unidad/afiliación/coautoría |
+| D-468 | Gómez y Macho se reclasifican de "evidencia débil, retenidos" a "aplicados", corrigiendo una evaluación propia anterior | La evaluación anterior nunca corrió el cruce por Auth-ID que sí se hizo para el Tier B; al correrlo, ambos pares comparten Auth-ID — evidencia independiente del ORCID que los había hecho parecer débiles |
+| D-469 | La contradicción de Moya/Moyano se documenta con evidencia nueva pero NO se fuerza a resolución | `apply_decisions.py` está diseñado para detenerse ante una firma con veredictos ORCID contradictorios, no para desempatar; forzar una decisión nueva sin resolver la vieja habría roto la aplicación de todas las demás decisiones de esta sesión |
+| D-470 | La prosa de `docs/INDICATORS.md` deja de repetir la cifra de "publicados" y remite a la tabla | Es la tercera vez que este número se desincroniza entre tabla y prosa (28→29→31); repetirlo por cuarta vez sólo pospone el mismo error |
+
+### Archivos modificados
+
+```
+internal/scopus_author_search_multiples_id.csv     Hartmann/Quezada/Torres sincronizados
+internal/scopus_author_search_decisiones.csv       + 3 filas de sincronización
+internal/identity_decisions.csv                    + 16 decisiones (Tier B, Bilicic/Ubierna, Gómez, Macho)
+config/identidades_consolidadas.yml                48→51 grupos, 117→123 formas
+config/firmas_e09_resueltas.yml, orcid_revisado.yml  sólo fecha de cabecera
+docs/INDICATORS.md                                 P-06, AU-05, footnote, párrafo "28"→remite a tabla, advertencias 5→8
+docs/ORCID_COVERAGE.md, docs/ARCHITECTURE.md,
+docs/AUTHOR_PROFILE.md, docs/DEPLOYMENT.md,
+docs/FUENTES_Y_APIS.md, docs/LIMITATIONS.md,
+docs/V2_BACKLOG.md, README.md                      530→513, 268→252, narrativa V2-01 extendida
+STATE.md, docs/DECISIONS.md                         regenerados (post-build real)
+docs/BUILD_VERIFICATION.md                          regenerado por el build
+SESSION_NOTES.md                                    este cierre
+```
+
+### Supuestos descartados
+
+- Que la evaluación anterior de Gómez/Macho (Tier A) era definitiva: no
+  lo era — le faltaba el cruce por Auth-ID que sí se aplicó al Tier B
+  inmediatamente después, y que revierte la conclusión.
+- Que encontrar evidencia nueva a favor de un veredicto ORCID contradicho
+  bastaba para aplicarlo: técnicamente no se puede sin antes decidir qué
+  pasa con la fila vieja, y esa decisión —tocar o no una fila de historial
+  ya escrita por una persona— no es mía por regla del proyecto (D-462) ni
+  seguro de hacer sin romper el resto de la aplicación.
+
+### Ambigüedades abiertas
+
+Las mismas que quedaron del cierre anterior, con un matiz nuevo en Moya/
+Moyano: ahora hay evidencia adicional (repositorio institucional,
+`Moyano Dávila, Camila`, 2 registros sin ambigüedad) a favor de que el
+ORCID en disputa SÍ es correcto, pero la contradicción técnica en
+`identity_decisions.csv` sigue sin resolverse — alguien tiene que decidir
+si la fila `noverif-Moyano Davila C.`/`noverif-Moyano Dávila C.`
+(2026-08-26, sin nota) se retira o se deja, antes de que se pueda aplicar
+cualquier veredicto nuevo sobre esa firma.
+
+Siguen sin tocar: los 5 casos restantes de "Varios Scopus ID" quedaron en
+2 (Cabello, Caffarena); Tier B/C ya no existen como pendiente, quedaron
+aplicados; los 82 casos de `internal/pendientes_consolidacion.md`; y las
+tres propuestas de funcionalidad (V2-10/11/12) que el usuario también
+pidió llevar adelante, entregadas como respuesta directa en vez de cierre
+de sesión porque son features nuevas, no continuación de revisión.
+
+### Próximo paso recomendado
+
+Si se quiere seguir con identidad: revisar la contradicción de Moya/
+Moyano con la evidencia nueva de este cierre, o encolar candidatos
+nuevos con `auth_ids_por_firma()` sobre el resto de `authors_orcid.csv`
+(el método demostró encontrar casos que el ORCID-fuente-única por sí solo
+no alcanzaba a resolver con confianza). Fuera de identidad: correr
+`make sitio` y desplegar si se quiere que estas 16 fusiones lleguen al
+sitio público (hoy sólo están en `data/processed/`, gitignored, no
+comprometidas a `main`).

@@ -21,8 +21,8 @@
 # Se elige así y no por longitud porque el desempate alfabético
 # publicaba la variante sin tilde teniendo la variante con tilde.
 #
-# Decisiones leídas: 424 · grupos consolidados: 39
-# Fecha de la revisión: 2026-09-03
+# Decisiones leídas: 440 · grupos consolidados: 51
+# Fecha de la revisión: 2026-09-04
 
 grupos:
   - canonica: 'Amarouch García I.'
@@ -46,6 +46,11 @@ grupos:
     variantes:
       - 'Ballesteros P.'   # 1 publicaciones
       - 'Ballesteros P. P.'   # 1 publicaciones
+  - canonica: 'Benites M.H.'
+    origen: humana
+    variantes:
+      - 'Benites M.'   # 1 publicaciones
+      - 'Benites M.H.'   # 5 publicaciones
   - canonica: 'Busquets-Losada P.'
     origen: humana
     variantes:
@@ -56,6 +61,11 @@ grupos:
     variantes:
       - 'Cancino-Lopez J.'   # 4 publicaciones
       - 'Cancino-López J.'   # 8 publicaciones
+  - canonica: 'Casals-Hill A.'
+    origen: humana
+    variantes:
+      - 'Casals-Hill A.'   # 1 publicaciones
+      - 'Hill A.C.'   # 1 publicaciones
   - canonica: 'Castillo-Valenzuela O.'
     origen: humana
     variantes:
@@ -78,6 +88,13 @@ grupos:
     variantes:
       - 'Crisóstomo Flores P.'   # 1 publicaciones
       - 'Crisóstomo-Flores P.'   # 1 publicaciones
+      - 'Flores P.C.'   # 2 publicaciones
+  - canonica: 'De la Fuente M.'
+    origen: humana
+    variantes:
+      - 'De la Fuente M.'   # 2 publicaciones
+      - 'Fuente M.D.L.'   # 1 publicaciones
+      - 'de la Fuente M.'   # 1 publicaciones
   - canonica: 'Domínguez A.'
     origen: humana
     variantes:
@@ -88,6 +105,16 @@ grupos:
     variantes:
       - 'Diaz F.'   # 7 publicaciones
       - 'Díaz F.'   # 14 publicaciones
+  - canonica: 'Ferre A.'
+    origen: humana
+    variantes:
+      - 'Ferre A.'   # 25 publicaciones
+      - 'Ferre Contreras A.'   # 1 publicaciones
+  - canonica: 'Figueroa D.'
+    origen: humana
+    variantes:
+      - 'Figueroa D.'   # 2 publicaciones
+      - 'Figueroa-Moya D.'   # 1 publicaciones
   - canonica: 'Galleguillos R.'
     origen: humana
     variantes:
@@ -121,6 +148,11 @@ grupos:
     variantes:
       - 'Gomez Barbieri G.'   # 1 publicaciones
       - 'Gómez Barbieri G.'   # 1 publicaciones
+  - canonica: 'Gómez G.G.'
+    origen: humana
+    variantes:
+      - 'Gómez G.'   # 1 publicaciones
+      - 'Gómez G.G.'   # 1 publicaciones
   - canonica: 'Hartmann D.'
     origen: humana
     variantes:
@@ -143,6 +175,11 @@ grupos:
     variantes:
       - 'Jimenez A.G.'   # 1 publicaciones
       - 'Jiménez A.G.'   # 1 publicaciones
+  - canonica: 'Kobayashi M.A.'
+    origen: humana
+    variantes:
+      - 'Andrade Kobayashi M.'   # 1 publicaciones
+      - 'Kobayashi M.A.'   # 3 publicaciones
   - canonica: 'Lomboy Finsterbusch M.I.'
     origen: humana
     variantes:
@@ -154,6 +191,11 @@ grupos:
       - 'Lopez-Arana S.'   # 2 publicaciones
       - 'López Arana S.'   # 1 publicaciones
       - 'López-Arana S.'   # 10 publicaciones
+  - canonica: 'Macho R.A.M.'
+    origen: humana
+    variantes:
+      - 'Macho R.A.M.'   # 1 publicaciones
+      - 'Macho R.M.'   # 1 publicaciones
   - canonica: 'Martínez M.'
     origen: ortografica
     variantes:
@@ -174,6 +216,7 @@ grupos:
   - canonica: 'Morales Sepúlveda J.P.'
     origen: humana
     variantes:
+      - 'Morales J.-P.'   # 4 publicaciones
       - 'Morales Sepúlveda J.P.'   # 1 publicaciones
       - 'Morales-Sepulveda J.P.'   # 1 publicaciones
   - canonica: 'Moyano Dávila C.'
@@ -211,6 +254,16 @@ grupos:
     variantes:
       - 'Ruiz Riquelme P.'   # 1 publicaciones
       - 'Ruiz-Riquelme P.'   # 5 publicaciones
+  - canonica: 'Salas-Guzmán N.'
+    origen: humana
+    variantes:
+      - 'Salas N.'   # 1 publicaciones
+      - 'Salas-Guzmán N.'   # 5 publicaciones
+  - canonica: 'Silva-Figueroa A.M.'
+    origen: humana
+    variantes:
+      - 'Silva A.K.'   # 1 publicaciones
+      - 'Silva-Figueroa A.M.'   # 1 publicaciones
   - canonica: 'Strauss F.J.'
     origen: humana
     variantes:
@@ -224,8 +277,19 @@ grupos:
   - canonica: 'Tabilo Prieto I.'
     origen: humana
     variantes:
+      - 'Prieto I.T.'   # 1 publicaciones
       - 'Tabilo Prieto I.'   # 1 publicaciones
       - 'Tabilo-Prieto I.'   # 1 publicaciones
+  - canonica: 'Ubierna D.B.B.'
+    origen: humana
+    variantes:
+      - 'Bilicic D.'   # 1 publicaciones
+      - 'Ubierna D.B.B.'   # 1 publicaciones
+  - canonica: 'Van Sint Jan N.'
+    origen: humana
+    variantes:
+      - 'Jan N.V.S.'   # 2 publicaciones
+      - 'Van Sint Jan N.'   # 2 publicaciones
   - canonica: 'Yanine F.F.'
     origen: humana
     variantes:
@@ -234,5 +298,6 @@ grupos:
   - canonica: 'Álvarez-Valdés C.'
     origen: humana
     variantes:
+      - 'Valdés C.Á.'   # 3 publicaciones
       - 'Álvarez C.'   # 1 publicaciones
       - 'Álvarez-Valdés C.'   # 1 publicaciones
