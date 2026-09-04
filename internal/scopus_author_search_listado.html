@@ -97,8 +97,8 @@ estos casos decide nada por sí solo (D-08) — es evidencia para revisión huma
 <table>
   <thead><tr><th>Nombre (Scopus)</th><th>Scopus Author ID</th><th>Estado ya registrado</th></tr></thead>
   <tbody>
-    <tr><td>Moya, Patricia</td><td>57767862900 · 60235456000</td>
-      <td>Pendiente (D-366) — dispersión temática entre los dos identificadores</td></tr>
+    <tr style="background:#dafbe1"><td>Moya, Patricia</td><td>57767862900 · 60235456000</td>
+      <td>Resuelto (2026-09-03) — misma persona, ver nota abajo</td></tr>
     <tr><td>Hartmann Schatloff, Dan</td><td>58612624500 · 59093175300</td>
       <td>Registrado en <code>ambiguities_authors.csv</code> (P-04), sin decisión aplicada</td></tr>
     <tr><td>Quezada, Mauricio</td><td>56013972600 · 60138063800</td>
@@ -218,8 +218,8 @@ simplemente no tiene — no hay evidencia para decidir cuál.</p>
   publicaciones combinadas, ORCID <code>0000-0003-2444-8179</code> a confianza alta).
 </div>
 
-<div class="flag">
-  <strong>(2) Entrado a la cola de "Varios Scopus ID" (2026-09-03):</strong> "Fortuny, Esteban
+<div class="flag confirmado">
+  <strong>(2) Resuelto (2026-09-03):</strong> "Fortuny, Esteban
   Fortuny" no encaja en el patrón de apellido compuesto, pero su ORCID coincide exacto con
   "Fortuny E." ya asignado en el proyecto — bajo un Auth-ID <strong>distinto</strong>
   (59254638800 en el corpus, frente a 57203373183 en Scopus Author Search). Es fragmentación de
@@ -228,13 +228,48 @@ simplemente no tiene — no hay evidencia para decidir cuál.</p>
   fuente; "Fortuny, Esteban" y "Fortuny, Esteban Fortuny" no comparten nombre en ninguna fuente,
   sólo el ORCID). Se agregó <code>candidatos_fragmentacion_orcid()</code> a
   <code>scopus_author_search.py</code> para que esta clase de evidencia quede en la misma cola de
-  forma reproducible, no sólo anotada aquí — ahora es el 8º candidato en
-  <code>internal/scopus_author_search_multiples_id.csv</code>, <code>PENDIENTE_REVISION_HUMANA</code>.
-  Evidencia a favor: ORCID <code>0000-0002-0864-5669</code> declarado por el propio titular en el
-  registro de ORCID (fuente de la asignación existente) y confirmado, independientemente, por
-  Scopus Author Search — mismo nombre completo, mismo campo (Medicine/salud), coherente con la
-  publicación del corpus. No se aplicó ninguna decisión: queda pendiente de que alguien la
-  autorice.
+  forma reproducible, no sólo anotada aquí — es el 8º candidato en
+  <code>internal/scopus_author_search_multiples_id.csv</code>. Evidencia a favor: ORCID
+  <code>0000-0002-0864-5669</code> declarado por el propio titular en el registro de ORCID (fuente
+  de la asignación existente) y confirmado, independientemente, por Scopus Author Search — mismo
+  nombre completo, mismo campo (Medicine/salud), coherente con la publicación del corpus, sin
+  ninguna evidencia en contra. Se confirmó vía <code>internal/scopus_author_search_decisiones.csv</code>
+  + <code>apply_scopus_author_decisions.py</code> (mismo mecanismo usado para "Esis Villarroel,
+  Ivette S." en esta cola) — <code>resolucion</code> pasó de <code>PENDIENTE_REVISION_HUMANA</code>
+  a <code>CONFIRMADO_MISMA_PERSONA</code>. No cambia ninguna firma del proyecto (ya era una sola,
+  "Fortuny E."): sólo confirma que el Auth-ID adicional visto por esta fuente es la misma persona,
+  no una homonimia. No se tocó la confianza de este ORCID en
+  <code>data/enriched/authors_orcid.csv</code> (sigue en "media") — a diferencia de las
+  confirmaciones de apellido compuesto de más arriba, esta cola no ha venido subiendo confianza al
+  resolverse (tampoco se hizo para "Esis Villarroel"); queda como ambigüedad abierta si debería.
+</div>
+
+<div class="flag confirmado">
+  <strong>(3) Resuelto (2026-09-03), revierte un veredicto anterior:</strong> "Moya, Patricia"
+  (Auth-ID 57767862900 · 60235456000) llevaba <code>pendiente</code> desde el 2026-09-02: el
+  Auth-ID 57767862900 firma tanto «atención de urgencia por ideación suicida» (Salud Pública) como
+  «determinantes de caries en preescolares» (Facultad de Odontología) — dispersión temática que
+  entonces no alcanzó el umbral de evidencia dispositiva. Evidencia nueva la resuelve: el ORCID de
+  «Moya P.» (<code>0000-0002-8442-2571</code>) ya estaba confirmado por otra vía (caso
+  «ver-Moya P.», cola ORCID sin confirmar, 2026-09-01), y ese mismo ORCID aparece declarado, en el
+  campo <code>dc.contributor.orcid</code> del repositorio institucional
+  (<code>data/raw/Inventario_Repositorio_Institucional_UFT.csv</code>), directamente sobre la
+  publicación de ideación suicida — la que motivaba la duda. El otro Auth-ID (60235456000, la
+  bibliometría de ansiedad en estudiantes de odontología) firma como "Observatorio en Salud
+  Pública Oral, Facultad de Odontología, UFT": una unidad de salud pública <strong>dentro</strong>
+  de la Facultad de Odontología, lo mismo que declara 57767862900 en su otra publicación del
+  corpus ("Salud Pública, Facultad de Odontología, Universidad Finís Terrae"). La aparente
+  dispersión temática es en realidad un perfil de salud pública aplicada a la práctica
+  odontológica, reforzado por 24 publicaciones adicionales bajo el mismo ORCID en el repositorio
+  institucional (mayoría de epidemiología oral/salud pública) y porque Scopus Author Search
+  declara el mismo nombre completo exacto para ambos Auth-ID, con área temática superpuesta
+  ("Dentistry" en los dos). Se actualizó tanto <code>internal/identity_decisions.csv</code> (caso
+  <code>p04-Moya, Patricia</code>, de <code>pendiente</code> a <code>misma</code>) como
+  <code>internal/scopus_author_search_decisiones.csv</code>, para mantener las dos colas
+  coherentes entre sí. Verificado que no cambia ningún artefacto generado
+  (<code>config/identidades_consolidadas.yml</code>, <code>authors_orcid.csv</code>): la firma del
+  proyecto ya era una sola ("Moya P."), así que esta decisión sólo confirma que el segundo Auth-ID
+  es la misma persona, no descarta un fragmento del pipeline.
 </div>
 
 <div class="footer">

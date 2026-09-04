@@ -2,7 +2,7 @@
 
 **Generado** el 2026-09-03 por `src/review/build_review.py`. Regenerable.
 
-Quedan **83 casos** de 290. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
+Quedan **82 casos** de 290. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 
 > **Capa interna.** Este documento nombra personas y dice de cuáles no se sabe algo. No se publica.
 
@@ -448,21 +448,6 @@ En al menos una de sus publicaciones la unidad académica no se pudo determinar;
 | Registro del titular en ORCID | <https://orcid.org/0000-0003-1086-0840> |
 | Buscar «Yanine F.F.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Yanine%20F.F.> |
 | Perfil 55785548400 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=55785548400> |
-
----
-
-## Varios Scopus ID — 1 pendiente(s)
-
-### [Moya, Patricia](revision_identidad.html#caso-p04-moya-patricia)
-
-Un mismo nombre completo con varios identificadores de Scopus: perfil fragmentado en la fuente, u homonimia. IDs: 57767862900 · 60235456000
-
-| Comprobar en | Enlace |
-|---|---|
-| Registro del titular en ORCID | <https://orcid.org/0000-0002-8442-2571> |
-| Buscar «Moya P.» en ORCID | <https://orcid.org/orcid-search/search?searchQuery=Moya%20P.> |
-| Perfil 57767862900 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=57767862900> |
-| Perfil 60235456000 en Scopus (requiere suscripción) | <https://www.scopus.com/authid/detail.uri?authorId=60235456000> |
 
 ---
 
