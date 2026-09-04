@@ -10916,3 +10916,89 @@ Ejecutar la purga de historial de `docs/SEGURIDAD_PURGA.md` en la sesión
 autenticada del propietario, con el backup previo que el propio documento
 exige. Y correr `make obras-externas` desde una red que alcance DataCite,
 Europe PMC y Zenodo.
+
+## Cierre: el README de la capa interna, al día con D-SEC-01 (2026-09-03)
+
+### Contexto
+
+Quedaba señalado como ambigüedad abierta en la fusión con `main`:
+`internal/README.md` se titulaba «fuera del sitio, **dentro del
+repositorio**» cuando ese mismo archivo, más abajo, ya documentaba que
+`D-SEC-01` había sacado el directorio del repositorio. El usuario pidió
+actualizarlo.
+
+### Qué estaba mal, además del título
+
+Al revisarlo entero aparecieron tres problemas más, ninguno visible desde
+el título:
+
+1. **Una sección entera con la premisa invertida.** «Que estos archivos sean
+   **accesibles** no los convierte en publicables» presupone que siguen
+   siendo accesibles en el repositorio, y además repetía casi literalmente
+   el párrafo que la precede. Se fundió con él en una sola regla.
+2. **La tabla de contenido cubría 11 de los 36 archivos.** Faltaban las
+   colas de OpenAlex, las de Scopus Author Search, las de validación de
+   unidad, las de autoarchivo, el grafo de coautoría, las herramientas de
+   revisión y las trazas de los conectores nuevos. Se reconstruyó agrupada
+   por propósito y con una columna nueva: **qué comando genera cada
+   archivo**, que es la pregunta práctica ahora que un clon nuevo trae el
+   directorio vacío.
+3. **Cifras vivas escritas a mano, ya falsas y contradictorias entre sí.**
+   Decía «los 110 casos» en un párrafo y «los 127 pares» tres líneas más
+   abajo; hoy la herramienta reporta 284 casos, 202 decididos y 82
+   pendientes. Se quitaron en vez de actualizarse: ver `D-474`.
+
+### Lo que se añadió
+
+- **Un aviso al principio**: este README es lo único versionado del
+  directorio, y un clon nuevo lo trae vacío. No es un error, es la
+  política. Sin eso, el primer efecto de `D-SEC-01` sobre quien clone es
+  desconcierto.
+- **Una sección «Cómo se regenera»**: qué comandos reconstruyen qué, y la
+  advertencia de que todo sale de `data/raw/`, que tampoco se versiona —
+  hace falta una máquina con los exports bajo licencia institucional.
+- **El estado real de `PD-04`**: sus tres archivos no existen en ningún
+  disco todavía, porque el conector nunca se ha corrido de verdad. Se dice
+  en el propio bloque de la tabla, no en una nota aparte.
+- **El vocabulario de resolución de `PD-02`/`PD-04`**, que es distinto del
+  de las colas de identidad y no estaba en ninguna parte de este archivo.
+- **La advertencia de homónimo de la vía por afiliación de `PD-04`**, junto
+  a la que ya existía para `orcid_candidatos_afiliacion.csv`: es el mismo
+  límite metodológico (`I-05`) en dos sitios distintos, y tenerlas juntas
+  evita que alguien resuelva una y no vea la otra.
+- **Un puntero a `docs/SEGURIDAD_PURGA.md`**, porque la purga del historial
+  sigue pendiente y este archivo es donde se va a mirar primero.
+
+### Verificación
+
+Comprobado por script sobre el texto, no a ojo:
+
+- los 36 archivos del directorio están documentados; ninguno quedó fuera;
+- los 11 objetivos `make` que cita existen en el `Makefile`;
+- los 10 scripts que cita existen en `src/`;
+- los únicos archivos citados que no están en disco son los tres de
+  `PD-04`, y el propio README declara por qué;
+- las dos compuertas de `D-SEC-01` siguen pasando: sólo `internal/README.md`
+  versionado, `data/raw/` fuera del control de versiones.
+
+Dos filas se corrigieron al verificar: la tabla atribuía a `make orcid-datos`
+tres trazas (`zenodo_log.csv`, `datacite_log.csv`, `europepmc_log.csv`) y
+sólo la primera existe — las otras dos están declaradas por sus conectores
+pero la corrida del 2026-09-03 no produjo ninguna fila. Se dice así.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-474 | `internal/README.md` no fija cifras de las colas: remite a lo que imprime `make revision` y a `pendientes_consolidacion.md` | Las que tenía llevaban semanas siendo falsas y se contradecían entre sí («110 casos» y «127 pares» en el mismo apartado). Un recuento de una cola cambia con cada decisión que se toma; escribirlo a mano en un archivo que nadie regenera garantiza que envejezca mal sin que se note |
+
+### Ambigüedades abiertas
+
+Ninguna nueva. La purga del historial (`docs/SEGURIDAD_PURGA.md`) y las tres
+de `PD-04` siguen abiertas; la del título de este README queda cerrada.
+
+### Próximo paso recomendado
+
+Correr `make obras-externas` desde una red que alcance DataCite, Europe PMC
+y Zenodo, y ejecutar la purga de historial en la sesión autenticada del
+propietario.
