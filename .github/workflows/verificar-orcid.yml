@@ -19,6 +19,15 @@ name: Verificar ORCID contra su registro
 #
 # CÓMO SE LANZA
 #   Pestaña Actions → «Verificar ORCID contra su registro» → Run workflow.
+#
+# D-SEC-02: esta verificación necesita la capa de datos SENSIBLE (data/interim,
+# data/enriched, internal/matching_log). Esas capas NO se versionan (D-SEC-01),
+# así que en un runner de GitHub no están. El camino canónico es LOCAL:
+#   scripts/verificar-orcid.ps1  (en la máquina institucional de confianza,
+#   donde viven data/raw/ e internal/).
+#   Este workflow sólo sirve si el repositorio de ejecución ya contiene esas
+#   capas (p. ej. un runner propio con los datos montados); lo verifica el paso
+#   «Comprobar capa de datos» y aborta con un mensaje claro si no están.
 
 on:
   workflow_dispatch:
@@ -82,8 +91,22 @@ jobs:
           fi
           echo "Credenciales presentes (Client ID: ${ID:0:8}...)"
 
-      - name: Auditoría
-        run: python3 src/audit/run_all.py
+      - name: Comprobar capa de datos sensible
+        run: |
+          for f in data/interim/publications_universe.csv \
+                   data/enriched/authors_orcid.csv \
+                   internal/matching_log.csv; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Falta $f (capa de datos sensible, no versionada, D-SEC-01)."
+              failed=1
+            fi
+          done
+          if [ -n "${failed:-}" ]; then
+            echo "Este workflow no puede correr en un runner sin las capas sensibles."
+            echo "Ejecute en su lugar, en la máquina institucional:  scripts/verificar-orcid.ps1"
+            exit 1
+          fi
+          echo "Capa de datos sensible presente — procediendo"
 
       - name: Verificar contra el registro de ORCID
         env:
@@ -101,6 +124,10 @@ jobs:
 
       # Siempre descargable, se comitee o no: si algo sale mal con el commit,
       # el resultado de las consultas no se pierde.
+      #
+      # SEGURIDAD (D-SEC-01): el hallazgo (internal/orcid_hallazgos.csv) es
+      # capa interna y NO se sube al repositorio — se mantiene sólo como
+      # artefacto de esta ejecución. El commit siguiente no lo guarda.
       - name: Publicar el resultado como artefacto descargable
         if: always()
         uses: actions/upload-artifact@v5
@@ -111,6 +138,8 @@ jobs:
             internal/orcid_hallazgos.csv
           if-no-files-found: ignore
 
+      # Sólo se versiona el resultado público (data/enriched/), nunca el
+      # hallazgo interno. La decisión y su fundamento en docs/LAYERS.md §3.
       - name: Guardar el resultado en el repositorio
         if: ${{ inputs.commitear }}
         env:
@@ -123,12 +152,10 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Uno por uno: `git add A B` falla entero si B no existe, y entonces
-          # tampoco añade A. internal/orcid_hallazgos.csv sólo se genera cuando
-          # hay asignaciones dudosas, así que a veces no existe.
-          for f in data/enriched/orcid_verificacion.csv internal/orcid_hallazgos.csv; do
-            [ -f "$f" ] && git add "$f"
-          done
+          if [ -f data/enriched/orcid_verificacion.csv ]; then
+            git add data/enriched/orcid_verificacion.csv
+          fi
+          # internal/orcid_hallazgos.csv NO se añade: capa interna (D-SEC-01).
           if git diff --cached --quiet; then
             echo "Sin cambios que guardar."
           else

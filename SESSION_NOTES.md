@@ -10812,3 +10812,107 @@ aquí.
 
 Correr `make obras-externas` desde una red que alcance DataCite, Europe PMC
 y Zenodo. Y decidir si esta rama se lleva a `main`.
+
+## Fusión con `origin/main` (2026-09-03): la purga de seguridad D-SEC-01/D-SEC-02
+
+### Contexto
+
+El usuario pidió llevar esta rama a `main`. `main` había avanzado tres
+commits mientras tanto, y no eran menores: la auditoría de seguridad del
+2026-09-03 expulsó del árbol publicado `data/raw/` (exports de Elsevier, no
+redistribuibles) e `internal/` (decisiones de identidad sobre personas
+reales), invirtió la política de `.gitignore` —`data/processed/` pasa a
+versionarse, `internal/` y `data/raw/` dejan de hacerlo— y reescribió CI
+para ensamblar el sitio desde la capa pública versionada en vez de
+reconstruirlo desde las fuentes sensibles (`docs/SEGURIDAD_PURGA.md`).
+
+Esta rama modifica ocho ficheros de `internal/`. **Una fusión ingenua los
+habría resucitado**, deshaciendo la purga sin que nadie lo notara en el
+diff. Ése era el riesgo real de esta fusión, y por eso se leyó
+`docs/SEGURIDAD_PURGA.md` antes de tocar nada.
+
+### Cómo se resolvió
+
+- **Los ocho conflictos `modify/delete` de `internal/`**: gana la supresión
+  de `main`, sin excepción. Se sacaron del índice con `git rm --cached`, no
+  con `git rm`: el fichero desaparece del control de versiones y **sigue en
+  disco**, que es exactamente lo que la política nueva pide (la capa interna
+  vive en la máquina de confianza, no en el repositorio).
+- **`data/raw/` e `internal/` que la fusión borró del disco**: la fusión
+  también los eliminó del árbol de trabajo, y sin ellos no se puede
+  reconstruir nada. Se restauraron con
+  `git restore --source=bf33fc0 --worktree`, que toca el disco y **no** el
+  índice. Comprobado después: 10 ficheros en `data/raw/`, 37 en `internal/`,
+  y en el índice sólo `internal/README.md`.
+- **`.gitignore` e `internal/README.md`**: se toman tal cual de `main`.
+- **`.github/workflows/deploy.yml`**: los dos lados añadían pasos en el
+  mismo punto. Se conservan los dos, con los de `main` primero para no
+  reordenar lo ya desplegado.
+- **`data/processed/`**: `main` empezó a versionarla, pero con una copia
+  generada antes de las consolidaciones de identidad de la tarde. Se
+  regeneró entera desde la capa sensible restaurada —que es justamente el
+  modelo que `D-SEC-02` describe: la reconstrucción completa es una
+  operación local en la máquina que tiene las licencias— y se versionó el
+  resultado.
+
+### Tres defectos de `main` que esta fusión tuvo que arreglar para poder desplegar
+
+1. **Faltaba `data/processed/produccion_declarada.json` en la capa pública.**
+   `main` versionó doce artefactos y se dejó éste. Sin él, `cargar()` recibe
+   un 404 y **la página de Producción ampliada entera se queda sin
+   contenido**: es el único artefacto que consume. Ahora está versionado.
+2. **Ese artefacto no pasaba la compuerta de CI de `main`.** Lleva un campo
+   `herramienta_de_revision` con la ruta `internal/…`, y el paso «Verificar
+   que no haya filtración en la capa pública» rechaza cualquier mención de
+   `internal/` en `data/processed/`. Es plausible que sea la razón por la
+   que `main` lo omitió, pero omitirlo rompe la página. Se quitó el campo:
+   ninguna vista lo consumía, y la página nombra la herramienta en prosa,
+   donde es una indicación de método y no un dato. El de `PD-02` tenía el
+   mismo campo desde antes; también se fue.
+3. **CI invocaba `src/enrich/wos_piloto.py --test`, un fichero que no existe
+   en ninguna rama.** Ese paso falla y con él todo el despliegue: `main`
+   estaba, en la práctica, sin poder publicar. Se retiró el paso —vuelve
+   cuando exista el conector, no antes— tras comprobar uno por uno que los
+   otros 19 pasos sí apuntan a ficheros presentes.
+
+### Verificación
+
+- Las tres compuertas de `main`, ejecutadas a mano aquí: `data/raw/` no
+  versionado, `internal/` sólo con su README, y `data/processed/` sin
+  material interno y con `meta.json`. Las tres pasan.
+- Todos los pasos `--test` del workflow apuntan a ficheros que existen,
+  comprobado por script sobre el YAML.
+- Auditoría 29/30 (misma falla preexistente `E-06`), build sin fallas de
+  capa, **530 fichas de autor**. `main` versionaba 542: las 12 de diferencia
+  son variantes de firma que las consolidaciones de la tarde y del "Tier A"
+  absorbieron (Amarouch, Busquets, Yanine, Núñez Lisboa, Martínez Mardones,
+  Orellana Donoso, Ballesteros, García, Mardonez), más una ficha canónica
+  nueva. La capa pública de `main` estaba generada antes de todo eso.
+- Ensamblado del sitio desde la capa pública y batería de navegador
+  completa —contraste, estructura, flujos, responsive, higiene y peso— sin
+  fallos.
+- `--test` de los tres módulos de `PD-04` y del conector de Scopus, en
+  verde tras fusionar.
+
+### Ambigüedades abiertas
+
+- **`internal/README.md` se titula «fuera del sitio, dentro del
+  repositorio»**, y desde `D-SEC-01` la capa interna ya no está en el
+  repositorio. Es documentación de `main`, de la misma sesión que decidió la
+  purga: se deja como está y se señala, en vez de reescribir por cuenta
+  propia el texto de una decisión de seguridad ajena.
+- **La purga de historial sigue pendiente.** `docs/SEGURIDAD_PURGA.md`
+  advierte que expulsar las capas del árbol no borra los blobs viejos, y que
+  hacerlo exige `git filter-repo`, un backup del remoto y la sesión
+  autenticada del propietario. Esta rama es una de las que el documento
+  nombra como portadoras de material sensible en su historial.
+- Las tres de `PD-04` siguen: `openalex_cobertura.py` pisa resoluciones
+  humanas al reejecutarse, los contratos de búsqueda de las tres APIs no
+  están verificados contra la red, y `PD-04` no tiene corrida real.
+
+### Próximo paso recomendado
+
+Ejecutar la purga de historial de `docs/SEGURIDAD_PURGA.md` en la sesión
+autenticada del propietario, con el backup previo que el propio documento
+exige. Y correr `make obras-externas` desde una red que alcance DataCite,
+Europe PMC y Zenodo.

@@ -36,9 +36,10 @@ Windows:
 
 ## Regla cardinal: capas de datos
 
-- Público: `docs/`, `data/processed/`, el sitio. Interno: `internal/` (matching, ambigüedades, colas, hallazgos, logs). **`internal/` nunca entra en `dist/`** — verificado en cada build y otra vez en CI.
+- Público: `docs/`, `data/processed/`, el sitio. Interno: `internal/` (matching, ambigüedades, colas, hallazgos, logs) y `data/raw/` (exports de Elsevier).
+- **`internal/` y `data/raw/` ni se despliegan ni se versionan (D-SEC-01).** Viven sólo en el disco local y en los artefactos de CI. El build lo verifica (`05`/`06`) y el workflow de despliegue lo vuelve a comprobar sobre `dist/` y sobre el índice de git.
 - No publicar material usado sólo para depuración/conciliación. Las colas de revisión humana se encolan y se deciden a mano, nunca por heurística (D-08).
-- El repo es **privado a propósito**: mantener fuera del alcance público `data/raw/` (exports Elsevier) e `internal/`.
+- El repo debe permanecer **privado**: `data/raw/` (exports Elsevier «no redistribuibles») e `internal/` (datos de identidad de personas) no pueden residir en un repositorio accesible. Un despliegue público de Pages se sirve desde un repo/sitio específico que no contiene estas capas.
 
 ## Configuración ≠ código
 
@@ -57,10 +58,10 @@ Sin dependencias en el navegador, **sin CDN**: SVG generados en JS propio + nodo
 ## CI / despliegue
 
 - `deploy.yml`: construye y verifica en push a `main` y en PRs; sólo publica (GitHub Pages) desde `main`. En PR sólo valida.
-- `ampliar-orcid.yml` y `verificar-orcid.yml`: requieren secretos `ORCID_CLIENT_ID`/`ORCID_CLIENT_SECRET`, se lanzan a mano y ganan escritura al repo (commits automáticos del bot).
+- `ampliar-orcid.yml` y `verificar-orcid.yml`: flujos de enriquecimiento que necesitan la capa de datos SENSIBLE (no versionada). En un runner de GitHub sin esos datos abortan con un mensaje claro (D-SEC-02). El camino canónico es LOCAL: `scripts/verificar-orcid.ps1` / `scripts/ampliar-orcid-afiliacion.ps1` en la máquina institucional. Sólo se usan en CI si hay un runner con las capas montadas; sus commits de bot versionan únicamente lo público (`data/enriched/*`, docs).
 - Pages necesita activación manual única (Settings → Pages → GitHub Actions). Mientras no esté activada, el job de publicar falla con "Get Pages site failed" pero el resto del pipeline igual valida.
 
 ## Higiene
 
-- `data/interim/`, `data/processed/`, `dist/`, `design-system/` no se versionan (derivados; gitignore). `internal/` sí se versiona pero nunca se despliega.
+- `data/interim/`, `data/processed/`, `dist/`, `design-system/` no se versionan (derivados; gitignore). `internal/` y `data/raw/` tampoco se versionan (D-SEC-01): capa sensible, véase «Regla cardinal: capas de datos».
 - Cerrar sesión dejando decisiones, pendientes, archivos tocados, supuestos descartados, ambigüedades y próximo paso (regla de cierre en CLAUDE.md).

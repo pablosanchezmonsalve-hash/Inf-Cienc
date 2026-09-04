@@ -1,53 +1,70 @@
-# Intermedios regenerables: se reconstruyen con `make auditoria`
+# ─────────────────────────────────────────────────────────────────────────────
+# .gitignore — política de capas del proyecto (D-SEC-01 / D-SEC-02)
+#
+# Tres clases de datos:
+#   · PÚBLICA — docs/, web/, config/, src/ y data/processed/ (derivados
+#     validados, CC BY 4.0). Se versionan.
+#   · SENSIBLE NO VERSIONABLE — data/raw/ (exports propietarios de Elsevier,
+#     «no redistribuibles») e internal/ (matching, ambigüedades, decisiones de
+#     identidad, ORCID, hallazgos). NUNCA se versionan: viven sólo en el disco
+#     local y en los artefactos de CI.
+#   · DERIVADOS REGENERABLES — data/interim/, dist/, design-system/, cachés.
+#     Se reconstruyen con el pipeline; no se versionan.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Derivados regenerables ──────────────────────────────────────────────────
+# Intermedios: se reconstruyen con `make auditoria`.
 data/interim/
 
-# Artefactos publicables: se reconstruyen con `make artefactos`
-data/processed/
-
-# Sitio ensamblado y desplegable: se reconstruye con `make sitio`
+# Sitio ensamblado y desplegable: se reconstruye con `make sitio`.
 dist/
 
 # Paquete de sistema de diseño para Claude Design: se reconstruye con `make kit`.
-# No se versiona por la misma razón que dist/ — es una salida derivada, y cada
-# regeneración produciría un diff de un megabyte de HTML generado.
 design-system/
 
-# Respuestas cacheadas de Crossref: ~800 archivos, se regeneran solos.
-# Se conservan en disco para poder reejecutar el enriquecimiento sin volver a
-# golpear la API, pero no se versionan.
+# Respuestas cacheadas de Crossref, ORCID y otras APIs: se regeneran solas.
 data/cache/
-# Ídem para las respuestas del registro de ORCID.
 
-# Nunca desplegar la capa interna en la web pública (CLAUDE.md, <data_governance>).
-# Se versiona en el repositorio de trabajo, pero queda fuera del bundle: la
-# exclusión efectiva la aplica y verifica src/build/06_assemble_site.py.
+# Lienzo de diseño ya ensamblado; se regenera desde las fuentes .dc.html. Lo
+# que se versiona es la FUENTE del diseño, no el paquete.
+design/informe/*.html
+!design/informe/*.dc.html
 
-# Capturas de verificación local
-.shots/
+# ── Capa sensible: NUNCA se versiona (D-SEC-01) ─────────────────────────────
+#
+# data/raw/ — exportaciones originales de Scopus/SciVal (Elsevier), «no
+# redistribuibles» según docs/DATA_LICENSE.md §2. La licencia institucional no
+# autoriza a publicarlas ni a versionarlas en un repositorio accesible.
+data/raw/
 
+# internal/ — capa interna de conciliación/depuración: matching, ambigüedades,
+# decisiones de identidad, hallazgos de ORCID, herramientas de revisión.
+# Contienen afirmaciones SIN VERIFICAR sobre personas reales (docs/LAYERS.md §3,
+# «nunca se exponen por defecto»). Se conserva sólo internal/README.md
+# (documentación, sin datos nominales).
+internal/*
+!internal/README.md
+
+# Respaldos del asistente de revisión y puntero a la herramienta privada.
+internal/.respaldos/
+internal/enlace_herramienta.txt
+
+# ── Hygiene local ────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 .venv/
 .DS_Store
-
-# Playwright y sus dependencias (src/verify/run_all.mjs): se instalan con
-# `npm install --no-save playwright` — CI lo hace en cada corrida, efímero.
 node_modules/
 
-# Respaldos del asistente de revisión antes de sustituir el CSV de decisiones.
-# El archivo bueno sí se versiona; sus copias de seguridad no.
-internal/.respaldos/
+# Capturas de verificación local y de diseño (no son fuentes).
+.shots/
+_cap_*.png
+_rev_*.png
+_captura_*.png
+_shot.js
 
-# Lienzo de diseño ya ensamblado: ~2 MB de editor empaquetado que se regenera
-# desde los .dc.html con `node <skill>/seed-canvas.mjs`. Lo que se versiona es
-# la FUENTE del diseño, no el paquete.
-design/informe/*.html
-!design/informe/*.dc.html
-
-# Puntero a la herramienta de revisión publicada como artefacto privado. Es de
-# una cuenta y una máquina, no del proyecto: `build_review.py` funciona sin él
-# y entonces enlaza al archivo local, que es el comportamiento por defecto.
-internal/enlace_herramienta.txt
+# Conocimiento de codebase (graphify): salida local, no fuente.
+src/graphify-out/
 
 # Corridas aisladas del fork runner (informes/_fork_runner.py): caches y salidas
 # derivadas de ejecutar conectores ORCID en sandbox. Se regeneran con cada
