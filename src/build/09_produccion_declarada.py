@@ -308,7 +308,11 @@ def main() -> None:
         "fuente": {
             "nombre": b.SOURCES.get("openalex_api", {}).get("nombre"),
             "conector": "src/enrich/openalex_cobertura.py",
-            "herramienta_de_revision": "internal/revision_cobertura_openalex.html",
+            # La ruta de la herramienta de revisión NO viaja en el artefacto
+            # público: `internal/` dejó de versionarse (D-SEC-01) y la
+            # compuerta de CI de `main` rechaza cualquier mención suya en
+            # `data/processed/`. Ninguna vista la consumía; la página nombra
+            # la herramienta en prosa, donde es una indicación de método.
         },
         "resumen": resumen_oa,
         "por_anio": oa_por_anio,
@@ -453,7 +457,6 @@ def main() -> None:
         "fuente": {
             "nombre": "DataCite, Europe PMC y Zenodo",
             "conector": "src/enrich/obras_externas.py",
-            "herramienta_de_revision": "internal/revision_obras_externas.html",
         },
         "resumen": resumen_oe,
         "por_anio": oe_por_anio,

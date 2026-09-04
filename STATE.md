@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `ff19f18` · PD-04: cuarta fuente fuera de Scopus, Nivel V, sobre repositorios de d
+Último commit: `bf33fc0` · Fusiona claude/state-review-next-steps-wzzq0h: identidad de autores al
 Snapshot: 2026-09-04
 
 ---
