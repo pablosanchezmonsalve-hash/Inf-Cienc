@@ -10047,6 +10047,451 @@ trabajando, para no perder de vista el fix del tooltip.
 Sitio, CI y ambas ramas en un estado consistente y verificado. Sesión
 cerrada.
 
+## Cierre: se resuelve el pendiente de Fortuny en la cola de "Varios Scopus ID"
+
+### Contexto
+
+El usuario pidió un balance de las revisiones de identidad. Al revisarlo
+se detectó y corrigió una imprecisión propia: la cifra "Varios Scopus ID:
+1 pendiente" que se había reportado como si fuera Fortuny en realidad
+correspondía a "Moya, Patricia" — son dos colas distintas que comparten
+nombre de categoría pero no de mecanismo. `internal/pendientes_consolidacion.md`
+(los "290 casos / 83 pendientes") se genera sólo de
+`internal/identity_decisions.csv`, y Fortuny nunca entró ahí: vive
+exclusivamente en `internal/scopus_author_search_multiples_id.csv`, la
+cola nueva que produce `candidatos_fragmentacion_orcid()`
+(`src/enrich/scopus_author_search.py`, agregado el 2026-09-03). El
+usuario pidió entonces cerrar ese pendiente puntual.
+
+### Qué se hizo
+
+Se siguió el mecanismo vigente de esa cola —no `identity_decisions.csv` +
+`apply_decisions.py`, que es el canal usado para "Varios Scopus ID" en una
+generación anterior de esta misma cola (los casos `p04-*`, ya resueltos en
+su momento) pero no el que se usó esta sesión para los candidatos nuevos
+("Esis Villarroel, Ivette S.", agregada el 2026-09-02, siguió el otro
+canal—:
+
+1. Se agregó una fila para "Fortuny, Esteban Fortuny" en
+   `internal/scopus_author_search_decisiones.csv` con veredicto `misma` y
+   la evidencia: el ORCID `0000-0002-0864-5669` que el proyecto ya tenía
+   asignado a "Fortuny E." (declarado por el propio titular) coincide,
+   confirmado de forma independiente, con el que Scopus Author Search
+   asigna al perfil "Fortuny, Esteban Fortuny" (Auth-ID distinto, 3
+   documentos, mismo campo Medicine/salud) — mismo patrón de convergencia
+   de ORCID entre dos fuentes independientes ya usado para confirmar a
+   Esis Villarroel en esta cola.
+2. Se corrió `python3 src/review/apply_scopus_author_decisions.py
+   --dry-run` (1 cambio, sólo Fortuny) y luego sin `--dry-run`: la columna
+   `resolucion` de su fila en `scopus_author_search_multiples_id.csv` pasó
+   de `PENDIENTE_REVISION_HUMANA` a `CONFIRMADO_MISMA_PERSONA`.
+3. Se actualizó la nota (2) de `internal/scopus_author_search_listado.html`
+   de "Entrado a la cola" (naranja) a "Resuelto" (verde), documentando el
+   mecanismo de aplicación y dejando explícito que la confianza del ORCID
+   en `data/enriched/authors_orcid.csv` NO se tocó (sigue en "media").
+4. Se corrigió `docs/FUENTES_Y_APIS.md` §2.9: decía "7 nombres" en la cola
+   cuando ya eran 8 desde que se agregó Fortuny (2026-09-03) y no mencionaba
+   el segundo detector ni el estado de revisión. Ahora dice 8, describe
+   `candidatos_fragmentacion_orcid()` y resume el estado real: 2
+   confirmados, 6 pendientes.
+
+Esta resolución no cambia ninguna firma del proyecto ni ninguna cifra
+pública: "Fortuny E." ya era una única firma en el corpus; lo que se
+confirmó es que el Auth-ID adicional que ve Scopus Author Search
+corresponde a la misma persona, no a una homonimia. Es puramente capa
+interna (evidencia de identidad, D-08).
+
+### Verificación
+
+- `apply_scopus_author_decisions.py --dry-run` mostró exactamente 1
+  cambio (Fortuny) antes de aplicar — ninguno de los otros 6 pendientes se
+  tocó.
+- Tras aplicar, se releyó `scopus_author_search_multiples_id.csv` completo
+  y se confirmó que sólo la fila de Fortuny cambió de `resolucion`.
+- Se verificó que este conector no está encadenado en ningún pipeline
+  automático (`Makefile`, `.github/workflows/`, `config/sources.yml` sólo
+  lo referencia como conector manual) — la resolución no corre riesgo de
+  perderse en la próxima corrida de CI, a diferencia del bug ya documentado
+  antes en esta sesión (regenerar el conector a mano sí resetea la cola;
+  correr `--test` en CI no).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-457 | Fortuny se resuelve por `scopus_author_search_decisiones.csv` + `apply_scopus_author_decisions.py`, no por `identity_decisions.csv` | Es el mecanismo que esta sesión ya usó para el resto de los candidatos nuevos de esta misma cola (Esis Villarroel); usar el otro canal habría creado dos registros de la misma decisión en dos archivos, sin necesidad |
+| D-458 | No se sube la confianza del ORCID de "Fortuny E." en `authors_orcid.csv` al resolver este pendiente | Sigue el precedente literal ya sentado para "Esis Villarroel" en esta misma cola esta sesión (tampoco se subió la suya); cambiar el criterio sólo para Fortuny sería inconsistente sin una razón declarada — se deja como ambigüedad abierta en vez de decidirlo por mi cuenta |
+
+### Archivos modificados
+
+```
+internal/scopus_author_search_decisiones.csv    + fila Fortuny (misma)
+internal/scopus_author_search_multiples_id.csv  resolucion actualizada
+internal/scopus_author_search_listado.html      nota (2): pendiente → resuelto
+docs/FUENTES_Y_APIS.md                          §2.9: 7→8 nombres, detector nuevo, estado real
+SESSION_NOTES.md, STATE.md, docs/DECISIONS.md   este cierre
+```
+
+### Supuestos descartados
+
+- Que el "Varios Scopus ID: 1 pendiente" reportado en la respuesta anterior
+  era Fortuny: era Moya, Patricia. Se corrige explícitamente aquí en vez de
+  dejar la afirmación anterior sin corregir.
+- Que resolver este pendiente debía también subir la confianza del ORCID
+  en `authors_orcid.csv` (por analogía con las 12 confirmaciones de
+  apellido compuesto de antes en la sesión): se decidió NO hacerlo, para
+  no romper la consistencia con "Esis Villarroel", que se resolvió sin ese
+  paso.
+
+### Ambigüedades abiertas
+
+Si las confirmaciones de esta cola ("Varios Scopus ID") deberían subir la
+confianza del ORCID en `authors_orcid.csv` cuando la evidencia es
+convergencia de ORCID entre dos fuentes independientes — el mismo tipo de
+evidencia que sí subió la confianza en la cola de apellido compuesto. Hoy
+el comportamiento es inconsistente entre colas (una sube, la otra no) y
+nadie lo ha decidido explícitamente; afecta también a "Esis Villarroel",
+ya resuelta antes de este cierre.
+
+Siguen pendientes, sin cambios en este cierre: los 6 casos restantes de
+"Varios Scopus ID" (Cabello, Caffarena, Hartmann Schatloff, Moya Patricia,
+Quezada, Torres) y los 83 casos de `internal/pendientes_consolidacion.md`.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente sobre Fortuny — cerrado. Si se quiere
+seguir con la revisión de identidad, las colas más grandes siguen siendo
+"Candidato de unidad académica por autoarchivo" (29) y "ORCID no
+verificable" (22) en `internal/pendientes_consolidacion.md`, o cualquiera
+de los 6 restantes en `scopus_author_search_multiples_id.csv`.
+
+## Cierre: se resuelve el pendiente de Moya, Patricia en la cola de "Varios Scopus ID"
+
+### Contexto
+
+El usuario pidió seguir con "Moya, Patricia", el único caso que quedaba
+`pendiente` en `internal/identity_decisions.csv` bajo la cola "Varios
+Scopus ID" (`p04-Moya, Patricia`, decidido `pendiente` el 2026-09-02): el
+Auth-ID 57767862900 firma tanto «atención de urgencia por ideación
+suicida» (Salud Pública) como «determinantes de caries en preescolares»
+(Facultad de Odontología) — dos temas que entonces parecían demasiado
+distintos bajo un mismo identificador para cumplir el umbral de evidencia
+dispositiva del proyecto, más que en los otros 9 casos revisados junto a
+este en su momento.
+
+### Qué se hizo
+
+Se reunió evidencia local que no se había cruzado antes:
+
+1. El ORCID de "Moya P." (`0000-0002-8442-2571`) ya estaba confirmado por
+   otra vía, independiente de este caso: `ver-Moya P.`, cola "ORCID sin
+   confirmar", 2026-09-01 — acuerdo entre repositorio institucional e
+   inventario de autoarchivo, 3 publicaciones cruzadas cada uno.
+2. Se buscó ese ORCID directamente en `data/raw/Inventario_Repositorio_
+   Institucional_UFT.csv` (24 registros bajo "Moya, Patricia" o variantes
+   cercanas). El campo `dc.contributor.orcid` —el campo limpio de un solo
+   valor, no la lista mezclada de `dc.identifier.orcid`— lo declara
+   directamente sobre "Atención de urgencia por ideación suicida en
+   Chile": exactamente la publicación que generaba la duda, y coincide con
+   el DOI y el Auth-ID (57767862900) del registro en el corpus Scopus.
+3. Se cruzó `internal/matching_log.csv` para ver la afiliación declarada
+   exacta de cada aparición de "Moya P." en el corpus: una de las dos
+   publicaciones bajo 57767862900 (EID 2-s2.0-105024529012, que en
+   realidad es la de bibliometría de ansiedad, firmada por Auth-ID
+   60235456000 — se verificó el emparejamiento EID↔Auth-ID contra el
+   export nativo de Scopus, no se asumió) declara "Salud Pública, Facultad
+   de Odontología, Universidad Finís Terrae" — una unidad de salud pública
+   **dentro** de la Facultad de Odontología. Esto reconcilia exactamente
+   la tensión que dejó el caso pendiente: no son dos campos distintos, es
+   un perfil de salud pública aplicada a la práctica odontológica.
+4. El export nativo de Scopus (`Authors with affiliations`) confirmó lo
+   mismo para el Auth-ID 60235456000: "Observatorio en Salud Pública Oral,
+   Facultad de Odontología, Universidad Finís Terrae".
+5. `data/raw/Scopus_Author_Search_UFT.csv` declara el mismo nombre
+   completo exacto, "Moya, Patricia", para ambos Auth-ID, con área
+   temática superpuesta ("Dentistry" en los dos; el 57767862900 agrega
+   "Medicine").
+
+Con esa evidencia se revirtió el veredicto:
+
+- `internal/identity_decisions.csv`: caso `p04-Moya, Patricia` de
+  `pendiente` a `misma`, nota reescrita con la evidencia nueva, fecha
+  actualizada a 2026-09-03.
+- `internal/scopus_author_search_decisiones.csv`: se agregó una fila
+  equivalente para "Moya, Patricia" (`misma`), para no dejar las dos colas
+  diciendo cosas distintas — la confusión de la respuesta anterior sobre
+  cuál pendiente era cuál ya mostró el costo de no mantenerlas coherentes.
+- Se aplicaron ambas: `apply_decisions.py` y
+  `apply_scopus_author_decisions.py`.
+- Se regeneró `internal/pendientes_consolidacion.{md,html}` y
+  `internal/revision_identidad.html` con `src/review/build_review.py`
+  (herramienta declarada "GENERADO, no editar a mano").
+- Se actualizó `internal/scopus_author_search_listado.html` (fila de Moya
+  en la tabla de "ya conocidos", más una nota nueva (3) con el detalle
+  completo) y el conteo de `docs/FUENTES_Y_APIS.md` §2.9 (2→3
+  confirmados, 6→5 pendientes).
+
+### Verificación
+
+- `apply_decisions.py --dry-run` antes de aplicar: sin avisos de
+  contradicción, sin cambio en "grupos consolidados" (38, igual que
+  antes) — confirma la hipótesis de que la firma "Moya P." es un grupo de
+  una sola forma en `firmas_de()`, así que esta decisión no fusiona nada
+  nuevo, sólo confirma que el segundo Auth-ID no es una persona distinta.
+- Tras aplicar de verdad, `git diff` sobre `config/identidades_
+  consolidadas.yml`, `config/orcid_revisado.yml`,
+  `config/firmas_e09_resueltas.yml` y `data/enriched/authors_orcid.csv`
+  salió vacío — verificado explícitamente, no asumido: esta decisión no
+  cambia ningún artefacto que el build consuma, sólo la capa interna de
+  evidencia.
+- `apply_scopus_author_decisions.py --dry-run` mostró exactamente 1 cambio
+  (Moya) antes de aplicar.
+- `build_review.py` recalculó 290 casos, 208 decididos, 82 pendientes
+  (antes: 207/83) — baja en 1, como corresponde.
+- Se confirmó con un `grep` dirigido que la sección "Varios Scopus ID" de
+  `pendientes_consolidacion.md` desapareció del todo (quedó en 0
+  pendientes entre las dos colas combinadas).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-459 | Se revierte el veredicto `pendiente` de `p04-Moya, Patricia` a `misma` | Evidencia nueva (ORCID declarado directamente sobre la publicación en disputa, en el repositorio institucional; unidad de salud pública dentro de la propia Facultad de Odontología en ambos Auth-ID) supera el umbral de evidencia dispositiva que dejó el caso pendiente el 2026-09-02; no es una decisión tomada por rutina ni por analogía con los otros casos, es evidencia directa sobre este caso específico |
+| D-460 | Se mantienen sincronizadas `identity_decisions.csv` y `scopus_author_search_decisiones.csv` para el mismo caso, en vez de decidir sólo en una | La sesión anterior ya mostró el costo de que las dos colas divergieran silenciosamente (la confusión Fortuny/Moya en la respuesta al usuario); duplicar el registro es más barato que dejarlas incoherentes otra vez |
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv                   p04-Moya: pendiente → misma
+internal/scopus_author_search_decisiones.csv       + fila Moya (misma)
+internal/scopus_author_search_multiples_id.csv     resolucion actualizada
+internal/scopus_author_search_listado.html         fila Moya + nota (3)
+internal/pendientes_consolidacion.md, .html        regenerados (build_review.py)
+internal/revision_identidad.html                   regenerado (build_review.py)
+docs/FUENTES_Y_APIS.md                             §2.9: 2→3 confirmados, 6→5 pendientes
+SESSION_NOTES.md, STATE.md, docs/DECISIONS.md      este cierre
+```
+
+Sin cambios en `config/identidades_consolidadas.yml`, `config/orcid_
+revisado.yml`, `config/firmas_e09_resueltas.yml` ni
+`data/enriched/authors_orcid.csv` — verificado, no sólo esperado.
+
+### Supuestos descartados
+
+- Que la evidencia de "unidad exacta y mismo tema" (el criterio usado
+  para Castillo/Hartmann/Quezada/Torres) era necesaria para este caso: se
+  usó evidencia más directa y más fuerte (ORCID declarado sobre la
+  publicación puntual en disputa, desde una fuente independiente), no la
+  misma plantilla aplicada mecánicamente.
+- Que revertir un veredicto `pendiente` anterior requería descartar la
+  duda original como un error: no lo era — la dispersión temática
+  observada en 2026-09-02 era real y razonable de cuestionar; lo que
+  cambió es que apareció evidencia nueva, no que la duda original fuera
+  infundada.
+
+### Ambigüedades abiertas
+
+Las mismas que dejó el cierre de Fortuny, sin cambios: si esta cola
+("Varios Scopus ID") debería subir la confianza del ORCID en
+`authors_orcid.csv` al confirmarse (no se hizo aquí tampoco, siguiendo el
+mismo precedente que Esis Villarroel y Fortuny).
+
+Siguen pendientes, sin tocar en este cierre: los 5 casos restantes de
+"Varios Scopus ID" (Cabello, Caffarena, Hartmann Schatloff, Quezada,
+Torres) y los 82 casos de `internal/pendientes_consolidacion.md`.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente sobre Moya — cerrado. De los 5 casos
+restantes en esta cola, Hartmann Schatloff, Quezada y Torres ya tenían
+`misma` en una generación anterior de `identity_decisions.csv` (2026-09-02,
+antes del detector actual) pero siguen `PENDIENTE_REVISION_HUMANA` en
+`scopus_author_search_multiples_id.csv` — la misma clase de
+inconsistencia entre colas que se acaba de corregir para Moya, sin
+resolver todavía para esos tres. Sería el siguiente candidato natural si
+se sigue con esta cola.
+
+## Cierre: fusión de firmas por convergencia de ORCID no consolidada ("Tier A")
+
+### Contexto
+
+El usuario preguntó cuántos autores afiliados tiene UFT 2023-2025 (589
+formas / 536 entidades consolidadas), y a partir de ahí pidió un listado
+de posibles autores fusionables para aprobar. En vez de limitarme a las
+colas ya trabajadas esta sesión (Varios Scopus ID, Variantes de nombre
+pendientes — 0 en la herramienta de revisión), se buscó una fuente nueva:
+firmas que comparten el mismo ORCID en `data/enriched/authors_orcid.csv`
+sin estar fusionadas en `config/identidades_consolidadas.yml`. El cruce
+(agrupando por ORCID, descartando grupos ya totalmente consolidados, y
+verificando cada uno contra `internal/matching_log.csv` para confirmar
+apariciones reales en el corpus y coincidencia de unidad académica)
+encontró 22 grupos. Se presentaron en tres niveles (Tier A: variante
+ortográfica/de forma con evidencia adicional; Tier B: apellido compuesto
+truncado sin verificar; Tier C: sin patrón claro) y el usuario pidió
+aplicar el Tier A (8 grupos).
+
+### Qué se hizo
+
+Antes de escribir las 8 decisiones se revisó la fuerza real de cada una
+—no sólo la similitud de cadena— y se detectaron dos problemas que
+cambiaron el alcance de lo aplicado:
+
+1. **2 de los 8 (Gómez G./Gómez G.G., Macho R.A.M./Macho R.M.) tenían
+   evidencia más débil que el resto**: en ambos casos, las dos firmas del
+   par comparten el mismo ORCID por la MISMA fuente no independiente
+   (OpenAlex las dos — ver la advertencia ya documentada en
+   `docs/FUENTES_Y_APIS.md` §3.1 sobre que OpenAlex ingiere Crossref y no
+   cuenta como segunda fuente), sin ninguna unidad académica que corrobore
+   en el corpus. Se comunicó esto al usuario antes de aplicar nada; quedan
+   fuera de esta fusión.
+2. **Al preparar las notas de los 6 restantes, se encontró que 3 ya tenían
+   una fusión PARCIAL decidida previamente** que mis notas originales no
+   reflejaban (afirmaban «nunca antes decidido»): `p03-nunezlisboa`
+   (2026-08-26, 2 de 5 formas), `p03-moyanodavila` (2026-08-05) +
+   `orcid-0000-0002-6357-3469` (2026-09-01, juntas cubrían 3 de 4 formas),
+   `p03-martinezmardones` (2026-08-26, 2 de 4 formas). Se corrigieron las
+   tres notas para decir exactamente qué ya estaba fusionado y qué se
+   agregaba de nuevo, antes de aplicar — no se dejó una nota inexacta en
+   un archivo de registro auditado.
+3. **Al correr `apply_decisions.py --dry-run`, un chequeo cruzado contra
+   `config/orcid_revisado.yml` (la lista `retiradas`, que registra qué
+   ORCID el pipeline dejará de usar por decisiones previas de tipo
+   `orcid_incorrecto`) encontró que 2 de los 6 grupos usaban como base
+   exactamente un ORCID ya retirado**:
+   - `Vasquez F.` tiene su ORCID (`0000-0003-1769-3969`, el mismo que
+     comparte con `Vásquez F.`) marcado `orcid_incorrecto` por una
+     decisión previa (`noverif-Vasquez F.`, cola "ORCID no verificable",
+     2026-08-26). La fusión propuesta se apoyaba precisamente en ese
+     ORCID compartido — con la base inválida, la evidencia desaparece.
+     **Se retiró del todo, no se aplicó.**
+   - El grupo Moyano/Dávila tiene el mismo problema en 2 de sus 4 formas:
+     `Moyano Davila C.` y `Moyano Dávila C.` tienen su ORCID
+     (`0000-0002-6357-3469`) marcado `orcid_incorrecto` (2026-08-26) —
+     pero ese mismo ORCID YA estaba siendo usado por dos decisiones de
+     fusión más recientes y todavía vigentes (`p03-moyanodavila`,
+     2026-08-05, y `orcid-0000-0002-6357-3469`, cola "ORCID compartido",
+     2026-09-01). Es una **contradicción preexistente en el propio
+     historial de decisiones del proyecto**, de antes de esta sesión, que
+     no se investigó a fondo (no hay nota en ninguna de las decisiones
+     involucradas, ni rastro en `SESSION_NOTES.md` de por qué se marcó
+     incorrecto ese ORCID). No se resolvió por mi cuenta: **se retiró mi
+     adición** (la cuarta forma, `Dávila C.M.`, que habría profundizado la
+     contradicción sin aportar nada a resolverla) **y se deja la
+     contradicción existente declarada, sin tocar**, como ambigüedad
+     abierta para que la resuelva una persona.
+
+Con eso, se aplicaron finalmente **4 de los 8** grupos originales del
+Tier A:
+
+| Grupo | Formas fusionadas | Evidencia |
+|---|---|---|
+| `orcidconv-nunezlisboa` | 5 (2 ya fusionadas + 3 nuevas) | Mismo ORCID por dos linajes de fuente independientes (ORCID declarado + Crossref), misma unidad (Facultad de Medicina y Salud) en las 5 |
+| `orcidconv-yanine` | 2 (nuevo grupo) | Mismo ORCID por dos linajes independientes (Crossref + ORCID declarado), ambas ya `orcid_correcto` confirmado por separado (2026-09-01), misma unidad (Facultad de Ingeniería) |
+| `orcidconv-martinezmardones` | 4 (2 ya fusionadas + 2 nuevas) | Mismo ORCID, 3 de 4 ya `orcid_correcto` confirmadas por separado, misma unidad donde hay dato (Facultad de Medicina y Salud) |
+| `orcidconv-busquets` | 2 (nuevo grupo) | Mismo ORCID; una de las dos ya tenía revisión humana previa (candidato por afiliación, confianza alta) |
+
+### Verificación
+
+- `apply_decisions.py --dry-run` corrido dos veces: una tras escribir las
+  6 notas corregidas (sin avisos de contradicción sobre los grupos
+  nuevos), otra tras retirar Vasquez y Moyano (39 grupos, 94 formas —
+  antes 38/87).
+- Se cruzaron programáticamente los 6 grupos candidatos contra las listas
+  `confirmadas`/`retiradas`/`sin_registro` de `config/orcid_revisado.yml`
+  antes de la corrida real, no después — así se encontró el problema de
+  Vasquez/Moyano antes de escribir nada en `identidades_consolidadas.yml`.
+- Tras aplicar de verdad: `git diff --stat` confirma que sólo cambió
+  `config/identidades_consolidadas.yml` (los otros tres artefactos que
+  genera `apply_decisions.py` — `orcid_revisado.yml`,
+  `firmas_e09_resueltas.yml`, `authors_orcid.csv` — no cambiaron, porque
+  estas 4 decisiones son puras fusiones de nombre, no tocan asignación de
+  ORCID). Se inspeccionó el YAML resultante grupo por grupo: los 4 grupos
+  nuevos/ampliados tienen exactamente las formas esperadas, ninguna con
+  Vasquez ni con la cuarta forma de Moyano.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-461 | Se retira `orcidconv-vasquez` de la aplicación, pese a la instrucción de aplicar todo el Tier A | Su única evidencia (ORCID compartido) está construida sobre un ORCID que una decisión previa (2026-08-26) ya calificó de incorrecto para esa firma; aplicar hubiera fusionado dos personas con una base ya invalidada |
+| D-462 | Se retira la adición de «Dávila C.M.» al grupo Moyano, pero NO se toca el grupo ya existente (3 formas) que comparte el mismo problema | El grupo ya existente es una decisión previa vigente, tomada por una persona en su momento; no me corresponde deshacerla por mi cuenta al notar la contradicción — se declara la contradicción, no se resuelve unilateralmente (regla del proyecto sobre ambigüedades) |
+| D-463 | Se corrigen 3 notas antes de aplicar, en vez de dejarlas con la afirmación inexacta «nunca antes decidido» | Es un archivo de registro auditado (`internal/identity_decisions.csv`); una nota que dice algo falso sobre el estado previo del caso es un error de integridad de datos, no un detalle menor |
+
+### Archivos modificados
+
+```
+internal/identity_decisions.csv       + 4 decisiones aplicadas (nunezlisboa, yanine, martinezmardones, busquets)
+config/identidades_consolidadas.yml   38→39 grupos, 87→94 formas
+SESSION_NOTES.md, STATE.md, docs/DECISIONS.md   este cierre
+```
+
+Nota: `config/orcid_revisado.yml`, `config/firmas_e09_resueltas.yml` y
+`data/enriched/authors_orcid.csv` NO cambiaron (verificado con `git diff`),
+pese a que `apply_decisions.py` los regenera en cada corrida — su
+contenido resultante es idéntico al de antes de esta sesión de fusiones.
+
+### Supuestos descartados
+
+- Que las 8 firmas del Tier A tenían todas evidencia equivalente porque
+  compartían un ORCID: no era cierto — 2 tenían fuente única no
+  independiente sin corroboración (Gómez, Macho), y 2 más tenían el ORCID
+  compartido directamente invalidado por una decisión previa (Vasquez, y
+  parcialmente Moyano). Aplicar sin este chequeo habría escrito fusiones
+  con una base de evidencia falsa en un archivo que el proyecto trata como
+  registro auditado.
+- Que la instrucción «Aplica Tier A» obligaba a aplicar las 8 tal como se
+  presentaron: se interpretó como autorización sobre el TIPO de fusión
+  (evidencia de ORCID + coherencia de forma/unidad), no como una orden de
+  escribir decisiones concretas sin volver a mirar la evidencia una vez
+  redactada — la instrucción no pudo prever el hallazgo de una
+  contradicción con `orcid_revisado.yml`, que sólo apareció al preparar la
+  aplicación real.
+
+### Ambigüedades abiertas
+
+**Nueva, importante:** el grupo Moyano (`Moyano C.` / `Moyano Davila C.` /
+`Moyano Dávila C.`, ORCID `0000-0002-6357-3469`) tiene una contradicción
+sin resolver en el propio historial del proyecto: una decisión de
+2026-08-26 (`noverif-Moyano Davila C.`, `noverif-Moyano Dávila C.`, cola
+"ORCID no verificable") calificó ese ORCID de incorrecto para esas dos
+firmas, pero dos decisiones de fusión posteriores y vigentes
+(`p03-moyanodavila`, 2026-08-05 — anterior en fecha pero no revocada; y
+`orcid-0000-0002-6357-3469`, cola "ORCID compartido", 2026-09-01 —
+posterior) siguen usando ese mismo ORCID como base para fusionar a estas
+personas. Ninguna de las decisiones en conflicto tiene nota que explique
+el porqué, y no hay rastro en `SESSION_NOTES.md`. No se investigó más ni
+se resolvió — queda declarada para que una persona decida cuál veredicto
+prevalece.
+
+Siguen abiertos, sin tocar en este cierre: Tier B (13 grupos, patrón de
+apellido compuesto truncado, sin la verificación de posición que sí se
+hizo para casos anteriores como Fernández Abara); Tier C (Bilicic
+D./Ubierna D.B.B., sin patrón claro); Gómez G./Gómez G.G. y Macho
+R.A.M./Macho R.M. del propio Tier A, retirados por evidencia insuficiente
+más que por contradicción.
+
+**Cifra pública desactualizada:** la fila "Entidades de autor publicadas"
+de `STATE.md` (536) viene de `data/processed/authors.json`
+(`data/processed/` es artefacto de build, gitignored) y NO se recalculó
+con esta fusión — `snapshot.py` no reconstruye el sitio, sólo lee lo que
+ya existe. Con 94 formas / 39 grupos la cifra real tras un build sería
+589 − 94 + 39 − 4 = **530**, no 536. La fila de texto ("87 formas... 38
+personas" → "94 formas... 39 personas") sí se actualizó porque viene
+directo de `identidades_consolidadas.yml`. No se corrió el pipeline de
+build en este cierre — sigue pendiente.
+
+### Próximo paso recomendado
+
+Si se quiere que el recuento público (536→530) y las fichas de autor
+reflejen estas 4 fusiones, hace falta correr el pipeline de build
+(`python3 src/build/build_all.py` o `make sitio`) y, si se despliega,
+repetir el ciclo de verificación ya establecido esta sesión (CI, revisión
+visual). Como siguiente ronda de identidad: resolver la contradicción de
+Moyano (ambigüedad abierta arriba) antes de decidir si agregar «Dávila
+C.M.»; o pedir la verificación de posición del Tier B, el mismo método
+que ya se usó para Fernández Abara/Amarouch/Fortuny, para elevarlo a un
+nivel de evidencia aplicable.
+
 ## Cierre: `PD-04` — la cuarta fuente fuera de Scopus, Nivel V, sobre repositorios de datos y acceso abierto (2026-09-03)
 
 ### Contexto
@@ -10286,3 +10731,84 @@ conector se detiene y deja la respuesta cruda en
 `data/cache/obras_externas/<fuente>/ultima_respuesta.json` — ese archivo dice
 exactamente qué corregir. Con la cola llena: `make revisar-obras-externas`,
 revisar caso por caso, aplicar y reconstruir.
+
+## Fusión de `claude/state-review-next-steps-wzzq0h` (2026-09-03)
+
+### Contexto
+
+El usuario pidió fusionar la rama que quedaba sin integrar, señalada como
+ambigüedad abierta en el cierre de `PD-04`. Traía tres commits desde el
+ancestro común (`4d23df6`): los pendientes de Fortuny y de Moya, Patricia
+en la cola de "Varios Scopus ID", y la fusión de 4 grupos de firmas por
+convergencia de ORCID no consolidada ("Tier A").
+
+### Por qué esta fusión fue mecánica, a diferencia de la del 2026-09-03 por la mañana
+
+Aquélla tuvo 10 archivos en conflicto real y exigió leer la evidencia caso
+por caso (`D-442`–`D-445`). Ésta no, y la diferencia es verificable, no una
+impresión: los dos lados **sólo añadieron** al final de los mismos cuatro
+archivos. Se comprobó comparando las primeras 10.048 líneas de cada versión
+de `SESSION_NOTES.md` contra el ancestro: idénticas byte a byte en ambos
+lados. Con eso, "conservar los dos" no es una elección entre versiones — es
+la única resolución sin pérdida.
+
+- **`SESSION_NOTES.md`**: se reconstruyó como ancestro + las 3 notas de la
+  otra rama + la nota de `PD-04`, en orden cronológico (las suyas son de las
+  20:39–22:25; la de `PD-04`, posterior). Verificado después: cero líneas
+  únicas de cualquiera de los dos lados ausentes del resultado.
+- **`STATE.md` y `docs/DECISIONS.md`**: regenerados con `snapshot.py`, nunca
+  fusionados a mano (`D-444`). 473 decisiones indexadas.
+- **`docs/FUENTES_Y_APIS.md`**: git lo auto-fusionó. Verificado que trae los
+  dos cambios —el §2.9 actualizado a 8 nombres con varios Scopus ID (suyo) y
+  el §2.10 de `PD-04` (mío)—; la única línea "perdida" es el "**7 nombres**"
+  que su propio commit reemplaza por "**8 nombres**".
+- **Identidad** (`identity_decisions.csv`, `identidades_consolidadas.yml`,
+  `scopus_author_search_*`, `pendientes_consolidacion.*`,
+  `revision_identidad.html`): entraron enteros desde su rama, sin conflicto —
+  esta rama no tocó ninguno.
+
+### Que la numeración de decisiones no chocara no fue suerte
+
+`D-472` ya lo había previsto: el cierre de `PD-04` saltó de `D-456` a
+`D-464` precisamente porque esta rama existía y llegaba hasta `D-463`. El
+resultado fusionado es contiguo, `D-457`…`D-473`, sin un solo identificador
+repetido — comprobado con `uniq -d` sobre las tablas de decisiones.
+
+### Verificación
+
+- Sin marcadores de conflicto en ningún archivo del árbol.
+- `apply_decisions.py --dry-run`: **39 grupos consolidados, 94 formas de
+  firma**, exactamente las cifras que la nota del "Tier A" declara tras
+  aplicar. El estado de identidad fusionado es el que su rama produjo.
+- **530 fichas de autor** (antes 536). Verificado por aritmética
+  independiente de la salida del build, no aceptado porque el build lo
+  imprimiera: 589 formas − (94 formas en grupo − 39 grupos) − 4 firmas
+  descartadas = 530. Las 6 fichas que desaparecen son las formas que los 4
+  grupos nuevos absorbieron.
+- `src/audit/run_all.py`: 29/30, misma falla preexistente `E-06`, sin fallas
+  nuevas. `src/build/build_all.py`: 0 fallas de capa. Total fuera de Scopus
+  209, sin cambio — ninguna de las dos ramas tocaba esas fuentes.
+- `--test` de los tres módulos de `PD-04` (29/29, 10/10, 11/11) y de
+  `apply_decisions.py` y `apply_scopus_author_decisions.py` (5/5) tras
+  fusionar.
+- `node src/verify/run_all.mjs`: contraste, estructura, flujos, responsive,
+  higiene y peso, sin fallos.
+
+### Supuestos descartados
+
+- Que esta fusión necesitaría el mismo trabajo de arbitraje que la de la
+  mañana: descartado al comprobar que ambos lados sólo añadían, con el
+  prefijo idéntico al ancestro.
+
+### Ambigüedades abiertas
+
+Ninguna nueva. Las tres del cierre de `PD-04` siguen: `openalex_cobertura.py`
+pisa las resoluciones humanas al reejecutarse, los contratos de búsqueda de
+las tres APIs siguen sin verificar contra la red, y `PD-04` sigue sin
+corrida real. La tercera de esa lista —esta rama sin fusionar— queda cerrada
+aquí.
+
+### Próximo paso recomendado
+
+Correr `make obras-externas` desde una red que alcance DataCite, Europe PMC
+y Zenodo. Y decidir si esta rama se lleva a `main`.

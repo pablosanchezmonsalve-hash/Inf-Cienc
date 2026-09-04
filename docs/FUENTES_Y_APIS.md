@@ -347,7 +347,7 @@ identificador antes de exportar.
 `src/enrich/scopus_author_search.py` (nuevo) cruza los 812 perfiles contra
 el corpus y contra `internal/ambiguities_authors.csv`, y produce:
 
-- `internal/scopus_author_search_multiples_id.csv` — **7 nombres** con 2+
+- `internal/scopus_author_search_multiples_id.csv` — **8 nombres** con 2+
   Scopus Author ID. 4 ya estaban conocidos (Moya Patricia, Hartmann
   Schatloff Dan, Quezada Mauricio, Torres Keila — esta fuente los confirma
   de forma independiente). **3 son nuevos, no detectables por `P-04` antes
@@ -360,6 +360,24 @@ el corpus y contra `internal/ambiguities_authors.csv`, y produce:
   necesario para revisar sin volver a buscar nada: qué dice SciVal de cada
   identificador, si aparece en el corpus y con cuántas publicaciones, y
   bajo qué otro nombre si corresponde.
+
+  Un **8º candidato**, "Fortuny, Esteban Fortuny", lo ve un segundo
+  detector (`candidatos_fragmentacion_orcid()`, agregado 2026-09-03): dos
+  identificadores que no comparten nombre en NINGUNA fuente, sólo el
+  mismo ORCID (el declarado por el titular para "Fortuny E." en el corpus,
+  y el que Scopus Author Search asigna a su propio perfil de 3
+  documentos). El primer detector agrupa por nombre exacto dentro de esta
+  misma fuente y no puede ver esto.
+
+  Revisión humana al 2026-09-03: **3 confirmados** ("Esis Villarroel,
+  Ivette S.", "Fortuny, Esteban Fortuny", "Moya, Patricia" — convergencia
+  de ORCID entre dos o más fuentes independientes en los tres casos; el de
+  Moya revierte un veredicto `pendiente` del 2026-09-02, también reflejado
+  en `internal/identity_decisions.csv`), **5 pendientes** (Cabello,
+  Caffarena, Hartmann Schatloff, Quezada, Torres — sin evidencia suficiente
+  todavía, o con evidencia en contra en el caso de Caffarena). Decisiones
+  en `internal/scopus_author_search_decisiones.csv`, aplicadas con
+  `apply_scopus_author_decisions.py`.
 - `internal/scopus_author_search_orcid.csv` — contraste del ORCID que
   Scopus declara en el perfil del autor (tercera fuente independiente,
   además de Crossref y el registro público de ORCID) contra

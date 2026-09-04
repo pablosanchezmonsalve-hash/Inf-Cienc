@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4d23df6` · Addendum de cierre: reconciliación con PR #39 (fix del tooltip ORCID)
+Último commit: `ff19f18` · PD-04: cuarta fuente fuera de Scopus, Nivel V, sobre repositorios de d
 Snapshot: 2026-09-04
 
 ---
@@ -32,18 +32,18 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **536** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades de autor publicadas | **530** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **328** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **274** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades con ORCID | **268** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **44** | `config/indicators.yml` |
 | Indicadores publicados | **32** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **87 formas de firma eran 38 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+Las cifras de autor van en dos bases porque una revisión humana declaró que **94 formas de firma eran 39 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
 ---
 
@@ -69,7 +69,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/scopus_author_search_multiples_id.csv` | 8 |
 | `internal/scopus_author_search_orcid.csv` | 50 |
 
-`make revision` reúne estas colas en 290 casos, de los que **83 siguen pendientes**: 207 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 290 casos, de los que **82 siguen pendientes**: 208 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 466
+## Decisiones tomadas: 473
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
