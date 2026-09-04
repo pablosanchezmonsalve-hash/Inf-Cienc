@@ -71,6 +71,14 @@ SALIDA = ROOT / "internal" / "revision_obras_externas.html"
 
 FUENTE_LEGIBLE = {"datacite": "DataCite", "europepmc": "Europe PMC", "zenodo": "Zenodo"}
 
+
+def b_ventana() -> tuple[int, int]:
+    """La ventana declarada del proyecto, leída de la configuración."""
+    sys.path.insert(0, str(ROOT / "src" / "audit"))
+    import common as c  # noqa: PLC0415
+    v = c.load_config("institution.yml")["ventana_temporal"]
+    return int(v["anio_inicio"]), int(v["anio_fin"])
+
 CABECERA_CSV = [
     "# Revisión de obras en repositorios de datos y acceso abierto (PD-04) — decisión humana",
     "# Generado por internal/revision_obras_externas.html",
@@ -143,7 +151,7 @@ def _via_legible(via: str) -> str:
     return " y ".join(etiquetas.get(v, v) for v in via.split("|") if v)
 
 
-def render_html(filas: pd.DataFrame) -> str:
+def render_html(filas: pd.DataFrame, n_ventana: int | None = None) -> str:
     previas = leer_previas(DECISIONES)
     items: list[dict] = []
     cuerpo = ""
@@ -227,6 +235,7 @@ def render_html(filas: pd.DataFrame) -> str:
 <header><div class="c">
   <h1>Obras en repositorios de datos y acceso abierto que Scopus no indexa</h1>
   <p>Capa interna · generado el {hoy} · {n} obras ({por_fuente})</p>
+  {f'<p>Las <b>{n_ventana}</b> primeras caen en la ventana {b_ventana()[0]}-{b_ventana()[1]} y son las únicas que pueden llegar a contarse. Las {n - n_ventana} restantes quedan detrás, sin descartarse.</p>' if n_ventana is not None else ''}
 </div></header>
 
 <div class="barra"><div class="c">
@@ -340,18 +349,32 @@ def main() -> int:
                   "python3 src/enrich/obras_externas.py")
     df = pd.read_csv(FUENTE, dtype=str).fillna("")
 
-    # Primero lo corroborado por otra fuente y lo hallado por ORCID: son los
-    # casos donde la evidencia ya está y decidir cuesta una lectura. Lo que
-    # llegó sólo por afiliación exige más trabajo y va al final a propósito.
+    # Orden: primero lo que puede llegar a contarse, después lo que más
+    # evidencia trae.
+    #
+    # La ventana manda por encima de todo. `build 09` sólo cuenta lo que cae
+    # en 2023-2025, así que revisar una obra de 2015 es trabajo que no puede
+    # traducirse en cifra por mucho que se confirme. En la corrida real eso
+    # separa 322 filas de 1.967: la diferencia entre una cola revisable y una
+    # que nadie va a empezar. Las de fuera NO se descartan —la ventana puede
+    # cambiar, y son evidencia igual—, van detrás.
+    ventana = b_ventana()
+    en_ventana = df["anio"].str.slice(0, 4)
+    en_ventana = en_ventana.where(en_ventana.str.isdigit(), "")
     df = df.assign(
+        _ventana=[1 if a and ventana[0] <= int(a) <= ventana[1] else 0 for a in en_ventana],
         _orden=df["corroborada_por"].astype(bool).astype(int) * 2
-        + (df["via"].str.contains("orcid")).astype(int)
-    ).sort_values(["_orden", "anio"], ascending=[False, False]).drop(columns="_orden")
+        + (df["via"].str.contains("orcid")).astype(int),
+    ).sort_values(["_ventana", "_orden", "anio"], ascending=[False, False, False])
+    n_ventana = int(df["_ventana"].sum())
+    df = df.drop(columns=["_ventana", "_orden"])
 
-    SALIDA.write_text(render_html(df), encoding="utf-8")
+    SALIDA.write_text(render_html(df, n_ventana), encoding="utf-8")
 
     previas = leer_previas(DECISIONES)
     print(f"  obras a revisar          : {len(df)}")
+    print(f"    en ventana {b_ventana()[0]}-{b_ventana()[1]}, primero : {n_ventana}"
+          f"  (las únicas que pueden contarse)")
     print(f"  ya revisadas             : {len(previas)}")
     print(f"  pendientes               : {len(df) - len(previas)}")
     for fuente, n in df["fuente"].value_counts().items():
