@@ -11084,6 +11084,263 @@ pendiente.
 
 El usuario corre `make obras-externas` en su máquina. Lo primero que imprime
 la sección de Zenodo es qué plantilla usó y por qué; eso cierra la pregunta.
+---
+
+## Sesión 2026-09-01 (noche) - Vuelta de tuerca: celdas neutras claras + bordeaux solo en el dato
+
+### Contexto
+El usuario confirmó que los mapas seguían mal pese a que el contraste WCAG
+pasaba. Sintomas: treemap con celdas bordeaux-oscuro casi iguales, texto
+ilegible, heatmap apagado/murky, leyendas chocando. Diagnóstico: la identidad
+de marca (vino/champán) está bien para ACENTOS, pero llenar mapas densos de
+bordeaux oscuro + texto sobre ellos es ilegible. El usuario eligió:
+**"Celdas neutras claras + bordeaux solo en el dato"**.
+
+### Cambios
+- `web/assets/css/app.css`: nueva rampa `--mapa-1..5`
+  (claro `#f7ebd6/#eed0b2/#e1b794/#cf9e7d/#b9836f` · oscuro
+  `#1e0f12/#341d20/#4e2e2f/#6a403c/#88534b`), celdas cálidas claras. No toca
+  `--ord-*` (siguen para la rampa ordinal) ni `--serie-1` (bordeaux, el dato).
+- `src/design/validar_paleta.py`: nuevas reglas §1 `--mapa-* vs --tinta`
+  (piso 4,5, ambos temas) en ámbito raíz SÓLO (viven en `bento-card`, no en
+  bandas de contraste — mismo trato que `--bento-acento`); nuevo §3bis
+  `CELDAS DE MAPA` ΔE ≥ 6,5 entre vecinas. Resultado: **SISTEMA VÁLIDO**.
+- `web/assets/js/visualizations/treemap.js`: `RAMPA` pasa a `--mapa-1..5`;
+  identidad por etiqueta, color sólo para separar vecinas.
+- `web/assets/js/visualizations/heatmap.js`: las celdas usan `rellenoDeCelda(i)`
+  sobre la rampa `--mapa-*`, y la franja de mayor intensidad (≥ UMBRAL_DATO 0,9)
+  usa **`--serie-1` bordeaux** (el dato). Etiqueta `--tinta`; sobre la celda
+  bordeaux, texto claro. Leyenda con 5 + bordeaux.
+- `web/assets/css/modern-ui.css`: etiquetas del treemap pasan a `fill: --tinta`
+  (oscura en claro, clara en oscuro) sin halo (ya no hace falta sobre celdas
+  claras); `.heatmap-cifra.es-clara` usa `light-dark(#fdf6ef,#241014)` porque
+  sobre el bordeaux la tinta tiene que invertir con el tema.
+
+### Verificación
+- `py src/design/validar_paleta.py` → **SISTEMA CROMÁTICO VÁLIDO**.
+- `node src/verify/run_all.mjs dist` → **VERIFICACIÓN COMPLETA · sin fallos**.
+- Pixel-check ambos temas: treemap claro ahora crema/clay + gris sin-dato
+  (antes bordeaux oscuro); heatmap claro gradiente mapa-brand → bordeaux;
+  labels `--tinta` (74,54,54 claro / 212,194,182 oscuro). Sin desborde X.
+
+### Archivos tocados
+`web/assets/css/app.css`, `src/design/validar_paleta.py`,
+`web/assets/js/visualizations/treemap.js`, `heatmap.js`,
+`web/assets/css/modern-ui.css`, `SESSION_NOTES.md`.
+
+### Pendiente
+- Commit (aún sin commitear) de estos 6 archivos.
+- Nota: la celda gigante `--sin-dato` (gris) del treemap sigue siendo la mayor
+  volumen real (gran "No determinada"); no es bug de paleta.
+- Confirmación visual final del usuario (claro y oscuro).
+
+## Sesión 2026-09-01 (noche, 2ª parte) - Grilla Bento a ancho completo
+
+### Contexto
+Tras el rediseño de celdas claras, el usuario sugirió que sobraban laterales y
+que los mapas podrían crecer. Diagnóstico por medición (Playwright): los mapas
+estaban atrapados en `.explorador-resultado` (872px) porque `.explorador` tiene
+dos columnas (`17rem` panel + `minmax(0,1fr)`); la grilla era hija de la columna
+derecha y el panel de filtros bloqueaba la izquierda. El usuario eligió "sacar la
+grilla a ancho completo".
+
+### Cambios
+- `web/produccion.html`: el bloque "Jerarquía y temáticas" (`bento-grid`) se
+  MOVIÓ fuera de `.explorador-resultado`; ahora es hijo directo de
+  `.explorador`, con su `h2` de sección.
+- `web/assets/css/modern-ui.css`: `.bento-grid > .bento-ancha` pasa de
+  `span 2` a `1 / -1` (tarjeta ancha = fila completa); nueva regla
+  `.explorador > .bento-grid { grid-column: 1 / -1 }` para que la grilla
+  atraviese las dos columnas del explorador sin chocar con el panel sticky
+  (vive en una fila superior distinta).
+
+### Resultado medido
+- Treemap/heatmap: **826px → 1130px** (+37%), aprovechando los laterales.
+- Validator → **SISTEMA CROMÁTICO VÁLIDO**; verificar → sin fallos; desborde
+  horizontal 0px. Leyendas del heatmap (0/17/34) reubicadas correctamente.
+- Captura regenerada `_rev_produccion.png`.
+
+### Archivos tocados
+`web/produccion.html`, `web/assets/css/modern-ui.css`, `SESSION_NOTES.md`.
+
+### Pendiente
+- Commit (aún sin commitear) de los 8 archivos de esta serie (rediseño + grilla):
+  `web/assets/css/app.css`, `src/design/validar_paleta.py`, `treemap.js`,
+  `heatmap.js`, `modern-ui.css`, `web/produccion.html`, `SESSION_NOTES.md`.
+- Confirmación visual final del usuario (claro y oscuro).
+
+## Sesión 2026-09-01 (noche, 3ª parte) - "En oscuro se visualiza poco"
+
+### Contexto
+Al ver el ancho completo en oscuro, el usuario reportó que los mapas "se
+visualizan poco". Medición: las celdas oscuras (1,05–3,15:1 contra el fondo
+`--superficie` oscuro `#17080a`) desaparecían dentro de la tarjeta oscura.
+
+### Causa raíz (dos problemas encadenados)
+1. `--mapa-1..5` eran `light-dark(claro, OSSS)`: en oscuro se volvían vino
+   oscuro y se fundían con la tarjeta oscura. El usuario pidió "celdas neutras
+   claras", lo que en contexto significa un campo de datos claro en AMBOS temas.
+2. BUG de especificidad: `app.css:1359` `svg.chart text { fill: var(--tinta-2) }`
+   (0,1,1) **pisaba** `.treemap-etq { fill: var(--tinta) }` de `modern-ui.css`
+   (0,1,0). El texto "legible" que veíamos eran `--tinta-2` (`#4a3636`/`#d4c2b6`),
+   no la tinta del mapa.
+
+### Cambios
+- `app.css`: `--mapa-1..5` pasan a valores ÚNICOS claros (#f7ebd6…#b9836f), sin
+  `light-dark`. Nuevos tokens: `--mapa-tinta: #241014` (texto sobre el campo,
+  oscuro fijo en ambos temas) y `--mapa-dato: #8a2430` (bordeaux del dato,
+  oscuro fijo — si fuera `--serie-1`, en oscuro se volvería rosa claro y se
+  perdería contra las celdas claras).
+- `modern-ui.css`: `.treemap-etq/.treemap-cifra/.heatmap-cifra` →
+  `fill: var(--mapa-tinta)` y se re-encasillan como `svg.chart .treemap-etq`
+  (0,2,1) para ganar al `svg.chart text` genérico; `.heatmap-cifra.es-clara` →
+  `var(--marca-tinta)` (clara fija) sobre la celda de dato.
+- `heatmap.js`: `CELDA_DATO` → `var(--mapa-dato)`; comentario actualizado.
+- `validar_paleta.py`: `REGLAS_MAPA` miden el par real (`--mapa-N vs
+  --mapa-tinta` piso 4,5) y la cifra del dato (`--mapa-dato vs --marca-tinta`).
+
+### Resultado medido (ambos temas idénticos)
+- Celdas `--mapa-1..5` claras (#f7ebd6…#b9836f); texto `--mapa-tinta`
+  `rgb(36,16,20)`; dato `--mapa-dato` `#8a2430` con `--marca-tinta`.
+- Oscuro: las celdas claras ahora RESALTAN sobre la tarjeta oscura → se leen.
+- Validator → VÁLIDO · batería → sin fallos · overflow 0 · lienzo 1130px.
+- Capturas: `_rev_produccion.png` (claro) y `_rev_produccion_oscuro.png`.
+
+### Archivos tocados
+`web/assets/css/app.css`, `web/assets/css/modern-ui.css`, `heatmap.js`,
+`treemap.js`, `src/design/validar_paleta.py`, `SESSION_NOTES.md`.
+
+### Pendiente
+- Commit (aún sin commitear) de toda la serie (ahora ~10 archivos).
+- Confirmación visual final del usuario en claro y, sobre todo, en OSCURO.
+
+## Sesión 2026-09-01 (noche, 4ª parte) - El treemap vuelve a la familia BORDEAUX
+
+### Contexto
+Tras el arreglo de oscuro, el usuario notó que el treemap "la paleta de colores
+es distinta a todo el resto del informe": las celdas pastel `--mapa-*`
+(crema/arena/tostada) quedaban ajenas a la familia bordeaux (--serie-1/2,
+--ord-1..4) que usa todo lo demás. El usuario eligió **"Rampa ordinal bordeaux"**.
+
+### Cambios
+- `treemap.js`: `RAMPA` vuelve a la ordinal bordeaux
+  `['--ord-3','--ord-2','--ord-4','--ord-1']` (misma familia de los gráficos de
+  cuartiles; `light-dark`, invierte con el tema).
+- `modern-ui.css`:
+  - `.treemap-etq/.treemap-cifra` → `fill: --superficie` (claro sobre bordeaux
+    oscuro en claro; oscuro sobre bordeaux claro en oscuro) + HALO `--marca`
+    (`paint-order: stroke`, 3px) para que se lea hasta sobre la celda más clara
+    (`--ord-4`).
+  - `.treemap-celda { stroke: --superficie; stroke-width: 2px }`: resquicio de
+    la superficie entre celdas → el treemap se lee como MOSAICO y no se
+    apelmaza (el defecto original de las celdas bordeaux "casi iguales").
+- La leyenda ya iteraba `RAMPA` + `--sin-dato`, así que ahora muestra los 4
+  tonos ordinales + gris sin cambios.
+
+### Por qué no se repite el apelmazado ni la ilegibilidad originales
+- La ordinal tiene ΔE ≥ 8,1 entre vecinas (validado §0) y ahora además las
+  celdas tienen gutter de 2px que las separa visualmente.
+- El texto usa `--superficie` + halo; la celda más clara (`--ord-4`) cae a
+  ~3,3-3,6:1 crudo, que el halo remedia en la práctica (remedio aceptado en la
+  opción elegida; no se mide como par estricto WCAG en el validador).
+
+### Resultado medido
+- Claro: celdas #a6505d (dominante) + #bf6977 + #5c1f29 + #8c3845 (todos
+  presentes) + gris sin-dato; texto/gutters #fdf6ef.
+- Oscuro: celdas #cf828e + #9d4a56 + #f8dde0 + #ebaab4 + gris; texto/gutters
+  #17080a.
+- Validator → VÁLIDO · batería → sin fallos · overflow 0 · lienzo 1130px.
+- Capturas: `_rev_produccion.png` y `_rev_produccion_oscuro.png`.
+
+### Nota
+- El HEATMAP mantiene sus celdas claras `--mapa-*` con bordeaux `--mapa-dato`
+  en el dato: el usuario no lo señaló (lo aprobó como "mucho mejor"). Queda la
+  inconsistencia visual treemap-bordeaux vs heatmap-claro; si el usuario lo
+  quiere unificado, sería el siguiente paso.
+
+### Archivos tocados
+`web/assets/js/visualizations/treemap.js`, `web/assets/css/modern-ui.css`,
+`SESSION_NOTES.md`.
+
+### Pendiente
+- Commit (aún sin commitear) de toda la serie.
+- Confirmación visual del treemap en claro y oscuro.
+
+---
+
+## Sesión 2026-09-03 - Revisión de visibilidad + mejora del informe descargable
+
+### Contexto
+El usuario pidió (1) revisar cada página y cada gráfico para asegurar que sean
+visibles, y (2) usar los conocimientos/skills para mejorar la interfaz del
+informe descargable (PDF), que debe ser accesible visualmente y agradable.
+
+### Parte A - Visibilidad del sitio (auditoría estructural)
+Auditoría Playwright sobre las 10 páginas (`index, impacto, produccion,
+colaboracion, tematica, indicadores, autores, publicaciones, metodologia,
+autor.html?id=...`) × temas claro/oscuro, por métricas DOM (sin ver imágenes):
+- **Montaje** sin errores de consola ni `pageerror` en todas.
+- **25 gráficos** con datos: 28 barras, 15 barras-de-déficit, 9 celdas de
+  treemap, 24 celdas de heatmap, 4 segmentos de donut, 3 anillos acumulados,
+  210 nodos de red de coautoría. **Ningún gráfico vacío/roto.**
+- **Contraste**: 0 fallos WCAG AA (claro y oscuro) sobre ~10.000 nodos de texto
+  (cabecera de gradiente bordeaux validada leyendo el `linear-gradient`).
+- **Desbordes** horizontales: ninguno. **Fuentes < 11px**: ninguna.
+- Recordatorio: el treemap es sólo de `produccion.html` (la portada es un
+  explorador de BARRAS, no reproduce el treemap por diseño).
+
+### Parte B - Informe descargable (impresión): defectos encontrados
+El informe descargable es `window.print()` (el PDF = la página impresa, sin
+segunda maquetación). Se encontraron tres defectos reales en `@media print`:
+1. **El panel de filtros imprimía**: la regla ocultaba `.filtros` (clase
+   antigua) pero el explorador usa `.explorador-panel`; el panel sticky caía a
+   la izquierda de TODAS las páginas del PDF.
+2. **El `.explorador` seguía en grid de 2 columnas** en papel → los gráficos
+   quedaban encerrados en ~390px frente a un panel vacío en vez de usar el ancho
+   de la hoja.
+3. **`padding-bottom: 45vh`** (respaldo de pantalla para que el último corte
+   suba hasta la cabecera; D-2a) añadía media página en blanco al final de cada
+   sección impresa.
+
+### Cambios (app.css)
+- Lista `display:none` de impresión: añadidos `.explorador-panel`,
+  `.filtros-explorador`, `.estado-recorte`, `#controles`, `.treemap-migas`,
+  `.treemap-leyenda` (migas y leyenda de los mapas no hacen falta en papel,
+  donde no hay drill-down).
+- Nuevo bloque `@media print` AL FINAL del archivo (a propósito: estas reglas
+  tienen la misma especificidad que las del explorador, líneas ~1737 y ~1948, y
+  en la cascada manda la última; los `@media print` del medio del archivo quedan
+  detrás de ellas en el orden de origen):
+  - `.explorador { display: block }` → colapsa a una sola columna en papel.
+  - `.explorador-resultado { padding-bottom: 0 }` → elimina el hueco de 45vh.
+  - `.portada-cabecera { padding: 34mm 0 28mm; text-align: center }` + h1 a
+    30pt con filete inferior → la primera hoja se lee como portada de informe,
+    no como borde superior de una web. `break-inside: avoid`.
+  - `.bento-card { break-inside: avoid }` → el treemap/heatmap no se parte a la
+    mitad de la figura.
+
+### Resultado medido (print emulado y PDF real)
+- Panel de filtros `display:none`; explorador a `block`; `padding-bottom: 0`;
+  resultado a ancho completo de hoja; sin desborde. PDFs de `index/produccion`
+  regenerados sin error (333 KB / 495 KB).
+- Secciones `impacto/colaboracion/tematica`: h1 + portada-sub presentes, gráficos
+  montados (la red de coautoría de colaboración va a ancho completo, 711px).
+- Validador paleta → VÁLIDO · batería `src/verify/run_all.mjs` → sin fallos
+  (0 contraste, 0 estructura, 0 excepciones JS, 0 desborde, higiene OK, peso OK).
+
+### Nota
+- Los overrides de pantalla→papel viven al final de `app.css` con comentario
+  explicando el porqué del orden de cascada; no hay que reintroducirlos en el
+  `@media print` del medio o volverán a perder contra `.explorador` (más tarde
+  en origen).
+
+### Archivos tocados
+`web/assets/css/app.css`, `SESSION_NOTES.md`; **sin commitear** (sigue pendiente
+el commit de toda la serie).
+
+### Pendiente
+- Commit de toda la serie (~11 archivos) y push.
+- Confirmación visual del treemap en claro y oscuro y del PDF del informe.
 
 ## Cierre: revisión del asistente de purga de historial (2026-09-03)
 

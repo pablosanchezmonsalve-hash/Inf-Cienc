@@ -163,6 +163,36 @@
   --ord-3: light-dark(#a6505d, #cf828e);
   --ord-4: light-dark(#bf6977, #9d4a56);
 
+  /* ---- Rampa de CELDAS de los mapas (treemap/heatmap). NO es la rampa
+          ordinal de arriba. Decisión del usuario: los mapas densos se vuelven
+          ilegibles si se llenan de bordeaux oscuro apelmazado + texto difícil;
+          en vez de eso usan celdas NEUTRAS CÁLIDAS, aireadas, con el bordeaux
+          reservado (vía --serie-1) para marcar el dato.
+
+          El campo del gráfico es claro en AMBOS temas: un treemap/heatmap es
+          una "hoja de datos" y debe leerse igual esté o no en modo oscuro.
+          Las celdas se llenan con el mismo relleno claro y sus etiquetas van
+          en --mapa-tinta (vino oscuro constante, también en ambos temas).
+          Si las celdas se oscurecieron con el tema (light-dark) desaparecían
+          contra el fondo oscuro de la tarjeta (1,05-3,15:1) y "no se veían"
+          (regresión 2026-09-01). ---- */
+  --mapa-1: #f7ebd6;
+  --mapa-2: #eed0b2;
+  --mapa-3: #e1b794;
+  --mapa-4: #cf9e7d;
+  --mapa-5: #b9836f;
+
+  /* Tinta de las etiquetas sobre el campo de mapa: vino oscuro FIJO en ambos
+     temas (las celdas son claras siempre, así que el texto también debe ser
+     oscuro siempre, al revés que --tinta que sí invierte). */
+  --mapa-tinta: #241014;
+
+  /* Celda DATO de los mapas: el bordeaux del dato, FIJO en ambos temas. Sin
+     light-dark: sobre un campo de mapa claro, el dato debe leer como el mismo
+     bordeaux en claro y en oscuro (si fuese --serie-1, en oscuro se volvería
+     un rosa claro que no se distinguiría del resto del campo). */
+  --mapa-dato: #8a2430;
+
   /* ---- Ausencia de dato: gris, siempre (decisión D-09). ---- */
   --sin-dato: light-dark(#87807a, #7d8886);
 
@@ -1600,9 +1630,16 @@ svg.chart .trama { pointer-events: none; }
 }
 
 @media print {
+  /* Cromo de interfaz que no tiene nada que hacer en papel. El panel de
+     filtros del explorador usa `.explorador-panel` (no el antiguo
+     `.filtros`, que se deja por las páginas que aún lo arrancan); sin
+     ocultarlo, la columna sticky de filtros imprimiría a la izquierda de
+     todas las páginas del informe. */
   .cabecera, .tema, .filtros, .paginacion, .salto-contenido,
   .rail, .vigencia-guia, .descargar, .ayuda, .tooltip, .nav-toggle,
-  .v-migas, .v-chip, .recorte-vivo, .v-anio, .minifoco { display: none; }
+  .v-migas, .v-chip, .recorte-vivo, .v-anio, .minifoco,
+  .explorador-panel, .filtros-explorador, .estado-recorte,
+  #controles, .treemap-migas, .treemap-leyenda { display: none; }
   body { background: #fff; }
   .disposicion { display: block; }
   .modulo, .kpi, .tabla-envoltura { box-shadow: none; border-color: #999; break-inside: avoid; }
@@ -1931,3 +1968,39 @@ svg.chart .trama { pointer-events: none; }
 .col-marca input[type="checkbox"] { width: 1.1rem; height: 1.1rem; margin: 0; cursor: pointer; }
 
 .enlace-lista { font-weight: 650; font-size: var(--t-s); white-space: nowrap; }
+
+/* ════════════════════════════════════════════ IMPRESIÓN: ajustes de layout ═
+   Overrides de PANTALLA para el informe descargable, al final del archivo a
+   propósito: las reglas de esta cola tienen la misma especificidad que las
+   del resto del sitio para los mismos selectores, y en la cascada manda la
+   última. Los @media print de la mitad del archivo (sección 1608) se quedan
+   atrás de las reglas del explorador (líneas ~1737 y ~1930); poner aquí los
+   que deshacen el layout de pantalla garantiza que ganen.
+
+   El explorador de portada y de producción es un grid de dos columnas (panel
+   de filtros + resultado). En papel se colapsa a una sola columna: sin los
+   filtros a la izquierda, los gráficos y las cifras aprovechan todo el ancho
+   de la hoja en vez de quedar encerrados en ~390px frente a un panel vacío. */
+@media print {
+  .explorador { display: block; }
+  .explorador-resultado { padding-bottom: 0; }
+
+  /* La primera página del PDF es la portada: el título del informe en papel
+     debe leerse como cabecera de documento, no como el borde superior de una
+     web. Se le da aire vertical, se centra el bloque y se cierra con un filete
+     que separa la página de portada del cuerpo que la sigue. */
+  .portada-cabecera { padding: 34mm 0 28mm; text-align: center; }
+  .portada-cabecera .portada-id h1 {
+    font-size: 30pt; line-height: 1.1; letter-spacing: -.02em; padding: 0 0 10pt;
+    border-bottom: 1.5px solid #000; margin-bottom: 10pt;
+  }
+  .portada-sub { font-size: 11.5pt; max-width: none; margin-top: 4pt; }
+  /* La pasada en que la portada se corta a mitad de su bloque no debe vaciar
+     media página para romper el título a la mitad. */
+  .portada-cabecera { break-inside: avoid; }
+
+  /* Los tableros Bento (treemap y heatmap de producción) no deben cortarse a
+     la mitad de la figura: un mapa de calor partido por un salto de página no
+     se puede leer. Se les pide no partir, igual que a los módulos. */
+  .bento-card { break-inside: avoid; }
+}
