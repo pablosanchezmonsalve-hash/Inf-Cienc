@@ -111,10 +111,19 @@ const CABE_ETIQUETA = 46;
    es lo único que medía `validar_paleta.py` hasta ahora), caen a ΔE 2,5 bajo
    deuteranopía — el propio comentario del token ya avisaba de esto ("quien
    las estrene debe revalidarlas para el número de ranuras que vaya a usar,
-   no para seis"). En vez de forzar diez tonos poco separados, la identidad
-   de cada celda la lleva la ETIQUETA (igual que en cualquier treemap
-   profesional); el color sólo codifica PROFUNDIDAD con la rampa ordinal ya
-   validada, más el gris de "sin dato" (D-09). */
+   no para seis").
+
+   La identidad de cada celda la lleva la ETIQUETA (igual que en cualquier
+   treemap profesional); el color sólo ayuda a separar celdas vecinas. Tras la
+   revisión del usuario (2026-09-01), el treemap vuelve a la FAMILIA BORDEAUX
+   del resto del informe (la detección anterior de celdas pastel fue un
+   paréntesis: "la paleta es distinta a todo el resto"). Usa la rampa ordinal
+   `--ord-1..4` (los mismos tonos de los gráficos de cuartiles). El texto va
+   en `--superficie` (claro sobre el bordeaux oscuro en claro, oscuro sobre el
+   bordeaux claro en oscuro) con un HALO `--marca` para que se lea hasta sobre
+   la celda más clara (`--ord-4`), y cada celda lleva una separación de la
+   superficie de la tarjeta para que el mosaico no se apelmace. Gris mantenido
+   para "sin dato" (D-09). Validado por `src/design/validar_paleta.py` §1. */
 const RAMPA = ['var(--ord-3)', 'var(--ord-2)', 'var(--ord-4)', 'var(--ord-1)'];
 
 function colorDe(nombre, indice) {
@@ -125,16 +134,24 @@ function colorDe(nombre, indice) {
     `.citas`, `.rect`. `nivel`: rótulo del nivel actual, para el `aria-label`
     ("Facultad" / "Escuela"), sólo texto, no cambia el dato. */
 export function renderTreemap(nodos, { ancho, alto, nivel = 'unidad', conHijos = () => false } = {}) {
+  // Un solo punto de tabulación para todo el mapa (la primera celda
+  // realmente dibujada — algunas se saltan por `w<=0||h<=0`), no una por
+  // celda: el mismo "veinte paradas de Tab" que las barras ya evitan
+  // (paginas.js, tecladoGraficos()), que recorre estas celdas con flechas
+  // generalizando el mismo mecanismo.
+  let primeraVisible = true;
   const celdas = nodos.map((n, i) => {
     const { x, y, w, h } = n.rect;
     if (w <= 0 || h <= 0) return '';
     const color = colorDe(n.nombre, i);
     const clicable = conHijos(n);
+    const tab = primeraVisible ? 0 : -1;
+    primeraVisible = false;
     const etiqueta = (w >= CABE_ETIQUETA && h >= 24)
       ? `<text x="${x + 8}" y="${y + 18}" class="treemap-etq">${escapar(n.nombre)}</text>
          ${h >= 42 ? `<text x="${x + 8}" y="${y + 34}" class="treemap-cifra">${nf.format(n.valor)}</text>` : ''}`
       : '';
-    return `<g class="treemap-nodo${clicable ? ' es-clicable' : ''}" tabindex="0"
+    return `<g class="treemap-nodo${clicable ? ' es-clicable' : ''}" tabindex="${tab}"
         role="${clicable ? 'button' : 'listitem'}"
         aria-label="${escapar(n.nombre)}: ${nf.format(n.valor)} publicaciones${n.citas != null ? `, ${nf.format(n.citas)} citas` : ''}${clicable ? '. Activar para ver el detalle' : ''}"
         data-tip="${escapar(n.nombre)}" data-tip-v="${nf.format(n.valor)} pub."

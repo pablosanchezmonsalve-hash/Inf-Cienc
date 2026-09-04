@@ -18,6 +18,17 @@ name: Ampliar la cobertura de ORCID
 #   Solo: el día 1 de cada mes a las 06:00 UTC (T-19 — el registro de ORCID
 #   cambia despacio; una corrida mensual basta y no gasta cuota de más).
 #
+# D-SEC-02: esta ampliación necesita la capa de datos SENSIBLE (data/interim,
+# data/enriched, internal/matching_log). Esas capas NO se versionan (D-SEC-01),
+# así que en un runner de GitHub no están —y no deben reproducirse ahí, porque
+# reconstruirlas exige data/raw/ (exports de Elsevier). El camino canónico es
+# LOCAL: scripts/ampliar-orcid-afiliacion.ps1, en la máquina institucional.
+#   Este workflow sólo sirve si el repositorio de ejecución ya contiene esas
+#   capas (p. ej. un runner propio con los datos montados); lo verifica el paso
+#   «Comprobar capa de datos» y aborta con un mensaje claro si no están. La
+#   corrida programada mensual (schedule) quedará así sin efecto salvo en un
+#   runner con los datos.
+#
 # INPUTS EN LA CORRIDA PROGRAMADA
 #   `inputs.*` sólo existe cuando el disparo es `workflow_dispatch`; en
 #   `schedule` llega vacío. Los `if:` de abajo lo resuelven con
@@ -50,8 +61,9 @@ on:
         type: boolean
         required: false
         default: true
-  schedule:
-    - cron: '0 6 1 * *'
+  # Sin `schedule`: la corrida mensual programada corría en un runner sin las
+  # capas sensibles (D-SEC-01) y abortaría siempre en la compuerta de datos.
+  # La ampliación se lanza a mano, cuando hay un runner con los datos montados.
 
 permissions:
   contents: write
@@ -92,8 +104,23 @@ jobs:
           fi
           echo "Credenciales presentes (Client ID: ${ID:0:8}...)"
 
-      - name: Auditoría
-        run: python3 src/audit/run_all.py
+      - name: Comprobar capa de datos sensible
+        run: |
+          for f in data/interim/publications_universe.csv \
+                   data/enriched/authors_orcid.csv \
+                   internal/matching_log.csv; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Falta $f (capa de datos sensible, no versionada, D-SEC-01)."
+              failed=1
+            fi
+          done
+          if [ -n "${failed:-}" ]; then
+            echo "Este workflow no puede correr en un runner sin las capas sensibles."
+            echo "Ejecute en su lugar, en la máquina institucional:"
+            echo "  scripts/ampliar-orcid-afiliacion.ps1"
+            exit 1
+          fi
+          echo "Capa de datos sensible presente — procediendo"
 
       - name: Cobertura antes de ampliar
         run: |
@@ -162,6 +189,10 @@ jobs:
             internal/orcid_candidatos_afiliacion.csv
           if-no-files-found: ignore
 
+      # SEGURIDAD (D-SEC-01): sólo se versionan los resultados públicos
+      # (data/enriched/*). Los archivos de internal/ (log de ampliación,
+      # desacuerdos, hallazgos, candidatos por afiliación) son capa interna y
+      # NO se suben al repositorio; viajan sólo como artefactos (paso previo).
       - name: Guardar el resultado en el repositorio
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.commitear }}
         env:
@@ -170,13 +201,9 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Uno por uno: `git add A B` falla entero si B no existe, y entonces
-          # tampoco añade A. Varios de estos sólo se generan si hubo hallazgos.
+          # tampoco añade A. Sólo se añade lo público.
           for f in data/enriched/authors_orcid.csv \
                    data/enriched/orcid_verificacion.csv \
-                   internal/orcid_ampliacion_log.csv \
-                   internal/orcid_desacuerdos.csv \
-                   internal/orcid_hallazgos.csv \
-                   internal/orcid_candidatos_afiliacion.csv \
                    docs/AUTHOR_PROFILE.md docs/BUILD_VERIFICATION.md; do
             [ -f "$f" ] && git add "$f"
           done

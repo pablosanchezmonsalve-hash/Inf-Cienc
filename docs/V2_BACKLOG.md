@@ -19,7 +19,7 @@ lugar.
 
 | # | Pendiente | Desbloquea | Origen |
 |---|---|---|---|
-| **V2-01** | Subir la cobertura de ORCID desde el 51,1 % actual (277 de 542), confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
+| **V2-01** | Subir la cobertura de ORCID desde el 50,9 % actual (274 de 538), confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
 | **V2-02** | ~~Resolver los grupos de variantes de nombre que siguen pendientes~~ | `C-05` red de coautoría; recuento real de personas | T-03 (cerrado, 2026-08-26) |
 | **V2-03** | Revisión humana de los 20 identificadores fragmentados | `C-07` liderazgo autoral | T-04 |
 | **V2-04** | Validar institucionalmente el vocabulario de unidades | Retirar la advertencia destacada de `P-07` | T-02 |
@@ -32,18 +32,22 @@ firmas no podían consolidarse y que era la única vía sin trabajo manual. Las 
 afirmaciones caducaron:
 
 - **La vía Crossref ya se recorrió.** `T-01` se cerró el 2026-08-01 con 174
-  firmas, y la ampliación desde el registro más las decisiones humanas la
-  dejaron en **322 asignaciones sobre 589 formas de firma sin consolidar**, que
-  son **277 de 542 entidades publicadas (51,1 %)**. El 100 % no es alcanzable
-  sin inventar datos: el argumento está en `docs/ORCID_COVERAGE.md` §5.
+  firmas, y la ampliación desde el registro, OpenAlex y las decisiones humanas
+  la dejaron en **327 asignaciones sobre 589 formas de firma sin consolidar**,
+  que son **274 de 538 entidades publicadas (50,9 %)**. El 100 % no es
+  alcanzable sin inventar datos: el argumento está en `docs/ORCID_COVERAGE.md`
+  §5.
 - **La consolidación no esperó al ORCID.** De los 110 casos que `make revision`
   puso delante de una persona —repartidos en cuatro colas—, 52 se resolvieron:
-  51 «misma persona» y 1 «personas distintas». Su cierre transitivo dejó **63
-  formas de firma convertidas en 30 personas**
-  (`config/identidades_consolidadas.yml`); una consolidación posterior
-  (2026-09-01) llevó la base publicada a **542 entidades**. El camino fue humano
-  y caso por caso, que es justo lo que `D-08` exige y lo que este párrafo daba
-  por imposible.
+  51 «misma persona» y 1 «personas distintas». Su cierre transitivo, sumado a
+  revisiones posteriores, dejó **84 formas de firma convertidas en 37 personas**
+  (`config/identidades_consolidadas.yml`) — la consolidación del 2026-09-01
+  llevó la base a 542 entidades, y la regla `E-09` descartó 4 formas más que
+  resultaron ser fragmentos de cadena de afiliación, no personas
+  (`config/firmas_e09_resueltas.yml`, ver `docs/LIMITATIONS.md` §7), dejando
+  la base publicada hoy en **538 entidades**. El camino fue humano y caso por
+  caso, que es justo lo que `D-08` exige y lo que este párrafo daba por
+  imposible.
 
 No confundir dos recuentos que coinciden en el número: la cola de variantes de
 nombre tiene **51 grupos** (`T-03`, 123 filas en `internal/ambiguities_authors.csv`),
@@ -101,7 +105,7 @@ Ya evaluados en Fase 2 y verificados como calculables. Están en
 
 | # | Decisión | Estado |
 |---|---|---|
-| **T-11** | Alcance de publicación de fichas de autor | **Supuesto vigente:** se publican las **556 entidades** —las 589 formas de firma de la fuente, con 63 ya fusionadas en 30 personas—, ranking por defecto n ≥ 5 (`config/publication.yml`). Sin confirmar |
+| **T-11** | Alcance de publicación de fichas de autor | **Supuesto vigente:** se publican las **538 entidades** —las 589 formas de firma de la fuente, con 84 ya fusionadas en 37 personas y 4 descartadas por la regla `E-09` (no son personas)—, ranking por defecto n ≥ 5 (`config/publication.yml`). Sin confirmar |
 | ~~T-13~~ | ~~Confirmar la semántica del percentil de citación con documentación de SciVal~~ | **Cerrado (2026-08-26)**: empírica (correlación −0,66) y ahora también documental — `docs/METHODOLOGY.md` §7 bis |
 | — | Licencia de datos derivados (CC BY 4.0) | Propuesta en `DATA_LICENSE.md`, sin validar |
 | — | Alcance de publicación de métricas de Elsevier | Sin verificación jurídica |
@@ -157,7 +161,7 @@ y `CLAUDE.md` prohíbe suponer disponibilidad de APIs o credenciales.
 | # | Integración | Desbloquea | Qué falta confirmar |
 |---|---|---|---|
 | ~~**V2-19**~~ | OpenAlex · **ejecutado (2026-08-26)**, `src/enrich/orcid_openalex.py` | ORCID donde no había: **80 asignaciones nuevas**, cobertura 242 → 322. Contraste institucional por ROR: **68 publicaciones** que este proyecto atribuye a la UFT y OpenAlex no (cola en `internal/openalex_deteccion.csv`), **6 desacuerdos** de ORCID encolados (`internal/openalex_desacuerdos.csv`), ninguno resuelto automáticamente (`D-08`) | Cerrado. Recordatorio vigente: OpenAlex no es fuente independiente de verificación —ingiere Crossref—, así que sus 212 concordancias no suben ninguna asignación a «verificado» |
-| ~~**V2-26**~~ | OpenAlex **por institución** · **ejecutado (2026-08-26)**, `src/enrich/openalex_cobertura.py` | Mide la brecha de cobertura que `LIMITATIONS.md` sólo advertía en prosa: OpenAlex atribuye **1.112 obras** a la UFT por ROR, de las cuales **698 ya están en el universo** y **414 no** (385 con DOI ausente del universo, 29 sin DOI en OpenAlex). Cola de revisión en `internal/openalex_cobertura.csv`, **nunca un ajuste del corpus** (`D-206`): Scopus y OpenAlex indexan con criterios distintos | Cerrado. Las 414 son candidatas a revisión humana, no producción confirmada perdida — pueden ser desambiguación errónea de OpenAlex, tipo documental excluido a propósito, o fecha fuera de ventana |
+| ~~**V2-26**~~ | OpenAlex **por institución** · **ejecutado (2026-08-26)**, `src/enrich/openalex_cobertura.py` | Mide la brecha de cobertura que `LIMITATIONS.md` sólo advertía en prosa: OpenAlex atribuye **1.112 obras** a la UFT por ROR, de las cuales **698 ya están en el universo** y **414 no** (385 con DOI ausente del universo, 29 sin DOI en OpenAlex). Cola de revisión en `internal/openalex_cobertura.csv`, **nunca un ajuste del corpus** (`D-206`): Scopus y OpenAlex indexan con criterios distintos | Cerrado. De las 414, **20 confirmadas** (`CONFIRMADO_PRODUCCION_UFT`) publicadas desde el 2026-09-02 como `PD-02` (§8 abajo); **394 siguen pendientes de revisión** — no son producción confirmada perdida, pueden ser desambiguación errónea de OpenAlex, tipo documental excluido a propósito, o fecha fuera de ventana |
 | ~~**V2-20**~~ | ROR · **conector escrito (2026-08-19)**, `src/enrich/ror_institucion.py` | Cierra `ror_id` e `isni`, y contrasta el patrón de detección institucional contra los nombres que ROR registra | **Falta ejecutar la consulta.** El entorno de desarrollo no alcanza `api.ror.org`; se corre desde la máquina del proyecto y se pega el resultado en `config/institution.yml`. La lógica está verificada con 12 casos en CI |
 | **V2-21** | SciELO | Mide la brecha de cobertura que hoy sólo se advierte en prosa: humanidades, ciencias sociales y publicación en español | **Investigado el 2026-08-26** (`docs/FUENTES_Y_APIS.md` §3.6): la interfaz real es la API REST ArticleMeta, sin autenticación, pero **no filtra por institución** — sólo por ISSN, colección y fecha. El dato de afiliación existe por artículo, pero exige cosechar identificadores y volver a pedir cada uno individualmente: más trabajo que `V2-19`/`V2-26`, no menos. Queda sin confirmar el código de colección de Chile y si limitarse a esa colección alcanza — `scielo.readthedocs.io` y `articlemeta.scielo.org` bloqueados desde este entorno, igual que `api.ror.org` en `V2-20`. Sin código escrito: es una decisión de alcance |
 | **V2-22** | API de Scopus | `V2-05` y la ambigüedad `A-05`: fecha de corte declarada por la propia consulta, y actualización como objetivo del `Makefile` | Clave institucional, si la suscripción la habilita, y si exige IP institucional. **Bloqueante** |
@@ -170,7 +174,7 @@ Europe PMC y Wikidata. Dimensions y Lens.org quedan fuera por requerir acuerdo.
 
 ---
 
-## 8. Corpus paralelo declarado — producción institucional fuera de Scopus/SciVal (propuesta, 2026-08-27)
+## 8. Corpus paralelo declarado — producción institucional fuera de Scopus/SciVal (propuesta el 2026-08-27, **implementada el 2026-09-02** como `PD-02`)
 
 **No confundir con §6 arriba:** eso descarta *fusionar* corpus de fuentes
 distintas en un solo universo. Esto es lo que `D-206` ya deja abierto en su
@@ -199,22 +203,69 @@ canónico, ni su cifra, ni ningún indicador que dependa de ese denominador
 (`D-16`). Sumar produciría exactamente la cifra irreconciliable que §6 arriba y
 `D-206` prohíben.
 
-**Lo que sí propondría, si se autoriza diseñarlo:**
+**Lo que se implementó (2026-09-02), con autorización explícita del
+usuario** ("Integra todo el contenido recuperado desde APIs en un nuevo
+apartado que indique la producción total fuera de Scopus"):
 
-- Una sección o página aparte —"Producción institucional detectada fuera de
-  Scopus/SciVal" o equivalente—, con su propio denominador declarado
-  (`D-16`), que muestre los casos con veredicto `CONFIRMADO_PRODUCCION_UFT`
-  de `internal/openalex_cobertura.csv` a medida que la revisión avanza.
-  Nunca mezclada con `P-01`/`P-03` ni con ningún indicador del universo
-  primario.
-- Etiquetado explícito de la fuente y el método de verificación en cada obra
-  (OpenAlex + Crossref, revisión humana, fecha), para que nadie la lea como
-  Scopus.
-- Seguir la revisión humana de los 294 autores restantes sin evidencia fuerte
-  todavía (`internal/openalex_cobertura.csv`, `internal/openalex_cobertura_crossref.csv`)
-  antes de fijar un tamaño definitivo de este corpus paralelo.
+- Una sección propia — `PD-02` en `produccion-ampliada.html` ("Confirmada
+  por revisión de cobertura OpenAlex (V2-26)") —, con su propio
+  denominador declarado (`D-16`), que agrega por año los casos con
+  veredicto `CONFIRMADO_PRODUCCION_UFT` de `internal/openalex_cobertura.csv`
+  dentro de la ventana 2023-2025 (**20** hoy). Nunca mezclada con
+  `P-01`/`P-03` ni con ningún indicador del universo primario. Se agrega
+  sólo por año, no por Facultad: esta evidencia es por autor, no una
+  declaración editorial de una unidad.
+- Los **394** casos que siguen `PENDIENTE_REVISION_HUMANA` se publican como
+  cifra de transparencia en la misma sección — nunca como producción
+  confirmada, nunca ocultos.
+- Etiquetado explícito de la fuente y el método de verificación: el sello
+  de procedencia de la sección declara "OpenAlex, confirmado por revisión
+  humana (no Scopus)", y la advertencia metodológica de `PD-02`
+  (`config/indicators.yml`) dice, en prosa, que cada caso pasa por
+  revisión humana antes de contarse.
+- El total combinado de la página (`total_fuera_de_scopus`) une por DOI
+  todas las fuentes fuera de Scopus (ver `PD-03` abajo): el solapamiento
+  real se resta antes de sumar, no se cuenta dos veces la misma obra.
+- La evidencia independiente de Crossref (`V2-26 bis`) y la revisión de los
+  294 autores restantes **siguen sin resolver** — `PD-02` sólo cuenta lo ya
+  confirmado hoy, y crecerá a medida que la revisión avance (correr de
+  nuevo `09_produccion_declarada.py` después de aplicar más decisiones en
+  `apply_openalex_review.py`).
 
-**Qué falta confirmar:** esto es una propuesta de alcance, no una decisión
-tomada — `D-206` exige que ampliar lo que el informe cubre sea "una decisión
-de alcance aparte, posterior y explícita". Falta que el usuario autorice
-diseñarla e implementarla, y decidir dónde vive en la navegación del sitio.
+**Segunda ronda, mismo día:** el usuario pidió, además, sumar "todas [las
+Facultades], usando el repositorio institucional" — implementado como
+`PD-03`, tercera fuente de otra naturaleza que `PD-01`/`PD-02`: la hoja de
+autoarchivo que biblioteca cura (`data/raw/Inventario_Repositorio_Autoarchivo.xlsx`),
+para TODA la institución a la vez. Su Facultad/Escuela viene en bruto por
+fila; `src/enrich/autoarchivo_produccion.py` (nuevo) resuelve a Facultad
+canónica sólo donde esa relación está validada institucionalmente
+(reutilizando `common.canonical_academic_unit()`/`facultad_de()`, las
+mismas funciones que `P-07`), y publica el resto por unidad declarada, sin
+forzar ninguna Facultad sin validar. Resultado: 808 leídos → 498 fuera del
+universo → 341 con Facultad validada (125 en ventana 2023-2025, la cifra
+que entra al total) + 157 sin Facultad validada (57 en ventana, publicadas
+aparte, nunca ocultas). El total combinado de la página pasó a unir las
+TRES fuentes por DOI: hay solapamiento real entre las tres, no sólo entre
+pares (Medicina aparece declarada en su propio sitio Y autoarchivada por
+sus autores).
+
+**Tercera ronda, 2026-09-03:** el usuario preguntó de qué forma es posible
+incluir publicaciones fuera de Scopus/SciVal y autorizó "avancemos con esa
+cuarta fuente de nivel V" — implementada como `PD-04`: DataCite, Europe PMC
+y Zenodo consultados **por obra**, no por DOI del universo. Recupera por los
+ORCID que el proyecto ya confirmó (descontando los retirados) y por la
+afiliación declarada, deja una cola de revisión propia, y trae un veredicto
+que ninguna otra cola necesita —"otra versión de una obra ya contada"—
+porque Zenodo acuña un DOI por versión. Se publica el MECANISMO: la política
+de red del entorno de desarrollo bloquea las tres APIs, así que la cola nace
+vacía y la sección lo declara en la página. **Pendiente**: correr
+`make obras-externas` desde una red que las alcance, y revisar la cola que
+produzca. Nuevo: `src/enrich/obras_externas.py`,
+`src/review/build_obras_externas_review.py`,
+`src/review/apply_obras_externas_review.py`.
+
+Ver `src/build/09_produccion_declarada.py`, `docs/FUENTES_Y_APIS.md` §2.7
+(`PD-02`), §2.8 (`PD-03`) y §2.10 (`PD-04`), y
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md` (marco Nivel D/Nivel V; `PD-01` y
+`PD-03` son Nivel D, `PD-02` y `PD-04` son Nivel V, con mecanismos de cola
+distintos entre sí).

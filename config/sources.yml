@@ -189,6 +189,38 @@ fuentes:
       (D-206). Empareja por apellido contra los autores que Crossref lista;
       no siempre encuentra una coincidencia única.
 
+  crossref_financiamiento_api:
+    nombre: "Crossref — REST API (financiamiento declarado, fuente complementaria para X-03)"
+    tipo: "api"
+    endpoint: "https://api.crossref.org/works/{doi}"
+    autenticacion: "ninguna (mailto para el polite pool)"
+    conector: "src/enrich/crossref_financiamiento.py"
+    rol: "enriquecimiento — la 'fuente complementaria de financiamiento' que config/indicators.yml -> X-03 declara que falta"
+    aporta:
+      - financiador_y_numero_de_proyecto_segun_crossref
+      - contraste_contra_funding_details_de_scopus_sin_fusionar
+    salida: "data/enriched/crossref_financiamiento.csv"
+    fecha_corte: null            # cada consulta lleva la suya
+    ejecutada: false              # implementado y probado con --test el 2026-09-02; api.crossref.org
+                                   # devuelve CONNECT tunnel failed / 403 desde este entorno (gateway,
+                                   # "policy denial" — ver curl "$HTTPS_PROXY/__agentproxy/status").
+                                   # Corrida real pendiente de una máquina con acceso.
+    nota: >-
+      Tercera pregunta a este mismo endpoint (junto a crossref_api y
+      crossref_cobertura_api): qué financiador y número de proyecto declaró
+      el EDITOR directamente en Crossref (message.funder, con el
+      identificador del Crossref Funder Registry cuando existe) — distinto
+      del texto libre que Scopus exporta en Funding Details/Funding Texts
+      (306 de 818 filas, 37,4 %, hoy sin extraer a ningún artefacto
+      procesado: no llega a publications_universe.csv, verificado). NO
+      fusiona el nombre de financiador de una fuente con el de la otra —
+      normalizar "CONICYT" y su sucesora "ANID" a la misma entidad es
+      trabajo de vocabulario institucional, no de este conector — reporta
+      las dos cadenas una al lado de la otra. La cobertura combinada
+      resultante es la cifra que decide si X-03 cruza el umbral que hoy lo
+      mantiene sin publicar; esa decisión queda pendiente de la corrida
+      real.
+
   orcid_api:
     nombre: "ORCID — Public API v3.0"
     tipo: "api"
@@ -316,16 +348,18 @@ fuentes:
     archivo: "data/raw/Inventario_Repositorio_Autoarchivo.xlsx"
     formato: "xlsx"
     hoja: "AUTOARCHIVOS"
-    conector: "src/enrich/autoarchivo_uft.py"
-    rol: "verificación y candidatos de ORCID; candidatos EN BRUTO de Facultad/Escuela"
+    conector: "src/enrich/autoarchivo_uft.py, src/enrich/autoarchivo_produccion.py"
+    rol: "verificación y candidatos de ORCID; candidatos EN BRUTO de Facultad/Escuela; corpus paralelo declarado (PD-03) para las relaciones YA validadas"
     aporta:
       - contraste_de_orcid_ya_asignado_contra_una_obra_propia
       - candidatos_de_orcid_por_nombre_para_firmas_sin_ninguno
       - candidatos_de_facultad_o_escuela_para_no_determinada_sin_traducir_al_vocabulario
+      - produccion_declarada_por_unidad_fuera_del_corpus_scopus_pd_03
     salida: >-
       data/interim/autoarchivo_verificacion.csv,
       internal/autoarchivo_candidatos.csv,
-      internal/autoarchivo_unidad_candidatos.csv
+      internal/autoarchivo_unidad_candidatos.csv,
+      data/enriched/autoarchivo_produccion.json
     fecha_export: "2026-09-01"       # fecha en que el usuario entregó el archivo
     n_registros_leido: 808
     entregado_por: "responsable del proyecto (sesión 2026-09-01)"
@@ -338,7 +372,216 @@ fuentes:
       dato que `dspace_repositorio` no tiene. Ese campo se declara EN BRUTO
       («Medicina», «CIDOC», etc., sin traducir a `config/matching_rules.yml`):
       traducirlo a la jerarquía oficial es el mismo trabajo institucional que
-      exigió `T-02`, y este conector no lo hace por su cuenta. Las dos
+      exigió `T-02`. `autoarchivo_produccion.py` (2026-09-02) SÍ lo traduce,
+      pero SÓLO para las relaciones que ya están validadas (jerarquía
+      confirmada, vocabulario I-07, o las dos entradas de
+      `REFERENCIA_UNIDADES_AUTOARCHIVO` que el usuario confirmó contra
+      finis.cl) — el resto de las ~35 cadenas EN BRUTO se publica por
+      unidad declarada, nunca forzado a una Facultad sin validar. Las dos
       fuentes pueden confirmarse o contradecirse entre sí (`Arroyo A.`
       aparece contradicho en ambas, con el mismo ORCID alternativo en las
       dos — evidencia cruzada, no una casualidad).
+
+  facultad_medicina_publicaciones:
+    nombre: "Facultad de Medicina y Salud UFT — listado propio de publicaciones (API REST de WordPress)"
+    tipo: "api"
+    endpoint: "https://facultadmedicina.finis.cl/wp-json/wp/v2/pages?slug=publicaciones&_fields=id,title,link,content"
+    autenticacion: "ninguna"
+    conector: "src/enrich/facultad_medicina_publicaciones.py"
+    rol: "corpus paralelo declarado por la institución, no verificado por Scopus (D-206, D-398)"
+    # La bandera que 09_produccion_declarada.py usa para DESCUBRIR fuentes de
+    # este tipo sin nombrar "Medicina" en el código: una segunda Facultad que
+    # sume su propio listado más adelante sólo necesita esta misma bandera en
+    # su propia entrada, y su propio conector siguiendo el mismo esquema (ver
+    # el docstring de facultad_medicina_publicaciones.py) — nada en
+    # src/build/ cambia.
+    corpus_paralelo_declarado: true
+    aporta:
+      - produccion_declarada_por_la_facultad_fuera_del_corpus_scopus
+    salida: "data/enriched/facultad_medicina_publicaciones.json, internal/facultad_medicina_cruce.csv"
+    # El único de los dos que 09_produccion_declarada.py lee.
+    salida_declarada: "data/enriched/facultad_medicina_publicaciones.json"
+    fecha_corte: null              # cada descarga lleva su propia fecha, no una fecha de corte fija
+    fecha_ejecucion: "2026-09-01"  # última corrida real (Cierre · V2-27, SESSION_NOTES.md)
+    n_registros_leido: 609
+    nota: >-
+      La Facultad publica su propia lista de producción (Medicina por año,
+      Enfermería, Nutrición y Dietética, y Libros) en su sitio, con criterio
+      editorial propio: no es un índice bibliográfico y no aplica los mismos
+      criterios de cobertura que Scopus. El conector cruza por DOI contra
+      publications_universe.csv sólo para separar lo que ya está en el
+      corpus indexado de lo que declara por fuera de él; NUNCA escribe en
+      publications_universe.csv ni en ningún artefacto que mezcle ambos
+      conteos. Publica sólo RECUENTOS por facultad × año (PD-01) — nunca
+      citas ni FWCI, porque SciVal sólo mide lo indexado en Scopus. La
+      fuente NO deduplica (609 registros crudos, DOIs repetidos): "el sitio
+      lista duplicados; borrarlos en el extractor ocultaría un dato de la
+      fuente y forzaría una decisión que no le toca a la ingesta" — la
+      deduplicación por DOI ocurre en el consumidor,
+      `src/build/09_produccion_declarada.py`.
+
+  scopus_author_search:
+    nombre: "Scopus Author Search — directorio de autores por afiliación institucional"
+    tipo: "archivo"
+    archivo: "data/raw/Scopus_Author_Search_UFT.csv"
+    formato: "csv"
+    encoding: "utf-8-sig"
+    conector: "src/enrich/scopus_author_search.py"
+    rol: "verificación y candidatos de identidad — capa interna, nunca decide (D-08)"
+    aporta:
+      - candidatos_de_nombre_con_multiples_scopus_author_id
+      - contraste_de_orcid_declarado_directamente_por_scopus
+    salida: >-
+      internal/scopus_author_search_multiples_id.csv,
+      internal/scopus_author_search_orcid.csv
+    fecha_corte: null                # no aplica: es un directorio de autores, no un export de producción
+    fecha_entrega: "2026-09-02"      # fecha en que el usuario entregó el archivo
+    n_registros_leido: 812
+    entregado_por: "responsable del proyecto (sesión 2026-09-02)"
+    nota: >-
+      DISTINTO de `scopus_export`: aquél es el export nativo de
+      publicaciones (823 filas, ventana 2023-2025 declarada); éste es el
+      directorio de AUTORES que Scopus Author Search asocia a la
+      afiliación "Universidad Finis Terrae", sin ventana temporal —
+      confirmado con el usuario: "búsqueda por afiliación", sin filtro de
+      año. El "Number of Documents" de cada perfil es el que ve Scopus
+      Author Search (alcance completo del perfil), NO el número de
+      publicaciones de ese autor dentro del corpus de este proyecto — los
+      dos nunca se mezclan sin decirlo.
+
+      Verificado antes de construir el conector: el detector automático de
+      "un nombre con más de un Scopus Author ID" (`P-04`,
+      `src/audit/04_author_population.py`) sólo ve fragmentación cuando
+      ambos identificadores aparecen, DENTRO del corpus de 823
+      publicaciones, bajo la misma cadena de nombre exacta — no puede ver
+      un identificador cuyas publicaciones caen fuera del corpus ni
+      conectar dos identificadores bajo grafías distintas del mismo
+      nombre. Esta fuente sí los ve, porque Scopus ya agrupó por
+      identificador antes de exportar (3 casos nuevos encontrados así, no
+      detectables antes: "Esis Villarroel, Ivette S." — un segundo perfil
+      con 14 documentos invisible al detector; "Cabello, José Miguel";
+      "Caffarena, Paula" — con un identificador que en el corpus aparece
+      bajo "Barcenilla, Paula Caffarena", apellidos en otro orden).
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PD-04 — repositorios de datos y acceso abierto (Nivel V)
+  #
+  # Las tres entran al proyecto el 2026-09-03 como fuentes de ORCID
+  # (docs/FUENTES_Y_APIS.md §2.1 ter) y se declaran aquí al pasar a alimentar
+  # también un indicador publicable de obras (PD-04). Regla 1 de
+  # docs/METODOLOGIA_FUERA_DE_SCOPUS.md: ninguna fuente empieza a alimentar
+  # nada sin su clasificación de nivel escrita.
+  #
+  # `consulta_obras` es la plantilla de búsqueda, declarada aquí y NO en el
+  # código: otra institución que replique la plataforma cambia
+  # config/institution.yml y estas plantillas, nunca src/. `{orcid}` y
+  # `{institucion}` son los únicos marcadores que el conector sustituye.
+  datacite_api:
+    nombre: "DataCite — DOI de datasets, software y otros outputs no tradicionales"
+    tipo: "api"
+    endpoint: "https://api.datacite.org/dois"
+    autenticacion: "ninguna"
+    conector: "src/enrich/datacite.py (ORCID por DOI), src/enrich/obras_externas.py (obras, PD-04)"
+    rol: "Nivel V — cola de candidatos de obra, confirmada por revisión humana caso por caso (D-206, D-313)"
+    nivel_evidencia: "V"           # docs/METODOLOGIA_FUERA_DE_SCOPUS.md §1
+    aporta:
+      - orcid_donde_no_habia
+      - obras_fuera_del_universo_scopus_como_candidatas_de_revision
+    salida: "data/enriched/authors_orcid.csv, internal/datacite_log.csv, internal/obras_externas_cobertura.csv"
+    consulta_obras:
+      por_orcid: 'creators.nameIdentifiers.nameIdentifier:"https://orcid.org/{orcid}"'
+      por_afiliacion: 'creators.affiliation.name:"{institucion}"'
+    fecha_corte: null
+    ejecutada: false               # la política de red del entorno de desarrollo bloquea api.datacite.org
+    fecha_ejecucion: null
+    nota: >-
+      Indexa repositorios que las bases bibliográficas principales ignoran
+      (Zenodo, Figshare, repositorios institucionales). Es fuente
+      INDEPENDIENTE de Crossref y de OpenAlex: una coincidencia cuenta como
+      confirmación, no como comprobación circular. El contrato de búsqueda
+      (`/dois?query=`) NO está verificado desde este repositorio: el conector
+      comprueba la forma de la respuesta y, si no la reconoce, guarda la
+      respuesta cruda y se detiene en vez de adivinar.
+
+  europepmc_api:
+    nombre: "Europe PMC — literatura biomédica de acceso abierto"
+    tipo: "api"
+    endpoint: "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+    autenticacion: "ninguna"
+    conector: "src/enrich/europepmc.py (ORCID por DOI), src/enrich/obras_externas.py (obras, PD-04)"
+    rol: "Nivel V — cola de candidatos de obra, confirmada por revisión humana caso por caso (D-206, D-313)"
+    nivel_evidencia: "V"
+    aporta:
+      - orcid_donde_no_habia
+      - obras_fuera_del_universo_scopus_como_candidatas_de_revision
+    salida: "data/enriched/authors_orcid.csv, internal/europepmc_log.csv, internal/obras_externas_cobertura.csv"
+    consulta_obras:
+      por_orcid: 'AUTHORID:"{orcid}"'
+      por_afiliacion: 'AFF:"{institucion}"'
+    fecha_corte: null
+    ejecutada: false               # la política de red del entorno de desarrollo bloquea www.ebi.ac.uk
+    fecha_ejecucion: null
+    nota: >-
+      Indexa PubMed, PubMed Central y repositorios de acceso abierto. Cubre
+      biomedicina y NO cubre ciencias sociales ni humanidades: su aporte a
+      PD-04 estará sesgado hacia la Facultad de Medicina y Salud por
+      construcción, y ese sesgo se declara, no se corrige silenciosamente.
+      El contrato de búsqueda no está verificado desde este repositorio.
+
+  zenodo_api:
+    nombre: "Zenodo — repositorio de datos, software y materiales del CERN (OpenAIRE)"
+    tipo: "api"
+    endpoint: "https://zenodo.org/api/records"
+    autenticacion: "ninguna"
+    conector: "src/enrich/zenodo.py (ORCID por DOI), src/enrich/obras_externas.py (obras, PD-04)"
+    rol: "Nivel V — cola de candidatos de obra, confirmada por revisión humana caso por caso (D-206, D-313)"
+    nivel_evidencia: "V"
+    aporta:
+      - orcid_donde_no_habia
+      - obras_fuera_del_universo_scopus_como_candidatas_de_revision
+    salida: "data/enriched/authors_orcid.csv, internal/zenodo_log.csv, internal/obras_externas_cobertura.csv"
+    # Dos candidatas por vía, no una: Zenodo migró a InvenioRDM y el nombre
+    # del campo por el que se busca cambió, sin que se haya podido comprobar
+    # cuál sirve hoy desde ningún entorno con red (todas las salidas a
+    # zenodo.org están bloqueadas). El conector sondea la primera, y si no
+    # responde pasa a la segunda, diciendo cuál usó. La forma HEREDADA va
+    # primero porque es la que la corrida del 2026-09-03 verificó en el
+    # endpoint de recuperación por DOI.
+    consulta_obras:
+      por_orcid:
+        - 'creators.orcid:"{orcid}"'
+        - 'metadata.creators.person_or_org.identifiers.identifier:"{orcid}"'
+      por_afiliacion:
+        - 'creators.affiliation:"{institucion}"'
+        - 'metadata.creators.affiliations.name:"{institucion}"'
+    fecha_corte: null
+    ejecutada: false               # la política de red del entorno de desarrollo bloquea zenodo.org
+    fecha_ejecucion: null
+    nota: >-
+      Deposita datasets, software, pósters y presentaciones. LÍMITE PROPIO Y
+      DECLARADO: Zenodo acuña un DOI nuevo por cada versión de un mismo
+      depósito, además del DOI de concepto que las agrupa. La deduplicación
+      por DOI de este proyecto NO colapsa esas versiones — son DOI distintos
+      para la misma obra. Por eso la revisión de PD-04 tiene un veredicto
+      propio ('version') que ningún otro indicador necesita.
+
+  github_orcid_api:
+    nombre: "GitHub — ORCID declarado en el perfil de investigadores"
+    tipo: "api"
+    endpoint: "https://api.github.com/search/users"
+    autenticacion: "token en la variable de entorno GITHUB_ORCID_TOKEN, nunca en disco"
+    conector: "src/enrich/github_orcid.py"
+    rol: "verificación cruzada de ORCID, capa interna"
+    nivel_evidencia: null          # no aporta obras: no entra a PD-04
+    aporta:
+      - verificacion_cruzada_de_orcid_declarado_por_el_titular
+    salida: "internal/github_orcid_log.csv"
+    fecha_corte: null
+    ejecutada: false               # requiere token; inactivo por defecto
+    fecha_ejecucion: null
+    nota: >-
+      Se declara aquí para que la fuente exista en el registro, no porque
+      alimente un indicador: NO aporta obras y por lo tanto NO entra a PD-04.
+      La REST API de GitHub no permite buscar "ORCID in:bio" sin
+      autenticación, y la búsqueda amplia exige GraphQL. Documentada, no
+      ejecutada.

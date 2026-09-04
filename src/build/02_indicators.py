@@ -311,7 +311,8 @@ def catalogo() -> None:
                      "publica en esta versión."),
     }
     CATEGORIAS = {"descriptivo": "Producción y descripción", "impacto": "Impacto",
-                  "colaboracion": "Colaboración", "tematico": "Áreas temáticas"}
+                  "colaboracion": "Colaboración", "tematico": "Áreas temáticas",
+                  "declarado": "Producción declarada (fuera de Scopus)"}
 
     fact = {}
     p = b.ROOT / "data" / "interim" / "indicator_feasibility.csv"

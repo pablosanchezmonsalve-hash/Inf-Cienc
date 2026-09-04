@@ -128,7 +128,7 @@ async function main() {
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
       const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
       const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia);
-      html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo), a);
+      html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo, ejes[clave]), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);
       html = rellenar(html, 'controles', sec.controles, a);
       html = rellenar(html, 'cifras', sec.cifras, a);
@@ -168,6 +168,11 @@ async function main() {
       const a = [];
       html = rellenar(html, 'catalogo', v.catalogo(await leerJSON('catalogo.json')), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    } else if (tipo === 'produccionAmpliada') {
+      const a = [];
+      html = rellenar(html, 'produccion-declarada',
+        v.produccionDeclarada(await leerJSON('produccion_declarada.json')), a);
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'metodologia') {
       // El glosario es el destino de todo enlace `#slug` a una definición,
       // desde el tooltip de ayuda contextual o desde otra página (p. ej.
@@ -186,21 +191,6 @@ async function main() {
       const conOrcid = autoresOrcid.filter(a2 => a2.orcid).length;
       html = rellenar(html, 'orcid-cobertura',
         `${c.nf.format(conOrcid)} de ${c.nf.format(autoresOrcid.length)} formas de firma con ORCID`, a);
-      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
-    } else if (tipo === 'modulos') {
-      const codigos = (html.match(/id="modulos"[^>]*data-indicadores="([^"]+)"/) || [])[1]
-        ?.split(',').map(s => s.trim()) || [];
-      // El eje se identifica por el nombre del archivo, que ya es la clave de
-      // la sección. Si falta su panel en ejes.json, se aborta: una sección sin
-      // el aviso de qué NO responde es justo la que lo necesitaba.
-      const clave = archivo.replace(/\.html$/, '');
-      if (!ejes[clave]) {
-        console.error(`\nFALTA EL PANEL CONCEPTUAL de '${clave}' en ejes.json`);
-        process.exit(1);
-      }
-      const a = [];
-      html = rellenar(html, 'modulos',
-        v.paginaModulos(codigos, series, ejes[clave], await leerJSON('catalogo.json')), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'fuentesexternas') {
       const a = [];

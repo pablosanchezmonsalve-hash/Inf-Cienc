@@ -1,7 +1,7 @@
 # PLAN.md
 # Plan maestro por fases
 
-**Última actualización:** 2026-07-31 (Fase 3 — V1 completa)
+**Última actualización:** 2026-08-26 (Fase 3 — V1 completa)
 
 Orden de precedencia ante conflicto (definido en `CLAUDE.md`):
 decisión validada en sesión → `CLAUDE.md` → `PROJECT_SPEC.md` → `PLAN.md` →

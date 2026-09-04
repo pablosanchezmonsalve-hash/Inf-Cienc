@@ -531,7 +531,7 @@ El color codifica **una** de tres cosas, y cuál se declara en la llamada:
 | `escala` | Cuándo | Ejemplo |
 |---|---|---|
 | (por defecto) | Una sola serie | Rankings por volumen: `P-03`, `P-05`, `C-03` |
-| `'serie'` | Entidades distintas sin orden entre sí | Anillo de `C-01` |
+| `'serie'` | Entidades distintas sin orden entre sí | Sin gráfico publicado que la use hoy — `C-01` se dibuja como barras horizontales de una sola serie (§5). Queda declarada en `colorDe()`/`SERIES` (core.js) para el próximo gráfico categórico que la necesite |
 | `'ordinal'` | Posiciones de una escala ordenada | Cuartiles de revista, `R-01` |
 
 Tres reglas que no se negocian:

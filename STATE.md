@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `be2e857` · Integra el trabajo paralelo de main (V2-27 cobertura 68 DOIs, mapas, p
-Snapshot: 2026-09-02
+Último commit: `61fb194` · Asistente de purga: cuatro defectos corregidos, verificados en laborat
+Snapshot: 2026-09-04
 
 ---
 
@@ -32,18 +32,18 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **545** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades de autor publicadas | **530** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
-| Firmas con ORCID | **322** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **275** | tras consolidación humana · **la que sirve el sitio** |
-| Indicadores evaluados | **40** | `config/indicators.yml` |
-| Indicadores publicados | **28** | `config/indicators.yml`, `publicar: true` |
+| Firmas con ORCID | **328** | sin consolidar · `data/enriched/authors_orcid.csv` |
+| Entidades con ORCID | **268** | tras consolidación humana · **la que sirve el sitio** |
+| Indicadores evaluados | **44** | `config/indicators.yml` |
+| Indicadores publicados | **32** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **74 formas de firma eran 34 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+Las cifras de autor van en dos bases porque una revisión humana declaró que **94 formas de firma eran 39 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
 ---
 
@@ -55,9 +55,9 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 |---|---|
 | `internal/ambiguities_authors.csv` | 414 |
 | `internal/ambiguities_publications.csv` | 14 |
-| `internal/autoarchivo_candidatos.csv` | 9 |
+| `internal/autoarchivo_candidatos.csv` | 4 |
 | `internal/autoarchivo_unidad_candidatos.csv` | 73 |
-| `internal/dspace_candidatos.csv` | 25 |
+| `internal/dspace_candidatos.csv` | 20 |
 | `internal/identity_candidates.csv` | 17 |
 | `internal/openalex_cobertura.csv` | 414 |
 | `internal/openalex_desacuerdos.csv` | 6 |
@@ -66,8 +66,10 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/orcid_conflicts.csv` | 1 |
 | `internal/orcid_desacuerdos.csv` | 2 |
 | `internal/orcid_hallazgos.csv` | 56 |
+| `internal/scopus_author_search_multiples_id.csv` | 8 |
+| `internal/scopus_author_search_orcid.csv` | 50 |
 
-`make revision` reúne estas colas en 300 casos, de los que **138 siguen pendientes**: 162 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 284 casos, de los que **82 siguen pendientes**: 202 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -80,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 381
+## Decisiones tomadas: 481
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
@@ -114,6 +116,7 @@ Abrir sólo lo que responde la pregunta que se tiene:
 | Cómo adaptarlo a otra institución | `docs/REPLICATION.md` |
 | Cómo recuperar ORCID | `docs/ORCID_GUIDE.md` |
 | Qué falta para la V2 | `docs/V2_BACKLOG.md` |
+| Cómo tratar una fuente fuera de Scopus | `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` |
 | Historia de cada sesión | `SESSION_NOTES.md` |
 
 ---

@@ -188,7 +188,7 @@ Verificado automáticamente por `06_assemble_site.py`:
 
 ## 6. Rendimiento observado
 
-Sobre el build actual (823 publicaciones, 589 fichas):
+Sobre el build actual (823 publicaciones, 538 fichas):
 
 | | |
 |---|---|

@@ -35,6 +35,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import io
 import re
 import sys
 from datetime import datetime
@@ -56,7 +57,15 @@ RESPALDOS = ROOT / "internal" / ".respaldos"
 
 
 def leer_decisiones(path: Path) -> pd.DataFrame:
-    df = pd.read_csv(path, dtype=str, comment="#").fillna("")
+    # Se salta la cabecera de comentario por POSICIÓN, no con
+    # `pd.read_csv(comment='#')`: eso trunca en la primera almohadilla ESTÉ
+    # DONDE ESTÉ, y una nota como «ítem #3» perdería la mitad en silencio
+    # (mismo bug que ya se corrigió en decisiones.py::leer()).
+    lineas = path.read_text(encoding="utf-8-sig").splitlines()
+    i = 0
+    while i < len(lineas) and lineas[i].startswith("#"):
+        i += 1
+    df = pd.read_csv(io.StringIO("\n".join(lineas[i:])), dtype=str).fillna("")
     faltan = {"id", "tipo", "nombre", "correcto", "correccion", "nota"} - set(df.columns)
     if faltan:
         sys.exit(f"El CSV no trae las columnas esperadas: faltan {sorted(faltan)}")

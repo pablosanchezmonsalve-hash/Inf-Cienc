@@ -3,13 +3,14 @@
 **Capa:** pública · **Pendientes que ataca:** `T-19` y la pregunta de cuánta
 cobertura es alcanzable
 
-> **Las cifras van sobre la base publicada: 542 entidades de autor**, que son las
+> **Las cifras van sobre la base publicada: 538 entidades de autor**, que son las
 > 589 formas de firma de la fuente con las variantes ya fusionadas por revisión
-> humana (77 formas en 34 personas en la consolidación vigente; la última
-> revisión de identidad del 2026-09-01 llevó la base publicada a 542). Este
-> documento se escribió sobre la base anterior (556) y se actualizó el
-> 2026-09-01 a la base que sirve el sitio; si vuelve a divergir, manda
-> `STATE.md`, que se deriva del repositorio.
+> humana (84 formas en 37 personas en la consolidación vigente) y 4 formas
+> descartadas por la regla `E-09` (fragmentos de cadena de afiliación, no
+> personas — ver `docs/LIMITATIONS.md` §7). Este documento se escribió sobre
+> la base de 556, se actualizó el 2026-09-01 a 542, y de nuevo el 2026-09-02 a
+> la base que sirve el sitio hoy; si vuelve a divergir, manda `STATE.md`, que
+> se deriva del repositorio.
 
 ---
 
@@ -44,8 +45,8 @@ completa consultó los 804 DOI del corpus y encoló 2 desacuerdos entre Crossref
 el registro, sin resolverlos.
 
 Después vino la revisión humana, que consolidó variantes y confirmó candidatos
-por afiliación. **Sobre la base que hoy publica el sitio la cobertura es de 277
-de 542 entidades (51,1 %)**, y son 322 asignaciones si se cuentan sobre las
+por afiliación. **Sobre la base que hoy publica el sitio la cobertura es de 274
+de 538 entidades (50,9 %)**, y son 327 asignaciones si se cuentan sobre las
 formas de firma sin consolidar. Las dos cifras son ciertas y miden poblaciones
 distintas; citar una donde corresponde la otra es el error que este proyecto
 persigue.
@@ -135,26 +136,27 @@ que no publica.
 
 ## 4. Lo que el 100 % exigiría
 
-Para que las 542 tuvieran ORCID harían falta las cuatro cosas a la vez:
+Para que las 538 tuvieran ORCID harían falta las cuatro cosas a la vez:
 
-1. que las 542 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
+1. que las 538 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
 2. que su registro sea **público** —puede configurarse como privado—;
 3. que alguna fuente **conecte** ese ORCID con alguna de sus publicaciones de
    este corpus, o que la persona declare la universidad;
 4. que el nombre permita distinguirla de sus homónimos.
 
 Las cuatro se cumplen para una parte de los autores y no para el resto. Escribir
-542 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
+538 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
 las reglas del proyecto: *«No inventes datos, columnas, métricas, relaciones ni
 resultados»*.
 
-**Y 542 entidades tampoco son 542 personas.** Una revisión humana ya fusionó
-variantes (77 formas en 34 personas en la consolidación vigente), pero quedan
-grupos de variantes y perfiles fragmentados sin resolver (`T-03`, `T-04`), y
-cuatro firmas que probablemente no sean personas sino fragmentos de cadena de
-afiliación (`E-09`). Una cobertura del «100 % de los autores» ni siquiera está
-bien definida mientras no se sepa cuántos autores hay — y esa cifra sólo baja
-según se resuelve la cola, nunca sube.
+**Y 538 entidades tampoco son 538 personas.** Una revisión humana ya fusionó
+variantes (84 formas en 37 personas en la consolidación vigente) y descartó
+cuatro firmas que resultaron ser fragmentos de cadena de afiliación, no
+personas (`E-09`, ya resuelto — ver `docs/LIMITATIONS.md` §7), pero quedan
+grupos de variantes y perfiles fragmentados sin resolver (`T-03`, `T-04`). Una
+cobertura del «100 % de los autores» ni siquiera está bien definida mientras
+no se sepa cuántos autores hay — y esa cifra sólo baja según se resuelve la
+cola, nunca sube.
 
 ---
 
