@@ -11002,3 +11002,85 @@ de `PD-04` siguen abiertas; la del título de este README queda cerrada.
 Correr `make obras-externas` desde una red que alcance DataCite, Europe PMC
 y Zenodo, y ejecutar la purga de historial en la sesión autenticada del
 propietario.
+
+## Cierre: la plantilla de Zenodo no se pudo verificar, así que la corrida la resuelve (2026-09-03)
+
+### Contexto
+
+Antes de correr `make obras-externas` en su máquina, el usuario pidió
+verificar la plantilla de búsqueda de Zenodo — la candidata más frágil de
+las tres, porque Zenodo migró a InvenioRDM y el campo por el que se busca un
+ORCID cambió de nombre.
+
+**No se pudo verificar.** `zenodo.org` está bloqueado por la política de
+egreso de la organización, comprobado con `curl` y también con `WebFetch`,
+que sale por el mismo proxy y devuelve `EGRESS_BLOCKED`. Tampoco había
+respuestas cacheadas: `data/cache/zenodo/` está vacío en este entorno.
+
+### Qué se hizo en vez de adivinar
+
+Convertir la pregunta abierta en algo que la primera corrida responda sola,
+y protegerla del modo de fallo que de verdad importa.
+
+**El parseo acepta las dos serializaciones.** Un autor de Zenodo llega como
+`{name, orcid, affiliation}` (heredada) o como
+`{person_or_org: {name, identifiers}, affiliations}` (InvenioRDM). El código
+leía sólo la primera. Si el endpoint de búsqueda sirviera la segunda, cada
+obra habría entrado a la cola **con el autor vacío y sin que nada fallara**
+— la cola se llenaría de filas inútiles en silencio, que es justo lo que
+este proyecto no admite. Ahora lee las dos y se detiene ante una tercera.
+
+**La plantilla se declara por duplicado y se decide sondeando.**
+`config/sources.yml` admite ahora una lista de candidatas por vía; Zenodo
+declara la heredada primero —es la que la corrida del 2026-09-03 verificó en
+el endpoint de recuperación por DOI— y la de InvenioRDM como alternativa. El
+conector sondea al empezar, fija la que responda e imprime cuál usó.
+
+**No se prueba la alternativa en cada consulta**, y esa decisión importa: la
+mayoría de las 322 firmas no tiene ningún depósito en Zenodo, así que «cero
+resultados» es la respuesta correcta y no un síntoma. Reintentar con la otra
+plantilla cada vez habría duplicado ~322 peticiones sin ganar nada. Se
+sondea una vez, con unos pocos identificadores.
+
+**Si ninguna responde, se dice.** Con la red delante no se puede distinguir
+«el campo de búsqueda cambió» de «esta institución no tiene depósitos aquí»,
+y el conector no elige por su cuenta entre esas dos lecturas: usa la primera
+y deja constancia.
+
+### Lo que sí se sabe, y lo que sigue sin saberse
+
+La corrida del 2026-09-03 sobre el corpus **sí verificó** la forma de la
+respuesta del endpoint de recuperación por DOI: es la heredada. Eso es
+evidencia real de que Zenodo sigue sirviendo esa serialización, y por eso va
+primera. Pero la serialización y el índice de búsqueda son capas distintas:
+que un registro se devuelva en forma heredada no prueba que `creators.orcid`
+siga siendo un campo consultable. Esa parte sigue sin verificar, y ahora se
+resuelve sola en la primera corrida en vez de fallar de forma callada.
+
+### Verificación
+
+`--test`: 35/35 en `obras_externas.py` (seis casos nuevos: las dos formas de
+autor, la tercera forma que se detiene, las dos candidatas declaradas, y que
+una fuente con una sola plantilla no gaste sondas), 10/10 y 11/11 en los
+otros dos módulos. YAML de `sources.yml` parseado.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-475 | El parseo de un autor de Zenodo acepta la forma heredada y la de InvenioRDM, y se detiene ante una tercera | Leer sólo una habría producido una cola entera de filas con el autor vacío, sin error: un fallo silencioso sobre datos, que es peor que una parada ruidosa |
+| D-476 | Una vía de consulta puede declarar varias plantillas candidatas en `sources.yml`, y el conector sondea cuál responde en vez de elegirse una a ciegas | El campo de búsqueda de Zenodo no se pudo verificar desde ningún entorno con red; publicar el cero que devolvería la plantilla equivocada habría sido presentar un fallo de integración como una medición |
+| D-477 | El sondeo se hace una vez por fuente y vía, no en cada consulta vacía | La mayoría de las firmas no tiene depósitos: «cero resultados» es la respuesta correcta en el caso normal, y reintentar ahí duplicaría las peticiones sin aportar información |
+
+### Ambigüedades abiertas
+
+Las tres de `PD-04` siguen, con la primera ya acotada: los contratos de
+búsqueda de DataCite y Europe PMC siguen sin verificar (y esas dos declaran
+una sola plantilla), `openalex_cobertura.py` pisa resoluciones humanas al
+reejecutarse, y `PD-04` no tiene corrida real. La purga de historial sigue
+pendiente.
+
+### Próximo paso recomendado
+
+El usuario corre `make obras-externas` en su máquina. Lo primero que imprime
+la sección de Zenodo es qué plantilla usó y por qué; eso cierra la pregunta.
