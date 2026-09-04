@@ -70,3 +70,44 @@ Se modelan y quedan vacíos, con la razón explícita. No se omiten del esquema.
 | `Afiliacion.ror_id` | No verificado | Registro ROR |
 | `UnidadAcademica` oficial | Sin catálogo institucional | Validación con la universidad |
 | `scopus_export.fecha_corte` | No declarada por el export | Reexportar con fecha registrada |
+
+## Corpus paralelo declarado (fuera de este modelo)
+
+`data/processed/produccion_declarada.json` no es parte del diagrama de
+arriba: agrega TRES fuentes de otra naturaleza que el resto del modelo,
+cada una fuera del universo Scopus/SciVal y ninguna unida jamás a
+`Publicacion` ni a ningún indicador de este modelo — mezclar criterios de
+indexación distintos sin declararlo sería exactamente el error que este
+proyecto evita (D-206, D-398):
+
+- `PD-01` (clave `por_facultad_anio`): recuento agregado (Facultad × año) de
+  publicaciones que una Facultad declara en su propio sitio. Nivel D
+  (declarado, no verificado obra por obra). Ver `docs/FUENTES_Y_APIS.md`
+  §2.6, `config/sources.yml` → `facultad_medicina_publicaciones`.
+- `PD-02` (clave `openalex_cobertura`): recuento agregado (por año, sin
+  Facultad) de publicaciones que OpenAlex atribuye a la institución y un
+  humano confirmó caso por caso (V2-26) que el universo no tiene. Nivel V
+  (verificado por revisión humana, no por fuente independiente). Ver
+  `docs/FUENTES_Y_APIS.md` §2.7, `internal/openalex_cobertura.csv`.
+- `PD-03` (clave `autoarchivo_produccion`): recuento agregado (Facultad ×
+  año) de publicaciones que sus propios autores autoarchivaron en el
+  repositorio institucional. Nivel D, pero con un límite propio: la
+  Facultad/Escuela declarada por biblioteca viene en bruto, así que sólo se
+  agrega por Facultad donde esa relación está validada
+  (`config/matching_rules.yml`); el resto se publica por unidad declarada,
+  en `unidades_sin_mapeo`, nunca forzado a una Facultad. Ver
+  `docs/FUENTES_Y_APIS.md` §2.8, `data/enriched/autoarchivo_produccion.json`.
+- `PD-04` (clave `obras_externas`): recuento agregado (por año, sin Facultad)
+  de obras que DataCite, Europe PMC o Zenodo atribuyen a una firma o a la
+  afiliación institucional, y que un humano confirmó caso por caso que el
+  universo no tiene — datasets, software, preprints, materiales depositados.
+  Nivel V, como `PD-02`, pero con clave de identidad y vocabulario de
+  veredictos propios. Su recuento llega YA colapsado entre sus tres fuentes:
+  el mismo DOI en dos repositorios es una obra, no dos. Ver
+  `docs/FUENTES_Y_APIS.md` §2.10, `internal/obras_externas_cobertura.csv`.
+
+La clave `total_fuera_de_scopus` es la unión por DOI de las cuatro —
+aritmética sobre PD-01, PD-02, PD-03 y PD-04, no un quinto indicador con
+fuente propia; hay solapamiento real entre ellas (verificado, no asumido) y
+se resta antes de sumar. Ver `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` para el
+marco general de niveles de evidencia.

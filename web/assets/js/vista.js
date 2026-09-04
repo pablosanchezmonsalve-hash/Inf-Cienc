@@ -4,7 +4,7 @@
    `document`, ni un `addEventListener`, ni un `localStorage`. Esa disciplina
    es la que permite que el mismo código corra en dos sitios:
 
-     · en el BUILD, bajo Node (src/build/07_prerender.mjs), para dejar el HTML
+     · en el BUILD, bajo Node (src/build/prerender.mjs), para dejar el HTML
        ya escrito en dist/*.html;
      · en el NAVEGADOR (paginas.js), cuando hay que repintar tras un filtro.
 
@@ -18,441 +18,6 @@
    después manipula. */
 
 import * as c from './core.js';
-
-/* ═══════════════════════════════════════════════════════ gráficos por código */
-
-/* El color por serie se reserva a los cortes CATEGÓRICOS —vías de acceso
-   abierto, cuartiles, países— donde cada barra es una entidad distinta. Un
-   ranking por volumen se queda en una sola serie: colorear por posición haría
-   que el color siguiera al rank y no a la entidad, y repintaría los
-   supervivientes en cuanto cambiara el recorte. */
-/* `cuotaValida` habilita el «% de lo mostrado» en el tooltip. Se activa SÓLO
-   donde las barras son realmente partes de un total: no en umbrales encajados
-   (I-05), no en multivaluados (A-01, C-03, C-04, T-01, T-04, T-05) y no en
-   rankings recortados (P-05), donde un porcentaje afirmaría algo falso. */
-export const RENDER = {
-  'P-02': s => c.barrasV(s.datos, { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n' }),
-  'P-03': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
-  'P-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-  'P-07': s => c.barrasH(s.datos, { titulo: s.nombre, cuotaValida: true, trama: s.multivaluado }),
-  'I-01': s => c.barrasV(s.datos, { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n' }),
-  // DESVIACIÓN, no magnitud: el FWCI se lee CONTRA el 1,00 mundial, así que el
-  // 1,00 va en el eje y el déficit se lee sin aritmética mental (FT: Deviation).
-  'I-04': s => c.desviacion(s.datos.map(d => ({ anio: d.anio, valor: d.valor })), {
-    titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'valor', decimales: 2,
-    referencia: 1, refEtiqueta: '1,00 — promedio mundial',
-  }),
-  // Los tramos son ACUMULADOS y anidados: las 3 del top 1 % están también en el
-  // top 5, 10 y 25. Cuatro barras hermanas sugerían cuatro grupos disjuntos que
-  // podrían sumarse —322, una cifra sin significado— (FT: Distribution).
-  'I-05': s => c.acumulada(s.datos, { titulo: s.nombre, total: s.base_percentil }),
-  // Q1–Q4 es una escala ORDENADA, no cuatro categorías sueltas: un solo tono en
-  // cuatro pasos, del más oscuro (mejor posición) al más claro.
-  'R-01': s => c.proporcional(s.datos, { titulo: s.nombre }),
-  // Acceso abierto se queda en una sola serie a propósito: las categorías se
-  // llaman Gold, Green y Bronze, y pintarlas con la paleta categórica dejaría
-  // «Green» de color naranja. Cuando el nombre de la categoría ya es un color,
-  // el color deja de estar disponible para codificar.
-  'A-01': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-  'C-01': s => c.anillo(s.datos, { titulo: s.nombre }),
-  'C-03': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-  'C-04': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-  // El tamaño del equipo es un continuo tramificado: ordenarlo por frecuencia
-  // destruiría el eje, que es justo la información (FT: Distribution).
-  'C-06': s => c.distribucion(s.datos, { titulo: s.nombre, etiquetaEje: 'autores por publicación' }),
-  'T-05': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-  'T-01': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-  'T-04': s => c.barrasH(s.datos, { titulo: s.nombre, trama: s.multivaluado }),
-};
-
-/* Advertencias que nacen de CÓMO se dibuja el indicador, no de cómo se calcula.
-   Por eso viven aquí y no en config/indicators.yml: describen una lectura que
-   el gráfico induce, y sólo existen mientras el gráfico sea ése. */
-const LECTURA = {
-  // Un gráfico de citas por año de publicación invita a leer «el impacto está
-  // cayendo». Lo que cae es el tiempo disponible para acumular citas.
-  'I-01': `<div class="nota-destacada"><b>Cómo se lee este gráfico</b>
-    Las barras cuentan las citas recibidas por las publicaciones de cada año, no
-    la actividad citadora de ese año. Un año reciente ha tenido menos tiempo para
-    acumular citas, así que <strong>la caída del último año no indica menor
-    impacto</strong>. Para comparar años use el FWCI, que está normalizado por
-    campo, año y tipo documental.</div>`,
-  // Cuatro barras crecientes parecen cuatro categorías; son cuatro umbrales
-  // encajados uno dentro del otro.
-  'I-05': `<p class="nota">Los umbrales son <strong>acumulativos y encajados</strong>:
-    las publicaciones del top 1 % también están contadas en el top 5 %, el 10 %
-    y el 25 %. Las barras no son categorías excluyentes y no se suman.</p>`,
-};
-
-const EXTRA = {
-  'I-04': s => `<p class="nota">Publicaciones aún sin citas por año: ` +
-    s.sin_citas_pct.map(x => `${x.anio}: <strong>${x.pct === null ? 'sin dato' : x.pct + ' %'}</strong>`)
-      .join(' · ') + `</p>`,
-  'C-06': s => `<p class="nota">Media ${s.media} · <strong>mediana ${s.mediana}</strong>.
-    La distribución es asimétrica: la mediana describe mejor el caso típico.</p>`,
-  'P-05': s => `<p class="nota">Se muestran las 20 fuentes con más publicaciones,
-    de ${c.nf.format(s.total_fuentes)} distintas.</p>`,
-  'A-01': s => `<p class="nota"><strong>${c.nf.format(s.con_varias_etiquetas)}</strong>
-    publicaciones tienen más de una vía de acceso abierto declarada —típicamente
-    Gold en la revista y Green en un repositorio—, así que aparecen en más de una
-    barra.</p>`,
-  'T-04': s => `<p class="nota"><strong>${c.nf.format(s.con_ods)}</strong> publicaciones
-    tienen al menos un ODS asignado. Se reporta como recuento, no como
-    distribución porcentual del total.</p>`,
-  'P-07': () => `<p class="nota">Las escuelas se agregan a su facultad según la
-    jerarquía declarada en configuración. Las unidades sin jerarquía declarada
-    aparecen tal como figuran en la afiliación.</p>`,
-};
-
-/* Un gráfico cuyas barras no suman el total tiene que decirlo junto al gráfico,
-   no sólo en la nota metodológica. La bandera la publica el build desde
-   config/indicators.yml. */
-function avisoMultivaluado(s) {
-  if (!s.multivaluado) return '';
-  // La LEYENDA va siempre: es la que enseña el código visual. Un lector la
-  // aprende una vez —«rayado = las barras no suman»— y la reconoce en los seis
-  // módulos multivaluados del sitio sin volver a leer nada.
-  const leyenda = `<p class="leyenda-trama">Barras rayadas: no son partes de un
-    total y no suman.</p>`;
-  // El texto largo, en cambio, se omite si la advertencia del indicador ya lo
-  // dice. Dos avisos idénticos se leen como un descuido y restan credibilidad
-  // al resto de las advertencias.
-  if (/multivaluad|no sumable/i.test(s.nota?.texto || '')) return leyenda;
-  return leyenda + `<p class="nota"><strong>Multivaluado:</strong> una publicación
-    puede aparecer en varias barras, de modo que la suma de las barras supera el
-    número de publicaciones. Las barras no son partes de un total.</p>`;
-}
-
-/* ══════════════════════════════════════════════════════════════ módulos */
-
-/** Conmutador Gráfico ⇄ Tabla de un módulo.
-
-    El patrón viene de los portales del oficio: el Leiden Ranking presenta la
-    misma tabla como lista, dispersión o mapa y deja elegir, en vez de decidir
-    por el lector cuál es la representación buena. Aquí las dos vistas son el
-    gráfico y la tabla, y la tabla dejó de estar detrás de un «Ver datos».
-
-    El control se oculta cuando no hay JavaScript —no haría nada— y en ese caso
-    las dos vistas se muestran a la vez, que es el comportamiento correcto: la
-    tabla es la vía equivalente al gráfico, no un extra. Lo decide una sola
-    clase en <html> escrita antes de pintar. */
-function conmutador(id) {
-  return `<div class="vistas" role="group" aria-label="Forma de presentación">
-    <button type="button" data-vista="grafico" aria-pressed="true"
-      aria-controls="${id}-grafico">Gráfico</button>
-    <button type="button" data-vista="tabla" aria-pressed="false"
-      aria-controls="${id}-tabla">Tabla</button>
-  </div>`;
-}
-
-/** Un módulo de indicador completo.
-
-    El orden no es decorativo. Primero lo que condiciona la lectura —la
-    advertencia metodológica y la nota de lectura del gráfico—, después la
-    figura, después el sello que dice de dónde sale y sobre cuántos casos, y al
-    final las notas de detalle. Poner el sello al final lo convertía en letra
-    pequeña; puesto justo bajo la figura, se lee con ella. */
-export function modulo(cod, s) {
-  const dibujar = RENDER[cod] || (x => c.barrasH(x.datos, { titulo: x.nombre }));
-  return `<section class="modulo" id="${cod}" tabindex="-1">
-    <header>
-      <div class="modulo-id">
-        <h3>${c.escapar(s.nombre)}</h3>
-        <span class="codigo">${cod}</span>
-      </div>
-      ${conmutador(cod)}
-    </header>
-    ${s.nota && s.nota.destacada ? c.nota(s.nota) : ''}
-    ${LECTURA[cod] || ''}
-    <div class="vista" id="${cod}-grafico" data-vista="grafico" data-activa="true">
-      ${dibujar(s)}
-    </div>
-    <div class="vista" id="${cod}-tabla" data-vista="tabla" data-activa="false">
-      ${c.tablaEquivalente(s.datos)}
-    </div>
-    ${c.sello(s.procedencia)}
-    ${avisoMultivaluado(s)}
-    ${EXTRA[cod] ? EXTRA[cod](s) : ''}
-    ${s.nota && !s.nota.destacada ? c.nota(s.nota) : ''}
-  </section>`;
-}
-
-/** Índice lateral de la página.
-
-    Copiado en intención del panel de entidades que SciVal mantiene fijo a la
-    izquierda: en una página de cinco indicadores largos, saber qué hay y poder
-    saltar sin recorrer la página entera es la diferencia entre consultar y
-    resignarse a leer en orden. El indicador activo se marca por scroll-spy
-    desde paginas.js; sin JavaScript sigue siendo una lista de anclas útil. */
-export function rail(codigos, series, porCodigo = {}) {
-  // Un indicador diferido sigue en el índice: si desapareciera de aquí, la
-  // página diría que no existe, que es justo lo que el módulo evita decir.
-  const items = codigos.map(cod => {
-    const s = series[cod] || porCodigo[cod];
-    if (!s) return '';
-    const dif = !series[cod];
-    return `<li><a href="#${cod}"${dif ? ' class="rail-diferido"' : ''}>
-      <span class="rail-cod">${cod}</span>
-      <span class="rail-txt">${c.escapar(s.nombre)}</span>
-      ${dif ? '<span class="rail-marca">diferido</span>' : ''}</a></li>`;
-  }).join('');
-  return `<nav class="rail" aria-label="Indicadores de esta página">
-    <p class="rail-titulo">En esta página</p>
-    <ol>${items}</ol>
-  </nav>`;
-}
-
-/** El panel conceptual que abre una sección.
-
-    Cada sección invita a una lectura equivocada concreta —producción se lee como
-    rendimiento, impacto como calidad, colaboración como influencia, la
-    clasificación temática como el tema real del artículo— y un lector que llega
-    sin saber qué pregunta responde la sección no tiene forma de saber cuál NO
-    responde. Decirlo después de los gráficos es decirlo tarde: va delante.
-
-    El texto viene de `docs/EJES.md` a través de `ejes.json`. No se escribe aquí:
-    es una afirmación metodológica y se revisa como documento. */
-export function panelEje(eje) {
-  if (!eje) return '';
-  return `<section class="panel-eje" aria-label="Qué responde esta sección">
-    <h2>${c.escapar(eje.titulo)}</h2>
-    <dl>
-      <dt>Responde</dt><dd>${c.escapar(eje.responde)}</dd>
-      <dt>No responde</dt><dd>${c.escapar(eje.no_responde)}</dd>
-      <dt>Sobre qué</dt><dd>${c.escapar(eje.sobre_que)}</dd>
-    </dl>
-  </section>`;
-}
-
-/** Módulo de un indicador que NO se publica.
-
-    Un indicador diferido que simplemente no aparece se lee como que el
-    fenómeno no existe: en colaboración, un hueco donde iría la red de
-    coautoría dice «no hay coautoría interna», que es una afirmación distinta
-    y falsa. Es la misma regla que `D-09` aplica a la celda —ausencia de dato
-    y cero nunca se ven igual— llevada al módulo completo.
-
-    No inventa texto: el motivo sale de `catalogo.json`, que a su vez lo toma
-    de `config/indicators.yml`. Se combinan `razon` y `advertencia` con el
-    mismo criterio que la tabla del catálogo, para que las dos vistas del
-    mismo hecho no puedan divergir. */
-export function moduloDiferido(cod, r) {
-  const motivo = [r.razon, r.advertencia].filter(Boolean).join(' ');
-  return `<section class="modulo modulo-diferido" id="${cod}" tabindex="-1">
-    <header>
-      <div class="modulo-id">
-        <h3>${c.escapar(r.nombre)}</h3>
-        <span class="codigo">${cod}</span>
-      </div>
-      <span class="estado" data-e="${r.estado}">${c.escapar(r.estado_etiqueta)}</span>
-    </header>
-    <p class="diferido-detalle">${c.escapar(r.estado_detalle)}</p>
-    ${motivo ? `<p class="nota-destacada"><b>Por qué no se publica</b>${c.escapar(motivo)}</p>` : ''}
-    ${r.que_falta ? `<p class="nota"><strong>Qué falta:</strong> ${c.escapar(r.que_falta)}</p>` : ''}
-    <p class="nota">Este módulo no muestra un gráfico vacío ni un cero: el dato
-      todavía no se ha construido, que no es lo mismo que valer cero. Ver el
-      <a href="indicadores.html#${cod}">catálogo de indicadores</a>.</p>
-  </section>`;
-}
-
-/** Los módulos de una página de sección, con su panel y su índice.
-
-    `catalogo` es opcional: sin él la página se comporta como antes. Con él,
-    los códigos declarados en la página que no tienen serie porque no se
-    publican se dibujan como módulo diferido en lugar de desaparecer. */
-export function paginaModulos(codigos, series, eje, catalogo = null) {
-  const porCodigo = {};
-  if (catalogo) for (const r of catalogo.indicadores) porCodigo[r.codigo] = r;
-
-  // Se conserva el orden declarado en la página: el diferido ocupa el lugar
-  // que le corresponde en la secuencia, no se relega al final.
-  const presentes = codigos.filter(cod =>
-    series[cod] || (porCodigo[cod] && porCodigo[cod].estado !== 'publicado'));
-
-  // Los diferidos se separan de los publicados porque van a bandas distintas:
-  // lo que el informe NO sabe merece su propio suelo, no una tarjeta más en la
-  // fila. Dentro de cada grupo se conserva el orden declarado en la página.
-  const publicados = presentes.filter(cod => series[cod]);
-  const diferidos = presentes.filter(cod => !series[cod]);
-
-  const bandas = [];
-
-  // 1 · APERTURA — qué responde la sección y qué NO responde. Va primero
-  //     porque condiciona todo lo que viene después.
-  bandas.push(banda('papel', panelEje(eje)));
-
-  // 2 · TRABAJO — el índice y los módulos publicados. Es la banda de consulta:
-  //     aquí la narrativa cede y manda la función de referencia.
-  if (publicados.length) {
-    bandas.push(banda('papel-2', `<h2 class="solo-lectores">Indicadores publicados</h2>
-      <div class="disposicion">${
-      rail(presentes, series, porCodigo)}<div class="modulos">${
-      publicados.map(cod => modulo(cod, series[cod])).join('')}</div></div>`));
-  }
-
-  // 3 · AUSENCIA — sobre el suelo de contraste. Un indicador diferido metido
-  //     entre los publicados se lee como uno más; aquí se lee como lo que es.
-  if (diferidos.length) {
-    bandas.push(banda('contraste', `
-      <div class="banda-titulo">
-        <p class="banda-gancho">Lo que esta sección todavía no puede mostrar</p>
-        <h2>${diferidos.length === 1 ? 'Un indicador' : `${diferidos.length} indicadores`}
-          de esta sección está${diferidos.length === 1 ? '' : 'n'} verificado${
-          diferidos.length === 1 ? '' : 's'} pero no se publica${diferidos.length === 1 ? '' : 'n'}.</h2>
-        <p>Se dice cuál y por qué. Un hueco se leería como que el fenómeno no existe.</p>
-      </div>
-      <div class="modulos">${diferidos.map(cod => moduloDiferido(cod, porCodigo[cod])).join('')}</div>`));
-  }
-
-  // 4 · CIERRE — sobre Peach, SÓLO tipografía y enlaces: sobre ese suelo el
-  //     color del dato no despeja 4,5:1 y la marca de ausencia no despeja 3:1.
-  bandas.push(banda('enfasis', cierre(eje)));
-
-  return bandas.join('');
-}
-
-/** Envoltura de una banda: franja a sangre con su contenido en el contenedor. */
-function banda(suelo, contenido) {
-  return `<section class="banda banda-${suelo}"><div class="contenedor">${contenido}</div></section>`;
-}
-
-/** Banda de cierre: el denominador de la sección y la salida a las demás.
-
-    Repite el denominador a propósito. Es la última cosa que se lee y la que
-    más se cita de memoria: «823» y «816» no son la misma cifra medida dos
-    veces, y decirlo una vez arriba no basta. */
-function cierre(eje) {
-  const salidas = c.PAGINAS
-    .filter(([href]) => !['index.html', 'publicaciones.html', 'autores.html'].includes(href))
-    .slice(0, 3);
-  return `
-    <div class="banda-titulo">
-      <h2>Cada indicador declara su propio denominador.</h2>
-      <p>${eje && eje.sobre_que ? c.escapar(eje.sobre_que)
-        : 'Los denominadores del informe no son intercambiables.'}
-        Ninguna sección los mezcla, y por eso dos cifras del mismo informe
-        pueden medirse sobre conjuntos distintos sin contradecirse.</p>
-    </div>
-    <div class="banda-salidas">${salidas.map(([href, txt]) => `
-      <a href="${href}"><strong>${c.escapar(txt)}</strong><span>Ver la sección →</span></a>`).join('')}
-    </div>`;
-}
-
-/* ══════════════════════════════════════════════════════════════ portada */
-
-const AYUDA_KPI = {
-  'I-03': 'FWCI', 'C-01': 'Colaboración internacional',
-  'P-06': 'Formas de firma', 'I-01': 'Fecha de corte',
-};
-
-/* Los tres indicadores que abren el informe. No es una preferencia estética:
-   son los tres ejes que el proyecto declara —cuánto se produce, con qué impacto
-   normalizado, y con quién se colabora—. El resto de los KPI baja a la rejilla.
-
-   La alternativa era repetir: el titular mostraba 823 publicaciones y la
-   rejilla, cuatro centímetros más abajo, volvía a mostrar 823 publicaciones. Un
-   indicador dicho dos veces en la misma pantalla no gana énfasis, lo pierde. */
-const TITULARES = ['P-01', 'I-03', 'C-01'];
-
-/** Titular de portada: los tres indicadores de cabecera a tamaño display.
-
-    Las plataformas del oficio abren con la magnitud y el índice normalizado, no
-    con un índice de contenidos: hay que saber de qué tamaño es el objeto antes
-    de que un desglose signifique algo. Son TRES y no seis porque un titular con
-    seis cifras no tiene titular.
-
-    Cada cifra arrastra SU denominador y, si lo tiene, su referencia. Un 0,87 de
-    FWCI sin el «1,0 = promedio mundial» al lado no es un titular: es un número
-    suelto, que es justo lo que este proyecto no publica. */
-export function hero(meta, lista) {
-  const cifras = TITULARES.map(cod => lista.find(k => k.codigo === cod)).filter(Boolean);
-
-  return `<section class="hero">
-    <div class="hero-texto">
-      <div>
-        <p class="hero-kicker">${c.escapar(meta.institucion)}</p>
-        <h1>${c.escapar(meta.titulo_plataforma)}</h1>
-      </div>
-      <p class="intro">Producción, impacto, colaboración y estructura temática de la
-      actividad científica institucional indexada en <strong>Scopus</strong>, con las
-      métricas normalizadas de <strong>SciVal</strong>. Cada indicador declara en su
-      sello qué fuente lo sostiene, a qué fecha y sobre cuántos casos se calcula.</p>
-    </div>
-    <dl class="hero-cifras">${cifras.map(k => {
-      const dec = Number.isInteger(k.valor) ? 0 : (k.sufijo === '%' ? 1 : 2);
-      const ref = k.referencia !== undefined
-        ? `${k.referencia} = ${c.escapar(k.referencia_etiqueta)}`
-        : `sobre ${c.nf.format(k.denominador)} publicaciones`;
-      return `
-      <div>
-        <dt class="cifra-display">${c.num(k.valor, dec)}${
-          k.sufijo ? `<span class="suf">${c.escapar(k.sufijo)}</span>` : ''}</dt>
-        <dd class="cifra-etq">${c.escapar(k.nombre)}<span>${ref}</span></dd>
-      </div>`;
-    }).join('')}</dl>
-  </section>`;
-}
-
-/** Los KPI que NO subieron al titular. Se filtran aquí y no en la página para
-    que el corte esté declarado en un solo sitio. */
-export const kpisRestantes = lista => lista.filter(k => !TITULARES.includes(k.codigo));
-
-/** Rejilla de tarjetas KPI. */
-export function kpis(lista) {
-  return lista.map(k => {
-    const ayuda = AYUDA_KPI[k.codigo] ? c.botonAyuda(AYUDA_KPI[k.codigo]) : '';
-    const sec = k.mediana !== undefined
-      ? `<div class="secundario">Mediana: <strong>${c.num(k.mediana, 2)}</strong> ·
-         referencia ${k.referencia} = ${k.referencia_etiqueta}</div>` : '';
-    // Los porcentajes llevan un decimal; los enteros, ninguno. Dos decimales en
-    // un porcentaje sugieren una precisión que el dato no tiene.
-    const dec = Number.isInteger(k.valor) ? 0 : (k.sufijo === '%' ? 1 : 2);
-    // La unidad del valor ('formas de firma') va bajo la etiqueta, no dentro
-    // del número: intercalada rompe la línea y estorba la lectura.
-    const unidad = k.etiqueta_valor
-      ? `<div class="secundario">${c.escapar(k.etiqueta_valor)}</div>` : '';
-    // La advertencia del indicador se pinta en la tarjeta, no sólo en el
-    // artefacto: el puente entre las 589 formas de firma de la fuente y las 556
-    // que publica el sitio se calculaba y no llegaba a ninguna pantalla.
-    const aviso = k.nota && k.nota.texto
-      ? `<div class="kpi-nota">${c.escapar(k.nota.texto)}</div>` : '';
-    return `<article class="kpi">
-      <div class="valor">${c.num(k.valor, dec)}${k.sufijo ? `<small>${k.sufijo}</small>` : ''}</div>
-      <div class="etiqueta">${c.escapar(k.nombre)}${ayuda}</div>
-      <div class="denominador">sobre ${c.nf.format(k.denominador)} publicaciones</div>
-      ${unidad}${sec}${aviso}</article>`;
-  }).join('');
-}
-
-/* Panorama: la portada no puede ser sólo un puñado de cifras. Tres cortes que
-   responden «cuánto», «con quién» y «de qué», cada uno enlazado a su sección
-   para que la portada oriente en vez de agotar. */
-const PANORAMA = [
-  ['P-02', 'produccion.html', s => c.barrasV(s.datos,
-    { titulo: s.nombre, etiquetaX: 'anio', etiquetaY: 'n', ancho: 330, alto: 210 })],
-  ['C-01', 'colaboracion.html', s => c.anillo(s.datos, { titulo: s.nombre })],
-  ['T-05', 'tematica.html', s => c.barrasH(s.datos.slice(0, 6),
-    { titulo: s.nombre, alto: 25, ancho: 330, trama: s.multivaluado })],
-];
-
-export function panorama(series) {
-  const bloques = PANORAMA.filter(([cod]) => series[cod]);
-  if (!bloques.length) return '';
-  return `<h2 class="titulo-seccion">Panorama</h2>
-    <div class="rejilla">${bloques.map(([cod, destino, dibujar]) => `
-      <section class="modulo modulo-compacto">
-        <header>
-          <div class="modulo-id">
-            <h3>${c.escapar(series[cod].nombre)}</h3>
-            <span class="codigo">${cod}</span>
-          </div>
-        </header>
-        ${dibujar(series[cod])}
-        <p class="nota"><a class="enlace-seguir" href="${destino}"
-           aria-label="Ver la sección completa de ${c.escapar(series[cod].nombre)}"
-           >Ver la sección completa →</a></p>
-      </section>`).join('')}</div>`;
-}
 
 /* El FWCI mediano (0,41) frente a la media (0,87) es el dato que más fácilmente
    se malinterpreta: se explicita en portada, no sólo en el módulo. */
@@ -583,9 +148,329 @@ export function catalogo(cat) {
     regenera en cada build. Un indicador diferido está verificado como
     calculable; uno no calculable no lo está, y aproximarlo sería inventar la
     métrica.</p>
-    <nav class="rail" aria-label="Categorías del catálogo">
-      <p class="rail-titulo">En esta página</p><ol>${indice}</ol></nav>
-    ${secciones}`;
+    <div class="disposicion">
+      <nav class="rail" aria-label="Categorías del catálogo">
+        <p class="rail-titulo">En esta página</p><ol>${indice}</ol></nav>
+      <div>${secciones}</div>
+    </div>`;
+}
+
+/** Producción ampliada: tres fuentes, de naturaleza distinta, de producción
+    fuera del corpus indexado en Scopus — nunca mezcladas en los gráficos
+    de producción/impacto del resto del sitio, y por eso viven en su propia
+    página con su propio marcado, no reutilizando `RENDER`/`kpiCarta` de
+    los indicadores Scopus/SciVal.
+
+    PD-01 es lo que cada Facultad declara editorialmente en su propio
+    sitio (hoy sólo Medicina). PD-02 es lo que OpenAlex atribuye a la
+    institución y un humano confirmó caso por caso (V2-26). PD-03 es lo
+    que sus propios autores autoarchivaron en el repositorio institucional,
+    con la Facultad o Escuela que biblioteca les asignó — cubre TODAS las
+    Facultades a la vez, pero esa unidad viene en bruto: sólo se agrega por
+    Facultad cuando la relación está validada institucionalmente
+    (`config/matching_rules.yml`); el resto se cuenta aparte, por unidad
+    declarada, nunca forzado a una Facultad sin validar. Ninguna de las
+    tres declara Facultad de la misma forma que otra, así que cada una va
+    en su propia subsección, no mezclada en la tabla de otra.
+
+    Los párrafos de transparencia (fuera de ventana / sin año / pendientes
+    de revisión / sin Facultad validada) se componen aquí desde los datos —
+    nunca una cifra escrita a mano — porque ocultarlos habría sido tan
+    engañoso como mezclarlos en un gráfico Scopus. */
+export function produccionDeclarada(datos) {
+  const { resumen, por_facultad_anio: filas, fuera_de_ventana_o_sin_anio: extra,
+          ventana, procedencia: proc, nota, fuentes,
+          openalex_cobertura: oa, autoarchivo_produccion: aa,
+          obras_externas: oe, total_fuera_de_scopus: total } = datos;
+
+  const hayPD01 = !!(fuentes && fuentes.length);
+  const hayPD02 = !!(oa && oa.disponible);
+  const hayPD03 = !!(aa && aa.disponible);
+  const hayPD04 = !!(oe && oe.disponible);
+
+  if (!hayPD01 && !hayPD02 && !hayPD03 && !hayPD04) {
+    return `
+    <p class="nota">Todavía no hay ninguna fuente de producción fuera de
+    Scopus: ni una Facultad con listado propio en
+    <code>config/sources.yml</code>, ni <code>internal/openalex_cobertura.csv</code>
+    (V2-26), ni <code>data/enriched/autoarchivo_produccion.json</code>, ni
+    <code>internal/obras_externas_cobertura.csv</code>. Esta
+    sección aparece vacía a propósito: el dato es opcional, no un indicador
+    que debiera existir.</p>`;
+  }
+
+  const kpi = (valor, etiqueta, secundario) => `
+    <div class="kpi">
+      <span class="valor">${c.nf.format(valor)}</span>
+      <span class="etiqueta">${c.escapar(etiqueta)}</span>
+      ${secundario ? `<span class="secundario">${c.escapar(secundario)}</span>` : ''}
+    </div>`;
+
+  // Fila «Facultad · año · N», compartida por las tablas de PD-01 y PD-03
+  // (las dos únicas fuentes que agregan a este nivel; PD-02 no tiene
+  // Facultad y usa su propia fila, sólo año).
+  const filaFacultadAnio = (r) => `
+    <tr><td>${c.escapar(r.facultad)}</td><td>${r.anio}</td>
+      <td>${c.nf.format(r.n)}</td></tr>`;
+
+  const totalHTML = total ? `
+    <div class="kpis">${kpi(
+      total.en_ventana, `Producción total fuera de Scopus, ${ventana.inicio}-${ventana.fin}`,
+      `${c.nf.format(total.pd01_en_ventana)} declaradas por las Facultades + `
+      + `${c.nf.format(total.pd02_en_ventana)} confirmadas por revisión de cobertura OpenAlex + `
+      + `${c.nf.format(total.pd03_en_ventana)} autoarchivadas en el repositorio institucional + `
+      + `${c.nf.format(total.pd04_en_ventana || 0)} confirmadas en repositorios de datos y acceso abierto`
+      + (total.duplicados_entre_fuentes
+        ? `, menos ${c.nf.format(total.duplicados_entre_fuentes)} repetidas entre esas fuentes`
+        : ''))}</div>
+    <p class="nota">Suma de las cuatro fuentes de abajo, sin contar dos veces la
+    misma obra: se unen por DOI y lo que aparece en más de una se resta las
+    veces que se repite.</p>` : '';
+
+  const pd01HTML = hayPD01 ? (() => {
+    const kpisHTML = [
+      kpi(resumen.total_leido, 'Registros declarados',
+        `por las Facultades participantes, ${resumen.duplicados_colapsados_por_doi} duplicados de la fuente ya colapsados`),
+      kpi(resumen.en_universo_scopus, 'Ya en el universo Scopus',
+        'divulgación: ya se cuentan en el resto del sitio, no se repiten aquí'),
+      kpi(resumen.fuera_del_universo, 'Fuera del universo Scopus',
+        'el conjunto que este corpus paralelo aporta de nuevo'),
+      kpi(resumen.en_ventana, `En la ventana ${ventana.inicio}-${ventana.fin}`,
+        'la cifra que entra al total combinado de arriba'),
+    ].join('');
+
+    const tabla = filas.length ? `
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Facultad</th><th scope="col">Año</th>
+            <th scope="col">Publicaciones declaradas</th></tr></thead>
+          <tbody>${filas.map(filaFacultadAnio).join('')}</tbody>
+        </table>
+      </div>` : `
+      <p class="nota">Ninguna publicación declarada cae dentro de la ventana
+      ${ventana.inicio}-${ventana.fin}. Ver la nota de transparencia abajo:
+      no significa que no haya datos, sino que los que hay quedan fuera de
+      esta ventana o sin año declarado.</p>`;
+
+    const notaExtra = (extra || []).filter(e => e.fuera_de_ventana || e.sin_anio)
+      .map(e => {
+        const partes = [];
+        if (e.fuera_de_ventana) partes.push(`${c.nf.format(e.fuera_de_ventana)} fuera de la ventana ${ventana.inicio}-${ventana.fin}`);
+        if (e.sin_anio) partes.push(`${c.nf.format(e.sin_anio)} sin año declarado`);
+        return `${c.escapar(e.facultad)}: ${partes.join(', ')}`;
+      }).join('; ');
+
+    return `
+      <h2>Declarada por las Facultades</h2>
+      <div class="kpis" data-n="4">${kpisHTML}</div>
+      ${c.nota(nota)}
+      <h3>Por Facultad y año, dentro de la ventana ${ventana.inicio}-${ventana.fin}</h3>
+      ${tabla}
+      ${notaExtra ? `<p class="nota">Registros declarados adicionales que
+      quedan fuera de esta tabla, sin descartarse: ${notaExtra}.</p>` : ''}
+      ${c.sello(proc)}
+      <p class="nota">En esta subsección, «Cobertura» es el porcentaje de lo
+      declarado que cae dentro de la ventana ${ventana.inicio}-${ventana.fin}
+      — no el sentido habitual del sello en el resto del sitio (porcentaje de
+      publicaciones con un dato poblado).</p>`;
+  })() : `
+    <h2>Declarada por las Facultades</h2>
+    <p class="nota">Ninguna Facultad tiene, por ahora, un listado propio
+    declarado en <code>config/sources.yml</code>.</p>`;
+
+  const pd02HTML = hayPD02 ? (() => {
+    const r = oa.resumen;
+    const kpisHTML = [
+      kpi(r.total_evaluados, 'Candidatos evaluados por OpenAlex',
+        'obras que OpenAlex atribuye a la institución y el universo Scopus no tiene (V2-26)'),
+      kpi(r.confirmadas, 'Confirmadas con revisión humana',
+        'caso por caso, antes de contarse — nunca automáticamente'),
+      kpi(r.en_ventana, `En la ventana ${ventana.inicio}-${ventana.fin}`,
+        'la cifra que entra al total combinado de arriba'),
+      kpi(r.pendientes_revision_humana, 'Pendientes de revisión',
+        'todavía sin decidir: NO se cuentan como producción confirmada'),
+    ].join('');
+
+    const filaAnio = (f) => `<tr><td>${f.anio}</td><td>${c.nf.format(f.n)}</td></tr>`;
+    const tabla = oa.por_anio.length ? `
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Año</th>
+            <th scope="col">Publicaciones confirmadas</th></tr></thead>
+          <tbody>${oa.por_anio.map(filaAnio).join('')}</tbody>
+        </table>
+      </div>` : `
+      <p class="nota">Ninguna confirmación cae dentro de la ventana
+      ${ventana.inicio}-${ventana.fin} todavía.</p>`;
+
+    const notaExtra = (r.fuera_de_ventana || r.sin_anio) ? `
+      <p class="nota">Además, ${c.nf.format(r.fuera_de_ventana)} confirmadas
+      fuera de la ventana ${ventana.inicio}-${ventana.fin} y
+      ${c.nf.format(r.sin_anio)} sin año declarado, sin descartarse.</p>` : '';
+
+    return `
+      <h2>Confirmada por revisión de cobertura OpenAlex (V2-26)</h2>
+      <div class="kpis" data-n="4">${kpisHTML}</div>
+      ${c.nota(oa.nota)}
+      <h3>Por año, dentro de la ventana ${ventana.inicio}-${ventana.fin}</h3>
+      ${tabla}
+      ${notaExtra}
+      ${c.sello(oa.procedencia)}
+      <p class="nota">En esta subsección, «Cobertura» es el porcentaje de lo
+      confirmado que cae dentro de la ventana ${ventana.inicio}-${ventana.fin}.
+      Revisión caso por caso en
+      <code>internal/revision_cobertura_openalex.html</code>.</p>`;
+  })() : `
+    <h2>Confirmada por revisión de cobertura OpenAlex (V2-26)</h2>
+    <p class="nota">Falta <code>internal/openalex_cobertura.csv</code>: correr
+    <code>src/enrich/openalex_cobertura.py</code>.</p>`;
+
+  const pd03HTML = hayPD03 ? (() => {
+    const r = aa.resumen;
+    const kpisHTML = [
+      kpi(r.total_leido, 'Registros autoarchivados',
+        `${r.duplicados_colapsados_por_doi} duplicados de la fuente ya colapsados`),
+      kpi(r.fuera_del_universo, 'Fuera del universo Scopus',
+        'el conjunto que este corpus paralelo aporta de nuevo'),
+      kpi(r.en_ventana_con_facultad, `Con Facultad validada, en la ventana ${ventana.inicio}-${ventana.fin}`,
+        'la cifra que entra al total combinado de arriba'),
+      kpi(r.en_ventana_sin_facultad, 'Sin Facultad validada, misma ventana',
+        'unidad declarada en bruto: NO se cuenta por Facultad, ver la lista abajo'),
+    ].join('');
+
+    const tabla = aa.por_facultad_anio.length ? `
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Facultad</th><th scope="col">Año</th>
+            <th scope="col">Publicaciones autoarchivadas</th></tr></thead>
+          <tbody>${aa.por_facultad_anio.map(filaFacultadAnio).join('')}</tbody>
+        </table>
+      </div>` : `
+      <p class="nota">Ninguna publicación con Facultad validada cae dentro
+      de la ventana ${ventana.inicio}-${ventana.fin}.</p>`;
+
+    const filaUnidad = (u) => `<tr><td>${c.escapar(u.unidad_declarada)}</td><td>${c.nf.format(u.n)}</td></tr>`;
+    const tablaSinMapeo = (aa.unidades_sin_mapeo || []).length ? `
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Unidad declarada (en bruto)</th>
+            <th scope="col">Publicaciones, en ventana</th></tr></thead>
+          <tbody>${aa.unidades_sin_mapeo.map(filaUnidad).join('')}</tbody>
+        </table>
+      </div>` : '';
+
+    const notaExtra = (r.fuera_de_ventana || r.sin_anio) ? `
+      <p class="nota">Además, ${c.nf.format(r.fuera_de_ventana)} fuera de la
+      ventana ${ventana.inicio}-${ventana.fin} y ${c.nf.format(r.sin_anio)}
+      sin año declarado, sin descartarse.</p>` : '';
+
+    return `
+      <h2>Autoarchivada en el repositorio institucional</h2>
+      <div class="kpis" data-n="4">${kpisHTML}</div>
+      ${c.nota(aa.nota)}
+      <h3>Por Facultad y año, dentro de la ventana ${ventana.inicio}-${ventana.fin}
+      — sólo unidades con relación escuela→Facultad validada</h3>
+      ${tabla}
+      ${notaExtra}
+      ${c.sello(aa.procedencia)}
+      <h3>Por unidad declarada, sin Facultad validada institucionalmente</h3>
+      <p class="nota">Estas ${c.nf.format(r.en_ventana_sin_facultad)} publicaciones,
+      dentro de la misma ventana, están fuera de Scopus tanto como las de
+      arriba — pero la Facultad o Escuela que biblioteca les asignó no tiene
+      hoy una relación validada a nivel de Facultad
+      (<code>config/matching_rules.yml</code>). Se cuentan aquí, por su
+      propia unidad, en vez de adivinar a qué Facultad pertenecen.</p>
+      ${tablaSinMapeo}
+      <p class="nota">En esta subsección, «Cobertura» es el porcentaje de lo
+      autoarchivado con Facultad validada que cae dentro de la ventana
+      ${ventana.inicio}-${ventana.fin} — no el sentido habitual del sello en
+      el resto del sitio.</p>`;
+  })() : `
+    <h2>Autoarchivada en el repositorio institucional</h2>
+    <p class="nota">Falta <code>data/enriched/autoarchivo_produccion.json</code>:
+    correr <code>src/enrich/autoarchivo_produccion.py</code>.</p>`;
+
+  const pd04HTML = hayPD04 ? (() => {
+    const r = oe.resumen;
+    // Estas frases se leen con cifras de una sola obra tan a menudo como con
+    // cifras grandes —una cola recién revisada tiene uno o dos casos—, y
+    // «1 confirmadas» delata que el número lo escribió una plantilla.
+    const pl = (n, sing, plur) => `${c.nf.format(n)} ${n === 1 ? sing : plur}`;
+    const kpisHTML = [
+      kpi(r.total_evaluados, 'Candidatos en repositorios externos',
+        'obras que DataCite, Europe PMC o Zenodo atribuyen a la institución y el universo Scopus no tiene'),
+      kpi(r.confirmadas, 'Confirmadas con revisión humana',
+        'caso por caso, antes de contarse — nunca automáticamente'),
+      kpi(r.en_ventana, `Obras en la ventana ${ventana.inicio}-${ventana.fin}`,
+        r.corroboradas_entre_fuentes
+          ? `la cifra que entra al total combinado; ${pl(r.corroboradas_entre_fuentes, 'llegaba', 'llegaban')} por más de una fuente y se cuenta una vez`
+          : 'la cifra que entra al total combinado de arriba'),
+      kpi(r.pendientes_revision_humana, 'Pendientes de revisión',
+        'todavía sin decidir: NO se cuentan como producción confirmada'),
+    ].join('');
+
+    const filaAnio = (f) => `<tr><td>${f.anio}</td><td>${c.nf.format(f.n)}</td></tr>`;
+    const tabla = oe.por_anio.length ? `
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Año</th>
+            <th scope="col">Obras confirmadas</th></tr></thead>
+          <tbody>${oe.por_anio.map(filaAnio).join('')}</tbody>
+        </table>
+      </div>` : `
+      <p class="nota">Ninguna confirmación cae dentro de la ventana
+      ${ventana.inicio}-${ventana.fin} todavía.</p>`;
+
+    // Por fuente se cuentan APORTES, no obras: una obra corroborada por dos
+    // repositorios aparece en los dos. Sumar esta columna da más que el
+    // recuento de arriba, y decirlo aquí evita que alguien lea la diferencia
+    // como un error de cuadratura.
+    const nombreFuente = { datacite: 'DataCite', europepmc: 'Europe PMC', zenodo: 'Zenodo' };
+    const filaFuente = (f) => `<tr><td>${c.escapar(nombreFuente[f.fuente] || f.fuente)}</td>
+      <td>${c.nf.format(f.n)}</td></tr>`;
+    const tablaFuente = (oe.por_fuente || []).length ? `
+      <h3>Qué aportó cada repositorio, dentro de la misma ventana</h3>
+      <p class="nota">Aportes, no obras: una obra que dos repositorios traen
+      cuenta en los dos. Por eso esta columna suma más que
+      ${c.nf.format(r.en_ventana)} — la diferencia ${r.corroboradas_entre_fuentes === 1
+        ? 'es 1 obra corroborada'
+        : `son las ${c.nf.format(r.corroboradas_entre_fuentes)} obras corroboradas`}.</p>
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Repositorio</th>
+            <th scope="col">Aportes confirmados</th></tr></thead>
+          <tbody>${oe.por_fuente.map(filaFuente).join('')}</tbody>
+        </table>
+      </div>` : '';
+
+    const extras = [];
+    if (r.fuera_de_ventana) extras.push(`${pl(r.fuera_de_ventana, 'confirmada', 'confirmadas')} fuera de la ventana ${ventana.inicio}-${ventana.fin}`);
+    if (r.sin_anio) extras.push(`${c.nf.format(r.sin_anio)} sin año declarado`);
+    if (r.sin_doi_en_ventana) extras.push(`${pl(r.sin_doi_en_ventana, 'sin DOI, que no se puede colapsar por clave y se cuenta como un registro propio', 'sin DOI, que no se pueden colapsar por clave y se cuentan una por registro')}`);
+    if (r.descartadas_por_ser_otra_version) extras.push(`${pl(r.descartadas_por_ser_otra_version, 'descartada', 'descartadas')} por ser otra versión de una obra ya contada`);
+    const notaExtra = extras.length ? `
+      <p class="nota">Además, ${extras.join('; ')}. Nada de esto se descarta en
+      silencio.</p>` : '';
+
+    return `
+      <h2>Confirmada en repositorios de datos y acceso abierto</h2>
+      <div class="kpis" data-n="4">${kpisHTML}</div>
+      ${c.nota(oe.nota)}
+      <h3>Por año, dentro de la ventana ${ventana.inicio}-${ventana.fin}</h3>
+      ${tabla}
+      ${notaExtra}
+      ${c.sello(oe.procedencia)}
+      ${tablaFuente}
+      <p class="nota">En esta subsección, «Cobertura» es el porcentaje de lo
+      confirmado que cae dentro de la ventana ${ventana.inicio}-${ventana.fin}.
+      Revisión caso por caso en
+      <code>internal/revision_obras_externas.html</code>.</p>`;
+  })() : `
+    <h2>Confirmada en repositorios de datos y acceso abierto</h2>
+    <p class="nota">Falta <code>internal/obras_externas_cobertura.csv</code>:
+    correr <code>src/enrich/obras_externas.py</code>.</p>`;
+
+  return `${totalHTML}${pd01HTML}${pd02HTML}${pd03HTML}${pd04HTML}`;
 }
 
 /** La lista de procedencia de metodologia.html: fuentes, ventana temporal,

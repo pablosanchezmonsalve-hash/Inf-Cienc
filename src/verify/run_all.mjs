@@ -14,7 +14,7 @@
 
    QUÉ COMPRUEBA
 
-     contraste     WCAG 2.1 · 9 páginas × 2 temas, con composición alfa,
+     contraste     WCAG 2.1 · 11 páginas × 2 temas, con composición alfa,
                    paradas de degradado y exclusión de decoración
      estructura    consola, peticiones fallidas, id duplicados, ARIA que
                    apunta a nada, anclas y enlaces internos rotos

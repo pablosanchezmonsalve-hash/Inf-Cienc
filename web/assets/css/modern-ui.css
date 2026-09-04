@@ -18,8 +18,15 @@
 }
 
 /* Una tarjeta puede pedir más ancho (el treemap respira mejor con dos
-   columnas) sin salirse del sistema de grilla. */
+   columnas) sin salirse del sistema de grilla. La grilla vive DENTRO de
+   .explorador-resultado (la columna derecha del explorador): `span 2` ocupa
+   las dos columnas de la grilla, que suman la columna derecha entera. NO se
+   saca la grilla a ancho completo del .explorador: al hacerlo invadía la
+   columna del panel de filtros (sticky) y éste tapaba el mapa al scrollear. */
 .bento-grid > .bento-ancha { grid-column: span 2; }
+@media (max-width: 52rem) {
+  .bento-grid > .bento-ancha { grid-column: span 1; }
+}
 @media (max-width: 52rem) {
   .bento-grid > .bento-ancha { grid-column: span 1; }
 }
@@ -118,27 +125,33 @@
 }
 .treemap-nodo.es-clicable { cursor: pointer; }
 
-.treemap-etq {
+svg.chart .treemap-etq {
   fill: var(--superficie);
   font-size: 12.5px;
   font-weight: 600;
   pointer-events: none;
   paint-order: stroke;
-  stroke: var(--tinta);
+  stroke: var(--marca);
   stroke-width: 3px;
   stroke-linejoin: round;
 }
-.treemap-cifra {
+svg.chart .treemap-cifra {
   fill: var(--superficie);
   font-size: 11px;
   font-variant-numeric: var(--num-tabular);
   pointer-events: none;
   paint-order: stroke;
-  stroke: var(--tinta);
+  stroke: var(--marca);
   stroke-width: 3px;
   stroke-linejoin: round;
-  opacity: .85;
+  opacity: .9;
 }
+
+/* Separación entre celdas: la rampa ordinal es bordeaux y sus tonos vecinos
+   no se distinguen mucho entre sí; un resquicio de la superficie de la tarjeta
+   entre celda y celda hace que el treemap se lea como un MOSAICO y no como un
+   bloque bordeaux uniforme (apelmazado). */
+svg.chart .treemap-celda { stroke: var(--superficie); stroke-width: 2px; }
 .treemap-leyenda {
   display: flex;
   flex-wrap: wrap;
@@ -169,14 +182,18 @@
   fill: var(--tinta-2);
   font-size: 12px;
 }
-.heatmap-cifra {
-  fill: var(--tinta);
+svg.chart .heatmap-cifra {
+  fill: var(--mapa-tinta);
   font-size: 11px;
   font-variant-numeric: var(--num-tabular);
   pointer-events: none;
   text-anchor: middle;
 }
-.heatmap-cifra.es-clara { fill: var(--superficie); }
+/* Texto de la célula DATO (bordeaux --mapa-dato, oscuro fijo): necesita
+   tinta CLARA también en ambos temas. --marca-tinta es crema clara y fija
+   (a diferencia de --tinta, que sí invierte), justo lo que pide una celda
+   de dato oscura sobre el campo claro del mapa. */
+svg.chart .heatmap-cifra.es-clara { fill: var(--marca-tinta); }
 .heatmap-celda rect { transition: filter .12s ease; }
 .heatmap-celda:hover rect,
 .heatmap-celda:focus-visible rect {

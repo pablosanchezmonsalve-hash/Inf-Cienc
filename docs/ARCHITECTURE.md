@@ -1,6 +1,7 @@
 # Arquitectura técnica
 
-**Capa:** técnica · **Fase:** 2 · **Estado:** diseño aprobado, sin implementar
+**Capa:** técnica · **Estado:** implementada y en producción (V1 completa,
+`STATE.md`); este documento describe lo construido, no un diseño pendiente
 
 ---
 
@@ -22,20 +23,20 @@ auditada.
 
 ```
 data/raw/          →  src/audit/     →  data/interim/  →  src/build/  →  data/processed/  →  web/
-(inmutable)           (Fase 1)          (auditoría)       (Fase 3)       (artefactos)        (estático)
+(inmutable)           (auditoría)       (validado)        (build)        (artefactos)        (estático)
 ```
 
 | Etapa | Responsabilidad | Estado |
 |---|---|---|
-| `data/raw/` | Exports originales. Nunca se modifican | ✅ Fase 1 |
-| `src/audit/` | Inventario, reconciliación, matching, validación | ✅ Fase 1 |
-| `data/interim/` | Universo, tabla maestra, log de matching, factibilidad | ✅ Fase 1–2 |
-| `src/build/` | Construcción de artefactos publicables | ⏳ Fase 3 |
-| `data/processed/` | JSON preagregados que consume la web | ⏳ Fase 3 |
-| `web/` | Sitio estático | ⏳ Fase 3 |
+| `data/raw/` | Exports originales. Nunca se modifican | ✅ implementado |
+| `src/audit/` | Inventario, reconciliación, matching, validación | ✅ implementado |
+| `data/interim/` | Universo, tabla maestra, log de matching, factibilidad | ✅ implementado |
+| `src/build/` | Construcción de artefactos publicables (`01_publications.py`…`09_produccion_declarada.py`) | ✅ implementado |
+| `data/processed/` | JSON preagregados que consume la web | ✅ implementado |
+| `web/` | Sitio estático, 11 páginas | ✅ implementado y desplegado |
 
 **Regla de barrera:** `src/build/` no lee de `data/raw/`. Sólo consume
-`data/interim/`, que ya pasó las 29 reglas de validación. Si la validación
+`data/interim/`, que ya pasó las 30 reglas de validación. Si la validación
 falla con severidad bloqueante, el build no debe ejecutarse.
 
 ---
@@ -48,31 +49,42 @@ falla con severidad bloqueante, el build no debe ejecutarse.
 publicaciones, con las banderas `tiene_metricas`, `tiene_autoria_detallada` y
 `tiene_area_tematica` que determinan el denominador de cada indicador.
 
-`data/interim/authors_master_draft.csv` (589 filas) es la tabla maestra de
-autores. Pasa a `authors_master.csv` cuando se resuelvan T-03 y T-04.
+`data/interim/authors_master_draft.csv` (589 filas) es el borrador inicial de
+la tabla maestra de autores, una fila por forma de firma sin consolidar. El
+plan original era promoverlo a `authors_master.csv` al cerrarse `T-03`/`T-04`
+(ambos cerrados, 2026-08-26); en la práctica la consolidación tomó otra forma:
+`config/identidades_consolidadas.yml` y `config/firmas_e09_resueltas.yml`
+—generados por `src/review/apply_decisions.py` desde decisiones humanas en
+`make revision`, nunca a mano (`D-08`)— son hoy el mecanismo real de
+consolidación, y `data/processed/authors.json` (538 entidades) es el
+artefacto final que sirve el sitio. `authors_master.csv` nunca se creó.
 
 `internal/matching_log.csv` (1.207 filas) es la tabla de autoría — la entidad
 puente del modelo. **Capa interna:** contiene las cadenas de afiliación crudas y
 el método de detección.
 
-### Artefactos publicables (Fase 3)
+### Artefactos publicables
 
 Diseñados para carga diferida: la portada no descarga el corpus completo.
+Tamaños medidos en `dist/`, no estimados (ver `README.md` §Rendimiento para el
+detalle comprimido).
 
-| Artefacto | Contenido | Tamaño estimado |
-|---|---|---|
-| `kpis.json` | Los 6 KPIs de portada + fecha de corte | < 2 KB |
-| `series.json` | Series anuales preagregadas de todos los módulos | ~20 KB |
-| `publications.json` | 823 registros, campos de tabla y filtro | ~400 KB |
-| `authors.json` | 589 autores con agregados | ~150 KB |
-| `author/<id>.json` | Ficha individual con sus publicaciones | ~5 KB × 589 |
-| `facets.json` | Valores de cada filtro con su recuento | ~15 KB |
-| `glossary.json` | Definiciones de métricas para tooltips | ~10 KB |
-| `meta.json` | Fuentes, cortes, ventana, versión del build | < 2 KB |
+| Artefacto | Contenido |
+|---|---|
+| `kpis.json` | Los 6 KPIs de portada + fecha de corte |
+| `series.json` | Series anuales preagregadas de todos los módulos |
+| `publications.json` | 823 registros, campos de tabla y filtro |
+| `authors.json` | 538 entidades de autor con agregados |
+| `author/<id>.json` | Ficha individual con sus publicaciones, una por entidad (538 archivos) |
+| `facets.json` | Valores de cada filtro con su recuento |
+| `glossary.json` | Definiciones de métricas para tooltips |
+| `meta.json` | Fuentes, cortes, ventana, versión del build |
+| `hierarchy.json` | Jerarquía escuela→facultad para el explorador reactivo |
+| `produccion_declarada.json` | Corpus paralelo declarado (`PD-01`), fuera del universo Scopus/SciVal — nunca se une a los anteriores (`D-206`, `D-398`) |
 
 **Decisión:** las fichas de autor se generan como archivos individuales, no
-como un único JSON de 589 entradas con todas sus publicaciones. Evita descargar
-~3 MB para ver una ficha.
+como un único JSON con todas las entidades y sus publicaciones. Evita
+descargar el corpus completo para ver una ficha.
 
 ---
 
@@ -82,7 +94,7 @@ Un nuevo período de datos se incorpora así:
 
 1. Depositar los nuevos exports en `data/raw/`.
 2. Registrarlos en `config/sources.yml` con su fecha de corte y ventana.
-3. `python3 src/audit/run_all.py` → revalida las 29 reglas.
+3. `python3 src/audit/run_all.py` → revalida las 30 reglas.
 4. Revisar las colas nuevas en `internal/` (ambigüedades no resueltas).
 5. `python3 src/build/build_all.py` → regenera `data/processed/`.
 6. Desplegar.
@@ -97,14 +109,17 @@ institucional y las reglas de matching viven en `config/`.
 Sitio estático servible desde cualquier hosting de archivos. Sin base de datos,
 sin proceso servidor, sin variables de entorno en runtime.
 
-La elección concreta del generador (Astro, Eleventy, Quarto, Observable
-Framework o HTML+JS plano) **se difiere a Fase 3** y está registrada como
-pendiente T-08. Los requisitos que debe cumplir, y que condicionan la elección:
+**`T-08` (cerrado):** se descartó todo generador de terceros (Astro, Eleventy,
+Quarto, Observable Framework) a favor de **HTML/CSS/JS sin dependencias +
+build en Python**, con pre-renderizado propio (`src/build/prerender.mjs`, vía
+Node) para que cada página tenga contenido real sin JavaScript. Cumple los
+requisitos que motivaron la decisión:
 
 - Salida completamente estática, sin runtime de servidor.
-- Generación de 589 páginas de autor en build.
+- Generación de 538 páginas de autor en build (una por entidad publicada).
 - Carga diferida por módulo.
-- Sin dependencia de CDN externo en runtime (los datos son institucionales).
+- Sin dependencia de CDN externo en runtime (los datos son institucionales;
+  `README.md` declara **0** dependencias externas en el navegador).
 
 ---
 
@@ -112,13 +127,22 @@ pendiente T-08. Los requisitos que debe cumplir, y que condicionan la elección:
 
 **Implementadas** (paso de enriquecimiento entre `interim` y `build`, por DOI):
 
-| Integración | Script | Qué aporta |
-|---|---|---|
-| Crossref | `src/enrich/orcid_crossref.py` | ORCID declarado por el editor |
-| ORCID Public API | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | Verificación, ampliación y candidatos |
-| ROR | `src/enrich/ror_institucion.py` | Identidad de la institución y sus nombres registrados. Escrito, **consulta sin ejecutar** |
-| OpenAlex | `src/enrich/orcid_openalex.py` | ORCID donde no había y contraste de la detección por ROR. Escrito, **consulta sin ejecutar**. No es fuente independiente: ingiere Crossref |
-| OpenAlex por institución | `src/enrich/openalex_cobertura.py` | La brecha de cobertura: producción que OpenAlex atribuye a la institución y el universo no tiene. Escrito, **consulta sin ejecutar** |
+| Integración | Script | Qué aporta | Ejecutada |
+|---|---|---|---|
+| Crossref | `src/enrich/orcid_crossref.py` | ORCID declarado por el editor | ✅ 2026-08-01 |
+| ORCID Public API | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | Verificación, ampliación y candidatos | ✅ |
+| ROR | `src/enrich/ror_institucion.py` | Identidad de la institución y sus nombres registrados | ✅ 2026-08-25 |
+| OpenAlex | `src/enrich/orcid_openalex.py` | ORCID donde no había y contraste de la detección por ROR. No es fuente independiente: ingiere Crossref | ✅ 2026-08-26 |
+| OpenAlex por institución | `src/enrich/openalex_cobertura.py`, `openalex_cobertura_crossref.py` | La brecha de cobertura: producción que OpenAlex atribuye a la institución y el universo no tiene, con corroboración de Crossref | ✅ 2026-08-26 |
+| Repositorio institucional (DSpace) | `src/enrich/dspace_inventario.py` | Confirmación cruzada de ORCID vía autoarchivo institucional | ✅ 2026-09-01 |
+| Autoarchivo de biblioteca | `src/enrich/autoarchivo_uft.py` | Inventario curado por biblioteca UFT, cruce de identidad | ✅ 2026-09-01 |
+| Listado propio de Facultad | `src/enrich/facultad_medicina_publicaciones.py` | Corpus paralelo declarado (`PD-01`), no verificado obra por obra — ver `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` | ✅ 2026-09-01 |
+
+Todas se declaran en `config/sources.yml` con su fecha de ejecución real
+(`ejecutada: true`/`fecha_ejecucion`); ninguna corre en el build normal —cada
+una se ejecuta aparte y versiona su salida, para que el sitio no dependa de
+red disponible—. El detalle metodológico de cada vía está en
+`docs/FUENTES_Y_APIS.md` §2.
 
 Scopus y SciVal **no se consultan por API**: se leen de exports manuales
 versionados en `data/raw/`. Confundir las dos cosas cambia lo que se puede
@@ -126,8 +150,8 @@ prometer sobre actualización y fecha de corte.
 
 **Evaluadas y no implementadas:** SciELO, las API de Elsevier, Unpaywall y
 Altmetric, entre otras. Qué preguntaría cada una, qué desbloquearía
-y qué falta confirmar está en `docs/FUENTES_Y_APIS.md`; el orden de prioridad,
-en `V2_BACKLOG.md` §7.
+y qué falta confirmar está en `docs/FUENTES_Y_APIS.md` §3; el orden de
+prioridad, en `V2_BACKLOG.md` §7.
 
 El contrato es `config/sources.yml`: cualquier fuente nueva se declara ahí con
 su rol, fecha de corte y cobertura, y el pipeline la trata igual que a un
@@ -147,7 +171,7 @@ resueltas— están en `docs/FUENTES_Y_APIS.md` §4.
 | Paginación | Tabla de publicaciones en páginas de 50; sin scroll infinito |
 | Fichas individuales | Un archivo por autor, no un bundle monolítico |
 
-El corpus (823 publicaciones, 589 autores) es lo bastante pequeño para filtrar
+El corpus (823 publicaciones, 538 entidades de autor) es lo bastante pequeño para filtrar
 en cliente sobre `publications.json` sin índice invertido. Se registra que este
 supuesto deja de valer alrededor de ~10.000 publicaciones, umbral a partir del
 cual haría falta un índice precomputado.

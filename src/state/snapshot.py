@@ -24,6 +24,7 @@ Salidas:
 
 from __future__ import annotations
 
+import io
 import json
 import re
 import subprocess
@@ -59,6 +60,7 @@ MAPA_LECTURA = [
     ("Cómo adaptarlo a otra institución", "docs/REPLICATION.md"),
     ("Cómo recuperar ORCID", "docs/ORCID_GUIDE.md"),
     ("Qué falta para la V2", "docs/V2_BACKLOG.md"),
+    ("Cómo tratar una fuente fuera de Scopus", "docs/METODOLOGIA_FUERA_DE_SCOPUS.md"),
     ("Historia de cada sesión", "SESSION_NOTES.md"),
 ]
 
@@ -135,6 +137,22 @@ def git(*args: str) -> str:
         return ""
 
 
+def _titulo_de_seccion(titulo: str) -> str:
+    """El título de una nota, sin el prefijo de tipo ni la fecha entre paréntesis.
+
+    "## Cierre: PD-04 — la cuarta fuente … (2026-09-03)" describe la sesión
+    igual de bien que un "## Sesión …", y es como se titula casi todo desde
+    agosto. Se le quitan el prefijo y la fecha para que la columna quepa y
+    diga lo mismo que las filas antiguas: de qué iba el tramo de trabajo.
+    """
+    # El separador varía entre las 92 notas: "Cierre · …" (64), "Cierre: …"
+    # (27), "Addendum: …" (1). Se aceptan los tres.
+    t = re.sub(r"^(Cierre de sesión|Cierre de tramo|Cierre|Addendum|Fusión)\s*[:·—-]\s*",
+               "", titulo).strip()
+    t = re.sub(r"\s*\((?:\d{4}-\d{2}-\d{2}[^)]*|mismo día[^)]*)\)\s*$", "", t).strip()
+    return t or titulo.strip()
+
+
 def extraer_decisiones() -> list[dict]:
     """Recupera las decisiones de las tablas de SESSION_NOTES.md.
 
@@ -144,14 +162,37 @@ def extraer_decisiones() -> list[dict]:
     texto = leer("SESSION_NOTES.md")
     sesion_actual = "?"
     filas = []
-    for linea in texto.splitlines():
-        m_sesion = re.match(r"^## Sesión (\S+) — (.+)$", linea.strip())
+    vistos: dict[str, int] = {}
+    for n, linea in enumerate(texto.splitlines(), start=1):
+        # El paréntesis intermedio es real: "## Sesión 2026-08-27 (cont.) — ...",
+        # "(EN CURSO)", "(tarde)". Sin tolerarlo, la sesión no matchea, el título
+        # anterior queda pegado, y la columna "Fase" de docs/DECISIONS.md termina
+        # atribuyendo filas enteras a la sesión equivocada.
+        m_sesion = re.match(r"^## Sesión (\S+)(?:\s*\([^)]*\))?\s+—\s+(.+)$", linea.strip())
         if m_sesion:
             sesion_actual = m_sesion.group(2)
             continue
+        # La mayoría de las notas recientes NO se titulan "## Sesión …" sino
+        # "## Cierre: …" o "## Fusión con …". Reconocer sólo la primera forma
+        # dejaba `sesion_actual` clavada en la última sección que sí lo hacía,
+        # y la columna "Fase" atribuía decisiones enteras a una sesión sin
+        # relación con ellas — 15 filas lo estaban al detectarlo (2026-09-03).
+        # Es el mismo defecto que ya se corrigió una vez para "(cont.)", sobre
+        # otro patrón de título.
+        m_otro = re.match(r"^## (.+)$", linea.strip())
+        if m_otro:
+            sesion_actual = _titulo_de_seccion(m_otro.group(1))
+            continue
         m = re.match(r"^\|\s*(D-\d+)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|$", linea.strip())
         if m:
-            filas.append({"id": m.group(1), "decision": m.group(2),
+            id_ = m.group(1)
+            if id_ in vistos:
+                print(f"  AVISO · {id_} reutilizado: línea {vistos[id_]} y línea "
+                      f"{n} de SESSION_NOTES.md. Corregir la numeración a mano "
+                      "(no se renombra solo: DECISIONS.md es una vista, no la "
+                      "fuente).", file=sys.stderr)
+            vistos[id_] = n
+            filas.append({"id": id_, "decision": m.group(2),
                           "fundamento": m.group(3), "fase": sesion_actual})
     return filas
 
@@ -264,11 +305,21 @@ def colas_internas() -> list[tuple[str, int]]:
     out = []
     for p in sorted((ROOT / "internal").glob("*.csv")):
         try:
-            df = pd.read_csv(p, nrows=0)
+            # Sin saltar las líneas de cabecera "#" por posición, una cola con
+            # cabecera-comentario (como identity_decisions.csv) pierde su
+            # primera línea de datos como si fuera la fila de encabezado — el
+            # mismo bug que ya se corrigió en src/review/decisiones.py y
+            # hermanos, aplicado aquí antes de que llegara a afectar una cola
+            # real con columna `resolucion`.
+            lineas = p.read_text(encoding="utf-8-sig").splitlines()
+            i = 0
+            while i < len(lineas) and lineas[i].startswith("#"):
+                i += 1
+            df = pd.read_csv(io.StringIO("\n".join(lineas[i:])), dtype=str)
         except Exception:
             continue
         if "resolucion" in df.columns:
-            out.append((p.stem, len(pd.read_csv(p))))
+            out.append((p.stem, len(df)))
     return out
 
 

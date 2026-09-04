@@ -150,7 +150,7 @@ indicadores:
   AU-03: {nombre: "h-index en ventana 2023-2025", categoria: impacto, publicar: true,
           solo_en: ficha_autor, n_minimo: 5, confiabilidad: baja,
           advertencia_destacada: true,
-         advertencia: "No es el h-index de carrera. Ventana 2023-2025; sólo se muestra cuando la muestra lo hace mínimamente legible (n≥5, 50 de las 542 entidades publicadas)."}
+         advertencia: "No es el h-index de carrera. Ventana 2023-2025; sólo se muestra cuando la muestra lo hace mínimamente legible (n≥5, 50 de las 538 entidades publicadas)."}
   AU-06: {nombre: "Evolución temporal por autor", categoria: descriptivo, publicar: true,
           solo_en: ficha_autor, confiabilidad: media,
           advertencia: "Tres puntos: se presenta como barras, no como línea de tendencia."}
@@ -178,8 +178,51 @@ indicadores:
   X-03: {nombre: "Indicadores de financiamiento", categoria: descriptivo, publicar: false,
          estado: no_calculable,
          razon: "Cobertura 37,4 %: insuficiente para reportar sin sesgo.",
-         que_falta: "Fuente complementaria de financiamiento."}
+         que_falta: "Fuente complementaria de financiamiento: src/enrich/crossref_financiamiento.py está implementado y probado (--test), pero api.crossref.org no es alcanzable desde este entorno (config/sources.yml -> crossref_financiamiento_api, ejecutada: false). Falta correrlo con acceso de red real y medir la cobertura combinada."}
   X-04: {nombre: "Tendencia de largo plazo", categoria: descriptivo, publicar: false,
          estado: no_calculable,
          razon: "La ventana 2023-2025 no sostiene una tendencia.",
          que_falta: "Datos anteriores a 2023."}
+
+  # ------------------------------- producción declarada (corpus paralelo, no Scopus)
+  # Deliberadamente AUSENTE de kpis_portada: eso es lo que mantiene este dato
+  # fuera de los gráficos Scopus/SciVal existentes. Vive sólo en su propia
+  # sección (produccion-ampliada.html).
+  PD-01: {nombre: "Producción declarada por las Facultades, fuera de Scopus",
+          categoria: declarado, publicar: true, confiabilidad: baja,
+          solo_recuento: true, advertencia_destacada: true,
+          advertencia: "Recuento que cada Facultad declara en su propio sitio, no un índice bibliográfico: no aplica los criterios de cobertura de Scopus, y SciVal no lo mide — no tiene citas, FWCI ni ningún otro indicador de impacto. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}
+
+  # V2-26: OpenAlex atribuye a la institución obras que el universo Scopus no
+  # tiene. Evidencia distinta de PD-01 — no es una Facultad declarando su
+  # propia lista editorial, es una API externa cuyos candidatos pasan uno por
+  # uno por revisión humana (internal/revision_cobertura_openalex.html) antes
+  # de contarse aquí. Los que siguen pendientes de esa revisión NUNCA se
+  # cuentan como producción confirmada, aunque existan como candidatos.
+  PD-02: {nombre: "Producción institucional confirmada por revisión de cobertura OpenAlex, fuera de Scopus",
+          categoria: declarado, publicar: true, confiabilidad: baja,
+          solo_recuento: true, advertencia_destacada: true,
+          advertencia: "OpenAlex atribuye a la institución obras que el universo Scopus no tiene; cada candidato se confirma con revisión humana caso por caso (V2-26) antes de contarse — nunca automáticamente, y los que aún no se revisaron no se cuentan. No tiene citas, FWCI ni ningún otro indicador de impacto: SciVal no lo mide. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}
+
+  # Repositorio institucional (hoja de autoarchivo que cura biblioteca):
+  # cubre TODAS las Facultades a la vez, a diferencia de PD-01 (una sola,
+  # su propio sitio). La Facultad/Escuela viene EN BRUTO por obra — sólo se
+  # agrega por Facultad cuando la relación escuela->facultad está validada
+  # institucionalmente (config/matching_rules.yml); el resto se publica por
+  # unidad declarada, nunca forzado a una Facultad.
+  PD-03: {nombre: "Producción autoarchivada en el repositorio institucional, fuera de Scopus",
+          categoria: declarado, publicar: true, confiabilidad: baja,
+          solo_recuento: true, advertencia_destacada: true,
+          advertencia: "Obras que sus propios autores autoarchivaron en el repositorio institucional, con la Facultad o Escuela que biblioteca les asignó. Se agrega por Facultad sólo cuando esa relación está validada institucionalmente; el resto se cuenta por separado, por unidad declarada, nunca forzado a una Facultad que no está confirmada. No tiene citas, FWCI ni ningún otro indicador de impacto: SciVal no lo mide. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}
+
+  # PD-04: DataCite, Europe PMC y Zenodo ven outputs que ningún índice
+  # bibliográfico cubre bien —datasets, software, preprints, pósters—. Es
+  # Nivel V como PD-02 (cada obra pasa por revisión humana antes de contarse),
+  # pero NO comparte su mecanismo: PD-02 recupera por ROR institucional desde
+  # un índice; éste recupera por ORCID confirmado y por afiliación declarada
+  # desde tres repositorios, y tiene un modo de fallo propio —versiones de una
+  # misma obra con DOI distinto— que ningún otro indicador enfrenta.
+  PD-04: {nombre: "Producción en repositorios de datos y acceso abierto confirmada obra por obra, fuera de Scopus",
+          categoria: declarado, publicar: true, confiabilidad: baja,
+          solo_recuento: true, advertencia_destacada: true,
+          advertencia: "DataCite, Europe PMC y Zenodo indexan datasets, software, preprints y materiales depositados que Scopus no cubre. Cada candidato se confirma con revisión humana caso por caso antes de contarse; los pendientes no se cuentan. Dos límites propios y declarados: las obras halladas sólo por la cadena de afiliación pueden ser de un homónimo, y Zenodo acuña un DOI por versión, de modo que una misma obra puede aparecer con varios DOI — por eso la revisión distingue una versión repetida de una atribución errónea. No tiene citas, FWCI ni ningún otro indicador de impacto: SciVal no lo mide. Nunca se suma al universo que construye el resto del sitio (D-206, D-398). Ver Producción ampliada."}

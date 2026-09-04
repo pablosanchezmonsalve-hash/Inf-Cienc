@@ -116,16 +116,25 @@ bundle desplegado**. La licencia del software es MIT (`D-39`) y la de los datos
 derivados, CC BY 4.0.
 
 > **Alcance declarado, no limitación abierta.** «No forma parte del bundle» no
-> equivale a «no es público»: `data/raw/` e `internal/` están versionados en un
-> repositorio público y por tanto son accesibles. Las compuertas del build
-> protegen el sitio, no el repositorio.
+> equivale a «no es público». Hasta la auditoría de seguridad de 2026-09-03,
+> `data/raw/` e `internal/` estaban **versionados en el repositorio**, que era
+> público y por tanto las hacía accesibles. Las compuertas del build protegían
+> el sitio, no el repositorio.
 >
-> Se decidió mantenerlo así (`T-16`, cerrado el 2026-08-03): los nombres de
-> autor ya son públicos en Scopus, y documentar la incertidumbre es lo que hace
-> auditable al proyecto. Lo que queda abierto es la **redistribución de las
-> exportaciones de Elsevier**, que depende de la licencia institucional y no de
-> una decisión de este proyecto. Ver `internal/README.md` para el razonamiento
-> completo y las condiciones que obligarían a revisarlo.
+> La decisión `T-16` que mantuvo eso abierto se **revirtió** (`D-SEC-01`,
+> auditoría de seguridad de 2026-09-03): `data/raw/` e `internal/` dejan de
+> versionarse y quedan fuera del repositorio (`.gitignore`). La compuerta del
+> build (proteger `dist/`) y la compuerta del repositorio (no versionar las
+> capas internas) son ahora dos barreras distintas y las dos obligatorias:
+> ninguna sustituye a la otra. El repositorio, además, debe permanecer
+> **privado** (lo exige la licencia de Elsevier y la privacidad de las colas
+> de identidad); cualquier despliegue de Pages público debe servirse desde un
+> repositorio/sitio específico que no contenga estas capas.
+>
+> Queda abierto, como siempre, el alcance exacto de lo que la licencia
+> institucional de Elsevier permite publicar derivado (ver
+> `docs/DATA_LICENSE.md` ©5): es una cuestión con quien administra la
+> suscripción, no una decisión de este proyecto.
 
 ---
 
@@ -143,7 +152,10 @@ Implementado en Fase 3 (T-09 cerrado):
 3. `internal/` y `data/raw/` excluidos explícitamente del directorio de
    despliegue, y comprobados de nuevo en el workflow antes de publicar.
 
-Las tres cubren `dist/`. Ninguna cubre el repositorio: ver el recuadro de §5.
+Las tres cubren `dist/`. La cuarta barrera, añadida en `D-SEC-01` (2026-09-03),
+cubre el **repositorio**: `internal/` y `data/raw/` no se versionan
+(`.gitignore`) y los workflows que los generan los conservan sólo como
+artefactos de ejecución, sin committearlos. Ver el recuadro de §5.
 
 La verificación automática es deliberada: la separación de capas no puede
 depender de que nadie se equivoque al escribir un `build`.

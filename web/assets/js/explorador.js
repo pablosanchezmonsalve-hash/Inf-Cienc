@@ -248,9 +248,16 @@ export function describir(sel) {
    y no repartido por el código es lo que permite comprobar de un vistazo que
    ningún indicador cambió de significado al volverse filtrable. */
 
+// Mismos cortes que `equipo` en src/build/02_indicators.py (C-06): antes esta
+// lista tenía sus propios tramos —1,2,3,4–5,6–10,11–20,21 o más—, y el
+// gráfico de "Autores por publicación" cambiaba de agrupación entera al
+// tocar cualquier filtro (la vista estática usa 1,2–3,4–6,7–10,11–20,21+).
+// No es sólo un rótulo distinto: son fronteras de bin distintas, así que un
+// mismo valor podía caer en tramos distintos según cuál de las dos versiones
+// se estuviera mirando.
 const TRAMOS_AUTORES = [
-  [1, 1, '1'], [2, 2, '2'], [3, 3, '3'], [4, 5, '4–5'],
-  [6, 10, '6–10'], [11, 20, '11–20'], [21, Infinity, '21 o más'],
+  [1, 1, '1'], [2, 3, '2-3'], [4, 6, '4-6'], [7, 10, '7-10'],
+  [11, 20, '11-20'], [21, Infinity, '21+'],
 ];
 
 /** Campos que no son dimensiones de filtro pero sí ejes de un gráfico. */
@@ -268,16 +275,24 @@ export const CAMPOS = {
   },
   // El cuartil sale del percentil SJR de la revista. Q1 es el mejor, y el
   // percentil alto es el mejor, así que el corte va de mayor a menor.
+  // Sin percentil declarado, cuenta como 'Sin dato declarado' — el mismo
+  // quinto valor que ya trae `cuartiles` en 02_indicators.py (R-01). Antes
+  // esta rama devolvía [] y la publicación simplemente desaparecía del
+  // gráfico reactivo: el de proporcional() es un "parte de un total" del
+  // 100 % conocido, así que sin este bucket el corte filtrado se redibujaba
+  // como si TODO lo filtrado tuviera cuartil, mientras el sello de cobertura
+  // justo debajo (que sí usa cobertura(), más abajo) seguía diciendo el
+  // porcentaje real — dos lecturas contradictorias del mismo recorte.
   cuartil: p => {
     const q = p.sjr_percentil;
-    if (typeof q !== 'number') return [];
+    if (typeof q !== 'number') return ['Sin dato declarado'];
     return [q >= 75 ? 'Q1' : q >= 50 ? 'Q2' : q >= 25 ? 'Q3' : 'Q4'];
   },
 };
 
 const ORDEN_FIJO = {
   autores_tramo: TRAMOS_AUTORES.map(t => t[2]),
-  cuartil: ['Q1', 'Q2', 'Q3', 'Q4'],
+  cuartil: ['Q1', 'Q2', 'Q3', 'Q4', 'Sin dato declarado'],
 };
 
 /** Recuento por un campo cualquiera —dimensión de filtro o eje de gráfico—. */
@@ -302,7 +317,6 @@ export function porCampo(pubs_sel, clave, { tope = 0 } = {}) {
   return tope ? filas.slice(0, tope) : filas;
 }
 
-/** Suma de un campo numérico, agrupada por año. */
 /** Cobertura de un campo dentro del recorte: cuántas publicaciones lo traen.
 
     NO se deriva sumando las barras del gráfico. En los campos multivaluados
@@ -328,11 +342,21 @@ export function cobertura(pubs_sel, clave) {
   // 100 % inventado, y un sello que miente es peor que ningún sello.
   if (!saca) return { n, cubiertas: null, pct: null };
   let cub = 0;
-  for (const p of pubs_sel) if (saca(p).length) cub++;
+  // `CAMPOS.cuartil` devuelve `['Sin dato declarado']` en vez de `[]` para
+  // que el gráfico "parte de un total" (proporcional()) muestre el 100 % real
+  // del recorte en vez de desaparecer las publicaciones sin percentil — mismo
+  // criterio que `02_indicators.py` (R-01: la lista de barras SÍ trae el
+  // bucket, la cobertura publicada NO lo cuenta). Por eso el sello, que mide
+  // cobertura y no reparto, sigue excluyéndolo aquí.
+  for (const p of pubs_sel) {
+    const v = saca(p);
+    if (v.length && !(v.length === 1 && v[0] === 'Sin dato declarado')) cub++;
+  }
   return { n, cubiertas: cub, pct: pct(cub) };
 }
 
 
+/** Suma de un campo numérico, agrupada por año. */
 export function sumaPorAnio(pubs_sel, campo) {
   const acc = new Map();
   for (const p of pubs_sel) {

@@ -23,6 +23,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import io
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -48,7 +49,15 @@ VEREDICTO_A_RESOLUCION = {
 
 
 def leer_decisiones(ruta: Path) -> pd.DataFrame:
-    d = pd.read_csv(ruta, dtype=str, comment="#").fillna("")
+    # Se salta la cabecera de comentario por POSICIÓN, no con
+    # `pd.read_csv(comment='#')`: eso trunca en la primera almohadilla ESTÉ
+    # DONDE ESTÉ, y una nota como «ítem #3» perdería la mitad en silencio
+    # (mismo bug que ya se corrigió en decisiones.py::leer()).
+    lineas = ruta.read_text(encoding="utf-8-sig").splitlines()
+    i = 0
+    while i < len(lineas) and lineas[i].startswith("#"):
+        i += 1
+    d = pd.read_csv(io.StringIO("\n".join(lineas[i:])), dtype=str).fillna("")
     faltan = {"openalex_id", "veredicto"} - set(d.columns)
     if faltan:
         sys.exit(f"Faltan columnas en {ruta.name}: {sorted(faltan)}")

@@ -1,6 +1,6 @@
 # Nota metodológica
 
-**Capa:** pública · **Fase:** 1 · **Última actualización:** 2026-07-31
+**Capa:** pública · **Fase:** 1 · **Última actualización:** 2026-08-26
 
 Este documento fija los criterios que gobiernan todo cálculo publicado por la
 plataforma. Cualquier indicador que los contradiga no debe publicarse.

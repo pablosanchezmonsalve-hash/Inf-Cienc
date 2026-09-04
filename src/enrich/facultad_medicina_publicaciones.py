@@ -12,18 +12,35 @@ QUÉ RESUELVE
     publica por fuera de él.
 
 QUÉ NO HACE
-    No inserta nada en ningún corpus (D-314: confirmar que una obra es
-    producción real UFT no la convierte en parte del universo — ampliarlo es
-    una decisión de alcance aparte). No toca `data/interim/publications_universe.csv`
-    ni ningún artefacto publicable. Es ingesta de referencia para contraste,
-    misma lógica que la revisión de cobertura OpenAlex (V2-26).
+    No inserta nada en el corpus Scopus (D-314: confirmar que una obra es
+    producción real UFT no la convierte en parte del universo — ampliarlo
+    sería mezclar criterios de indexación distintos). Nunca toca
+    `data/interim/publications_universe.csv` ni ningún indicador que
+    reporte citas/FWCI (eso sólo existe para lo indexado en Scopus, vía
+    SciVal). Sí alimenta, como RECUENTO (nunca impacto), el indicador
+    PD-01 "Producción declarada por las Facultades, fuera de Scopus" —
+    ver `src/build/09_produccion_declarada.py` — que lo muestra en una
+    sección aparte del sitio, no en los gráficos de producción/impacto.
+
+ESQUEMA DE SALIDA (convención para cualquier conector de este tipo)
+    Cada registro trae `facultad` (nombre CANÓNICO, el mismo que usa
+    `config/matching_rules.yml` -> unidad_academica.jerarquia.*.facultad;
+    NO la cadena cruda del sitio), `anio` (string, "" si no declarado),
+    `doi` (normalizado, "" si no hay), `en_universo_scopus` (bool), y
+    `eid_scopus`/`anio_scopus` SÓLO cuando `en_universo_scopus` es
+    verdadero (no siempre están las tres claves). Otra Facultad que sume
+    su propio listado más adelante escribe a su propio
+    `data/enriched/<algo>_publicaciones.json` con este mismo esquema, y
+    se declara en `config/sources.yml` con `corpus_paralelo_declarado:
+    true` — `09_produccion_declarada.py` la descubre sola, sin que este
+    archivo ni ningún otro nombren esa Facultad.
 
 USO
     python3 src/enrich/facultad_medicina_publicaciones.py            # baja y estructura
     python3 src/enrich/facultad_medicina_publicaciones.py --test     # valida el parser sin red
 
 Salida:
-    data/enriched/facultad_medicina_publicaciones.json   registros estructurados
+    data/enriched/facultad_medicina_publicaciones.json   registros estructurados, con 'facultad'
     internal/facultad_medicina_cruce.csv                 cruce contra el universo (capa interna)
 """
 
@@ -53,6 +70,14 @@ URL_PAGE = (
 )
 SALIDA_JSON = ROOT / "data" / "enriched" / "facultad_medicina_publicaciones.json"
 SALIDA_CSV = ROOT / "internal" / "facultad_medicina_cruce.csv"
+
+# Nombre CANÓNICO, el mismo que usa `config/matching_rules.yml` ->
+# unidad_academica.jerarquia.*.facultad — no la cadena cruda del sitio
+# ("Facultad de Medicina"). Es la convención que sigue cualquier conector de
+# "producción declarada": sin este campo, `09_produccion_declarada.py` no
+# puede agrupar por facultad sin hardcodear un nombre de facultad en el
+# pipeline de build.
+FACULTAD = "Facultad de Medicina y Salud"
 UNIVERSO = ROOT / "data" / "interim" / "publications_universe.csv"
 
 # Muestra reducida del marcado real de la página (ver SESSION_NOTES 2026-09-01):
@@ -211,6 +236,7 @@ def extraer(pages_json: dict) -> list[dict]:
 
         registros.append(
             {
+                "facultad": FACULTAD,
                 "indice": indice,
                 "seccion": seccion,
                 "anio": anio,
@@ -259,7 +285,7 @@ def _guardar(registros: list[dict]) -> None:
     df = pd.DataFrame(registros)
 
     claves = [
-        "indice", "seccion", "anio", "titulo", "primer_autor",
+        "facultad", "indice", "seccion", "anio", "titulo", "primer_autor",
         "autor_correspondencia", "autor_uft", "doi",
         "en_universo_scopus", "eid_scopus", "anio_scopus",
     ]
@@ -283,6 +309,8 @@ def test() -> int:
         fallos.append("no se encontró el DOI 10.1097/gme.0000000000002620")
     elif not (p["seccion"] == "Escuela de Medicina" and p["anio"] == "2025"):
         fallos.append(f"campos mal: {p}")
+    if any(r.get("facultad") != FACULTAD for r in registros):
+        fallos.append("algún registro no trae 'facultad' == FACULTAD")
     libros = [r for r in registros if r["seccion"] == "Libros"]
     if not libros or libros[0]["titulo"] != "Médico y escarabajo":
         fallos.append(f"sección Libros/editorial mal parseada: {libros}")

@@ -35,7 +35,7 @@ NUNCA_DESPLEGAR = ("data/raw", "internal")
 def expandir_cabeceras() -> None:
     """Compone el `<head>` de cada página desde una sola plantilla (V2-16).
 
-    Las dieciséis líneas de cabecera estaban copiadas en las diez páginas, y la
+    Las dieciséis líneas de cabecera estaban copiadas en las once páginas, y la
     del catálogo se creó copiando la de metodología: así es como diez copias se
     vuelven once y una se queda atrás. Ahora cada página declara sólo lo suyo
     —`data-titulo` y `data-descripcion`— y aquí se expande.

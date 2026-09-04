@@ -95,8 +95,8 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 
 | | |
 |---|---|
-| Evaluados contra los datos | **40** |
-| Publicados | **28** |
+| Evaluados contra los datos | **41** |
+| Publicados | **29** |
 | Diferidos a V2 | 8 |
 | No calculables, declarados | 5 |
 
@@ -104,8 +104,8 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 
 | | |
 |---|---|
-| Páginas | 10 |
-| Fichas de autor | **542**, una por archivo |
+| Páginas | 11 |
+| Fichas de autor | **538**, una por archivo |
 | Peso total de `dist/` | ~3,5 MB |
 | Dependencias externas en el navegador | **0** |
 
@@ -134,18 +134,22 @@ comprimidos— lo cachea el navegador entre páginas.
 | Documento | Contenido |
 |---|---|
 | **`STATE.md`** | **Punto de entrada: estado, cifras y mapa de lectura** |
-| `docs/DECISIONS.md` | Índice de las 353 decisiones, una línea cada una |
+| `docs/DECISIONS.md` | Índice de las 400 decisiones, una línea cada una |
 | `docs/AUDIT_REPORT.md` | Auditoría completa con cifras verificadas |
 | `docs/DATA_MODEL.md` | Modelo lógico, entidades y claves de enlace |
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
+| `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` | Cómo se clasifica y publica una fuente que no es Scopus/SciVal |
 | `docs/LIMITATIONS.md` | **Limitaciones declaradas. Leer antes de interpretar cualquier indicador** |
-| `docs/INDICATORS.md` | Catálogo de 40 indicadores y selección V1 |
+| `docs/INDICATORS.md` | Catálogo de 41 indicadores y selección V1 |
+| `docs/FUENTES_Y_APIS.md` | De dónde sale cada dato hoy, y qué plataformas podrían aportar lo que falta |
+| `docs/ORCID_COVERAGE.md` | Cobertura de ORCID: hasta dónde llega y por qué no llega al 100 % |
 | `docs/ARCHITECTURE.md` | Pipeline, artefactos y rendimiento |
 | `docs/UX_UI.md` | Navegación, KPIs, módulos, filtros y estados |
 | `docs/LAYERS.md` | Qué es público y qué es interno |
 | `docs/AUTHOR_PROFILE.md` | Estructura de la ficha pública de autor |
 | `docs/GLOSSARY.md` | Glosario y ayuda contextual |
 | `docs/EJES.md` | Qué pregunta responde cada sección, y cuál no |
+| `docs/OPERACION.md` | Cómo se opera el proyecto, paso a paso |
 | `docs/DEPLOYMENT.md` | Cómo construir y publicar |
 | `docs/UPDATING.md` | Cómo incorporar una carga de datos nueva |
 | `docs/UPDATING_REQUEST.md` | Qué pedir en la próxima exportación de datos |

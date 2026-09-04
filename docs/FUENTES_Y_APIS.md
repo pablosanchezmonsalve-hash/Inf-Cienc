@@ -36,13 +36,13 @@ exports, y sin identificador persistente no hay identidad de autor estable.
 |---|---|---|---|---|
 | Scopus | Export CSV manual | — | `src/audit/common.py` (lectura) | `data/interim/` |
 | SciVal | Export XLSX manual | — | `src/audit/common.py` (lectura) | `data/interim/` |
-| Crossref | REST, `api.crossref.org/works/{doi}` | Ninguna (`mailto` para el *polite pool*) | `src/enrich/orcid_crossref.py`, `src/enrich/openalex_cobertura_crossref.py` | `data/enriched/authors_orcid.csv`, `internal/openalex_cobertura_crossref.csv` |
+| Crossref | REST, `api.crossref.org/works/{doi}` | Ninguna (`mailto` para el *polite pool*) | `src/enrich/orcid_crossref.py`, `src/enrich/openalex_cobertura_crossref.py`, `src/enrich/crossref_financiamiento.py` (implementado, sin ejecutar — §3.4) | `data/enriched/authors_orcid.csv`, `internal/openalex_cobertura_crossref.csv`, `data/enriched/crossref_financiamiento.csv` |
 | ORCID | Public API v3.0, `pub.orcid.org` | Token `client_credentials`, alcance `/read-public`, gratuito | `orcid_api.py`, `orcid_expand.py`, `orcid_afiliacion.py` | `data/enriched/orcid_verificacion.csv`, `internal/orcid_*.csv` |
 | DataCite | REST, `api.datacite.org/dois/{doi}` | Ninguna | `src/enrich/datacite.py` | `data/enriched/authors_orcid.csv`, `internal/datacite_log.csv` |
 | Europe PMC | REST, `ebi.ac.uk/europepmc/webservices/rest/search` | Ninguna | `src/enrich/europepmc.py` | `data/enriched/authors_orcid.csv`, `internal/europepmc_log.csv` |
 | Zenodo | REST, `zenodo.org/api/records` | Ninguna | `src/enrich/zenodo.py` | `data/enriched/authors_orcid.csv`, `internal/zenodo_log.csv` |
 
-### 2.2 DataCite, Europe PMC y Zenodo — fuentes de datos no tradicionales
+### 2.1 ter DataCite, Europe PMC y Zenodo — fuentes de datos no tradicionales
 
 Tres APIs públicas sin autenticación que aportan **outputs no tradicionales**
 que ni Scopus ni OpenAlex indexan bien: `src/enrich/datacite.py` (datasets,
@@ -57,6 +57,11 @@ software), `src/enrich/europepmc.py` (acceso abierto biomédico) y
 - **Escriben** asignaciones nuevas en `data/enriched/authors_orcid.csv`
   (fusionando con lo previo) y dejan traza en `internal/`.
 - **Caché en disco y pausa** entre consultas, igual que los demás conectores.
+
+Desde el 2026-09-03 estas tres fuentes responden además una segunda pregunta,
+en dirección contraria: no "¿qué ORCID tienen los autores de este DOI?" sino
+"¿qué obras tienen estas personas que el universo no tiene?". Ese es el
+conector de `PD-04` (§2.10) — otro endpoint, otra salida, misma fuente.
 
 > GitHub (`src/enrich/github_orcid.py`) queda implementado pero **inactivo por
 > defecto**: su REST API no permite buscar por ORCID en el bio de un perfil sin
@@ -123,8 +128,11 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 - **`orcid_afiliacion.py` — candidatos.** Encuentra a quien declara la
   institución sin que haya publicación compartida que lo ancle. Dos homónimos de
   la misma universidad son indistinguibles por este método, así que **no escribe
-  en la capa publicable**: deja 20 candidatos en `internal/` para revisión
-  humana. 18 de ellos ya se confirmaron uno a uno.
+  en la capa publicable**: deja candidatos en `internal/` para revisión humana
+  (hoy, 20 pendientes). Las confirmaciones acumuladas por esta vía —25 a la
+  fecha— se escriben en `authors_orcid.csv`, no en el archivo de candidatos: el
+  conector lo regenera en cada corrida, así que no es el lugar donde persiste
+  qué ya se revisó.
 
 ### 2.3 Lo que aportó cada vía, medido
 
@@ -132,9 +140,10 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 |---|---|
 | Crossref | 174 |
 | Registro de ORCID (`doi-self`) | 48 |
-| OpenAlex (`doi-self`, vía autorías) | 80 |
-| Revisión humana sobre candidatos por afiliación | 20 |
-| **Total** | **322 formas de firma · 280 de 538 entidades publicadas** |
+| OpenAlex (`doi-self`, vía autorías) | 79 |
+| Revisión humana sobre candidatos por afiliación | 25 |
+| Revisión humana (búsqueda manual en el registro) | 1 |
+| **Total** | **327 formas de firma · 274 de 538 entidades publicadas** |
 
 El detalle metodológico y el argumento de por qué el 100 % no es alcanzable
 están en `docs/ORCID_COVERAGE.md`.
@@ -201,7 +210,293 @@ unidad declarada es correcta para esa persona, pero APLICARLA al pipeline
 público —traducirla al vocabulario oficial y que deje de figurar «No
 determinada»— sigue siendo un paso aparte, todavía sin construir.
 
+### 2.6 Facultad de Medicina y Salud — listado propio de publicaciones — **implementado el 2026-09-01, publicado el 2026-09-02**
+
+Distinta de §2.4 y §2.5 en naturaleza, no sólo en fuente: no es un inventario
+institucional para cruzar identidad de autor, es el listado de producción
+que la propia Facultad publica en su sitio
+(`https://facultadmedicina.finis.cl/investigacion-y-postgrado/publicaciones/`),
+vía la API REST de WordPress. `src/enrich/facultad_medicina_publicaciones.py`
+lo baja, lo estructura (facultad, sección, año, título, autores, DOI) y lo
+cruza por DOI contra `data/interim/publications_universe.csv`. No sale a
+red durante el build normal — se ejecuta aparte, y su salida se versiona
+(`data/enriched/facultad_medicina_publicaciones.json`,
+`internal/facultad_medicina_cruce.csv`).
+
+**609 registros**, 347 con DOI (284 DOIs únicos: la fuente lista
+duplicados, y el conector no los colapsa — "el sitio lista duplicados;
+borrarlos en el extractor ocultaría un dato de la fuente", `D-400`), **279
+ya en el universo Scopus**. El resto —lo que la Facultad declara y Scopus
+no indexa— NO se suma a `publications_universe.csv` ni a ningún indicador
+de citas/FWCI (D-206, D-398): eso mezclaría criterios de indexación
+distintos con evidencia que SciVal nunca midió.
+
+En cambio, alimenta un **corpus paralelo declarado**: el indicador `PD-01`
+("Producción declarada por las Facultades, fuera de Scopus"), calculado por
+`src/build/09_produccion_declarada.py`, publicado en su propia página
+(`produccion-ampliada.html`) — sólo recuentos por Facultad × año, dentro de
+la ventana 2023-2025, con nota explícita de cuántos registros adicionales
+quedan fuera de ventana o sin año. El mecanismo es general, no hardcodeado
+a Medicina: cualquier fuente que declare `corpus_paralelo_declarado: true`
+en `config/sources.yml` con un JSON del mismo esquema (documentado en el
+docstring del conector) se descubre sola.
+
+`PD-01` es Nivel D (declarado, sin verificación individual por obra) según
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md`. No confundir con `PD-02` (§2.7), que
+es Nivel V: cada caso pasó por revisión humana antes de contarse.
+
+### 2.7 OpenAlex — cobertura confirmada por revisión humana, fuera de Scopus (V2-26) — **publicado el 2026-09-02**
+
+Segunda fuente de `produccion-ampliada.html`, de otra naturaleza que §2.6:
+no es una Facultad declarando su propia lista editorial, es
+`src/enrich/openalex_cobertura.py` preguntándole a OpenAlex quién publica
+desde la institución (por ROR, `V2-20`) y comparando contra el universo
+Scopus — la brecha que §3.1 mide. Cada caso de esa brecha (414) pasa por
+revisión humana caso por caso en
+`internal/revision_cobertura_openalex.html`
+(`src/review/apply_openalex_review.py`) antes de contarse: sólo los que
+quedan `CONFIRMADO_PRODUCCION_UFT` alimentan el indicador `PD-02`
+("Producción institucional confirmada por revisión de cobertura OpenAlex,
+fuera de Scopus"), calculado por el mismo `09_produccion_declarada.py` que
+PD-01. Los que siguen `PENDIENTE_REVISION_HUMANA` (394 hoy) NUNCA se
+cuentan como producción confirmada — se publican como cifra de
+transparencia, no se ocultan ni se dan por buenos.
+
+`PD-02` no trae `facultad` (es evidencia por autor, no una declaración
+editorial de una unidad), así que no entra al mecanismo de
+`corpus_paralelo_declarado` de §2.6: tiene su propia sección en
+`produccion-ampliada.html`, agregada sólo por año. El total combinado que
+la página encabeza (`total_fuera_de_scopus`) es la unión por DOI de PD-01 y
+PD-02 — no un tercer indicador con fuente propia, sino aritmética sobre los
+dos de arriba: 3 DOI de Medicina (§2.6) coinciden con confirmaciones de
+V2-26, y se restan una sola vez para no contar la misma obra dos veces.
+
+Como PD-01, `PD-02` NUNCA toca `publications_universe.csv` ni ningún
+indicador de citas/FWCI (D-206, D-398): "confirmado" aquí significa que un
+humano concluyó que la obra es producción real UFT fuera del corpus
+indexado, no que entra al corpus.
+
+### 2.8 Autoarchivo institucional — producción por unidad declarada (PD-03) — **publicado el 2026-09-02**
+
+Tercera fuente de `produccion-ampliada.html`, de otra naturaleza que §2.6 y
+§2.7: el usuario pidió sumar "todas [las Facultades], usando el
+repositorio institucional". El volcado DSpace (§2.4) no sirve para eso —su
+columna `collection` es un handle opaco, sin nombre de Facultad en ningún
+lado del export, verificado antes de descartarlo—, pero la hoja
+AUTOARCHIVOS que biblioteca cura (§2.5,
+`data/raw/Inventario_Repositorio_Autoarchivo.xlsx`) sí: 808 obras
+autoarchivadas por sus propios autores (artículo, capítulo, libro,
+ponencia — nunca tesis), cada una con DOI, año, título y la Facultad o
+Escuela que biblioteca le asignó, fila por fila, para toda la institución
+de una vez.
+
+El obstáculo real: ese campo de Facultad/Escuela viene EN BRUTO (§2.5 ya lo
+advertía). De los 35 valores distintos que trae, la mayoría no tiene una
+relación escuela→Facultad validada institucionalmente hoy —
+`config/matching_rules.yml` sólo confirma 5 escuelas en su `jerarquia`, más
+las que su `vocabulario` (regla I-07) resuelve directo a nivel de Facultad—.
+Nuevo conector `src/enrich/autoarchivo_produccion.py` reutiliza EXACTAMENTE
+esas dos funciones de producción (`canonical_academic_unit()` +
+`facultad_de()`, las mismas que ya usa `P-07`), más un puñado de alias
+explícitos y documentados uno por uno (dos, "Educación básica"/"Educación
+parvularia", tomados de `REFERENCIA_UNIDADES_AUTOARCHIVO` porque el usuario
+los confirmó DIRECTAMENTE contra finis.cl — el resto de esa referencia
+sigue marcada "sin verificar" y NO se usa aquí). Cada registro trae
+`unidad_declarada` (siempre) y `facultad` (sólo si está validada) por
+separado — nunca se fuerza la segunda a partir de la primera.
+
+**Resultado (2026-09-02):** 808 leídos, 7 duplicados colapsados por DOI,
+498 fuera del universo Scopus. De esas, 341 con Facultad validada (125 en
+la ventana 2023-2025 — la cifra que entra a `PD-03`) y 157 sin Facultad
+validada (57 en ventana), publicadas por unidad declarada en vez de
+adivinar a qué Facultad pertenecen — nunca ocultas.
+
+**Solapamiento real con §2.6 y §2.7, verificado antes de publicar el
+total:** Medicina aparece declarada en su propio sitio (PD-01) Y
+autoarchivada por sus autores (PD-03) — y algunas de las confirmaciones de
+V2-26 (PD-02) también están autoarchivadas. El total combinado de
+`produccion-ampliada.html` une las tres por DOI antes de sumar, exactamente
+por esto.
+
+`PD-03` es Nivel D para las filas con Facultad validada (declarado por
+biblioteca, no verificado obra por obra) según
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md` — mismo nivel que `PD-01`, fuente
+distinta.
+
+### 2.9 Scopus Author Search — directorio de autores por afiliación — **entregado y ejecutado el 2026-09-02**
+
+Distinta en naturaleza de todo lo demás que este proyecto usa de Scopus:
+no es un export de publicaciones (`scopus_export`, 823 filas, ventana
+2023-2025), es el directorio de AUTORES que Scopus Author Search asocia a
+la afiliación "Universidad Finis Terrae" — 812 perfiles (nombre, Scopus
+Author ID, N° de documentos según Scopus, área temática, ORCID cuando
+existe), sin ventana temporal ni filtro de año (confirmado con el usuario:
+"búsqueda por afiliación", nada más). Capa interna, nunca publicable
+directamente (D-08): alimenta dos colas de revisión, nunca decide.
+
+**Por qué hacía falta, y qué no puede ver el detector automático del
+proyecto.** `P-04` (`src/audit/04_author_population.py`) ya detecta
+"nombre con más de un Scopus Author ID" — pero sólo cuando los dos
+identificadores aparecen, DENTRO del corpus de 823 publicaciones, bajo la
+misma cadena de nombre exacta. No puede ver un identificador cuyas
+publicaciones caen fuera del corpus (otra ventana, otro tipo documental),
+ni conectar dos identificadores que aparecen bajo grafías distintas del
+mismo nombre. Scopus Author Search sí los ve, porque ya agrupó por
+identificador antes de exportar.
+
+`src/enrich/scopus_author_search.py` (nuevo) cruza los 812 perfiles contra
+el corpus y contra `internal/ambiguities_authors.csv`, y produce:
+
+- `internal/scopus_author_search_multiples_id.csv` — **8 nombres** con 2+
+  Scopus Author ID. 4 ya estaban conocidos (Moya Patricia, Hartmann
+  Schatloff Dan, Quezada Mauricio, Torres Keila — esta fuente los confirma
+  de forma independiente). **3 son nuevos, no detectables por `P-04` antes
+  de esta fuente**: "Esis Villarroel, Ivette S." (un segundo perfil con 14
+  documentos y ORCID propio, invisible al detector porque ninguna de esas
+  14 publicaciones está en el corpus), "Cabello, José Miguel" (mismo
+  patrón), "Caffarena, Paula" (sus dos identificadores SÍ están en el
+  corpus, pero uno aparece bajo "Barcenilla, Paula Caffarena" — apellidos
+  en otro orden, cadena distinta). Cada candidato lleva el detalle
+  necesario para revisar sin volver a buscar nada: qué dice SciVal de cada
+  identificador, si aparece en el corpus y con cuántas publicaciones, y
+  bajo qué otro nombre si corresponde.
+
+  Un **8º candidato**, "Fortuny, Esteban Fortuny", lo ve un segundo
+  detector (`candidatos_fragmentacion_orcid()`, agregado 2026-09-03): dos
+  identificadores que no comparten nombre en NINGUNA fuente, sólo el
+  mismo ORCID (el declarado por el titular para "Fortuny E." en el corpus,
+  y el que Scopus Author Search asigna a su propio perfil de 3
+  documentos). El primer detector agrupa por nombre exacto dentro de esta
+  misma fuente y no puede ver esto.
+
+  Revisión humana al 2026-09-03: **3 confirmados** ("Esis Villarroel,
+  Ivette S.", "Fortuny, Esteban Fortuny", "Moya, Patricia" — convergencia
+  de ORCID entre dos o más fuentes independientes en los tres casos; el de
+  Moya revierte un veredicto `pendiente` del 2026-09-02, también reflejado
+  en `internal/identity_decisions.csv`), **5 pendientes** (Cabello,
+  Caffarena, Hartmann Schatloff, Quezada, Torres — sin evidencia suficiente
+  todavía, o con evidencia en contra en el caso de Caffarena). Decisiones
+  en `internal/scopus_author_search_decisiones.csv`, aplicadas con
+  `apply_scopus_author_decisions.py`.
+- `internal/scopus_author_search_orcid.csv` — contraste del ORCID que
+  Scopus declara en el perfil del autor (tercera fuente independiente,
+  además de Crossref y el registro público de ORCID) contra
+  `data/enriched/authors_orcid.csv`. De 50 filas con ORCID: **26
+  coinciden** con lo ya asignado (corroboración), **0 contradicen**, **1
+  es nuevo** (firma ya reconocida como UFT, sin ORCID asignado todavía:
+  "Bastías, Jaime"), **23** corresponden a firmas que Scopus asocia a la
+  afiliación pero que la población UFT del proyecto no reconoce como tal
+  (fuera de la ventana 2023-2025, u homonimia — no se investiga más sin
+  evidencia adicional).
+
+Ninguna de las dos salidas escribe en `data/enriched/authors_orcid.csv` ni
+en ninguna ficha publicada. Un ORCID que contradijera al ya asignado se
+reportaría como conflicto, igual que hace `orcid_crossref.py` — no ocurrió
+en esta corrida, pero el conector está probado para ese caso (`--test`).
+
 ---
+
+### 2.10 DataCite, Europe PMC y Zenodo — obras fuera del universo (PD-04) — **mecanismo publicado el 2026-09-03**
+
+Cuarta fuente de `produccion-ampliada.html`. El usuario preguntó de qué forma
+es posible incluir publicaciones fuera de Scopus/SciVal y, sobre la respuesta,
+autorizó explícitamente avanzar con "esa cuarta fuente de nivel V".
+
+**La pregunta que ninguna fuente del proyecto hacía.** §2.7 (`PD-02`) ya
+pregunta qué le atribuye a la institución un índice bibliográfico grande que
+el universo no tiene. Queda otra: **qué produjeron estas personas que ningún
+índice bibliográfico indexa bien** — datasets, software, preprints, pósters,
+materiales depositados. Las tres fuentes de §2.1 ter sí los ven. Hasta hoy se
+les consultaba sólo **por DOI del universo**, para recuperar el ORCID de sus
+autores: eso únicamente puede mirar hacia adentro. `src/enrich/obras_externas.py`
+invierte la dirección.
+
+**Cómo busca, y por qué de dos maneras.**
+
+- **Por ORCID** (`via = orcid`): un identificador de persona. Usa sólo los
+  ORCID vigentes de `data/enriched/authors_orcid.csv`, **descontando los que
+  `config/orcid_revisado.yml` marca como `retiradas`** — un ORCID que una
+  persona ya declaró incorrecto para esa firma no puede fundar la
+  recuperación de obras suyas. Es la vía fuerte.
+- **Por afiliación** (`via = afiliacion`): la cadena institucional declarada
+  en el registro. Es matching por cadena suelta, que `I-05` prohíbe como base
+  de una atribución — por eso aquí **no atribuye nada**: sólo propone un
+  candidato que una persona confirma. Se conserva porque recupera obras de
+  las 267 firmas sin ORCID, que la vía fuerte no puede ver por construcción.
+
+Cada fila declara por cuál de las dos llegó, y la herramienta de revisión
+advierte del homónimo en la tarjeta del caso, no en una nota al pie.
+
+**Las plantillas de búsqueda están en `config/sources.yml`**, campo
+`consulta_obras`, con `{orcid}` y `{institucion}` como únicos marcadores —
+no en el código. Otra institución que replique la plataforma cambia
+`config/institution.yml` y esas plantillas; si una API renombra su campo de
+búsqueda, se corrige la configuración.
+
+Una vía puede declarar **varias plantillas candidatas**, y Zenodo lo hace:
+migró a InvenioRDM y el campo por el que se busca un ORCID cambió de nombre,
+sin que se haya podido comprobar cuál sirve hoy —todas las salidas a
+`zenodo.org` están bloqueadas desde este entorno—. El conector **sondea** las
+candidatas al empezar, con unos pocos identificadores, fija la que responda
+para el resto de la corrida e imprime cuál usó. No prueba la alternativa en
+cada consulta: la mayoría de las firmas no tiene ningún depósito, y ahí
+«cero resultados» es la respuesta correcta, no un síntoma. Si ninguna
+responde, lo dice: con la red delante no se puede distinguir «el campo
+cambió» de «no hay depósitos», y el conector no elige por su cuenta entre
+las dos lecturas.
+
+Por la misma migración, el **parseo** acepta las dos serializaciones de un
+autor —la heredada (`name`/`orcid`/`affiliation`) y la de InvenioRDM
+(`person_or_org.identifiers`)— y se detiene ante una tercera. Leer sólo una
+habría devuelto un autor vacío por obra si la búsqueda sirviera la otra: la
+cola se llenaría de filas sin autor sin que nada fallara.
+
+**El cuarto veredicto.** Zenodo acuña un DOI por cada versión de un depósito,
+además del DOI de concepto; DataCite indexa preprints cuya versión publicada
+sí está en Scopus. Son DOI distintos para la misma obra, y la deduplicación
+por DOI —el único mecanismo de deduplicación del proyecto— no los colapsa. La
+obra SÍ es de la institución, así que "atribución errónea" perdería la
+distinción. La revisión tiene por eso un veredicto propio, `version`, y su
+recuento se publica: saber si la cola está llena de homónimos o de versiones
+repetidas son dos diagnósticos con soluciones distintas.
+
+**Corroboración entre las tres.** El mismo DOI en dos repositorios es una
+obra corroborada dos veces, no dos obras (Regla 3 de
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md`). La cola conserva las dos filas —quien
+revisa necesita ver las dos— y el recuento cuenta una. La tabla "qué aportó
+cada repositorio" cuenta APORTES, no obras, y la página lo dice donde se
+lee, para que la diferencia no parezca un error de cuadratura.
+
+**Reejecutar no borra revisiones.** La cola se reconstruye entera en cada
+corrida, pero `resolucion` es trabajo humano, no un dato de la API: se
+conserva emparejando por `(fuente, id_fuente)`.
+
+**Estado (2026-09-03): mecanismo publicado, cifra ausente.** La política de
+red del entorno de desarrollo bloquea `api.datacite.org`, `www.ebi.ac.uk` y
+`zenodo.org` — 403 en el CONNECT del proxy, comprobado. El conector, la cola,
+la herramienta de revisión, el aplicador, el agregado y la sección del sitio
+están construidos y probados con `--test` en CI; la cola nace vacía y la
+sección lo declara en la página en vez de mostrar un cero que se leería como
+un resultado. **Los contratos de búsqueda de las tres APIs están tomados de
+su documentación y NO verificados contra la red desde este repositorio**: el
+conector comprueba la forma de cada respuesta y, si no la reconoce, guarda la
+respuesta cruda y se detiene, en vez de adivinar.
+
+Para llenarla, desde una red que alcance las tres APIs:
+
+```
+make obras-externas            # construye internal/obras_externas_cobertura.csv
+make revisar-obras-externas    # genera internal/revision_obras_externas.html
+# marcar caso por caso, exportar el CSV a internal/obras_externas_decisiones.csv
+python3 src/review/apply_obras_externas_review.py --dry-run
+python3 src/review/apply_obras_externas_review.py
+python3 src/build/build_all.py
+```
+
+**Lo que no hace:** no toca `data/interim/publications_universe.csv` ni
+ningún indicador de citas o FWCI. Confirmar una obra la vuelve contable como
+`PD-04`, en su propia sección, con su propio denominador y sin impacto —
+SciVal no mide nada de esto (`D-206`, `D-398`, Regla 5).
 
 ## 3. Propuestas de nuevas integraciones
 
@@ -239,7 +534,10 @@ formalidad: es lo que separa una propuesta de una promesa.
   compara contra el universo. Es la primera vez que la brecha de cobertura que
   `LIMITATIONS.md` advierte en prosa se puede **medir**. Su resultado es una cola
   de revisión en `internal/`, nunca un ajuste del corpus: Scopus y OpenAlex
-  indexan con criterios distintos y sumarlos no significa nada (`D-206`).
+  indexan con criterios distintos y sumarlos no significa nada (`D-206`). Desde
+  el 2026-09-02, los casos que esa revisión CONFIRMA (no los pendientes) se
+  publican como recuento en `PD-02` (§2.7) — nunca al universo, pero ya no sólo
+  en la capa interna.
 - **Dependencia declarada:** el contraste necesita el ROR de la institución
   (`V2-20`). Sin él esa mitad no corre, y se dice; no se sustituye por una
   comparación de nombres, que la regla `I-05` prohíbe.
@@ -314,14 +612,40 @@ No es una integración nueva: es usar más del conector que ya existe.
 
 ### 3.4 Crossref — ampliar lo ya implementado
 
-- **Financiadores** (`funder`): `PROJECT_SPEC` no incluye financiamiento, pero
-  el export de Scopus sí trae el campo y hoy no se explota.
+- **Financiadores** (`funder`) — **implementado y probado el 2026-09-02;
+  falta ejecutar la consulta.** `PROJECT_SPEC` no incluye financiamiento,
+  pero el export de Scopus sí trae el campo (`Funding Details`/`Funding
+  Texts`, 306 de 818 filas, 37,4 %) y hasta ahora ningún paso del pipeline
+  lo extraía —no llega a `publications_universe.csv`, verificado antes de
+  escribir código—. Es, literalmente, la "fuente complementaria de
+  financiamiento" que `config/indicators.yml` -> `X-03` declara que falta
+  para poder evaluar si ese indicador cruza el umbral de cobertura que hoy
+  lo mantiene sin publicar. Nuevo conector
+  `src/enrich/crossref_financiamiento.py`: extrae por fin el campo de
+  Scopus, y consulta Crossref por DOI para traer el `funder` que el editor
+  registró ahí directamente (con el identificador del Crossref Funder
+  Registry cuando existe) — una fuente distinta, no una segunda copia del
+  mismo dato. Reporta las dos cadenas de financiador una al lado de la
+  otra, sin fusionarlas (normalizar nombres de financiador entre fuentes es
+  el mismo trabajo de vocabulario institucional que
+  `unidad_academica.vocabulario`, no algo que este conector decida por su
+  cuenta). Probado con `--test` (11 casos); la consulta real no pudo
+  correr desde este entorno — `api.crossref.org` devuelve `CONNECT tunnel
+  failed, response 403` (política del gateway de red, confirmado con
+  `curl` y con el estado del proxy, no un error transitorio). Ver
+  `config/sources.yml` -> `crossref_financiamiento_api`
+  (`ejecutada: false`).
 - **Licencias y acceso abierto**: contrastaría el `open_access` de SciVal contra
-  una fuente distinta.
+  una fuente distinta. Nota: Crossref no tiene un campo limpio de "acceso
+  abierto" (sólo URLs de licencia, que exigen heurística para clasificar);
+  §3.5 (Unpaywall) es la herramienta que este proyecto ya identificó para
+  esa pregunta específica — no se duplicó ese trabajo aquí.
 - **Referencias**: habilitaría análisis de citación interna que hoy no existe.
-- **Hay que confirmar:** nada técnico; sí una decisión de alcance, porque cada
-  uno de estos añade indicadores nuevos al catálogo y eso es una decisión, no
-  una consecuencia.
+  Es la más grande de las tres en alcance (necesitaría una estructura de
+  grafo nueva, comparable a la de C-05) — sin empezar.
+- **Hay que confirmar:** nada técnico para financiadores (ya implementado);
+  para las otras dos, publicarlas sigue siendo una decisión de alcance,
+  porque cada una añade un indicador nuevo al catálogo.
 
 ### 3.5 Unpaywall — acceso abierto verificado
 
