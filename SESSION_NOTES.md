@@ -11436,3 +11436,114 @@ contiene, extraídos y corridos tal cual.
 
 El usuario ejecuta el script en su máquina, tras el respaldo y con la
 protección de rama de `main` desactivada.
+
+## Cierre: se retira la atribución nominal de «Fuentes externas» (2026-09-04)
+
+### Contexto
+
+El usuario fusionó a `main` la rama `integracion-identidad`, que añadía una
+página con **701 pares obra-autor y 344 personas nombradas**, procedentes de
+Facultad de Medicina, DSpace y el inventario de autoarchivo. La capa pública
+versionada incluía `data/processed/fuentes_externas.json` con esos nombres, y
+CI ensambla el sitio exactamente desde ahí: estaba publicándose.
+
+El propio commit lo declaraba: «Los autores no están verificados
+individualmente… La afiliación a la UFT se asume por la fuente institucional,
+no por verificación humana». Eso es una afirmación no verificada sobre
+personas reales, que `docs/LAYERS.md` §3 clasifica como capa interna — el
+día siguiente de que `D-SEC-01` sacara esa capa del repositorio por esa misma
+razón.
+
+El usuario pidió primero agotar los cruces disponibles y, a la vista del
+resultado, retirar la parte nominal.
+
+### Qué dieron los cruces, medido
+
+Sobre las 344 personas que la fuente nombra:
+
+| Vía | Confirma | Aporta nuevos |
+|---|---|---|
+| Firma ya en el corpus Scopus 2023-2025 | 110 | — |
+| Directorio Scopus por afiliación (812 perfiles, sin ventana) | 98 | 22 |
+| ORCID de la propia fuente = ORCID del proyecto, misma persona | 80 | 0 |
+| **Verificadas por alguna vía local** | **132 (38 %)** | |
+
+Y el hallazgo que zanjó la decisión: **152 nombres vienen acompañados de un
+ORCID que el proyecto tiene asignado a OTRA persona**. No es ruido de
+emparejamiento — en el inventario de autoarchivo la columna `ORCID` lleva con
+frecuencia el identificador de un coautor, no el de quien figura en `Autor`.
+Ejemplos verificados: la fuente empareja «Cruces, Pablo» con el ORCID de
+«Díaz F.», y «Krause, Christina» con el de «Farsani D.». Publicar eso
+atribuiría trabajos a personas equivocadas, con nombre y apellido.
+
+**Dos errores propios durante la medición, corregidos antes de concluir.**
+El primero: normalicé los nombres asumiendo «Nombre Apellido» cuando el
+corpus usa «Apellido I.», y salió 0 % de coincidencia — un cero tan redondo
+que era obviamente un bug, no un resultado. El segundo, más caro: llegué a
+reportar al usuario un 76 % de cobertura porque partía el campo de autor sólo
+por `;`, y estas fuentes usan además `||`; varias personas contaban como una.
+Se retiró la cifra en cuanto la comprobación cruzada la contradijo. La
+lección operativa: un número que sale redondo o demasiado bueno se comprueba
+contra otra cosa antes de decirlo.
+
+### Qué se hizo
+
+La frontera se aplica en `src/build/10_fuentes_externas.py`, que era un
+paso-a-través de `interim` a `processed`. Ahora:
+
+- **Publica obras, no personas.** Que un DOI exista, esté fuera del universo
+  Scopus y proceda de una fuente institucional declarada es una afirmación
+  sobre un trabajo, del mismo nivel que `PD-01`/`PD-03`. Quién lo firma, no.
+- **Colapsa las filas a obras**: 701 pares obra-autor son 436 obras. Contar
+  las filas multiplicaba cada trabajo por su número de autores.
+- **Cada obra guarda TODAS sus fuentes**, no la primera. Quedarse con una
+  hacía que el autoarchivo apareciera aportando 46 obras cuando declara 302
+  filas; corregido, aporta 238, y 193 obras las declara más de una fuente.
+- **Declara lo que retiene**: `atribuciones_retenidas` (701) y
+  `personas_nombradas_en_la_fuente` (344) viajan en el resumen, y la página
+  sustituye la tabla de autores por una explicación de por qué no está.
+
+`data/interim/fuentes_externas.json` conserva el detalle nominal íntegro —no
+se versiona— para alimentar la cola de revisión cuando se monte.
+
+### Verificación
+
+- **Cero nombres de la fuente en las 12 páginas de `dist/`**, comprobado
+  cruzando la lista de 344 contra el HTML ensamblado.
+- El artefacto público no tiene clave `autores` ni campo de autor en ninguna
+  de sus 436 entradas.
+- Compuerta de CI de `main` sobre `data/processed/`: limpia.
+- Auditoría 29/30, sin fallas nuevas. Build sin fallas de capa.
+- **530 fichas de autor**: la fusión había reintroducido 16 fichas de firmas
+  que la consolidación del 2026-09-03 había fusionado (el build local del
+  usuario corrió con otro estado de identidad). La reconstrucción las retira.
+- Batería de navegador completa, sin fallos. Encontró un error real de mi
+  edición —`node --check` lo dio por bueno y el navegador no— al recortar el
+  bloque de autores por un índice que casaba dentro de otro bloque. Corregido
+  y reverificado.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-482 | La capa pública de «Fuentes externas» publica obras y NO la atribución obra-persona | Sólo 132 de 344 nombres se confirman con todas las vías locales, y 152 traen un ORCID asignado a otra persona: publicar la atribución adjudicaría trabajos a quien no los firmó. Una obra fuera del universo es una afirmación sobre un trabajo; quién la firma es una afirmación sobre una persona, y exige el mismo respaldo que el resto del proyecto pide |
+| D-483 | El corte se aplica en el build (`10_fuentes_externas.py`), no en el conector | `data/interim/` no se versiona y puede conservar el detalle nominal íntegro para la cola de revisión futura; mutilarlo en el conector obligaría a recuperarlo de la fuente otra vez |
+| D-484 | El artefacto declara cuántas atribuciones retiene y cuántas personas hay detrás | Una cifra ausente sin explicación no se distingue de un dato que no existe; el proyecto ya publica así sus pendientes en `PD-02` y `PD-04` |
+| D-485 | Cada obra registra todas las fuentes que la declaran, y el desglose por fuente cuenta aportes | Quedarse con la primera fuente atribuía a DSpace los trabajos compartidos y hacía ilegible la contribución del autoarchivo |
+
+### Ambigüedades abiertas
+
+- **Crossref por DOI sigue sin correrse**, y es la vía más fuerte: preguntar a
+  cada una de las 435 publicaciones qué afiliación declaró ella misma,
+  evidencia primaria e independiente de la fuente institucional. La red de
+  este entorno lo bloquea; queda para la máquina del usuario.
+- **La cola de revisión de estas atribuciones no está montada.** El detalle
+  vive en `interim/`; falta el conector que lo convierta en cola, su
+  herramienta y su aplicador, siguiendo el patrón de `PD-04`.
+- Las de `PD-04` y la purga de historial siguen igual.
+
+### Próximo paso recomendado
+
+Correr Crossref sobre los 435 DOI desde la máquina del usuario, y con eso
+decidir cuánta de la atribución se puede confirmar automáticamente antes de
+montar la cola para el resto.

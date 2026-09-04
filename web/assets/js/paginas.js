@@ -725,7 +725,7 @@ async function fichaAutor() {
         <tbody>${a.publicaciones.map(p => `<tr>
           <td>${c.anio(p.anio)}</td>
           <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>` : c.escapar(p.titulo)}</td>
-          <td>${c.celda(p.fuente)}</td>
+          <td>${c.celda((p.fuentes || []).join(' · '))}</td>
           <td>${c.celda(p.tipo)}</td>
           <td class="num">${p.tiene_metricas ? c.celda(p.citas) : '<span class="sin-dato-txt">Sin métricas</span>'}</td>
         </tr>`).join('')}</tbody></table></div>
@@ -863,7 +863,10 @@ async function fuentesexternas() {
     return;
   }
 
-  const { meta, publicaciones: pubs, autores: lista, resumen } = datos;
+  // Sin `autores`: la capa pública ya no trae la atribución obra-persona.
+  // La frontera la aplica src/build/10_fuentes_externas.py; aquí sólo se
+  // consume lo que llega, y se declara lo que no llega.
+  const { meta, publicaciones: pubs, resumen } = datos;
   const zonas = {
     estado: document.getElementById('estado-recorte'),
     controles: document.getElementById('controles'),
@@ -875,8 +878,9 @@ async function fuentesexternas() {
   document.getElementById('kpis-fuentes').innerHTML =
     `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_publicaciones)}</div>
       <div class="etiqueta">Publicaciones fuera de Scopus</div></article>
-    <article class="kpi"><div class="valor">${c.nf.format(resumen.total_autores)}</div>
-      <div class="etiqueta">Autores UFT</div></article>
+    <article class="kpi"><div class="valor">${c.nf.format(resumen.atribuciones_retenidas)}</div>
+      <div class="etiqueta">Atribuciones obra-persona en revisión</div>
+      <div class="secundario">no se publican hasta confirmarse</div></article>
     <article class="kpi"><div class="valor">${c.nf.format(meta.universo_scopus_dois)}</div>
       <div class="etiqueta">DOIs en universo Scopus</div></article>`;
 
@@ -887,14 +891,12 @@ async function fuentesexternas() {
   function pintar({ nuevaEntrada = false } = {}) {
     let f = pubs;
     if (sel.fuente && sel.fuente.length)
-      f = f.filter(p => sel.fuente.includes(p.fuente_id));
+      f = f.filter(p => (p.fuentes_id || []).some(x => sel.fuente.includes(x)));
     if (sel.anio && sel.anio.length)
       f = f.filter(p => sel.anio.includes(String(p.anio)));
     if (sel.q) {
       const nq = sel.q.toLowerCase();
-      f = f.filter(p =>
-        (p.titulo || '').toLowerCase().includes(nq) ||
-        (p.autor_uft || '').toLowerCase().includes(nq));
+      f = f.filter(p => (p.titulo || '').toLowerCase().includes(nq));
     }
 
     if (zonas.estado)
@@ -916,7 +918,7 @@ async function fuentesexternas() {
              data-dim="anio" data-valor="${a}">${a}</button>`
          ).join('')}</div>
          <h3>Buscar</h3>
-         <input type="search" id="q-fuentes" class="buscador" placeholder="Título o autor…" value="${c.escapar(sel.q || '')}">`;
+         <input type="search" id="q-fuentes" class="buscador" placeholder="Título…" value="${c.escapar(sel.q || '')}">`;
     }
 
     const totalPag = Math.max(1, Math.ceil(f.length / POR_PAGINA_FUENTES));
@@ -931,9 +933,8 @@ async function fuentesexternas() {
       cuerpo.innerHTML = pag.map(p => `<tr>
         <td>${c.anio(p.anio)}</td>
         <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>`
-          : c.escapar(p.titulo)}
-          <br><span class="nota">${c.escapar(p.autor_uft)}</span></td>
-        <td>${c.celda(p.fuente)}</td>
+          : c.escapar(p.titulo)}</td>
+        <td>${c.celda((p.fuentes || []).join(' · '))}</td>
         <td>${c.celda(p.tipo)}</td>
       </tr>`).join('');
     }
@@ -963,12 +964,12 @@ async function fuentesexternas() {
     }
     if (e.target.id === 'exportar') {
       let f = pubs;
-      if (sel.fuente && sel.fuente.length) f = f.filter(p => sel.fuente.includes(p.fuente_id));
+      if (sel.fuente && sel.fuente.length) f = f.filter(p => (p.fuentes_id || []).some(x => sel.fuente.includes(x)));
       if (sel.anio && sel.anio.length) f = f.filter(p => sel.anio.includes(String(p.anio)));
-      if (sel.q) { const nq = sel.q.toLowerCase(); f = f.filter(p => (p.titulo||'').toLowerCase().includes(nq) || (p.autor_uft||'').toLowerCase().includes(nq)); }
+      if (sel.q) { const nq = sel.q.toLowerCase(); f = f.filter(p => (p.titulo||'').toLowerCase().includes(nq)); }
       const cab = [`# Producción fuera del corpus Scopus — UFT`, `# ${f.length} de ${pubs.length} publicaciones`, `# Generado el ${meta.fecha_generacion}`].join('\n');
-      const cols = ['titulo', 'autor_uft', 'doi', 'anio', 'tipo', 'fuente', 'escuela'];
-      const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const cols = ['titulo', 'doi', 'anio', 'tipo', 'fuentes', 'escuela'];
+      const esc = v => `"${String(Array.isArray(v) ? v.join(' · ') : (v ?? '')).replace(/"/g, '""')}"`;
       const csv = [cab, cols.join(','), ...f.map(r => cols.map(k => esc(r[k])).join(','))].join('\n');
       const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }));
       const a = document.createElement('a'); a.href = url; a.download = `fuentes-externas-${meta.fecha_generacion}.csv`; a.click(); URL.revokeObjectURL(url);
@@ -981,29 +982,6 @@ async function fuentesexternas() {
     if (!sel.q) delete sel.q;
     pagina = 1; pintar();
   }, 250));
-
-  // Autores
-  const tablaAutores = document.getElementById('tabla-autores');
-  let ordenAutores = 'total', ascAutores = false;
-  function pintarAutores() {
-    const f = [...lista].sort((x, y) => (ascAutores ? 1 : -1) * ((x[ordenAutores] ?? 0) - (y[ordenAutores] ?? 0) || x.nombre.localeCompare(y.nombre)));
-    tablaAutores.innerHTML = f.map(a => `<tr>
-      <td>${c.escapar(a.nombre)}</td>
-      <td class="num">${a.obras_facultad_medicina || ''}</td>
-      <td class="num">${a.obras_dspace || ''}</td>
-      <td class="num">${a.obras_autoarchivo || ''}</td>
-      <td class="num">${a.total}</td></tr>`).join('');
-  }
-  document.querySelectorAll('#seccion-autores th[data-orden]').forEach(th => {
-    th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); th.click(); } });
-    th.addEventListener('click', () => {
-      const k = th.dataset.orden;
-      ascAutores = (ordenAutores === k) ? !ascAutores : false;
-      ordenAutores = k;
-      pintarAutores();
-    });
-  });
-  pintarAutores();
 
   pintar();
 }
