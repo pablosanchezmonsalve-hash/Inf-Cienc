@@ -835,8 +835,166 @@ function tecladoGraficos() {
   });
 }
 
+/* =================================================== fuentes externas */
+
+const POR_PAGINA_FUENTES = 50;
+
+async function fuentesexternas() {
+  let datos;
+  try { datos = await c.cargar('fuentes_externas.json'); }
+  catch (e) {
+    const cont = document.getElementById('contenido');
+    c.mostrarError(cont, e);
+    return;
+  }
+
+  const { meta, publicaciones: pubs, autores: lista, resumen } = datos;
+  const zonas = {
+    estado: document.getElementById('estado-recorte'),
+    controles: document.getElementById('controles'),
+  };
+
+  document.getElementById('aviso-fuentes').innerHTML =
+    `<b>Sobre este listado</b> ${c.escapar(meta.advertencia)}`;
+
+  document.getElementById('kpis-fuentes').innerHTML =
+    `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_publicaciones)}</div>
+      <div class="etiqueta">Publicaciones fuera de Scopus</div></article>
+    <article class="kpi"><div class="valor">${c.nf.format(resumen.total_autores)}</div>
+      <div class="etiqueta">Autores UFT</div></article>
+    <article class="kpi"><div class="valor">${c.nf.format(meta.universo_scopus_dois)}</div>
+      <div class="etiqueta">DOIs en universo Scopus</div></article>`;
+
+  const fuentesCortas = { facmed: 'Fac. Medicina', dspace: 'DSpace', autoarchivo: 'Autoarchivo' };
+  let sel = { fuente: [], anio: [], q: undefined };
+  let pagina = 1;
+
+  function pintar({ nuevaEntrada = false } = {}) {
+    let f = pubs;
+    if (sel.fuente && sel.fuente.length)
+      f = f.filter(p => sel.fuente.includes(p.fuente_id));
+    if (sel.anio && sel.anio.length)
+      f = f.filter(p => sel.anio.includes(String(p.anio)));
+    if (sel.q) {
+      const nq = sel.q.toLowerCase();
+      f = f.filter(p =>
+        (p.titulo || '').toLowerCase().includes(nq) ||
+        (p.autor_uft || '').toLowerCase().includes(nq));
+    }
+
+    if (zonas.estado)
+      zonas.estado.innerHTML = VX.estado(f.length, pubs.length, sel);
+
+    const anios = [...new Set(pubs.map(p => String(p.anio)).filter(a => a))]
+      .sort((a, b) => Number(b) - Number(a));
+    const fuentesIds = ['facmed', 'dspace', 'autoarchivo'];
+    if (zonas.controles) {
+      zonas.controles.innerHTML =
+        `<h3>Fuente</h3>
+         <div class="chips">${fuentesIds.map(fid =>
+           `<button type="button" class="chip${(sel.fuente || []).includes(fid) ? ' chip-activo' : ''}"
+             data-dim="fuente" data-valor="${fid}">${fuentesCortas[fid]}<span class="chip-conteo">${resumen.por_fuente[fid] || 0}</span></button>`
+         ).join('')}</div>
+         <h3>Año</h3>
+         <div class="chips">${anios.map(a =>
+           `<button type="button" class="chip${(sel.anio || []).includes(a) ? ' chip-activo' : ''}"
+             data-dim="anio" data-valor="${a}">${a}</button>`
+         ).join('')}</div>
+         <h3>Buscar</h3>
+         <input type="search" id="q-fuentes" class="buscador" placeholder="Título o autor…" value="${c.escapar(sel.q || '')}">`;
+    }
+
+    const totalPag = Math.max(1, Math.ceil(f.length / POR_PAGINA_FUENTES));
+    pagina = Math.min(pagina, totalPag);
+    const pag = f.slice((pagina - 1) * POR_PAGINA_FUENTES, pagina * POR_PAGINA_FUENTES);
+
+    const cuerpo = document.getElementById('tabla-cuerpo');
+    if (!f.length) {
+      cuerpo.innerHTML = `<tr><td colspan="4"><div class="vacio">
+        <p>Ningún resultado con este recorte.</p></div></td></tr>`;
+    } else {
+      cuerpo.innerHTML = pag.map(p => `<tr>
+        <td>${c.anio(p.anio)}</td>
+        <td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>`
+          : c.escapar(p.titulo)}
+          <br><span class="nota">${c.escapar(p.autor_uft)}</span></td>
+        <td>${c.celda(p.fuente)}</td>
+        <td>${c.celda(p.tipo)}</td>
+      </tr>`).join('');
+    }
+
+    document.getElementById('paginacion').innerHTML = totalPag > 1 ? `
+      <button class="boton" id="ant-f" ${pagina === 1 ? 'disabled' : ''}>Anterior</button>
+      <span>Página ${pagina} de ${totalPag}</span>
+      <button class="boton" id="sig-f" ${pagina === totalPag ? 'disabled' : ''}>Siguiente</button>` : '';
+    const ant = document.getElementById('ant-f'), sig = document.getElementById('sig-f');
+    if (ant) ant.onclick = () => { pagina--; pintar(); };
+    if (sig) sig.onclick = () => { pagina++; pintar(); };
+  }
+
+  document.addEventListener('click', e => {
+    const chip = e.target.closest('.chip[data-dim]');
+    if (chip) {
+      const { dim, valor } = chip.dataset;
+      const actual = sel[dim] || [];
+      sel = { ...sel, [dim]: actual.includes(valor)
+        ? actual.filter(x => x !== valor) : [...actual, valor] };
+      pagina = 1; pintar({ nuevaEntrada: true });
+      return;
+    }
+    if (e.target.closest('#limpiar-recorte')) {
+      sel = { fuente: [], anio: [], q: undefined };
+      pagina = 1; pintar({ nuevaEntrada: true });
+    }
+    if (e.target.id === 'exportar') {
+      let f = pubs;
+      if (sel.fuente && sel.fuente.length) f = f.filter(p => sel.fuente.includes(p.fuente_id));
+      if (sel.anio && sel.anio.length) f = f.filter(p => sel.anio.includes(String(p.anio)));
+      if (sel.q) { const nq = sel.q.toLowerCase(); f = f.filter(p => (p.titulo||'').toLowerCase().includes(nq) || (p.autor_uft||'').toLowerCase().includes(nq)); }
+      const cab = [`# Producción fuera del corpus Scopus — UFT`, `# ${f.length} de ${pubs.length} publicaciones`, `# Generado el ${meta.fecha_generacion}`].join('\n');
+      const cols = ['titulo', 'autor_uft', 'doi', 'anio', 'tipo', 'fuente', 'escuela'];
+      const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const csv = [cab, cols.join(','), ...f.map(r => cols.map(k => esc(r[k])).join(','))].join('\n');
+      const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }));
+      const a = document.createElement('a'); a.href = url; a.download = `fuentes-externas-${meta.fecha_generacion}.csv`; a.click(); URL.revokeObjectURL(url);
+    }
+  });
+
+  document.addEventListener('input', c.debounce(e => {
+    if (e.target.id !== 'q-fuentes') return;
+    sel = { ...sel, q: e.target.value || undefined };
+    if (!sel.q) delete sel.q;
+    pagina = 1; pintar();
+  }, 250));
+
+  // Autores
+  const tablaAutores = document.getElementById('tabla-autores');
+  let ordenAutores = 'total', ascAutores = false;
+  function pintarAutores() {
+    const f = [...lista].sort((x, y) => (ascAutores ? 1 : -1) * ((x[ordenAutores] ?? 0) - (y[ordenAutores] ?? 0) || x.nombre.localeCompare(y.nombre)));
+    tablaAutores.innerHTML = f.map(a => `<tr>
+      <td>${c.escapar(a.nombre)}</td>
+      <td class="num">${a.obras_facultad_medicina || ''}</td>
+      <td class="num">${a.obras_dspace || ''}</td>
+      <td class="num">${a.obras_autoarchivo || ''}</td>
+      <td class="num">${a.total}</td></tr>`).join('');
+  }
+  document.querySelectorAll('#seccion-autores th[data-orden]').forEach(th => {
+    th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); th.click(); } });
+    th.addEventListener('click', () => {
+      const k = th.dataset.orden;
+      ascAutores = (ordenAutores === k) ? !ascAutores : false;
+      ordenAutores = k;
+      pintarAutores();
+    });
+  });
+  pintarAutores();
+
+  pintar();
+}
+
 /* ============================================================== arranque */
-const PAGINAS = { portada, seccion, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo };
+const PAGINAS = { portada, seccion, modulos, publicaciones, autores, fichaAutor, metodologia, catalogo, fuentesexternas };
 
 document.addEventListener('DOMContentLoaded', async () => {
   const pagina = document.body.dataset.pagina;

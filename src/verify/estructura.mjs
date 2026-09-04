@@ -10,7 +10,8 @@ const DIST = process.argv[2] || process.env.DIST || 'dist';
 const RUTAS = [
   ['index.html', ''], ['produccion.html', ''], ['impacto.html', ''],
   ['colaboracion.html', ''], ['tematica.html', ''], ['autores.html', ''],
-  ['publicaciones.html', ''], ['indicadores.html', ''],
+  ['publicaciones.html', ''], ['fuentes-externas.html', ''],
+  ['indicadores.html', ''],
   ['metodologia.html', ''],
   ['autor.html', '?id=giglio-jimenez-a'],
 ];

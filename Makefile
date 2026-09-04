@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades revisar-cobertura-openalex cobertura-crossref kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
+.PHONY: instalar auditoria factibilidad fuentes-externas artefactos sitio servir estado revision validar-unidades revisar-cobertura-openalex cobertura-crossref kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -15,8 +15,11 @@ auditoria:
 factibilidad:
 	python3 src/analysis/indicator_feasibility.py
 
-artefactos: auditoria factibilidad
+artefactos: auditoria factibilidad fuentes-externas
 	python3 src/build/build_all.py
+
+fuentes-externas:
+	python3 src/enrich/fuentes_externas.py
 
 sitio: artefactos
 	python3 src/build/06_assemble_site.py
