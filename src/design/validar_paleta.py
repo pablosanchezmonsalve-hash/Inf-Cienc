@@ -191,11 +191,24 @@ REGLAS = [
     ("--accion",              "--superficie-2", 4.5, "enlace sobre superficie alterna"),
     ("--serie-1",             "--superficie",   3.0, "barra de dato"),
     ("--serie-2",             "--superficie",   3.0, "segunda ranura · anillo C-01"),
-    ("--sin-dato",            "--superficie",   3.0, "barra de ausencia"),
-    ("--ord-1",               "--superficie",   3.0, "ordinal 1 · Q1"),
-    ("--ord-2",               "--superficie",   3.0, "ordinal 2 · Q2"),
-    ("--ord-3",               "--superficie",   3.0, "ordinal 3 · Q3"),
-    ("--ord-4",               "--superficie",   3.0, "ordinal 4 · Q4"),
+("--sin-dato", "--superficie",   3.0, "barra de ausencia"),
+    ("--ord-1",    "--superficie",   3.0, "ordinal 1 · Q1"),
+    ("--ord-2",    "--superficie",   3.0, "ordinal 2 · Q2"),
+    ("--ord-3",    "--superficie",   3.0, "ordinal 3 · Q3"),
+    ("--ord-4",    "--superficie",   3.0, "ordinal 4 · Q4"),
+    # Celdas de los mapas: NUNCA se dibujan dentro de una banda de contraste
+    # (viven en tarjetas `bento` sobre la superficie normal), igual que
+    # --bento-acento — ver la nota bajo REGLAS_BENTO. Se miden SÓLO en el
+    # ámbito raíz (REGLAS_MAPA), no en el de la banda. La separación entre
+    # vecinas se mide aparte en §3bis.
+]
+REGLAS_MAPA = [
+    ("--mapa-1", "--mapa-tinta", 4.5, "celda de mapa (tinta fija sobre campo claro)"),
+    ("--mapa-2", "--mapa-tinta", 4.5, "celda de mapa (tinta fija sobre campo claro)"),
+    ("--mapa-3", "--mapa-tinta", 4.5, "celda de mapa (tinta fija sobre campo claro)"),
+    ("--mapa-4", "--mapa-tinta", 4.5, "celda de mapa (tinta fija sobre campo claro)"),
+    ("--mapa-5", "--mapa-tinta", 4.5, "celda de mapa (tinta fija sobre campo claro)"),
+    ("--mapa-dato",             "--marca-tinta", 4.5, "cifra sobre la celda DATO del mapa"),
     ("--marca-tinta",         "--marca",        4.5, "nav sobre la cabecera"),
     ("--aviso-tinta",         "--aviso-fondo",  4.5, "texto de advertencia"),
     ("--aviso-tinta-grafico", "--superficie",   4.5, "etiqueta de referencia"),
@@ -229,6 +242,7 @@ RAMPA = ["--ord-1", "--ord-2", "--ord-3", "--ord-4"]
 PAR_CATEGORICO = ("--serie-1", "--serie-2")
 PISO_DE = 20.0        # dato vs advertencia
 PISO_ESCALON = 8.0    # entre escalones de la rampa y entre ranuras categóricas
+PISO_CELDA_MAPA = 6.5 # entre celdas vecinas de los mapas (la identidad la da la etiqueta)
 
 
 def main() -> None:
@@ -262,6 +276,7 @@ def main() -> None:
         print(f"\n  {tema.upper()}")
         fallos += medir(T, REGLAS, tema)
         fallos += medir(T, REGLAS_BENTO, tema)
+        fallos += medir(T, REGLAS_MAPA, tema)
         # Blanco sobre la marca: es donde va el título de la cabecera.
         r = contraste("#ffffff", val("--marca", tema))
         ok = r >= 4.5
@@ -315,6 +330,19 @@ def main() -> None:
         fallos += 0 if ok else 1
         print(f"    {'OK  ' if ok else 'FALLA'} paso mínimo ΔE {min(pasos):5.1f} "
               f"(piso {PISO_ESCALON:.0f}) · luminosidad {'monótona' if monotona else 'NO MONÓTONA'}  {tema}")
+
+    # ---- 3 bis. Rampa de celdas de los mapas: separación entre vecinas.
+    # No se exige monotonía (las celdas NO codifican magnitud): sólo que cada
+    # par de celdas contiguas se distinga con claridad.
+    print("\n  CELDAS DE MAPA (--mapa-1..5): separación entre vecinas")
+    MAPA = [f"--mapa-{i}" for i in range(1, 6)]
+    for tema in ("claro", "oscuro"):
+        cols = [val(t, tema) for t in MAPA]
+        pasos = [delta_e(a, b) for a, b in zip(cols, cols[1:])]
+        ok = min(pasos) >= PISO_CELDA_MAPA
+        fallos += 0 if ok else 1
+        print(f"    {'OK  ' if ok else 'FALLA'} paso mínimo ΔE {min(pasos):5.1f} "
+              f"(piso {PISO_CELDA_MAPA:.0f}) · tinta legible ya medido en §1  {tema}")
 
     # ---- 4. El par categórico en uso, bajo daltonismo
     print("\n  PAR CATEGÓRICO EN USO (anillo C-01) BAJO DALTONISMO")

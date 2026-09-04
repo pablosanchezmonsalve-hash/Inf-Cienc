@@ -111,10 +111,19 @@ const CABE_ETIQUETA = 46;
    es lo único que medía `validar_paleta.py` hasta ahora), caen a ΔE 2,5 bajo
    deuteranopía — el propio comentario del token ya avisaba de esto ("quien
    las estrene debe revalidarlas para el número de ranuras que vaya a usar,
-   no para seis"). En vez de forzar diez tonos poco separados, la identidad
-   de cada celda la lleva la ETIQUETA (igual que en cualquier treemap
-   profesional); el color sólo codifica PROFUNDIDAD con la rampa ordinal ya
-   validada, más el gris de "sin dato" (D-09). */
+   no para seis").
+
+   La identidad de cada celda la lleva la ETIQUETA (igual que en cualquier
+   treemap profesional); el color sólo ayuda a separar celdas vecinas. Tras la
+   revisión del usuario (2026-09-01), el treemap vuelve a la FAMILIA BORDEAUX
+   del resto del informe (la detección anterior de celdas pastel fue un
+   paréntesis: "la paleta es distinta a todo el resto"). Usa la rampa ordinal
+   `--ord-1..4` (los mismos tonos de los gráficos de cuartiles). El texto va
+   en `--superficie` (claro sobre el bordeaux oscuro en claro, oscuro sobre el
+   bordeaux claro en oscuro) con un HALO `--marca` para que se lea hasta sobre
+   la celda más clara (`--ord-4`), y cada celda lleva una separación de la
+   superficie de la tarjeta para que el mosaico no se apelmace. Gris mantenido
+   para "sin dato" (D-09). Validado por `src/design/validar_paleta.py` §1. */
 const RAMPA = ['var(--ord-3)', 'var(--ord-2)', 'var(--ord-4)', 'var(--ord-1)'];
 
 function colorDe(nombre, indice) {

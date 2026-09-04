@@ -65,30 +65,46 @@ export function agregarMatriz(publicaciones, { campo = 'asjc', topN = 8 } = {}) 
 const MARGEN_IZQ = 210;  // ancho reservado para el nombre de categoría
 const MARGEN_SUP = 28;   // alto reservado para el año
 
+// Rama de intensidad → relleno. Igual que las celdas del treemap, el mapa NO
+// usa la rampa ordinal bordeaux oscuro (se ve apelmazado y el texto no se
+// lee): usa la rampa de celdas clara `--mapa-1..5`, y reserva el bordeaux del
+// dato —`--mapa-dato`— para la franja de mayor intensidad (decisión del
+// usuario: "bordeaux solo en el dato"). El campo es claro en ambos temas, así
+// que la etiqueta se dibuja con `--mapa-tinta` (oscura fija) y la del dato
+// (sobre bordeaux) con `--marca-tinta` (clara fija).
+const RAMPA_CELDA = ['var(--mapa-1)', 'var(--mapa-2)', 'var(--mapa-3)', 'var(--mapa-4)', 'var(--mapa-5)'];
+const CELDA_DATO = 'var(--mapa-dato)';
+const UMBRAL_DATO = 0.9;   // por encima de este piso de intensidad → bordeaux
+const PASO_RAMPA = 1 / RAMPA_CELDA.length;
+
 const LEGEND_X = MARGEN_IZQ;               // misma línea de salida que las celdas
 const LEGEND_SW = 22;                       // ancho de cada pastilla de la escala
 const LEGEND_H = 12;
 const LEGEND_GUTTER = 20;                   // separación vertical tras la última fila
 
-function renderLegend(maximo, ancho, baseY) {
-  // Leyenda de escala: deja claro qué codifica la intensidad sin forzar la
-  // lectura de opacidades. La escala es raíz cuadrada (como las celdas), así
-  // que la posición de cada marcador es el cuadrado del valor que representa.
+function rellenoDeCelda(intensidad) {
+  if (intensidad >= UMBRAL_DATO) return CELDA_DATO;
+  const ranura = Math.min(RAMPA_CELDA.length - 1,
+    Math.floor((intensidad / UMBRAL_DATO) * RAMPA_CELDA.length));
+  return RAMPA_CELDA[Math.max(0, ranura)];
+}
+
+function renderLegend(maximo, baseY) {
+  // Leyenda de escala sobre la misma rampa que las celdas: varias pastillas
+  // de --mapa-* + la pastilla bordeaux del dato, y marcas 0 / mitad / máximo.
   const fila = n => n > 0 ? Math.sqrt(n / maximo) : 0;
   const puntos = [
     { t: '0',                f: 0 },
     { t: nf.format(Math.ceil(maximo / 2)), f: fila(Math.ceil(maximo / 2)) },
     { t: nf.format(maximo),  f: fila(maximo) },
   ];
-  const pastillas = [0, .33, .66, 1].map((f, i) => {
+  const pastillas = [...RAMPA_CELDA, CELDA_DATO].map((c, i) => {
     const x = LEGEND_X + i * LEGEND_SW;
-    return `<rect x="${x}" y="${baseY + 2}" width="${LEGEND_SW}" height="${LEGEND_H}" rx="3"
-        fill="var(--serie-1)" fill-opacity="${(0.06 + f * 0.88).toFixed(3)}"/>`;
+    return `<rect x="${x}" y="${baseY + 2}" width="${LEGEND_SW}" height="${LEGEND_H}" rx="3" fill="${c}"/>`;
   }).join('');
 
-  const lastX = LEGEND_X + LEGEND_SW * 3;
   const marcas = puntos.map((p, i) => {
-    const x = LEGEND_X + p.f * (LEGEND_SW * 3);
+    const x = LEGEND_X + p.f * (LEGEND_SW * 5);
     const et = `<text x="${x}" y="${baseY + LEGEND_H + 14}" class="heatmap-ley-marca"
         text-anchor="${i === 0 ? 'start' : (i === puntos.length - 1 ? 'end' : 'middle')}">${p.t}</text>`;
     const guia = i === 0 || i === puntos.length - 1 ? '' : `<line x1="${x}" y1="${baseY + 2}" x2="${x}" y2="${baseY + LEGEND_H + 2}" class="heatmap-ley-guia"/>`;
@@ -96,7 +112,7 @@ function renderLegend(maximo, ancho, baseY) {
   }).join('');
 
   return `<g class="heatmap-leyenda" role="img" aria-label="Escala de 0 a ${nf.format(maximo)} publicaciones">
-    <text x="${LEGEND_X + LEGEND_SW * 3 + 8}" y="${baseY + LEGEND_H - 1}" class="heatmap-ley-titulo">publicaciones</text>
+    <text x="${LEGEND_X + LEGEND_SW * 5 + 8}" y="${baseY + LEGEND_H - 1}" class="heatmap-ley-titulo">publicaciones</text>
     ${pastillas}${marcas}
   </g>`;
 }
@@ -128,13 +144,14 @@ export function renderHeatmap({ anios, categorias, matriz, maximo }, { ancho, al
       // barras (paginas.js, tecladoGraficos()) — que también recorre estas
       // celdas con flechas, generalizando el mismo mecanismo.
       const tab = fi === 0 && ai === 0 ? 0 : -1;
+      const esDato = intensidad >= UMBRAL_DATO && n > 0;
       return `<g class="heatmap-celda" tabindex="${tab}" role="gridcell"
           aria-label="${escapar(cat)}, ${anio}: ${nf.format(n)} publicaciones"
           data-tip="${escapar(cat)}" data-tip-v="${nf.format(n)} pub." data-tip-n="${anio}">
         <rect x="${x + 2}" y="${y + 3}" width="${anchoCol - 4}" height="${altoFila - 6}" rx="6"
-          fill="var(--serie-1)" fill-opacity="${(0.06 + intensidad * 0.88).toFixed(3)}"/>
+          fill="${rellenoDeCelda(intensidad)}"/>
         ${n > 0 && anchoCol >= 30 ? `<text x="${x + anchoCol / 2}" y="${y + altoFila / 2 + 4}"
-          class="heatmap-cifra${intensidad > 0.66 ? ' es-clara' : ''}" text-anchor="middle">${n}</text>` : ''}
+          class="heatmap-cifra${esDato ? ' es-clara' : ''}" text-anchor="middle">${n}</text>` : ''}
       </g>`;
     }).join('');
 
@@ -143,7 +160,7 @@ export function renderHeatmap({ anios, categorias, matriz, maximo }, { ancho, al
 
   return `<svg class="chart heatmap-svg" viewBox="0 0 ${ancho} ${alto}" role="img"
       aria-label="Frecuencia de temática ASJC por año">
-    ${cabeceraAnios}${filas}${renderLegend(maximo, ancho, MARGEN_SUP + categorias.length * altoFila + LEGEND_GUTTER)}
+    ${cabeceraAnios}${filas}${renderLegend(maximo, MARGEN_SUP + categorias.length * altoFila + LEGEND_GUTTER)}
   </svg>`;
 }
 
