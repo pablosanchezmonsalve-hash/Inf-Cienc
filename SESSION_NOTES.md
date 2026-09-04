@@ -11682,3 +11682,52 @@ probarse, porque el tamaño se rechazaba antes. La próxima corrida lo dirá.
 
 45/45 en el conector, con cuatro casos nuevos sobre el tamaño por fuente.
 10/10 y 11/11 en los otros dos módulos.
+
+## Addendum: la cola de PD-04, ordenada por lo que puede llegar a contarse (2026-09-04)
+
+La primera corrida completa dejó **1.967 filas**, y de esas sólo **322 caen
+en la ventana 2023-2025**. Como `build 09` únicamente cuenta lo que está en
+ventana, revisar una obra de 2015 es trabajo que no puede traducirse en
+cifra por mucho que se confirme.
+
+La herramienta de revisión ordena ahora por ventana primero, después por
+evidencia (corroborada entre fuentes, luego hallada por ORCID), y lo declara
+en la cabecera: cuántas caen dentro y cuántas quedan detrás. Las de fuera
+**no se descartan** —la ventana puede cambiar y son evidencia igual—, sólo
+dejan de estorbar.
+
+Es la diferencia entre una cola que nadie empieza y una del mismo orden que
+la de OpenAlex (`PD-02`, 414), que el proyecto ya trata así.
+
+### Lo que la corrida dejó establecido
+
+| Fuente | Recuperadas | Fuera del universo |
+|---|---|---|
+| DataCite | 169 | 168 |
+| Europe PMC | 2.784 | 2.085 |
+| Zenodo | 36 | 30 |
+
+La plantilla de Zenodo que funciona es **la primera candidata**, la
+heredada: el campo nunca estuvo mal, el problema era el tamaño de página. La
+vía por ORCID de Zenodo quedó sin consultar porque las tres candidatas
+devolvieron vacío en las sondas — que con la red delante no distingue «campo
+equivocado» de «esas ocho personas no tienen depósitos». Como la plantilla
+hermana de afiliación sí responde, lo segundo es lo probable; queda
+declarado, no resuelto.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-491 | La cola de revisión se ordena por ventana temporal antes que por evidencia | Sólo lo que cae en 2023-2025 puede contarse; en la corrida real eso separa 322 filas de 1.967. Ordenar por evidencia primero enterraba las revisables bajo mil setecientas que no pueden traducirse en cifra |
+| D-492 | Las filas fuera de ventana se conservan en la cola, detrás | La ventana es un parámetro de configuración, no una verdad del dato: si cambia, esas filas vuelven a ser relevantes. Y siguen siendo evidencia de producción institucional aunque hoy no se cuenten |
+
+### Ambigüedades abiertas
+
+- **Las 322 en ventana siguen sin revisar.** Es el trabajo humano que PD-04
+  exige y que nadie ha empezado.
+- Si la vía por ORCID de Zenodo funciona, sin resolver: las sondas se toman
+  de las ocho primeras firmas por orden alfabético, no de las más
+  productivas. Sondear por número de publicaciones lo despejaría.
+- Crossref sobre los 435 DOI de fuentes institucionales, y la cola de
+  atribución nominal de «Fuentes externas», siguen pendientes.

@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `687df09` · PD-04: un 400 de una fuente ya no tira la corrida entera
+Último commit: `499d2bb` · Zenodo: el 400 era el tamaño de página, no la plantilla
 Snapshot: 2026-09-04
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 490
+## Decisiones tomadas: 492
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
