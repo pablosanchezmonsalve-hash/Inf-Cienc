@@ -540,9 +540,20 @@ fuentes:
       - orcid_donde_no_habia
       - obras_fuera_del_universo_scopus_como_candidatas_de_revision
     salida: "data/enriched/authors_orcid.csv, internal/zenodo_log.csv, internal/obras_externas_cobertura.csv"
+    # Dos candidatas por vía, no una: Zenodo migró a InvenioRDM y el nombre
+    # del campo por el que se busca cambió, sin que se haya podido comprobar
+    # cuál sirve hoy desde ningún entorno con red (todas las salidas a
+    # zenodo.org están bloqueadas). El conector sondea la primera, y si no
+    # responde pasa a la segunda, diciendo cuál usó. La forma HEREDADA va
+    # primero porque es la que la corrida del 2026-09-03 verificó en el
+    # endpoint de recuperación por DOI.
     consulta_obras:
-      por_orcid: 'creators.orcid:"{orcid}"'
-      por_afiliacion: 'creators.affiliation:"{institucion}"'
+      por_orcid:
+        - 'creators.orcid:"{orcid}"'
+        - 'metadata.creators.person_or_org.identifiers.identifier:"{orcid}"'
+      por_afiliacion:
+        - 'creators.affiliation:"{institucion}"'
+        - 'metadata.creators.affiliations.name:"{institucion}"'
     fecha_corte: null
     ejecutada: false               # la política de red del entorno de desarrollo bloquea zenodo.org
     fecha_ejecucion: null

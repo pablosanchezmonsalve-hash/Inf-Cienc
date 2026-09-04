@@ -433,6 +433,24 @@ no en el código. Otra institución que replique la plataforma cambia
 `config/institution.yml` y esas plantillas; si una API renombra su campo de
 búsqueda, se corrige la configuración.
 
+Una vía puede declarar **varias plantillas candidatas**, y Zenodo lo hace:
+migró a InvenioRDM y el campo por el que se busca un ORCID cambió de nombre,
+sin que se haya podido comprobar cuál sirve hoy —todas las salidas a
+`zenodo.org` están bloqueadas desde este entorno—. El conector **sondea** las
+candidatas al empezar, con unos pocos identificadores, fija la que responda
+para el resto de la corrida e imprime cuál usó. No prueba la alternativa en
+cada consulta: la mayoría de las firmas no tiene ningún depósito, y ahí
+«cero resultados» es la respuesta correcta, no un síntoma. Si ninguna
+responde, lo dice: con la red delante no se puede distinguir «el campo
+cambió» de «no hay depósitos», y el conector no elige por su cuenta entre
+las dos lecturas.
+
+Por la misma migración, el **parseo** acepta las dos serializaciones de un
+autor —la heredada (`name`/`orcid`/`affiliation`) y la de InvenioRDM
+(`person_or_org.identifiers`)— y se detiene ante una tercera. Leer sólo una
+habría devuelto un autor vacío por obra si la búsqueda sirviera la otra: la
+cola se llenaría de filas sin autor sin que nada fallara.
+
 **El cuarto veredicto.** Zenodo acuña un DOI por cada versión de un depósito,
 además del DOI de concepto; DataCite indexa preprints cuya versión publicada
 sí está en Scopus. Son DOI distintos para la misma obra, y la deduplicación

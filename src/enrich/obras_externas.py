@@ -174,12 +174,50 @@ def plantillas(fuente: str) -> dict:
     return spec.get("consulta_obras") or {}
 
 
-def consulta(fuente: str, clave: str, valor: str) -> str:
-    """Sustituye `{orcid}`/`{institucion}` en la plantilla declarada."""
+def plantillas_de(fuente: str, clave: str) -> list[str]:
+    """Las plantillas candidatas de una consulta, en orden de preferencia.
+
+    `sources.yml` admite una cadena o una lista. La lista existe por Zenodo:
+    migró a InvenioRDM y el campo por el que se busca un ORCID cambió de
+    nombre, sin que se haya podido comprobar desde ningún entorno con red
+    cuál sirve hoy. Declarar las dos y dejar que la primera corrida lo
+    resuelva es más honesto que elegir una a ciegas y publicar el cero que
+    devuelva la equivocada.
+    """
     tpl = plantillas(fuente).get(clave)
     if not tpl:
         raise KeyError(f"sources.yml: falta consulta_obras.{clave} en {fuente}_api")
-    return tpl.format(orcid=valor, institucion=valor)
+    return [tpl] if isinstance(tpl, str) else list(tpl)
+
+
+def consulta(fuente: str, clave: str, valor: str, i: int = 0) -> str:
+    """Sustituye `{orcid}`/`{institucion}` en la plantilla `i` de esa clave."""
+    return plantillas_de(fuente, clave)[i].format(orcid=valor, institucion=valor)
+
+
+def elegir_plantilla(fuente: str, clave: str, valores: list[str],
+                     sondas: int = 8) -> tuple[int, str]:
+    """Cuál de las plantillas candidatas responde, decidido UNA vez.
+
+    Probar la alternativa cada vez que una consulta vuelve vacía duplicaría
+    las peticiones sin motivo: la mayoría de las firmas no tiene ningún
+    depósito, y «cero resultados» es ahí la respuesta correcta, no un
+    síntoma. Se sondea con unos pocos valores al principio y se fija la
+    plantilla que devuelva algo para el resto de la corrida.
+
+    Si ninguna devuelve nada, no se puede distinguir «el campo de búsqueda
+    es otro» de «esta institución no tiene depósitos aquí»: se dice, se usa
+    la primera, y la corrida sigue.
+    """
+    candidatas = plantillas_de(fuente, clave)
+    if len(candidatas) == 1:
+        return 0, "única plantilla declarada"
+    for i, _ in enumerate(candidatas):
+        for valor in valores[:sondas]:
+            if buscar(fuente, consulta(fuente, clave, valor, i), max_paginas=1):
+                return i, f"responde con {valores.index(valor) + 1} sonda(s)"
+    return 0, ("ninguna plantilla devolvió resultados en las sondas: puede ser "
+               "que el campo de búsqueda haya cambiado, o que no haya depósitos")
 
 
 # ─────────────────────────────────────────── una página de resultados por fuente
@@ -302,6 +340,46 @@ def _pagina_zenodo(data: dict) -> tuple[list[dict], str | None, int | None]:
     return hits, None, total             # la paginación por página la lleva el llamador
 
 
+def _creador_zenodo(cr: dict) -> dict:
+    """Un autor de Zenodo, venga en la forma heredada o en la de InvenioRDM.
+
+    Zenodo migró a InvenioRDM y las dos serializaciones conviven según el
+    endpoint y la versión de la API:
+
+        heredada    {"name": …, "orcid": …, "affiliation": …}
+        InvenioRDM  {"person_or_org": {"name": …, "identifiers":
+                                       [{"scheme": "orcid", "identifier": …}]},
+                     "affiliations": [{"name": …}]}
+
+    La corrida del 2026-09-03 sobre el corpus verificó la forma HEREDADA en
+    el endpoint de recuperación por DOI (`src/enrich/zenodo.py`), pero el
+    endpoint de BÚSQUEDA no se ha podido probar desde ningún entorno con red.
+    Leer sólo la heredada habría devuelto un autor vacío por cada obra si la
+    búsqueda sirviera la otra: la cola se llenaría de filas sin autor, sin
+    que nada fallara — que es exactamente el modo de fallo silencioso que
+    este proyecto no admite. Se aceptan las dos y se rechaza cualquier
+    tercera.
+    """
+    if "person_or_org" in cr:
+        po = cr.get("person_or_org") or {}
+        orcid = ""
+        for ident in po.get("identifiers") or []:
+            if isinstance(ident, dict) and str(ident.get("scheme", "")).lower() == "orcid":
+                orcid = str(ident.get("identifier") or "").rstrip("/").split("/")[-1]
+                break
+        afiliaciones = [str(a.get("name") or "") for a in (cr.get("affiliations") or [])
+                        if isinstance(a, dict)]
+        return {"nombre": (po.get("name") or "").strip(), "orcid": orcid,
+                "afiliacion": "; ".join(a for a in afiliaciones if a)}
+    if "name" in cr:
+        return {"nombre": (cr.get("name") or "").strip(),
+                "orcid": (cr.get("orcid") or "").strip(),
+                "afiliacion": (cr.get("affiliation") or "").strip()}
+    raise ContratoDesconocido(
+        "un creator de Zenodo no trae ni 'name' ni 'person_or_org': "
+        f"claves {sorted(cr)[:6]}")
+
+
 def _obra_zenodo(item: dict) -> dict:
     md = item.get("metadata") or {}
     rt = md.get("resource_type") or {}
@@ -315,10 +393,8 @@ def _obra_zenodo(item: dict) -> dict:
         "titulo": (md.get("title") or item.get("title") or "").strip(),
         "anio": fecha[:4] if len(fecha) >= 4 and fecha[:4].isdigit() else "",
         "tipo": tipo,
-        "autores": [{"nombre": (cr.get("name") or "").strip(),
-                     "orcid": (cr.get("orcid") or "").strip(),
-                     "afiliacion": (cr.get("affiliation") or "").strip()}
-                    for cr in (md.get("creators") or []) if isinstance(cr, dict)],
+        "autores": [_creador_zenodo(cr) for cr in (md.get("creators") or [])
+                    if isinstance(cr, dict)],
     }
 
 
@@ -680,11 +756,43 @@ def autotest() -> int:
     caso("una fila nueva nace pendiente", refrescadas[2]["resolucion"] == PENDIENTE, refrescadas[2])
     caso("se informa cuántas se conservaron", conservadas == 1, conservadas)
 
+    # ── Zenodo sirve dos serializaciones distintas del mismo autor
+    heredada = _obra_zenodo(ZENODO_BUSQUEDA["hits"]["hits"][0])
+    caso("Zenodo, forma heredada: nombre, ORCID y afiliación",
+         heredada["autores"][0] == {"nombre": "Pérez, Ana",
+                                    "orcid": "0000-0001-0000-0001",
+                                    "afiliacion": "Universidad Finis Terrae"},
+         heredada["autores"][0])
+    invenio = _obra_zenodo({"doi": "10.5281/zenodo.78", "metadata": {
+        "title": "t", "publication_date": "2025-01-01",
+        "resource_type": {"type": "dataset"},
+        "creators": [{"person_or_org": {
+            "name": "Pérez, Ana",
+            "identifiers": [{"scheme": "orcid",
+                             "identifier": "https://orcid.org/0000-0001-0000-0001"}]},
+            "affiliations": [{"name": "Universidad Finis Terrae"}]}]}})
+    caso("Zenodo, forma InvenioRDM: el mismo autor, leído igual",
+         invenio["autores"][0] == heredada["autores"][0], invenio["autores"][0])
+    try:
+        _obra_zenodo({"metadata": {"creators": [{"otra_cosa": 1}]}})
+        ok = False
+    except ContratoDesconocido:
+        ok = True
+    caso("un creator con una tercera forma se detiene, no devuelve un autor vacío", ok)
+
     # ── las plantillas salen de sources.yml, no del código
     caso("la consulta por ORCID se arma desde sources.yml",
          consulta("zenodo", "por_orcid", "0000-0001-0000-0001")
          == 'creators.orcid:"0000-0001-0000-0001"',
          consulta("zenodo", "por_orcid", "0000-0001-0000-0001"))
+    caso("Zenodo declara dos plantillas candidatas por vía",
+         len(plantillas_de("zenodo", "por_orcid")) == 2
+         and len(plantillas_de("zenodo", "por_afiliacion")) == 2)
+    caso("la segunda candidata es la de InvenioRDM",
+         "person_or_org" in plantillas_de("zenodo", "por_orcid")[1])
+    caso("una fuente con una sola plantilla no gasta sondas",
+         elegir_plantilla("datacite", "por_orcid", ["0000-0001-0000-0001"])
+         == (0, "única plantilla declarada"))
     caso("la consulta por afiliación se arma desde sources.yml",
          'Universidad Finis Terrae' in consulta("europepmc", "por_afiliacion",
                                                 INSTITUCION["institucion"]["nombre_canonico"]))
@@ -751,10 +859,28 @@ def main() -> int:
             consultas += [("orcid", v["orcid"], v["firma"]) for v in vigentes]
         consultas.append(("afiliacion", institucion, ""))
 
+        # Qué plantilla de consulta sirve se decide aquí, una vez por fuente
+        # y por vía, con unas pocas sondas — no en cada una de las 322
+        # consultas. Sólo Zenodo declara más de una candidata hoy.
+        elegida: dict[str, int] = {}
+        for via in sorted({v for v, _, _ in consultas}):
+            valores = [val for vv, val, _ in consultas if vv == via]
+            try:
+                i, motivo = elegir_plantilla(fuente, f"por_{via}", valores)
+            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
+                sys.exit(f"\n  No se pudo consultar {fuente}: {e}\n"
+                         "  Si su red lo bloquea, corra este conector desde una red que no.")
+            except (KeyError, ContratoDesconocido) as e:
+                sys.exit(f"\n  {e}")
+            elegida[via] = i
+            if len(plantillas_de(fuente, f"por_{via}")) > 1:
+                print(f"     plantilla por_{via}: "
+                      f"{plantillas_de(fuente, f'por_{via}')[i]}  ({motivo})")
+
         recuperadas = 0
         for via, valor, firma in consultas:
             try:
-                q = consulta(fuente, f"por_{via}", valor)
+                q = consulta(fuente, f"por_{via}", valor, elegida[via])
             except KeyError as e:
                 sys.exit(f"\n  {e}")
             try:
