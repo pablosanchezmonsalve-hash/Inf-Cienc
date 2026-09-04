@@ -1,6 +1,6 @@
 # Metodología para datos fuera de Scopus/SciVal
 
-**Capa:** pública · **Estado:** vigente · **Última actualización:** 2026-09-02
+**Capa:** pública · **Estado:** vigente · **Última actualización:** 2026-09-03
 
 Este documento fija cómo se clasifica, construye y publica cualquier fuente de
 datos que no sea el corpus Scopus/SciVal. No reemplaza a `METHODOLOGY.md`
@@ -14,9 +14,8 @@ más de una fuente fuera de Scopus, ¿cómo se relacionan entre sí?**
 ## 0. Por qué hace falta esto ahora
 
 Hasta el 2026-09-01 "fuera de Scopus" tenía un solo caso real. Ya no: existen
-tres fuentes con esa etiqueta, publicadas en el mismo día, y son
-**metodológicamente incompatibles** entre sí, aunque las tres respeten
-`D-206`:
+cuatro fuentes con esa etiqueta y son **metodológicamente incompatibles**
+entre sí, aunque las cuatro respeten `D-206`:
 
 - `PD-01` (publicado): la Facultad de Medicina y Salud autodeclara su propio
   listado de publicaciones en su sitio. El proyecto no verifica cada título
@@ -35,8 +34,16 @@ tres fuentes con esa etiqueta, publicadas en el mismo día, y son
   propio: la Facultad/Escuela viene en bruto por fila, y sólo una parte de
   esas cadenas tiene una relación escuela→Facultad validada
   institucionalmente. Ver §1 (Regla 2, nota sobre granularidad parcial).
+- `PD-04` (mecanismo publicado el 2026-09-03, con autorización explícita del
+  usuario — ver §4): DataCite, Europe PMC y Zenodo, los tres repositorios de
+  outputs no tradicionales que el proyecto ya consultaba por ORCID. Mismo
+  Nivel V que `PD-02` —cada obra pasa por revisión humana antes de contarse—
+  pero **no comparte su mecanismo**: `PD-02` recupera de un índice
+  bibliográfico filtrando por ROR institucional; `PD-04` recupera de tres
+  repositorios por ORCID ya confirmado y por afiliación declarada, y enfrenta
+  un modo de fallo que ningún otro indicador tiene (§1, nota sobre versiones).
 
-Si un cuarto origen (SciELO, un segundo listado de otra Facultad) se agrega
+Si un quinto origen (SciELO, un segundo listado de otra Facultad) se agrega
 sin este marco, el riesgo concreto es que alguien —humano o Claude, en una
 sesión futura sin este contexto— termine sumando distintos tipos de
 evidencia bajo el mismo indicador, o reinventando desde cero una distinción
@@ -52,11 +59,11 @@ institución declarados?**
 | | Nivel D — Declarado | Nivel V — Verificado obra por obra |
 |---|---|---|
 | **Qué certifica** | La fuente agrega/publica un conjunto; el proyecto no re-verifica cada título individualmente | Cada registro pasa un criterio explícito antes de contar |
-| **Ejemplo real** | `PD-01` — Facultad de Medicina y Salud; `PD-03` — autoarchivo institucional | `PD-02` — cola OpenAlex, `internal/openalex_cobertura.csv` (`V2-26`) |
-| **Estado** | Publicado (`produccion-ampliada.html`) | Publicado (`produccion-ampliada.html`, `PD-02`, desde 2026-09-02) |
+| **Ejemplo real** | `PD-01` — Facultad de Medicina y Salud; `PD-03` — autoarchivo institucional | `PD-02` — cola OpenAlex, `internal/openalex_cobertura.csv` (`V2-26`); `PD-04` — cola de repositorios externos, `internal/obras_externas_cobertura.csv` |
+| **Estado** | Publicado (`produccion-ampliada.html`) | Publicado (`produccion-ampliada.html`): `PD-02` desde 2026-09-02, `PD-04` desde 2026-09-03 (mecanismo publicado; la cola se llena cuando el conector corra desde una red que alcance las tres APIs) |
 | **Mecanismo de "cuenta"** | `corpus_paralelo_declarado: true` en `config/sources.yml` + `09_produccion_declarada.py` (`PD-01`); lectura directa de `data/enriched/autoarchivo_produccion.json` en el mismo build, agregada sólo donde la Facultad está validada (`PD-03`) | `internal/openalex_cobertura_decisiones.csv` (veredicto humano) → `apply_openalex_review.py` → `resolucion: CONFIRMADO_PRODUCCION_UFT` → agregado por año en `09_produccion_declarada.py` |
 | **Cifras reales (2026-09-02)** | `PD-01`: 609 leídos → 63 duplicados por DOI colapsados → 325 fuera del universo Scopus → 83 en ventana 2023-2025 (cifra publicada), 222 fuera de ventana + 20 sin año. `PD-03`: 808 leídos → 7 duplicados colapsados → 498 fuera del universo → 341 con Facultad validada (125 en ventana, cifra publicada) + 157 sin Facultad validada (57 en ventana, publicadas por unidad declarada, nunca forzadas) | 414 candidatos → 20 confirmados (`CONFIRMADO_PRODUCCION_UFT`), 394 `PENDIENTE_REVISION_HUMANA` — ninguno se promueve solo (`D-313`) |
-| **Corroboración cruzada** | Ninguna prevista: es la propia institución declarando | Crossref, cuando el DOI existe (`internal/openalex_cobertura_crossref.csv`) — refuerza, no reemplaza la revisión humana |
+| **Corroboración cruzada** | Ninguna prevista: es la propia institución declarando | `PD-02`: Crossref, cuando el DOI existe (`internal/openalex_cobertura_crossref.csv`). `PD-04`: las tres fuentes entre sí — el mismo DOI en dos repositorios es una obra corroborada dos veces, y el recuento la cuenta una (Regla 3). Refuerza, no reemplaza la revisión humana |
 
 Mezclar estos dos niveles bajo un mismo número sería el mismo error que
 `METHODOLOGY.md` §3 y §4 ya evitan dentro del corpus canónico —presentar
@@ -73,6 +80,33 @@ esté validado. Esto no es un tercer nivel de evidencia (la pregunta de la
 declarada), es un límite de COMPLETITUD dentro del mismo Nivel D, y se
 resuelve igual que cualquier otro límite conocido en este proyecto: se
 declara, nunca se oculta ni se fuerza (ver Regla 2 abajo).
+
+**Matiz que `PD-04` agrega, dentro del mismo Nivel V**: la pregunta de la §1
+sigue siendo la misma —cada obra pasa por un criterio explícito antes de
+contarse— pero el conjunto de lecturas incompatibles que la revisión tiene
+que separar es más grande, y no por descuido:
+
+1. **Versiones de una misma obra.** Zenodo acuña un DOI por cada versión de
+   un depósito, además de un DOI de concepto que las agrupa; DataCite indexa
+   preprints cuya versión publicada sí está en Scopus. Son DOI distintos para
+   la misma obra: la deduplicación por DOI —el único mecanismo de
+   deduplicación que este proyecto tiene— no puede colapsarlos. La obra SÍ es
+   de la institución, así que llamarlo "atribución errónea" perdería la
+   distinción. Por eso la revisión de `PD-04` tiene un cuarto veredicto,
+   `version`, que ninguna otra cola necesita, y su recuento se publica: saber
+   si la cola está llena de homónimos o de versiones repetidas son dos
+   diagnósticos con soluciones distintas.
+2. **Dos vías de recuperación con fuerza distinta.** La vía por ORCID parte
+   de un identificador de persona ya confirmado por el proyecto. La vía por
+   afiliación parte de una cadena de texto — matching suelto, que `I-05`
+   prohíbe como base de una atribución. Aquí no atribuye nada: sólo propone
+   un candidato. Cada fila declara por cuál de las dos llegó, y la
+   herramienta de revisión advierte del homónimo en la tarjeta misma, no en
+   una nota general al pie.
+
+Ninguna de las dos cosas justifica un tercer nivel de evidencia: el criterio
+por obra existe y es humano, que es lo que define el Nivel V. Son límites
+declarados dentro de él.
 
 ## 2. Las reglas
 
@@ -110,6 +144,23 @@ propio mecanismo de cola y su propio criterio de "confirmado", porque el
 nivel de evidencia por registro es cualitativamente distinto, no un dato
 más en la misma tabla.
 
+Y dos fuentes del MISMO Nivel V tampoco comparten mecanismo por defecto.
+`PD-04` no reutiliza la cola de `PD-02`, y no por descuido: aquélla se
+identifica por `openalex_id` (una obra, un identificador), ésta por
+`(fuente, id_fuente)` —la misma obra puede estar en los tres repositorios y
+cada uno se decide por separado, porque la evidencia que aporta cada uno es
+distinta—; aquélla tiene tres veredictos, ésta cuatro. Forzar una sola cola
+habría exigido que la clave y el vocabulario de veredictos de `PD-02`
+aceptaran casos que no son suyos, que es exactamente lo que `PD-03` evitó no
+metiéndose en el mecanismo de `PD-01`.
+
+Lo que sí se comparte, porque ahí no hay diferencia metodológica, es la
+INTERACCIÓN de la herramienta de revisión: marcar, filtrar, guardar en el
+navegador y exportar el CSV. `build_obras_externas_review.py` importa el CSS
+y el JavaScript de `build_openalex_review.py` en vez de copiarlos. Compartir
+la lógica de presentación no mezcla evidencias; copiarla habría significado
+corregir cada error de exportación dos veces.
+
 ### Regla 3 — Evidencia cruzada refuerza, nunca duplica
 
 Cuando dos fuentes independientes corroboran el **mismo** registro (mismo
@@ -130,18 +181,26 @@ la segunda decide qué es un duplicado.
 ### Regla 4 — Cada nivel, su propio indicador
 
 Nunca combinar Nivel D y Nivel V bajo una etiqueta compartida como "fuera de
-Scopus", aunque las tres respeten `D-206`. `PD-01`/`PD-03` (Nivel D) y `PD-02`
-(Nivel V, cola OpenAlex + Crossref) son la instancia concreta de esta regla —
-ya declarada en `docs/V2_BACKLOG.md` §8. Publicados como tres indicadores
+Scopus", aunque las cuatro respeten `D-206`. `PD-01`/`PD-03` (Nivel D) y
+`PD-02`/`PD-04` (Nivel V) son la instancia concreta de esta regla — ya
+declarada en `docs/V2_BACKLOG.md` §8. Publicados como cuatro indicadores
 separados, cada uno con su propia sección en `produccion-ampliada.html`;
-ninguno es una fila más dentro de otro — ni siquiera `PD-01` y `PD-03`,
-que comparten nivel: son fuentes distintas (una Facultad declarando su
-sitio; biblioteca curando autoarchivo institucional), con mecanismos de
-"cuenta" distintos (ver Regla 2), y mezclarlas en una sola tabla ocultaría
-esa diferencia. El único punto en que se tocan las tres es el total
-combinado de la página (`total_fuera_de_scopus`), que es la unión por DOI
-de las tres — aritmética declarada sobre los tres indicadores, no un cuarto
+ninguno es una fila más dentro de otro — ni siquiera los pares que comparten
+nivel. `PD-01` y `PD-03` son fuentes distintas (una Facultad declarando su
+sitio; biblioteca curando autoarchivo institucional); `PD-02` y `PD-04`
+también (un índice bibliográfico filtrado por ROR; tres repositorios de
+outputs no tradicionales recuperados por ORCID y afiliación), con mecanismos
+de "cuenta" distintos (ver Regla 2), y mezclarlos en una sola tabla ocultaría
+esa diferencia. El único punto en que se tocan los cuatro es el total
+combinado de la página (`total_fuera_de_scopus`), que es la unión por DOI de
+los cuatro — aritmética declarada sobre los cuatro indicadores, no un quinto
 con fuente propia.
+
+`PD-04` entra a ese total con su recuento YA colapsado entre sus tres
+fuentes: si el mismo DOI está confirmado en DataCite y en Zenodo, aporta una
+obra, no dos. Sumar sus filas en vez de sus obras contaría dos veces una
+corroboración que el propio indicador ya descontó, y la cifra de "repetidas
+entre fuentes" dejaría de cuadrar.
 
 ### Regla 5 — El denominador del universo no se toca, en ningún nivel
 
@@ -160,6 +219,10 @@ para todo lo que este documento describe.
 3. **¿Es un índice o agregador externo (OpenAlex, Crossref, SciELO, un
    repositorio) que requiere corroborar la atribución institucional obra
    por obra?** Normalmente Nivel V.
+3 bis. **Si es Nivel V, ¿su clave de identidad, su vocabulario de veredictos
+   y sus modos de fallo son los de una cola que ya existe?** Si alguno de los
+   tres difiere, es su propia cola (ver Regla 2). Reutilizar la interacción
+   de la herramienta de revisión sí; reutilizar la cola, no.
 4. **¿Puede integrarse agregando sólo una entrada a `sources.yml`, sin
    tocar `src/build/`?** Si la respuesta es no incluso dentro del mismo
    nivel, el mecanismo genérico de ese nivel está mal diseñado — corregirlo
@@ -186,8 +249,17 @@ para todo lo que este documento describe.
   límite de granularidad de §1): sólo se agrega por Facultad donde esa
   relación está validada institucionalmente; el resto se publica por
   unidad declarada. Ver `docs/FUENTES_Y_APIS.md` §2.8.
-- No reabre `D-206`, `D-313`, `D-314` ni `D-398`: ni `PD-02` ni `PD-03`
-  tocan `publications_universe.csv` ni ningún indicador de citas/FWCI.
+- **Tercera actualización, 2026-09-03**: tras preguntar de qué forma es
+  posible incluir publicaciones fuera de Scopus/SciVal, el usuario autorizó
+  explícitamente "avancemos con esa cuarta fuente de nivel V" — otra decisión
+  de alcance aparte y explícita. Implementada como `PD-04`. Se publica el
+  MECANISMO, no una cifra: la política de red del entorno de desarrollo
+  bloquea las tres APIs (403 en el CONNECT del proxy, comprobado el
+  2026-09-03), así que la cola nace vacía y la sección lo dice en la página
+  en vez de mostrar un cero que parecería un resultado. Ver
+  `docs/FUENTES_Y_APIS.md` §2.10.
+- No reabre `D-206`, `D-313`, `D-314` ni `D-398`: ni `PD-02`, ni `PD-03`, ni
+  `PD-04` tocan `publications_universe.csv` ni ningún indicador de citas/FWCI.
 - No cambia nada del corpus Scopus/SciVal ni de `METHODOLOGY.md`.
 - Es un marco para clasificar y aislar fuentes nuevas — no reemplaza a
   `docs/DECISIONS.md` como registro de qué se decidió y cuándo.
@@ -202,16 +274,22 @@ para todo lo que este documento describe.
 - `docs/V2_BACKLOG.md` §8 — la propuesta de publicar el Nivel V, autorizada
   y cerrada el 2026-09-02.
 - `docs/DATA_MODEL.md` — «Corpus paralelo declarado (fuera de este modelo)».
-- `docs/FUENTES_Y_APIS.md` §2.6 (Nivel D, `PD-01`), §2.7 (Nivel V, `PD-02`)
-  y §2.8 (Nivel D con límite de granularidad, `PD-03`).
+- `docs/FUENTES_Y_APIS.md` §2.6 (Nivel D, `PD-01`), §2.7 (Nivel V, `PD-02`),
+  §2.8 (Nivel D con límite de granularidad, `PD-03`) y §2.10 (Nivel V,
+  `PD-04`).
 - `config/sources.yml` → `facultad_medicina_publicaciones`,
-  `corpus_paralelo_declarado`, `openalex_api`, `autoarchivo_biblioteca`.
+  `corpus_paralelo_declarado`, `openalex_api`, `autoarchivo_biblioteca`,
+  `datacite_api`, `europepmc_api`, `zenodo_api` (las tres con
+  `nivel_evidencia: V` y su plantilla `consulta_obras`).
 - `src/build/09_produccion_declarada.py` — mecanismo genérico de Nivel D
   (`PD-01`), agregación de Nivel V (`PD-02`), y bloque propio para Nivel D
   con granularidad parcial (`PD-03`), en un mismo build.
 - `src/review/build_openalex_review.py`, `src/review/apply_openalex_review.py`
   — mecanismo de cola de Nivel V; su `resolucion: CONFIRMADO_PRODUCCION_UFT`
   alimenta `PD-02`.
+- `src/enrich/obras_externas.py`, `src/review/build_obras_externas_review.py`,
+  `src/review/apply_obras_externas_review.py` — la segunda cola de Nivel V,
+  la de `PD-04`. `make obras-externas` y `make revisar-obras-externas`.
 - `src/enrich/autoarchivo_produccion.py` — reutiliza
   `common.canonical_academic_unit()`/`common.facultad_de()` (las mismas
   funciones que `P-07`) para resolver `PD-03` a Facultad sólo donde esa

@@ -130,6 +130,20 @@ jobs:
       - name: Verificar la lógica de la brecha de cobertura
         run: python3 src/enrich/openalex_cobertura.py --test
 
+      # PD-04. Los tres contratos de búsqueda (DataCite, Europe PMC, Zenodo)
+      # están tomados de la documentación y no se pudieron verificar contra la
+      # red desde el entorno de desarrollo: el autotest ejercita el parseo
+      # sobre respuestas guardadas y comprueba que una forma distinta se
+      # detenga en vez de adivinar. Es lo único que protege ese parseo.
+      - name: Verificar la recuperación de obras en repositorios externos
+        run: python3 src/enrich/obras_externas.py --test
+
+      - name: Verificar la herramienta de revisión de obras externas
+        run: python3 src/review/build_obras_externas_review.py --test
+
+      - name: Verificar la aplicación de decisiones sobre obras externas
+        run: python3 src/review/apply_obras_externas_review.py --test
+
       # Lo que decide qué firmas se fusionan como una persona y cuáles dejan de
       # contarse por no serlo. Es la lógica con más consecuencias sobre lo
       # publicado que existe fuera del pipeline, y hasta ahora no la ejercía

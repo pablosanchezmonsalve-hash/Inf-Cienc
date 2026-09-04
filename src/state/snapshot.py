@@ -137,6 +137,22 @@ def git(*args: str) -> str:
         return ""
 
 
+def _titulo_de_seccion(titulo: str) -> str:
+    """El título de una nota, sin el prefijo de tipo ni la fecha entre paréntesis.
+
+    "## Cierre: PD-04 — la cuarta fuente … (2026-09-03)" describe la sesión
+    igual de bien que un "## Sesión …", y es como se titula casi todo desde
+    agosto. Se le quitan el prefijo y la fecha para que la columna quepa y
+    diga lo mismo que las filas antiguas: de qué iba el tramo de trabajo.
+    """
+    # El separador varía entre las 92 notas: "Cierre · …" (64), "Cierre: …"
+    # (27), "Addendum: …" (1). Se aceptan los tres.
+    t = re.sub(r"^(Cierre de sesión|Cierre de tramo|Cierre|Addendum|Fusión)\s*[:·—-]\s*",
+               "", titulo).strip()
+    t = re.sub(r"\s*\((?:\d{4}-\d{2}-\d{2}[^)]*|mismo día[^)]*)\)\s*$", "", t).strip()
+    return t or titulo.strip()
+
+
 def extraer_decisiones() -> list[dict]:
     """Recupera las decisiones de las tablas de SESSION_NOTES.md.
 
@@ -155,6 +171,17 @@ def extraer_decisiones() -> list[dict]:
         m_sesion = re.match(r"^## Sesión (\S+)(?:\s*\([^)]*\))?\s+—\s+(.+)$", linea.strip())
         if m_sesion:
             sesion_actual = m_sesion.group(2)
+            continue
+        # La mayoría de las notas recientes NO se titulan "## Sesión …" sino
+        # "## Cierre: …" o "## Fusión con …". Reconocer sólo la primera forma
+        # dejaba `sesion_actual` clavada en la última sección que sí lo hacía,
+        # y la columna "Fase" atribuía decisiones enteras a una sesión sin
+        # relación con ellas — 15 filas lo estaban al detectarlo (2026-09-03).
+        # Es el mismo defecto que ya se corrigió una vez para "(cont.)", sobre
+        # otro patrón de título.
+        m_otro = re.match(r"^## (.+)$", linea.strip())
+        if m_otro:
+            sesion_actual = _titulo_de_seccion(m_otro.group(1))
             continue
         m = re.match(r"^\|\s*(D-\d+)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|$", linea.strip())
         if m:

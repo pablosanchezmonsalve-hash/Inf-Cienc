@@ -4,7 +4,7 @@
 # reglas bloqueantes fallando o si la verificación de capas encuentra material
 # interno en un artefacto público.
 
-.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades revisar-cobertura-openalex cobertura-crossref kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
+.PHONY: instalar auditoria factibilidad artefactos sitio servir estado revision validar-unidades revisar-cobertura-openalex obras-externas revisar-obras-externas cobertura-crossref kit verificar rendimiento verificar-orcid ror openalex cobertura scopus orcid-afiliacion informe limpiar todo
 
 instalar:
 	pip install -r requirements.txt
@@ -155,6 +155,23 @@ cobertura-crossref:
 #   python3 src/review/apply_openalex_review.py
 revisar-cobertura-openalex:
 	python3 src/review/build_openalex_review.py
+
+# PD-04: obras que DataCite, Europe PMC y Zenodo tienen y el universo Scopus
+# no — datasets, software, preprints, materiales depositados. Busca por los
+# ORCID que el proyecto ya confirmó y por la afiliación institucional; deja una
+# COLA DE REVISIÓN, nunca un ajuste del corpus (D-206). Reejecutarlo conserva
+# las resoluciones humanas ya tomadas.
+# En Windows:  py src\enrich\obras_externas.py
+obras-externas: auditoria
+	python3 src/enrich/obras_externas.py
+
+# Genera internal/revision_obras_externas.html a partir de esa cola. Tras
+# marcar y exportar el CSV desde el navegador:
+#   python3 src/review/apply_obras_externas_review.py --dry-run
+#   python3 src/review/apply_obras_externas_review.py
+#   python3 src/build/build_all.py     (para que la cifra llegue al sitio)
+revisar-obras-externas:
+	python3 src/review/build_obras_externas_review.py
 
 # Genera internal/revision_huecos_autores.html: qué fichas de autor publicadas
 # carecen de ORCID, de unidad académica determinada, o tienen identidad sin

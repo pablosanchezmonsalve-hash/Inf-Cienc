@@ -181,18 +181,20 @@ export function produccionDeclarada(datos) {
   const { resumen, por_facultad_anio: filas, fuera_de_ventana_o_sin_anio: extra,
           ventana, procedencia: proc, nota, fuentes,
           openalex_cobertura: oa, autoarchivo_produccion: aa,
-          total_fuera_de_scopus: total } = datos;
+          obras_externas: oe, total_fuera_de_scopus: total } = datos;
 
   const hayPD01 = !!(fuentes && fuentes.length);
   const hayPD02 = !!(oa && oa.disponible);
   const hayPD03 = !!(aa && aa.disponible);
+  const hayPD04 = !!(oe && oe.disponible);
 
-  if (!hayPD01 && !hayPD02 && !hayPD03) {
+  if (!hayPD01 && !hayPD02 && !hayPD03 && !hayPD04) {
     return `
     <p class="nota">Todavía no hay ninguna fuente de producción fuera de
     Scopus: ni una Facultad con listado propio en
     <code>config/sources.yml</code>, ni <code>internal/openalex_cobertura.csv</code>
-    (V2-26), ni <code>data/enriched/autoarchivo_produccion.json</code>. Esta
+    (V2-26), ni <code>data/enriched/autoarchivo_produccion.json</code>, ni
+    <code>internal/obras_externas_cobertura.csv</code>. Esta
     sección aparece vacía a propósito: el dato es opcional, no un indicador
     que debiera existir.</p>`;
   }
@@ -216,11 +218,12 @@ export function produccionDeclarada(datos) {
       total.en_ventana, `Producción total fuera de Scopus, ${ventana.inicio}-${ventana.fin}`,
       `${c.nf.format(total.pd01_en_ventana)} declaradas por las Facultades + `
       + `${c.nf.format(total.pd02_en_ventana)} confirmadas por revisión de cobertura OpenAlex + `
-      + `${c.nf.format(total.pd03_en_ventana)} autoarchivadas en el repositorio institucional`
+      + `${c.nf.format(total.pd03_en_ventana)} autoarchivadas en el repositorio institucional + `
+      + `${c.nf.format(total.pd04_en_ventana || 0)} confirmadas en repositorios de datos y acceso abierto`
       + (total.duplicados_entre_fuentes
         ? `, menos ${c.nf.format(total.duplicados_entre_fuentes)} repetidas entre esas fuentes`
         : ''))}</div>
-    <p class="nota">Suma de las tres fuentes de abajo, sin contar dos veces la
+    <p class="nota">Suma de las cuatro fuentes de abajo, sin contar dos veces la
     misma obra: se unen por DOI y lo que aparece en más de una se resta las
     veces que se repite.</p>` : '';
 
@@ -387,7 +390,87 @@ export function produccionDeclarada(datos) {
     <p class="nota">Falta <code>data/enriched/autoarchivo_produccion.json</code>:
     correr <code>src/enrich/autoarchivo_produccion.py</code>.</p>`;
 
-  return `${totalHTML}${pd01HTML}${pd02HTML}${pd03HTML}`;
+  const pd04HTML = hayPD04 ? (() => {
+    const r = oe.resumen;
+    // Estas frases se leen con cifras de una sola obra tan a menudo como con
+    // cifras grandes —una cola recién revisada tiene uno o dos casos—, y
+    // «1 confirmadas» delata que el número lo escribió una plantilla.
+    const pl = (n, sing, plur) => `${c.nf.format(n)} ${n === 1 ? sing : plur}`;
+    const kpisHTML = [
+      kpi(r.total_evaluados, 'Candidatos en repositorios externos',
+        'obras que DataCite, Europe PMC o Zenodo atribuyen a la institución y el universo Scopus no tiene'),
+      kpi(r.confirmadas, 'Confirmadas con revisión humana',
+        'caso por caso, antes de contarse — nunca automáticamente'),
+      kpi(r.en_ventana, `Obras en la ventana ${ventana.inicio}-${ventana.fin}`,
+        r.corroboradas_entre_fuentes
+          ? `la cifra que entra al total combinado; ${pl(r.corroboradas_entre_fuentes, 'llegaba', 'llegaban')} por más de una fuente y se cuenta una vez`
+          : 'la cifra que entra al total combinado de arriba'),
+      kpi(r.pendientes_revision_humana, 'Pendientes de revisión',
+        'todavía sin decidir: NO se cuentan como producción confirmada'),
+    ].join('');
+
+    const filaAnio = (f) => `<tr><td>${f.anio}</td><td>${c.nf.format(f.n)}</td></tr>`;
+    const tabla = oe.por_anio.length ? `
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Año</th>
+            <th scope="col">Obras confirmadas</th></tr></thead>
+          <tbody>${oe.por_anio.map(filaAnio).join('')}</tbody>
+        </table>
+      </div>` : `
+      <p class="nota">Ninguna confirmación cae dentro de la ventana
+      ${ventana.inicio}-${ventana.fin} todavía.</p>`;
+
+    // Por fuente se cuentan APORTES, no obras: una obra corroborada por dos
+    // repositorios aparece en los dos. Sumar esta columna da más que el
+    // recuento de arriba, y decirlo aquí evita que alguien lea la diferencia
+    // como un error de cuadratura.
+    const nombreFuente = { datacite: 'DataCite', europepmc: 'Europe PMC', zenodo: 'Zenodo' };
+    const filaFuente = (f) => `<tr><td>${c.escapar(nombreFuente[f.fuente] || f.fuente)}</td>
+      <td>${c.nf.format(f.n)}</td></tr>`;
+    const tablaFuente = (oe.por_fuente || []).length ? `
+      <h3>Qué aportó cada repositorio, dentro de la misma ventana</h3>
+      <p class="nota">Aportes, no obras: una obra que dos repositorios traen
+      cuenta en los dos. Por eso esta columna suma más que
+      ${c.nf.format(r.en_ventana)} — la diferencia ${r.corroboradas_entre_fuentes === 1
+        ? 'es 1 obra corroborada'
+        : `son las ${c.nf.format(r.corroboradas_entre_fuentes)} obras corroboradas`}.</p>
+      <div class="tabla-envoltura tabla-datos">
+        <table>
+          <thead><tr><th scope="col">Repositorio</th>
+            <th scope="col">Aportes confirmados</th></tr></thead>
+          <tbody>${oe.por_fuente.map(filaFuente).join('')}</tbody>
+        </table>
+      </div>` : '';
+
+    const extras = [];
+    if (r.fuera_de_ventana) extras.push(`${pl(r.fuera_de_ventana, 'confirmada', 'confirmadas')} fuera de la ventana ${ventana.inicio}-${ventana.fin}`);
+    if (r.sin_anio) extras.push(`${c.nf.format(r.sin_anio)} sin año declarado`);
+    if (r.sin_doi_en_ventana) extras.push(`${pl(r.sin_doi_en_ventana, 'sin DOI, que no se puede colapsar por clave y se cuenta como un registro propio', 'sin DOI, que no se pueden colapsar por clave y se cuentan una por registro')}`);
+    if (r.descartadas_por_ser_otra_version) extras.push(`${pl(r.descartadas_por_ser_otra_version, 'descartada', 'descartadas')} por ser otra versión de una obra ya contada`);
+    const notaExtra = extras.length ? `
+      <p class="nota">Además, ${extras.join('; ')}. Nada de esto se descarta en
+      silencio.</p>` : '';
+
+    return `
+      <h2>Confirmada en repositorios de datos y acceso abierto</h2>
+      <div class="kpis" data-n="4">${kpisHTML}</div>
+      ${c.nota(oe.nota)}
+      <h3>Por año, dentro de la ventana ${ventana.inicio}-${ventana.fin}</h3>
+      ${tabla}
+      ${notaExtra}
+      ${c.sello(oe.procedencia)}
+      ${tablaFuente}
+      <p class="nota">En esta subsección, «Cobertura» es el porcentaje de lo
+      confirmado que cae dentro de la ventana ${ventana.inicio}-${ventana.fin}.
+      Revisión caso por caso en
+      <code>internal/revision_obras_externas.html</code>.</p>`;
+  })() : `
+    <h2>Confirmada en repositorios de datos y acceso abierto</h2>
+    <p class="nota">Falta <code>internal/obras_externas_cobertura.csv</code>:
+    correr <code>src/enrich/obras_externas.py</code>.</p>`;
+
+  return `${totalHTML}${pd01HTML}${pd02HTML}${pd03HTML}${pd04HTML}`;
 }
 
 /** La lista de procedencia de metodologia.html: fuentes, ventana temporal,

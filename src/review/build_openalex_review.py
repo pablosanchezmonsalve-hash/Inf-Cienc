@@ -76,6 +76,15 @@ def _json_para_script(obj) -> str:
         .replace("&", "\\u0026")
     )
 
+CABECERA_CSV = [
+    "# Revisión de la brecha de cobertura OpenAlex (V2-26) — decisión humana",
+    "# Generado por internal/revision_cobertura_openalex.html",
+    "# veredicto: uft = producción real de la UFT fuera de Scopus ·",
+    "#            error = atribución errónea de OpenAlex (no es UFT) ·",
+    "#            tipo = tipo documental que este proyecto excluye a propósito",
+    "# ESTO NO MODIFICA EL UNIVERSO PUBLICADO. Sólo deja constancia de la revisión.",
+]
+
 CSS = """
 :root{--plano:#f1f5f6;--sup:#fff;--sup2:#eaf1f2;--tinta:#10222b;--tinta2:#4a5f68;
 --tinta3:#5a6b71;--linea:#dbe6e8;--marca:#22577A;--accion:#1a6d78;--viva:#38A3A5;
@@ -123,6 +132,7 @@ border-top:1px solid var(--linea);padding-top:.7rem}
 .dec button[aria-pressed="true"][data-v="uft"]{background:var(--si);color:#fff;border-color:var(--si)}
 .dec button[aria-pressed="true"][data-v="error"]{background:var(--no);color:#fff;border-color:var(--no)}
 .dec button[aria-pressed="true"][data-v="tipo"]{background:var(--tipo);color:#fff;border-color:var(--tipo)}
+.dec button[aria-pressed="true"][data-v="version"]{background:var(--tinta2);color:#fff;border-color:var(--tinta2)}
 .dec input{flex:1;min-width:170px;font:inherit;font-size:.83rem;padding:.35rem .55rem;
 border:1px solid #bccdd2;border-radius:4px;background:var(--sup);color:var(--tinta)}
 footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:var(--tinta2)}
@@ -130,7 +140,8 @@ footer{border-top:1px solid var(--linea);padding:1.5rem 0;font-size:.8rem;color:
 
 JS = """
 const ITEMS = __DATOS__;
-const CLAVE = 'revision_cobertura_openalex_v1';
+const COLUMNAS = __COLUMNAS__;
+const CLAVE = '__CLAVE__';
 let dec = {};
 try { dec = JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch (e) { dec = {}; }
 
@@ -193,21 +204,15 @@ function aplicarFiltro() {
 
 document.getElementById('exportar').addEventListener('click', () => {
   const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const cab = [
-    '# Revisión de la brecha de cobertura OpenAlex (V2-26) — decisión humana',
-    '# Generado por internal/revision_cobertura_openalex.html',
-    `# Exportado: ${new Date().toISOString().slice(0, 10)}`,
-    '# veredicto: uft = producción real de la UFT fuera de Scopus ·',
-    '#            error = atribución errónea de OpenAlex (no es UFT) ·',
-    '#            tipo = tipo documental que este proyecto excluye a propósito',
-    '# ESTO NO MODIFICA EL UNIVERSO PUBLICADO. Sólo deja constancia de la revisión.',
-  ].join('\\n');
-  const cols = ['openalex_id', 'doi', 'veredicto', 'nota'];
+  const cab = __CABECERA__.concat(
+    ['# Exportado: ' + new Date().toISOString().slice(0, 10)]).join('\\n');
+  const cols = [...COLUMNAS, 'veredicto', 'nota'];
   const filas = ITEMS.map(it => {
     const d = dec[it.id] || {};
-    return [it.id, it.doi, d.veredicto || 'pendiente', d.nota || ''].map(esc).join(',');
+    return [...COLUMNAS.map(k => it.campos[k]),
+            d.veredicto || 'pendiente', d.nota || ''].map(esc).join(',');
   });
-  entregar('openalex_cobertura_decisiones', '\\ufeff' + [cab, cols.join(','), ...filas].join('\\n'));
+  entregar('__NOMBRE_CSV__', '\\ufeff' + [cab, cols.join(','), ...filas].join('\\n'));
 });
 
 async function entregar(nombre, csv) {
@@ -263,7 +268,11 @@ def _leer_previas(ruta: Path) -> dict[str, dict]:
     while i < len(lineas) and lineas[i].startswith("#"):
         i += 1
     df = pd.read_csv(io.StringIO("\n".join(lineas[i:])), dtype=str).fillna("")
-    return {r["openalex_id"]: {"veredicto": r["veredicto"], "nota": r["nota"]}
+    # `nota` es opcional: la exportación la escribe siempre, pero un CSV
+    # editado a mano —como el que hay hoy en el repositorio, con sólo
+    # `openalex_id,veredicto`— es igual de válido como registro de la
+    # decisión. Exigirla hacía que esta herramienta no se pudiera regenerar.
+    return {r["openalex_id"]: {"veredicto": r["veredicto"], "nota": r.get("nota", "")}
             for _, r in df.iterrows() if r.get("veredicto") not in (None, "", "pendiente")}
 
 
@@ -312,6 +321,25 @@ def _bloque_crossref(xref: dict | None) -> str:
       </p>"""
 
 
+def render_js(datos: str, columnas: list[str], clave: str,
+              nombre_csv: str, cabecera: list[str]) -> str:
+    """El mismo JS de revisión, para las dos colas que lo usan.
+
+    La lógica de marcar, filtrar, guardar en el navegador y exportar es
+    idéntica en la revisión de cobertura OpenAlex (`PD-02`) y en la de obras
+    en repositorios externos (`PD-04`); lo único que cambia es qué columnas
+    identifican una fila, con qué clave se guarda en el navegador y qué dice
+    la cabecera del CSV. Tener dos copias del mismo JavaScript significaría
+    corregir cada bug de exportación dos veces — y descubrir la segunda copia
+    tarde.
+    """
+    return (JS.replace("__DATOS__", datos)
+              .replace("__COLUMNAS__", _json_para_script(columnas))
+              .replace("__CLAVE__", clave)
+              .replace("__NOMBRE_CSV__", nombre_csv)
+              .replace("__CABECERA__", _json_para_script(cabecera)))
+
+
 def render_html(filas: pd.DataFrame) -> str:
     previas = _leer_previas(DECISIONES)
     crossref = _leer_crossref(CROSSREF)
@@ -330,7 +358,8 @@ def render_html(filas: pd.DataFrame) -> str:
         institucion = str(r.get("institucion_declarada") or "")
         motivo = str(r.get("motivo") or "")
 
-        items.append({"id": oid, "doi": doi, "previa": previas.get(oid)})
+        items.append({"id": oid, "campos": {"openalex_id": oid, "doi": doi},
+                      "previa": previas.get(oid)})
 
         doi_html = (f'<a href="https://doi.org/{htmlmod.escape(doi)}" target="_blank" '
                     f'rel="noopener">{htmlmod.escape(doi)}</a>' if doi
@@ -412,7 +441,9 @@ def render_html(filas: pd.DataFrame) -> str:
   Regenerable — no pierde respuestas ya exportadas a CSV. Exporte y aplique con
   <span class="mono">python3 src/review/apply_openalex_review.py</span>.
 </div></footer>
-<script>{JS.replace("__DATOS__", datos)}</script>
+<script>{render_js(datos, ["openalex_id", "doi"],
+                   "revision_cobertura_openalex_v1",
+                   "openalex_cobertura_decisiones", CABECERA_CSV)}</script>
 </body>
 </html>
 """
