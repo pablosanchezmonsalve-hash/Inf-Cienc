@@ -126,7 +126,17 @@ VENTANA = INSTITUCION["ventana_temporal"]
 # pública limita a 60 peticiones por minuto para clientes sin token.
 PAUSA = {"datacite": 0.20, "europepmc": 0.20, "zenodo": 1.2}
 
-TAMANO_PAGINA = 100
+# Tamaño de página por fuente. Zenodo limita a 25 sin autenticación y
+# responde HTTP 400 si se pide más —comprobado en la corrida del 2026-09-04,
+# que devolvía «Page size cannot be greater than 25»—. Pedir 100 a las tres
+# hacía que Zenodo rechazara CUALQUIER consulta, incluida la de texto libre,
+# y el error parecía de sintaxis cuando era de tamaño.
+TAMANO_PAGINA = {"datacite": 100, "europepmc": 100, "zenodo": 25}
+POR_DEFECTO = 100
+
+
+def pagina_de(fuente: str) -> int:
+    return TAMANO_PAGINA.get(fuente, POR_DEFECTO)
 
 
 class ContratoDesconocido(Exception):
@@ -241,7 +251,7 @@ def elegir_plantilla(fuente: str, clave: str, valores: list[str],
 # autotest pueda ejercitarla sobre una respuesta guardada sin tocar la red.
 
 def _url_datacite(q: str, cursor: str | None) -> str:
-    p = {"query": q, "page[size]": TAMANO_PAGINA, "page[cursor]": cursor or "1"}
+    p = {"query": q, "page[size]": pagina_de("datacite"), "page[cursor]": cursor or "1"}
     return f"{SOURCES['datacite_api']['endpoint']}?{urllib.parse.urlencode(p)}"
 
 
@@ -291,7 +301,7 @@ def _afiliacion_datacite(creator: dict) -> str:
 
 def _url_europepmc(q: str, cursor: str | None) -> str:
     p = {"query": q, "format": "json", "resultType": "core",
-         "pageSize": TAMANO_PAGINA, "cursorMark": cursor or "*"}
+         "pageSize": pagina_de("europepmc"), "cursorMark": cursor or "*"}
     return f"{SOURCES['europepmc_api']['endpoint']}?{urllib.parse.urlencode(p)}"
 
 
@@ -338,7 +348,7 @@ def _tipo_europepmc(item: dict) -> str:
 
 
 def _url_zenodo(q: str, cursor: str | None) -> str:
-    p = {"q": q, "size": TAMANO_PAGINA, "page": cursor or "1"}
+    p = {"q": q, "size": pagina_de("zenodo"), "page": cursor or "1"}
     return f"{SOURCES['zenodo_api']['endpoint']}?{urllib.parse.urlencode(p)}"
 
 
@@ -442,6 +452,18 @@ def pedir(fuente: str, url: str) -> dict:
     try:
         with urllib.request.urlopen(req, timeout=45) as resp:
             data = json.load(resp)
+    except urllib.error.HTTPError as e:
+        # El cuerpo de un 4xx suele decir EXACTAMENTE qué parámetro sobra
+        # —Zenodo respondía «Page size cannot be greater than 25»— y se
+        # perdía entero: el error llegaba como «HTTP 400» a secas y parecía
+        # un problema de sintaxis de la consulta.
+        try:
+            detalle = e.read().decode("utf-8", "replace")[:400]
+        except Exception:
+            detalle = ""
+        if detalle:
+            e.msg = f"{e.msg} · {detalle}"
+        raise
     finally:
         time.sleep(PAUSA.get(fuente, 0.5))
 
@@ -481,7 +503,7 @@ def buscar(fuente: str, q: str, max_paginas: int | None = None) -> list[dict]:
                 break
             cursor = siguiente
         else:
-            if len(crudas) < TAMANO_PAGINA:
+            if len(crudas) < pagina_de(fuente):
                 break
             cursor = str(pagina_n + 1)
     return obras
@@ -816,6 +838,14 @@ def autotest() -> int:
     caso("ninguna cadena de consulta está escrita en este archivo",
          "creators.orcid:" not in Path(__file__).read_text(encoding="utf-8")
          .split("DATACITE_BUSQUEDA")[0])
+
+    # ── el tamaño de página lo fija cada API, no una constante global
+    caso("Zenodo pide 25 por página, no 100", pagina_de("zenodo") == 25, pagina_de("zenodo"))
+    caso("las otras dos siguen en 100",
+         pagina_de("datacite") == 100 and pagina_de("europepmc") == 100)
+    caso("la URL de Zenodo lleva ese tamaño",
+         "size=25" in _url_zenodo("x", None), _url_zenodo("x", None))
+    caso("una fuente desconocida cae en el valor por defecto", pagina_de("otra") == 100)
 
     # ── una plantilla que la API rechaza se descarta, no tumba la corrida
     import types
