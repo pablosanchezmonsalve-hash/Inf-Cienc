@@ -11547,3 +11547,94 @@ se versiona— para alimentar la cola de revisión cuando se monte.
 Correr Crossref sobre los 435 DOI desde la máquina del usuario, y con eso
 decidir cuánta de la atribución se puede confirmar automáticamente antes de
 montar la cola para el resto.
+
+## Cierre: la primera corrida real de PD-04, y dos fallos de diseño que expuso (2026-09-04)
+
+### Contexto
+
+El usuario corrió `obras_externas.py` en su máquina, la primera ejecución
+real del conector contra las tres APIs. Resultado:
+
+| Fuente | Obras recuperadas | Fuera del universo |
+|---|---|---|
+| DataCite | 169 | 168 |
+| Europe PMC | 2.784 | 2.085 |
+| Zenodo | — | HTTP 400 |
+
+### El primer fallo: un 400 tiraba la corrida entera
+
+`elegir_plantilla()` sólo pasaba a la plantilla siguiente cuando la primera
+devolvía **cero resultados**. Zenodo no devuelve cero: devuelve **HTTP 400**,
+porque no reconoce el nombre del campo. Ese error subía como excepción de red
+y `main()` lo trataba como fatal, así que la corrida murió sin escribir la
+cola — perdiendo también las 2.253 filas que DataCite y Europe PMC ya habían
+recuperado.
+
+Es un fallo de diseño mío, y el escenario que más probable era: monté todo el
+mecanismo de plantillas candidatas precisamente porque no podía verificar el
+contrato de Zenodo, y luego no contemplé la forma en que ese contrato falla.
+
+Corregido en tres puntos:
+
+- **Un 400 o 422 descarta esa plantilla y prueba la siguiente.** Otros
+  códigos siguen propagándose: un 500 es la API caída, no una consulta mala,
+  y confundirlos haría que un corte pasajero pareciera un campo renombrado.
+- **Una vía que no se puede consultar se salta, no aborta.** Se anota en una
+  lista de fallos y la corrida sigue con el resto.
+- **La cola se escribe igual**, con lo recuperado, y el resumen final declara
+  qué quedó sin consultar. Perder el trabajo de dos APIs porque una tercera
+  rechaza su consulta no ayuda a nadie.
+
+Se añadió además una **tercera plantilla candidata por vía** para Zenodo:
+búsqueda de texto libre, sin nombre de campo. Menos precisa, pero no depende
+de cómo se llame el campo hoy — y para una cola que revisa una persona, un
+poco de ruido es preferible a no tener nada que revisar.
+
+### El segundo hallazgo: el volumen
+
+Europe PMC devolvió **2.085 obras fuera del universo**, frente a 168 de
+DataCite. No es un error: consultar por ORCID trae toda la producción de esa
+persona, también la que firmó en otras instituciones y la que cae fuera de la
+ventana 2023-2025. Pero una cola de ~2.250 filas no es revisable caso por
+caso por una persona, que es justo lo que `PD-04` exige antes de contar nada.
+
+Queda sin resolver y es el problema serio del indicador. Opciones que habrá
+que sopesar con el usuario: filtrar por ventana antes de encolar, exigir que
+la obra declare la afiliación institucional, o priorizar la cola por
+evidencia y revisar sólo el tramo alto. Ninguna es gratis: la primera
+descarta producción real anterior a 2023, y la segunda devuelve el problema a
+la afiliación declarada, que es justo lo que no siempre está.
+
+### Verificación
+
+`--test`: 41/41, con cuatro casos nuevos que cubren el camino del 400 —que
+descarta la plantilla y prueba la siguiente, que devuelve -1 cuando ninguna
+sirve, que un 500 sí se propaga, y que la candidata de texto libre no lleva
+nombre de campo—. Los otros dos módulos, 10/10 y 11/11.
+
+Una de esas comprobaciones falló al escribirla y el código tenía razón: yo
+esperaba que el motivo dijera «rechaza» cuando la segunda plantilla funciona,
+y lo que dice es con qué sonda respondió, que es más útil. Se corrigió la
+expectativa, no el código.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-486 | Un HTTP 400/422 de una plantilla la descarta y pasa a la siguiente; otros códigos se propagan | Un 400 es la API diciendo que no entiende la consulta —una plantilla mala—; un 500 es la API caída. Tratarlos igual haría que un corte pasajero se leyera como un campo renombrado, y al revés |
+| D-487 | Una fuente o vía que falla no aborta la corrida: se anota y la cola se escribe con lo recuperado | La corrida real perdió 2.253 filas ya recuperadas porque la tercera fuente rechazó su consulta. El trabajo hecho se conserva y el resumen declara qué falta |
+| D-488 | Zenodo declara una tercera plantilla de texto libre, sin nombre de campo | Las dos primeras dependen de cómo se llame el campo, que es exactamente lo que no se pudo verificar y lo que resultó estar mal. Una búsqueda libre es menos precisa, pero alimenta una cola que revisa una persona, donde algo de ruido cuesta menos que no tener nada |
+
+### Ambigüedades abiertas
+
+- **El volumen de la cola de Europe PMC** (~2.085 filas). Sin resolver.
+- **Qué plantilla de Zenodo funciona** sigue sin saberse: la primera está
+  descartada por la corrida real, las otras dos no se han probado.
+- Crossref sobre los 435 DOI de fuentes institucionales, y la cola de
+  revisión de esas atribuciones, siguen pendientes.
+
+### Próximo paso recomendado
+
+Reejecutar el conector en la máquina del usuario. DataCite y Europe PMC se
+releen de la caché en segundos; la corrida entra directa en Zenodo y la línea
+de plantilla dirá cuál de las tres responde.

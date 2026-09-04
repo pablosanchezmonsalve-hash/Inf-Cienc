@@ -212,12 +212,26 @@ def elegir_plantilla(fuente: str, clave: str, valores: list[str],
     candidatas = plantillas_de(fuente, clave)
     if len(candidatas) == 1:
         return 0, "única plantilla declarada"
-    for i, _ in enumerate(candidatas):
+    motivos = []
+    for i, tpl in enumerate(candidatas):
+        rechazada = None
         for valor in valores[:sondas]:
-            if buscar(fuente, consulta(fuente, clave, valor, i), max_paginas=1):
-                return i, f"responde con {valores.index(valor) + 1} sonda(s)"
-    return 0, ("ninguna plantilla devolvió resultados en las sondas: puede ser "
-               "que el campo de búsqueda haya cambiado, o que no haya depósitos")
+            try:
+                if buscar(fuente, consulta(fuente, clave, valor, i), max_paginas=1):
+                    return i, f"responde con {valores.index(valor) + 1} sonda(s)"
+            except urllib.error.HTTPError as e:
+                # 400/422 no es «no hay resultados»: es la API diciendo que no
+                # entiende la consulta. Zenodo devolvió 400 a su primera
+                # plantilla el 2026-09-04, en la corrida real desde la máquina
+                # del usuario. Una plantilla rechazada se descarta y se pasa
+                # a la siguiente; tratarla como error fatal tiraba la corrida
+                # entera y con ella el trabajo ya hecho de las otras fuentes.
+                if e.code not in (400, 422):
+                    raise
+                rechazada = f"la API la rechaza con HTTP {e.code}"
+                break
+        motivos.append(f"[{i}] {rechazada or 'sin resultados en las sondas'}")
+    return -1, "ninguna plantilla sirve · " + " · ".join(motivos)
 
 
 # ─────────────────────────────────────────── una página de resultados por fuente
@@ -785,9 +799,12 @@ def autotest() -> int:
          consulta("zenodo", "por_orcid", "0000-0001-0000-0001")
          == 'creators.orcid:"0000-0001-0000-0001"',
          consulta("zenodo", "por_orcid", "0000-0001-0000-0001"))
-    caso("Zenodo declara dos plantillas candidatas por vía",
-         len(plantillas_de("zenodo", "por_orcid")) == 2
-         and len(plantillas_de("zenodo", "por_afiliacion")) == 2)
+    caso("Zenodo declara varias plantillas candidatas por vía",
+         len(plantillas_de("zenodo", "por_orcid")) >= 2
+         and len(plantillas_de("zenodo", "por_afiliacion")) >= 2)
+    caso("la última candidata es texto libre, sin nombre de campo",
+         ":" not in plantillas_de("zenodo", "por_orcid")[-1],
+         plantillas_de("zenodo", "por_orcid")[-1])
     caso("la segunda candidata es la de InvenioRDM",
          "person_or_org" in plantillas_de("zenodo", "por_orcid")[1])
     caso("una fuente con una sola plantilla no gasta sondas",
@@ -799,6 +816,46 @@ def autotest() -> int:
     caso("ninguna cadena de consulta está escrita en este archivo",
          "creators.orcid:" not in Path(__file__).read_text(encoding="utf-8")
          .split("DATACITE_BUSQUEDA")[0])
+
+    # ── una plantilla que la API rechaza se descarta, no tumba la corrida
+    import types
+    _buscar_real = globals()["buscar"]
+    llamadas = []
+
+    def _falso(fuente, q, max_paginas=None):
+        llamadas.append(q)
+        if "creators.orcid" in q:
+            raise urllib.error.HTTPError(q, 400, "BAD REQUEST", None, None)
+        return [{"id_fuente": "z1"}]
+
+    globals()["buscar"] = _falso
+    try:
+        i, motivo = elegir_plantilla("zenodo", "por_orcid", ["0000-0001-0000-0001"])
+        caso("un HTTP 400 descarta esa plantilla y prueba la siguiente", i == 1, (i, motivo))
+        caso("y el motivo describe con qué sonda respondió la buena",
+             "responde" in motivo, motivo)
+        caso("la plantilla rechazada se probó antes que la buena",
+             any("creators.orcid" in q for q in llamadas), llamadas)
+
+        def _todo_400(fuente, q, max_paginas=None):
+            raise urllib.error.HTTPError(q, 400, "BAD REQUEST", None, None)
+
+        globals()["buscar"] = _todo_400
+        i2, m2 = elegir_plantilla("zenodo", "por_orcid", ["0000-0001-0000-0001"])
+        caso("si ninguna sirve, se devuelve -1 para saltar la vía", i2 == -1, (i2, m2))
+
+        def _500(fuente, q, max_paginas=None):
+            raise urllib.error.HTTPError(q, 500, "SERVER ERROR", None, None)
+
+        globals()["buscar"] = _500
+        try:
+            elegir_plantilla("zenodo", "por_orcid", ["0000-0001-0000-0001"])
+            ok = False
+        except urllib.error.HTTPError:
+            ok = True
+        caso("un 500 NO se confunde con una plantilla mala: se propaga", ok)
+    finally:
+        globals()["buscar"] = _buscar_real
 
     # ── los ORCID retirados no fundan búsquedas
     vigentes = orcid_vigentes()
@@ -852,6 +909,7 @@ def main() -> int:
           "  (no filtra la cola: la partición por ventana la hace el build 09)")
 
     filas: list[dict] = []
+    fallos: list[str] = []
     for fuente in fuentes:
         print(f"\n  ── {fuente}")
         consultas: list[tuple[str, str, str]] = []
@@ -868,10 +926,18 @@ def main() -> int:
             try:
                 i, motivo = elegir_plantilla(fuente, f"por_{via}", valores)
             except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
-                sys.exit(f"\n  No se pudo consultar {fuente}: {e}\n"
-                         "  Si su red lo bloquea, corra este conector desde una red que no.")
+                fallos.append(f"{fuente}/{via}: no se pudo consultar ({e})")
+                i, motivo = -1, str(e)
             except (KeyError, ContratoDesconocido) as e:
-                sys.exit(f"\n  {e}")
+                fallos.append(f"{fuente}/{via}: {e}")
+                i, motivo = -1, str(e)
+            if i < 0:
+                # Esta vía queda fuera de la corrida. Lo que ya recuperaron las
+                # otras fuentes se conserva y se escribe: perder el trabajo de
+                # dos APIs porque una tercera rechaza su consulta no ayuda a
+                # nadie, y la cola declara al final qué quedó sin consultar.
+                print(f"     por_{via}: SIN CONSULTAR · {motivo}")
+                continue
             elegida[via] = i
             if len(plantillas_de(fuente, f"por_{via}")) > 1:
                 print(f"     plantilla por_{via}: "
@@ -879,6 +945,8 @@ def main() -> int:
 
         recuperadas = 0
         for via, valor, firma in consultas:
+            if via not in elegida:
+                continue
             try:
                 q = consulta(fuente, f"por_{via}", valor, elegida[via])
             except KeyError as e:
@@ -886,12 +954,11 @@ def main() -> int:
             try:
                 obras = buscar(fuente, q)
             except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
-                sys.exit(f"\n  No se pudo consultar {fuente}: {e}\n"
-                         "  Si su red lo bloquea, corra este conector desde una red que no.")
+                fallos.append(f"{fuente}/{via} «{valor}»: {e}")
+                continue
             except ContratoDesconocido as e:
-                sys.exit(f"\n  EL CONTRATO DE BÚSQUEDA DE {fuente.upper()} NO ES EL ESPERADO: {e}\n\n"
-                         "  No se adivina la forma. Corrija la plantilla en config/sources.yml\n"
-                         "  si cambió el campo de búsqueda, o envíe esa respuesta cruda.")
+                fallos.append(f"{fuente}/{via}: contrato inesperado · {e}")
+                break
             recuperadas += len(obras)
             filas += cribar(obras, fuente, via, valor, firma, dois_universo)
         print(f"     obras recuperadas : {recuperadas}")
@@ -922,6 +989,14 @@ def main() -> int:
     print(f"  corroboradas       : {sum(1 for f in filas if f['corroborada_por'])}"
           " (el mismo DOI en más de una fuente)")
     print(f"  resoluciones vivas : {conservadas} conservadas de la corrida anterior")
+    if fallos:
+        print(f"\n  NO SE PUDO CONSULTAR ({len(fallos)}):")
+        for f in fallos[:10]:
+            print(f"    ⚠ {f}")
+        if len(fallos) > 10:
+            print(f"    … y {len(fallos) - 10} más")
+        print("  La cola se escribe igual con lo recuperado; esas vías faltan.")
+
     print("\n  Es una COLA DE REVISIÓN, no un ajuste del corpus: nada de esto entra en el")
     print("  universo (D-206, Regla 5 de docs/METODOLOGIA_FUERA_DE_SCOPUS.md). Sólo lo")
     print("  que una persona confirme una por una llega a contarse como PD-04.")
