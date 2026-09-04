@@ -97,9 +97,17 @@ proyecto evita (D-206, D-398):
   (`config/matching_rules.yml`); el resto se publica por unidad declarada,
   en `unidades_sin_mapeo`, nunca forzado a una Facultad. Ver
   `docs/FUENTES_Y_APIS.md` §2.8, `data/enriched/autoarchivo_produccion.json`.
+- `PD-04` (clave `obras_externas`): recuento agregado (por año, sin Facultad)
+  de obras que DataCite, Europe PMC o Zenodo atribuyen a una firma o a la
+  afiliación institucional, y que un humano confirmó caso por caso que el
+  universo no tiene — datasets, software, preprints, materiales depositados.
+  Nivel V, como `PD-02`, pero con clave de identidad y vocabulario de
+  veredictos propios. Su recuento llega YA colapsado entre sus tres fuentes:
+  el mismo DOI en dos repositorios es una obra, no dos. Ver
+  `docs/FUENTES_Y_APIS.md` §2.10, `internal/obras_externas_cobertura.csv`.
 
-La clave `total_fuera_de_scopus` es la unión por DOI de las tres —
-aritmética sobre PD-01, PD-02 y PD-03, no un cuarto indicador con fuente
-propia; hay solapamiento real entre las tres (verificado, no asumido) y se
-resta antes de sumar. Ver `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` para el
+La clave `total_fuera_de_scopus` es la unión por DOI de las cuatro —
+aritmética sobre PD-01, PD-02, PD-03 y PD-04, no un quinto indicador con
+fuente propia; hay solapamiento real entre ellas (verificado, no asumido) y
+se resta antes de sumar. Ver `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` para el
 marco general de niveles de evidencia.

@@ -202,6 +202,21 @@ def _leer_autoarchivo_produccion() -> tuple[list[dict], bool]:
     return json.loads(AUTOARCHIVO_PRODUCCION.read_text(encoding="utf-8")), True
 
 
+OBRAS_EXTERNAS = b.ROOT / "internal" / "obras_externas_cobertura.csv"
+
+
+def _leer_obras_externas() -> tuple[list[dict], bool]:
+    """Filas de internal/obras_externas_cobertura.csv (PD-04), si existe.
+
+    Capa interna —cada fila trae `motivo`/`consecuencia` y la afiliación en
+    bruto, que no se publican—; este build sólo cuenta, nunca reexpone las
+    filas."""
+    if not OBRAS_EXTERNAS.exists():
+        return [], False
+    with OBRAS_EXTERNAS.open(encoding="utf-8") as f:
+        return list(csv.DictReader(f)), True
+
+
 def main() -> None:
     b.banner("BUILD 09 — PRODUCCIÓN DECLARADA POR LAS FACULTADES (FUERA DE SCOPUS)")
 
@@ -368,7 +383,96 @@ def main() -> None:
         ) if existe_aa else None,
     }
 
-    # ── Total combinado: unión por DOI entre PD-01, PD-02 y PD-03 ──
+    # ── PD-04: obras en repositorios de datos y acceso abierto ──
+    # Cuarta fuente. Comparte NIVEL con PD-02 —cada obra pasa por revisión
+    # humana antes de contarse— pero no su mecanismo: PD-02 recupera de un
+    # índice bibliográfico por ROR institucional; ésta recupera de tres
+    # repositorios de outputs no tradicionales, por ORCID confirmado y por
+    # afiliación declarada. Tampoco trae `facultad` (es evidencia por obra,
+    # no una declaración editorial de una unidad), así que va por año, como
+    # PD-02, y nunca a la tabla Facultad x año.
+    #
+    # La misma obra puede estar en dos o en las tres fuentes con el mismo
+    # DOI. Se cuenta UNA vez: son la misma obra corroborada dos veces, no dos
+    # obras (Regla 3 de docs/METODOLOGIA_FUERA_DE_SCOPUS.md). Las obras sin
+    # DOI no se pueden colapsar por clave y se cuentan una por fila — límite
+    # conocido, declarado en el resumen, no escondido.
+    filas_oe, existe_oe = _leer_obras_externas()
+    confirmadas_oe = [r for r in filas_oe if r.get("resolucion") == "CONFIRMADO_PRODUCCION_UFT"]
+    pendientes_oe = sum(1 for r in filas_oe if r.get("resolucion") == "PENDIENTE_REVISION_HUMANA")
+    descartadas_oe = sum(1 for r in filas_oe if (r.get("resolucion") or "").startswith("DESCARTADO"))
+    descartadas_version_oe = sum(
+        1 for r in filas_oe if r.get("resolucion") == "DESCARTADO_VERSION_DE_OBRA_YA_CONTADA")
+
+    oe_en_ventana, oe_fuera_de_ventana, oe_sin_anio = _particionar_por_ventana(
+        confirmadas_oe, inicio, fin)
+
+    dois_oe = _dois(oe_en_ventana)
+    sin_doi_oe = sum(1 for r in oe_en_ventana if not r.get("doi"))
+    oe_obras_en_ventana = len(dois_oe) + sin_doi_oe
+    corroboradas_oe = len(oe_en_ventana) - oe_obras_en_ventana
+
+    # El recuento por año se hace sobre obras, no sobre filas: si el mismo
+    # DOI está confirmado en dos fuentes, su año se cuenta una vez.
+    vistos: set[str] = set()
+    conteo_oe_por_anio: Counter = Counter()
+    for r in oe_en_ventana:
+        doi = (r.get("doi") or "").strip().lower()
+        if doi:
+            if doi in vistos:
+                continue
+            vistos.add(doi)
+        conteo_oe_por_anio[int(r["anio"])] += 1
+    oe_por_anio = sorted(
+        ({"anio": anio, "n": n} for anio, n in conteo_oe_por_anio.items()),
+        key=lambda x: x["anio"],
+    )
+
+    conteo_oe_por_fuente = Counter(r.get("fuente", "") for r in oe_en_ventana)
+    oe_por_fuente = sorted(
+        ({"fuente": f, "n": n} for f, n in conteo_oe_por_fuente.items() if f),
+        key=lambda x: (-x["n"], x["fuente"]),
+    )
+
+    resumen_oe = {
+        "total_evaluados": len(filas_oe),
+        "confirmadas": len(confirmadas_oe),
+        "en_ventana": oe_obras_en_ventana,
+        "filas_en_ventana": len(oe_en_ventana),
+        "corroboradas_entre_fuentes": corroboradas_oe,
+        "sin_doi_en_ventana": sin_doi_oe,
+        "fuera_de_ventana": len(oe_fuera_de_ventana),
+        "sin_anio": len(oe_sin_anio),
+        "pendientes_revision_humana": pendientes_oe,
+        "descartadas": descartadas_oe,
+        "descartadas_por_ser_otra_version": descartadas_version_oe,
+    }
+
+    obras_externas = {
+        "disponible": existe_oe,
+        "fuente": {
+            "nombre": "DataCite, Europe PMC y Zenodo",
+            "conector": "src/enrich/obras_externas.py",
+            "herramienta_de_revision": "internal/revision_obras_externas.html",
+        },
+        "resumen": resumen_oe,
+        "por_anio": oe_por_anio,
+        "por_fuente": oe_por_fuente,
+        "nota": b.nota("PD-04"),
+        "procedencia": b.procedencia(
+            "PD-04",
+            cubiertas=oe_obras_en_ventana,
+            n=len(confirmadas_oe),
+            unidad="obras confirmadas",
+            # La fecha de referencia de PD-04 es la de la consulta que armó la
+            # cola, no la fecha de corte de SciVal: `procedencia()` cae en esa
+            # por defecto, y mostrarla aquí publicaría un corte que no tiene
+            # ninguna relación con este dato (lo advierte su propio docstring).
+            corte=max((r.get("fecha_consulta") or "" for r in filas_oe), default="") or None,
+        ) if existe_oe else None,
+    }
+
+    # ── Total combinado: unión por DOI entre PD-01, PD-02, PD-03 y PD-04 ──
     # No es un cuarto indicador con fuente propia: es la suma de los tres de
     # arriba, restando lo que más de una fuente ya declara (verificado: hay
     # solapamiento real entre las tres, no sólo entre pares — Medicina
@@ -376,13 +480,20 @@ def main() -> None:
     dois_pd01 = _dois(en_ventana)
     dois_pd02 = _dois(oa_en_ventana)
     dois_pd03 = _dois(aa_en_ventana_con_facultad)
-    union_dois = dois_pd01 | dois_pd02 | dois_pd03
+    dois_pd04 = dois_oe
+    union_dois = dois_pd01 | dois_pd02 | dois_pd03 | dois_pd04
     sin_doi_pd01 = sum(1 for r in en_ventana if not r.get("doi"))
     sin_doi_pd02 = sum(1 for r in oa_en_ventana if not r.get("doi"))
     sin_doi_pd03 = sum(1 for r in aa_en_ventana_con_facultad if not r.get("doi"))
-    total_en_ventana = len(union_dois) + sin_doi_pd01 + sin_doi_pd02 + sin_doi_pd03
+    sin_doi_pd04 = sin_doi_oe
+    total_en_ventana = (len(union_dois) + sin_doi_pd01 + sin_doi_pd02
+                        + sin_doi_pd03 + sin_doi_pd04)
+    # PD-04 aporta su recuento YA colapsado entre sus tres fuentes: sumar sus
+    # filas aquí contaría dos veces la corroboración que ese indicador ya
+    # descontó, y el número de 'repetidas entre fuentes' dejaría de cuadrar.
     duplicados_entre_fuentes = (
-        len(en_ventana) + len(oa_en_ventana) + len(aa_en_ventana_con_facultad) - total_en_ventana
+        len(en_ventana) + len(oa_en_ventana) + len(aa_en_ventana_con_facultad)
+        + oe_obras_en_ventana - total_en_ventana
     )
 
     total_fuera_de_scopus = {
@@ -390,8 +501,9 @@ def main() -> None:
         "pd01_en_ventana": len(en_ventana),
         "pd02_en_ventana": len(oa_en_ventana),
         "pd03_en_ventana": len(aa_en_ventana_con_facultad),
+        "pd04_en_ventana": oe_obras_en_ventana,
         "duplicados_entre_fuentes": duplicados_entre_fuentes,
-    } if (fuentes_meta or existe_oa or existe_aa) else None
+    } if (fuentes_meta or existe_oa or existe_aa or existe_oe) else None
 
     salida = {
         "meta": b.build_meta(),
@@ -410,13 +522,15 @@ def main() -> None:
         ) if fuentes_meta else None,
         "openalex_cobertura": openalex_cobertura,
         "autoarchivo_produccion": autoarchivo_produccion,
+        "obras_externas": obras_externas,
         "total_fuera_de_scopus": total_fuera_de_scopus,
     }
     b.write_json(salida, "produccion_declarada.json")
 
-    if not fuentes_meta and not existe_oa and not existe_aa:
+    if not fuentes_meta and not existe_oa and not existe_aa and not existe_oe:
         print("  ninguna fuente declarada: ni config/sources.yml, ni "
-              "internal/openalex_cobertura.csv, ni data/enriched/autoarchivo_produccion.json")
+              "internal/openalex_cobertura.csv, ni data/enriched/autoarchivo_produccion.json, "
+              "ni internal/obras_externas_cobertura.csv")
         print("  OK · data/processed/produccion_declarada.json (vacío, sin fuentes)")
         return
 
@@ -456,10 +570,25 @@ def main() -> None:
         print("\n  PD-03: falta data/enriched/autoarchivo_produccion.json (correr "
               "src/enrich/autoarchivo_produccion.py)")
 
+    if existe_oe:
+        print(f"\n  Repositorios externos: {len(filas_oe)} evaluados (PD-04)")
+        print(f"  confirmadas          : {len(confirmadas_oe)} filas")
+        print(f"    en ventana {inicio}-{fin} : {oe_obras_en_ventana} obras"
+              f" ({corroboradas_oe} corroboradas entre fuentes, contadas una vez)")
+        print(f"    fuera de ventana        : {len(oe_fuera_de_ventana)}")
+        print(f"    sin año                 : {len(oe_sin_anio)}")
+        print(f"  pendientes de revisión: {pendientes_oe} (no se cuentan)")
+        print(f"  descartadas          : {descartadas_oe}"
+              f" ({descartadas_version_oe} por ser otra versión de una obra ya contada)")
+    else:
+        print("\n  PD-04: falta internal/obras_externas_cobertura.csv (correr "
+              "src/enrich/obras_externas.py)")
+
     if total_fuera_de_scopus:
         print(f"\n  TOTAL fuera de Scopus, en ventana: {total_fuera_de_scopus['en_ventana']}"
               f"  ({len(en_ventana)} PD-01 + {len(oa_en_ventana)} PD-02"
               f" + {len(aa_en_ventana_con_facultad)} PD-03"
+              f" + {oe_obras_en_ventana} PD-04"
               f" - {duplicados_entre_fuentes} repetidas entre fuentes)")
 
     print("\n  OK · data/processed/produccion_declarada.json")

@@ -58,6 +58,11 @@ software), `src/enrich/europepmc.py` (acceso abierto biomédico) y
   (fusionando con lo previo) y dejan traza en `internal/`.
 - **Caché en disco y pausa** entre consultas, igual que los demás conectores.
 
+Desde el 2026-09-03 estas tres fuentes responden además una segunda pregunta,
+en dirección contraria: no "¿qué ORCID tienen los autores de este DOI?" sino
+"¿qué obras tienen estas personas que el universo no tiene?". Ese es el
+conector de `PD-04` (§2.10) — otro endpoint, otra salida, misma fuente.
+
 > GitHub (`src/enrich/github_orcid.py`) queda implementado pero **inactivo por
 > defecto**: su REST API no permite buscar por ORCID en el bio de un perfil sin
 > autenticación. Requiere un token en
@@ -372,6 +377,90 @@ reportaría como conflicto, igual que hace `orcid_crossref.py` — no ocurrió
 en esta corrida, pero el conector está probado para ese caso (`--test`).
 
 ---
+
+### 2.10 DataCite, Europe PMC y Zenodo — obras fuera del universo (PD-04) — **mecanismo publicado el 2026-09-03**
+
+Cuarta fuente de `produccion-ampliada.html`. El usuario preguntó de qué forma
+es posible incluir publicaciones fuera de Scopus/SciVal y, sobre la respuesta,
+autorizó explícitamente avanzar con "esa cuarta fuente de nivel V".
+
+**La pregunta que ninguna fuente del proyecto hacía.** §2.7 (`PD-02`) ya
+pregunta qué le atribuye a la institución un índice bibliográfico grande que
+el universo no tiene. Queda otra: **qué produjeron estas personas que ningún
+índice bibliográfico indexa bien** — datasets, software, preprints, pósters,
+materiales depositados. Las tres fuentes de §2.1 ter sí los ven. Hasta hoy se
+les consultaba sólo **por DOI del universo**, para recuperar el ORCID de sus
+autores: eso únicamente puede mirar hacia adentro. `src/enrich/obras_externas.py`
+invierte la dirección.
+
+**Cómo busca, y por qué de dos maneras.**
+
+- **Por ORCID** (`via = orcid`): un identificador de persona. Usa sólo los
+  ORCID vigentes de `data/enriched/authors_orcid.csv`, **descontando los que
+  `config/orcid_revisado.yml` marca como `retiradas`** — un ORCID que una
+  persona ya declaró incorrecto para esa firma no puede fundar la
+  recuperación de obras suyas. Es la vía fuerte.
+- **Por afiliación** (`via = afiliacion`): la cadena institucional declarada
+  en el registro. Es matching por cadena suelta, que `I-05` prohíbe como base
+  de una atribución — por eso aquí **no atribuye nada**: sólo propone un
+  candidato que una persona confirma. Se conserva porque recupera obras de
+  las 267 firmas sin ORCID, que la vía fuerte no puede ver por construcción.
+
+Cada fila declara por cuál de las dos llegó, y la herramienta de revisión
+advierte del homónimo en la tarjeta del caso, no en una nota al pie.
+
+**Las plantillas de búsqueda están en `config/sources.yml`**, campo
+`consulta_obras`, con `{orcid}` y `{institucion}` como únicos marcadores —
+no en el código. Otra institución que replique la plataforma cambia
+`config/institution.yml` y esas plantillas; si una API renombra su campo de
+búsqueda, se corrige la configuración.
+
+**El cuarto veredicto.** Zenodo acuña un DOI por cada versión de un depósito,
+además del DOI de concepto; DataCite indexa preprints cuya versión publicada
+sí está en Scopus. Son DOI distintos para la misma obra, y la deduplicación
+por DOI —el único mecanismo de deduplicación del proyecto— no los colapsa. La
+obra SÍ es de la institución, así que "atribución errónea" perdería la
+distinción. La revisión tiene por eso un veredicto propio, `version`, y su
+recuento se publica: saber si la cola está llena de homónimos o de versiones
+repetidas son dos diagnósticos con soluciones distintas.
+
+**Corroboración entre las tres.** El mismo DOI en dos repositorios es una
+obra corroborada dos veces, no dos obras (Regla 3 de
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md`). La cola conserva las dos filas —quien
+revisa necesita ver las dos— y el recuento cuenta una. La tabla "qué aportó
+cada repositorio" cuenta APORTES, no obras, y la página lo dice donde se
+lee, para que la diferencia no parezca un error de cuadratura.
+
+**Reejecutar no borra revisiones.** La cola se reconstruye entera en cada
+corrida, pero `resolucion` es trabajo humano, no un dato de la API: se
+conserva emparejando por `(fuente, id_fuente)`.
+
+**Estado (2026-09-03): mecanismo publicado, cifra ausente.** La política de
+red del entorno de desarrollo bloquea `api.datacite.org`, `www.ebi.ac.uk` y
+`zenodo.org` — 403 en el CONNECT del proxy, comprobado. El conector, la cola,
+la herramienta de revisión, el aplicador, el agregado y la sección del sitio
+están construidos y probados con `--test` en CI; la cola nace vacía y la
+sección lo declara en la página en vez de mostrar un cero que se leería como
+un resultado. **Los contratos de búsqueda de las tres APIs están tomados de
+su documentación y NO verificados contra la red desde este repositorio**: el
+conector comprueba la forma de cada respuesta y, si no la reconoce, guarda la
+respuesta cruda y se detiene, en vez de adivinar.
+
+Para llenarla, desde una red que alcance las tres APIs:
+
+```
+make obras-externas            # construye internal/obras_externas_cobertura.csv
+make revisar-obras-externas    # genera internal/revision_obras_externas.html
+# marcar caso por caso, exportar el CSV a internal/obras_externas_decisiones.csv
+python3 src/review/apply_obras_externas_review.py --dry-run
+python3 src/review/apply_obras_externas_review.py
+python3 src/build/build_all.py
+```
+
+**Lo que no hace:** no toca `data/interim/publications_universe.csv` ni
+ningún indicador de citas o FWCI. Confirmar una obra la vuelve contable como
+`PD-04`, en su propia sección, con su propio denominador y sin impacto —
+SciVal no mide nada de esto (`D-206`, `D-398`, Regla 5).
 
 ## 3. Propuestas de nuevas integraciones
 

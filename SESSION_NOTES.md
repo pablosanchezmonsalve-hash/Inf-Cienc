@@ -10046,3 +10046,243 @@ trabajando, para no perder de vista el fix del tooltip.
 
 Sitio, CI y ambas ramas en un estado consistente y verificado. Sesión
 cerrada.
+
+## Cierre: `PD-04` — la cuarta fuente fuera de Scopus, Nivel V, sobre repositorios de datos y acceso abierto (2026-09-03)
+
+### Contexto
+
+El usuario pidió primero un resumen del trabajo de esa misma tarde
+(conectores ORCID de DataCite/Europe PMC/Zenodo/GitHub, la herramienta
+de `informes/`, consolidación de identidad) y después preguntó **"¿de
+qué forma es posible incluir las publicaciones fuera de Scopus/SciVal?"**
+Sobre la respuesta —el marco de `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`,
+que ya define dos niveles de evidencia y tres indicadores publicados—
+autorizó explícitamente: **"avancemos con esa cuarta fuente de nivel V"**.
+
+La oportunidad concreta: las tres fuentes que entraron esa misma tarde
+sólo se consultaban **por DOI del universo**, para recuperar el ORCID de
+sus autores. Esa dirección sólo puede mirar hacia adentro. Las mismas
+tres APIs indexan datasets, software, preprints y materiales depositados
+que ningún índice bibliográfico cubre bien — y nadie se lo había
+preguntado.
+
+### La restricción del entorno, comprobada antes de escribir nada
+
+La política de red de este entorno bloquea `api.datacite.org`,
+`www.ebi.ac.uk` y `zenodo.org`: 403 en el CONNECT del proxy, verificado
+con `curl` sobre los tres hosts y contra `__agentproxy/status`, no
+supuesto. Igual que `api.crossref.org` y `api.openalex.org`. Es el mismo
+precedente de `crossref_financiamiento.py` (2026-09-02): se construye y
+se prueba el mecanismo, la corrida real la hace el usuario desde otra
+red. Se le dijo antes de empezar, no al entregar.
+
+### Qué se construyó
+
+- **`src/enrich/obras_externas.py`** — recupera obras de las tres
+  fuentes por dos vías, criba contra `publications_universe.csv` y deja
+  `internal/obras_externas_cobertura.csv` como cola de revisión.
+- **`src/review/build_obras_externas_review.py`** — la herramienta de
+  revisión, con cuatro veredictos.
+- **`src/review/apply_obras_externas_review.py`** — aplica el CSV
+  exportado sobre la columna `resolucion`.
+- **`src/build/09_produccion_declarada.py`** — bloque de agregación de
+  `PD-04` y su entrada en el total combinado.
+- **`web/assets/js/vista.js`** — la cuarta sección de
+  `produccion-ampliada.html`.
+- **`config/sources.yml`** — las cuatro fuentes de esa tarde
+  (DataCite, Europe PMC, Zenodo, GitHub), que **no estaban declaradas**;
+  `config/indicators.yml` — `PD-04`; `Makefile` — dos objetivos;
+  `.github/workflows/deploy.yml` — tres `--test` nuevos.
+
+### Las decisiones que costaron pensar
+
+**Por qué NO reutiliza la cola de `PD-02`, aunque sean el mismo nivel.**
+La tentación era obvia: las dos son Nivel V, las dos terminan en
+`CONFIRMADO_PRODUCCION_UFT`. Pero la cola de OpenAlex se identifica por
+`openalex_id` —una obra, un identificador— y ésta necesita
+`(fuente, id_fuente)`, porque la misma obra puede estar en los tres
+repositorios y cada uno se decide por separado (la evidencia que aporta
+cada uno es distinta). Además hay obras sin DOI, que con clave por DOI
+se pisarían todas entre sí. Y el vocabulario de veredictos no coincide.
+Forzar una sola cola habría exigido que la clave y los veredictos de
+`PD-02` aceptaran casos que no son suyos — exactamente lo que `PD-03`
+evitó al no meterse en el mecanismo de `PD-01`.
+
+**Qué sí se comparte.** La INTERACCIÓN de la herramienta de revisión
+—marcar, filtrar, guardar en el navegador, exportar el CSV— no tiene
+contenido metodológico: es presentación. Copiar sus ~120 líneas de
+JavaScript habría significado corregir cada bug de exportación dos veces
+y descubrir la segunda copia tarde. Se parametrizó
+`build_openalex_review.py` (clave de navegador, columnas de identidad,
+nombre del CSV, cabecera de comentario) y el nuevo módulo la importa.
+La salida de la herramienta de OpenAlex se verificó idéntica en
+estructura tras el cambio.
+
+**El cuarto veredicto, que ninguna otra cola necesita.** Zenodo acuña un
+DOI por cada versión de un depósito, además del DOI de concepto;
+DataCite indexa preprints cuya versión publicada sí está en Scopus. Son
+DOI distintos para la misma obra, y la deduplicación por DOI —el único
+mecanismo de deduplicación del proyecto— no puede colapsarlos. La obra
+SÍ es de la institución, así que meterlo en "atribución errónea" habría
+perdido la distinción y, con ella, la capacidad de saber si la cola está
+llena de homónimos o de versiones repetidas: dos diagnósticos con
+soluciones distintas.
+
+**Las dos vías de recuperación, y por qué la débil se conserva.** La vía
+por ORCID parte de un identificador de persona ya confirmado. La vía por
+afiliación parte de una cadena de texto, que `I-05` prohíbe como base de
+una atribución. No se descartó porque las 267 firmas sin ORCID son
+invisibles a la vía fuerte por construcción; se conserva declarando que
+no atribuye nada —sólo propone un candidato— y la advertencia del
+homónimo va en la tarjeta del caso, no en una nota al pie que nadie
+relaciona con lo que tiene delante.
+
+**Los ORCID retirados no fundan búsquedas.** `config/orcid_revisado.yml`
+lista 18 asignaciones que una persona declaró incorrectas para esa firma.
+Usarlas para recuperar "obras de esa persona" habría reconstruido, del
+lado de las obras, el error que esa decisión ya descartó del lado de los
+autores. Se excluyen, y hay un caso de prueba que lo comprueba.
+
+**Las plantillas de consulta salen de `config/sources.yml`.** El
+guardarraíl técnico de `CLAUDE.md` pide que otra institución adapte el
+sistema cambiando parámetros, no reescribiendo lógica. Las tres cadenas
+de búsqueda viven en `consulta_obras`, con `{orcid}` y `{institucion}`
+como únicos marcadores; hay un caso de prueba que verifica que ninguna
+cadena de consulta esté escrita en el código.
+
+**Reejecutar no borra revisiones.** La cola se reconstruye entera en cada
+corrida, pero `resolucion` es trabajo humano. Se conserva emparejando por
+`(fuente, id_fuente)`. `openalex_cobertura.py` NO hace esto: reejecutarlo
+hoy pondría en `PENDIENTE` las 20 confirmaciones existentes. Se declara
+como ambigüedad abierta, no se corrigió — es otro indicador y no estaba
+en el encargo.
+
+### Tres defectos reales encontrados de paso
+
+1. **`build_openalex_review.py` no se podía ejecutar.** `_leer_previas()`
+   exigía una columna `nota` que el `openalex_cobertura_decisiones.csv`
+   versionado no tiene (sólo `openalex_id,veredicto`): `KeyError: 'nota'`.
+   Verificado que es previo a esta sesión (`git stash` y reejecutar sobre
+   el árbol limpio). Corregido con `.get("nota", "")`. Al regenerarlo, el
+   HTML versionado resultó estar congelado desde el 2026-08-27: le
+   faltaban los bloques de evidencia Crossref (V2-26 bis) y las 20
+   decisiones ya tomadas. Ahora los trae.
+2. **El sello de procedencia de `PD-04` mostraba la fecha de corte de
+   SciVal.** `procedencia()` cae en ella por defecto, y su propio
+   docstring advierte que eso es engañoso para un indicador que no viene
+   de Scopus ni de SciVal. Se pasa la fecha de consulta de la propia cola.
+3. **La columna «Fase» de `docs/DECISIONS.md` atribuía 346 de 465
+   decisiones a la sesión equivocada.** `snapshot.py` sólo reconocía
+   encabezados `## Sesión … — …` como frontera de sesión, y desde agosto
+   casi todas las notas se titulan `## Cierre · …` (64), `## Cierre: …`
+   (27) o `## Addendum: …` (1). La variable de sesión se quedaba clavada
+   en el último encabezado que sí calzaba, así que las 15 decisiones más
+   recientes —y las mías— aparecían bajo «Paleta H (vino + champán)», una
+   sesión de diseño del 2026-09-01 sin ninguna relación. Es el MISMO
+   defecto que la auditoría del 2026-09-02 ya corrigió una vez, sobre otro
+   patrón de título (`(cont.)`), sin cubrir éste. Corregido reconociendo
+   cualquier `## ` como frontera y limpiando prefijo y fecha del título;
+   verificado fila por fila contra el encabezado real de cada nota.
+
+### Verificación
+
+- `--test` de los tres módulos nuevos: 29/29, 10/10 y 11/11.
+- Agregación de `PD-04` ejercitada con una cola sintética de 7 filas que
+  cubre los casos difíciles: mismo DOI en dos fuentes, obra sin DOI, fuera
+  de ventana, pendiente, descartada por versión, y un DOI que `PD-02` ya
+  cuenta. Resultado esperado y obtenido: 4 filas confirmadas en ventana →
+  3 obras (1 corroborada, contada una vez); total combinado 209 → 211,
+  con `duplicados_entre_fuentes` 19 → 20, porque una de las tres ya
+  estaba en `PD-02`. **La cola sintética se borró antes de comitear**: es
+  dato inventado y no puede quedar versionada (`CLAUDE.md`,
+  `<non_negotiable_rules>`).
+- Atribución de `DECISIONS.md` verificada tras el arreglo: se recompuso
+  el mapa decisión → encabezado real leyendo `SESSION_NOTES.md` por
+  separado, y se contrastó contra la columna generada. Las filas de
+  Fase 1/2/3 no cambiaron.
+- `src/audit/run_all.py`: 29/30, misma falla preexistente E-06, sin
+  fallas nuevas. `src/build/build_all.py`: 0 fallas en la compuerta
+  pública/interna, 536 fichas de autor, total fuera de Scopus 209 —
+  idéntico al de antes del cambio, que es lo que debe ocurrir mientras la
+  cola esté vacía.
+- `node src/verify/run_all.mjs` con la sección renderizada: contraste,
+  estructura, flujos, responsive, higiene y peso, sin fallos.
+- `node --check` sobre `vista.js`; YAML de los tres archivos de
+  configuración y del workflow, parseados.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-464 | `PD-04` es Nivel V con cola PROPIA, no una ampliación de la cola de `PD-02` | Clave de identidad distinta (`(fuente, id_fuente)` frente a `openalex_id`, porque la misma obra puede estar en los tres repositorios y decidirse por separado en cada uno), obras sin DOI que una clave por DOI pisaría entre sí, y un vocabulario de veredictos distinto. Forzar una sola cola habría metido en `PD-02` casos que no son suyos |
+| D-465 | La INTERACCIÓN de la herramienta de revisión se comparte entre las dos colas; la cola, no | Marcar, filtrar y exportar no tiene contenido metodológico: es presentación. Dos copias del mismo JavaScript significan corregir cada bug de exportación dos veces. Mezclar las colas sí tendría contenido metodológico |
+| D-466 | La revisión de `PD-04` tiene un cuarto veredicto, «otra versión de una obra ya contada» | Zenodo acuña un DOI por versión y DataCite indexa preprints de obras ya en Scopus: son DOI distintos para la misma obra y la deduplicación por DOI no los colapsa. La obra SÍ es de la institución, así que clasificarlo como atribución errónea perdería la distinción entre una cola llena de homónimos y una llena de versiones — dos problemas con soluciones distintas |
+| D-467 | Se conserva la vía de recuperación por afiliación pese a ser matching por cadena suelta (`I-05`) | Las 267 firmas sin ORCID son invisibles a la vía por identificador, por construcción. `I-05` prohíbe la cadena suelta como base de una ATRIBUCIÓN; aquí no atribuye nada — propone un candidato que una persona confirma, y cada fila declara por qué vía llegó |
+| D-468 | Los ORCID de `config/orcid_revisado.yml → retiradas` no fundan la recuperación de obras | Un ORCID que una persona ya declaró incorrecto para esa firma reconstruiría, del lado de las obras, el mismo error que esa decisión descartó del lado de los autores |
+| D-469 | Las plantillas de consulta de las tres APIs viven en `config/sources.yml`, no en el código | Guardarraíl de replicabilidad de `CLAUDE.md`: otra institución cambia parámetros, no lógica. Y si una API renombra su campo de búsqueda, se corrige la configuración |
+| D-470 | El conector conserva las resoluciones humanas al reejecutarse | La cola se reconstruye entera desde la API, pero `resolucion` es trabajo humano, no un dato recuperado: sobrescribirlo devolvería a cero cada revisión al refrescar la fuente |
+| D-471 | Se publica el MECANISMO de `PD-04` con la cola vacía, y la sección lo declara en la página | La red de este entorno bloquea las tres APIs (403 verificado). Publicar un cero se leería como «no hay producción fuera de Scopus en repositorios», que es una afirmación que nadie ha comprobado; declarar que falta correr el conector es el estado real |
+| D-473 | `snapshot.py` toma cualquier `## ` de `SESSION_NOTES.md` como frontera de sesión, no sólo `## Sesión … — …` | Desde agosto las notas se titulan `## Cierre …`; reconocer sólo el patrón viejo dejaba la sesión clavada y atribuía 346 de 465 decisiones a la sección equivocada. `DECISIONS.md` es el índice por el que el proyecto recupera el porqué de cada decisión: una columna de procedencia falsa lo vuelve inútil justo donde más se usa |
+| D-472 | La numeración de decisiones salta de `D-456` a `D-464` | La rama `claude/state-review-next-steps-wzzq0h` ya usa hasta `D-463` sin haberse fusionado. Continuar en `D-457` habría creado ocho identificadores duplicados al fusionar, que es el bug que la auditoría del 2026-09-02 ya tuvo que corregir una vez (26 IDs duplicados) |
+
+### Archivos modificados
+
+```
+src/enrich/obras_externas.py                    nuevo · conector de las tres fuentes
+src/review/build_obras_externas_review.py       nuevo · herramienta de revisión
+src/review/apply_obras_externas_review.py       nuevo · aplicador de decisiones
+src/review/build_openalex_review.py             parametrizado (CSS/JS compartidos) + fix de `nota`
+src/build/09_produccion_declarada.py            bloque PD-04 y total combinado
+src/build/common_build.py                       fuente de procedencia de PD-04
+web/assets/js/vista.js                          cuarta sección de produccion-ampliada
+config/sources.yml                              4 fuentes declaradas + plantillas de consulta
+config/indicators.yml                           PD-04
+Makefile                                        obras-externas, revisar-obras-externas
+.github/workflows/deploy.yml                    3 --test nuevos
+docs/METODOLOGIA_FUERA_DE_SCOPUS.md             §0, §1, Reglas 2 y 4, checklist, §4
+docs/FUENTES_Y_APIS.md                          §2.10 nueva; §2.1 ter actualizada
+docs/DATA_MODEL.md, docs/V2_BACKLOG.md          PD-04 en el modelo y en el backlog
+internal/revision_cobertura_openalex.html       regenerado (estaba congelado en agosto)
+src/state/snapshot.py                           frontera de sesión: cualquier `## `, no sólo `## Sesión`
+STATE.md, docs/DECISIONS.md                     regenerados (346 filas con la Fase corregida)
+```
+
+### Supuestos descartados
+
+- Que las tres APIs se podrían consultar desde aquí: descartado con `curl`
+  sobre los tres hosts, 403 en el CONNECT del proxy.
+- Que `PD-04` podía entrar como una fuente más en la cola de `PD-02` por
+  compartir nivel de evidencia: descartado al ver que la misma obra
+  necesita decidirse por separado en cada repositorio.
+- Que sumar las filas confirmadas de `PD-04` al total combinado era
+  correcto: descartado — el indicador ya colapsa la corroboración entre
+  sus tres fuentes, y sumar filas contaría dos veces lo que ya descontó.
+- Que `build_openalex_review.py` estaba sano: no lo estaba, y el HTML
+  versionado llevaba una semana sin poder regenerarse.
+
+### Ambigüedades abiertas
+
+- **`openalex_cobertura.py` pisa las resoluciones humanas al reejecutarse.**
+  Escribe `resolucion="PENDIENTE_REVISION_HUMANA"` en todas las filas: una
+  corrida nueva borraría las 20 confirmaciones de `PD-02`. El conector nuevo
+  no tiene el problema (`D-470`). No se corrigió el de OpenAlex: es otro
+  indicador, no estaba en el encargo, y merece su propia verificación.
+- **Los contratos de BÚSQUEDA de las tres APIs no están verificados.** Los de
+  recuperación por DOI sí se corrieron contra el corpus real desde otra red;
+  el endpoint de búsqueda tiene otra forma de respuesta y está tomado de la
+  documentación. El conector se detiene y guarda la respuesta cruda si no la
+  reconoce, en vez de adivinar — pero la primera corrida real puede exigir
+  ajustar una plantilla en `config/sources.yml`.
+- **La rama `claude/state-review-next-steps-wzzq0h` tiene 3 commits sin
+  fusionar** (Fortuny, Moya Patricia, y las 4 fusiones de firmas por
+  convergencia de ORCID), con decisiones hasta `D-463`. No se fusionó aquí
+  para no mezclar dos trabajos distintos en un mismo commit.
+
+### Próximo paso recomendado
+
+Correr `make obras-externas` desde una red que alcance las tres APIs. Si
+alguna plantilla de `consulta_obras` no calza con el contrato real, el
+conector se detiene y deja la respuesta cruda en
+`data/cache/obras_externas/<fuente>/ultima_respuesta.json` — ese archivo dice
+exactamente qué corregir. Con la cola llena: `make revisar-obras-externas`,
+revisar caso por caso, aplicar y reconstruir.

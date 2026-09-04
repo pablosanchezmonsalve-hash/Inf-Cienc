@@ -449,6 +449,10 @@ FUENTE_POR_INDICADOR = {
     # cubre todas las Facultades a la vez — no una API externa ni el sitio
     # de una sola Facultad.
     "PD-03": "Repositorio institucional, autoarchivo (no Scopus)",
+    # PD-04: tres repositorios de outputs no tradicionales. Se nombran los
+    # tres porque una obra puede venir de cualquiera de ellos y el sello
+    # tiene que decir de dónde salió el recuento, no una fuente genérica.
+    "PD-04": "DataCite · Europe PMC · Zenodo, confirmado por revisión humana (no Scopus)",
 }
 
 

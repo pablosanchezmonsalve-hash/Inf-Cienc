@@ -462,3 +462,115 @@ fuentes:
       con 14 documentos invisible al detector; "Cabello, José Miguel";
       "Caffarena, Paula" — con un identificador que en el corpus aparece
       bajo "Barcenilla, Paula Caffarena", apellidos en otro orden).
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PD-04 — repositorios de datos y acceso abierto (Nivel V)
+  #
+  # Las tres entran al proyecto el 2026-09-03 como fuentes de ORCID
+  # (docs/FUENTES_Y_APIS.md §2.1 ter) y se declaran aquí al pasar a alimentar
+  # también un indicador publicable de obras (PD-04). Regla 1 de
+  # docs/METODOLOGIA_FUERA_DE_SCOPUS.md: ninguna fuente empieza a alimentar
+  # nada sin su clasificación de nivel escrita.
+  #
+  # `consulta_obras` es la plantilla de búsqueda, declarada aquí y NO en el
+  # código: otra institución que replique la plataforma cambia
+  # config/institution.yml y estas plantillas, nunca src/. `{orcid}` y
+  # `{institucion}` son los únicos marcadores que el conector sustituye.
+  datacite_api:
+    nombre: "DataCite — DOI de datasets, software y otros outputs no tradicionales"
+    tipo: "api"
+    endpoint: "https://api.datacite.org/dois"
+    autenticacion: "ninguna"
+    conector: "src/enrich/datacite.py (ORCID por DOI), src/enrich/obras_externas.py (obras, PD-04)"
+    rol: "Nivel V — cola de candidatos de obra, confirmada por revisión humana caso por caso (D-206, D-313)"
+    nivel_evidencia: "V"           # docs/METODOLOGIA_FUERA_DE_SCOPUS.md §1
+    aporta:
+      - orcid_donde_no_habia
+      - obras_fuera_del_universo_scopus_como_candidatas_de_revision
+    salida: "data/enriched/authors_orcid.csv, internal/datacite_log.csv, internal/obras_externas_cobertura.csv"
+    consulta_obras:
+      por_orcid: 'creators.nameIdentifiers.nameIdentifier:"https://orcid.org/{orcid}"'
+      por_afiliacion: 'creators.affiliation.name:"{institucion}"'
+    fecha_corte: null
+    ejecutada: false               # la política de red del entorno de desarrollo bloquea api.datacite.org
+    fecha_ejecucion: null
+    nota: >-
+      Indexa repositorios que las bases bibliográficas principales ignoran
+      (Zenodo, Figshare, repositorios institucionales). Es fuente
+      INDEPENDIENTE de Crossref y de OpenAlex: una coincidencia cuenta como
+      confirmación, no como comprobación circular. El contrato de búsqueda
+      (`/dois?query=`) NO está verificado desde este repositorio: el conector
+      comprueba la forma de la respuesta y, si no la reconoce, guarda la
+      respuesta cruda y se detiene en vez de adivinar.
+
+  europepmc_api:
+    nombre: "Europe PMC — literatura biomédica de acceso abierto"
+    tipo: "api"
+    endpoint: "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+    autenticacion: "ninguna"
+    conector: "src/enrich/europepmc.py (ORCID por DOI), src/enrich/obras_externas.py (obras, PD-04)"
+    rol: "Nivel V — cola de candidatos de obra, confirmada por revisión humana caso por caso (D-206, D-313)"
+    nivel_evidencia: "V"
+    aporta:
+      - orcid_donde_no_habia
+      - obras_fuera_del_universo_scopus_como_candidatas_de_revision
+    salida: "data/enriched/authors_orcid.csv, internal/europepmc_log.csv, internal/obras_externas_cobertura.csv"
+    consulta_obras:
+      por_orcid: 'AUTHORID:"{orcid}"'
+      por_afiliacion: 'AFF:"{institucion}"'
+    fecha_corte: null
+    ejecutada: false               # la política de red del entorno de desarrollo bloquea www.ebi.ac.uk
+    fecha_ejecucion: null
+    nota: >-
+      Indexa PubMed, PubMed Central y repositorios de acceso abierto. Cubre
+      biomedicina y NO cubre ciencias sociales ni humanidades: su aporte a
+      PD-04 estará sesgado hacia la Facultad de Medicina y Salud por
+      construcción, y ese sesgo se declara, no se corrige silenciosamente.
+      El contrato de búsqueda no está verificado desde este repositorio.
+
+  zenodo_api:
+    nombre: "Zenodo — repositorio de datos, software y materiales del CERN (OpenAIRE)"
+    tipo: "api"
+    endpoint: "https://zenodo.org/api/records"
+    autenticacion: "ninguna"
+    conector: "src/enrich/zenodo.py (ORCID por DOI), src/enrich/obras_externas.py (obras, PD-04)"
+    rol: "Nivel V — cola de candidatos de obra, confirmada por revisión humana caso por caso (D-206, D-313)"
+    nivel_evidencia: "V"
+    aporta:
+      - orcid_donde_no_habia
+      - obras_fuera_del_universo_scopus_como_candidatas_de_revision
+    salida: "data/enriched/authors_orcid.csv, internal/zenodo_log.csv, internal/obras_externas_cobertura.csv"
+    consulta_obras:
+      por_orcid: 'creators.orcid:"{orcid}"'
+      por_afiliacion: 'creators.affiliation:"{institucion}"'
+    fecha_corte: null
+    ejecutada: false               # la política de red del entorno de desarrollo bloquea zenodo.org
+    fecha_ejecucion: null
+    nota: >-
+      Deposita datasets, software, pósters y presentaciones. LÍMITE PROPIO Y
+      DECLARADO: Zenodo acuña un DOI nuevo por cada versión de un mismo
+      depósito, además del DOI de concepto que las agrupa. La deduplicación
+      por DOI de este proyecto NO colapsa esas versiones — son DOI distintos
+      para la misma obra. Por eso la revisión de PD-04 tiene un veredicto
+      propio ('version') que ningún otro indicador necesita.
+
+  github_orcid_api:
+    nombre: "GitHub — ORCID declarado en el perfil de investigadores"
+    tipo: "api"
+    endpoint: "https://api.github.com/search/users"
+    autenticacion: "token en la variable de entorno GITHUB_ORCID_TOKEN, nunca en disco"
+    conector: "src/enrich/github_orcid.py"
+    rol: "verificación cruzada de ORCID, capa interna"
+    nivel_evidencia: null          # no aporta obras: no entra a PD-04
+    aporta:
+      - verificacion_cruzada_de_orcid_declarado_por_el_titular
+    salida: "internal/github_orcid_log.csv"
+    fecha_corte: null
+    ejecutada: false               # requiere token; inactivo por defecto
+    fecha_ejecucion: null
+    nota: >-
+      Se declara aquí para que la fuente exista en el registro, no porque
+      alimente un indicador: NO aporta obras y por lo tanto NO entra a PD-04.
+      La REST API de GitHub no permite buscar "ORCID in:bio" sin
+      autenticación, y la búsqueda amplia exige GraphQL. Documentada, no
+      ejecutada.

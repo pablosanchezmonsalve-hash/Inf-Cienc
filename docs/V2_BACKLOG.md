@@ -249,6 +249,23 @@ TRES fuentes por DOI: hay solapamiento real entre las tres, no sólo entre
 pares (Medicina aparece declarada en su propio sitio Y autoarchivada por
 sus autores).
 
+**Tercera ronda, 2026-09-03:** el usuario preguntó de qué forma es posible
+incluir publicaciones fuera de Scopus/SciVal y autorizó "avancemos con esa
+cuarta fuente de nivel V" — implementada como `PD-04`: DataCite, Europe PMC
+y Zenodo consultados **por obra**, no por DOI del universo. Recupera por los
+ORCID que el proyecto ya confirmó (descontando los retirados) y por la
+afiliación declarada, deja una cola de revisión propia, y trae un veredicto
+que ninguna otra cola necesita —"otra versión de una obra ya contada"—
+porque Zenodo acuña un DOI por versión. Se publica el MECANISMO: la política
+de red del entorno de desarrollo bloquea las tres APIs, así que la cola nace
+vacía y la sección lo declara en la página. **Pendiente**: correr
+`make obras-externas` desde una red que las alcance, y revisar la cola que
+produzca. Nuevo: `src/enrich/obras_externas.py`,
+`src/review/build_obras_externas_review.py`,
+`src/review/apply_obras_externas_review.py`.
+
 Ver `src/build/09_produccion_declarada.py`, `docs/FUENTES_Y_APIS.md` §2.7
-(`PD-02`) y §2.8 (`PD-03`), y `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` (marco
-Nivel D/Nivel V; `PD-01` y `PD-03` son Nivel D, `PD-02` es Nivel V).
+(`PD-02`), §2.8 (`PD-03`) y §2.10 (`PD-04`), y
+`docs/METODOLOGIA_FUERA_DE_SCOPUS.md` (marco Nivel D/Nivel V; `PD-01` y
+`PD-03` son Nivel D, `PD-02` y `PD-04` son Nivel V, con mecanismos de cola
+distintos entre sí).
