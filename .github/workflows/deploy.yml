@@ -130,6 +130,27 @@ jobs:
       - name: Verificar la lógica de la brecha de cobertura
         run: python3 src/enrich/openalex_cobertura.py --test
 
+      # Conectores que no deciden identidad de autor, pero sí qué entra a un
+      # indicador publicado (X-03, financiamiento) o a la producción declarada
+      # fuera de Scopus (PD-02, PD-03) — encontrados sin autoprueba en CI en la
+      # misma auditoría que agregó el bloque de arriba.
+      - name: Verificar la lógica de financiamiento por Crossref
+        run: python3 src/enrich/crossref_financiamiento.py --test
+
+      - name: Verificar la lógica de cobertura OpenAlex contra Crossref
+        run: python3 src/enrich/openalex_cobertura_crossref.py --test
+
+      - name: Verificar la lógica de producción de la Facultad de Medicina
+        run: python3 src/enrich/facultad_medicina_publicaciones.py --test
+
+      - name: Verificar la lógica de producción autoarchivada
+        run: python3 src/enrich/autoarchivo_produccion.py --test
+
+      # Declara la fecha de corte y la consulta exacta de Scopus (T-06); no
+      # sale a red en --test, igual que ROR.
+      - name: Verificar la lógica de la API de Scopus
+        run: python3 src/enrich/scopus_api.py --test
+
       # Lo que decide qué firmas se fusionan como una persona y cuáles dejan de
       # contarse por no serlo. Es la lógica con más consecuencias sobre lo
       # publicado que existe fuera del pipeline, y hasta ahora no la ejercía

@@ -129,8 +129,8 @@ Además del pipeline y de las compuertas de la sección siguiente:
 
 | Paso | Qué ejerce |
 |---|---|
-| Autopruebas de los cuatro módulos de ORCID | Qué identificador se atribuye a qué persona |
-| Autoprueba de `apply_decisions` (20 casos) | Qué firmas se fusionan como una persona y cuáles dejan de contarse |
+| Autopruebas de los conectores de `src/enrich/` (18 módulos) | Qué identificador se atribuye a qué persona, y qué entra a un indicador publicado o a la producción declarada fuera de Scopus |
+| Autoprueba de `apply_decisions` | Qué firmas se fusionan como una persona y cuáles dejan de contarse |
 | Contenido sin JavaScript | Que el pre-renderizado ocurrió de verdad |
 | Barrera pública/interna | Que nada de `internal/` viaja en `dist/` |
 | `src/verify/run_all.mjs` | Contraste WCAG, estructura, consola, flujos, responsive e higiene |
@@ -188,11 +188,11 @@ Verificado automáticamente por `06_assemble_site.py`:
 
 ## 6. Rendimiento observado
 
-Sobre el build actual (823 publicaciones, 538 fichas):
+Sobre el build actual (823 publicaciones, 530 fichas):
 
 | | |
 |---|---|
-| Peso total de `dist/` | ~1,9 MB |
+| Peso total de `dist/` | ~3,6 MB |
 | Carga de la portada | `meta.json` + `kpis.json` + `glossary.json` ≈ 25 KB |
 | Página de publicaciones | + `publications.json` ≈ 700 KB |
 | Ficha de autor | + un archivo de ~5 KB |

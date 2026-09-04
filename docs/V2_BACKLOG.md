@@ -19,7 +19,7 @@ lugar.
 
 | # | Pendiente | Desbloquea | Origen |
 |---|---|---|---|
-| **V2-01** | Subir la cobertura de ORCID desde el 50,9 % actual (274 de 538), confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
+| **V2-01** | Subir la cobertura de ORCID desde el 50,6 % actual (268 de 530), confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
 | **V2-02** | ~~Resolver los grupos de variantes de nombre que siguen pendientes~~ | `C-05` red de coautoría; recuento real de personas | T-03 (cerrado, 2026-08-26) |
 | **V2-03** | Revisión humana de los 20 identificadores fragmentados | `C-07` liderazgo autoral | T-04 |
 | **V2-04** | Validar institucionalmente el vocabulario de unidades | Retirar la advertencia destacada de `P-07` | T-02 |
@@ -33,8 +33,8 @@ afirmaciones caducaron:
 
 - **La vía Crossref ya se recorrió.** `T-01` se cerró el 2026-08-01 con 174
   firmas, y la ampliación desde el registro, OpenAlex y las decisiones humanas
-  la dejaron en **327 asignaciones sobre 589 formas de firma sin consolidar**,
-  que son **274 de 538 entidades publicadas (50,9 %)**. El 100 % no es
+  la dejaron en **328 asignaciones sobre 589 formas de firma sin consolidar**,
+  que son **268 de 530 entidades publicadas (50,6 %)**. El 100 % no es
   alcanzable sin inventar datos: el argumento está en `docs/ORCID_COVERAGE.md`
   §5.
 - **La consolidación no esperó al ORCID.** De los 110 casos que `make revision`
@@ -45,9 +45,12 @@ afirmaciones caducaron:
   llevó la base a 542 entidades, y la regla `E-09` descartó 4 formas más que
   resultaron ser fragmentos de cadena de afiliación, no personas
   (`config/firmas_e09_resueltas.yml`, ver `docs/LIMITATIONS.md` §7), dejando
-  la base publicada hoy en **538 entidades**. El camino fue humano y caso por
-  caso, que es justo lo que `D-08` exige y lo que este párrafo daba por
-  imposible.
+  la base publicada en **538 entidades** el 2026-09-02. Una revisión adicional
+  el 2026-09-03 —convergencia de ORCID no explorada antes, fuera de las cuatro
+  colas originales— fusionó 10 formas más, dejando **94 formas convertidas en
+  39 personas** y la base publicada hoy en **530 entidades**. El camino fue
+  humano y caso por caso, que es justo lo que `D-08` exige y lo que este
+  párrafo daba por imposible.
 
 No confundir dos recuentos que coinciden en el número: la cola de variantes de
 nombre tiene **51 grupos** (`T-03`, 123 filas en `internal/ambiguities_authors.csv`),
@@ -105,7 +108,7 @@ Ya evaluados en Fase 2 y verificados como calculables. Están en
 
 | # | Decisión | Estado |
 |---|---|---|
-| **T-11** | Alcance de publicación de fichas de autor | **Supuesto vigente:** se publican las **538 entidades** —las 589 formas de firma de la fuente, con 84 ya fusionadas en 37 personas y 4 descartadas por la regla `E-09` (no son personas)—, ranking por defecto n ≥ 5 (`config/publication.yml`). Sin confirmar |
+| **T-11** | Alcance de publicación de fichas de autor | **Supuesto vigente:** se publican las **530 entidades** —las 589 formas de firma de la fuente, con 94 ya fusionadas en 39 personas y 4 descartadas por la regla `E-09` (no son personas)—, ranking por defecto n ≥ 5 (`config/publication.yml`). Sin confirmar |
 | ~~T-13~~ | ~~Confirmar la semántica del percentil de citación con documentación de SciVal~~ | **Cerrado (2026-08-26)**: empírica (correlación −0,66) y ahora también documental — `docs/METHODOLOGY.md` §7 bis |
 | — | Licencia de datos derivados (CC BY 4.0) | Propuesta en `DATA_LICENSE.md`, sin validar |
 | — | Alcance de publicación de métricas de Elsevier | Sin verificación jurídica |

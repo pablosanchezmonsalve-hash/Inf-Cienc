@@ -124,9 +124,10 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
   institución sin que haya publicación compartida que lo ancle. Dos homónimos de
   la misma universidad son indistinguibles por este método, así que **no escribe
   en la capa publicable**: deja candidatos en `internal/` para revisión humana
-  (hoy, 20 pendientes). Las confirmaciones acumuladas por esta vía —25 a la
-  fecha— se escriben en `authors_orcid.csv`, no en el archivo de candidatos: el
-  conector lo regenera en cada corrida, así que no es el lugar donde persiste
+  (la cola está hoy resuelta por completo, 0 pendientes). Las confirmaciones
+  acumuladas por esta vía —26 a la fecha— se escriben en `authors_orcid.csv`,
+  no en el archivo de candidatos: el conector lo regenera en cada corrida, así
+  que no es el lugar donde persiste
   qué ya se revisó.
 
 ### 2.3 Lo que aportó cada vía, medido
@@ -136,9 +137,9 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 | Crossref | 174 |
 | Registro de ORCID (`doi-self`) | 48 |
 | OpenAlex (`doi-self`, vía autorías) | 79 |
-| Revisión humana sobre candidatos por afiliación | 25 |
+| Revisión humana sobre candidatos por afiliación | 26 |
 | Revisión humana (búsqueda manual en el registro) | 1 |
-| **Total** | **327 formas de firma · 274 de 538 entidades publicadas** |
+| **Total** | **328 formas de firma · 268 de 530 entidades publicadas** |
 
 El detalle metodológico y el argumento de por qué el 100 % no es alcanzable
 están en `docs/ORCID_COVERAGE.md`.

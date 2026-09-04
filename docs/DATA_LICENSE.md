@@ -78,10 +78,13 @@ No se incorpora ningún dato personal que no esté en la fuente.
 Aun así hay tres decisiones deliberadas:
 
 1. **No se afirma identidad.** Cada ficha corresponde a una forma de firma, no
-   a una persona verificada. Una revisión humana ya fusionó 84 formas en 37
+   a una persona verificada. Una revisión humana ya fusionó 94 formas en 39
    personas y descartó 4 firmas más que resultaron ser fragmentos de cadena de
-   afiliación, no personas (regla `E-09`, ya resuelto); quedan **31 grupos de
-   variantes** y **20 identificadores fragmentados** declarados sin resolver.
+   afiliación, no personas (regla `E-09`, ya resuelto). Las colas automáticas
+   de variantes de nombre (`P-03`) y de Scopus ID múltiples (`P-04`) están hoy
+   resueltas por completo (`internal/pendientes_consolidacion.md`); persisten
+   otras colas de revisión abiertas (ORCID sin confirmar, unidad académica,
+   candidatos por afiliación — 82 casos, ver `STATE.md`).
 2. **No se enlazan firmas sospechosas entre sí.** Sugerir que dos firmas son la
    misma persona publicaría una afirmación no verificada. La cola de revisión
    permanece interna.
