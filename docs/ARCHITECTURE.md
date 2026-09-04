@@ -56,7 +56,7 @@ plan original era promoverlo a `authors_master.csv` al cerrarse `T-03`/`T-04`
 `config/identidades_consolidadas.yml` y `config/firmas_e09_resueltas.yml`
 —generados por `src/review/apply_decisions.py` desde decisiones humanas en
 `make revision`, nunca a mano (`D-08`)— son hoy el mecanismo real de
-consolidación, y `data/processed/authors.json` (538 entidades) es el
+consolidación, y `data/processed/authors.json` (530 entidades) es el
 artefacto final que sirve el sitio. `authors_master.csv` nunca se creó.
 
 `internal/matching_log.csv` (1.207 filas) es la tabla de autoría — la entidad
@@ -74,8 +74,8 @@ detalle comprimido).
 | `kpis.json` | Los 6 KPIs de portada + fecha de corte |
 | `series.json` | Series anuales preagregadas de todos los módulos |
 | `publications.json` | 823 registros, campos de tabla y filtro |
-| `authors.json` | 538 entidades de autor con agregados |
-| `author/<id>.json` | Ficha individual con sus publicaciones, una por entidad (538 archivos) |
+| `authors.json` | 530 entidades de autor con agregados |
+| `author/<id>.json` | Ficha individual con sus publicaciones, una por entidad (530 archivos) |
 | `facets.json` | Valores de cada filtro con su recuento |
 | `glossary.json` | Definiciones de métricas para tooltips |
 | `meta.json` | Fuentes, cortes, ventana, versión del build |
@@ -116,7 +116,7 @@ Node) para que cada página tenga contenido real sin JavaScript. Cumple los
 requisitos que motivaron la decisión:
 
 - Salida completamente estática, sin runtime de servidor.
-- Generación de 538 páginas de autor en build (una por entidad publicada).
+- Generación de 530 páginas de autor en build (una por entidad publicada).
 - Carga diferida por módulo.
 - Sin dependencia de CDN externo en runtime (los datos son institucionales;
   `README.md` declara **0** dependencias externas en el navegador).
@@ -171,7 +171,7 @@ resueltas— están en `docs/FUENTES_Y_APIS.md` §4.
 | Paginación | Tabla de publicaciones en páginas de 50; sin scroll infinito |
 | Fichas individuales | Un archivo por autor, no un bundle monolítico |
 
-El corpus (823 publicaciones, 538 entidades de autor) es lo bastante pequeño para filtrar
+El corpus (823 publicaciones, 530 entidades de autor) es lo bastante pequeño para filtrar
 en cliente sobre `publications.json` sin índice invertido. Se registra que este
 supuesto deja de valer alrededor de ~10.000 publicaciones, umbral a partir del
 cual haría falta un índice precomputado.

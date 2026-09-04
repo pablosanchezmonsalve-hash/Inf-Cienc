@@ -87,17 +87,17 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Con autoría detallada | 818 |
 | Formas de firma de autor | **589** |
 | Pares autor × publicación | **1.207** |
-| Firmas con ORCID (sin consolidar) | **322** |
-| Entidades publicadas con ORCID | **277** |
+| Firmas con ORCID (sin consolidar) | **328** |
+| Entidades publicadas con ORCID | **268** |
 | Reglas de validación | **30** · 29 pasan · 0 fallas bloqueantes |
 
 ### Indicadores (Fase 2)
 
 | | |
 |---|---|
-| Evaluados contra los datos | **41** |
-| Publicados | **29** |
-| Diferidos a V2 | 8 |
+| Evaluados contra los datos | **43** |
+| Publicados | **31** |
+| Diferidos a V2 | 7 |
 | No calculables, declarados | 5 |
 
 ### Sitio (Fase 3)
@@ -105,8 +105,8 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | | |
 |---|---|
 | Páginas | 11 |
-| Fichas de autor | **538**, una por archivo |
-| Peso total de `dist/` | ~3,5 MB |
+| Fichas de autor | **530**, una por archivo |
+| Peso total de `dist/` | ~3,6 MB |
 | Dependencias externas en el navegador | **0** |
 
 Peso por página, medido en navegador. La segunda columna es lo que realmente
@@ -140,7 +140,7 @@ comprimidos— lo cachea el navegador entre páginas.
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
 | `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` | Cómo se clasifica y publica una fuente que no es Scopus/SciVal |
 | `docs/LIMITATIONS.md` | **Limitaciones declaradas. Leer antes de interpretar cualquier indicador** |
-| `docs/INDICATORS.md` | Catálogo de 41 indicadores y selección V1 |
+| `docs/INDICATORS.md` | Catálogo de 43 indicadores y selección V1 |
 | `docs/FUENTES_Y_APIS.md` | De dónde sale cada dato hoy, y qué plataformas podrían aportar lo que falta |
 | `docs/ORCID_COVERAGE.md` | Cobertura de ORCID: hasta dónde llega y por qué no llega al 100 % |
 | `docs/ARCHITECTURE.md` | Pipeline, artefactos y rendimiento |

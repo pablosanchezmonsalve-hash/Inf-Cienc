@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `f7adf3a` · Resuelve el pendiente de Moya, Patricia en la cola de Varios Scopus ID
-Snapshot: 2026-09-03
+Último commit: `a10d442` · Fusiona 4 grupos de firmas por convergencia de ORCID no consolidada
+Snapshot: 2026-09-04
 
 ---
 
@@ -32,11 +32,11 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **536** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades de autor publicadas | **530** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **328** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **274** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades con ORCID | **268** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **43** | `config/indicators.yml` |
 | Indicadores publicados | **31** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 463
+## Decisiones tomadas: 466
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

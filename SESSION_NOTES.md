@@ -10491,3 +10491,187 @@ Moyano (ambigüedad abierta arriba) antes de decidir si agregar «Dávila
 C.M.»; o pedir la verificación de posición del Tier B, el mismo método
 que ya se usó para Fernández Abara/Amarouch/Fortuny, para elevarlo a un
 nivel de evidencia aplicable.
+
+## Cierre: auditoría completa del repositorio
+
+### Contexto
+
+El usuario pidió auditar el repositorio entero, corregir los defectos
+encontrados, y al final reportar el total de trabajo pendiente en el
+proyecto.
+
+### Qué se hizo
+
+Se corrió toda la infraestructura de verificación que el proyecto ya
+tiene, en vez de inventar una nueva:
+
+1. Sintaxis de los 58 archivos Python (`py_compile`) y de todo el
+   JavaScript del sitio (`node --check`) — limpio.
+2. `python3 src/audit/run_all.py` — 30 reglas, 29 pasan, 0 bloqueantes
+   fallando. La única falla (`E-06`, columna `Molecular Sequence Numbers`
+   vacía) se investigó a fondo antes de tocar nada: es un hallazgo
+   **intencional y ya documentado** (T-07 cerrado, excluida del dataset
+   procesado, `docs/LIMITATIONS.md`, `docs/V2_BACKLOG.md` V2-18) — la
+   auditoría la sigue reportando a propósito como transparencia sobre la
+   fuente cruda. No es un defecto; no se tocó.
+3. Autopruebas de los 20 conectores de `src/enrich/` y de los 4 scripts
+   de `src/review/` con `--test` — todas OK.
+4. Pipeline de build completo (`build_all.py`, `06_assemble_site.py`) —
+   limpio, 0 fallas en la barrera pública/interna.
+5. `node src/verify/run_all.mjs` (contraste WCAG, estructura, flujos,
+   responsive, higiene, peso) — 6/6 en verde.
+6. Enlaces internos de los 36 archivos Markdown del repositorio — 0
+   rotos.
+7. Validez de los 12 YAML del proyecto (`config/*.yml`,
+   `.github/workflows/*.yml`) — todos parsean.
+8. Estructura de todos los CSV propios del proyecto (columnas consistentes
+   fila a fila) — limpia (excluyendo `data/raw/Scopus_Author_Search_UFT.csv`,
+   que trae un preámbulo no tabular por diseño del export de Scopus, ya
+   manejado correctamente por su conector).
+9. Higiene de git (archivos temporales/caché rastreados por error) y
+   búsqueda de credenciales hardcodeadas — limpio en ambos.
+
+**Defectos reales encontrados y corregidos:**
+
+- **Deriva de la cifra de entidades de autor publicadas en la
+  documentación.** La cifra bajó dos veces esta sesión (538→536→530) por
+  las fusiones de identidad aplicadas, y quedó incrustada como texto fijo
+  en 9 archivos de documentación (`README.md`, `docs/ARCHITECTURE.md`,
+  `docs/AUTHOR_PROFILE.md`, `docs/DATA_LICENSE.md`, `docs/DEPLOYMENT.md`,
+  `docs/FUENTES_Y_APIS.md`, `docs/INDICATORS.md`, `docs/LIMITATIONS.md`,
+  `docs/ORCID_COVERAGE.md`, `docs/V2_BACKLOG.md`), en ~25 menciones
+  distintas. Se corrigió cada una a mano, no con un reemplazo global:
+  varias apariciones de «538» resultaron ser una métrica DISTINTA
+  (autores con menos de 5 publicaciones sobre las 589 formas crudas, que
+  sigue siendo 538 y no debía tocarse — `docs/METHODOLOGY.md`,
+  `docs/ORCID_GUIDE.md`, la fila `V-06` de `VALIDATION_REPORT.md`), y
+  varias más eran instantáneas históricas fechadas (tablas «resultado de
+  la primera corrida» en `docs/ORCID_GUIDE.md`, secciones «entregado y
+  ejecutado el FECHA» en `docs/FUENTES_Y_APIS.md`, filas de
+  `docs/DECISIONS.md`, que es generado y nunca se edita a mano) que deben
+  quedar congeladas, no actualizarse. Antes de corregir se corrió
+  `python3 src/build/build_all.py` de verdad para obtener la cifra real
+  post-fusión (**530**, confirmando la aritmética 589−94+39−4) en vez de
+  calcularla de memoria.
+- **`STATE.md` seguía mostrando 536** porque `snapshot.py` lee
+  `data/processed/authors.json`, que es artefacto de build y no se
+  regenera solo — hacía falta correr el pipeline de verdad, no sólo
+  `snapshot.py`. Se corrió y se regeneró.
+- **`README.md` tenía una segunda capa de cifras desactualizadas** que la
+  búsqueda inicial (acotada a «538») no capturó: «Firmas con ORCID
+  (sin consolidar) 322» (real: 328), «Entidades publicadas con ORCID 277»
+  (real: 268), «Evaluados contra los datos 41» (real: 43, `config/
+  indicators.yml` ya tiene 43 indicadores), «Publicados 29» (real: 31),
+  «Diferidos a V2 8» (real: 7, recalculado leyendo `publicar`/`estado` de
+  cada indicador en `indicators.yml`). Se encontraron cruzando la tabla
+  completa de `README.md` contra la tabla de cifras canónicas de
+  `STATE.md`, línea por línea, no sólo repitiendo la búsqueda anterior.
+  El mismo par (41/29) también estaba mal en `docs/INDICATORS.md`.
+- **La tabla de etiquetas de veredicto ORCID en `docs/ORCID_COVERAGE.md`
+  estaba desactualizada en cifras Y en vocabulario**: una etiqueta se
+  había renombrado en el código («comprobado a mano» → «comprobado por
+  revisión», `src/build/03_authors.py`) y había aparecido una etiqueta
+  nueva («encontrado por revisión», para asignaciones por búsqueda manual
+  pura, sin publicación compartida que las ancle) que el documento nunca
+  llegó a describir. Se recalculó la distribución completa leyendo
+  `orcid_veredicto_etiqueta` de las 268 entidades reales en
+  `data/processed/authors.json` (el build recién corrido), no
+  reutilizando ninguna cifra vieja.
+- **5 conectores con autoprueba (`--test`) pero sin paso en CI**:
+  `crossref_financiamiento.py`, `facultad_medicina_publicaciones.py`,
+  `openalex_cobertura_crossref.py`, `autoarchivo_produccion.py`,
+  `scopus_api.py`. Es la misma clase de defecto que ya se corrigió antes
+  en esta sesión para datacite/europepmc/zenodo/github_orcid — connectors
+  que deciden qué entra a un indicador publicado o a la producción
+  declarada fuera de Scopus, sin ninguna prueba que se ejerciera en cada
+  despliegue. Se agregaron los 5 pasos a `.github/workflows/deploy.yml`,
+  verificados uno por uno con `--test` antes de escribirlos, y se corrigió
+  la fila de `docs/DEPLOYMENT.md` que describía el bloque como «los
+  cuatro módulos de ORCID» cuando ya eran 18 módulos de `src/enrich/`
+  probados, ninguno exclusivamente de ORCID.
+
+**No se tocó** (declarado, no resuelto, para no convertir una duda en un
+arreglo apresurado): el párrafo de `docs/INDICATORS.md` que dice «por eso
+el total es 28» no cuadra limpiamente con la cifra de publicados de la
+tabla que lo precede (29 antes de este cierre, 31 ahora) — no se entendió
+con suficiente certeza qué base usaba ese «28» como para reescribirlo sin
+arriesgar una nueva imprecisión. Queda como ambigüedad abierta.
+
+### Verificación
+
+- Cada figura corregida se verificó contra una fuente recién computada
+  (el build que se corrió en este mismo cierre, o `config/indicators.yml`
+  leído directamente), nunca contra memoria de la sesión ni copiada de un
+  documento a otro.
+- `git diff --stat` sobre los artefactos regenerados
+  (`docs/BUILD_VERIFICATION.md`, `internal/pendientes_consolidacion.*`,
+  `internal/revision_identidad.html`) inspeccionado antes de aceptar los
+  cambios — diffs pequeños y coherentes con lo esperado (fecha y conteos).
+- Enlaces Markdown y validez YAML reverificados después de todas las
+  ediciones, no sólo antes.
+- `data/processed/` y `dist/` (artefactos del build corrido en este
+  cierre) confirmados fuera de `git status` — gitignored, como declara
+  `CLAUDE.md`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-464 | `E-06` se investiga y se deja sin tocar en vez de "arreglarse" | Es un hallazgo intencional ya documentado (T-07, V2-18); silenciarlo o excluir la columna en la propia regla de auditoría ocultaría una característica real de la fuente cruda que el proyecto decidió mostrar a propósito |
+| D-465 | Las cifras de "entidades de autor" se corrigen documento por documento, nunca con un reemplazo global de "538"→"530" | El mismo número (538) describía tres cosas distintas en distintos documentos (entidades publicadas, autores con n<5, y una instantánea histórica fechada); un reemplazo global habría corrompido las dos últimas |
+| D-466 | Se agregan 5 conectores más a los pasos de `--test` en CI, ampliando el trabajo ya hecho antes en esta sesión para otros 4 | Mismo criterio ya establecido: cualquier conector cuya lógica decide qué entra a un indicador publicado o a una cola de revisión debe tener una prueba que se ejecute en cada despliegue |
+
+### Archivos modificados
+
+```
+.github/workflows/deploy.yml                    + 5 pasos --test
+README.md                                       8 cifras corregidas
+docs/ARCHITECTURE.md                            5 menciones de 538→530
+docs/AUTHOR_PROFILE.md                          cifras + aritmética actualizada
+docs/DATA_LICENSE.md                            84/37→94/39, colas resueltas
+docs/DEPLOYMENT.md                              peso de dist/, fila de CI
+docs/FUENTES_Y_APIS.md                          cola de afiliación resuelta, tabla de vías
+docs/INDICATORS.md                              P-06, AU-05, tabla de evaluados/publicados
+docs/LIMITATIONS.md                             cifras de consolidación y ORCID
+docs/ORCID_COVERAGE.md                          nota de cabecera + tabla de etiquetas recalculada
+docs/V2_BACKLOG.md                              V2-01, narrativa extendida al 2026-09-03, T-11
+STATE.md, docs/DECISIONS.md                     regenerados (post-build real)
+docs/BUILD_VERIFICATION.md                      regenerado por el build
+internal/pendientes_consolidacion.{md,html}
+internal/revision_identidad.html                regenerados por build_review.py
+SESSION_NOTES.md                                este cierre
+```
+
+### Supuestos descartados
+
+- Que cualquier "538" en la documentación era la misma cifra: no lo era
+  en al menos 6 de los ~30 lugares donde aparecía (la métrica de n<5, y
+  las instantáneas históricas fechadas).
+- Que arreglar la cifra encontrada por la primera búsqueda (538) agotaba
+  el problema: `README.md` tenía una segunda familia de cifras
+  (indicadores evaluados/publicados, ORCID sin consolidar) desactualizada
+  por una razón distinta y sin relación textual con "538" — sólo apareció
+  al cruzar la tabla completa contra `STATE.md`.
+- Que el párrafo confuso de `docs/INDICATORS.md` ("el total es 28") se
+  podía corregir junto con el resto: se declaró en vez de adivinar.
+
+### Ambigüedades abiertas
+
+`docs/INDICATORS.md`: la frase "por eso el total es 28" no se concilió
+con la cifra de publicados de la tabla que la precede. Puede ser una
+base de cálculo distinta (p.ej., excluyendo un indicador específico) o
+un error de redacción anterior a esta sesión — no se investigó lo
+suficiente para decidir cuál, y reescribirlo sin saberlo arriesgaba
+cambiar una imprecisión por otra.
+
+Las ambigüedades ya declaradas en cierres anteriores de esta sesión (la
+contradicción de Moyano, Tier B/C sin verificar, los 5 casos restantes de
+Varios Scopus ID, los 82 pendientes de `pendientes_consolidacion.md`)
+siguen abiertas, sin cambios en este cierre.
+
+### Próximo paso recomendado
+
+Ninguna acción de código pendiente de este cierre específico. El
+inventario completo de trabajo pendiente del proyecto —agregando lo que
+esta auditoría no tocó— se entrega en la respuesta al usuario, no aquí,
+porque así se pidió explícitamente.

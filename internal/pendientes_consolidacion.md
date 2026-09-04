@@ -1,6 +1,6 @@
 # Pendientes de consolidación
 
-**Generado** el 2026-09-03 por `src/review/build_review.py`. Regenerable.
+**Generado** el 2026-09-04 por `src/review/build_review.py`. Regenerable.
 
 Quedan **82 casos** de 290. Cada uno lleva el enlace al caso dentro de la herramienta de revisión y los enlaces externos que hay que abrir para comprobarlo.
 

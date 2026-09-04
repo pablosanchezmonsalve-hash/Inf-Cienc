@@ -19,7 +19,7 @@ supuesta.
 | Afiliación UFT | ✅ 589/589 | matching | — |
 | Unidad académica | ⚠️ 353/589 (60 %) | inferida | «No determinada» |
 | Scopus Author ID | ✅ 575/589 (97,6 %) | Scopus | «No resuelto» + explicación |
-| **ORCID** | ✅ **274/538 (50,9 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
+| **ORCID** | ✅ **268/530 (50,6 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
 | Otros identificadores | ❌ 0/589 | — | Sección oculta si no hay ninguno |
 
 ### Indicadores
@@ -93,17 +93,20 @@ es normalizado por campo y **sí está disponible por publicación** (`I-05`).
 
 La ficha corresponde a **una forma de firma**, no necesariamente a una persona.
 
-### 589 en la auditoría, 538 en el sitio: no es una incoherencia
+### 589 en la auditoría, 530 en el sitio: no es una incoherencia
 
-Las cifras son correctas y miden cosas distintas.
+Las cifras son correctas y miden cosas distintas. La consolidación avanza con
+cada revisión de identidad, así que el número de entidades baja con el
+tiempo — lo que sigue fijo es el método, no la cifra puntual (ver
+`STATE.md` para el valor vigente).
 
 - **589** son las formas de firma que la auditoría detecta en Scopus. Describe
   la fuente, y no cambia porque nosotros revisemos nada.
-- **538** son las entidades que el sitio publica hoy, en dos pasos: una
-  revisión humana fusionó 84 formas de firma en 37 personas
-  (589 − 84 + 37 = 542, `config/identidades_consolidadas.yml`), y la regla
+- **530** son las entidades que el sitio publica hoy, en dos pasos: una
+  revisión humana fusionó 94 formas de firma en 39 personas
+  (589 − 94 + 39 = 534, `config/identidades_consolidadas.yml`), y la regla
   `E-09` marcó 4 formas más como fragmentos de cadena de afiliación —no
-  personas—, confirmados y descartados tras revisión (542 − 4 = 538,
+  personas—, confirmados y descartados tras revisión (534 − 4 = 530,
   `config/firmas_e09_resueltas.yml`; ver `docs/LIMITATIONS.md` §7).
 
 La consolidación no la hace ninguna heurística (decisión `D-08`). La única vía
@@ -180,11 +183,11 @@ la capa interna.
 
 ## 5. Alcance de publicación
 
-> **Nota de base (actualizada 2026-09-02).** Las cifras de esta sección son de
+> **Nota de base (actualizada 2026-09-03).** Las cifras de esta sección son de
 > antes de la consolidación humana: 589 es el número de **formas de firma** de
-> la fuente, de las que 84 se fusionaron en 37 personas, y 4 más se
+> la fuente, de las que 94 se fusionaron en 39 personas, y 4 más se
 > descartaron por no ser personas (regla `E-09`, ver `docs/LIMITATIONS.md` §7).
-> Las **entidades publicadas hoy son 538**. El razonamiento no cambia; los
+> Las **entidades publicadas hoy son 530**. El razonamiento no cambia; los
 > números sí. El supuesto vigente está en `V2_BACKLOG.md` §4 (`T-11`).
 
 Pregunta abierta para el responsable del proyecto: **¿se publican las 589
