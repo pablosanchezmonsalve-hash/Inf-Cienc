@@ -161,6 +161,21 @@ y el JavaScript de `build_openalex_review.py` en vez de copiarlos. Compartir
 la lógica de presentación no mezcla evidencias; copiarla habría significado
 corregir cada error de exportación dos veces.
 
+**Señales automáticas: argumentan el caso, no lo deciden.** Cada tarjeta de la
+cola de `PD-04` muestra el resultado de cuatro comprobaciones mecánicas contra
+datos que el proyecto ya tiene (`src/review/senales_obras_externas.py`): qué
+ORCID vigente sostiene el caso y con qué confianza, qué institución declara la
+fuente para esa firma **en esa obra**, si el título ya está en el corpus con
+otro DOI, y si se repite dentro de la propia cola. Existen porque averiguar eso
+a mano, obra por obra, es trabajo mecánico que no aporta criterio y que en la
+práctica impide empezar la revisión.
+
+Ninguna marca un veredicto ni preselecciona un botón, y no hay umbral que
+apruebe nada por su cuenta. La distinción es la de la Regla 1: en cuanto un
+recuento saliera de un filtro automático dejaría de ser Nivel V y pasaría a ser
+Nivel D, con lo que `PD-04` no podría presentarse como verificado obra por
+obra. Las señales cambian cuánto cuesta decidir; no cambian quién decide.
+
 ### Regla 3 — Evidencia cruzada refuerza, nunca duplica
 
 Cuando dos fuentes independientes corroboran el **mismo** registro (mismo

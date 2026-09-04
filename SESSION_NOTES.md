@@ -11731,3 +11731,67 @@ declarado, no resuelto.
   productivas. Sondear por número de publicaciones lo despejaría.
 - Crossref sobre los 435 DOI de fuentes institucionales, y la cola de
   atribución nominal de «Fuentes externas», siguen pendientes.
+
+---
+
+## Addendum: señales automáticas que arman cada caso de PD-04 sin decidirlo (2026-09-04)
+
+**Contexto.** Con la cola ordenada, el usuario preguntó si eso significaba
+revisar a mano. Sí: es lo único que hace de `PD-04` un indicador de Nivel V, y
+no hay atajo legítimo — un recuento salido de un umbral automático sería
+Nivel D y el indicador dejaría de ser lo que dice ser. Pero buena parte del
+trabajo por caso no era criterio, era *averiguación*: abrir el DOI para
+descubrir cosas que el proyecto ya sabía. Repetir eso 322 veces es lo que hace
+que una cola no se empiece nunca.
+
+**Qué se hizo.** `src/review/senales_obras_externas.py` calcula cuatro
+comprobaciones mecánicas por fila y las muestra en cada tarjeta, verdes cuando
+empujan hacia «sí» y rojas cuando empujan hacia «no»:
+
+| Señal | Qué comprueba | Por qué importa |
+|---|---|---|
+| identificador | Qué ORCID vigente sostiene el caso, y con qué confianza | Distingue una obra que llega por identificador firme de una que llega por una asignación sólo probable (`D-08`) |
+| afiliación | Qué institución declara la fuente para esa firma **en esa obra** | La de mayor rendimiento: la consulta por ORCID en Europe PMC devuelve toda la obra de una persona, incluida la que firmó en otra institución, y la producción institucional se define por la afiliación de la firma |
+| título/corpus | El mismo título ya en el universo Scopus, con **otro** DOI | El cribado por DOI no puede verlo: un preprint y su versión publicada son dos DOI. Es el indicio típico de «otra versión» |
+| título/cola | El mismo título repetido dentro de la propia cola | Zenodo acuña un DOI por versión: una obra con tres versiones aparece tres veces y a lo sumo una puede contarse |
+
+Se calculan **al presentar**, no en el conector: son una lectura de lo que el
+proyecto ya sabe, no un dato nuevo de la fuente. Así se corrigen o amplían sin
+volver a salir a la red ni invalidar la cola descargada, y basta con reejecutar
+`build_obras_externas_review.py` sobre el CSV que ya está en disco.
+
+Dentro de la ventana, el orden pasa a regirlo `s_fuerza`, que resume las
+señales: los casos que varias comprobaciones sostienen arriba, los que huelen a
+duplicado al final. Los tokens de señal entran en el índice de búsqueda, así
+que el buscador que las dos colas ya comparten filtra por señal sin tocar el
+JavaScript común; los códigos de la cabecera se pueden pulsar.
+
+**La línea que no se cruza.** Ninguna señal marca un veredicto ni preselecciona
+un botón. El autotest lo comprueba: los cuatro botones de cada tarjeta salen
+con `aria-pressed="false"`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-493 | La cola de PD-04 muestra señales automáticas por caso | Abrir el DOI para averiguar lo que el proyecto ya sabe es trabajo mecánico repetido 322 veces, y es lo que impide empezar la revisión |
+| D-494 | Las señales argumentan y nunca deciden: no hay autoaprobación ni umbral | Un recuento salido de un filtro automático sería Nivel D; `PD-04` se publica como Nivel V y eso exige un clic humano por obra (Regla 1 de `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`) |
+| D-495 | Se calculan al presentar, no en el conector | Son una lectura de datos propios, no un dato de la fuente: cambiarlas no debe obligar a volver a la red ni invalidar la cola ya descargada |
+| D-496 | La afiliación declarada por la fuente en cada obra es la señal principal | La producción institucional se define por la afiliación de la firma, no por dónde trabaja hoy quien firma; es lo que separa las obras UFT del resto de la carrera de una persona |
+| D-497 | Las variantes del nombre institucional salen de `config/institution.yml` | Guardarraíl de replicabilidad de `CLAUDE.md`: otra institución cambia ese archivo y la señal sigue funcionando |
+| D-498 | Los títulos de menos de 20 caracteres normalizados no disparan señal de título | «Editorial» o «Introduction» colisionarían con cualquier otro igual de corto, y un falso positivo aquí empuja a marcar «otra versión» una obra distinta |
+
+### Archivos
+
+- `src/review/senales_obras_externas.py` (nuevo, autotest 16/16)
+- `src/review/build_obras_externas_review.py` (señales en la tarjeta, orden por
+  `s_fuerza`, filtros por señal, resumen de señales en consola; autotest 16/16)
+
+### Ambigüedades abiertas
+
+- Las 322 en ventana siguen sin revisar. Las señales reducen el coste por caso;
+  no lo eliminan ni pretenden hacerlo.
+- La señal de título compara por igualdad exacta tras normalizar. Un título con
+  subtítulo distinto entre el preprint y la versión publicada no se cruza. Se
+  prefirió precisión a cobertura: un falso positivo aquí descuenta una obra
+  real del recuento.
