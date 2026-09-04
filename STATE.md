@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `19e3a3a` · Fuentes externas: retira la atribución nominal de la capa pública
+Último commit: `687df09` · PD-04: un 400 de una fuente ya no tira la corrida entera
 Snapshot: 2026-09-04
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 488
+## Decisiones tomadas: 490
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -11638,3 +11638,47 @@ expectativa, no el código.
 Reejecutar el conector en la máquina del usuario. DataCite y Europe PMC se
 releen de la caché en segundos; la corrida entra directa en Zenodo y la línea
 de plantilla dirá cuál de las tres responde.
+
+## Addendum: el 400 de Zenodo era el tamaño de página, no la plantilla (2026-09-04)
+
+Con las tres plantillas candidatas ya en su sitio, la segunda corrida real
+las rechazó **las tres** con HTTP 400, incluida la de texto libre. Eso
+descartaba la hipótesis: si una búsqueda sin nombre de campo también falla,
+el problema no es el campo.
+
+Se consultó la API directamente y el cuerpo del error lo dijo en una línea:
+
+> `Page size cannot be greater than 25. Please use authenticated requests to
+> increase the limit to 100.`
+
+`TAMANO_PAGINA` era una constante global de 100 compartida por las tres
+fuentes. Zenodo limita a 25 sin autenticación y rechaza cualquier consulta
+que pida más — con lo cual las tres plantillas fallaban por la misma razón,
+que no era la suya.
+
+**Y ese diagnóstico costó dos corridas de más porque el conector tiraba el
+cuerpo del error.** `pedir()` dejaba subir el `HTTPError` sin leerlo, así que
+el mensaje llegaba como «HTTP Error 400: BAD REQUEST» a secas, sin la frase
+que explicaba todo. Corregido: ahora el cuerpo del 4xx se lee y se adjunta al
+mensaje.
+
+Dos correcciones, entonces:
+
+- **Tamaño de página por fuente**, no global: Zenodo 25, las otras dos 100.
+- **El cuerpo del error de la API se lee y se muestra**, que es donde estaba
+  la respuesta desde el principio.
+
+La plantilla original de Zenodo puede estar perfectamente bien; nunca llegó a
+probarse, porque el tamaño se rechazaba antes. La próxima corrida lo dirá.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-489 | El tamaño de página se declara por fuente, no como constante única | Cada API pone su propio límite y Zenodo rechaza la petición entera si se excede. Una constante compartida hacía que el límite de una fuente rompiera esa fuente por completo, con un error que no nombraba la causa |
+| D-490 | El cuerpo de un error 4xx se lee y se adjunta al mensaje | El diagnóstico estaba en la respuesta desde la primera corrida y se estaba descartando. Sin él, un error de tamaño se leyó dos veces como un error de sintaxis |
+
+### Verificación
+
+45/45 en el conector, con cuatro casos nuevos sobre el tamaño por fuente.
+10/10 y 11/11 en los otros dos módulos.
