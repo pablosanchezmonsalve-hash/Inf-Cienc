@@ -193,11 +193,15 @@ def calcular(df: pd.DataFrame, orcids: dict[str, dict] | None = None,
         # entre fuentes pesa más que el identificador porque es evidencia
         # independiente; la afiliación pesa porque es la definición misma de
         # producción institucional.
+        #
+        # La repetición dentro de la cola NO resta aquí: de eso se ocupa
+        # `depurar_repetidos`, y penalizar además a la superviviente sería
+        # castigarla por un duplicado que ya no está.
         fuerza = (2 * int(bool(str(fila.get("corroborada_por") or "")))
                   + 2 * int(afiliacion == "institucion")
                   - int(afiliacion == "otra")
                   + int(confianza == "alta")
-                  - 2 * int(bool(en_corpus) or n_cola > 0))
+                  - 2 * int(bool(en_corpus)))
 
         tokens = " ".join(filter(None, [
             f"sig-orcid-{confianza}" if confianza else "sig-sin-identificador",
@@ -211,6 +215,72 @@ def calcular(df: pd.DataFrame, orcids: dict[str, dict] | None = None,
                       "s_titulo_cola": n_cola, "s_fuerza": fuerza, "s_tokens": tokens})
 
     return df.assign(**{col: [f[col] for f in filas] for col in COLUMNAS})
+
+
+def depurar_repetidos(df: pd.DataFrame, preferencia, protegidas=None) -> pd.DataFrame:
+    """Regla de título repetido: de cada título, una sola fila queda revisable.
+
+    POR QUÉ ES ARITMÉTICA Y NO CRITERIO
+        Zenodo acuña un DOI por versión de un depósito, además del DOI de
+        concepto; dos repositorios pueden traer la misma obra con DOI
+        distintos. Son varias filas para UNA obra, y de todas ellas a lo sumo
+        una puede contarse. Decidir las demás a mano no añade información:
+        la respuesta ya está determinada por la primera.
+
+        Es la asimetría que permite aplicarla en bloque. Una regla que
+        DESCARTA sólo puede dejar el recuento corto, y quedarse corto se
+        declara. Una regla que ACEPTA lo infla, y por eso el «sí» sigue
+        costando un clic humano por obra.
+
+    QUIÉN SOBREVIVE
+        La de mayor `preferencia` —la calcula quien llama, normalmente la
+        ventana temporal por delante de la fuerza de las señales—, y a
+        igualdad, la más reciente y luego el orden de identificador. El
+        criterio es determinista a propósito: la misma cola debe elegir
+        siempre la misma superviviente, o las decisiones ya tomadas dejarían
+        de corresponder con las filas al regenerar.
+
+    LO QUE LA REGLA NO PUEDE TOCAR
+        Una fila que ya lleva veredicto humano nunca se desplaza. El orden de
+        precedencia de `CLAUDE.md` pone la decisión explícita por encima de
+        cualquier regla, y una regla que borrase trabajo ya hecho sería
+        justamente eso.
+
+    Añade `s_duplicada` (1 si la desplaza la regla) y `s_sobrevive`, el
+    identificador de la fila que la desplaza, para que el descarte sea
+    auditable y no un silencio.
+    """
+    protegidas = set(protegidas or ())
+    claves = [normalizar(t) for t in df.get("titulo", pd.Series([""] * len(df)))]
+    pref = list(preferencia)
+    ids = [f"{f} · {i}" for f, i in zip(df.get("fuente", [""] * len(df)),
+                                        df.get("id_fuente", [""] * len(df)))]
+    anios = [str(a or "") for a in df.get("anio", [""] * len(df))]
+
+    grupos: dict[str, list[int]] = {}
+    for n, k in enumerate(claves):
+        if len(k) >= MINIMO_TITULO:
+            grupos.setdefault(k, []).append(n)
+
+    duplicada = [0] * len(df)
+    sobrevive = [""] * len(df)
+    for filas in grupos.values():
+        if len(filas) < 2:
+            continue
+        decididas = [n for n in filas if ids[n] in protegidas]
+        # Con veredicto humano de por medio, la regla se aparta entera: no
+        # desplaza las decididas ni elige por encima de ellas.
+        if decididas:
+            for n in filas:
+                if n not in decididas:
+                    duplicada[n], sobrevive[n] = 1, ids[decididas[0]]
+            continue
+        elegida = max(filas, key=lambda n: (pref[n], anios[n], ids[n]))
+        for n in filas:
+            if n != elegida:
+                duplicada[n], sobrevive[n] = 1, ids[elegida]
+
+    return df.assign(s_duplicada=duplicada, s_sobrevive=sobrevive)
 
 
 def autotest() -> int:
@@ -294,6 +364,41 @@ def autotest() -> int:
          normalizar("COVID-19: una Revisión") == normalizar("covid 19 una revision"))
     caso("las variantes salen de la configuración, no del código",
          "universidad finis terrae" in variantes_institucion())
+
+    # --- regla de título repetido -----------------------------------------
+    d = pd.DataFrame([
+        {"fuente": "zenodo", "id_fuente": "z1", "anio": "2024",
+         "titulo": "Conjunto de datos de la cohorte longitudinal"},
+        {"fuente": "zenodo", "id_fuente": "z2", "anio": "2024",
+         "titulo": "Conjunto de datos de la cohorte longitudinal"},
+        {"fuente": "zenodo", "id_fuente": "z3", "anio": "2024",
+         "titulo": "Conjunto de datos de la cohorte longitudinal"},
+        {"fuente": "datacite", "id_fuente": "d1", "anio": "2024", "titulo": "Editorial"},
+        {"fuente": "datacite", "id_fuente": "d2", "anio": "2024", "titulo": "Editorial"},
+        {"fuente": "europepmc", "id_fuente": "e1", "anio": "2024",
+         "titulo": "Un trabajo que aparece una sola vez en la cola"},
+    ])
+    r = depurar_repetidos(d, preferencia=[0, 5, 1, 0, 0, 0])
+
+    caso("de tres versiones del mismo título sólo una queda revisable",
+         list(r["s_duplicada"])[:3] == [1, 0, 1])
+    caso("sobrevive la de mayor preferencia, no la primera que llega",
+         r.loc[0, "s_sobrevive"] == "zenodo · z2" and r.loc[2, "s_sobrevive"] == "zenodo · z2")
+    caso("una obra que aparece una sola vez no la toca la regla",
+         r.loc[5, "s_duplicada"] == 0 and r.loc[5, "s_sobrevive"] == "")
+    caso("los títulos por debajo del umbral no se agrupan entre sí",
+         r.loc[3, "s_duplicada"] == 0 and r.loc[4, "s_duplicada"] == 0)
+    caso("la regla es determinista: dos corridas eligen la misma superviviente",
+         list(depurar_repetidos(d, [0, 5, 1, 0, 0, 0])["s_sobrevive"])
+         == list(r["s_sobrevive"]))
+    caso("a igualdad de preferencia decide el orden, no el azar",
+         list(depurar_repetidos(d, [0, 0, 0, 0, 0, 0])["s_duplicada"])[:3] == [1, 1, 0])
+
+    prot = depurar_repetidos(d, preferencia=[0, 5, 1, 0, 0, 0], protegidas={"zenodo · z1"})
+    caso("una fila ya decidida por una persona nunca la desplaza la regla",
+         prot.loc[0, "s_duplicada"] == 0)
+    caso("la decisión humana desplaza a las demás del grupo, aunque pesen más",
+         prot.loc[1, "s_duplicada"] == 1 and prot.loc[1, "s_sobrevive"] == "zenodo · z1")
 
     fallos = [n for n, ok, _ in casos if not ok]
     for n, ok, obs in casos:

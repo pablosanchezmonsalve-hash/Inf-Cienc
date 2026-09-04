@@ -11795,3 +11795,66 @@ con `aria-pressed="false"`.
   subtítulo distinto entre el preprint y la versión publicada no se cruza. Se
   prefirió precisión a cobertura: un falso positivo aquí descuenta una obra
   real del recuento.
+
+---
+
+## Addendum: la regla de título repetido, y por qué un «no» puede tomarse en bloque (2026-09-04)
+
+**Contexto.** El usuario volvió sobre lo mismo: si cada decisión tenía que ser
+manual. La respuesta honesta es que sí para lo que suma, y no necesariamente
+para lo que resta. Una regla aplicada a una clase entera de filas para
+DESCARTARLAS sólo puede dejar el recuento corto, y quedarse corto se declara.
+Una regla que las ACEPTE lo infla, y es contra eso que existe el Nivel V. De
+las tres reglas que se le propusieron —afiliación de otra institución, tipos
+documentales excluidos, títulos repetidos— adoptó la tercera: «Títulos
+repetidos deben ser depurados».
+
+**Qué se hizo.** `depurar_repetidos()` agrupa por título normalizado y deja una
+sola fila revisable por grupo. Sobrevive la que cae en ventana y, a igualdad,
+la de señales más fuertes; el desempate es determinista (año, luego
+identificador) porque regenerar la cola no puede reasignar las decisiones ya
+tomadas a otra fila.
+
+Lo depurado no se esconde. Sale a `internal/obras_externas_depuradas.csv` con
+la columna `s_sobrevive`, que nombra la fila que lo sustituye, y la cabecera de
+la herramienta declara cuántas filas salieron por esta vía. Sin eso, la
+diferencia entre 322 y lo que quede sería un número sin explicación.
+
+Una fila con veredicto humano previo nunca la desplaza la regla: el orden de
+precedencia de `CLAUDE.md` pone la decisión explícita por encima, y una regla
+capaz de borrar trabajo ya hecho sería justamente eso.
+
+**Efecto colateral que hubo que corregir.** La señal de título repetido decía
+«el mismo título aparece dos veces más en esta cola», y tras la depuración eso
+era falso: las otras ya no están. Ahora la superviviente lo dice al revés —de
+este título había otras versiones, depuradas por regla, y ésta es la que puede
+contarse—, y la línea pasa de roja a neutra: no hay nada en su contra. Por lo
+mismo, la repetición dejó de restar en `s_fuerza`, que habría penalizado a la
+superviviente por un duplicado que ya no existe.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-499 | Una regla puede descartar en bloque; aceptar en bloque, nunca | Descartar sólo deja el recuento corto y eso se declara; aceptar lo infla, que es contra lo que existe el Nivel V |
+| D-500 | De cada título repetido, una sola fila queda revisable | Varias versiones de un depósito son UNA obra y a lo sumo una puede contarse: decidir las demás a mano no añade información |
+| D-501 | Sobrevive la de ventana y mayor fuerza, con desempate determinista | Regenerar la cola no puede reasignar a otra fila las decisiones ya tomadas |
+| D-502 | Lo depurado queda listado con la fila que lo sustituye | Un descarte sin rastro es indistinguible de una pérdida de datos (`D-14`, criterio de transparencia) |
+| D-503 | Una fila con veredicto humano previo nunca la desplaza la regla | Orden de precedencia de `CLAUDE.md`: la decisión explícita manda sobre cualquier regla |
+
+### Archivos
+
+- `src/review/senales_obras_externas.py` (`depurar_repetidos`, autotest 24/24)
+- `src/review/build_obras_externas_review.py` (aplica la regla, escribe el
+  rastro, lo declara en cabecera y consola; autotest 18/18)
+- `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` (la asimetría, dentro de la Regla 2)
+- `internal/README.md` (`obras_externas_depuradas.csv`)
+
+### Pendientes
+
+- Las otras dos reglas propuestas siguen sin decidir: descartar por afiliación
+  de otra institución (recomendada, es la definición de producción
+  institucional) y por tipo documental excluido (depende de qué quiera
+  significar el indicador, es decisión del usuario).
+- Cuánto reduce la regla las 322 en ventana está por medir: la cola vive en la
+  máquina del usuario, no en el repositorio.
