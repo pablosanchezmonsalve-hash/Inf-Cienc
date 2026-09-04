@@ -548,12 +548,19 @@ fuentes:
     # primero porque es la que la corrida del 2026-09-03 verificó en el
     # endpoint de recuperación por DOI.
     consulta_obras:
+      # Tres candidatas por vía, en orden de precisión decreciente. Las dos
+      # primeras nombran el campo —la heredada y la de InvenioRDM—; la tercera
+      # es búsqueda de texto libre, menos precisa pero que no depende de cómo
+      # se llame el campo hoy. Corrida real del 2026-09-04: Zenodo devolvió
+      # HTTP 400 a la primera, señal de que ya no reconoce ese nombre de campo.
       por_orcid:
         - 'creators.orcid:"{orcid}"'
         - 'metadata.creators.person_or_org.identifiers.identifier:"{orcid}"'
+        - '"{orcid}"'
       por_afiliacion:
         - 'creators.affiliation:"{institucion}"'
         - 'metadata.creators.affiliations.name:"{institucion}"'
+        - '"{institucion}"'
     fecha_corte: null
     ejecutada: false               # la política de red del entorno de desarrollo bloquea zenodo.org
     fecha_ejecucion: null
