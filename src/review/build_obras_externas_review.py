@@ -81,6 +81,7 @@ import senales_obras_externas as senales  # noqa: E402
 FUENTE = ROOT / "internal" / "obras_externas_cobertura.csv"
 DECISIONES = ROOT / "internal" / "obras_externas_decisiones.csv"
 SALIDA = ROOT / "internal" / "revision_obras_externas.html"
+DEPURADAS = ROOT / "internal" / "obras_externas_depuradas.csv"
 
 FUENTE_LEGIBLE = {"datacite": "DataCite", "europepmc": "Europe PMC", "zenodo": "Zenodo"}
 
@@ -220,9 +221,15 @@ def _bloque_senales(r) -> str:
         lineas.append(("no", f"Un título idéntico ya está en el corpus Scopus con otro DOI{ya}. "
                              "Suele ser «otra versión de una obra ya contada»."))
     if en_cola:
-        veces = "una vez más" if en_cola == 1 else f"{en_cola} veces más"
-        lineas.append(("no", f"El mismo título aparece {veces} en esta cola. "
-                             "De todas ellas, a lo sumo una puede contarse."))
+        # Tras la regla de título repetido, las demás versiones ya no están en
+        # la cola: decir que "aparece dos veces más" sería falso. Ésta es la
+        # que quedó, y por eso la línea es neutra y no roja — no hay nada en
+        # contra de ella, hay algo que ella representa.
+        otras = "otra versión" if en_cola == 1 else f"otras {en_cola} versiones"
+        lineas.append(("neutro",
+                       f"Del mismo título había {otras} en la cola, depuradas por regla. "
+                       "Ésta es la única que puede contarse: si es de la institución, "
+                       "cuenta por todas."))
 
     filas = "".join(f'<span class="sig {cl}">{txt}</span>' for cl, txt in lineas)
     return f"""
@@ -237,7 +244,8 @@ def _via_legible(via: str) -> str:
     return " y ".join(etiquetas.get(v, v) for v in via.split("|") if v)
 
 
-def render_html(filas: pd.DataFrame, n_ventana: int | None = None) -> str:
+def render_html(filas: pd.DataFrame, n_ventana: int | None = None,
+                n_depuradas: int = 0) -> str:
     previas = leer_previas(DECISIONES)
     items: list[dict] = []
     cuerpo = ""
@@ -335,7 +343,8 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None) -> str:
 <header><div class="c">
   <h1>Obras en repositorios de datos y acceso abierto que Scopus no indexa</h1>
   <p>Capa interna · generado el {hoy} · {n} obras ({por_fuente})</p>
-  {f'<p>Las <b>{n_ventana}</b> primeras caen en la ventana {b_ventana()[0]}-{b_ventana()[1]} y son las únicas que pueden llegar a contarse. Las {n - n_ventana} restantes quedan detrás, sin descartarse.</p>' if n_ventana is not None else ''}
+  {f'<p>Las <b>{n_ventana}</b> primeras caen en la ventana {b_ventana()[0]}-{b_ventana()[1]} y son las únicas que pueden llegar a contarse. {"La restante queda detrás, sin descartarse" if n - n_ventana == 1 else f"Las {n - n_ventana} restantes quedan detrás, sin descartarse"}.</p>' if n_ventana is not None else ''}
+  {f'<p>Otras <b>{n_depuradas}</b> quedaron fuera por la regla de título repetido: varias versiones de un mismo depósito son una obra, y de todas ellas a lo sumo una puede contarse. Quedan listadas en <span class="mono">internal/obras_externas_depuradas.csv</span> con la fila que las sustituye.</p>' if n_depuradas else ''}
 </div></header>
 
 <div class="barra"><div class="c">
@@ -474,6 +483,13 @@ def autotest() -> int:
     caso("los tokens de señal quedan en el índice de búsqueda",
          "sig-afiliacion-institucion" in html and "sig-orcid-alta" in html)
 
+    con_depuradas = render_html(df, 2, 7)
+    caso("lo depurado por regla se declara en la cabecera, no se calla",
+         "<b>7</b>" in con_depuradas and "título repetido" in con_depuradas
+         and "obras_externas_depuradas.csv" in con_depuradas)
+    caso("sin nada depurado no se anuncia una depuración vacía",
+         "título repetido" not in html)
+
     # Una cola generada antes de que existieran las señales no debe romper el
     # render: sin columnas `s_*`, el bloque simplemente no aparece.
     sin_senales = render_html(df.drop(columns=senales.COLUMNAS))
@@ -529,13 +545,33 @@ def main() -> int:
     en_ventana = en_ventana.where(en_ventana.str.isdigit(), "")
     df = df.assign(
         _ventana=[1 if a and ventana[0] <= int(a) <= ventana[1] else 0 for a in en_ventana],
-    ).sort_values(["_ventana", "s_fuerza", "anio"], ascending=[False, False, False])
+    )
+
+    # Regla de título repetido, decidida por el usuario el 2026-09-04: de
+    # cada título, una sola fila queda revisable. Se aplica ANTES de ordenar
+    # y de contar la ventana, porque lo depurado no es cola: no se revisa, no
+    # se cuenta y no se esconde — queda en su propio CSV con la fila que lo
+    # sustituye. Dentro de un grupo prefiere la que cae en ventana, y a
+    # igualdad la de señales más fuertes: de nada sirve conservar la versión
+    # de 2019 de un depósito cuya versión de 2024 sí podría contarse.
+    previas = leer_previas(DECISIONES)
+    df = senales.depurar_repetidos(
+        df,
+        preferencia=df["_ventana"] * 10 + df["s_fuerza"],
+        protegidas=set(previas),
+    )
+    depuradas = df[df["s_duplicada"] == 1]
+    df = df[df["s_duplicada"] == 0]
+    if len(depuradas):
+        DEPURADAS.parent.mkdir(parents=True, exist_ok=True)
+        depuradas.drop(columns=["_ventana"]).to_csv(DEPURADAS, index=False)
+
+    df = df.sort_values(["_ventana", "s_fuerza", "anio"], ascending=[False, False, False])
     n_ventana = int(df["_ventana"].sum())
     df = df.drop(columns=["_ventana"])
 
-    SALIDA.write_text(render_html(df, n_ventana), encoding="utf-8")
+    SALIDA.write_text(render_html(df, n_ventana, len(depuradas)), encoding="utf-8")
 
-    previas = leer_previas(DECISIONES)
     print(f"  obras a revisar          : {len(df)}")
     print(f"    en ventana {b_ventana()[0]}-{b_ventana()[1]}, primero : {n_ventana}"
           f"  (las únicas que pueden contarse)")
@@ -544,6 +580,9 @@ def main() -> int:
     for fuente, n in df["fuente"].value_counts().items():
         print(f"    {FUENTE_LEGIBLE.get(fuente, fuente):<12}: {n}")
     print(f"  corroboradas entre fuentes: {int(df['corroborada_por'].astype(bool).sum())}")
+    if len(depuradas):
+        print(f"  depuradas por título repetido: {len(depuradas)}"
+              f"  ({DEPURADAS.name}, con la fila que las sustituye)")
 
     # Qué hay delante, contado sobre lo que de verdad se va a revisar. Sin
     # esto, las señales sólo se ven caso a caso y no dan idea del reparto.

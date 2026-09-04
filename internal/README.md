@@ -131,6 +131,7 @@ solo.
 | `obras_externas_cobertura.csv` | La cola de `PD-04`: obras en DataCite, Europe PMC y Zenodo fuera del universo | `make obras-externas` |
 | `revision_obras_externas.html` | Herramienta de revisión de esa cola | `make revisar-obras-externas` |
 | `obras_externas_decisiones.csv` | Veredicto humano sobre esa cola | exportación humana |
+| `obras_externas_depuradas.csv` | Filas que la regla de título repetido sacó de la cola, con la fila que las sustituye | `make revisar-obras-externas` |
 
 > Los tres archivos de `PD-04` **todavía no existen en ningún disco**: la
 > política de red del entorno donde se construyó el conector bloquea las tres

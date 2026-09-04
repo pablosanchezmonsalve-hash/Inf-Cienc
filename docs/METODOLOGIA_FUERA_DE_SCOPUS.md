@@ -176,6 +176,28 @@ recuento saliera de un filtro automático dejaría de ser Nivel V y pasaría a s
 Nivel D, con lo que `PD-04` no podría presentarse como verificado obra por
 obra. Las señales cambian cuánto cuesta decidir; no cambian quién decide.
 
+**La asimetría que sí permite decidir en bloque.** Una regla aplicada a una
+clase entera de filas para DESCARTARLAS sólo puede dejar el recuento corto, y
+quedarse corto se declara. Una regla que las ACEPTE lo infla, y es contra eso
+que existe el Nivel V. Por eso el «sí» sigue costando un clic humano por obra,
+mientras que un «no» determinado por aritmética puede tomarse una vez.
+
+La única regla de ese tipo hoy vigente es la de **título repetido**
+(`depurar_repetidos`, decidida por el usuario el 2026-09-04): de cada título
+normalizado, una sola fila queda revisable. Zenodo acuña un DOI por versión de
+un depósito además del DOI de concepto, y dos repositorios pueden traer la
+misma obra con DOI distintos; son varias filas para UNA obra, y de todas ellas
+a lo sumo una puede contarse, así que decidir las demás a mano no añadiría
+información. Sobrevive la que cae en ventana y, a igualdad, la de señales más
+fuertes, con desempate determinista para que regenerar la cola no reasigne las
+decisiones ya tomadas. Lo depurado no desaparece: queda en
+`internal/obras_externas_depuradas.csv` junto a la fila que lo sustituye, y la
+cabecera de la herramienta dice cuántas filas salieron por esta vía.
+
+Una fila que ya lleva veredicto humano nunca la desplaza la regla. El orden de
+precedencia de `CLAUDE.md` pone la decisión explícita por encima de cualquier
+regla, y una regla capaz de borrar trabajo ya hecho sería exactamente eso.
+
 ### Regla 3 — Evidencia cruzada refuerza, nunca duplica
 
 Cuando dos fuentes independientes corroboran el **mismo** registro (mismo
