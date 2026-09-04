@@ -88,24 +88,44 @@ cd purga-inf-cienc
 git fetch --all --tags
 
 # 2) Purga EN UNA SOLA PASADA: elimina data/raw/ e internal/ de TODA la
-#    historia (blobs, árboles, commits, en todas las ramas).
-#    --invert-paths elimina EXACTAMENTE las rutas listadas (todo internal/,
-#    incluido internal/README.md).
-git filter-repo --path data/raw/ --path internal/ --invert-paths --force
+#    historia (blobs, árboles, commits, en todas las ramas), CONSERVANDO
+#    internal/README.md, que es lo que pide la Sección 2.
+git filter-repo --force --filename-callback "return None if (filename.startswith(b'data/raw/') or (filename.startswith(b'internal/') and filename != b'internal/README.md')) else filename"
 ```
 
-> **`internal/README.md` se elimina con `internal/`.** Es esperado y aceptable:
-> es un archivo pequeño de documentación y se **re-crea** tras la purga (Sección
-> 6.4). No intente "conservar" un archivo dentro de una ruta eliminada con
-> `--invert-paths`: ese modo elimina todas las rutas listadas sin excepción.
-> `data/processed/` NO se lista y por tanto **se conserva intacto** (es la capa
-> pública CC BY 4.0 que CI usa en D-SEC-02).
+> **Por qué un callback y no `--invert-paths`.** `--invert-paths` elimina
+> exactamente las rutas listadas, sin excepciones: con él, `internal/README.md`
+> desaparece del historial, en contra de lo que la Sección 2 declara como
+> alcance. El callback decide archivo por archivo y sí admite la excepción.
+> Comprobado el 2026-09-03 sobre un repositorio de laboratorio con dos ramas y
+> una etiqueta: el README sobrevive, todo lo demás de `internal/` y
+> `data/raw/` desaparece de las dos ramas, y las etiquetas se reescriben.
+>
+> Las cadenas de Python del callback van con **comillas simples**: PowerShell
+> maltrata las comillas dobles al pasar argumentos a un ejecutable nativo, y el
+> callback llegaría roto a `git`.
+>
+> `data/processed/` no se toca y **se conserva intacto** (es la capa pública
+> CC BY 4.0 que CI usa en D-SEC-02). Compruébelo explícitamente tras la purga:
+> verificar sólo que lo sensible desapareció dejaría pasar un filtro que además
+> se llevara la capa pública, y sin ella el despliegue no puede ensamblar el
+> sitio.
+
+Verificación tras la purga, las dos direcciones:
+
+```bash
+# lo que NO debe quedar (vacío = limpio)
+git log --all --oneline -- data/raw internal/ ':!internal/README.md'
+# lo que SÍ debe seguir
+git ls-tree -r --name-only HEAD -- data/processed | head
+git ls-tree -r --name-only HEAD -- internal/README.md
+```
 
 ### Volver a asociar el remoto y forzar el push
 
 ```bash
 git remote add origin https://github.com/pablosanchezmonsalve-hash/Inf-Cienc.git
-git push origin --force --all
+git push origin --force --atomic --all
 git push origin --force --tags
 ```
 
@@ -145,7 +165,9 @@ git reflog expire --expire=now --all
 git gc --prune=now --aggressive
 ```
 
-`internal/README.md` se eliminó junto con `internal/`. Tras la purga,
+`internal/README.md` se eliminó junto con `internal/` — **a diferencia del
+método recomendado de la Sección 4**, que lo conserva: `filter-branch` con
+`git rm -r --cached` no admite excepciones dentro de la ruta. Tras la purga,
 **re-créelo** en `main` (es documentación pequeña, sin datos nominales) y
 ajuste `.gitignore` (`internal/*` con `!internal/README.md`) si fuera parte de
 lo purgado. Luego force-push igual que en la Sección 4.
@@ -188,8 +210,12 @@ se filtran por contenido, pero rote por prudencia si sospecha exposición:
    - Cualquier API key de Scopus/Elsevier de `config/` o scripts: no debe
      estar versionada; si lo estuvo en algún commit, gire esa key.
 
-### 6.4 Tras la purga: re-crear `internal/README.md` y comprobar
-- Re-cree `internal/README.md` (es documentación pequeña, sin datos nominales;
+### 6.4 Tras la purga: comprobar `internal/README.md` y el `.gitignore`
+- `internal/README.md` **se conserva** con el filtro de la Sección 4, así que
+  normalmente no hay nada que recrear: compruébelo con
+  `git ls-tree -r --name-only HEAD -- internal/README.md`. Si usó
+  `--invert-paths` en vez del callback, sí desapareció y hay que reponerlo
+  (es documentación pequeña, sin datos nominales;
   la purga lo eliminó junto con `internal/`), revise `.gitignore`
   (`internal/*` con `!internal/README.md`) y comitee.
 - `git ls-tree -r --name-only origin/main -- data/raw` → **vacío**.

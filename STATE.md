@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `0f84ac4` · Merge remote-tracking branch 'origin/main' into claude/hitapp-publicat
+Último commit: `c70662e` · Zenodo: la plantilla no se pudo verificar, así que la corrida la resue
 Snapshot: 2026-09-04
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 477
+## Decisiones tomadas: 481
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -11084,3 +11084,98 @@ pendiente.
 
 El usuario corre `make obras-externas` en su máquina. Lo primero que imprime
 la sección de Zenodo es qué plantilla usó y por qué; eso cierra la pregunta.
+
+## Cierre: revisión del asistente de purga de historial (2026-09-03)
+
+### Contexto
+
+El usuario pidió correr la purga. No se corrió desde aquí, y no por falta
+de autorización suya: el respaldo que `docs/SEGURIDAD_PURGA.md` exige como
+paso previo obligatorio no se puede cumplir en un contenedor efímero —un
+mirror que se recicla al cerrar la sesión no es un respaldo—, el script pide
+la sesión autenticada del propietario con permiso de administración, el
+force-push alcanza a las diez ramas remotas que el propio documento lista, y
+el asistente es PowerShell sobre un contenedor Linux. Se explicó y el usuario
+pidió, en su lugar, revisar el script línea por línea.
+
+### Cómo se revisó
+
+No de memoria. Se instaló `git-filter-repo` en un entorno aislado y se montó
+un repositorio de laboratorio con dos ramas, una etiqueta, capa sensible
+(`internal/` con README y con datos, `data/raw/`) y capa pública
+(`data/processed/`), reproduciendo el flujo exacto del script: mirror →
+clon de trabajo → filtro → force-push a un remoto local → verificación.
+
+Tres cosas que se sospechaban rotas resultaron correctas, y conviene
+dejarlo escrito para no volver a dudarlas:
+
+- **Las ramas que sólo existen como referencias de seguimiento sí se
+  empujan.** Era la duda principal: un `git clone` crea una sola rama local.
+  Se comprobó que `filter-repo` convierte las remote-tracking en locales, de
+  modo que `--all` alcanza a todas. En el laboratorio se reescribieron las
+  dos ramas y la etiqueta.
+- Las etiquetas sobreviven a la reescritura.
+- `data/processed/` sobrevive al filtro.
+
+### Los cuatro defectos encontrados, y sus arreglos
+
+1. **Reejecutarlo destruía el único respaldo previo.** El paso 2 ofrecía
+   sobrescribir el mirror existente. Una segunda corrida ocurre justo tras
+   un fallo parcial —cuando el remoto ya puede estar reescrito—, así que
+   aceptar reemplazaba el respaldo del historial original por uno del remoto
+   ya purgado. Ahora el nombre lleva sello de tiempo, nunca se sobrescribe
+   nada, y si hay respaldos anteriores el script los lista advirtiendo que
+   **el bueno es el más antiguo**.
+2. **`internal/README.md` se borraba del historial**, contra el alcance que
+   declara la Sección 2 del propio documento. Verificado en el laboratorio.
+   Se sustituyó `--invert-paths` por un `--filename-callback` que hace la
+   excepción; probado, conserva el README y elimina todo lo demás.
+3. **El force-push no era atómico.** El encabezado avisa de la protección de
+   rama pero nada la comprueba: con `--all` a secas, si `main` está protegido
+   el resto de ramas se reescribe y `main` no, dejando dos historiales
+   incompatibles conviviendo en el remoto. Ahora va con `--atomic` y, si
+   falla, el mensaje dice que no se escribió ninguna rama y por qué.
+4. **La verificación sólo miraba lo que debía desaparecer.** Un filtro
+   equivocado que además se llevara `data/processed/` habría pasado en
+   silencio, y sin capa pública el despliegue no puede ensamblar el sitio.
+   Se añadió la comprobación positiva, y la negativa ahora excluye el README
+   para no dar falsa alarma con el filtro nuevo.
+
+`docs/SEGURIDAD_PURGA.md` se actualizó para no contradecir al script: la
+Sección 4 documenta el callback y por qué, con las comillas simples de Python
+explicadas (PowerShell maltrata las dobles al pasar argumentos a un
+ejecutable nativo), la Sección 6.4 deja de mandar recrear el README, y la
+Sección 5 declara que el método alternativo con `filter-branch` sí lo borra.
+
+### Verificación
+
+La secuencia corregida entera, ejecutada de punta a punta en el laboratorio:
+push atómico que reescribe las dos ramas y la etiqueta, verificación negativa
+vacía, `data/processed/` e `internal/README.md` presentes en el árbol final, y
+cero rastro sensible en el remoto resultante.
+
+**Lo que NO se pudo comprobar**: no hay PowerShell en este entorno, así que la
+sintaxis del script no se ejecutó. Lo verificado son los comandos `git` que
+contiene, extraídos y corridos tal cual.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-478 | La purga no se ejecuta desde el entorno remoto, aunque el usuario lo pida | El respaldo obligatorio no es cumplible en un contenedor efímero, y es el único margen que hace recuperable un force-push irreversible sobre diez ramas. La operación se corre en la máquina del propietario, con su gestor de credenciales y el respaldo fuera del clon |
+| D-479 | El filtro conserva `internal/README.md` mediante `--filename-callback` en vez de eliminarlo con `--invert-paths` | La Sección 2 del documento declara ese alcance; el método anterior lo contradecía y obligaba a un paso manual posterior. El callback admite la excepción y se verificó en laboratorio |
+| D-480 | Cada corrida crea su propio respaldo fechado y ninguna sobrescribe uno anterior | Un respaldo se sobrescribe precisamente en el segundo intento, que es cuando el remoto ya puede estar reescrito: la copia del historial original se perdería en el momento en que hace falta |
+| D-481 | El force-push va con `--atomic` | Sin él, la protección de rama sobre `main` deja el remoto a medio reescribir, con ramas en dos historiales incompatibles y sin señal clara de qué entró |
+
+### Ambigüedades abiertas
+
+- **La sintaxis PowerShell del script sigue sin ejecutarse.** No hay
+  intérprete en este entorno. El primer arranque en la máquina del
+  propietario es la primera prueba real; el script pide confirmación antes de
+  cada paso destructivo, y el respaldo es el paso cero.
+- Las de `PD-04` y la purga en sí siguen pendientes.
+
+### Próximo paso recomendado
+
+El usuario ejecuta el script en su máquina, tras el respaldo y con la
+protección de rama de `main` desactivada.

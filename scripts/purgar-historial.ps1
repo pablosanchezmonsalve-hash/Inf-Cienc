@@ -38,7 +38,13 @@ function Confirmar($mensaje) {
 $root  = Split-Path -Parent $PSScriptRoot                # raíz del repo
 $origen = Split-Path -Leaf $root                          # nombre del proyecto
 $tmp   = Join-Path $env:TEMP "$origen`-purga"             # clon de trabajo efímero
-$bak   = Join-Path $root "..\$origen`-backup-mirror.git"  # mirror de respaldo
+# El respaldo lleva fecha y hora, y NUNCA se sobrescribe: una segunda corrida
+# ocurre justo después de un fallo parcial, que es cuando el remoto ya puede
+# estar reescrito. Reemplazar el mirror anterior por uno del remoto YA purgado
+# borraría la única copia del historial original en el momento exacto en que
+# hace falta.
+$sello = Get-Date -Format "yyyyMMdd-HHmmss"
+$bak   = Join-Path $root "..\$origen`-backup-mirror-$sello.git"
 $bak   = [IO.Path]::GetFullPath($bak)
 
 Write-Host "══════════════════════════════════════════════════════════════"
@@ -64,9 +70,17 @@ Ok "Acceso al remoto OK."
 
 # ── 2. Mirror de backup (no destructivo) ─────────────────────────────────
 if (Test-Path $bak) {
-    Aviso "Ya existe un backup en: $bak"
-    if (-not (Confirmar "¿Sobrescribirlo?")) { Errorf "Abortado."; exit 1 }
-    Remove-Item -Recurse -Force $bak
+    Errorf "Ya existe un respaldo con este sello de tiempo: $bak"
+    Errorf "No se sobrescribe ningún respaldo. Muevalo o espere un segundo."
+    exit 1
+}
+$previos = @(Get-ChildItem (Split-Path -Parent $bak) -Directory `
+             -Filter "$origen-backup-mirror-*.git" -ErrorAction SilentlyContinue)
+if ($previos.Count -gt 0) {
+    Aviso "Ya hay $($previos.Count) respaldo(s) de corridas anteriores:"
+    foreach ($d in $previos) { Aviso "    $($d.Name)" }
+    Aviso "Se conservan todos. Si una corrida anterior ya purgó el remoto, el"
+    Aviso "respaldo BUENO es el MAS ANTIGUO, no el que se va a crear ahora."
 }
 Traza "Creando mirror de respaldo ..."
 git clone --mirror $Remoto $bak
@@ -123,8 +137,18 @@ try {
             exit 2
         }
     }
+    # `--path internal/ --invert-paths` se llevaba también internal/README.md,
+    # que docs/SEGURIDAD_PURGA.md §2 manda conservar («conservar solo
+    # internal/README.md»). El callback hace la excepción dentro del filtro,
+    # en vez de dejar que haya que recrear el archivo a mano después.
+    #
+    # Las cadenas de Python van con comillas SIMPLES a propósito: PowerShell
+    # maltrata las comillas dobles al pasar argumentos a un ejecutable nativo,
+    # y el callback llegaría roto a git.
+    $filtro = "return None if (filename.startswith(b'data/raw/') or (filename.startswith(b'internal/') and filename != b'internal/README.md')) else filename"
     Traza "filter-repo: eliminando data/raw/ e internal/ de toda la historia ..."
-    git filter-repo --path data/raw/ --path internal/ --invert-paths --force
+    Traza "             (se conserva internal/README.md)"
+    git filter-repo --force --filename-callback $filtro
     if ($LASTEXITCODE -ne 0) { Errorf "Falló la purga."; exit 1 }
     Ok "Purga completada en el clon."
 
@@ -137,21 +161,46 @@ try {
             exit 2
         }
     }
-    git push origin --force --all
-    if ($LASTEXITCODE -ne 0) { Errorf "Falló el force-push de ramas."; exit 1 }
+    # --atomic: o entran todas las ramas o no entra ninguna. Sin él, si main
+    # tiene protección de rama el resto se reescribe y main no, y el remoto
+    # queda con dos historiales incompatibles conviviendo entre ramas.
+    git push origin --force --atomic --all
+    if ($LASTEXITCODE -ne 0) {
+        Errorf "Falló el force-push de ramas. No se escribió NINGUNA (--atomic)."
+        Errorf "Causa habitual: main tiene protección de rama. Desactívela en"
+        Errorf "Settings -> Branches y vuelva a ejecutar; el remoto sigue intacto."
+        exit 1
+    }
     git push origin --force --tags
     if ($LASTEXITCODE -ne 0) { Aviso "No había tags o falló el push de tags." }
     Ok "Force-push completado."
 
     # ── 7. Verificación ──────────────────────────────────────────────────
     Traza "Verificando historial limpio ..."
-    $res = git log --all --oneline -- data/raw internal/
+    # Se excluye internal/README.md: ahora se conserva a propósito, y sin la
+    # exclusión esta comprobación daría una falsa alarma en cada corrida.
+    $res = git log --all --oneline -- data/raw internal/ ':!internal/README.md'
     if ($res) {
         Aviso "ADVERTENCIA: aún hay commits con data/raw/ o internal/:"
         Write-Host $res
         exit 3
     }
     Ok "Historial limpio: sin data/raw/ ni internal/ en ninguna rama."
+
+    # Comprobar sólo lo que debe desaparecer no basta: un filtro equivocado que
+    # se llevara además la capa pública pasaría en silencio, y sin
+    # data/processed/ el despliegue no puede ensamblar el sitio (D-SEC-02).
+    Traza "Verificando que la capa pública sobrevivió ..."
+    $pub = git ls-tree -r --name-only HEAD -- data/processed
+    if (-not $pub) {
+        Errorf "La capa pública data/processed/ NO está en el árbol tras la purga."
+        Errorf "El remoto ya fue reescrito: restaure desde $bak antes de nada más."
+        exit 3
+    }
+    Ok "Capa pública intacta: $(@($pub).Count) artefacto(s) en data/processed/."
+    $rme = git ls-tree -r --name-only HEAD -- internal/README.md
+    if ($rme) { Ok "internal/README.md conservado." }
+    else { Aviso "internal/README.md no está en HEAD: recréelo (ver cierre)." }
 }
 finally {
     Pop-Location
@@ -160,7 +209,8 @@ finally {
 # ── 8. Cierre ────────────────────────────────────────────────────────────
 Write-Host ""
 Ok "Purga finalizada. Recuerde:"
-Aviso "  1) Re-cree internal/README.md en main (fue eliminado con internal/) y ajuste .gitignore."
+Aviso "  1) internal/README.md se conservó: compruebe que .gitignore sigue con la"
+Aviso "     excepción !internal/README.md y que nada más de internal/ está indexado."
 Aviso "  2) Vuelva a activar la protección de rama de main si la desactivó."
 Aviso "  3) Rotar secretos ORCID/Scopus (el repo era público)."
 Aviso "  4) Los clientes/clones existentes deben re-clonar (los hashes cambiaron)."
