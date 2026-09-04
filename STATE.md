@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `499d2bb` · Zenodo: el 400 era el tamaño de página, no la plantilla
+Último commit: `ca9260e` · PD-04: la cola se ordena por ventana antes que por evidencia
 Snapshot: 2026-09-04
 
 ---
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 492
+## Decisiones tomadas: 498
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

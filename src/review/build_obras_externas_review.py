@@ -24,6 +24,18 @@ EL CUARTO VEREDICTO, QUE NINGUNA OTRA COLA NECESITA
     institución— ni un tipo excluido: es su propia categoría, y se registra
     como tal.
 
+SEÑALES AUTOMÁTICAS QUE ARGUMENTAN, PERO NO DECIDEN
+    Cada tarjeta muestra el resultado de las comprobaciones de
+    `senales_obras_externas.py` contra lo que el proyecto ya sabe: qué ORCID
+    vigente sostiene el caso y con qué confianza, qué institución declara la
+    fuente para esa firma EN ESA OBRA, y si el título ya está contado en el
+    corpus o repetido en la propia cola.
+
+    Ninguna marca un veredicto ni preselecciona un botón. Existen porque
+    averiguar eso a mano, 322 veces, es lo que hace que una cola no se empiece
+    nunca; y no deciden porque un recuento salido de un umbral automático
+    sería Nivel D, y `PD-04` se publica como Nivel V.
+
 QUÉ NO HACE
     No decide nada por sí sola y no toca
     `data/interim/publications_universe.csv` bajo ninguna circunstancia.
@@ -64,6 +76,7 @@ sys.path.insert(0, str(ROOT / "src" / "review"))
 # marcar, filtrar, guardar y exportar es la misma que la de la cola de
 # OpenAlex, y dos copias significan corregir cada bug de exportación dos veces.
 from build_openalex_review import CSS, _json_para_script, render_js  # noqa: E402
+import senales_obras_externas as senales  # noqa: E402
 
 FUENTE = ROOT / "internal" / "obras_externas_cobertura.csv"
 DECISIONES = ROOT / "internal" / "obras_externas_decisiones.csv"
@@ -146,6 +159,79 @@ def _bloque_corroboracion(otras: str) -> str:
       </p>"""
 
 
+def _recorta(texto: str, n: int = 140) -> str:
+    """Cadenas de afiliación de 400 caracteres rompen la tarjeta y no se leen."""
+    t = " ".join(str(texto or "").split())
+    return t if len(t) <= n else t[: n - 1].rstrip() + "…"
+
+
+def _bloque_senales(r) -> str:
+    """Los hechos que el proyecto ya sabe sobre este caso, dichos antes de decidir.
+
+    Cada línea es una comprobación mecánica con su resultado, verde cuando
+    empuja hacia «sí» y roja cuando empuja hacia «no». NINGUNA marca el
+    veredicto ni preselecciona un botón: la decisión sigue costando un clic
+    humano, que es lo único que hace de `PD-04` un indicador de Nivel V.
+
+    Si la fila no trae columnas de señal —una cola vieja, o una prueba— el
+    bloque simplemente no aparece.
+    """
+    identificador = str(r.get("s_identificador") or "")
+    firma = str(r.get("s_firma") or "")
+    afiliacion = str(r.get("s_afiliacion") or "")
+    en_corpus = str(r.get("s_titulo_corpus") or "")
+    try:
+        en_cola = int(r.get("s_titulo_cola") or 0)
+    except (TypeError, ValueError):
+        en_cola = 0
+    if not (identificador or afiliacion or en_corpus or en_cola):
+        return ""
+
+    lineas: list[tuple[str, str]] = []
+    # Las firmas del corpus llevan la inicial con punto ("Abara J.F."), así que
+    # cerrar la frase a ciegas produce "Abara J.F..".
+    quien = f" — <b>{htmlmod.escape(firma)}</b>" if firma else ""
+    punto = "" if firma.endswith(".") else "."
+    if identificador == "alta":
+        lineas.append(("si",
+                       f"La sostiene un ORCID que este proyecto da por firme{quien}{punto}"))
+    elif identificador:
+        lineas.append(("neutro",
+                       f"La sostiene un ORCID de confianza <b>{htmlmod.escape(identificador)}</b>"
+                       f"{quien}: asignación probable, no comprobada."))
+    else:
+        lineas.append(("no", "Ningún ORCID vigente la sostiene: el vínculo es sólo "
+                             "la cadena de afiliación."))
+
+    declarada = _recorta(r.get("afiliacion_declarada"))
+    if afiliacion == "institucion":
+        lineas.append(("si", "La fuente declara a esta institución como afiliación "
+                             "<b>en esta obra</b>."))
+    elif afiliacion == "otra":
+        lineas.append(("no", "La fuente declara <b>otra institución</b> en esta obra: "
+                             f"«{htmlmod.escape(declarada)}». La producción institucional "
+                             "se define por la afiliación de la firma."))
+    elif afiliacion == "sin dato":
+        lineas.append(("neutro", "La fuente no declara afiliación en esta obra: "
+                                 "aquí no hay evidencia en ningún sentido."))
+
+    if en_corpus:
+        ya = "" if en_corpus == "sí" else f" (<span class=\"mono\">{htmlmod.escape(en_corpus)}</span>)"
+        lineas.append(("no", f"Un título idéntico ya está en el corpus Scopus con otro DOI{ya}. "
+                             "Suele ser «otra versión de una obra ya contada»."))
+    if en_cola:
+        veces = "una vez más" if en_cola == 1 else f"{en_cola} veces más"
+        lineas.append(("no", f"El mismo título aparece {veces} en esta cola. "
+                             "De todas ellas, a lo sumo una puede contarse."))
+
+    filas = "".join(f'<span class="sig {cl}">{txt}</span>' for cl, txt in lineas)
+    return f"""
+      <p class="xref senales">
+        <span class="etq">Señales automáticas · no deciden nada, sólo arman el caso</span>
+        {filas}
+      </p>"""
+
+
 def _via_legible(via: str) -> str:
     etiquetas = {"orcid": "por ORCID confirmado", "afiliacion": "por afiliación declarada"}
     return " y ".join(etiquetas.get(v, v) for v in via.split("|") if v)
@@ -178,7 +264,12 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None) -> str:
         doi_html = (f'<a href="https://doi.org/{htmlmod.escape(doi)}" target="_blank" '
                     f'rel="noopener">{htmlmod.escape(doi)}</a>' if doi
                     else '<em>sin DOI</em>')
-        buscar = htmlmod.escape(f"{titulo} {autor} {firma} {doi} {tipo} {fuente}".lower())
+        # Los tokens de señal entran en el índice de búsqueda: escribir
+        # "sig-afiliacion-otra" en el buscador filtra la cola por esa señal
+        # sin tocar el JavaScript compartido con la cola de OpenAlex.
+        tokens = str(r.get("s_tokens") or "")
+        buscar = htmlmod.escape(
+            f"{titulo} {autor} {firma} {doi} {tipo} {fuente} {tokens}".lower())
 
         # La vía por afiliación es matching por cadena suelta (`I-05`): la
         # advertencia va en la propia tarjeta, no en una nota general al pie
@@ -204,7 +295,7 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None) -> str:
         {f'<br>Afiliación declarada: <b>{htmlmod.escape(afiliacion)}</b>' if afiliacion else ''}
         <br>DOI: <span class="mono">{doi_html}</span>
         <br><span class="mono">{htmlmod.escape(motivo)}</span>{aviso_via}
-      </p>{_bloque_corroboracion(str(r.get("corroborada_por") or ""))}
+      </p>{_bloque_corroboracion(str(r.get("corroborada_por") or ""))}{_bloque_senales(r)}
       <div class="dec">
         <button type="button" data-v="uft" aria-pressed="false">Sí, es UFT</button>
         <button type="button" data-v="error" aria-pressed="false">No es de esta institución</button>
@@ -229,6 +320,15 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None) -> str:
 <title>Revisión de obras en repositorios externos (PD-04) — capa interna</title>
 <style>{CSS}
 .aviso-via{{color:#8a5a00;font-size:.95em}}
+.senales{{border-left-color:var(--marca);background:#f7f8fb}}
+.sig{{display:block;padding-left:1.15rem;position:relative;margin-top:.3rem}}
+.sig::before{{position:absolute;left:0;font-weight:700}}
+.sig.si::before{{content:"+";color:var(--si)}}
+.sig.no::before{{content:"−";color:var(--no)}}
+.sig.neutro::before{{content:"·";color:var(--tinta2)}}
+.filtros{{font-size:.83rem;margin:.4rem 0 0}}
+.filtros code{{background:var(--sup);border:1px solid var(--linea);border-radius:4px;
+  padding:.05rem .3rem;font-size:.95em;cursor:pointer}}
 </style>
 </head>
 <body>
@@ -266,6 +366,23 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None) -> str:
     reconoce una obra que ya está contada, use «Otra versión», no «No es de
     esta institución» — sí es de la institución, y esa diferencia importa
     para saber cuánto de la cola es duplicación y cuánto atribución errada.
+    <br><br>
+    Cada tarjeta trae <b>señales automáticas</b>: comprobaciones mecánicas
+    contra lo que este proyecto ya sabe —qué ORCID la sostiene y con cuánta
+    confianza, qué institución declara la fuente para esa firma en esa obra,
+    y si el título ya está contado—. <b>Ninguna decide</b> ni preselecciona un
+    botón: están para que el caso llegue armado y la respuesta cueste una
+    lectura. El veredicto sigue siendo suyo, y es lo único que convierte una
+    obra en recuento.
+    <p class="filtros">Filtre por señal (clic para poner y quitar):
+      <code>sig-afiliacion-institucion</code>
+      <code>sig-afiliacion-otra</code>
+      <code>sig-afiliacion-sin-dato</code>
+      <code>sig-orcid-alta</code>
+      <code>sig-sin-identificador</code>
+      <code>sig-titulo-en-corpus</code>
+      <code>sig-titulo-repetido</code>
+    </p>
   </div>
   {cuerpo}
 </main>
@@ -277,6 +394,18 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None) -> str:
 </div></footer>
 <script>{render_js(datos, COLUMNAS, "revision_obras_externas_v1",
                    "obras_externas_decisiones", CABECERA_CSV)}</script>
+<script>
+// Los tokens de señal son texto dentro de `data-buscar`, así que filtrar por
+// ellos es escribirlos en el buscador. Esto sólo ahorra teclearlos; el filtro
+// es el mismo que ya comparten las dos colas.
+document.querySelectorAll('.filtros code').forEach(el => {{
+  el.addEventListener('click', () => {{
+    const b = document.getElementById('buscar');
+    b.value = b.value.trim() === el.textContent ? '' : el.textContent;
+    b.dispatchEvent(new Event('input', {{bubbles: true}}));
+  }});
+}});
+</script>
 </body>
 </html>
 """
@@ -302,6 +431,12 @@ def autotest() -> int:
          "afiliacion_declarada": "Universidad Finis Terrae", "motivo": "sin DOI",
          "corroborada_por": "", "resolucion": "PENDIENTE_REVISION_HUMANA"},
     ])
+    df = senales.calcular(
+        df,
+        orcids={"0000-0001-0000-0001": {"firma": "Pérez A.", "confianza": "alta"}},
+        variantes=["universidad finis terrae"],
+        universo={},
+    )
     html = render_html(df)
 
     caso("una tarjeta por obra", html.count('<article class="item"') == 2)
@@ -324,6 +459,27 @@ def autotest() -> int:
     caso("la clave de navegador no choca con la de la cola de OpenAlex",
          "revision_obras_externas_v1" in html
          and "revision_cobertura_openalex_v1" not in html)
+    caso("las señales se muestran y se declaran como no decisorias",
+         "Señales automáticas" in html and "no deciden nada" in html)
+    caso("la señal de identificador nombra la firma que lo sostiene",
+         "Pérez A." in html and "da por firme" in html)
+    caso("la señal de afiliación reconoce la institución configurada",
+         "declara a esta institución" in html)
+    # Los cuatro botones de las dos tarjetas salen sin pulsar. (En el CSS sí
+    # aparece `aria-pressed="true"`, dentro de un selector; el discriminante
+    # es el `>` que cierra la etiqueta.)
+    caso("ninguna señal preselecciona un veredicto",
+         html.count('aria-pressed="false"') == 8
+         and 'aria-pressed="true">' not in html)
+    caso("los tokens de señal quedan en el índice de búsqueda",
+         "sig-afiliacion-institucion" in html and "sig-orcid-alta" in html)
+
+    # Una cola generada antes de que existieran las señales no debe romper el
+    # render: sin columnas `s_*`, el bloque simplemente no aparece.
+    sin_senales = render_html(df.drop(columns=senales.COLUMNAS))
+    caso("una cola sin columnas de señal sigue renderizando",
+         sin_senales.count('<article class="item"') == 2
+         and "Señales automáticas" not in sin_senales)
 
     fallos = [n for n, ok, _ in casos if not ok]
     for n, ok, obs in casos:
@@ -349,6 +505,12 @@ def main() -> int:
                   "python3 src/enrich/obras_externas.py")
     df = pd.read_csv(FUENTE, dtype=str).fillna("")
 
+    # Las señales se calculan AQUÍ, al presentar, y no en el conector: son
+    # una lectura de lo que el proyecto ya sabe, no un dato nuevo de la
+    # fuente. Así se pueden cambiar, corregir o ampliar sin volver a salir a
+    # la red ni invalidar la cola ya descargada.
+    df = senales.calcular(df)
+
     # Orden: primero lo que puede llegar a contarse, después lo que más
     # evidencia trae.
     #
@@ -358,16 +520,18 @@ def main() -> int:
     # separa 322 filas de 1.967: la diferencia entre una cola revisable y una
     # que nadie va a empezar. Las de fuera NO se descartan —la ventana puede
     # cambiar, y son evidencia igual—, van detrás.
+    #
+    # Dentro de la ventana ordena `s_fuerza`, que resume las señales: primero
+    # los casos que varias comprobaciones sostienen, al final los que huelen a
+    # duplicado. Es orden de lectura, no una decisión: nada queda fuera.
     ventana = b_ventana()
     en_ventana = df["anio"].str.slice(0, 4)
     en_ventana = en_ventana.where(en_ventana.str.isdigit(), "")
     df = df.assign(
         _ventana=[1 if a and ventana[0] <= int(a) <= ventana[1] else 0 for a in en_ventana],
-        _orden=df["corroborada_por"].astype(bool).astype(int) * 2
-        + (df["via"].str.contains("orcid")).astype(int),
-    ).sort_values(["_ventana", "_orden", "anio"], ascending=[False, False, False])
+    ).sort_values(["_ventana", "s_fuerza", "anio"], ascending=[False, False, False])
     n_ventana = int(df["_ventana"].sum())
-    df = df.drop(columns=["_ventana", "_orden"])
+    df = df.drop(columns=["_ventana"])
 
     SALIDA.write_text(render_html(df, n_ventana), encoding="utf-8")
 
@@ -380,6 +544,23 @@ def main() -> int:
     for fuente, n in df["fuente"].value_counts().items():
         print(f"    {FUENTE_LEGIBLE.get(fuente, fuente):<12}: {n}")
     print(f"  corroboradas entre fuentes: {int(df['corroborada_por'].astype(bool).sum())}")
+
+    # Qué hay delante, contado sobre lo que de verdad se va a revisar. Sin
+    # esto, las señales sólo se ven caso a caso y no dan idea del reparto.
+    v = df.head(n_ventana)
+    if n_ventana:
+        print(f"\n  señales sobre esas {n_ventana} (no deciden nada, ordenan la lectura):")
+        marcas = [
+            ("afiliación institucional en la obra", (v["s_afiliacion"] == "institucion").sum()),
+            ("afiliación de otra institución     ", (v["s_afiliacion"] == "otra").sum()),
+            ("la fuente no declara afiliación    ", (v["s_afiliacion"] == "sin dato").sum()),
+            ("ORCID de confianza alta            ", (v["s_identificador"] == "alta").sum()),
+            ("sin ORCID vigente que la sostenga  ", (v["s_identificador"] == "").sum()),
+            ("título ya presente en el corpus    ", (v["s_titulo_corpus"] != "").sum()),
+            ("título repetido dentro de la cola  ", (v["s_titulo_cola"] > 0).sum()),
+        ]
+        for etiqueta, n in marcas:
+            print(f"    {etiqueta}: {int(n)}")
     print(f"\n  OK · {SALIDA.relative_to(ROOT)}")
     print("       Abra el .html, marque cada caso, exporte el CSV, y aplíquelo con")
     print("       python3 src/review/apply_obras_externas_review.py")
