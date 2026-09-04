@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `a10d442` · Fusiona 4 grupos de firmas por convergencia de ORCID no consolidada
+Último commit: `53732b6` · Auditoría completa del repositorio: corrige deriva documental y CI
 Snapshot: 2026-09-04
 
 ---
@@ -32,18 +32,18 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Con métricas | **816** | denominador `con_metricas` · `D-16` |
 | Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
 | Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **530** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades de autor publicadas | **513** | tras consolidación humana · **la que sirve el sitio** |
 | Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
 | Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **328** | sin consolidar · `data/enriched/authors_orcid.csv` |
-| Entidades con ORCID | **268** | tras consolidación humana · **la que sirve el sitio** |
+| Entidades con ORCID | **252** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **43** | `config/indicators.yml` |
 | Indicadores publicados | **31** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
 
-Las cifras de autor van en dos bases porque una revisión humana declaró que **94 formas de firma eran 39 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
+Las cifras de autor van en dos bases porque una revisión humana declaró que **123 formas de firma eran 51 personas** (`config/identidades_consolidadas.yml`, decisión `D-08`: el pipeline nunca fusiona por heurística). Las restantes siguen sin consolidar y pueden incluir variantes de una misma persona.
 
 ---
 
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 466
+## Decisiones tomadas: 470
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

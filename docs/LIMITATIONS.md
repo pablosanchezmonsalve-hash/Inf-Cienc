@@ -36,7 +36,7 @@ Estas ambigüedades están **declaradas por el detector automático de la
 fuente**; muchas ya tienen una decisión humana registrada encima (ver
 `STATE.md` para el estado vigente de cada cola). La cifra de
 589 autores debe leerse como *589 formas de firma detectadas*, no como 589
-personas. Consolidación humana (`D-08`, nunca automática) fijó **530
+personas. Consolidación humana (`D-08`, nunca automática) fijó **513
 entidades reales** (94 formas de firma resultaron ser 39 personas,
 `config/identidades_consolidadas.yml`) — esa es la base que sirve el sitio.
 
@@ -44,7 +44,7 @@ entidades reales** (94 formas de firma resultaron ser 39 personas,
 el repositorio institucional (DSpace), el inventario de autoarchivo de
 biblioteca y la propia API pública de ORCID — nunca inventado, siempre con
 su fuente declarada por firma. Cobertura hoy: **328 formas de firma con
-ORCID** sin consolidar, **268 entidades con ORCID** tras consolidación
+ORCID** sin consolidar, **252 entidades con ORCID** tras consolidación
 humana (`STATE.md`). El detalle metodológico completo —qué vía aportó qué,
 dónde persiste la brecha y por qué no llega al 100 %— vive en
 `docs/ORCID_COVERAGE.md` y `docs/ORCID_GUIDE.md`, no se repite aquí.
@@ -152,7 +152,7 @@ autor mononímico real): `config/firmas_e09_resueltas.yml` las registra en
 
 **Efecto en `P-06`:** las 589 formas de firma detectadas en la fuente,
 consolidadas por revisión humana (94 formas → 39 personas, `D-08`) y con
-estas 4 ya descartadas, publican **530 entidades** (`STATE.md`,
+estas 4 ya descartadas, publican **513 entidades** (`STATE.md`,
 `data/processed/authors.json`) — la cifra ya refleja la resolución, no una
 proyección hipotética.
 

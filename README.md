@@ -88,7 +88,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | Formas de firma de autor | **589** |
 | Pares autor × publicación | **1.207** |
 | Firmas con ORCID (sin consolidar) | **328** |
-| Entidades publicadas con ORCID | **268** |
+| Entidades publicadas con ORCID | **252** |
 | Reglas de validación | **30** · 29 pasan · 0 fallas bloqueantes |
 
 ### Indicadores (Fase 2)
@@ -105,7 +105,7 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | | |
 |---|---|
 | Páginas | 11 |
-| Fichas de autor | **530**, una por archivo |
+| Fichas de autor | **513**, una por archivo |
 | Peso total de `dist/` | ~3,6 MB |
 | Dependencias externas en el navegador | **0** |
 

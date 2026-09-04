@@ -3,14 +3,14 @@
 **Capa:** pública · **Pendientes que ataca:** `T-19` y la pregunta de cuánta
 cobertura es alcanzable
 
-> **Las cifras van sobre la base publicada: 530 entidades de autor**, que son las
+> **Las cifras van sobre la base publicada: 513 entidades de autor**, que son las
 > 589 formas de firma de la fuente con las variantes ya fusionadas por revisión
-> humana (94 formas en 39 personas en la consolidación vigente) y 4 formas
+> humana (123 formas en 51 personas en la consolidación vigente) y 4 formas
 > descartadas por la regla `E-09` (fragmentos de cadena de afiliación, no
 > personas — ver `docs/LIMITATIONS.md` §7). Este documento se escribió sobre
-> la base de 556, se actualizó el 2026-09-01 a 542, el 2026-09-02 a 538, y de
-> nuevo el 2026-09-03 a la base que sirve el sitio hoy; si vuelve a divergir,
-> manda `STATE.md`, que se deriva del repositorio.
+> la base de 556, se actualizó el 2026-09-01 a 542, el 2026-09-02 a 538, el
+> 2026-09-03 a 530, y de nuevo el 2026-09-04 a la base que sirve el sitio hoy;
+> si vuelve a divergir, manda `STATE.md`, que se deriva del repositorio.
 
 ---
 
@@ -45,8 +45,8 @@ completa consultó los 804 DOI del corpus y encoló 2 desacuerdos entre Crossref
 el registro, sin resolverlos.
 
 Después vino la revisión humana, que consolidó variantes y confirmó candidatos
-por afiliación. **Sobre la base que hoy publica el sitio la cobertura es de 268
-de 530 entidades (50,6 %)**, y son 328 asignaciones si se cuentan sobre las
+por afiliación. **Sobre la base que hoy publica el sitio la cobertura es de 252
+de 513 entidades (49,1 %)**, y son 328 asignaciones si se cuentan sobre las
 formas de firma sin consolidar. Las dos cifras son ciertas y miden poblaciones
 distintas; citar una donde corresponde la otra es el error que este proyecto
 persigue.
@@ -83,14 +83,14 @@ Los recuentos agregados se cuentan por esa etiqueta y no por el veredicto, para
 que el número de verificaciones independientes no se infle con comprobaciones
 circulares:
 
-Sobre las **268 entidades con ORCID** de la base publicada:
+Sobre las **252 entidades con ORCID** de la base publicada:
 
 | Etiqueta en la ficha | Entidades |
 |---|---:|
-| `verificado` — dos fuentes independientes coinciden | 154 |
-| `declarado por el titular` — una sola fuente, el titular | 37 |
-| `comprobado por revisión` — una persona abrió el registro del titular y respaldó una asignación que la vía automática no pudo resolver | 29 |
-| `confirmado por revisión` — una persona lo comprobó en `make revision` | 21 |
+| `verificado` — dos fuentes independientes coinciden | 147 |
+| `declarado por el titular` — una sola fuente, el titular | 36 |
+| `comprobado por revisión` — una persona abrió el registro del titular y respaldó una asignación que la vía automática no pudo resolver | 24 |
+| `confirmado por revisión` — una persona lo comprobó en `make revision` | 18 |
 | `no verificable` — sin obras con DOI que contrastar | 18 |
 | `sin confirmar` — pendiente de revisión humana | 8 |
 | `encontrado por revisión` — ninguna vía automática halló identificador; una persona lo buscó y lo encontró en el registro de ORCID | 1 |
@@ -112,13 +112,13 @@ dominado por firmas de una sola publicación:
 
 | Publicaciones de la entidad | Entidades | Con ORCID | Cobertura |
 |---|---:|---:|---:|
-| 1 | 375 | 146 | 38,9 % |
-| 2 | 74 | 50 | 67,6 % |
-| 3–4 | 43 | 35 | 81,4 % |
-| 5–9 | 31 | 27 | 87,1 % |
+| 1 | 342 | 117 | 34,2 % |
+| 2 | 71 | 46 | 64,8 % |
+| 3–4 | 48 | 40 | 83,3 % |
+| 5–9 | 33 | 30 | 90,9 % |
 | 10 o más | 19 | 19 | **100 %** |
 
-**69,2 % de las entidades tienen una sola publicación.** Una entidad con una
+**66,7 % de las entidades tienen una sola publicación.** Una entidad con una
 publicación tiene exactamente una oportunidad de ser encontrada: si su ORCID no
 aparece en ese único DOI, no hay una segunda vía por la que pueda aparecer.
 Entre quienes tienen diez o más, la cobertura es del **100 %**: **entre los autores
@@ -139,21 +139,21 @@ que no publica.
 
 ## 4. Lo que el 100 % exigiría
 
-Para que las 530 tuvieran ORCID harían falta las cuatro cosas a la vez:
+Para que las 513 tuvieran ORCID harían falta las cuatro cosas a la vez:
 
-1. que las 530 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
+1. que las 513 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
 2. que su registro sea **público** —puede configurarse como privado—;
 3. que alguna fuente **conecte** ese ORCID con alguna de sus publicaciones de
    este corpus, o que la persona declare la universidad;
 4. que el nombre permita distinguirla de sus homónimos.
 
 Las cuatro se cumplen para una parte de los autores y no para el resto. Escribir
-530 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
+513 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
 las reglas del proyecto: *«No inventes datos, columnas, métricas, relaciones ni
 resultados»*.
 
-**Y 530 entidades tampoco son 530 personas.** Una revisión humana ya fusionó
-variantes (94 formas en 39 personas en la consolidación vigente) y descartó
+**Y 513 entidades tampoco son 513 personas.** Una revisión humana ya fusionó
+variantes (123 formas en 51 personas en la consolidación vigente) y descartó
 cuatro firmas que resultaron ser fragmentos de cadena de afiliación, no
 personas (`E-09`, ya resuelto — ver `docs/LIMITATIONS.md` §7), pero quedan
 grupos de variantes y perfiles fragmentados sin resolver (`T-03`, `T-04`). Una

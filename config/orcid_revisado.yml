@@ -12,9 +12,9 @@
 # sin_registro  alguien buscó en el registro y no encontró a esta
 #               persona. No es lo mismo que «nadie ha mirado».
 #
-# Aplicado: 2026-09-03
+# Aplicado: 2026-09-04
 
-fecha_de_aplicacion: 2026-09-03
+fecha_de_aplicacion: 2026-09-04
 
 confirmadas:
   - firma: Abara J.F.

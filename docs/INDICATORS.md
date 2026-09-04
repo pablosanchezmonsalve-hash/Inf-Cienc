@@ -25,9 +25,9 @@ trabajo).
 | `P-03` | Tipo documental | Distribución por tipo | `group by tipo` | `tipo_documental` | **sí** 100 % | alta | ✅ | Permite excluir tipos no citables del impacto |
 | `P-04` | Fuentes distintas | Revistas y otras fuentes | `count(distinct Source ID)` | `Source ID` | **sí** 495 | alta | ✅ | `Source ID` mejor clave que ISSN |
 | `P-05` | Ranking de fuentes | Fuentes por volumen | `group by fuente, order desc` | `Scopus Source title` | **sí** | alta | ✅ | Volumen ≠ calidad. No ordenar por métrica de revista |
-| `P-06` | Autores UFT distintos | Formas de firma detectadas | `count(distinct autor)` | tabla maestra | **parcial** 530 publicadas de 589 en la fuente[^p06] | media | ✅ | **No son personas.** 589 en la fuente → 534 tras fusionar 94 variantes en 39 personas por revisión humana → **530 publicadas** tras descartar 4 fragmentos de afiliación (regla `E-09`, ya resuelto, ver `docs/LIMITATIONS.md` §7). Las colas automáticas de variantes de nombre y de Scopus ID múltiples están hoy resueltas por completo; persisten otras colas de revisión (ver `STATE.md`) |
+| `P-06` | Autores UFT distintos | Formas de firma detectadas | `count(distinct autor)` | tabla maestra | **parcial** 513 publicadas de 589 en la fuente[^p06] | media | ✅ | **No son personas.** 589 en la fuente → 517 tras fusionar 123 variantes en 51 personas por revisión humana → **513 publicadas** tras descartar 4 fragmentos de afiliación (regla `E-09`, ya resuelto, ver `docs/LIMITATIONS.md` §7). Las colas automáticas de variantes de nombre y de Scopus ID múltiples están hoy resueltas por completo; persisten otras colas de revisión (ver `STATE.md`) |
 
-[^p06]: Este recuento describe la decisión de la revisión histórica del 2026-07-31. Consolidaciones posteriores de identidad (94 formas en 39 personas, más 4 descartadas por `E-09`, al 2026-09-03) bajaron la base publicada a **530 entidades**, y el sitio sirve esa. Ver `STATE.md`. La nota metodológica («no son personas») no cambia.
+[^p06]: Este recuento describe la decisión de la revisión histórica del 2026-07-31. Consolidaciones posteriores de identidad (123 formas en 51 personas, más 4 descartadas por `E-09`, al 2026-09-04) bajaron la base publicada a **513 entidades**, y el sitio sirve esa. Ver `STATE.md`. La nota metodológica («no son personas») no cambia.
 | `P-07` | Producción por unidad académica | Pares por unidad | `group by unidad` | `unidad_academica` | **parcial** 63,8 % | **baja** | ⚠️ | Cobertura parcial + sesgo de cobertura Scopus. Advertencia obligatoria |
 | `P-08` | Distribución por idioma | Idioma del documento | `group by idioma` | `Language` | **sí** 100 % | alta | V2 | Bajo valor analítico inmediato |
 | `A-01` | Acceso abierto | Publicaciones con estado OA | `count(OA not null)` | `Open Access` | **parcial** 72,3 % | media | ⚠️ | **Ausencia ≠ «no OA»**. Reportar como «n con estado declarado» |
@@ -76,7 +76,7 @@ trabajo).
 | `AU-02` | Citas por autor | Citas atribuidas | `sum(citas) by autor` | `Autoria` + `Citations` | **sí** | media | ✅ | Atribución completa: una publicación aporta sus citas a cada autor UFT |
 | `AU-06` | Evolución temporal del autor | Publicaciones por año | `group by autor, anio` | `Autoria` | **sí** | media | ✅ | 3 puntos: **barras, no línea de tendencia** |
 | `AU-03` | h-index en ventana | h sobre 2023–2025 | h clásico sobre el subconjunto | `Autoria` + `Citations` | **parcial** | **baja** | ⚠️ | **497 de 589 autores tienen h ≤ 1: no discrimina.** Sólo en ficha, siempre etiquetado |
-| `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 328/589 firmas · 268/530 entidades | media | ✅ | Ya no es placeholder: se publicó al cerrarse `T-01` (2026-08-01); revisiones de identidad posteriores consolidaron más grupos y retiraron asignaciones erróneas. Cada asignación viaja con su veredicto; sin ORCID se muestra «no disponible», no se oculta |
+| `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 328/589 firmas · 252/513 entidades | media | ✅ | Ya no es placeholder: se publicó al cerrarse `T-01` (2026-08-01); revisiones de identidad posteriores consolidaron más grupos y retiraron asignaciones erróneas. Cada asignación viaja con su veredicto; sin ORCID se muestra «no disponible», no se oculta |
 | `AU-04` | FWCI por autor | Impacto normalizado del autor | — | — | **no** | no aplicable | ❌ | **Descartado.** El FWCI de un autor no es el promedio de sus publicaciones y SciVal no lo entrega a nivel autor. Calcularlo sería inventar la métrica |
 
 ### 1.6 Declarado — fuera del corpus Scopus/SciVal
@@ -142,11 +142,14 @@ Fase 2 tal como se tomó, no el estado actual del sitio.
 | Diferidos a V2 | 7 |
 | No calculables o fuera de alcance | 5 |
 
-`AU-05` (ORCID) dejó de ser placeholder al cerrarse `T-01` y se publica, y
-`C-05` (red de coautoría) se publicó con `T-10` (2026-08-26); por eso el total es
-28. De los publicados, **19 llevan nota metodológica contextual** (tooltip) y
-**5 llevan advertencia destacada** — banda visible junto al módulo, no
-ocultable: `P-07`, `I-04`, `A-01`, `T-04`, `AU-03`.
+`AU-05` (ORCID) dejó de ser placeholder al cerrarse `T-01`, `C-05` (red de
+coautoría) se publicó con `T-10` (2026-08-26), y las tres de producción
+declarada (`PD-01`/`PD-02`/`PD-03`) se sumaron después — la cifra de
+«Publicados» de la tabla de arriba es la que manda; no se repite aquí para
+no desincronizarse otra vez (ya lo hizo dos veces: 28 → 29 → 31 sin que
+esta prosa se actualizara). De los publicados, **8 llevan advertencia
+destacada** — banda visible junto al módulo, no ocultable: `P-07`, `I-04`,
+`A-01`, `T-04`, `AU-03`, `PD-01`, `PD-02`, `PD-03`.
 
 Los dos niveles son distintos por diseño: la nota contextual explica cómo leer
 un indicador correcto; la advertencia destacada señala que el indicador tiene
