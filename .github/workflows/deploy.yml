@@ -1,12 +1,20 @@
 name: Construir, verificar y desplegar
 
-# Reconstruye el sitio desde los datos versionados, lo verifica y lo publica en
-# GitHub Pages.
+# Ensambla el sitio desde la CAPA PÚBLICA versionada, lo verifica y lo publica
+# en GitHub Pages.
 #
-# El pipeline es el mismo que en local (`make sitio`): auditoría → validación →
-# artefactos → ensamblado. Si una regla bloqueante falla o si la verificación de
-# capas encuentra material interno en un artefacto público, el job falla y NO se
-# publica nada. Es la misma compuerta, ejecutada por CI.
+# D-SEC-02: CI ya NO reconstruye desde data/raw/ (exports de Elsevier) ni
+# internal/ (capa interna): esas capas no se versionan (D-SEC-01) y no residirán
+# en el runner. La reconstrucción completa «raw → dist» es una operación
+# INSTITUCIONAL/LOCAL en la máquina de confianza donde viven las licencias; lo
+# que CI hace es:
+#   1) ejercer todas las autopruebas --test (no tocan red ni datos sensibles);
+#   2) verificar que la capa pública versionada (data/processed/) está limpia;
+#   3) ensamblar dist/ desde data/processed/ + web/ (06_assemble_site.py);
+#   4) aplicar las compuertas (pre-renderizado, capa interna, índice de git) y
+#      la batería Playwright; y sólo entonces publicar.
+# La verificación de capas sigue protegiendo el REPOSITORIO: si data/raw/ o
+# internal/ volvieran a versionarse, el job falla y NO se publica nada.
 #
 # DOS DISPARADORES, UN SOLO JOB DE VERIFICACIÓN
 #   La compuerta corría sólo al empujar a `main`, es decir DESPUÉS de fusionar:
@@ -71,12 +79,25 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
-      - name: Auditoría y validación
-        run: python3 src/audit/run_all.py
+      # D-SEC-02: la capa pública que se ensambla es la versionada. Si hubiera
+      # recibido material interno (filtración en data/processed/ o en un
+      # artefacto), esto lo detiene antes de tocar dist/.
+      - name: Verificar que no haya filtración en la capa pública
+        run: |
+          set -e
+          if grep -rlE 'matching_log|ambiguities_|orcid_conflicts|identity_candidates|identity_decisions|data/raw/|internal/' data/processed/ >/dev/null 2>&1; then
+            echo "FALLA: la capa pública data/processed/ contiene material interno"
+            exit 1
+          fi
+          test -f data/processed/meta.json || { echo "FALLA: falta data/processed/meta.json"; exit 1; }
+          echo "Capa pública limpia y completa — verificado"
 
-      - name: Factibilidad de indicadores
-        run: python3 src/analysis/indicator_feasibility.py
+      - name: Ensamblar el sitio desde la capa pública
+        run: python3 src/build/06_assemble_site.py
 
+      # Autoprueba sin red del emparejamiento contra Crossref. No pide
+      # credenciales: si las pidiera, CI no podría ejercer esta lógica y se
+      # rompería en silencio.
       - name: Verificar la lógica de emparejamiento de ORCID
         run: python3 src/enrich/orcid_crossref.py --test
 
@@ -130,18 +151,25 @@ jobs:
       - name: Verificar la lógica de la brecha de cobertura
         run: python3 src/enrich/openalex_cobertura.py --test
 
+      # La consulta a Scopus no corre en CI —sale a red y exige API Key— pero
+      # su extracción y el contraste del corpus sí se comprueban: son la parte
+      # que puede romperse en silencio si la API cambia de forma y la que
+      # decidiría mal qué divergencias merecen revisión humana.
+      - name: Verificar la lógica del conector de Scopus
+        run: python3 src/enrich/scopus_api.py --test
+
+      # Piloto WoS: parsea exports manuales de la interfaz y los contrasta por
+      # DOI contra el export — lógica que nunca toca la red y que debe quedar
+      # comprobada en cada despliegue aunque la credencial sea web y personal.
+      - name: Verificar la lógica del piloto de Web of Science
+        run: python3 src/enrich/wos_piloto.py --test
+
       # Lo que decide qué firmas se fusionan como una persona y cuáles dejan de
       # contarse por no serlo. Es la lógica con más consecuencias sobre lo
       # publicado que existe fuera del pipeline, y hasta ahora no la ejercía
       # nada en CI.
       - name: Verificar la lógica de aplicación de decisiones humanas
         run: python3 src/review/apply_decisions.py --test
-
-      - name: Construir artefactos publicables
-        run: python3 src/build/build_all.py
-
-      - name: Ensamblar el sitio
-        run: python3 src/build/06_assemble_site.py
 
       # Un sitio que exige JavaScript para mostrar una cifra no es un informe
       # citable. Esto lo comprueba sobre el HTML desplegable, no sobre la
@@ -171,6 +199,23 @@ jobs:
           test ! -d dist/internal
           test ! -d dist/data/raw
           echo "Capa interna ausente de dist/ — verificado"
+
+      # D-SEC-01: la barrera también protege el REPOSITORIO, no sólo dist/.
+      # Si las capas internas volvieran a versionarse (data/raw/, internal/ o
+      # estructuras de revisión), el pipeline se detiene. Es imposible que un
+      # `dist/` limpio enmascare un repositorio que vuelve a filtrar datos.
+      - name: Comprobar que las capas internas no están versionadas
+        run: |
+          set -e
+          if git ls-files --error-unmatch data/raw >/dev/null 2>&1; then
+            echo "FALLA: data/raw/ está versionado (exports de Elsevier, D-SEC-01)"
+            exit 1
+          fi
+          if git ls-files internal/ | grep -qv '^internal/README.md$'; then
+            echo "FALLA: internal/ contiene archivos versionados (capa interna, D-SEC-01)"
+            exit 1
+          fi
+          echo "Capas internas ausentes del control de versiones — verificado"
 
       # La batería de `src/verify/`: contraste WCAG, estructura y consola,
       # flujos interactivos, responsive e higiene de CSS/JS. Existe en el
