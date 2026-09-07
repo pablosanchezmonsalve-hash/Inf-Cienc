@@ -245,7 +245,7 @@ def _via_legible(via: str) -> str:
 
 
 def render_html(filas: pd.DataFrame, n_ventana: int | None = None,
-                n_depuradas: int = 0) -> str:
+                fuera: dict[str, int] | None = None) -> str:
     previas = leer_previas(DECISIONES)
     items: list[dict] = []
     cuerpo = ""
@@ -313,6 +313,10 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None,
       </div>
     </article>"""
 
+    fuera = fuera or {}
+    n_ajenas = fuera.get("afiliacion_ajena", 0)
+    n_repetidas = fuera.get("titulo_repetido", 0)
+
     datos = _json_para_script(items)
     hoy = date.today().isoformat()
     n = len(filas)
@@ -344,7 +348,9 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None,
   <h1>Obras en repositorios de datos y acceso abierto que Scopus no indexa</h1>
   <p>Capa interna · generado el {hoy} · {n} obras ({por_fuente})</p>
   {f'<p>Las <b>{n_ventana}</b> primeras caen en la ventana {b_ventana()[0]}-{b_ventana()[1]} y son las únicas que pueden llegar a contarse. {"La restante queda detrás, sin descartarse" if n - n_ventana == 1 else f"Las {n - n_ventana} restantes quedan detrás, sin descartarse"}.</p>' if n_ventana is not None else ''}
-  {f'<p>Otras <b>{n_depuradas}</b> quedaron fuera por la regla de título repetido: varias versiones de un mismo depósito son una obra, y de todas ellas a lo sumo una puede contarse. Quedan listadas en <span class="mono">internal/obras_externas_depuradas.csv</span> con la fila que las sustituye.</p>' if n_depuradas else ''}
+  {f'<p>Otras <b>{n_ajenas}</b> quedaron fuera porque la fuente declara para esa firma, <b>en esa obra</b>, una institución distinta: la producción institucional se define por la afiliación de la firma. La ausencia de afiliación no cuenta como afiliación ajena, y esas siguen en la cola.</p>' if n_ajenas else ''}
+  {f'<p>Y <b>{n_repetidas}</b> por la regla de título repetido: varias versiones de un mismo depósito son una obra, y de todas ellas a lo sumo una puede contarse.</p>' if n_repetidas else ''}
+  {f'<p>Todo lo que sale por regla queda listado en <span class="mono">internal/obras_externas_depuradas.csv</span>, con la regla que lo sacó y, cuando aplica, la fila que lo sustituye.</p>' if n_ajenas or n_repetidas else ''}
 </div></header>
 
 <div class="barra"><div class="c">
@@ -385,7 +391,6 @@ def render_html(filas: pd.DataFrame, n_ventana: int | None = None,
     obra en recuento.
     <p class="filtros">Filtre por señal (clic para poner y quitar):
       <code>sig-afiliacion-institucion</code>
-      <code>sig-afiliacion-otra</code>
       <code>sig-afiliacion-sin-dato</code>
       <code>sig-orcid-alta</code>
       <code>sig-sin-identificador</code>
@@ -483,12 +488,15 @@ def autotest() -> int:
     caso("los tokens de señal quedan en el índice de búsqueda",
          "sig-afiliacion-institucion" in html and "sig-orcid-alta" in html)
 
-    con_depuradas = render_html(df, 2, 7)
-    caso("lo depurado por regla se declara en la cabecera, no se calla",
-         "<b>7</b>" in con_depuradas and "título repetido" in con_depuradas
-         and "obras_externas_depuradas.csv" in con_depuradas)
-    caso("sin nada depurado no se anuncia una depuración vacía",
-         "título repetido" not in html)
+    con_reglas = render_html(df, 2, {"afiliacion_ajena": 5, "titulo_repetido": 7})
+    caso("lo que sale por regla se declara en la cabecera, no se calla",
+         "<b>5</b>" in con_reglas and "<b>7</b>" in con_reglas
+         and "título repetido" in con_reglas
+         and "obras_externas_depuradas.csv" in con_reglas)
+    caso("la cabecera aclara que la falta de afiliación no es afiliación ajena",
+         "no cuenta como afiliación ajena" in con_reglas)
+    caso("sin nada fuera no se anuncia una depuración vacía",
+         "título repetido" not in html and "obras_externas_depuradas.csv" not in html)
 
     # Una cola generada antes de que existieran las señales no debe romper el
     # render: sin columnas `s_*`, el bloque simplemente no aparece.
@@ -547,30 +555,41 @@ def main() -> int:
         _ventana=[1 if a and ventana[0] <= int(a) <= ventana[1] else 0 for a in en_ventana],
     )
 
-    # Regla de título repetido, decidida por el usuario el 2026-09-04: de
-    # cada título, una sola fila queda revisable. Se aplica ANTES de ordenar
-    # y de contar la ventana, porque lo depurado no es cola: no se revisa, no
-    # se cuenta y no se esconde — queda en su propio CSV con la fila que lo
-    # sustituye. Dentro de un grupo prefiere la que cae en ventana, y a
-    # igualdad la de señales más fuertes: de nada sirve conservar la versión
-    # de 2019 de un depósito cuya versión de 2024 sí podría contarse.
+    # Las dos reglas que el usuario adoptó (2026-09-04) se aplican ANTES de
+    # ordenar y de contar la ventana, porque lo que sacan no es cola: no se
+    # revisa, no se cuenta y no se esconde — sale a su propio CSV diciendo qué
+    # regla lo sacó.
+    #
+    # El ORDEN entre ellas importa. La de afiliación va primero: si fuese
+    # después, una fila firmada en otra institución podría haber sido elegida
+    # superviviente de su grupo de título, y al retirarla se habría llevado por
+    # delante a una hermana que sí era revisable.
     previas = leer_previas(DECISIONES)
+    protegidas = set(previas)
+
+    df = senales.descartar_afiliacion_ajena(df, protegidas=protegidas)
+    ajenas = df[df["s_ajena"] == 1].assign(regla="afiliacion_ajena")
+    df = df[df["s_ajena"] == 0].reset_index(drop=True)
+
     df = senales.depurar_repetidos(
         df,
         preferencia=df["_ventana"] * 10 + df["s_fuerza"],
-        protegidas=set(previas),
+        protegidas=protegidas,
     )
-    depuradas = df[df["s_duplicada"] == 1]
-    df = df[df["s_duplicada"] == 0]
-    if len(depuradas):
+    repetidas = df[df["s_duplicada"] == 1].assign(regla="titulo_repetido")
+    df = df[df["s_duplicada"] == 0].reset_index(drop=True)
+
+    fuera = pd.concat([ajenas, repetidas], ignore_index=True)
+    if len(fuera):
         DEPURADAS.parent.mkdir(parents=True, exist_ok=True)
-        depuradas.drop(columns=["_ventana"]).to_csv(DEPURADAS, index=False)
+        fuera.drop(columns=["_ventana"]).to_csv(DEPURADAS, index=False)
+    conteo = {"afiliacion_ajena": len(ajenas), "titulo_repetido": len(repetidas)}
 
     df = df.sort_values(["_ventana", "s_fuerza", "anio"], ascending=[False, False, False])
     n_ventana = int(df["_ventana"].sum())
     df = df.drop(columns=["_ventana"])
 
-    SALIDA.write_text(render_html(df, n_ventana, len(depuradas)), encoding="utf-8")
+    SALIDA.write_text(render_html(df, n_ventana, conteo), encoding="utf-8")
 
     print(f"  obras a revisar          : {len(df)}")
     print(f"    en ventana {b_ventana()[0]}-{b_ventana()[1]}, primero : {n_ventana}"
@@ -580,9 +599,10 @@ def main() -> int:
     for fuente, n in df["fuente"].value_counts().items():
         print(f"    {FUENTE_LEGIBLE.get(fuente, fuente):<12}: {n}")
     print(f"  corroboradas entre fuentes: {int(df['corroborada_por'].astype(bool).sum())}")
-    if len(depuradas):
-        print(f"  depuradas por título repetido: {len(depuradas)}"
-              f"  ({DEPURADAS.name}, con la fila que las sustituye)")
+    if len(fuera):
+        print(f"  fuera de la cola por regla   : {len(fuera)}  ({DEPURADAS.name})")
+        print(f"    afiliación de otra institución: {len(ajenas)}")
+        print(f"    título repetido               : {len(repetidas)}")
 
     # Qué hay delante, contado sobre lo que de verdad se va a revisar. Sin
     # esto, las señales sólo se ven caso a caso y no dan idea del reparto.

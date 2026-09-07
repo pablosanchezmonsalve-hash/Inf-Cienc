@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `154c9fb` · PD-04: señales automáticas que arman cada caso sin decidirlo
-Snapshot: 2026-09-04
+Último commit: `22372cc` · PD-04: regla de título repetido, y el rastro de lo que descarta
+Snapshot: 2026-09-07
 
 ---
 
@@ -82,7 +82,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 503
+## Decisiones tomadas: 507
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -11858,3 +11858,64 @@ superviviente por un duplicado que ya no existe.
   significar el indicador, es decisión del usuario).
 - Cuánto reduce la regla las 322 en ventana está por medir: la cola vive en la
   máquina del usuario, no en el repositorio.
+
+---
+
+## Addendum: la regla de afiliación ajena, y lo que reveló el reparto real (2026-09-04)
+
+**La medición que decidió.** Con la regla de título repetido aplicada sobre la
+cola real, el usuario ejecutó la herramienta y el reparto por afiliación fue
+el argumento:
+
+| Lo que la fuente declara en la obra | Obras en ventana |
+|---|---|
+| Otra institución | 159 |
+| No declara afiliación | 101 |
+| La institución foco | 23 |
+
+Sólo 23 de 283 traen la afiliación institucional declarada. Es el efecto
+esperado de consultar Europe PMC por ORCID —devuelve la carrera entera de una
+persona, no su producción aquí— y hasta esta medición era una hipótesis.
+
+**Qué se hizo.** `descartar_afiliacion_ajena()` saca de la cola las filas donde
+la fuente declara otra institución para esa firma en esa obra. No es un atajo:
+la producción institucional se define por la afiliación de la firma, así que
+descartarlas es aplicar la definición del indicador, no saltársela. Son 159
+decisiones idénticas que no habrían aportado criterio.
+
+La ausencia de afiliación no se toca. Europe PMC omite con frecuencia la de
+quien no firma primero, y un campo vacío es un dato que falta, no evidencia en
+contra: esas 101 siguen en la cola.
+
+**El orden entre las dos reglas resultó no ser indiferente.** La de afiliación
+va primero. Al revés, una fila firmada en otra institución podía haber sido
+elegida superviviente de su grupo de título y, al retirarla, llevarse por
+delante a una hermana revisable. El autotest cubre el caso con un grupo de tres
+versiones donde la primera es ajena.
+
+El rastro se unificó: `internal/obras_externas_depuradas.csv` lleva ahora una
+columna `regla` y recoge lo que sacan ambas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-504 | Sale de la cola la obra cuya afiliación declarada es de otra institución | La producción institucional se define por la afiliación de la firma; es la definición del indicador, no un atajo |
+| D-505 | La ausencia de afiliación no cuenta como afiliación ajena | Europe PMC omite la de quien no firma primero: un campo vacío es dato que falta, no evidencia en contra |
+| D-506 | La regla de afiliación se aplica antes que la de título repetido | Al revés, una fila ajena podía ser elegida superviviente de su grupo y llevarse por delante a una hermana revisable |
+| D-507 | Un solo rastro para todas las reglas, con columna `regla` | Un CSV por regla multiplica archivos y esconde el total de lo que sale de la cola |
+
+### Archivos
+
+- `src/review/senales_obras_externas.py` (`descartar_afiliacion_ajena`, autotest 28/28)
+- `src/review/build_obras_externas_review.py` (aplica ambas reglas en orden,
+  rastro unificado, cabecera y consola las declaran; autotest 19/19)
+- `docs/METODOLOGIA_FUERA_DE_SCOPUS.md`, `internal/README.md`
+
+### Pendientes
+
+- Queda sin decidir la tercera regla propuesta: descartar por tipo documental
+  excluido. Depende de qué quiera significar el indicador y es del usuario.
+- Cuántas obras quedan tras aplicar la regla está por medir en la máquina del
+  usuario. La aritmética esperada es 283 − 159 = 124, pero las dos reglas
+  interactúan y el número real lo dirá la corrida.
