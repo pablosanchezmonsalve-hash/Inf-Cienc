@@ -75,9 +75,11 @@ trabajo).
 | `AU-01` | Publicaciones por autor | Conteo completo | `count(distinct eid) by autor` | `Autoria` | **sí** | media | ✅ | Suma por autor (1.205) > total (823). No es total institucional |
 | `AU-02` | Citas por autor | Citas atribuidas | `sum(citas) by autor` | `Autoria` + `Citations` | **sí** | media | ✅ | Atribución completa: una publicación aporta sus citas a cada autor UFT |
 | `AU-06` | Evolución temporal del autor | Publicaciones por año | `group by autor, anio` | `Autoria` | **sí** | media | ✅ | 3 puntos: **barras, no línea de tendencia** |
-| `AU-03` | h-index en ventana | h sobre 2023–2025 | h clásico sobre el subconjunto | `Autoria` + `Citations` | **parcial** | **baja** | ⚠️ | **497 de 589 autores tienen h ≤ 1: no discrimina.** Sólo en ficha, siempre etiquetado |
+| `AU-03` | h-index en ventana | h sobre 2023–2025 | h clásico sobre el subconjunto | `Autoria` + `Citations` | **parcial** | **baja** | ⚠️ | **442 de las 530 entidades tienen h ≤ 1 (83 %): sobre el conjunto no discrimina**[^au03]. Entre las 50 fichas donde sí se publica (n ≥ 5) la mediana es 3, el máximo 9 y sólo 4 quedan en h ≤ 1. Sólo en ficha, siempre etiquetado |
 | `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 328/589 firmas · 268/530 entidades | media | ✅ | Ya no es placeholder: se publicó al cerrarse `T-01` (2026-08-01); revisiones de identidad posteriores consolidaron más grupos y retiraron asignaciones erróneas. Cada asignación viaja con su veredicto; sin ORCID se muestra «no disponible», no se oculta |
 | `AU-04` | FWCI por autor | Impacto normalizado del autor | — | — | **no** | no aplicable | ❌ | **Descartado.** El FWCI de un autor no es el promedio de sus publicaciones y SciVal no lo entrega a nivel autor. Calcularlo sería inventar la métrica |
+
+[^au03]: Recalculado el 2026-09-07 con la **misma** función `h_index()` de `src/build/03_authors.py`, aplicada a las `publicaciones` de las 530 fichas: reproduce sin una sola discrepancia los 50 valores que el sitio publica, así que no es otra métrica sino la misma sobre toda la base. El reparto es 188 entidades con h = 0, 254 con h = 1, 44 con h = 2 y 44 con h ≥ 3. Que se calcule para el análisis no cambia lo que se publica: la ficha sigue mostrando h sólo con n ≥ 5 (`D-396`). La cifra anterior —497 de 589— la produce `src/analysis/indicator_feasibility.py` sobre **formas de firma sin consolidar**, que es otra población; se conserva ahí como nota interna de factibilidad (`D-397`) y sólo cambia si se re-corre ese análisis.
 
 ### 1.6 Declarado — fuera del corpus Scopus/SciVal
 
@@ -95,6 +97,7 @@ trabajo).
 | `X-04` | Tendencia de largo plazo | Ventana 2023–2025 | Datos previos a 2023 |
 
 ---
+
 
 ## 2. Selección priorizada V1
 
