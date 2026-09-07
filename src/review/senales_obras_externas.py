@@ -217,6 +217,41 @@ def calcular(df: pd.DataFrame, orcids: dict[str, dict] | None = None,
     return df.assign(**{col: [f[col] for f in filas] for col in COLUMNAS})
 
 
+def descartar_afiliacion_ajena(df: pd.DataFrame, protegidas=None) -> pd.DataFrame:
+    """Regla de afiliación ajena: fuera de la cola lo que se firmó en otra parte.
+
+    POR QUÉ ES LA DEFINICIÓN Y NO UN ATAJO
+        La producción institucional se define por la afiliación de la firma en
+        la obra, no por dónde trabaja hoy quien firma. Cuando la fuente declara
+        para esa persona, EN ESA OBRA, una institución distinta, la respuesta
+        ya está dada por la definición del indicador: no es producción de esta
+        institución. Someterlo a criterio humano 159 veces no añade criterio,
+        sólo lo gasta.
+
+        Medido en la corrida del 2026-09-04 sobre las 283 obras en ventana:
+        159 declaran otra institución y sólo 23 declaran ésta. Es el efecto
+        esperado de consultar Europe PMC por ORCID, que devuelve la carrera
+        entera de una persona y no su producción aquí.
+
+    LO QUE LA REGLA NO TOCA
+        La ausencia de afiliación NO es afiliación ajena. Europe PMC omite con
+        frecuencia la afiliación de quien no firma primero, así que un campo
+        vacío es un dato que falta y no evidencia en contra: esas 101 filas
+        siguen en la cola y hay que abrirlas una por una.
+
+        Tampoco desplaza una fila con veredicto humano previo, por el orden de
+        precedencia de `CLAUDE.md`.
+
+    Añade `s_ajena` (1 si la regla la saca de la cola).
+    """
+    protegidas = set(protegidas or ())
+    ids = [f"{f} · {i}" for f, i in zip(df.get("fuente", [""] * len(df)),
+                                        df.get("id_fuente", [""] * len(df)))]
+    ajena = [1 if (a == "otra" and k not in protegidas) else 0
+             for a, k in zip(df.get("s_afiliacion", [""] * len(df)), ids)]
+    return df.assign(s_ajena=ajena)
+
+
 def depurar_repetidos(df: pd.DataFrame, preferencia, protegidas=None) -> pd.DataFrame:
     """Regla de título repetido: de cada título, una sola fila queda revisable.
 
@@ -364,6 +399,22 @@ def autotest() -> int:
          normalizar("COVID-19: una Revisión") == normalizar("covid 19 una revision"))
     caso("las variantes salen de la configuración, no del código",
          "universidad finis terrae" in variantes_institucion())
+
+    # --- regla de afiliación ajena ----------------------------------------
+    a = descartar_afiliacion_ajena(s)
+    caso("sale de la cola lo que la fuente firma en otra institución",
+         a.loc[1, "s_ajena"] == 1)
+    caso("la afiliación institucional declarada se queda",
+         a.loc[0, "s_ajena"] == 0 and a.loc[2, "s_ajena"] == 0)
+    caso("la ausencia de afiliación NO se trata como afiliación ajena",
+         a.loc[5, "s_afiliacion"] == "sin dato" and a.loc[5, "s_ajena"] == 0)
+    ajenas = pd.DataFrame([
+        {"fuente": "europepmc", "id_fuente": "e1", "s_afiliacion": "otra"},
+        {"fuente": "europepmc", "id_fuente": "e2", "s_afiliacion": "otra"},
+    ])
+    prot_a = descartar_afiliacion_ajena(ajenas, protegidas={"europepmc · e1"})
+    caso("una fila ya decidida por una persona no la saca la regla",
+         prot_a.loc[0, "s_ajena"] == 0 and prot_a.loc[1, "s_ajena"] == 1)
 
     # --- regla de título repetido -----------------------------------------
     d = pd.DataFrame([

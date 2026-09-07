@@ -182,7 +182,25 @@ quedarse corto se declara. Una regla que las ACEPTE lo infla, y es contra eso
 que existe el Nivel V. Por eso el «sí» sigue costando un clic humano por obra,
 mientras que un «no» determinado por aritmética puede tomarse una vez.
 
-La única regla de ese tipo hoy vigente es la de **título repetido**
+Hay dos reglas de ese tipo vigentes, ambas decididas por el usuario el
+2026-09-04, y las dos escriben en `internal/obras_externas_depuradas.csv` qué
+sacaron y por qué.
+
+La primera es la de **afiliación ajena** (`descartar_afiliacion_ajena`): sale de
+la cola la fila donde la fuente declara, para esa firma y en esa obra, una
+institución distinta de la foco. No es un atajo sino la definición del
+indicador — la producción institucional se define por la afiliación de la
+firma, no por dónde trabaja hoy quien firma—, y es la que más volumen mueve:
+en la corrida del 2026-09-04, 159 de las 283 obras en ventana. Es el efecto
+esperado de consultar Europe PMC por ORCID, que devuelve la carrera entera de
+una persona y no su producción aquí.
+
+La ausencia de afiliación NO es afiliación ajena. Europe PMC omite con
+frecuencia la de quien no firma primero, así que un campo vacío es un dato que
+falta, no evidencia en contra: esas filas siguen en la cola y hay que abrirlas
+una por una.
+
+La segunda es la de **título repetido**
 (`depurar_repetidos`, decidida por el usuario el 2026-09-04): de cada título
 normalizado, una sola fila queda revisable. Zenodo acuña un DOI por versión de
 un depósito además del DOI de concepto, y dos repositorios pueden traer la
@@ -194,9 +212,15 @@ decisiones ya tomadas. Lo depurado no desaparece: queda en
 `internal/obras_externas_depuradas.csv` junto a la fila que lo sustituye, y la
 cabecera de la herramienta dice cuántas filas salieron por esta vía.
 
-Una fila que ya lleva veredicto humano nunca la desplaza la regla. El orden de
-precedencia de `CLAUDE.md` pone la decisión explícita por encima de cualquier
-regla, y una regla capaz de borrar trabajo ya hecho sería exactamente eso.
+El ORDEN entre ambas importa y no es arbitrario. La de afiliación se aplica
+primero: si fuese después, una fila firmada en otra institución podría haber
+sido elegida superviviente de su grupo de título, y al retirarla se habría
+llevado por delante a una hermana que sí era revisable.
+
+Una fila que ya lleva veredicto humano no la saca ninguna de las dos. El orden
+de precedencia de `CLAUDE.md` pone la decisión explícita por encima de
+cualquier regla, y una regla capaz de borrar trabajo ya hecho sería justamente
+eso.
 
 ### Regla 3 — Evidencia cruzada refuerza, nunca duplica
 
