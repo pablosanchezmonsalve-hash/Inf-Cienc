@@ -127,12 +127,19 @@ El recorte enlaza a la ficha en su pie.
 - **No se ofrece comparación entre personas descargable.** Un ranking en PDF es
   una tabla de desempeño individual con aspecto de dato oficial.
 - **Los cortes que cambian de significado sobre una persona se declaran o se
-  apagan.** Una red de coautoría de un solo autor es una estrella trivial; una
-  mediana sobre una publicación no es una mediana. Qué corte cae en cuál de las
-  dos categorías **sigue pendiente**: hoy los cortes se recalculan sobre el
-  recorte como con cualquier otra dimensión, y la regla que ya gobierna el
-  resto —si el indicador cambia de significado, se dice— está por aplicar caso
-  por caso sobre una persona.
+  apagan.** Resuelto el 2026-09-07, caso por caso:
+  - **La red de coautoría (`C-05`) se apaga**, con su explicación en el sitio
+    del gráfico. Recortada a una firma no es una red sino una estrella —esa
+    persona al centro y sus coautores alrededor—, y lo que el indicador mide,
+    cómo se agrupan las personas entre sí, deja de existir. Su contenido no se
+    pierde: la coautoría de esa persona está en su ficha (`T-10`), que además
+    abre el informe personal.
+  - **La mediana por año (`I-04`) se queda, con aviso.** Es una cifra correcta
+    sobre pocos valores; ocultarla dejaría un hueco que se leería como ausencia
+    de dato. Lo que hacía falta era decir sobre cuántos se calcula. Apagar de
+    más también engaña.
+  - **Las instituciones colaboradoras (`C-04`) ya declaraban** que no responden
+    al recorte, y eso no cambia.
 
 ---
 

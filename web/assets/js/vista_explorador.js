@@ -581,13 +581,49 @@ function corteRed(sub, corte, unidadPorPersona, proc) {
   </section>`;
 }
 
+/* Un corte que sobre una sola persona diría otra cosa.
+
+   La regla del proyecto es la de siempre: si el indicador cambia de
+   significado, se dice. Sobre un informe personal hay dos casos y no se
+   resuelven igual.
+
+   La RED DE COAUTORÍA se apaga. Recortada a una persona no es una red: es esa
+   persona en el centro y sus coautores alrededor, una estrella cuyo dibujo
+   siempre sale igual para todo el mundo y en la que la métrica que da sentido
+   al corte —cómo se agrupan las personas entre sí— no existe. Dibujarla
+   ofrecería una forma que se lee como estructura de colaboración y no lo es.
+   Su contenido no se pierde: la coautoría de esa persona, con quién y cuántas
+   veces, está en su ficha (C-05, `T-10`), que además abre el informe personal.
+
+   La MEDIANA POR AÑO se queda, con su aviso. Es una cifra correcta sobre pocos
+   valores, y ocultarla dejaría un hueco que se leería como ausencia de dato;
+   lo que hace falta es decir sobre cuántos se calcula. Apagar de más también
+   engaña. */
+function cortePersonal(corte, persona) {
+  if (corte.forma !== 'red') return null;
+  return `<section class="corte" id="${c.escapar(corte.cod || corte.campo)}"
+    data-corte="${c.escapar(corte.campo)}" tabindex="-1">
+    <header class="corte-cab"><h3>${c.escapar(corte.titulo)}</h3></header>
+    <p class="vacio">No se dibuja en un informe recortado a una persona.
+      Sobre ${c.escapar(persona)} esta red sería una estrella —esa firma en el
+      centro y sus coautores alrededor—, y su forma no describiría la estructura
+      de colaboración, que es lo que este indicador mide.
+      Con quién coautoró y cuántas veces está en su ficha.</p>
+  </section>`;
+}
+
 /** Los cortes de una sección, recalculados sobre el recorte vigente.
     `unidadPorPersona` sólo lo usa C-05 (red de coautoría); `jerarquia` sólo
-    'unidad' y 'escuela' (P-07). El resto de los cortes los ignora. */
-export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia) {
+    'unidad' y 'escuela' (P-07). `persona` (opcional) es la firma a la que está
+    recortado el informe, y cambia qué se dibuja: ver `cortePersonal`. */
+export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, persona) {
   const s = SECCIONES[clave];
   if (!s) return '';
   return s.cortes.map(corte => {
+    if (persona) {
+      const personal = cortePersonal(corte, persona);
+      if (personal) return personal;
+    }
     if (corte.forma === 'red') return corteRed(sub, corte, unidadPorPersona, proc);
     const r = dibujar(sub, corte, jerarquia);
     const id = corte.cod || corte.campo;
@@ -615,6 +651,11 @@ export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia) {
       ${MULTIVALUADO.has(corte.campo)
         ? '<p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>' : ''}
       ${corte.aviso ? `<p class="nota">${c.escapar(corte.aviso)}</p>` : ''}
+      ${persona && corte.forma === 'mediana-anio'
+        ? `<p class="nota">Recortado a una persona, cada punto es la mediana de
+            las publicaciones de esa firma en ese año, que pueden ser una o dos.
+            Una mediana sobre tan pocos valores no describe una tendencia.</p>`
+        : ''}
       ${selloCorte(sub, campoSello, codSello, proc)}
     </section>`;
   }).join('');
@@ -664,7 +705,8 @@ export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia, met
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
     cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
-    cortes: cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia),
+    cortes: cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia,
+      X.personaDelRecorte(sel)),
   };
 }
 

@@ -714,6 +714,13 @@ de muestra reducida por debajo del umbral—, con la misma redacción que la
 ficha y no una copia. Se ofrece a las 530 entidades, no sólo a las 50 que
 superan el umbral: `docs/INFORME_POR_INVESTIGADOR.md` explica por qué.
 
+Dos cortes cambian de significado sobre una sola persona y se tratan distinto.
+La **red de coautoría se apaga** y declara por qué: recortada a una firma es una
+estrella, no una estructura de colaboración, y con quién coautoró está en su
+ficha. La **mediana por año se queda con un aviso** que dice sobre cuántas
+publicaciones se calcula: es una cifra correcta sobre pocos valores, y ocultarla
+dejaría un hueco que se leería como ausencia de dato.
+
 **El informe a medida.** `make informe RECORTE="anio=2024&tipo=Article"` toma la
 misma consulta que el explorador escribe en la URL —se copia de la barra de
 direcciones— y la pasa a cada sección: las cifras, los gráficos y las tablas se

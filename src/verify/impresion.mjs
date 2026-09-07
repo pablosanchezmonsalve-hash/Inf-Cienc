@@ -56,6 +56,13 @@ const { autores } = JSON.parse(await readFile(join(DIST, 'data/authors.json'), '
 const escasa = autores.filter((a) => !a.interpretable)
   .sort((a, b) => a.nombre.localeCompare(b.nombre))[0];
 
+/* Y la firma más prolífica, para el corte que se apaga: sobre ella la red de
+   coautoría sí se dibujaría, así que si volviera a dibujarse esta comprobación
+   lo vería. Elegirla al azar podría dar con alguien de una publicación, cuya
+   red estaría vacía por otra razón y dejaría la compuerta pasando en falso. */
+const prolifica = [...autores].sort(
+  (a, b) => b.n_publicaciones - a.n_publicaciones || a.nombre.localeCompare(b.nombre))[0];
+
 /* Se compara sin espacios: pdf.js parte el texto en fragmentos por tipografía y
    por salto de línea, así que «Citas actualizadas al» puede llegar en tres
    trozos. Lo que se comprueba es que el contenido esté, no cómo quedó
@@ -106,6 +113,17 @@ const CASOS = [
             'principios de DORA y del Manifiesto de Leiden',
             'no son interpretables individualmente'],
     prohibe: ['Sin filtros'],
+  },
+  {
+    /* El corte que cambia de significado sobre una persona. La red recortada a
+       una firma es una estrella, no una estructura de colaboración, así que se
+       apaga y se declara; que el informe personal no la lleve es parte de lo
+       que hace legible ese PDF. */
+    nombre: 'la red de coautoría no se dibuja para una persona',
+    ruta: `colaboracion.html?autor=${encodeURIComponent(prolifica.nombre)}`,
+    exige: ['No se dibuja en un informe recortado a una persona',
+            `Autor: ${prolifica.nombre}`],
+    prohibe: ['personas en el recorte'],
   },
   {
     nombre: 'anexo dentro de un informe filtrado',
