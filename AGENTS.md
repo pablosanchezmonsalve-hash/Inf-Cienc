@@ -17,7 +17,7 @@ Pipeline vía Makefile; no correr subcomandos sueltos:
 - `make sitio` — pipeline completo: auditoría → factibilidad → artefactos → `dist/`. `make auditoria`, `make artefactos` para etapas.
 - `make estado` — regenera STATE.md.
 - `make servir` — `http.server` en `dist` puerto 8000.
-- `make verificar` — batería Playwright de `src/verify/` sobre el sitio construido. Playwright/Chromium son **solo dev** (`npm install --no-save playwright`); el sitio no tiene dependencias de runtime.
+- `make verificar` — batería Playwright de `src/verify/` sobre el sitio construido. Playwright/Chromium y pdfjs-dist son **solo dev** (`npm install --no-save playwright pdfjs-dist`); el sitio no tiene dependencias de runtime.
 - `make revision` / `make validar-unidades` / `make revisar-cobertura-openalex` / `make huecos-autores` — generan colas/herramientas de revisión humana en `internal/`.
 - `make kit`, `make ror`, `make openalex`, `make cobertura`, `make cobertura-crossref`, `make scopus`, `make orcid-afiliacion`, `make informe`, `make rendimiento` — catalog completo en Makefile.
 - `make rendimiento` tarda minutos y exige un segundo servidor (`PUERTO_SIN`); no correrlo por defecto.
@@ -48,7 +48,7 @@ La replicabilidad es por configuración, no por reescritura: la institución se 
 ## Verificación y tests
 
 - Autopruebas sin red y sin credenciales: cada enriquecedor de `src/enrich/` responde `--test` (`orcid_crossref`, `orcid_api`, `orcid_expand`, `orcid_afiliacion`, `ror_institucion`, `orcid_openalex`, `openalex_cobertura`) y `src/review/apply_decisions.py` también. Se ejercen en CI en cada push/PR. Ej.: `python3 src/enrich/orcid_api.py --test`.
-- `node src/verify/run_all.mjs dist` verifica el sitio construido (WCAG, estructura, consola, flujos, responsive, higiene). CI lo corre directamente sobre `dist/`, sin re-construir.
+- `node src/verify/run_all.mjs dist` verifica el sitio construido (WCAG, estructura, consola, flujos, responsive, impresión, higiene). El paso de impresión genera PDF de verdad y lee su texto: el DOM con medio `print` emulado miente sobre lo que acaba en la hoja. CI lo corre directamente sobre `dist/`, sin re-construir.
 - El CI exige pre-renderizado: `dist/{index,impacto,produccion,colaboracion,tematica}.html` deben contener `data-prerender="1"` y `dist/impacto.html` sus gráficos. Un sitio que depende de JS para mostrar cifras no pasa.
 
 ## Sitio (`web/`)

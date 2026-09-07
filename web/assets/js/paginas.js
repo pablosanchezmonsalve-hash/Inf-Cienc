@@ -1038,6 +1038,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   const archivo = location.pathname.split('/').pop() || 'index.html';
   try {
     await c.montarCabecera(archivo);
+    /* Una página sin explorador dentro de un informe filtrado no puede afirmar
+       que es el informe completo, que es lo que el cromo deja escrito por
+       defecto. El anexo metodológico no cuenta publicaciones ni las filtra,
+       pero SÍ forma parte del recorte que alguien pidió, y una hoja suelta que
+       lo niegue contradice a las demás del mismo PDF.
+
+       Sin cifras a propósito: esta página no tiene el corpus cargado y
+       declarar «N de M» exigiría pedirlo sólo para eso. Donde sí hay
+       explorador, `actualizarRecorteVivo()` reescribe la línea con las cifras
+       en el primer repintado. */
+    const partesURL = X.describir(X.leerURL());
+    const papel = document.getElementById('recorte-impreso');
+    if (papel && partesURL.length) {
+      papel.textContent = `Recorte aplicado: ${partesURL.join(' · ')}.`;
+    }
     await c.montarAyuda();
     c.montarTooltip();
     if (PAGINAS[pagina]) await PAGINAS[pagina]();

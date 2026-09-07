@@ -231,17 +231,23 @@ jobs:
           echo "Capas internas ausentes del control de versiones — verificado"
 
       # La batería de `src/verify/`: contraste WCAG, estructura y consola,
-      # flujos interactivos, responsive e higiene de CSS/JS. Existe en el
-      # repositorio desde `D-137` y hasta ahora había que acordarse de correrla
-      # a mano — que es la forma que tiene una verificación de no correrse.
+      # flujos interactivos, responsive, impresión e higiene de CSS/JS. Existe
+      # en el repositorio desde `D-137` y hasta ahora había que acordarse de
+      # correrla a mano — que es la forma que tiene una verificación de no
+      # correrse.
       #
-      # La versión se fija aquí y no en un package.json porque el sitio no tiene
-      # dependencias de JavaScript y no va a tenerlas por una herramienta de
-      # prueba. Es la misma con la que se verifica en local: una batería que
-      # corre contra otro navegador no comprueba lo mismo.
-      - name: Instalar Playwright y Chromium
+      # Las versiones se fijan aquí y no en un package.json porque el sitio no
+      # tiene dependencias de JavaScript y no va a tenerlas por una herramienta
+      # de prueba. Son las mismas con las que se verifica en local: una batería
+      # que corre contra otro navegador no comprueba lo mismo.
+      #
+      # `pdfjs-dist` lo pide `impresion.mjs`, que comprueba el informe
+      # descargado leyendo el TEXTO del PDF: el DOM con medio `print` emulado
+      # miente sobre lo que acaba en la hoja. Sin él ese paso se detiene y lo
+      # dice, en vez de dar verde sobre algo que no miró.
+      - name: Instalar Playwright, Chromium y pdf.js
         run: |
-          npm install --no-save playwright@1.56.1
+          npm install --no-save playwright@1.56.1 pdfjs-dist@6.3.289
           npx playwright install --with-deps chromium
 
       # Se invoca el guion directamente y no `make verificar`, que depende de
