@@ -32,21 +32,37 @@ async function seccion() {
   return montarExplorador(clave || null);
 }
 
-/* Estado del recorte en la barra de vigencia. La barra pertenece al cromo aux
+/* Estado del recorte en la barra de vigencia, en sus dos formas: el badge de
+   pantalla y la línea que se imprime. La barra pertenece al cromo aux
    (core.js) y existe en todas las páginas; éste es el único sitio donde se
    enciende el badge `.recorte-vivo`. En cualquier otra página queda oculto por
    su atributo hidden. Un vistazo a la parte superior debe bastar para saber
    que hay un recorte activo, sin bajar a los controles. */
 function actualizarRecorteVivo(publicaciones, sel) {
-  const badge = document.getElementById('recorte-vivo');
-  if (!badge) return;
   const n = X.recorte(publicaciones, sel).length;
   const total = publicaciones.length;
   const activo = X.hayRecorte(sel);
-  badge.hidden = !activo;
-  if (activo) {
-    badge.innerHTML = `Recorte <b>${c.nf.format(n)}</b> de ${c.nf.format(total)} publicaciones`;
+
+  const badge = document.getElementById('recorte-vivo');
+  if (badge) {
+    badge.hidden = !activo;
+    if (activo) {
+      badge.innerHTML = `Recorte <b>${c.nf.format(n)}</b> de ${c.nf.format(total)} publicaciones`;
+    }
   }
+
+  /* La misma declaración, para el informe que se descarga. `estado()` ya
+     escribe en la página la frase obligatoria «N de M · qué filtros», pero es
+     un bloque de pantalla: trae el botón «Ver todo» y el enlace al listado,
+     que en una hoja de papel no llevan a ninguna parte. La hoja de impresión
+     lo retira y esta línea ocupa su lugar, con la misma información y sin los
+     controles.
+
+     Mismo origen que la pantalla: la descripción sale de `X.describir(sel)`,
+     no de un segundo texto escrito aquí, y la redacción de `c.fraseRecorte()`,
+     que es la que el cromo deja pre-renderizada. */
+  const papel = document.getElementById('recorte-impreso');
+  if (papel) papel.textContent = c.fraseRecorte(n, total, X.describir(sel));
 }
 
 /* Selector de año en la barra de vigencia. Al elegir un año se filtra el

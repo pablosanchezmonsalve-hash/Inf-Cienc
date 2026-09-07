@@ -578,6 +578,13 @@ p:last-child { margin-bottom: 0; }
 .recorte-vivo[hidden] { display: none; }
 .recorte-vivo b { color: var(--accion); font-weight: 750; }
 
+/* Lo que existe SÓLO en el papel. Simétrico de `.solo-lectores`, que existe
+   sólo para quien no ve la pantalla: en los dos casos el contenido está en el
+   marcado y es un medio el que decide si se presenta. No se declara aquí
+   dónde se enseña —eso lo hace la hoja de impresión, más abajo—; aquí sólo se
+   retira de la pantalla. */
+.solo-papel { display: none; }
+
 /* Selector de año en la barra. Sólo se enseña en las páginas explorador, que
    es quienes lo rellenan con los años reales del corpus; en el resto queda
    oculto por el atributo hidden y por esta regla (`hidden` ya lo esconde, esto
@@ -1634,11 +1641,17 @@ svg.chart .trama { pointer-events: none; }
      filtros del explorador usa `.explorador-panel` (no el antiguo
      `.filtros`, que se deja por las páginas que aún lo arrancan); sin
      ocultarlo, la columna sticky de filtros imprimiría a la izquierda de
-     todas las páginas del informe. */
+     todas las páginas del informe.
+
+     `#estado-recorte` va por id y no por clase: `.estado-recorte` no existe en
+     ninguna página —el contenedor siempre fue un id—, así que la regla no
+     ocultaba nada y el bloque de pantalla se imprimía entero, con su botón
+     «Ver todo» y su enlace al listado. Lo que declara el recorte en papel es
+     `.recorte-impreso`, escrito para el papel. */
   .cabecera, .tema, .filtros, .paginacion, .salto-contenido,
   .rail, .vigencia-guia, .descargar, .ayuda, .tooltip, .nav-toggle,
   .v-migas, .v-chip, .recorte-vivo, .v-anio, .minifoco,
-  .explorador-panel, .filtros-explorador, .estado-recorte,
+  .explorador-panel, .filtros-explorador, #estado-recorte,
   #controles, .treemap-migas, .treemap-leyenda { display: none; }
   body { background: #fff; }
   .disposicion { display: block; }
@@ -1649,12 +1662,31 @@ svg.chart .trama { pointer-events: none; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; color: #555; }
 
   /* La procedencia se queda, y sin el aspecto de barra de interfaz: en papel
-     es la línea de crédito del informe. */
+     es la línea de crédito del informe.
+
+     Ojo con lo que «quedarse» significaba antes: las tres pastillas que
+     llevan fuente, ventana y fecha de corte son `<details>` y están en la
+     lista de arriba, así que esta caja se imprimía con su filete y sin una
+     palabra dentro. Lo que hace de esto una línea de crédito de verdad son
+     los dos párrafos `.solo-papel` que el cromo escribe en la barra. */
   .vigencia {
     border: 0; border-bottom: 1.5px solid #000; background: #fff;
     padding: 0 0 6pt; margin-bottom: 12pt;
   }
-  .vigencia .contenedor { padding: 0; }
+  /* La barra es una fila flex en pantalla. En papel sus dos párrafos son dos
+     líneas, una debajo de otra: en flex se habrían repartido el ancho. */
+  .vigencia .contenedor { padding: 0; display: block; }
+
+  /* `:not(:empty)` y no `.solo-papel` a secas, por dos razones: un párrafo que
+     alguna vez quede sin texto no debe imprimir una línea en blanco, y la
+     especificidad extra gana a `.solo-papel { display: none }` sin depender
+     del orden del archivo. */
+  .solo-papel:not(:empty) { display: block; }
+  .credito-impreso, .recorte-impreso {
+    margin: 0; font-size: 8.5pt; line-height: 1.4; color: #000;
+  }
+  .credito-impreso { font-weight: 600; }
+  .recorte-impreso { color: #333; }
 
   /* Cortes. Un titular al pie de una hoja y su figura en la siguiente es el
      defecto clásico de imprimir una web sin decirle nada al navegador. */
