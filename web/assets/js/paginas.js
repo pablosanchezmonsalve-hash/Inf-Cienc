@@ -699,6 +699,26 @@ async function fichaAutor() {
   const i = a.indicadores;
   document.title = `${a.nombre_en_fuente} — Ficha de autor`;
 
+  /* Qué declara esta hoja si alguien la imprime desde aquí.
+
+     Sin esto decía «Sin filtros: el informe completo, 823 publicaciones», que
+     es lo que el cromo deja escrito por defecto y aquí es falso: la hoja
+     enseña a UNA persona. Un PDF nominal que se presenta como el informe
+     institucional completo es exactamente la lectura que este proyecto
+     persigue impedir.
+
+     Se declara con la misma redacción que el resto —`fraseRecorte()`— y con
+     las cifras que la ficha ya tiene: sus publicaciones y el universo que
+     viaja en su propio `meta`. Cuando la ficha llega dentro de un informe
+     recortado, el despachador ya escribió la línea con el recorte de la URL y
+     ésta la confirma con las mismas palabras. */
+  const papelFicha = document.getElementById('recorte-impreso');
+  if (papelFicha) {
+    papelFicha.textContent = c.fraseRecorte(
+      i.n_publicaciones, a.meta.denominadores.universo_total,
+      [`Autor: ${a.nombre_en_fuente}`]);
+  }
+
   const idents = `
     <div><span>Nombre en fuente</span>${c.escapar(a.nombre_en_fuente)}</div>
     <div><span>Unidad académica</span>${c.escapar(a.unidades_academicas.join(' · '))}</div>

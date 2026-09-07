@@ -12582,3 +12582,58 @@ comprobado dentro de `dist/data/glossary.json`.
 |---|---|---|
 | D-534 | La advertencia de `AU-03` se mide sobre las entidades publicadas y declara su base | La cifra anterior mezclaba población: describía firmas sin consolidar mientras la fila hablaba de lo publicado. `D-396` seguía en pie —el h se publica sólo con n ≥ 5— porque calcular una distribución para el análisis no es publicar el h de nadie |
 | D-535 | Recalcular con la función del propio build, y validar contra los 50 valores publicados antes de citar el resultado | Es lo que separa derivar de inventar, que es la línea que `D-396` defendía. Sin esa validación, cualquier reimplementación del h sería una métrica nueva con el mismo nombre |
+
+## Cierre: la ficha impresa por sí sola ya no se declara «informe completo» (2026-09-07)
+
+### Contexto
+
+El usuario preguntó si se puede generar un informe desde el sitio. Al
+comprobarlo apareció un defecto en lo entregado esta misma serie de sesiones.
+
+### El defecto
+
+El botón «Descargar informe» existe en las doce páginas, así que una ficha se
+puede imprimir directamente desde el directorio de autores. Al hacerlo, la
+línea de declaración decía **«Sin filtros: el informe completo, 823
+publicaciones»** sobre una hoja que enseña a UNA persona: el valor por defecto
+que el cromo deja pre-renderizado, correcto en la portada y falso aquí.
+
+Es el peor sitio posible para esa frase. Un PDF nominal presentándose como el
+informe institucional completo es justo la lectura que las salvaguardas del
+informe personal existen para impedir. Dentro de `make informe` no ocurría —el
+generador le pasa el recorte a la ficha—, sólo por la vía del navegador, que es
+la que usa cualquiera.
+
+Medido también en `publicaciones.html`, `autores.html` e `indicadores.html`:
+ahí la frase se queda, y es correcta. Ninguna de las tres muestra un
+subconjunto: enseñan el informe sin filtrar.
+
+### El arreglo
+
+`fichaAutor()` escribe su propia declaración con la misma redacción que el
+resto —`c.fraseRecorte()`— y con las cifras que la ficha ya tiene: sus
+publicaciones y el universo de su propio `meta`. Queda «Recorte aplicado:
+Autor: Abara J.F. 1 de 823 publicaciones». Cuando la ficha llega dentro de un
+informe recortado, el despachador ya había escrito esa línea desde la URL y
+ésta la confirma con las mismas palabras.
+
+### Verificación
+
+Caso nuevo en la compuerta de impresión, y probado en negativo sobre `dist/`:
+sin el arreglo canta las tres cosas —falta la declaración, falta la persona, y
+aparece «Sin filtros»—. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-536 | Una página que enseña a una persona declara a esa persona en el papel, aunque no haya filtro en la URL | El valor por defecto del cromo describe el informe, no la hoja. Donde la hoja es un subconjunto —la ficha— heredarlo convierte un PDF nominal en uno que dice ser el informe institucional completo |
+
+### Archivos
+
+- `web/assets/js/paginas.js`, `src/verify/impresion.mjs`
+
+### Pendientes
+
+Sin cambios: `STATE.md` sin regenerar por falta de `data/interim/`, y confirmar
+el LCP con `make rendimiento`.
