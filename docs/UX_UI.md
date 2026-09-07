@@ -682,6 +682,33 @@ que los módulos se partan entre páginas y **despliega las dos vistas de cada
 módulo** —la figura y la tabla—, porque en papel no hay conmutador. Los enlaces
 externos imprimen su URL.
 
+### 12.7 bis El informe descargable
+
+Se descarga por dos vías y **una sola maquetación**. El botón «Descargar
+informe», en la barra de vigencia, es `window.print()`: el navegador ya pagina,
+embebe tipografías y produce texto seleccionable, y una librería de PDF costaría
+entre 300 KB y 1 MB para, o rasterizar el texto, o obligar a reescribir el
+informe en su API de maquetación. La otra vía es `make informe`
+(`src/build/informe_pdf.mjs`), que abre las mismas páginas de `dist/` con la
+misma hoja y pide el PDF al navegador; existe porque el botón resuelve a quien
+mira una sección y no un informe completo, idéntico en cada carga y archivable.
+Deja fuera las superficies de consulta —publicaciones, autores, ficha,
+catálogo—: son tablas paginadas y volcarlas produciría un anexo de cientos de
+páginas. Quien las quiera las exporta en CSV.
+
+La hoja **declara sobre qué está medida**, porque un PDF archivado no tiene el
+sitio al lado. La primera hoja abre con dos líneas que en pantalla no existen:
+la de crédito —institución, fuentes, ventana y fecha de corte de las citas— y la
+del recorte, que dice qué filtros están aplicados y sobre cuántas publicaciones,
+o que no hay ninguno y es el informe completo. El pie añade el universo y sus
+tres denominadores (`D-16`). El bloque de recorte de la pantalla no se imprime:
+trae controles que en una hoja no llevan a ninguna parte.
+
+**Límite conocido:** esas líneas van en la primera hoja, no en cada una.
+Chromium no implementa los cuadros de margen de CSS Paged Media, así que un
+encabezado repetido tendría que inyectarse desde `informe_pdf.mjs` y dejaría de
+valer para el botón del navegador.
+
 ### 12.8 Advertencias de lectura
 
 Además de la nota metodológica de cada indicador —que describe cómo se

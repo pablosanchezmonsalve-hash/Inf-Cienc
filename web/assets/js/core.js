@@ -31,6 +31,22 @@ export function num(v, dec = 0) {
   }).format(v);
 }
 
+/** La frase que declara, en el papel, sobre qué conjunto está medido lo que se
+    imprime. Una sola redacción para los dos caminos que la escriben —el
+    pre-renderizado, que sólo conoce el informe completo, y `paginas.js`, que
+    conoce el recorte vigente—: dos textos para la misma declaración divergen
+    sin que nadie lo note.
+
+    Sin filtros lo dice con todas las letras. En un PDF archivado «no dice
+    nada» y «es el informe completo» son indistinguibles, y el informe
+    institucional de `make informe` se genera precisamente sin filtros. */
+export function fraseRecorte(n, total, partes = []) {
+  return partes.length
+    ? `Recorte aplicado: ${partes.join(' · ')}. `
+      + `${nf.format(n)} de ${nf.format(total)} publicaciones.`
+    : `Sin filtros: el informe completo, ${nf.format(total)} publicaciones.`;
+}
+
 /** Ausencia de dato y cero nunca se ven igual (decisión D-24). */
 export function celda(v, dec = 0) {
   if (v === null || v === undefined || v === '')
@@ -139,6 +155,10 @@ function nombrePagina(href) {
 export function cromo(meta, paginaActual, tema = 'auto') {
   const nav = navHtml(paginaActual);
   const actual = nombrePagina(paginaActual);
+  // El universo, no el largo de `publications.json`: aquí no hay corpus
+  // cargado, y por `D-16` el universo es una cifra declarada del informe. Es
+  // la misma que el pie ya imprime en todas las páginas.
+  const universo = meta.denominadores.universo_total;
 
   const selectorTema = `<div class="tema" role="group" aria-label="Tema de color">${
     TEMAS.map(([id, txt, d]) => `<button type="button" data-tema="${id}"
@@ -169,6 +189,25 @@ export function cromo(meta, paginaActual, tema = 'auto') {
       <nav class="nav" id="menu-nav" aria-label="Secciones">${nav}</nav>
     </div>`,
 
+    /* La barra de vigencia lleva dos párrafos que en pantalla no existen y en
+       papel son la línea de crédito del informe descargado.
+
+       `.credito-impreso` — Fuente, ventana y fecha de corte de las citas están
+       arriba, en tres pastillas, pero son `<details>` interactivos y la hoja
+       de impresión los oculta: la caja se imprimía con su filete y sin una
+       palabra dentro. El CSV exportado ya llevaba esos tres datos en su
+       cabecera —`exportar()` en paginas.js— y el PDF no llevaba ninguno, que
+       es la asimetría que esto corrige. Mismo `meta`, dos presentaciones, sin
+       un segundo texto que pueda divergir.
+
+       `.recorte-impreso` — nace declarando el informe completo y lo reescribe
+       `actualizarRecorteVivo()` en cuanto hay un recorte, que es donde vive el
+       estado del filtro. No se deja vacío a la espera de ese repintado: en una
+       página pre-renderizada sin filtros el repintado NO ocurre —`paginas.js`
+       se lo salta para no destruir un LCP que ya pasó— y la hoja habría salido
+       sin declarar nada. Como el pie, que ya imprime el universo en todas las
+       páginas, esto se imprime en todas: es la identidad del informe, no un
+       adorno de las páginas con explorador. */
     vigencia: `
     <div class="contenedor">
       <nav class="v-migas" aria-label="Ruta de posición">
@@ -192,6 +231,14 @@ export function cromo(meta, paginaActual, tema = 'auto') {
         <p>Fecha en que se congelaron el recuento de citas y las métricas derivadas.</p>
       </details>
       <span class="recorte-vivo" id="recorte-vivo" hidden></span>
+      <p class="solo-papel credito-impreso">
+        ${escapar(meta.institucion)} · ${escapar(meta.titulo_plataforma)}.
+        Fuentes: ${escapar(meta.fuentes.join(' · '))}.
+        Ventana ${meta.ventana.inicio}–${meta.ventana.fin}.
+        Citas actualizadas al ${escapar(meta.fecha_corte_citas)}.
+      </p>
+      <p class="solo-papel recorte-impreso" id="recorte-impreso">${
+        escapar(fraseRecorte(universo, universo))}</p>
       <label class="v-anio" id="recorte-anio-env" hidden>
         <span class="solo-lectores">Filtrar por año</span>
         <select id="recorte-anio" aria-label="Filtrar por año de publicación"></select>

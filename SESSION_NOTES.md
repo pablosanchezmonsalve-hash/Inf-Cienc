@@ -11919,3 +11919,110 @@ columna `regla` y recoge lo que sacan ambas.
 - Cuántas obras quedan tras aplicar la regla está por medir en la máquina del
   usuario. La aritmética esperada es 283 − 159 = 124, pero las dos reglas
   interactúan y el número real lo dirá la corrida.
+
+## Cierre: el informe descargado declara sobre qué está medido (2026-09-07)
+
+### Contexto
+
+El usuario preguntó por «la casilla que ofrece el informe en modo descarga» y,
+tras recuperar el contexto, pidió avanzar. El caso de uso declarado es más
+ancho que lo que hoy existe: que un investigador pida un informe de
+productividad **aplicando filtros**, lo descargue y lo lea fuera del sitio.
+
+Esta sesión no construye ese informe parametrizado. Cierra el defecto que lo
+bloquea antes que ningún diseño: lo que se descarga no decía sobre qué conjunto
+estaba medido.
+
+### Lo que se encontró, y una corrección
+
+Medido sobre `dist/` con emulación de impresión y con PDF real, no leído.
+
+1. **La línea de crédito se imprimía vacía.** El comentario de `app.css` promete
+   que «la procedencia se queda: en papel es la línea de crédito del informe»,
+   pero fuente, ventana y fecha de corte de las citas viven en tres pastillas
+   `<details class="v-chip">` que la propia hoja de impresión oculta. La barra
+   salía con su filete y sin una palabra dentro. El pie sí imprimía universo,
+   denominadores y build, así que la hoja archivada tenía la mitad de su
+   procedencia y no la otra mitad.
+2. **El recorte sí se imprimía, pero por un error.** La primera lectura de esta
+   sesión —anotada aquí porque quedó dicha— fue que el filtro no llegaba al
+   papel. Es falso: la regla que debía ocultar ese bloque apunta a
+   `.estado-recorte`, una **clase que no existe en ninguna página** (el
+   contenedor siempre fue `id="estado-recorte"`), de modo que el bloque de
+   pantalla se imprimía entero, con su botón «Ver todo» y su enlace «Ver las N
+   publicaciones →». La declaración llegaba al papel por accidente y con
+   controles que en una hoja no llevan a ninguna parte.
+3. **La asimetría con el CSV.** `exportar()` ya escribe institución, fuentes,
+   ventana, fecha de corte, build y si las filas son una selección manual o un
+   recorte de filtros. El PDF no escribía nada de eso. Dos salidas del mismo
+   informe con dos criterios distintos de procedencia.
+
+### Cambios
+
+- `core.js`: la barra de vigencia emite dos párrafos `.solo-papel` —crédito y
+  recorte— que en pantalla no existen. El del recorte **nace declarando el
+  informe completo**: una página pre-renderizada sin filtros no se repinta
+  (`paginas.js` se salta ese primer `pintar()` para no destruir un LCP que ya
+  ocurrió), así que dejarlo vacío a la espera del repintado lo habría dejado
+  vacío para siempre en el caso más común, que es el del informe institucional.
+- `core.js`: `fraseRecorte(n, total, partes)`, una sola redacción para los dos
+  caminos que la escriben. El cromo la llama con el universo declarado
+  (`D-16`), `paginas.js` con el recorte vigente y `X.describir(sel)`.
+- `paginas.js`: `actualizarRecorteVivo()` mantiene el badge de pantalla y
+  además reescribe la línea de papel.
+- `app.css`: `.solo-papel` —simétrico de `.solo-lectores`—, el bloque de
+  impresión que lo enseña, `.vigencia .contenedor` a `block` en papel (en flex
+  los dos párrafos se repartían el ancho) y el selector muerto corregido a
+  `#estado-recorte`.
+
+### Verificación
+
+Sitio ensamblado y pre-renderizado (`06_assemble_site.py`, 12 páginas, 530
+fichas). Sobre él, seis casos en pantalla y en emulación de impresión: sección
+sin filtros, con uno y con tres, portada, listado filtrado y una página sin
+explorador. En los seis: las líneas de papel no se ven en pantalla, el crédito
+imprime fuente, ventana y corte de citas, el bloque de pantalla ya no imprime,
+y el recorte se declara —«Sin filtros: el informe completo, 823 publicaciones»
+o «Recorte aplicado: Año: 2024 · Tipo documental: Article. 201 de 823
+publicaciones»—. Cero errores de consola.
+
+PDF real generado por la misma vía que `informe_pdf.mjs` y leído con pdf.js: la
+hoja 1 abre con las dos líneas, como **texto extraíble**, y no contiene «Ver
+todo» ni «Ver las». Batería completa (`npm run verificar`): contraste 0,
+estructura 0, flujos 0 excepciones, responsive 0 desbordes, higiene y peso OK.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-508 | La hoja de impresión lleva su propia línea de crédito: institución, fuentes, ventana y fecha de corte de las citas | Los tres datos viven en pastillas `<details>` que la impresión oculta, así que la barra se imprimía vacía. El CSV exportado ya los llevaba en su cabecera y el PDF ninguno: dos salidas del mismo informe con distinto criterio de procedencia |
+| D-509 | El informe impreso declara su recorte, y declara también que no lo tiene | En un PDF archivado «no dice nada» y «es el informe completo» son indistinguibles, y el informe institucional de `make informe` se genera precisamente sin filtros |
+| D-510 | El bloque de recorte de pantalla no se imprime; lo sustituye una línea escrita para el papel | Trae un botón «Ver todo» y un enlace al listado, inertes en una hoja. La regla que creía ocultarlo apuntaba a `.estado-recorte`, clase que no existe en ninguna página |
+| D-511 | Una sola redacción para la frase del recorte, en `core.js` | La escriben dos caminos —el pre-renderizado, que sólo conoce el informe completo, y el navegador, que conoce el filtro—. Dos textos para la misma declaración divergen sin que nadie lo note, como ya pasó con el panel de ejes |
+
+### Archivos
+
+- `web/assets/js/core.js`, `web/assets/js/paginas.js`, `web/assets/css/app.css`
+- `docs/UX_UI.md` (§12.7: el informe descargable, sus dos vías y lo que declara)
+
+### Pendientes
+
+- **`STATE.md` sin regenerar, a propósito.** `snapshot.py` escribe los dos
+  archivos, pero en este contenedor no hay `data/interim/` ni las colas de
+  `internal/`: la corrida deja `docs/DECISIONS.md` correcto —sólo depende de
+  `SESSION_NOTES.md`, y ahí están D-508 a D-511— y vacía media tabla de cifras
+  canónicas de `STATE.md`. Se conservó el índice y se revirtió el estado, que
+  sigue diciendo «507 decisiones» hasta que se corra `make estado` donde esté
+  la capa de datos completa.
+- **La procedencia no viaja en cada hoja, sólo en la primera.** Chromium no
+  implementa los cuadros de margen de CSS Paged Media, así que un encabezado
+  repetido no sale de la hoja de estilo: hay que pasarlo por `headerTemplate`
+  en `informe_pdf.mjs`, y entonces el botón del navegador y el PDF construido
+  dejarían de tener el mismo origen. Decisión abierta.
+- **`informe_pdf.mjs` sigue sin aceptar parámetros**: abre seis secciones fijas
+  sin filtro, así que el informe a medida que pide el caso de uso todavía no se
+  puede generar desde ahí.
+- **Sin compuerta.** El defecto de esta sesión era un selector que no casaba con
+  nada, y ninguna verificación lo habría visto: la batería mira la pantalla, no
+  el papel. Una comprobación de medio `print` en `src/verify/` es el siguiente
+  paso natural, en la línea de `peso.mjs` («una compuerta, no una nota»).
