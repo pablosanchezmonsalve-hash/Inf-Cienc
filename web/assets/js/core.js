@@ -41,9 +41,17 @@ export function num(v, dec = 0) {
     nada» y «es el informe completo» son indistinguibles, y el informe
     institucional de `make informe` se genera precisamente sin filtros. */
 export function fraseRecorte(n, total, partes = []) {
+  // Sin doblar el punto: muchas firmas terminan en abreviatura —«Abara J.F.»—
+  // y la frase acababa en «J.F..», que en un informe con el nombre de una
+  // persona se lee como un descuido sobre esa persona.
+  const cerrar = (t) => (/[.!?]$/.test(t) ? t : `${t}.`);
+  // `n` y `total` pueden faltar: una página sin explorador conoce el recorte
+  // —viene en la URL— pero no tiene el corpus cargado para contarlo, y una
+  // cifra inventada sería peor que ninguna.
+  const cuantas = (n === null || n === undefined || total === null || total === undefined)
+    ? '' : ` ${nf.format(n)} de ${nf.format(total)} publicaciones.`;
   return partes.length
-    ? `Recorte aplicado: ${partes.join(' · ')}. `
-      + `${nf.format(n)} de ${nf.format(total)} publicaciones.`
+    ? `Recorte aplicado: ${cerrar(partes.join(' · '))}${cuantas}`
     : `Sin filtros: el informe completo, ${nf.format(total)} publicaciones.`;
 }
 

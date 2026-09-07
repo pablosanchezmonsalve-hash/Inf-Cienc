@@ -1,20 +1,25 @@
-# Informe por investigador: propuesta
+# Informe por investigador
 
-**Capa:** pública · **Fase:** 3 · **Estado:** **propuesta, pendiente de decisión del responsable del proyecto**
+**Capa:** pública · **Fase:** 3 · **Estado:** **decidido e implementado** (2026-09-07)
 
-Nada de este documento está implementado. Se escribe para que la decisión se
-tome antes del código, porque el código que la incumpla no se arregla después:
-un informe con el nombre de una persona y cifras de impacto circula, se archiva
-y se cita.
+La pregunta que gobernaba el diseño la respondió el responsable del proyecto:
+**se ofrece a las 530 entidades, con la banda de muestra reducida donde
+corresponda.** Las otras cuatro se implementaron con la recomendación de este
+documento, que queda marcada como tal en el §5 para que se pueda corregir
+cualquiera sin rehacer las demás.
+
+El documento se conserva porque la decisión importa más que el código que la
+cumple: un informe con el nombre de una persona y cifras de impacto circula, se
+archiva y se cita.
 
 ---
 
-## 1. Qué se pide decidir
+## 1. Qué se pedía
 
 Que un investigador pueda pedir «su» informe, aplicando filtros, descargarlo y
 leerlo fuera del sitio.
 
-Hoy no se puede. El explorador filtra por seis dimensiones —año, área QS,
+Antes de esto no se podía. El explorador filtraba por seis dimensiones —año, área QS,
 unidad académica, tipo documental, acceso abierto y colaboración— y ninguna es
 la persona. A alguien concreto sólo se llega por búsqueda de texto libre, que
 no es un filtro sino un colador, o por su ficha, que es otra página con otras
@@ -74,7 +79,7 @@ por omisión, y el proyecto ya tiene escrito que no se hace (`CLAUDE.md`,
 
 ---
 
-## 4. Propuesta
+## 4. El diseño
 
 ### 4.1 La persona es una dimensión de filtro más
 
@@ -92,9 +97,8 @@ informe de esta persona» que aplica el recorte. Nunca una lista completa.
 ### 4.2 El informe por investigador es la ficha más el recorte
 
 No un tercer artefacto. La ficha responde «quién es y qué publicó»; el recorte
-responde «cómo se ve el informe institucional mirando sólo su producción». Se
-propone que, cuando el recorte sea de una sola persona, la ficha entre como
-primera sección del PDF y las demás secciones la sigan.
+responde «cómo se ve el informe institucional mirando sólo su producción». Cuando el recorte es de una sola persona, la ficha entra como primera sección
+del PDF y las demás la siguen.
 
 ### 4.3 Las salvaguardas viajan con el informe, no se quedan en la web
 
@@ -104,9 +108,13 @@ hoja** del informe descargado, no enterradas:
 - la advertencia de lectura fija, la que adhiere a DORA y al Manifiesto de
   Leiden y dice que estas métricas no comparan personas;
 - **muestra reducida** cuando la persona tiene menos de cinco publicaciones en
-  la ventana, que es el caso de 480 de 530;
-- el **estado de identidad**, cuando la firma no está consolidada;
-- la **unidad no determinada**, cuando falta, en vez de una casilla vacía.
+  la ventana, que es el caso de 480 de 530.
+
+Las otras dos —el estado de identidad y la unidad no determinada— **no se
+repiten en el recorte**: viven en la ficha, con su evidencia, y la ficha abre
+el PDF personal. Duplicarlas aquí habría creado una segunda redacción de una
+advertencia metodológica, que es lo que este proyecto ya vio divergir una vez.
+El recorte enlaza a la ficha en su pie.
 
 ### 4.4 Lo que no se hace, y por qué
 
@@ -121,33 +129,35 @@ hoja** del informe descargado, no enterradas:
 - **Los cortes que cambian de significado sobre una persona se declaran o se
   apagan.** Una red de coautoría de un solo autor es una estrella trivial; una
   mediana sobre una publicación no es una mediana. Qué corte cae en cuál de las
-  dos categorías es trabajo de implementación, con la misma regla que ya
-  gobierna el resto: si el indicador cambia de significado, se dice.
+  dos categorías **sigue pendiente**: hoy los cortes se recalculan sobre el
+  recorte como con cualquier otra dimensión, y la regla que ya gobierna el
+  resto —si el indicador cambia de significado, se dice— está por aplicar caso
+  por caso sobre una persona.
 
 ---
 
-## 5. Decisiones que se piden
+## 5. Lo decidido
 
-Sin estas respuestas la implementación quedaría decidiendo por su cuenta cosas
-que no le tocan.
+1. **A quién se le ofrece.** **Decidido por el usuario: a las 530 entidades**,
+   con la banda de muestra reducida donde corresponda. Excluir a alguien de su
+   propio informe es una decisión sobre esa persona, tomada en silencio;
+   declararle la limitación es una decisión sobre el dato. La alternativa
+   —sólo las 50 interpretables— habría dejado fuera al 90 %.
+2. **La ficha abre el PDF cuando el recorte es una persona.** Implementado con
+   la recomendación: es lo único que declara identidad, ORCID con su evidencia
+   y unidad.
+3. **Se permite combinar persona con otras dimensiones**, y la declaración lo
+   dice entero. Añadir año a una persona con tres publicaciones deja una, y eso
+   se ve en la hoja en vez de deducirse. La banda de muestra reducida mira la
+   producción de la persona **en la ventana**, no la del corte: un filtro de año
+   no convierte a nadie en muestra reducida.
+4. **La dimensión no entra como lista.** El panel dibuja las firmas elegidas y
+   un campo con autocompletado del navegador; la entrada natural es el enlace
+   de la ficha. Nunca 530 pastillas.
+5. **Uso previsto en la primera hoja.** La advertencia de lectura —DORA y
+   Leiden— va sobre las cifras y viaja al papel con ellas.
 
-1. **¿A quién se le ofrece?** Recomendación: a las 530 entidades, con la banda
-   de muestra reducida donde corresponda. Excluir a alguien de su propio
-   informe es una decisión sobre esa persona, tomada en silencio; declararle la
-   limitación es una decisión sobre el dato. La alternativa —sólo las 50
-   interpretables— produce informes de mejor calidad y deja fuera al 90 %.
-2. **¿La ficha entra en el PDF cuando el recorte es una persona?**
-   Recomendación: sí, como primera sección.
-3. **¿Se permite combinar persona con otras dimensiones?** Recomendación: sí,
-   pero la declaración lo dice entero. Añadir año a una persona con tres
-   publicaciones deja una, y eso tiene que verse en la hoja, no deducirse.
-4. **¿Entra la dimensión en el panel de filtros o sólo por la ficha y la URL?**
-   Recomendación: entrada por la ficha y por búsqueda; nunca una lista de 530.
-5. **¿Cambia algo respecto de quién puede pedirlo?** Todo el dato es público y
-   viene de Scopus, así que técnicamente no hay dato nuevo. Pero un PDF nominal
-   circula distinto que una página, y conviene que el documento declare su uso
-   previsto. Recomendación: declararlo en la primera hoja, junto a la
-   advertencia de lectura.
+Cualquiera de las cuatro últimas se puede corregir sin tocar la primera.
 
 ---
 
@@ -158,3 +168,25 @@ habla de 84 formas fusionadas en 37 personas y de 538 entidades publicadas. El
 artefacto que sirve el sitio dice **94 en 39** (37 por revisión humana y 2 por
 diacríticos), 4 descartadas por no ser personas, y **530 entidades**. Conviene
 corregirlo antes de que esta propuesta se implemente citando el número viejo.
+
+---
+
+## 7. Cómo quedó
+
+- **Filtro `autor`**, una dimensión más del explorador: viaja en la URL, las
+  secciones se recalculan sobre él y el PDF lo declara en su primera hoja.
+- **Salvaguardas** sobre las cifras cuando el recorte es de una persona: la
+  advertencia de lectura siempre, y la de muestra reducida por debajo del
+  umbral, con **una sola redacción compartida con la ficha**.
+- **`make informe RECORTE="autor=Firma"`** produce el informe personal: la
+  ficha primero y las cinco secciones después, todas declarando el mismo
+  recorte, todas etiquetadas para lectores de pantalla.
+- **Ida y vuelta**: la ficha enlaza al informe recortado, y el informe
+  recortado enlaza a `autores.html?q=…`, que abre la lista entera —no sólo las
+  interpretables— para que una firma bajo el umbral se encuentre.
+- **La compuerta de impresión** comprueba, sobre el PDF y en cada corrida, que
+  un informe personal lleve el recorte declarado y las dos advertencias.
+
+Coste medido: la portada pasa de 39 a 60 KB en bruto y de 8 a 12 KB
+comprimidos, por la lista de sugerencias. Los artefactos de datos no cambian:
+el corpus ya traía los nombres canónicos.

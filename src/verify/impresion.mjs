@@ -47,6 +47,15 @@ try {
 const meta = JSON.parse(await readFile(join(DIST, 'data/meta.json'), 'utf8'));
 const { ejes } = JSON.parse(await readFile(join(DIST, 'data/ejes.json'), 'utf8'));
 
+/* Una firma por debajo del umbral de interpretabilidad, tomada del artefacto y
+   no escrita aquí: 480 de las 530 lo están, así que el caso normal de un
+   informe personal es éste, y es el que tiene que llevar las dos advertencias.
+   Se elige la primera por orden alfabético para que la comprobación sea la
+   misma en cada corrida. */
+const { autores } = JSON.parse(await readFile(join(DIST, 'data/authors.json'), 'utf8'));
+const escasa = autores.filter((a) => !a.interpretable)
+  .sort((a, b) => a.nombre.localeCompare(b.nombre))[0];
+
 /* Se compara sin espacios: pdf.js parte el texto en fragmentos por tipografía y
    por salto de línea, así que «Citas actualizadas al» puede llegar en tres
    trozos. Lo que se comprueba es que el contenido esté, no cómo quedó
@@ -81,6 +90,21 @@ const CASOS = [
     // alguien reescribe el eje, esta comprobación sigue midiendo lo mismo.
     exige: ['Recorte aplicado', 'Año: 2024', 'Tipo documental: Article',
             ejes.produccion.no_responde.slice(0, 80)],
+    prohibe: ['Sin filtros'],
+  },
+  {
+    /* Un informe personal es el caso en que el papel más se puede leer mal: un
+       PDF con el nombre de alguien y cifras de impacto circula sin el sitio al
+       lado. Las dos advertencias que lo hacen legible tienen que estar EN la
+       hoja, no en la web que se quedó atrás.
+
+       Los rótulos en negrita van en versalitas por CSS —«MUESTRA REDUCIDA» en
+       el PDF—, así que se busca el cuerpo de cada advertencia y no su título. */
+    nombre: 'informe recortado a una persona',
+    ruta: `index.html?autor=${encodeURIComponent(escasa.nombre)}`,
+    exige: ['Recorte aplicado', `Autor: ${escasa.nombre}`,
+            'principios de DORA y del Manifiesto de Leiden',
+            'no son interpretables individualmente'],
     prohibe: ['Sin filtros'],
   },
   {

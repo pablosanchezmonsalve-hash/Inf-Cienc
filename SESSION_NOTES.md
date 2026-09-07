@@ -12182,3 +12182,112 @@ Ninguna. El documento las pide, no las toma.
   en 37 personas y 538 entidades publicadas; el artefacto dice 94 en 39, 4
   descartadas y 530 entidades. Corregirlo antes de implementar esta propuesta,
   para que no se cite el número que ya no es.
+
+## Cierre: el filtro por persona, decidido e implementado (2026-09-07)
+
+### Contexto
+
+El usuario respondió la pregunta que gobernaba la propuesta: **el informe por
+investigador se ofrece a las 530 entidades, con la banda de muestra reducida
+donde corresponda**. Las otras cuatro preguntas quedaron sin responder, así que
+se implementaron con la recomendación escrita en el documento, marcada como tal
+para poder corregir cualquiera sin rehacer las demás.
+
+### Lo que se construyó
+
+- **Dimensión `autor`** en el explorador. Filtra por el nombre canónico, que el
+  corpus ya trae consolidado, así que no hay emparejamiento heurístico en el
+  navegador. Viaja en la URL, las secciones se recalculan y la línea de papel lo
+  declara sin escribir una segunda redacción.
+- **El panel no dibuja 530 pastillas.** Enseña las firmas elegidas y un campo
+  con `datalist` —autocompletado del navegador, sin librería y con teclado—,
+  cuyas sugerencias son las del recorte vigente.
+- **Salvaguardas** cuando el recorte es de una persona: la advertencia de
+  lectura que adhiere a DORA y a Leiden, siempre, y la de muestra reducida por
+  debajo del umbral. Van **sobre las cifras** y no en la barra de vigencia,
+  porque la barra es cromo y la hoja de impresión la retira: ahí no se
+  imprimirían, y un PDF nominal es justo donde hacen falta.
+- **Una sola redacción.** Las dos advertencias vivían escritas a mano en la
+  ficha; ahora las escribe `vista_explorador.js` y la ficha las llama. Copiar el
+  texto habría creado la segunda versión de una advertencia metodológica.
+- **Ida y vuelta.** La ficha enlaza al informe recortado; el pie del recorte
+  enlaza a `autores.html?q=…`, que ahora lee la búsqueda de la URL y **abre la
+  lista entera**: con el filtro por defecto, 480 de 530 firmas no aparecerían y
+  quien llegara buscando a alguien no lo encontraría.
+- **`make informe RECORTE="autor=Firma"`** produce el informe personal: la ficha
+  primero y las cinco secciones después.
+
+### Lo que se midió, y una cosa que se descartó por medirla
+
+- El corpus **ya trae los nombres canónicos**: 530 distintos, ninguno una
+  variante suelta, y `n_publicaciones` de `authors.json` coincide con el conteo
+  sobre `publications.json` para las 530. Ninguna entidad comparte nombre.
+- **El umbral no se metió en `meta.json`.** Se había añadido a `build_meta()`,
+  pero eso obliga a regenerar artefactos —imposible aquí, y con la fecha de
+  build cambiando en un solo archivo— cuando `authors.json` ya lo trae en
+  `parametros`, que es de donde lo toma la ficha. Se revirtió.
+- **Los identificadores de autor no se metieron en `publications.json`.** Habrían
+  hecho preciso el enlace del recorte a cada ficha, pero el presupuesto de datos
+  está al 81 % de su techo y el proyecto ya declara que ése es el punto de
+  presión. El enlace va por `autores.html?q=`, que cuesta cero.
+- **Coste del `datalist`:** la portada pasa de 39 a 60 KB en bruto y de 8 a 12
+  comprimidos. Se acepta: es la única forma de que la búsqueda funcione sin
+  repintar, y el margen de LCP medido es de más del doble. Conviene confirmarlo
+  con `make rendimiento` cuando haya ocasión.
+
+### Verificación
+
+Siete comprobaciones de punta a punta sobre el sitio construido: salvaguardas
+con y sin muestra reducida (39 publicaciones frente a 1), el panel con una
+pastilla y 529 sugerencias en vez de 530 pastillas, elegir una firma con el
+campo y ver el filtro en la URL, el enlace de la ficha, la vuelta a Autores con
+la lista abierta, y el PDF con el recorte y las dos advertencias dentro. Cero
+errores de consola.
+
+La **compuerta de impresión** incorpora el caso: toma del artefacto la primera
+firma bajo el umbral y exige que su informe declare la persona y lleve las dos
+advertencias. Batería completa sin fallos.
+
+Informe personal real generado con `autor=Orellana-Donoso M.`: siete PDF, la
+ficha abriendo, todas las hojas declarando el mismo recorte y las siete
+etiquetadas.
+
+Un defecto encontrado al leer el PDF: la frase terminaba en «Abara J.F..»,
+porque muchas firmas acaban en abreviatura. `fraseRecorte()` ya no dobla el
+punto, y de paso admite recorte sin cifras, que es lo que necesitaba la página
+sin explorador.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-518 | El informe por persona se ofrece a las 530 entidades, con la banda de muestra reducida donde corresponda | Decisión del usuario. 480 de 530 están bajo el umbral: excluirlas sería decidir sobre esas personas en silencio, y declararles la limitación es una decisión sobre el dato |
+| D-519 | La dimensión de persona no se dibuja como lista de pastillas | 530 pastillas no son un filtro: la lista deja de ser recorrible mucho antes del nombre buscado y empuja el resto del panel fuera de la pantalla. Firmas elegidas + campo con `datalist`, y entrada desde la ficha |
+| D-520 | Las salvaguardas van sobre las cifras, no en la barra de vigencia | La barra es cromo y la hoja de impresión la retira. Un PDF nominal circula sin el sitio al lado, que es exactamente donde la advertencia hace falta |
+| D-521 | La muestra reducida mide la producción de la persona en la ventana, no la del recorte | Alguien con seis publicaciones no pasa a ser muestra reducida porque se le añada un filtro de año: lo que baja es el tamaño del corte, y eso ya lo declara la línea del recorte |
+| D-522 | Una sola redacción de las advertencias, compartida entre la ficha y el recorte | Dos textos para la misma advertencia metodológica divergen sin que nadie lo note. Ya pasó con los paneles de eje |
+| D-523 | El umbral de interpretabilidad se toma de `authors.json`, no de `meta.json` | Es el mismo que aplica la ficha y ya viaja en un artefacto que estas páginas cargan. Añadirlo a `meta.json` obligaba a regenerar artefactos para una cifra que ya estaba |
+| D-524 | La ficha abre el PDF cuando el recorte es de una persona | Es lo único que declara identidad, ORCID con la evidencia de cada asignación y unidad. Sin ella las hojas siguientes son cifras de alguien sin decir de quién exactamente |
+| D-525 | El estado de identidad y la unidad no se repiten en el recorte | Viven en la ficha, con su evidencia, y la ficha abre el informe personal. Repetirlas sería la segunda redacción que `D-522` evita |
+| D-526 | `autores.html` lee la búsqueda de la URL y abre la lista entera cuando llega por ahí | La vista por defecto oculta las firmas bajo el umbral, que son 480: llegar buscando a alguien y no encontrarlo es peor que no ofrecer la búsqueda |
+| D-527 | La dimensión de persona no lleva cubo «sin dato declarado» | `unidad` lo lleva porque toda publicación tiene una o carece de ella; la autoría es una lista de personas y «sin autoría UFT nombrada» no es una persona. Esas publicaciones siguen en el informe y el listado las declara |
+
+### Archivos
+
+- `web/assets/js/explorador.js`, `vista_explorador.js`, `paginas.js`, `core.js`
+- `web/assets/css/app.css`, `src/build/prerender.mjs`, `src/build/informe_pdf.mjs`
+- `src/verify/impresion.mjs`
+- `docs/INFORME_POR_INVESTIGADOR.md`, `docs/UX_UI.md`
+
+### Pendientes
+
+- **Los cortes que cambian de significado sobre una persona.** Hoy se
+  recalculan como con cualquier otra dimensión. Una red de coautoría de un solo
+  autor es una estrella trivial y una mediana sobre una publicación no es una
+  mediana: falta declararlo o apagarlos, caso por caso.
+- **`docs/AUTHOR_PROFILE.md` sigue con cifras viejas** (84 en 37, 538
+  entidades). El artefacto dice 94 en 39 y 530.
+- **`STATE.md` sin regenerar**, por lo de siempre: sin `data/interim/` el
+  snapshot vacía media tabla de cifras canónicas.
+- Confirmar el LCP con `make rendimiento` tras el peso añadido por el
+  `datalist`.
