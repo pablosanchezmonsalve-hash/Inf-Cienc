@@ -133,13 +133,16 @@ Además del pipeline y de las compuertas de la sección siguiente:
 | Autoprueba de `apply_decisions` (20 casos) | Qué firmas se fusionan como una persona y cuáles dejan de contarse |
 | Contenido sin JavaScript | Que el pre-renderizado ocurrió de verdad |
 | Barrera pública/interna | Que nada de `internal/` viaja en `dist/` |
-| `src/verify/run_all.mjs` | Contraste WCAG, estructura, consola, flujos, responsive e higiene |
+| `src/verify/run_all.mjs` | Contraste WCAG, estructura, consola, flujos, responsive, impresión e higiene |
 
 La batería de `src/verify/` existía desde `D-137` pero había que acordarse de
-correrla a mano, que es la forma que tiene una verificación de no correrse. La
-versión de Playwright se fija en el workflow —no en un `package.json`, porque el
-sitio no tiene dependencias de JavaScript— y es la misma con la que se verifica
-en local: una batería que corre contra otro navegador no comprueba lo mismo.
+correrla a mano, que es la forma que tiene una verificación de no correrse. Las
+versiones que CI instala se fijan en el workflow, y son las mismas con las que
+se verifica en local: una batería que corre contra otro navegador no comprueba
+lo mismo. Son dos, Playwright y pdf.js, y las dos son **solo de desarrollo**:
+el sitio publicado no tiene ninguna dependencia de JavaScript. La segunda la
+pide el paso de impresión, que comprueba el informe descargado leyendo el texto
+del PDF en vez del DOM.
 
 ### Activación: un paso manual, una sola vez
 

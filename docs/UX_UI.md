@@ -704,10 +704,32 @@ o que no hay ninguno y es el informe completo. El pie añade el universo y sus
 tres denominadores (`D-16`). El bloque de recorte de la pantalla no se imprime:
 trae controles que en una hoja no llevan a ninguna parte.
 
-**Límite conocido:** esas líneas van en la primera hoja, no en cada una.
-Chromium no implementa los cuadros de margen de CSS Paged Media, así que un
-encabezado repetido tendría que inyectarse desde `informe_pdf.mjs` y dejaría de
-valer para el botón del navegador.
+**El informe a medida.** `make informe RECORTE="anio=2024&tipo=Article"` toma la
+misma consulta que el explorador escribe en la URL —se copia de la barra de
+direcciones— y la pasa a cada sección: las cifras, los gráficos y las tablas se
+recalculan sobre ese recorte, que es lo que el sitio ya hacía en pantalla. El
+recorte va en el nombre del archivo y, sobre todo, declarado en la hoja 1. El
+anexo metodológico también lo declara, sin cifras: no cuenta publicaciones,
+pero es parte del informe que alguien pidió y una hoja suelta que se llame
+«informe completo» contradiría a las demás del mismo PDF.
+
+**Qué llega al papel y qué no.** Los desplegables se imprimen abiertos: un
+`<details>` cerrado imprime su resumen y nada más, y eso vaciaba el panel «Qué
+NO dice esta sección» —el título de la advertencia sin la advertencia—. El
+conmutador Gráfico ⇄ Tabla no se imprime, porque en papel las dos vistas se
+despliegan y el control no conmuta nada. Todo esto lo comprueba
+`src/verify/impresion.mjs` **sobre el texto del PDF**, no sobre el DOM: con el
+medio `print` emulado, el cuerpo de un desplegable cerrado devuelve una caja de
+109 px de alto y aun así no aparece en el documento.
+
+**Accesibilidad del documento.** `make informe` pide el PDF etiquetado, con
+árbol de estructura para lectores de pantalla. El botón del navegador depende
+de los ajustes de quien imprime, que el sitio no controla.
+
+**Límite conocido:** las líneas de procedencia van en la primera hoja, no en
+cada una. Chromium no implementa los cuadros de margen de CSS Paged Media, así
+que un encabezado repetido tendría que inyectarse desde `informe_pdf.mjs` y
+dejaría de valer para el botón del navegador.
 
 ### 12.8 Advertencias de lectura
 

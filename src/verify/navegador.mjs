@@ -63,3 +63,27 @@ if (!chromium) {
 export const opciones = RUTAS.length ? { executablePath: RUTAS[0] } : {};
 
 export const abrir = () => chromium.launch(opciones);
+
+/** PDF con árbol de estructura, que es lo que un lector de pantalla necesita
+    para navegar el documento en vez de recitarlo.
+
+    La opción `tagged` no existe en todas las versiones de Playwright, y la del
+    flujo de trabajo de CI está fijada aparte de la del repositorio. Se intenta
+    y, si la versión instalada no la conoce, se emite el PDF sin etiquetar y se
+    devuelve `etiquetado: false` para que quien llame lo diga. Ni reventar por
+    una versión, ni fingir que el documento es accesible: las dos cosas serían
+    peores que declararlo.
+
+    El resultado se comprueba sobre el archivo —`/StructTreeRoot`— y no sobre
+    la opción aceptada: que una API admita un parámetro no prueba que el
+    navegador escribiera nada. */
+export async function pdfEtiquetado(pag, opciones = {}) {
+  try {
+    const buffer = await pag.pdf({ ...opciones, tagged: true });
+    return { buffer, etiquetado: buffer.includes('/StructTreeRoot') };
+  } catch (e) {
+    if (!/tagged/.test(String(e))) throw e;
+    const buffer = await pag.pdf(opciones);
+    return { buffer, etiquetado: false, motivo: 'esta versión de Playwright no acepta `tagged`' };
+  }
+}

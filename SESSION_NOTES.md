@@ -12026,3 +12026,106 @@ estructura 0, flujos 0 excepciones, responsive 0 desbordes, higiene y peso OK.
   nada, y ninguna verificación lo habría visto: la batería mira la pantalla, no
   el papel. Una comprobación de medio `print` en `src/verify/` es el siguiente
   paso natural, en la línea de `peso.mjs` («una compuerta, no una nota»).
+
+## Cierre: compuerta de impresión, informe a medida y PDF etiquetado (2026-09-07)
+
+### Contexto
+
+Continuación directa de la nota anterior. Sobre el plan que se le propuso al
+usuario —compuerta primero, limpiar la hoja después, informe parametrizado
+tercero— pidió avanzar con todo lo que se estimara conveniente. Queda fuera, a
+propósito, el filtro por persona: exige una decisión suya sobre qué puede
+afirmar un informe individual.
+
+### Lo que se encontró midiendo el PDF
+
+Dos defectos más de la familia del anterior, los dos invisibles para la batería
+porque la batería mira la pantalla:
+
+1. **El panel «Qué NO dice esta sección» imprimía su título y no su cuerpo.**
+   Es un `<details>` cerrado. En el PDF quedaba un titular de advertencia sin
+   la advertencia, que es peor que no ponerlo: `docs/EJES.md` dice que sin esa
+   parte el panel «sería un subtítulo».
+2. **El conmutador Gráfico ⇄ Tabla se imprimía** junto a cada figura. La regla
+   `.vistas { display: none }` del bloque de impresión pierde contra
+   `.js .vistas` (línea 994), que enciende el control con dos clases: pierde
+   por **especificidad**, no por orden, que es un caso distinto del que ya está
+   documentado al final del archivo.
+
+Y una tercera cosa, metodológica más que visual: **el DOM miente sobre el
+papel**. Con medio `print` emulado, el cuerpo de un desplegable cerrado
+devuelve una caja de 109 px de alto y no aparece en el PDF. La primera lectura
+de esta sesión se hizo con emulación y dio el resultado contrario al real. Por
+eso la compuerta lee el texto del PDF.
+
+### Cambios
+
+- **`src/verify/impresion.mjs`** (nuevo, en la batería): genera PDF de verdad de
+  tres casos —portada sin recorte, sección con recorte, anexo dentro de un
+  informe filtrado— y comprueba sobre su texto la procedencia, la declaración
+  del recorte, el cuerpo de los paneles metodológicos (leído de `ejes.json`, no
+  copiado), la ausencia de controles y el árbol de estructura. Tarda 5 s.
+- **`app.css`**: `details::details-content { content-visibility: visible }` y
+  `summary { list-style: none }` en papel; `.js .vistas { display: none }` para
+  ganar la especificidad; `.migas` fuera de la hoja.
+- **`informe_pdf.mjs`**: tercer argumento con el recorte, normalizado con
+  `URLSearchParams` —la misma consulta que el explorador escribe en la URL—, que
+  se pasa a cada sección. El recorte va en el nombre del archivo y declarado en
+  la hoja 1. Y pide el PDF **etiquetado**.
+- **`navegador.mjs`**: `pdfEtiquetado()`, un solo origen para pedir el árbol de
+  estructura y para degradar con aviso si la versión de Playwright no conoce la
+  opción. Lo usan el generador y la compuerta.
+- **`paginas.js`**: una página sin explorador dentro de un informe filtrado
+  declara el recorte (sin cifras: no tiene el corpus cargado).
+- **`deploy.yml`**: CI instala también `pdfjs-dist@6.3.289`.
+
+### Verificación
+
+Prueba **negativa** de la compuerta, que es la que dice si sirve: se degradó
+`dist/` a mano deshaciendo los tres arreglos y la compuerta cazó los tres, con
+cinco fallos nombrados. Restaurada, pasa.
+
+Batería completa con el paso nuevo dentro: contraste 0, estructura 0, flujos 0
+excepciones, responsive 0, impresión 0, higiene y peso OK.
+
+Informe a medida de punta a punta con
+`RECORTE="anio=2024&unidad=Facultad de Medicina y Salud"`: seis PDF, nombre con
+el recorte, hoja 1 con «Recorte aplicado: Año: 2024 · Unidad académica: Facultad
+de Medicina y Salud. 122 de 823 publicaciones», el anexo con la misma
+declaración sin cifras, y los seis con `/StructTreeRoot` y `/Marked true`
+verificados sobre el archivo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-512 | La batería tiene un paso de impresión, y lee el TEXTO DEL PDF, no el DOM | Los tres defectos de estas dos sesiones son reglas de impresión que no casan con el marcado, y ninguna verificación de pantalla los ve. Con medio `print` emulado el cuerpo de un desplegable cerrado mide 109 px de alto y no llega al papel: el DOM habría dado verde |
+| D-513 | En papel los desplegables van abiertos | Un `<details>` cerrado imprime su resumen y nada más. El panel que declara lo que la sección NO responde salía como un titular sin contenido, y ese texto es obligatorio por `docs/EJES.md` |
+| D-514 | El informe a medida se pide con la misma consulta que el explorador escribe en la URL | Se copia de la barra de direcciones tras filtrar. Inventar una sintaxis propia habría creado una segunda gramática de recorte que puede divergir de la del sitio |
+| D-515 | El recorte va en el nombre del archivo, pero la declaración va dentro | Dos informes distintos no pueden llamarse igual en la carpeta de descargas de nadie; y un nombre no sobrevive a que alguien renombre el archivo, la hoja 1 sí |
+| D-516 | Una página sin explorador dentro de un informe filtrado declara el recorte, sin cifras | El anexo metodológico no cuenta publicaciones, pero es parte del informe que alguien pidió: una hoja que se declare «informe completo» contradice a las demás del mismo PDF. Las cifras se omiten en vez de pedir el corpus sólo para eso |
+| D-517 | `make informe` pide el PDF etiquetado, y si la versión de Playwright no sabe, lo declara en vez de reventar o callar | Sin árbol de estructura un lector de pantalla recita el documento en vez de navegarlo. Comprobado sobre el archivo (`/StructTreeRoot`), no sobre que la API aceptara el parámetro |
+
+### Archivos
+
+- `src/verify/impresion.mjs` (nuevo), `src/verify/run_all.mjs`,
+  `src/verify/navegador.mjs`, `src/build/informe_pdf.mjs`
+- `web/assets/css/app.css`, `web/assets/js/paginas.js`
+- `Makefile`, `package.json`, `.github/workflows/deploy.yml`
+- `docs/UX_UI.md`, `docs/DEPLOYMENT.md`, `AGENTS.md`
+
+### Pendientes
+
+- **El filtro por persona no existe**, y es lo que falta para un informe de
+  productividad por investigador. Antes del código hace falta la decisión sobre
+  qué puede afirmar: la doctrina ya está escrita (`D-18`, umbral de muestra
+  pequeña, identidad no consolidada), falta aplicarla y que el usuario la valide.
+- **La procedencia sigue yendo sólo en la primera hoja.** Chromium no
+  implementa los cuadros de margen de CSS Paged Media; un encabezado repetido
+  saldría de `headerTemplate` y rompería el origen único con el botón.
+- **Las tarjetas «Ver la sección →» de la portada se imprimen.** No son un
+  control que prometa interacción y en papel funcionan como índice, así que se
+  dejan; conviene decidirlo a la vista de una hoja impresa.
+- **`STATE.md` sin regenerar**, por lo mismo que la sesión anterior: sin
+  `data/interim/` el snapshot vacía media tabla de cifras. `docs/DECISIONS.md`
+  sí, que sólo depende de este archivo.

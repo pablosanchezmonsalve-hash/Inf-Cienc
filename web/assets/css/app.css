@@ -1652,7 +1652,23 @@ svg.chart .trama { pointer-events: none; }
   .rail, .vigencia-guia, .descargar, .ayuda, .tooltip, .nav-toggle,
   .v-migas, .v-chip, .recorte-vivo, .v-anio, .minifoco,
   .explorador-panel, .filtros-explorador, #estado-recorte,
-  #controles, .treemap-migas, .treemap-leyenda { display: none; }
+  #controles, .treemap-migas, .treemap-leyenda, .migas { display: none; }
+  /* El conmutador Gráfico ⇄ Tabla. `.vistas { display: none }` de arriba NO
+     bastaba: `.js .vistas` (línea 994) lo enciende con dos clases y gana por
+     especificidad, no por orden, así que el par «Gráfico Tabla» se imprimía
+     junto a cada figura. Medido en el PDF, no en la pantalla: en papel las dos
+     vistas se despliegan y el control no conmuta nada. */
+  .js .vistas { display: none; }
+
+  /* Los desplegables van abiertos en papel. Un `<details>` cerrado imprime su
+     resumen y nada más, y eso vaciaba justo el contenido que no puede
+     perderse: el panel «Qué NO dice esta sección» salía como un titular de
+     advertencia sin la advertencia, que es peor que no ponerlo (`docs/EJES.md`
+     dice que sin esa parte el panel «sería un subtítulo»). El triángulo se
+     retira porque en una hoja no hay nada que desplegar. */
+  details::details-content { content-visibility: visible; }
+  summary { list-style: none; }
+
   body { background: #fff; }
   .disposicion { display: block; }
   .modulo, .kpi, .tabla-envoltura { box-shadow: none; border-color: #999; break-inside: avoid; }
