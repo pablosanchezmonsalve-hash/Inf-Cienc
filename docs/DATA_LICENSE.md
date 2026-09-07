@@ -78,7 +78,7 @@ No se incorpora ningún dato personal que no esté en la fuente.
 Aun así hay tres decisiones deliberadas:
 
 1. **No se afirma identidad.** Cada ficha corresponde a una forma de firma, no
-   a una persona verificada. Una revisión humana ya fusionó 84 formas en 37
+   a una persona verificada. Una revisión humana ya fusionó 94 formas en 39
    personas y descartó 4 firmas más que resultaron ser fragmentos de cadena de
    afiliación, no personas (regla `E-09`, ya resuelto); quedan **31 grupos de
    variantes** y **20 identificadores fragmentados** declarados sin resolver.

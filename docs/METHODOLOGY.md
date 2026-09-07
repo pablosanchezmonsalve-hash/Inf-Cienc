@@ -57,8 +57,9 @@ publicaciones de 2025 acumulan entre 7 y 19 meses de citación.
 Consecuencias operativas:
 
 - El FWCI de una publicación reciente tiene varianza muy alta.
-- 538 de los 589 autores tienen menos de 5 publicaciones en la ventana. A ese
-  n, las métricas normalizadas individuales no son interpretables.
+- 480 de las 530 entidades publicadas tienen menos de 5 publicaciones en la
+  ventana. A ese n, las métricas normalizadas individuales no son
+  interpretables.
 - El **FWCI de un conjunto se calcula sobre el conjunto**, nunca como promedio
   de los FWCI individuales.
 
