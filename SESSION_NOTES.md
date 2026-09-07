@@ -12291,3 +12291,60 @@ sin explorador.
   snapshot vacía media tabla de cifras canónicas.
 - Confirmar el LCP con `make rendimiento` tras el peso añadido por el
   `datalist`.
+
+## Cierre: la red de coautoría se apaga en un informe personal (2026-09-07)
+
+### Contexto
+
+El usuario aprobó el punto que quedaba abierto del filtro por persona y pidió
+expresamente apagar la red de coautoría. Se resolvieron los tres cortes que
+cambian de significado sobre una sola firma, con el criterio que el proyecto ya
+aplica al resto: si el indicador cambia de significado, se dice.
+
+### Qué se hizo
+
+- **`C-05` se apaga y se declara.** En su sitio queda la sección, con su
+  encabezado y su ancla —el índice lateral y los enlaces del catálogo siguen
+  llegando— y un texto que explica que sobre una persona esa red sería una
+  estrella, que su forma no describiría la estructura de colaboración, y que
+  con quién coautoró está en su ficha.
+- **`I-04` se queda con aviso.** La mediana por año sobre una o dos
+  publicaciones es una cifra correcta que no describe una tendencia; el aviso lo
+  dice. Ocultarla habría dejado un hueco que se lee como ausencia de dato, que
+  es el error contrario.
+- **`C-04` no cambia**: ya declaraba que no responde al recorte.
+- La decisión de qué corte cae en cuál categoría vive en `cortePersonal()`, una
+  sola función con el porqué escrito, y no repartida por el marcado.
+
+### Verificación
+
+Medido sobre el sitio construido: sin recorte la sección de colaboración dibuja
+la red —tres vistas SVG— y con `?autor=` no dibuja ninguna, conserva los cinco
+cortes y enseña la declaración. La sección de impacto recortada a una persona
+trae el aviso de la mediana. Cero errores de consola.
+
+La compuerta de impresión incorpora el caso, y con una firma elegida por ser la
+**más prolífica** del artefacto: sobre alguien de una publicación la red saldría
+vacía por otra razón y la comprobación pasaría en falso. Probada en negativo
+sobre `dist/`: al deshacer el apagado, el informe personal de colaboración pasa
+de 8 a 12 hojas y la compuerta canta las dos cosas —que falta la declaración y
+que aparece el texto de la red dibujada—. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-528 | La red de coautoría no se dibuja cuando el informe está recortado a una persona | Recortada a una firma no es una red sino una estrella: esa persona al centro y sus coautores alrededor, con la misma forma para todo el mundo. Lo que el indicador mide —cómo se agrupan las personas entre sí— deja de existir, y dibujarla ofrecería una figura que se lee como estructura de colaboración sin serlo |
+| D-529 | La mediana por año se queda, con un aviso que dice sobre cuántas publicaciones se calcula | Es una cifra correcta sobre pocos valores. Apagarla dejaría un hueco que se lee como ausencia de dato, y apagar de más engaña igual que no advertir |
+| D-530 | El corte apagado conserva su sección, su encabezado y su ancla | El índice lateral de la sección y los enlaces del catálogo apuntan al código del indicador. Un corte que desaparece del marcado rompe esos enlaces y, peor, se lee como que el indicador no existe |
+
+### Archivos
+
+- `web/assets/js/vista_explorador.js`, `src/verify/impresion.mjs`
+- `docs/INFORME_POR_INVESTIGADOR.md`, `docs/UX_UI.md`
+
+### Pendientes
+
+Los mismos de la sesión anterior menos éste: `docs/AUTHOR_PROFILE.md` con
+cifras viejas, `STATE.md` sin regenerar por falta de `data/interim/`, y
+confirmar el LCP con `make rendimiento` tras el peso del `datalist`.
