@@ -61,6 +61,7 @@ MAPA_LECTURA = [
     ("Cómo recuperar ORCID", "docs/ORCID_GUIDE.md"),
     ("Qué falta para la V2", "docs/V2_BACKLOG.md"),
     ("Cómo tratar una fuente fuera de Scopus", "docs/METODOLOGIA_FUERA_DE_SCOPUS.md"),
+    ("Qué puede afirmar un informe por persona", "docs/INFORME_POR_INVESTIGADOR.md"),
     ("Historia de cada sesión", "SESSION_NOTES.md"),
 ]
 
