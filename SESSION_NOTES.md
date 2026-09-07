@@ -12129,3 +12129,56 @@ verificados sobre el archivo.
 - **`STATE.md` sin regenerar**, por lo mismo que la sesión anterior: sin
   `data/interim/` el snapshot vacía media tabla de cifras. `docs/DECISIONS.md`
   sí, que sólo depende de este archivo.
+
+## Cierre: propuesta del filtro por persona, escrita y sin decidir (2026-09-07)
+
+### Contexto
+
+El usuario pidió redactar la propuesta que la sesión anterior dejó pendiente: el
+filtro por persona, que es la pieza que falta para un informe de productividad
+por investigador. Se redacta, no se implementa: la decisión es del responsable
+del proyecto y va antes del código.
+
+### Qué se escribió
+
+`docs/INFORME_POR_INVESTIGADOR.md`, marcado como propuesta pendiente de
+decisión, con cinco preguntas concretas y una recomendación para cada una.
+Entra en el mapa de lectura de `STATE.md` (`src/state/snapshot.py`), porque un
+documento que el punto de entrada no nombra es un documento que nadie abre.
+
+### Lo que se midió antes de proponer nada
+
+Sobre `data/processed/`, no de memoria:
+
+- **La consolidación ya está aplicada donde hace falta.** `publications.json`
+  trae 530 nombres distintos y **ninguno es una variante suelta**: todos son el
+  nombre canónico de una entidad, y ninguna entidad comparte nombre con otra.
+  El filtro por persona no exige tocar el build ni recalcular el corpus, que
+  era el supuesto con el que se entró.
+- **480 de 530 entidades están por debajo del umbral de interpretabilidad.** El
+  reparto es 360 con una publicación, 120 con dos a cuatro, 31 con cinco a
+  nueve y 19 con diez o más. Es el hecho que convierte esto en una decisión
+  metodológica y no en una tarea de interfaz.
+- 20 entidades con identidad no consolidada, 214 sin unidad determinada, 17 con
+  más de una, 268 con ORCID.
+- **Quinientas treinta pastillas no son un panel de filtros.** La dimensión
+  necesita búsqueda y entrada desde la ficha; una lista completa es una guía
+  telefónica.
+
+### Decisiones
+
+Ninguna. El documento las pide, no las toma.
+
+### Archivos
+
+- `docs/INFORME_POR_INVESTIGADOR.md` (nuevo), `src/state/snapshot.py`
+
+### Pendientes
+
+- **Las cinco preguntas del §5**, que son del usuario. La primera manda sobre
+  las demás: si el informe se ofrece a las 530 entidades o sólo a las 50
+  interpretables.
+- **`docs/AUTHOR_PROFILE.md` arrastra cifras viejas**: dice 84 formas fusionadas
+  en 37 personas y 538 entidades publicadas; el artefacto dice 94 en 39, 4
+  descartadas y 530 entidades. Corregirlo antes de implementar esta propuesta,
+  para que no se cite el número que ya no es.
