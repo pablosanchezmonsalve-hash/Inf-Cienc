@@ -73,8 +73,10 @@ async function main() {
   // Sólo lo usa C-05 (red de coautoría); el mismo mapa que arma el navegador
   // en paginas.js, para que el prerenderizado no divergan en qué unidad
   // muestra cada nodo.
+  const autoresJson = await leerJSON('authors.json');
   const unidadPorPersona = new Map(
-    (await leerJSON('authors.json')).autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+    autoresJson.autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+  const umbral = autoresJson.parametros?.n_minimo_interpretable;
   // Escuela -> facultad (P-07): mismo mapa que `meta.json` le da al navegador
   // (`common_build.build_meta()`), para que el pre-renderizado no diverja en
   // qué unidad agrega el gráfico.
@@ -112,7 +114,7 @@ async function main() {
       // las cifras y los gráficos del conjunto entero, y sólo pierde la
       // capacidad de recortarlo. Los `details` de los filtros se abren y se
       // leen igual sin guion.
-      const vacio = vx.explorador(publicaciones, {}, proc, jerarquia);
+      const vacio = vx.explorador(publicaciones, {}, proc, jerarquia, meta, umbral);
       html = rellenar(html, 'titular', vx.cabecera(meta), a);
       html = rellenar(html, 'estado-recorte', vacio.estado, a);
       html = rellenar(html, 'controles', vacio.controles, a);
@@ -127,7 +129,7 @@ async function main() {
       const a = [];
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
       const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
-      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia);
+      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia, meta, umbral);
       html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo, ejes[clave]), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);
       html = rellenar(html, 'controles', sec.controles, a);

@@ -108,6 +108,66 @@ export function estado(n, total, sel, { enlaceLista = false } = {}) {
   </p>`;
 }
 
+/* ───────────────────────────────────── salvaguardas de un informe personal */
+
+/* Las tres advertencias que acompañan a una persona. Viven aquí, en una sola
+   redacción, porque las escriben dos superficies: la ficha (`fichaAutor` en
+   paginas.js) y el informe recortado a esa persona. Antes sólo existía la
+   primera; copiar su texto habría creado la segunda versión de una advertencia
+   metodológica, que es exactamente la clase de duplicado que ya divergió una
+   vez en los paneles de eje. */
+
+/** Cómo se lee lo que describe a una persona. Adhiere a DORA y al Manifiesto
+    de Leiden, que es lo que impide leer estas cifras como una evaluación. */
+export function advertenciaLectura(meta, titulo = 'Cómo leer este informe') {
+  return `<div class="nota-destacada"><b>${c.escapar(titulo)}</b>
+    Los indicadores describen la producción indexada en Scopus entre
+    ${meta.ventana.inicio} y ${meta.ventana.fin}, con citas actualizadas al
+    ${c.escapar(meta.fecha_corte_citas)}. No representan la trayectoria completa de la persona.
+    Las métricas individuales sobre ventanas cortas y pocas publicaciones no son
+    comparables entre personas ni deben usarse para evaluar desempeño individual.
+    Este informe adhiere a los principios de DORA y del Manifiesto de Leiden.</div>`;
+}
+
+/** El umbral bajo el cual un indicador individual no es interpretable. Llega
+    de `authors.json` —`parametros.n_minimo_interpretable`, que el build copia
+    de `config/indicators.yml`—, que es el mismo que aplica la ficha. El
+    navegador no fija un umbral propio ni lo lleva escrito en dos sitios. */
+export function advertenciaMuestraReducida(umbral) {
+  return `<div class="nota-destacada"><b>Muestra reducida</b>
+    Con menos de ${c.nf.format(umbral)} publicaciones en la ventana, los indicadores
+    de impacto no son interpretables individualmente. Se muestran por transparencia,
+    no para comparación.</div>`;
+}
+
+/** Lo que un informe recortado a una persona tiene que llevar encima.
+
+    POR QUÉ VA CON LAS CIFRAS Y NO EN LA BARRA
+    Porque tiene que imprimirse. La barra de vigencia es cromo y la hoja de
+    impresión retira casi todo lo que hay en ella; esto va en el cuerpo, sobre
+    las cifras que califica, y por eso aparece también en la primera hoja del
+    PDF descargado — que es donde hace falta, porque un PDF nominal circula sin
+    el sitio al lado.
+
+    Se muestra para las 530 entidades, no sólo para las 50 que superan el
+    umbral: 480 quedan por debajo, y excluirlas de su propio informe sería
+    decidir sobre esas personas en silencio en vez de declararles la
+    limitación. Es la decisión del usuario del 2026-09-07. */
+export function salvaguardasPersona(pubs, sel, meta, umbral) {
+  const persona = X.personaDelRecorte(sel);
+  if (!persona || !meta) return '';
+  const n = X.publicacionesDe(pubs, persona);
+  return `<section class="salvaguardas" aria-label="Cómo leer este informe">
+    ${advertenciaLectura(meta)}
+    ${umbral && n < umbral ? advertenciaMuestraReducida(umbral) : ''}
+    <p class="nota">Recortado a <b>${c.escapar(persona)}</b>, con
+      ${c.nf.format(n)} ${n === 1 ? 'publicación' : 'publicaciones'} en la ventana.
+      Su identidad, su ORCID y su unidad académica —con la evidencia de cada uno—
+      se declaran en su ficha:
+      <a href="autores.html?q=${encodeURIComponent(persona)}">buscarla en Autores</a>.</p>
+  </section>`;
+}
+
 /** Los controles. Un `details` por dimensión: sin JavaScript se abren y se
     leen igual, que es la razón de usarlo en vez de un panel montado por
     guion. La primera dimensión va abierta para que el mecanismo se vea. */
@@ -125,14 +185,46 @@ export function controles(pubs, sel, { buscador = false } = {}) {
     return `<details class="dim" ${i === 0 || elegidos.length ? 'open' : ''}>
       <summary><span class="dim-nombre">${c.escapar(etiqueta)}</span>${
         elegidos.length ? `<span class="dim-n">${elegidos.length}</span>` : ''}</summary>
-      <div class="dim-ops">${opciones.map(([valor, n]) => {
-        const act = elegidos.includes(valor);
-        return `<button type="button" class="chip${act ? ' chip-on' : ''}"
-          data-dim="${clave}" data-valor="${c.escapar(valor)}"
-          aria-pressed="${act}">${c.escapar(valor)}<span class="chip-n">${c.nf.format(n)}</span></button>`;
-      }).join('')}</div>
+      <div class="dim-ops">${clave === 'autor'
+        ? opcionesAutor(opciones, elegidos)
+        : opciones.map(([valor, n]) => {
+          const act = elegidos.includes(valor);
+          return `<button type="button" class="chip${act ? ' chip-on' : ''}"
+            data-dim="${clave}" data-valor="${c.escapar(valor)}"
+            aria-pressed="${act}">${c.escapar(valor)}<span class="chip-n">${c.nf.format(n)}</span></button>`;
+        }).join('')}</div>
     </details>`;
   }).join('')}</div>`;
+}
+
+/** La dimensión de persona no se dibuja como las demás.
+
+    Quinientas treinta pastillas no son un filtro, son una guía telefónica: la
+    lista deja de ser recorrible mucho antes de llegar al nombre que se busca,
+    y empuja el resto del panel fuera de la pantalla. Se dibuja lo elegido
+    —pastillas, que se quitan igual que cualquier otra— y un campo de búsqueda
+    con `datalist`, que es autocompletado del navegador: sin librería, con
+    teclado, y legible por un lector de pantalla.
+
+    Las opciones son las del recorte vigente, no las 530 siempre: con un año o
+    una unidad ya elegidos, sugerir a quien no publicó nada ahí ofrecería un
+    filtro que deja la página vacía. */
+function opcionesAutor(opciones, elegidos) {
+  const puestas = elegidos.map(valor =>
+    `<button type="button" class="chip chip-on" data-dim="autor"
+      data-valor="${c.escapar(valor)}" aria-pressed="true"
+      >${c.escapar(valor)}<span class="chip-n" aria-hidden="true">×</span></button>`).join('');
+  const libres = opciones.filter(([valor]) => !elegidos.includes(valor));
+  return `${puestas}
+    <label class="solo-lectores" for="q-autor">Buscar una persona por su firma</label>
+    <input type="search" id="q-autor" class="busca-autor" list="autores-sugeridos"
+      placeholder="Escriba una firma…" autocomplete="off"
+      aria-describedby="q-autor-ayuda">
+    <datalist id="autores-sugeridos">${libres.map(([valor, n]) =>
+      `<option value="${c.escapar(valor)}">${c.nf.format(n)}</option>`).join('')}</datalist>
+    <p class="nota" id="q-autor-ayuda">${c.nf.format(libres.length)} firmas en este recorte.
+      Son formas de firma, no personas: las que una revisión humana declaró la misma
+      persona ya están fusionadas; el resto puede incluir variantes.</p>`;
 }
 
 /* ────────────────────────────────────────────────────────────── gráficos */
@@ -238,12 +330,14 @@ export function cortes(pubs_sel, proc, jerarquia) {
     completo y el navegador con el recorte vigente. `jerarquia` (opcional,
     de meta.json) agrega 'unidad' a facultad — sin ella se ve tal como la
     afiliación la nombró, escuela o facultad indistinto. */
-export function explorador(pubs, sel, proc, jerarquia) {
+export function explorador(pubs, sel, proc, jerarquia, meta, umbral) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel),
-    cifras: cifras(X.resumen(sub)),
+    // Las salvaguardas van pegadas a las cifras que califican, y por delante:
+    // una advertencia debajo del número al que corrige llega tarde.
+    cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
     cortes: cortes(sub, proc, jerarquia),
   };
 }
@@ -564,12 +658,12 @@ export function cabeceraSeccion(clave, titulo, eje) {
 /** Todo el cuerpo de una sección. `unidadPorPersona` (Map, opcional) sólo lo
     necesita C-05; `jerarquia` (objeto, opcional, de meta.json) sólo P-07.
     Las demás secciones los reciben y no los usan. */
-export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia) {
+export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia, meta, umbral) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
-    cifras: cifras(X.resumen(sub)),
+    cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
     cortes: cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia),
   };
 }

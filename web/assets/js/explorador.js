@@ -30,6 +30,18 @@
 
 export const DIMENSIONES = [
   ['anio',          'Año',                p => [String(p.anio)]],
+  /* La persona. Los nombres de `autores_uft` YA son los canónicos de cada
+     entidad —530 nombres distintos, ninguno una variante suelta, y ninguna
+     entidad comparte nombre con otra: comprobado sobre el artefacto—, así que
+     filtrar por nombre es exacto y no hay heurística de emparejamiento en el
+     navegador, que es lo que `D-08` prohíbe.
+
+     NO lleva cubo «sin dato». `unidad` sí lo lleva porque toda publicación
+     tiene una o carece de ella, pero la autoría es una lista de personas y «sin
+     autoría UFT nombrada» no es una persona: ofrecerla dentro de un filtro de
+     personas sería un error de categoría. Esas publicaciones siguen estando en
+     el informe y el listado las declara una por una. */
+  ['autor',         'Autor',              p => p.autores_uft || []],
   ['qs_area',       'Área QS',            p => p.qs_area],
   ['unidad',        'Unidad académica',   p => p.unidades.length ? p.unidades : ['Sin dato declarado']],
   ['tipo',          'Tipo documental',    p => [p.tipo]],
@@ -219,6 +231,29 @@ export function escribirURL(sel, reemplazar = true) {
   const q = consulta(sel);
   history[reemplazar ? 'replaceState' : 'pushState'](null, '', q ? `?${q}` : location.pathname);
 }
+
+/** El nombre de la persona a la que está recortado el informe, o `null`.
+
+    Una sola, y con o sin otras dimensiones encima: un informe de una persona
+    filtrado además por año sigue siendo el informe de esa persona, y las
+    salvaguardas que exige no dependen de cuántos filtros más haya. Con dos
+    personas elegidas ya no lo es, y las cifras vuelven a ser de un conjunto. */
+export const personaDelRecorte = (sel) =>
+  (sel.autor && sel.autor.length === 1) ? sel.autor[0] : null;
+
+/** Cuántas publicaciones tiene esa persona EN LA VENTANA, sin el resto del
+    recorte aplicado.
+
+    Sin el resto a propósito: es su base de interpretabilidad, no la del corte
+    que se esté mirando. Alguien con seis publicaciones a quien se le añade un
+    filtro de año no pasa a ser «muestra reducida» por eso; lo que baja es el
+    tamaño del corte, y eso ya lo declara la línea del recorte.
+
+    Coincide con `n_publicaciones` de `authors.json` para las 530 entidades
+    —comprobado sobre el artefacto—, así que la ficha y el informe recortado
+    dicen el mismo número sin que éste tenga que cargar aquél. */
+export const publicacionesDe = (pubs, nombre) =>
+  pubs.reduce((n, p) => n + ((p.autores_uft || []).includes(nombre) ? 1 : 0), 0);
 
 export const hayRecorte = sel =>
   Boolean(sel.q) || DIMENSIONES.some(([c]) => sel[c] && sel[c].length);

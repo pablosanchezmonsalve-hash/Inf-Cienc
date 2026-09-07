@@ -704,6 +704,16 @@ o que no hay ninguno y es el informe completo. El pie añade el universo y sus
 tres denominadores (`D-16`). El bloque de recorte de la pantalla no se imprime:
 trae controles que en una hoja no llevan a ninguna parte.
 
+**El informe por persona.** `autor` es una dimensión de filtro más, con los
+nombres canónicos que el corpus ya trae. No se dibuja como las demás: 530
+pastillas no son un filtro, así que el panel enseña las firmas elegidas y un
+campo con autocompletado, y la entrada natural es el enlace de cada ficha.
+Cuando el recorte es de una persona, sobre las cifras aparecen las salvaguardas
+—la advertencia de lectura que adhiere a DORA y al Manifiesto de Leiden, y la
+de muestra reducida por debajo del umbral—, con la misma redacción que la
+ficha y no una copia. Se ofrece a las 530 entidades, no sólo a las 50 que
+superan el umbral: `docs/INFORME_POR_INVESTIGADOR.md` explica por qué.
+
 **El informe a medida.** `make informe RECORTE="anio=2024&tipo=Article"` toma la
 misma consulta que el explorador escribe en la URL —se copia de la barra de
 direcciones— y la pasa a cada sección: las cifras, los gráficos y las tablas se
@@ -711,7 +721,9 @@ recalculan sobre ese recorte, que es lo que el sitio ya hacía en pantalla. El
 recorte va en el nombre del archivo y, sobre todo, declarado en la hoja 1. El
 anexo metodológico también lo declara, sin cifras: no cuenta publicaciones,
 pero es parte del informe que alguien pidió y una hoja suelta que se llame
-«informe completo» contradiría a las demás del mismo PDF.
+«informe completo» contradiría a las demás del mismo PDF. Si el recorte es de
+una persona (`RECORTE="autor=Firma"`), su ficha abre el informe: es lo único
+que declara identidad, ORCID con la evidencia de cada asignación y unidad.
 
 **Qué llega al papel y qué no.** Los desplegables se imprimen abiertos: un
 `<details>` cerrado imprime su resumen y nada más, y eso vaciaba el panel «Qué

@@ -2006,6 +2006,24 @@ svg.chart .trama { pointer-events: none; }
   border-radius: var(--radio-s); background: var(--plano); color: var(--tinta);
 }
 
+/* El campo de la dimensión «Autor». Mismo aspecto que el buscador general
+   —es la misma acción, escribir para acotar— pero dentro del desplegable de su
+   dimensión, junto a las firmas ya elegidas, que se quitan como cualquier otra
+   pastilla. */
+.busca-autor {
+  width: 100%; font: 400 var(--t-m)/1.4 var(--f-ui); margin-top: var(--e2);
+  padding: .5rem .65rem; border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s); background: var(--plano); color: var(--tinta);
+}
+.dim-ops .nota { margin-top: var(--e2); }
+
+/* Las salvaguardas de un informe personal. Van sobre las cifras que califican
+   y se imprimen con ellas: son la advertencia que hace legible un PDF nominal
+   fuera del sitio. */
+.salvaguardas { margin-bottom: var(--e5); }
+.salvaguardas .nota { margin-top: var(--e3); }
+.ficha-acciones { margin: var(--e4) 0 var(--e5); }
+
 .acciones-tabla { display: flex; align-items: center; gap: var(--e3); margin-bottom: var(--e4); }
 .acciones-tabla #estado-seleccion { margin-right: auto; font-weight: 650; color: var(--tinta-2); }
 

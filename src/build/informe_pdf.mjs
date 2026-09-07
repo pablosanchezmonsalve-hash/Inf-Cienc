@@ -24,6 +24,12 @@
    primera hoja declara el recorte, así que el PDF dice sobre qué está medido
    sin depender de cómo se llame el archivo.
 
+   Si el recorte es de UNA persona (`autor=…`), la ficha de esa firma abre el
+   informe: es lo único que declara su identidad, su ORCID con la evidencia de
+   cada asignación y su unidad. Las advertencias que exige un informe personal
+   —DORA y Leiden, y muestra reducida por debajo del umbral— las escribe el
+   propio sitio sobre las cifras, así que viajan solas al papel.
+
    REQUISITO BLANDO
    Necesita Playwright y Chromium, que este proyecto ya usa para verificar el
    sitio. Sin ellos no corre y lo dice; el sitio se construye igual.
@@ -59,11 +65,32 @@ const etiqueta = [...recorte.entries()]
 const base = salida.replace(/\.pdf$/, etiqueta ? `-${etiqueta}` : '');
 
 /* Las secciones del informe, en orden de lectura. NO incluye las superficies de
-   consulta —publicaciones, autores, la ficha, el catálogo—: son tablas con
-   filtro y paginación, y volcarlas enteras produciría un anexo de cientos de
-   páginas que nadie lee. Quien las quiera las exporta en CSV. */
+   consulta —publicaciones, autores, el catálogo—: son tablas con filtro y
+   paginación, y volcarlas enteras produciría un anexo de cientos de páginas que
+   nadie lee. Quien las quiera las exporta en CSV. */
 const SECCIONES = ['index.html', 'produccion.html', 'impacto.html',
                    'colaboracion.html', 'tematica.html', 'metodologia.html'];
+
+/* La excepción es la ficha, cuando el recorte es de UNA persona: entonces abre
+   el informe. Es lo único que declara su identidad, su ORCID con la evidencia
+   de cada asignación, su unidad y las variantes de firma que se fusionaron en
+   ella; sin eso, las páginas siguientes son cifras de alguien sin decir de
+   quién exactamente. El nombre se traduce a su identificador con `authors.json`
+   —el mismo artefacto que sirve el sitio—, no con una regla de slug reescrita
+   aquí, que sería una segunda forma de nombrar a las mismas personas. */
+async function fichaDe(nombre) {
+  if (!nombre) return null;
+  const autores = JSON.parse(await readFile(join(dist, 'data/authors.json'), 'utf8')).autores;
+  const a = autores.find((x) => x.nombre === nombre);
+  if (!a) {
+    console.log(`  ⚠ «${nombre}» no es una firma del corpus: el informe sale sin ficha.`);
+    return null;
+  }
+  return `autor.html?id=${encodeURIComponent(a.id)}`;
+}
+
+const autores = recorte.getAll('autor');
+const ficha = autores.length === 1 ? await fichaDe(autores[0]) : null;
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.css': 'text/css',
                 '.js': 'text/javascript', '.json': 'application/json',
@@ -88,9 +115,19 @@ const pag = await ctx.newPage();
 
 if (consulta) console.log(`  recorte: ${consulta}\n`);
 
+/* Cada parte es [ruta, nombre del archivo]. La ficha entra primero y con su
+   propio nombre; el recorte se le añade con `&` porque su ruta ya trae el
+   identificador, y hace falta para que su hoja declare el mismo recorte que
+   las demás en vez de contradecirlas. */
+const RUTAS = [
+  ...(ficha ? [[ficha, 'ficha']] : []),
+  ...SECCIONES.map((s) => [s, s.replace(/\.html$/, '')]),
+];
+
 const partes = [];
-for (const seccion of SECCIONES) {
-  const url = `http://127.0.0.1:${puerto}/${seccion}${consulta ? `?${consulta}` : ''}`;
+for (const [ruta, seccion] of RUTAS) {
+  const union = ruta.includes('?') ? '&' : '?';
+  const url = `http://127.0.0.1:${puerto}/${ruta}${consulta ? union + consulta : ''}`;
   await pag.goto(url, { waitUntil: 'networkidle' });
   // Sin esto el PDF sale con los gráficos a medio dibujar en las páginas que
   // los pintan al hidratar: `networkidle` dice que la red calló, no que el
@@ -101,7 +138,7 @@ for (const seccion of SECCIONES) {
   // pedirlo el documento sale sin marcar, comprobado sobre el archivo.
   const { buffer, etiquetado, motivo } = await pdfEtiquetado(pag, { format: 'A4', printBackground: true });
   partes.push({ seccion, buffer, etiquetado });
-  console.log(`  ${seccion.padEnd(20)} ${(buffer.length / 1024).toFixed(0)} KB`
+  console.log(`  ${seccion.padEnd(14)} ${(buffer.length / 1024).toFixed(0)} KB`
     + (etiquetado ? '' : `  ⚠ sin etiquetar${motivo ? `: ${motivo}` : ''}`));
 }
 
@@ -113,7 +150,7 @@ s.close();
    esto sería pagar un árbol entero por un grapado. Se declara en vez de
    fingir un informe de una pieza. */
 for (const { seccion, buffer } of partes) {
-  await writeFile(`${base}-${seccion.replace(/\.html$/, '')}.pdf`, buffer);
+  await writeFile(`${base}-${seccion}.pdf`, buffer);
 }
 const etiquetadas = partes.filter((p) => p.etiquetado).length;
 console.log(`\n  ${partes.length} secciones · ${base}-*.pdf`);

@@ -171,9 +171,15 @@ async function montarExplorador(claveSeccion) {
   // Persona → unidad académica, sólo para C-05 (red de coautoría): una
   // publicación no trae la unidad por autor individual, así que el corte de
   // colaboración necesita esta tabla aparte. Se carga siempre —barato, un
-  // Map de 538 entradas— para que funcione igual con o sin pre-renderizado.
+  // Map de una entrada por entidad— para que funcione igual con o sin
+  // pre-renderizado.
+  const autores = await c.cargar('authors.json');
   const unidadPorPersona = new Map(
-    (await c.cargar('authors.json')).autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+    autores.autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+  // El umbral de interpretabilidad, del mismo artefacto y con el mismo valor
+  // que aplica la ficha. No se copia aquí: dos umbrales para una misma regla
+  // es la forma de que acaben diciendo cosas distintas.
+  const umbral = autores.parametros?.n_minimo_interpretable;
 
   if (!yaPintado(zonas.cifras)) {
     const meta = await c.cargar('meta.json');
@@ -203,8 +209,8 @@ async function montarExplorador(claveSeccion) {
 
   function pintar({ nuevaEntrada = false } = {}) {
     const partes = claveSeccion
-      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona, jerarquia)
-      : VX.explorador(publicaciones, sel, proc, jerarquia);
+      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona, jerarquia, metaBase, umbral)
+      : VX.explorador(publicaciones, sel, proc, jerarquia, metaBase, umbral);
     // Se comparan los valores ANTES de reemplazar el marcado: la señal de
     // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
     const antes = new Map([...zonas.cifras.querySelectorAll('[data-valor]')]
@@ -283,6 +289,24 @@ async function montarExplorador(claveSeccion) {
       pintar({ nuevaEntrada: true });
       zonas.estado.querySelector('.recorte-n')?.scrollIntoView({ block: 'nearest' });
     }
+  });
+
+  /* El campo de persona. `change` y no `click`: se elige del autocompletado del
+     navegador, con el ratón o con el teclado, y ninguna de las dos vías pasa
+     por un clic sobre un elemento nuestro.
+
+     Sólo entra un nombre que exista en el corpus. Un texto a medio escribir
+     dejaría la página vacía y con un filtro que nadie puede quitar porque no
+     corresponde a nadie; escribir bien un apellido no es responsabilidad del
+     lector. El campo se limpia solo: el panel se repinta entero. */
+  document.addEventListener('change', e => {
+    if (e.target.id !== 'q-autor') return;
+    const nombre = e.target.value.trim();
+    if (!nombre || !X.publicacionesDe(publicaciones, nombre)) return;
+    const puestos = sel.autor || [];
+    if (!puestos.includes(nombre)) sel = { ...sel, autor: [...puestos, nombre] };
+    pintar({ nuevaEntrada: true });
+    zonas.controles.querySelector('#q-autor')?.focus();
   });
 
   // El conmutador Gráfico ⇄ Tabla se engancha al CONTENEDOR, no a cada corte:
@@ -524,7 +548,11 @@ async function exportar(filas, { esSeleccion = false } = {}) {
 async function autores() {
   const data = await c.cargar('authors.json');
   const { autores: lista, parametros } = data;
-  let soloInterpretables = true, orden = 'n_publicaciones', asc = false, q = '';
+  // `q` puede venir en la URL: es el camino de vuelta desde un informe
+  // recortado a una persona hacia su ficha, sin obligar a teclear el nombre
+  // otra vez. El resto del estado de esta página no viaja en la dirección.
+  let soloInterpretables = true, orden = 'n_publicaciones', asc = false;
+  let q = new URLSearchParams(location.search).get('q') || '';
 
   // El enlace de corrección va AQUÍ y no sólo en metodología: ésta es la página
   // donde alguien se encuentra a sí mismo mal representado, y es el momento en
@@ -594,10 +622,22 @@ async function autores() {
       : `<tr><td colspan="7"><div class="vacio">Ningún autor coincide.</div></td></tr>`;
   }
 
-  document.getElementById('solo-interpretables').addEventListener('change', e => {
+  const casilla = document.getElementById('solo-interpretables');
+  const campo = document.getElementById('buscar-autor');
+  /* Llegar buscando a alguien y no encontrarlo sería peor que no ofrecer la
+     búsqueda: la vista por defecto oculta las firmas por debajo del umbral, y
+     480 de las 530 lo están. Si la búsqueda viene en la URL se abre la lista
+     entera y los dos controles enseñan el estado real, en vez de filtrar por
+     detrás. */
+  if (q) {
+    soloInterpretables = false;
+    casilla.checked = false;
+    campo.value = q;
+  }
+  casilla.addEventListener('change', e => {
     soloInterpretables = e.target.checked; pintar();
   });
-  document.getElementById('buscar-autor').addEventListener('input',
+  campo.addEventListener('input',
     c.debounce(e => { q = e.target.value; pintar(); }, 250));
   document.querySelectorAll('th[data-orden]').forEach(th => {
     // Enter y Espacio, además del clic: sin esto la tabla no se podía ordenar
@@ -698,22 +738,20 @@ async function fichaAutor() {
       <div class="identificadores">${idents}</div>
     </div>
 
-    <div class="nota-destacada"><b>Cómo leer esta ficha</b>
-      Los indicadores describen la producción indexada en Scopus entre
-      ${a.meta.ventana.inicio} y ${a.meta.ventana.fin}, con citas actualizadas al
-      ${a.meta.fecha_corte_citas}. No representan la trayectoria completa de la persona.
-      Las métricas individuales sobre ventanas cortas y pocas publicaciones no son
-      comparables entre personas ni deben usarse para evaluar desempeño individual.
-      Este informe adhiere a los principios de DORA y del Manifiesto de Leiden.</div>
+    ${VX.advertenciaLectura(a.meta, 'Cómo leer esta ficha')}
 
-    ${a.advertencia_muestra_reducida ? `<div class="nota-destacada"><b>Muestra reducida</b>
-      Con menos de ${a.umbral_interpretable} publicaciones en la ventana, los indicadores
-      de impacto no son interpretables individualmente. Se muestran por transparencia,
-      no para comparación.</div>` : ''}
+    ${a.advertencia_muestra_reducida ? VX.advertenciaMuestraReducida(a.umbral_interpretable) : ''}
 
     ${a.identidad_no_consolidada ? `<div class="nota-destacada"><b>Identidad no consolidada</b>
       Esta firma está asociada a más de un identificador de autor en la fuente. La
       consolidación de identidades requiere validación institucional u ORCID, pendientes.</div>` : ''}
+
+    <!-- La entrada al informe recortado a esta persona. Va aquí y no en un panel
+         de filtros: una lista de 530 firmas no es un filtro, y quien quiere el
+         informe de alguien suele estar mirando a ese alguien. -->
+    <p class="ficha-acciones"><a class="enlace-lista"
+      href="index.html?autor=${encodeURIComponent(a.nombre_en_fuente)}"
+      >Ver el informe recortado a esta firma →</a></p>
 
     <div class="kpis">
       ${kpi(i.n_publicaciones, 'Publicaciones')}
@@ -1051,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const partesURL = X.describir(X.leerURL());
     const papel = document.getElementById('recorte-impreso');
     if (papel && partesURL.length) {
-      papel.textContent = `Recorte aplicado: ${partesURL.join(' · ')}.`;
+      papel.textContent = c.fraseRecorte(null, null, partesURL);
     }
     await c.montarAyuda();
     c.montarTooltip();
