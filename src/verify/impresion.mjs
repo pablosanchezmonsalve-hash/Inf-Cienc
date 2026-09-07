@@ -126,6 +126,16 @@ const CASOS = [
     prohibe: ['personas en el recorte'],
   },
   {
+    /* La ficha impresa POR SÍ SOLA, que es como llega a ella quien la abre
+       desde el directorio. Sin declaración propia heredaba la del cromo —«el
+       informe completo, 823 publicaciones»— sobre una hoja que enseña a una
+       persona: un PDF nominal presentándose como el informe institucional. */
+    nombre: 'ficha impresa por sí sola',
+    ruta: `autor.html?id=${encodeURIComponent(escasa.id)}`,
+    exige: ['Recorte aplicado', `Autor: ${escasa.nombre}`],
+    prohibe: ['Sin filtros'],
+  },
+  {
     nombre: 'anexo dentro de un informe filtrado',
     ruta: 'metodologia.html?anio=2024',
     // Sin explorador que cuente, pero el anexo es parte del informe que alguien
