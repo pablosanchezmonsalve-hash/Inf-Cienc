@@ -12505,3 +12505,80 @@ restantes. Queda anotado.
 - `AU-03`: 497 de 589 con h ≤ 1, sin recalcular.
 - `STATE.md` sin regenerar por falta de `data/interim/`; y confirmar el LCP con
   `make rendimiento`.
+
+## Cierre: el h-index de AU-03, recalculado sobre la base publicada (2026-09-07)
+
+### Contexto
+
+El usuario pidió recalcular la cifra de `AU-03` que la sesión anterior dejó
+anotada como no rehacible: «497 de 589 autores tienen h ≤ 1».
+
+**Esto pisa terreno decidido, y conviene decirlo.** `D-396` resolvió que la
+advertencia de `AU-03` no se portara a otra base porque hacerlo implicaba
+computar el h de todas las entidades, cosa que `03_authors.py` no hace a
+propósito; y `D-397` dejó el 497/589 como nota interna de factibilidad,
+argumentando que cambiarlo exigiría re-correr ese análisis. Una petición
+explícita del usuario en la sesión actual manda sobre una decisión anterior
+(`CLAUDE.md`, orden de precedencia), así que se recalcula — pero se recalcula
+de forma que ninguno de los dos fundamentos quede violado.
+
+### Cómo se recalculó
+
+Con la **misma** función `h_index()` de `src/build/03_authors.py`, aplicada a
+las `publicaciones` de las 530 fichas. No es otra métrica ni otro criterio: es
+la del build sobre toda la base.
+
+La comprobación que lo sostiene: **reproduce sin una sola discrepancia los 50
+valores de h que el sitio publica**. Si el recálculo hubiera cambiado la
+definición, esos 50 no cuadrarían.
+
+| h | Entidades |
+|---:|---:|
+| 0 | 188 |
+| 1 | 254 |
+| 2 | 44 |
+| 3 o más | 44 |
+
+- **h ≤ 1: 442 de 530 (83,4 %)**, frente al 497 de 589 anterior.
+- Máximo 9.
+- Entre las **50 fichas donde el sitio sí publica el h** (n ≥ 5): mediana 3,
+  máximo 9 y sólo 4 con h ≤ 1.
+
+Ese último dato es el que faltaba y cambia la lectura: el indicador no
+discrimina **sobre el conjunto entero**, que es casi todo gente con una o dos
+publicaciones, pero sí separa donde se publica. Es el argumento del gate `n ≥ 5`
+medido en vez de afirmado.
+
+### Qué se tocó
+
+- `docs/INDICATORS.md` (`AU-03`) con la cifra nueva y una nota al pie que
+  declara el método, el reparto y la relación con la cifra vieja.
+- `docs/GLOSSARY.md`, que es la **fuente** del tooltip del sitio, con el mismo
+  cambio en el lenguaje del glosario.
+- `data/processed/glossary.json` y `ejes.json`, regenerados con
+  `04_glossary.py` porque CI **no** reconstruye los artefactos: el despliegue
+  ensambla `dist/` desde `data/processed/`, así que sin regenerar el artefacto
+  el sitio seguiría enseñando el texto viejo.
+
+`src/analysis/indicator_feasibility.py` **no se toca** (`D-397`): su 497/589
+mide formas de firma sin consolidar, que es otra población, y su campo dinámico
+ya recalcula el recuento cuando el análisis se re-corre.
+
+### Un efecto colateral declarado
+
+Los dos artefactos regenerados llevan `fecha_build` 2026-09-07 y el resto sigue
+en 2026-09-04. No se ve en el sitio —el pie lee `meta.json`— y se resuelve solo
+en el próximo `make sitio` completo. Se prefiere esa asimetría a dejar el
+tooltip mintiendo, y a editar a mano un artefacto generado.
+
+### Verificación
+
+Batería completa sin fallos, con el sitio reconstruido y el tooltip nuevo
+comprobado dentro de `dist/data/glossary.json`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-534 | La advertencia de `AU-03` se mide sobre las entidades publicadas y declara su base | La cifra anterior mezclaba población: describía firmas sin consolidar mientras la fila hablaba de lo publicado. `D-396` seguía en pie —el h se publica sólo con n ≥ 5— porque calcular una distribución para el análisis no es publicar el h de nadie |
+| D-535 | Recalcular con la función del propio build, y validar contra los 50 valores publicados antes de citar el resultado | Es lo que separa derivar de inventar, que es la línea que `D-396` defendía. Sin esa validación, cualquier reimplementación del h sería una métrica nueva con el mismo nombre |
