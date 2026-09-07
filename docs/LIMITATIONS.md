@@ -34,15 +34,17 @@ problemas verificados:
 
 Estas ambigüedades están **declaradas y encoladas, no resueltas**. La cifra de
 589 autores debe leerse como *589 formas de firma detectadas*, no como 589
-personas. Consolidación humana (`D-08`, nunca automática) fijó **538
-entidades reales** (84 formas de firma resultaron ser 37 personas,
-`config/identidades_consolidadas.yml`) — esa es la base que sirve el sitio.
+personas. Consolidación humana (`D-08`, nunca automática) fijó **530
+entidades reales** (94 formas de firma resultaron ser 39 personas —37 por
+revisión caso por caso y 2 por diacríticos—,
+`config/identidades_consolidadas.yml`, y 4 más se descartaron por no ser
+personas) — esa es la base que sirve el sitio.
 
 **Actualización posterior a Fase 1: ORCID sí se recuperó**, desde Crossref,
 el repositorio institucional (DSpace), el inventario de autoarchivo de
 biblioteca y la propia API pública de ORCID — nunca inventado, siempre con
-su fuente declarada por firma. Cobertura hoy: **327 formas de firma con
-ORCID** sin consolidar, **274 entidades con ORCID** tras consolidación
+su fuente declarada por firma. Cobertura hoy: **328 formas de firma con
+ORCID** sin consolidar, **268 entidades con ORCID** tras consolidación
 humana (`STATE.md`). El detalle metodológico completo —qué vía aportó qué,
 dónde persiste la brecha y por qué no llega al 100 %— vive en
 `docs/ORCID_COVERAGE.md` y `docs/ORCID_GUIDE.md`, no se repite aquí.
@@ -149,8 +151,8 @@ autor mononímico real): `config/firmas_e09_resueltas.yml` las registra en
 `descartadas`, y ya no forman parte de las entidades publicadas.
 
 **Efecto en `P-06`:** las 589 formas de firma detectadas en la fuente,
-consolidadas por revisión humana (84 formas → 37 personas, `D-08`) y con
-estas 4 ya descartadas, publican **538 entidades** (`STATE.md`,
+consolidadas por revisión humana (94 formas → 39 personas, `D-08`) y con
+estas 4 ya descartadas, publican **530 entidades** (`STATE.md`,
 `data/processed/authors.json`) — la cifra ya refleja la resolución, no una
 proyección hipotética.
 

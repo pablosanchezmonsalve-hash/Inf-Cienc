@@ -12435,3 +12435,73 @@ el estado de hoy. Hay que leerlas una por una.
   también las que describen decisiones históricas fechadas.
 - `STATE.md` sin regenerar por falta de `data/interim/`, y confirmar el LCP con
   `make rendimiento`.
+
+## Cierre: barrido de cifras viejas, sólo donde hablan del presente (2026-09-07)
+
+### Contexto
+
+El usuario pidió corregir, de los nueve documentos que arrastraban las cifras
+anteriores a la última consolidación, **sólo las menciones que describen el
+estado actual**, dejando intactas las que describen decisiones o corridas
+fechadas.
+
+### Qué se corrigió
+
+Diez archivos. Todas las cifras salen de los artefactos, recalculadas en la
+sesión anterior y reutilizadas aquí sin volver a copiarlas de ningún documento.
+
+| Archivo | Qué decía | Dice |
+|---|---|---|
+| `README.md` | 538 fichas · `dist/` ~3,5 MB | 530 · ~3,8 MB |
+| `ARCHITECTURE.md` (×4) | 538 entidades, 538 archivos, 538 páginas | 530 |
+| `DEPLOYMENT.md` | 538 fichas; y la tabla de peso entera | 530; `dist/` 3,8 MB, `publications.json` 866 KB, portada 13 KB, ficha ~2 KB de mediana |
+| `FUENTES_Y_APIS.md` | 327 formas · 274 de 538 · revisión por afiliación 25 | 328 · 268 de 530 · 26 |
+| `LIMITATIONS.md` (×2) | 538 entidades · 84 en 37 · 327/274 | 530 · 94 en 39 · 328/268 |
+| `ORCID_COVERAGE.md` (×5) | 538 · 84 en 37 · 274 (50,9 %) · 327 | 530 · 94 en 39 · 268 (50,6 %) · 328 |
+| `DATA_LICENSE.md` | 84 formas en 37 personas | 94 en 39 |
+| `V2_BACKLOG.md` (×5) | 538 · 84 en 37 · 274 (50,9 %) · 327 | 530 · 94 en 39 · 268 (50,6 %) · 328 |
+| `INDICATORS.md` (×4) | 538 publicadas · 542 · 84 en 37 · 327/274 · n<5 538 de 589 | 530 · 534 · 94 en 39 · 328/268 · 480 de 530 |
+| `METHODOLOGY.md` | n<5: 538 de 589 autores | 480 de las 530 entidades publicadas |
+
+`T-11` en el backlog dejó de estar «sin confirmar»: el alcance de publicación lo
+confirmó `D-518` y la práctica ya lo aplicaba.
+
+### Qué se dejó intacto, y por qué
+
+Cuatro menciones sobreviven con la cifra vieja porque **son ciertas donde
+están**:
+
+- `AUDIT_REPORT.md` y `VALIDATION_REPORT.md` son salidas fechadas de los
+  scripts de auditoría, reejecutables. Su «538» no es la base publicada sino
+  los autores con n<5 de aquella corrida, y reescribirlo falsificaría un
+  informe con fecha.
+- `ORCID_GUIDE.md` explica el resultado de la primera corrida (2026-08-01) con
+  las cifras de ese día, bajo un encabezado que lo declara.
+- `DECISIONS.md` es generado, y la fila de `D-433` razona sobre lo que era
+  cierto cuando se decidió.
+
+### Lo que no se pudo recalcular
+
+`INDICATORS.md` (`AU-03`) dice que 497 de 589 autores tienen h ≤ 1. No se toca:
+el h-index sólo se publica por encima del umbral —50 fichas—, así que la cifra
+no se puede rehacer desde los artefactos sin recalcular el índice para las 480
+restantes. Queda anotado.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-533 | Una cifra vieja se corrige donde afirma el presente y se conserva donde describe una corrida o una decisión fechada | Un informe de auditoría con fecha y un reporte generado son evidencia de lo que se midió aquel día; reescribirlos no corrige un error, borra el historial. La distinción la marca el encabezado del documento, no la cifra |
+
+### Archivos
+
+`README.md`, `docs/ARCHITECTURE.md`, `docs/DEPLOYMENT.md`,
+`docs/FUENTES_Y_APIS.md`, `docs/LIMITATIONS.md`, `docs/ORCID_COVERAGE.md`,
+`docs/DATA_LICENSE.md`, `docs/V2_BACKLOG.md`, `docs/INDICATORS.md`,
+`docs/METHODOLOGY.md`
+
+### Pendientes
+
+- `AU-03`: 497 de 589 con h ≤ 1, sin recalcular.
+- `STATE.md` sin regenerar por falta de `data/interim/`; y confirmar el LCP con
+  `make rendimiento`.

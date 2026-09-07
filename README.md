@@ -105,8 +105,8 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | | |
 |---|---|
 | Páginas | 11 |
-| Fichas de autor | **538**, una por archivo |
-| Peso total de `dist/` | ~3,5 MB |
+| Fichas de autor | **530**, una por archivo |
+| Peso total de `dist/` | ~3,8 MB |
 | Dependencias externas en el navegador | **0** |
 
 Peso por página, medido en navegador. La segunda columna es lo que realmente

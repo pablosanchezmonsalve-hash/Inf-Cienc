@@ -191,14 +191,14 @@ Verificado automáticamente por `06_assemble_site.py`:
 
 ## 6. Rendimiento observado
 
-Sobre el build actual (823 publicaciones, 538 fichas):
+Sobre el build actual (823 publicaciones, 530 fichas):
 
 | | |
 |---|---|
-| Peso total de `dist/` | ~1,9 MB |
-| Carga de la portada | `meta.json` + `kpis.json` + `glossary.json` ≈ 25 KB |
-| Página de publicaciones | + `publications.json` ≈ 700 KB |
-| Ficha de autor | + un archivo de ~5 KB |
+| Peso total de `dist/` | ~3,8 MB |
+| Carga de la portada | `meta.json` + `kpis.json` + `glossary.json` ≈ 13 KB, sobre el HTML pre-renderizado |
+| Página de publicaciones | + `publications.json` ≈ 866 KB |
+| Ficha de autor | + un archivo de ~2 KB de mediana (máximo 14 KB) |
 
 La portada no descarga el corpus. Cada módulo pide su artefacto al abrirse.
 
