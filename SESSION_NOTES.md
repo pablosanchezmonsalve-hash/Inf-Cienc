@@ -12348,3 +12348,90 @@ que aparece el texto de la red dibujada—. Batería completa sin fallos.
 Los mismos de la sesión anterior menos éste: `docs/AUTHOR_PROFILE.md` con
 cifras viejas, `STATE.md` sin regenerar por falta de `data/interim/`, y
 confirmar el LCP con `make rendimiento` tras el peso del `datalist`.
+
+## Cierre: las cifras de la ficha documentada, recalculadas (2026-09-07)
+
+### Contexto
+
+El usuario pidió corregir las cifras viejas de `docs/AUTHOR_PROFILE.md`, que
+esta serie de sesiones venía arrastrando como pendiente: decía 538 entidades
+publicadas y 84 formas fusionadas en 37 personas, cuando el artefacto declara
+530 y 94 en 39.
+
+### Qué se corrigió, y contra qué
+
+Ninguna cifra se copió de otro documento: todas salen de `authors.json` y de las
+530 fichas de `data/processed/author/`, recalculadas en esta sesión.
+
+| Dato | Decía | Dice |
+|---|---|---|
+| Entidades publicadas | 538 | **530** |
+| Consolidación | 84 formas en 37 personas | **94 en 39** (37 por revisión humana, 2 por diacríticos) y 4 descartadas |
+| Unidad académica | 353/589 (60 %) | **316/530 (59,6 %)** |
+| Scopus Author ID | 575/589 (97,6 %) | **522/530 (98,5 %)** |
+| ORCID | 274/538 (50,9 %) | **268/530 (50,6 %)** |
+| Bajo el umbral (n<5) | 538 de 589 | **480 de 530** |
+| ORCID `verificado` | 139 | **154** |
+| ORCID `declarado por el titular` | 43 | **37** |
+| ORCID `confirmado por revisión` | 15 | **21** |
+| ORCID `no verificable` | 16 | **18** |
+| ORCID `sin confirmar` | 3 | **8** |
+| ORCID `comprobado por revisión` | 0 | **29** |
+| ORCID `encontrado por revisión` | 0 | **1** |
+
+Los siete veredictos suman las 268 entidades con ORCID, comprobado. Las dos
+etiquetas de revisión ya no están en cero, así que el párrafo que explicaba su
+cero se reescribió en vez de dejarlo contradiciendo a su propia tabla.
+
+Todas las bases pasan a estar medidas sobre **entidades publicadas** y no sobre
+formas de firma de la fuente, que es la mezcla que hacía irreconciliables las
+cifras. El documento declara arriba su base y su fecha.
+
+### Dos hallazgos que no eran cifras
+
+- **La ficha no muestra colaboración internacional**, y el documento la daba
+  por disponible con un ✅. La ficha publica cinco cifras —publicaciones, citas,
+  citas por publicación, h-index en ventana y top 10 %—, la evolución temporal y
+  la coautoría interna. El indicador existe por publicación y en el informe
+  recortado a esa firma, no en la ficha. Corregido a ❌ con la explicación.
+- **El §5 seguía pidiendo una decisión ya tomada.** Preguntaba si se publican
+  todas las firmas o un subconjunto validado; el sitio publica las 530 con su
+  estado de identidad visible y ofrece n ≥ 5 como vista por defecto, que era
+  justo la recomendación de esa sección, y `D-518` extendió el mismo criterio al
+  informe personal. Se cierra la pregunta con lo implementado en vez de dejar
+  abierta una decisión que la práctica ya resolvió.
+
+Se añadió un §6 con cómo se rehace cada cifra, para que la próxima divergencia
+se resuelva mirando el artefacto y no discutiendo entre documentos.
+
+### Lo que NO se tocó, y hace falta decidir
+
+Las mismas cifras viejas viven en **nueve documentos más**: `ARCHITECTURE.md`
+(cuatro veces), `DEPLOYMENT.md`, `FUENTES_Y_APIS.md`, `INDICATORS.md` (`P-06` y
+`AU-05`, más una nota al pie), `LIMITATIONS.md`, `ORCID_COVERAGE.md`,
+`DATA_LICENSE.md`, `V2_BACKLOG.md` (`T-11`) y `AUDIT_REPORT.md`.
+
+No se barren de oficio porque **no todas son errores**: la nota al pie de
+`INDICATORS.md` describe a propósito la decisión de una revisión histórica
+fechada, y reescribirla borraría el historial en vez de corregirlo. Otras —«el
+build actual: 823 publicaciones, 538 fichas»— sí son afirmaciones falsas sobre
+el estado de hoy. Hay que leerlas una por una.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-531 | `AUTHOR_PROFILE.md` declara arriba su base y su fecha, y al final cómo se recalcula cada cifra | El documento mezclaba dos bases —formas de firma de la fuente y entidades publicadas— sin decir cuál era cuál, que es la misma razón por la que `STATE.md` declara la base de cada cifra canónica. Sin eso, dos números correctos parecen contradecirse y el que envejece no se distingue del que no |
+| D-532 | Las cifras del documento se miden sobre entidades publicadas | Es lo que describe: una ficha por entidad. Medir sobre 589 describía la fuente, no lo publicado, y ninguna de las dos lecturas quedaba clara |
+
+### Archivos
+
+- `docs/AUTHOR_PROFILE.md`
+
+### Pendientes
+
+- **Las mismas cifras en nueve documentos más**, listados arriba. Pendiente de
+  decidir el alcance: barrer sólo las afirmaciones sobre el estado actual, o
+  también las que describen decisiones históricas fechadas.
+- `STATE.md` sin regenerar por falta de `data/interim/`, y confirmar el LCP con
+  `make rendimiento`.
