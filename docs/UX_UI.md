@@ -829,6 +829,20 @@ siendo el único sitio donde se decide cómo se ve el papel. El precio es que la
 portada se compone dos veces: una para que existan las demás secciones y otra
 ya con el índice.
 
+**El sitio lo ofrece hecho.** El despliegue compone el informe dentro del
+`dist/` que publica —después de verificarlo, con el Chromium que la batería ya
+instaló— y la portada muestra un bloque con los seis archivos y sus hojas. Los
+PDF no se versionan: son un derivado del sitio y comitearlos habría metido
+megabytes de binarios por carga de datos, además del hueco de siempre —datos
+nuevos, informe viejo, un PDF que contradice a sus propias páginas—.
+
+El bloque se dibuja SÓLO si existe `data/informe.json`, el manifiesto que deja
+la corrida que compuso los PDF. Enlaces escritos a mano en el HTML habrían
+apuntado a archivos que pueden no estar. El ensamblado deja el manifiesto vacío,
+así que la ausencia del informe es un bloque que no aparece y no un 404 en la
+consola de cada visita. Y si el informe se compuso con datos más viejos que los
+del sitio, el bloque lo declara en vez de callarlo.
+
 **Límite conocido:** las líneas de procedencia van en la primera hoja, no en
 cada una. Chromium no implementa los cuadros de margen de CSS Paged Media, así
 que un encabezado repetido tendría que inyectarse desde `informe_pdf.mjs` y

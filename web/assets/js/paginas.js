@@ -22,7 +22,55 @@ const yaPintado = el => el && el.dataset.prerender === '1';
    El HTML llega pre-renderizado con el recorte VACÍO —el informe completo—, así
    que sin JavaScript se ve el informe entero. Esta función no reescribe nada
    hasta que alguien toca un filtro: engancha el comportamiento y se aparta. */
-async function portada() { return montarExplorador(null); }
+async function portada() {
+  montarDescargaInforme();      // no se espera: es un añadido, no la portada
+  return montarExplorador(null);
+}
+
+/** El bloque de descarga del informe completo.
+
+    Existe porque el botón «Descargar informe» resuelve una cosa y no la otra:
+    da la página que se está mirando, con sus filtros, y no el informe entero
+    con sus seis secciones, su índice y sus hojas numeradas. Eso sólo lo compone
+    `make informe`, y hasta ahora había que tener el proyecto instalado para
+    conseguirlo.
+
+    Se dibuja SÓLO si existe `data/informe.json`, el manifiesto que deja la
+    corrida que generó los PDF. Sin manifiesto no hay bloque: enlaces escritos
+    a mano en el HTML apuntarían a archivos que pueden no estar, o que están y
+    son de otra carga de datos, y un informe que contradice al sitio del que
+    cuelga es peor que no ofrecerlo.
+
+    Por la misma razón compara la fecha de build del manifiesto con la del
+    sitio y lo dice cuando no coinciden, en vez de callarlo. */
+async function montarDescargaInforme() {
+  const caja = document.getElementById('informe-pdf');
+  if (!caja) return;
+  let inf, meta;
+  try {
+    [inf, meta] = await Promise.all([c.cargar('informe.json'), c.cargar('meta.json')]);
+  } catch { return; }                    // no se generó: no se ofrece
+  if (!inf?.archivos?.length) return;
+
+  const viejo = inf.build && meta.fecha_build && inf.build !== meta.fecha_build;
+  caja.innerHTML = `
+    <h2>El informe completo, en PDF</h2>
+    <p class="informe-pdf-intro">Las seis secciones con sus gráficos explicados,
+      hojas numeradas e índice. ${c.nf.format(inf.hojas)} hojas en
+      ${inf.archivos.length} archivos, uno por sección.
+      El botón «Descargar informe» de arriba hace otra cosa: da la página que
+      está viendo, con los filtros que tenga puestos.</p>
+    ${viejo ? `<p class="nota-destacada"><b>Informe de una carga anterior.</b>
+      Se compuso con los datos del ${c.escapar(inf.build)} y el sitio sirve los
+      del ${c.escapar(meta.fecha_build)}. Las cifras del PDF pueden no coincidir
+      con las de esta página.</p>` : ''}
+    <ul class="informe-pdf-lista">${inf.archivos.map(a => `
+      <li><a href="${c.escapar(a.archivo)}" download>${c.escapar(a.nombre)}</a>
+        <span class="informe-pdf-dato">${a.hojas} ${a.hojas === 1 ? 'hoja' : 'hojas'}
+          · ${c.nf.format(a.kb)} KB</span></li>`).join('')}
+    </ul>`;
+  caja.hidden = false;
+}
 
 /* Las secciones son el mismo explorador con OTROS cortes. Se comparte la
    función entera en vez de duplicarla: filtros, estado, URL y navegación son

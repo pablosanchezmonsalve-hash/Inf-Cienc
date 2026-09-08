@@ -150,6 +150,26 @@ reales, leídos del PDF ya compuesto, así que si alguno faltara el comando lo
 diría por su código. Ninguna de las dos cosas puede hacerlas el botón: el
 navegador no sabe en qué hoja cae nada.
 
+#### El informe que ofrece el sitio
+
+**No hay que hacer nada para eso.** El despliegue compone el informe dentro del
+sitio que publica, después de verificarlo, y la portada muestra un bloque con
+los seis archivos y sus hojas. Los PDF **no se versionan**: son un derivado del
+sitio, y comitearlos habría metido 3,4 MB de binarios por cada carga de datos
+además de abrir el hueco de siempre —actualizar los datos, olvidar regenerar el
+informe y ofrecer un PDF que contradice a sus propias páginas—.
+
+Si quiere el mismo bloque en su copia local, genere el informe **dentro de
+`dist\`**:
+
+```powershell
+node src\build\informe_pdf.mjs dist dist\informe\informe-cienciometrico.pdf
+```
+
+El generador deja ahí un manifiesto (`dist\data\informe.json`) con lo que de
+verdad compuso, y la portada dibuja el bloque sólo si lo encuentra. Si el
+informe se compuso con datos más viejos que los del sitio, el bloque lo dice.
+
 **Exige Node y Chromium**, que el Paso 1 no instala porque el sitio no los
 necesita. Sólo hacen falta para esto y para `make verificar`:
 

@@ -19,6 +19,16 @@
     <div id="titular"></div>
   </header>
 
+  <!-- El informe completo en PDF, cuando la corrida que construyó el sitio
+       también lo generó. Va vacío a propósito y NO lo rellena el
+       pre-renderizador: el informe se compone DESPUÉS del sitio, porque
+       necesita el sitio para componerse, así que a la hora de escribir esta
+       página todavía no se sabe si existe ni cuántas hojas tiene. Lo rellena
+       `paginas.js` leyendo `data/informe.json`, el manifiesto que deja el
+       generador; sin manifiesto no hay bloque, que es lo que impide ofrecer
+       un enlace a un archivo que no está o que es de otra carga de datos. -->
+  <section class="informe-pdf" id="informe-pdf" hidden></section>
+
   <div class="minifoco" id="minifoco" aria-label="Exploración rápida"></div>
 
   <div id="estado-recorte"></div>
