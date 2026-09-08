@@ -13294,3 +13294,86 @@ regenerar por falta de `internal/` y `data/interim/`.
 **Sin comprobar en el despliegue real:** el paso nuevo de `deploy.yml` no ha
 corrido todavía. Está escrito para no poder tumbar la publicación, pero eso hay
 que verlo en la primera corrida sobre `main`.
+
+---
+
+## Cierre: el LCP confirmado, y una regresión que se había colado (2026-09-08)
+
+Se corrió `make rendimiento`, que llevaba varias sesiones pendiente. La primera
+corrida salió con la portada en 3.152 ms y una mejora NEGATIVA del 18 % por
+pre-renderizar, mientras impacto y temática daban el 46 % de siempre.
+
+La primera lectura era inválida: la copia sin pre-renderizar se había construido
+antes de componer el informe, así que sólo una de las dos traía el bloque de
+descarga. Rehecha con las dos iguales, la portada seguía en 3.148 ms contra los
+1.428 de las otras dos. El defecto era real.
+
+### El bloque de descarga era el elemento de mayor pintado
+
+Medido sirviendo el MISMO sitio dos veces, con el manifiesto lleno en uno y
+vacío en el otro:
+
+| Portada | LCP | Elemento |
+|---|---:|---|
+| Con el bloque | 3.156 ms | `P.informe-pdf-intro` |
+| Sin el bloque | 1.420 ms | el `H1`, pre-renderizado |
+
+El bloque lo añadí hace unas horas, y duplicó el LCP de la primera pantalla del
+sitio.
+
+### Por qué no se arregla optimizando
+
+El bloque **no puede pre-renderizarse**: su manifiesto lo escribe el generador
+del informe, que corre DESPUÉS del ensamblado porque necesita el sitio para
+componerse. Esa dependencia es la que hace honesto el diseño —no se anuncian
+archivos que quizá no existan— y también la que garantiza que el bloque pinte
+tarde, tras el guion y dos peticiones sobre un enlace de 150 ms de latencia.
+
+Arriba y grande, un elemento que pinta tarde ES el LCP. La única salida sin
+romper la garantía es sacarlo del pliegue: abajo no es candidato. Y no se pierde
+nada, porque quien viene a por el informe entero en PDF no es el visitante de la
+primera pantalla.
+
+Movido al final de la portada, junto al cierre: 1.432 ms con bloque contra 1.424
+sin él, ocho milisegundos, dentro del ruido.
+
+### La tabla, al día
+
+| Página | Sin pre-render | Pre-renderizado | Mejora |
+|---|---|---|---|
+| `index` | 2.664 ms | **1.424 ms** | 47 % |
+| `impacto` | 2.652 ms | **1.432 ms** | 46 % |
+| `tematica` | 2.664 ms | **1.428 ms** | 46 % |
+
+Las cifras absolutas subieron respecto de la medición publicada —780 ms de
+portada contra 1.424— porque el contenedor donde se mide no es el mismo. Lo
+comparable es la columna de mejora y la relación entre páginas, que se miden en
+la misma corrida. Las tres páginas se comportan igual, que es lo que la tabla
+tiene que enseñar. Sigue con un 43 % de margen sobre el umbral de 2.500 ms.
+
+### Lo que esto dice del método
+
+La comprobación estaba pendiente por el peso del datalist de autores, +4 KB
+comprimidos. Ese coste resultó invisible. Lo que encontró la medición fue otra
+cosa, introducida ese mismo día y que ninguna compuerta miraba: la batería
+comprueba contraste, estructura, flujos, responsive, impresión, higiene y peso,
+y ninguna de esas cosas ve el LCP. Por eso `rendimiento` está fuera de la
+batería —tarda minutos— y por eso conviene correrlo al añadir algo que pinte
+en la primera pantalla.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-563 | El bloque de descarga del informe va al final de la portada, no bajo el titular | No puede pre-renderizarse, así que siempre pinta tarde; arriba y grande eso lo convierte en el LCP y duplicaba el de la primera pantalla. Abajo del pliegue no es candidato, y quien busca el informe entero no es el visitante de la primera pantalla |
+
+### Archivos
+
+- `web/index.html` — el bloque, movido, con la medición escrita al lado
+- `docs/UX_UI.md` — la tabla de LCP y la fila del presupuesto, al día
+
+### Pendientes
+
+`make rendimiento` deja de estar pendiente. Quedan las dos decisiones de diseño
+sobre el informe en papel: las cifras repetidas en la portada y en cada sección,
+y las hojas a medio llenar.
