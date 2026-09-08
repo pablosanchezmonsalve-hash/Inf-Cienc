@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `22372cc` · PD-04: regla de título repetido, y el rastro de lo que descarta
-Snapshot: 2026-09-07
+Último commit: `3623f9e` · Merge pull request #40: el informe descargable
+Snapshot: 2026-09-08
 
 ---
 
@@ -59,6 +59,8 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/autoarchivo_unidad_candidatos.csv` | 73 |
 | `internal/dspace_candidatos.csv` | 20 |
 | `internal/identity_candidates.csv` | 17 |
+| `internal/obras_externas_cobertura.csv` | 1967 |
+| `internal/obras_externas_depuradas.csv` | 877 |
 | `internal/openalex_cobertura.csv` | 414 |
 | `internal/openalex_desacuerdos.csv` | 6 |
 | `internal/openalex_deteccion.csv` | 68 |
@@ -69,7 +71,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `internal/scopus_author_search_multiples_id.csv` | 8 |
 | `internal/scopus_author_search_orcid.csv` | 50 |
 
-`make revision` reúne estas colas en 284 casos, de los que **82 siguen pendientes**: 202 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 290 casos, de los que **83 siguen pendientes**: 207 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
@@ -82,7 +84,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 507
+## Decisiones tomadas: 562
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
@@ -117,6 +119,7 @@ Abrir sólo lo que responde la pregunta que se tiene:
 | Cómo recuperar ORCID | `docs/ORCID_GUIDE.md` |
 | Qué falta para la V2 | `docs/V2_BACKLOG.md` |
 | Cómo tratar una fuente fuera de Scopus | `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` |
+| Qué puede afirmar un informe por persona | `docs/INFORME_POR_INVESTIGADOR.md` |
 | Historia de cada sesión | `SESSION_NOTES.md` |
 
 ---
