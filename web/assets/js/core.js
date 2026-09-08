@@ -31,6 +31,30 @@ export function num(v, dec = 0) {
   }).format(v);
 }
 
+/** La frase que declara, en el papel, sobre qué conjunto está medido lo que se
+    imprime. Una sola redacción para los dos caminos que la escriben —el
+    pre-renderizado, que sólo conoce el informe completo, y `paginas.js`, que
+    conoce el recorte vigente—: dos textos para la misma declaración divergen
+    sin que nadie lo note.
+
+    Sin filtros lo dice con todas las letras. En un PDF archivado «no dice
+    nada» y «es el informe completo» son indistinguibles, y el informe
+    institucional de `make informe` se genera precisamente sin filtros. */
+export function fraseRecorte(n, total, partes = []) {
+  // Sin doblar el punto: muchas firmas terminan en abreviatura —«Abara J.F.»—
+  // y la frase acababa en «J.F..», que en un informe con el nombre de una
+  // persona se lee como un descuido sobre esa persona.
+  const cerrar = (t) => (/[.!?]$/.test(t) ? t : `${t}.`);
+  // `n` y `total` pueden faltar: una página sin explorador conoce el recorte
+  // —viene en la URL— pero no tiene el corpus cargado para contarlo, y una
+  // cifra inventada sería peor que ninguna.
+  const cuantas = (n === null || n === undefined || total === null || total === undefined)
+    ? '' : ` ${nf.format(n)} de ${nf.format(total)} publicaciones.`;
+  return partes.length
+    ? `Recorte aplicado: ${cerrar(partes.join(' · '))}${cuantas}`
+    : `Sin filtros: el informe completo, ${nf.format(total)} publicaciones.`;
+}
+
 /** Ausencia de dato y cero nunca se ven igual (decisión D-24). */
 export function celda(v, dec = 0) {
   if (v === null || v === undefined || v === '')
@@ -45,6 +69,21 @@ export function anio(v) {
     return '<span class="sin-dato-txt">Sin dato declarado</span>';
   return escapar(String(v));
 }
+
+/** El nombre de una sección, sin la coletilla del informe.
+
+    «Producción — Informe Bibliométrico» es un buen `<title>` para una pestaña
+    del navegador y un mal titular para la hoja 1 de la sección de producción,
+    donde la línea de crédito ya dice de qué informe se trata: el nombre se
+    repetía en las cuatro portadillas del PDF.
+
+    Vive aquí porque lo necesitan dos consumidores —el pre-renderizador y el
+    navegador— y ya se había escrito dos veces, mal las dos: ambas cortaban por
+    «·» y el separador del título es «—», así que no cortaban nada. Se aceptan
+    los dos: el título los ha usado en distintos momentos, y una regla que sólo
+    contemple el de hoy se rompe en cuanto alguien cambie el otro. */
+export const tituloDeSeccion = (t, sino = '') =>
+  String(t || '').split(/\s+[—·]\s+/)[0].trim() || sino;
 
 export function escapar(s) {
   return String(s).replace(/[&<>"']/g, c =>
@@ -139,6 +178,10 @@ function nombrePagina(href) {
 export function cromo(meta, paginaActual, tema = 'auto') {
   const nav = navHtml(paginaActual);
   const actual = nombrePagina(paginaActual);
+  // El universo, no el largo de `publications.json`: aquí no hay corpus
+  // cargado, y por `D-16` el universo es una cifra declarada del informe. Es
+  // la misma que el pie ya imprime en todas las páginas.
+  const universo = meta.denominadores.universo_total;
 
   const selectorTema = `<div class="tema" role="group" aria-label="Tema de color">${
     TEMAS.map(([id, txt, d]) => `<button type="button" data-tema="${id}"
@@ -169,6 +212,25 @@ export function cromo(meta, paginaActual, tema = 'auto') {
       <nav class="nav" id="menu-nav" aria-label="Secciones">${nav}</nav>
     </div>`,
 
+    /* La barra de vigencia lleva dos párrafos que en pantalla no existen y en
+       papel son la línea de crédito del informe descargado.
+
+       `.credito-impreso` — Fuente, ventana y fecha de corte de las citas están
+       arriba, en tres pastillas, pero son `<details>` interactivos y la hoja
+       de impresión los oculta: la caja se imprimía con su filete y sin una
+       palabra dentro. El CSV exportado ya llevaba esos tres datos en su
+       cabecera —`exportar()` en paginas.js— y el PDF no llevaba ninguno, que
+       es la asimetría que esto corrige. Mismo `meta`, dos presentaciones, sin
+       un segundo texto que pueda divergir.
+
+       `.recorte-impreso` — nace declarando el informe completo y lo reescribe
+       `actualizarRecorteVivo()` en cuanto hay un recorte, que es donde vive el
+       estado del filtro. No se deja vacío a la espera de ese repintado: en una
+       página pre-renderizada sin filtros el repintado NO ocurre —`paginas.js`
+       se lo salta para no destruir un LCP que ya pasó— y la hoja habría salido
+       sin declarar nada. Como el pie, que ya imprime el universo en todas las
+       páginas, esto se imprime en todas: es la identidad del informe, no un
+       adorno de las páginas con explorador. */
     vigencia: `
     <div class="contenedor">
       <nav class="v-migas" aria-label="Ruta de posición">
@@ -192,6 +254,15 @@ export function cromo(meta, paginaActual, tema = 'auto') {
         <p>Fecha en que se congelaron el recuento de citas y las métricas derivadas.</p>
       </details>
       <span class="recorte-vivo" id="recorte-vivo" hidden></span>
+      <p class="solo-papel credito-impreso">
+        ${escapar(meta.institucion)} · ${escapar(meta.titulo_plataforma)}.
+        Fuentes: ${escapar(meta.fuentes.join(' · '))}.
+        Ventana ${meta.ventana.inicio}–${meta.ventana.fin}.
+        Citas actualizadas al ${escapar(meta.fecha_corte_citas)}.
+      </p>
+      <p class="solo-papel recorte-impreso" id="recorte-impreso">${
+        escapar(fraseRecorte(universo, universo))}</p>
+      <p class="solo-papel recorte-impreso" id="seleccion-impresa"></p>
       <label class="v-anio" id="recorte-anio-env" hidden>
         <span class="solo-lectores">Filtrar por año</span>
         <select id="recorte-anio" aria-label="Filtrar por año de publicación"></select>
@@ -459,6 +530,14 @@ export function barrasH(datos, {
   const cuota = d => (cuotaValida && sumaBarras
     ? `${(100 * d.n / sumaBarras).toFixed(1).replace('.', ',')} % de lo mostrado` : '');
 
+  /* ¿Sobrevivió alguna etiqueta al recorte? Lo necesita el papel: en pantalla
+     la etiqueta recortada tiene su nombre completo a un tooltip de distancia,
+     y en una hoja no hay tooltip. Cuando el recorte se comió un nombre, la
+     tabla equivalente es la única que lo dice entero, así que se imprime;
+     cuando no, la tabla repetiría barra por barra lo que la figura ya rotula.
+     Se marca en el SVG y lo lee la hoja de impresión (`data-cifras`). */
+  let recortadas = false;
+
   const filas = datos.map((d, i) => {
     const y = i * alto;
     const w = Math.max(2, anchoPista * (d.n / max));
@@ -470,6 +549,7 @@ export function barrasH(datos, {
     // la izquierda: exactamente el "lado equivocado" que el comentario de
     // más arriba decía resuelto.
     const etq = recortar(d.valor, anchoEtiqueta - 14, 13);
+    if (etq !== String(d.valor)) recortadas = true;
     const cy = y + alto / 2;
     const nota = d.nota || cuota(d);
 
@@ -525,6 +605,7 @@ export function barrasH(datos, {
   const pie = refEtiqueta
     ? `<p class="leyenda-ref">${escapar(refEtiqueta)}</p>` : '';
   return `<div class="grafico"><svg class="chart" id="${id}" viewBox="0 0 ${ancho} ${total}"
+    data-cifras="${recortadas ? 'parciales' : 'completas'}"
     role="list" aria-label="${escapar(etq)}">${defs}${filas}</svg></div>${pie}`;
 }
 
@@ -591,8 +672,10 @@ export function barrasV(datos, {
 
   const etq = titulo ? `${titulo} — gráfico de barras por año, ${datos.length} años`
                      : `Gráfico de barras verticales, ${datos.length} valores`;
+  // `completas`: cada barra lleva su valor encima y su categoría debajo, sin
+  // recorte. En papel, la tabla equivalente no añadiría nada. Ver `barrasH`.
   return `<div class="grafico" style="max-width:${ancho}px"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
-    role="list" aria-label="${escapar(etq)}">
+    data-cifras="completas" role="list" aria-label="${escapar(etq)}">
     ${red}${ref}${barras}
     <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
   </svg></div>`;
@@ -1093,8 +1176,9 @@ export function distribucion(datos, { titulo = '', ancho = 680, alto = 250, etiq
     ? `<text class="tick" x="${mIzq + (ancho - mIzq - mDer) / 2}" y="${alto - 10}" text-anchor="middle">${escapar(etiquetaEje)}</text>` : '';
   const etq = titulo ? `${titulo} — distribución en ${datos.length} tramos`
                      : `Distribución en ${datos.length} tramos`;
+  // `completas`: cada columna rotula su tramo y su recuento. Ver `barrasH`.
   return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
-    role="list" aria-label="${escapar(etq)}">
+    data-cifras="completas" role="list" aria-label="${escapar(etq)}">
     ${red}${cols}${eje}
     <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
   </svg></div>`;

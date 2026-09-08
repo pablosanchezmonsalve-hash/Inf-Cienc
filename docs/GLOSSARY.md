@@ -140,11 +140,13 @@ mundial; no dice nada sobre la calidad del trabajo institucional en ella.
 No es el h-index de carrera.
 
 **Extendido:** Restringido a la ventana del informe, es sistemáticamente mucho
-menor que el h-index de trayectoria completa. Con 3 años, **497 de 589 firmas
-tienen h ≤ 1**: el indicador casi no discrimina.
+menor que el h-index de trayectoria completa. Con 3 años, **442 de las 530
+entidades publicadas tienen h ≤ 1**: sobre el conjunto entero el indicador casi
+no discrimina.
 
 Se muestra sólo en fichas con 5 o más publicaciones, y siempre etiquetado «en
-ventana».
+ventana». Entre esas 50, la mediana es 3 y el máximo 9: donde se publica sí
+separa, y por eso se publica ahí y no en todas.
 
 ---
 

@@ -105,8 +105,8 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 | | |
 |---|---|
 | Páginas | 11 |
-| Fichas de autor | **538**, una por archivo |
-| Peso total de `dist/` | ~3,5 MB |
+| Fichas de autor | **530**, una por archivo |
+| Peso total de `dist/` | ~3,8 MB |
 | Dependencias externas en el navegador | **0** |
 
 Peso por página, medido en navegador. La segunda columna es lo que realmente
@@ -144,7 +144,9 @@ comprimidos— lo cachea el navegador entre páginas.
 | `docs/FUENTES_Y_APIS.md` | De dónde sale cada dato hoy, y qué plataformas podrían aportar lo que falta |
 | `docs/ORCID_COVERAGE.md` | Cobertura de ORCID: hasta dónde llega y por qué no llega al 100 % |
 | `docs/ARCHITECTURE.md` | Pipeline, artefactos y rendimiento |
-| `docs/UX_UI.md` | Navegación, KPIs, módulos, filtros y estados |
+| `docs/UX_UI.md` | Navegación, KPIs, módulos, filtros, estados y el informe descargable |
+| `docs/LECTURAS.md` | Qué muestra cada gráfico del informe, una lectura por indicador |
+| `docs/INFORME_POR_INVESTIGADOR.md` | Informe recortado a una persona: a quién se ofrece y con qué salvaguardas |
 | `docs/LAYERS.md` | Qué es público y qué es interno |
 | `docs/AUTHOR_PROFILE.md` | Estructura de la ficha pública de autor |
 | `docs/GLOSSARY.md` | Glosario y ayuda contextual |

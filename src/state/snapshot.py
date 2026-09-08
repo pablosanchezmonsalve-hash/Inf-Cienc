@@ -14,8 +14,21 @@ LA SOLUCIÓN
     Incluye un mapa de lectura: qué archivo abrir para cada pregunta concreta.
     Así el resto de la documentación pasa a ser consulta puntual.
 
+LA COMPUERTA
+    STATE.md se deriva de archivos que NO se versionan: `internal/*` y
+    `data/interim/`. En un clon limpio no existen, y hasta el 2026-09-08 esto
+    generaba un STATE.md que había perdido en silencio cinco cifras canónicas y
+    la tabla entera de colas de revisión. Un archivo así no dice «no lo sé»:
+    dice que no hay colas, y es el punto de entrada que se commitea.
+
+    Ahora, si faltan insumos, STATE.md **no se toca** y el guion sale con 1
+    diciendo qué falta y con qué se rehace. `--parcial` lo escribe igual, pero
+    declarándolo en su primera línea. docs/DECISIONS.md se regenera siempre:
+    su única fuente es SESSION_NOTES.md, que está versionada.
+
 Uso:
     python3 src/state/snapshot.py
+    python3 src/state/snapshot.py --parcial   # escribe aunque falten insumos
 
 Salidas:
     STATE.md            punto de entrada, ~100 líneas
@@ -61,6 +74,7 @@ MAPA_LECTURA = [
     ("Cómo recuperar ORCID", "docs/ORCID_GUIDE.md"),
     ("Qué falta para la V2", "docs/V2_BACKLOG.md"),
     ("Cómo tratar una fuente fuera de Scopus", "docs/METODOLOGIA_FUERA_DE_SCOPUS.md"),
+    ("Qué puede afirmar un informe por persona", "docs/INFORME_POR_INVESTIGADOR.md"),
     ("Historia de cada sesión", "SESSION_NOTES.md"),
 ]
 
@@ -323,6 +337,43 @@ def colas_internas() -> list[tuple[str, int]]:
     return out
 
 
+# Insumos de STATE.md que NO están versionados: `internal/*` y `data/interim/`
+# están en `.gitignore` (capa interna y derivados regenerables), así que en un
+# clon limpio no existen. Cada uno declara qué se pierde si falta y con qué se
+# reconstruye.
+INSUMOS = [
+    ("data/interim/validation_report.csv",
+     "las reglas de validación y cuántas bloqueantes fallan", "make auditoria"),
+    ("internal/matching_log.csv",
+     "las formas de firma, las apariciones y los pares firma × publicación",
+     "make auditoria"),
+    ("internal/revision_identidad.html",
+     "el avance de la revisión de identidad, casos y pendientes", "make revision"),
+]
+
+
+def insumos_ausentes() -> list[tuple[str, str, str]]:
+    """Qué le falta a STATE.md para ser el estado y no una parte de él.
+
+    POR QUÉ ES UNA COMPUERTA Y NO UN AVISO
+        Un STATE.md generado sin estos archivos no dice «no lo sé»: dice que no
+        hay colas de revisión y omite cinco cifras canónicas sin dejar hueco.
+        Es el punto de entrada del proyecto y se commitea, así que afirmar cero
+        pendientes internos donde hay ochenta y dos es peor que un archivo
+        viejo. Pasó el 2026-09-08 al correr `make estado` en un clon limpio.
+
+        `docs/DECISIONS.md` sí se regenera siempre: su única fuente es
+        `SESSION_NOTES.md`, que está versionada, así que ahí no hay nada que
+        pueda faltar.
+    """
+    faltan = [(ruta, cuesta, cmd) for ruta, cuesta, cmd in INSUMOS
+              if not (ROOT / ruta).exists()]
+    if not any((ROOT / "internal").glob("*.csv")):
+        faltan.append(("internal/*.csv",
+                       "la tabla entera de colas de revisión humana", "make auditoria"))
+    return faltan
+
+
 def avance_revision() -> tuple[int, int, int] | None:
     """Casos, pendientes y decididos de `make revision`.
 
@@ -348,10 +399,13 @@ def avance_revision() -> tuple[int, int, int] | None:
     return len(casos), len(casos) - decididos, decididos
 
 
-def main() -> None:
+def main() -> int:
     print("=" * 78)
     print("SNAPSHOT DE ESTADO")
     print("=" * 78)
+
+    parcial = "--parcial" in sys.argv
+    faltan = insumos_ausentes()
 
     dec = extraer_decisiones()
     pend = pendientes_abiertos()
@@ -371,6 +425,23 @@ def main() -> None:
     lineas += [f"| `{d['id']}` | {d['decision']} | {d['fundamento']} | {d['fase']} |"
                for d in dec]
     (ROOT / "docs/DECISIONS.md").write_text("\n".join(lineas) + "\n", encoding="utf-8")
+    print(f"  decisiones indexadas : {len(dec)}  · docs/DECISIONS.md escrito")
+
+    # --------------------------------------------------- compuerta de STATE.md
+    if faltan and not parcial:
+        print("\n  ✗ STATE.md NO se ha tocado: le faltan insumos y saldría "
+              "afirmando de menos.\n")
+        for ruta, cuesta, cmd in faltan:
+            print(f"    falta  {ruta}")
+            print(f"           se pierde: {cuesta}")
+            print(f"           se rehace con: {cmd}")
+        print("\n    `internal/*` y `data/interim/` no se versionan, así que en un "
+              "clon limpio\n    no existen. Corra `make estado` en el equipo que "
+              "los tiene.\n"
+              "\n    Si de verdad quiere el archivo a medias, "
+              "`python3 src/state/snapshot.py --parcial`:\n"
+              "    lo escribe declarando en su primera línea qué le falta.")
+        return 1
 
     # ----------------------------------------------------------- STATE.md
     # Sólo la tabla de "Estado general": PLAN.md tiene otras tablas cuya primera
@@ -383,6 +454,23 @@ def main() -> None:
         "# Estado del proyecto", "",
         "> **Generado** por `python3 src/state/snapshot.py`. No editar a mano: "
         "se sobrescribe.", "",
+    ]
+
+    # Un archivo parcial que no se declara parcial es peor que ninguno: se lee
+    # como el estado completo y sus huecos se leen como ceros. Va antes que
+    # nada, porque una advertencia al final llega después de la lectura.
+    if faltan:
+        s += ["> **⚠ ESTADO PARCIAL — no reemplaza al último completo.** Se "
+              "generó sin insumos que no se versionan, así que **faltan cifras "
+              "y colas enteras. Su ausencia aquí no significa que no existan.**",
+              ">",
+              *[f"> - Sin `{ruta}`: {cuesta}. Se rehace con `{cmd}`."
+                for ruta, cuesta, cmd in faltan],
+              ">",
+              "> Regenerar con `make estado` en el equipo que tiene `internal/` "
+              "y `data/interim/`.", ""]
+
+    s += [
         "**Este es el punto de entrada.** Leer sólo este archivo basta para "
         "retomar el trabajo. El resto de la documentación es consulta puntual: "
         "ver el mapa de lectura al final.", "",
@@ -443,9 +531,16 @@ def main() -> None:
     s += ["", "---", "", "## Colas de revisión humana", "",
           "Capa interna. Ninguna se resuelve automáticamente "
           "(decisión `D-08`). Se enumeran leyendo `internal/`: una cola es un "
-          "archivo con columna `resolucion`.", "",
-          "| Cola | Entradas |", "|---|---|"]
-    s += [f"| `internal/{n}.csv` | {v} |" for n, v in colas]
+          "archivo con columna `resolucion`.", ""]
+    # Una tabla con encabezado y sin filas se lee como «no hay colas». Cuando
+    # `internal/` no está, lo que corresponde decir es que no se pudo mirar.
+    if colas:
+        s += ["| Cola | Entradas |", "|---|---|"]
+        s += [f"| `internal/{n}.csv` | {v} |" for n, v in colas]
+    else:
+        s += ["> **No se pudo leer `internal/`**, que no se versiona. Esta tabla "
+              "no está vacía porque no haya colas: está vacía porque no se han "
+              "podido contar."]
     if rev:
         s += ["", f"`make revision` reúne estas colas en {rev[0]} casos, de los "
                   f"que **{rev[1]} siguen pendientes**: {rev[2]} ya se "
@@ -474,11 +569,16 @@ def main() -> None:
     (ROOT / "STATE.md").write_text("\n".join(s) + "\n", encoding="utf-8")
 
     n_lineas = len((ROOT / "STATE.md").read_text(encoding="utf-8").splitlines())
-    print(f"  decisiones indexadas : {len(dec)}")
     print(f"  pendientes abiertos  : {len(pend)}")
     print(f"  colas internas       : {len(colas)}")
     print(f"  cifras canónicas     : {len(c)}")
+    if faltan:
+        print(f"\n  ⚠ PARCIAL · STATE.md ({n_lineas} líneas), declarando en su "
+              f"primera línea que le faltan {len(faltan)} insumos.")
+        print("    NO lo commitee sobre uno completo.")
+        return 1
     print(f"\n  OK · STATE.md ({n_lineas} líneas) y docs/DECISIONS.md")
+    return 0
 
 
 if __name__ == "__main__":

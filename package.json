@@ -2,11 +2,12 @@
   "name": "inf-cienc",
   "version": "1.0.0",
   "private": true,
-  "description": "Plataforma bibliométrica institucional. Sin dependencias en tiempo de ejecución (README.md); playwright es SOLO de desarrollo, para src/verify/run_all.mjs.",
+  "description": "Plataforma bibliométrica institucional. Sin dependencias en tiempo de ejecución (README.md); playwright y pdfjs-dist son SOLO de desarrollo, para src/verify/run_all.mjs — el segundo lee el texto del PDF que comprueba src/verify/impresion.mjs.",
   "scripts": {
     "verificar": "node src/verify/run_all.mjs"
   },
   "devDependencies": {
+    "pdfjs-dist": "^6.3.289",
     "playwright": "^1.62.1"
   }
 }

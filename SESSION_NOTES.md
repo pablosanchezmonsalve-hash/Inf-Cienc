@@ -11919,3 +11919,1378 @@ columna `regla` y recoge lo que sacan ambas.
 - Cuántas obras quedan tras aplicar la regla está por medir en la máquina del
   usuario. La aritmética esperada es 283 − 159 = 124, pero las dos reglas
   interactúan y el número real lo dirá la corrida.
+
+## Cierre: el informe descargado declara sobre qué está medido (2026-09-07)
+
+### Contexto
+
+El usuario preguntó por «la casilla que ofrece el informe en modo descarga» y,
+tras recuperar el contexto, pidió avanzar. El caso de uso declarado es más
+ancho que lo que hoy existe: que un investigador pida un informe de
+productividad **aplicando filtros**, lo descargue y lo lea fuera del sitio.
+
+Esta sesión no construye ese informe parametrizado. Cierra el defecto que lo
+bloquea antes que ningún diseño: lo que se descarga no decía sobre qué conjunto
+estaba medido.
+
+### Lo que se encontró, y una corrección
+
+Medido sobre `dist/` con emulación de impresión y con PDF real, no leído.
+
+1. **La línea de crédito se imprimía vacía.** El comentario de `app.css` promete
+   que «la procedencia se queda: en papel es la línea de crédito del informe»,
+   pero fuente, ventana y fecha de corte de las citas viven en tres pastillas
+   `<details class="v-chip">` que la propia hoja de impresión oculta. La barra
+   salía con su filete y sin una palabra dentro. El pie sí imprimía universo,
+   denominadores y build, así que la hoja archivada tenía la mitad de su
+   procedencia y no la otra mitad.
+2. **El recorte sí se imprimía, pero por un error.** La primera lectura de esta
+   sesión —anotada aquí porque quedó dicha— fue que el filtro no llegaba al
+   papel. Es falso: la regla que debía ocultar ese bloque apunta a
+   `.estado-recorte`, una **clase que no existe en ninguna página** (el
+   contenedor siempre fue `id="estado-recorte"`), de modo que el bloque de
+   pantalla se imprimía entero, con su botón «Ver todo» y su enlace «Ver las N
+   publicaciones →». La declaración llegaba al papel por accidente y con
+   controles que en una hoja no llevan a ninguna parte.
+3. **La asimetría con el CSV.** `exportar()` ya escribe institución, fuentes,
+   ventana, fecha de corte, build y si las filas son una selección manual o un
+   recorte de filtros. El PDF no escribía nada de eso. Dos salidas del mismo
+   informe con dos criterios distintos de procedencia.
+
+### Cambios
+
+- `core.js`: la barra de vigencia emite dos párrafos `.solo-papel` —crédito y
+  recorte— que en pantalla no existen. El del recorte **nace declarando el
+  informe completo**: una página pre-renderizada sin filtros no se repinta
+  (`paginas.js` se salta ese primer `pintar()` para no destruir un LCP que ya
+  ocurrió), así que dejarlo vacío a la espera del repintado lo habría dejado
+  vacío para siempre en el caso más común, que es el del informe institucional.
+- `core.js`: `fraseRecorte(n, total, partes)`, una sola redacción para los dos
+  caminos que la escriben. El cromo la llama con el universo declarado
+  (`D-16`), `paginas.js` con el recorte vigente y `X.describir(sel)`.
+- `paginas.js`: `actualizarRecorteVivo()` mantiene el badge de pantalla y
+  además reescribe la línea de papel.
+- `app.css`: `.solo-papel` —simétrico de `.solo-lectores`—, el bloque de
+  impresión que lo enseña, `.vigencia .contenedor` a `block` en papel (en flex
+  los dos párrafos se repartían el ancho) y el selector muerto corregido a
+  `#estado-recorte`.
+
+### Verificación
+
+Sitio ensamblado y pre-renderizado (`06_assemble_site.py`, 12 páginas, 530
+fichas). Sobre él, seis casos en pantalla y en emulación de impresión: sección
+sin filtros, con uno y con tres, portada, listado filtrado y una página sin
+explorador. En los seis: las líneas de papel no se ven en pantalla, el crédito
+imprime fuente, ventana y corte de citas, el bloque de pantalla ya no imprime,
+y el recorte se declara —«Sin filtros: el informe completo, 823 publicaciones»
+o «Recorte aplicado: Año: 2024 · Tipo documental: Article. 201 de 823
+publicaciones»—. Cero errores de consola.
+
+PDF real generado por la misma vía que `informe_pdf.mjs` y leído con pdf.js: la
+hoja 1 abre con las dos líneas, como **texto extraíble**, y no contiene «Ver
+todo» ni «Ver las». Batería completa (`npm run verificar`): contraste 0,
+estructura 0, flujos 0 excepciones, responsive 0 desbordes, higiene y peso OK.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-508 | La hoja de impresión lleva su propia línea de crédito: institución, fuentes, ventana y fecha de corte de las citas | Los tres datos viven en pastillas `<details>` que la impresión oculta, así que la barra se imprimía vacía. El CSV exportado ya los llevaba en su cabecera y el PDF ninguno: dos salidas del mismo informe con distinto criterio de procedencia |
+| D-509 | El informe impreso declara su recorte, y declara también que no lo tiene | En un PDF archivado «no dice nada» y «es el informe completo» son indistinguibles, y el informe institucional de `make informe` se genera precisamente sin filtros |
+| D-510 | El bloque de recorte de pantalla no se imprime; lo sustituye una línea escrita para el papel | Trae un botón «Ver todo» y un enlace al listado, inertes en una hoja. La regla que creía ocultarlo apuntaba a `.estado-recorte`, clase que no existe en ninguna página |
+| D-511 | Una sola redacción para la frase del recorte, en `core.js` | La escriben dos caminos —el pre-renderizado, que sólo conoce el informe completo, y el navegador, que conoce el filtro—. Dos textos para la misma declaración divergen sin que nadie lo note, como ya pasó con el panel de ejes |
+
+### Archivos
+
+- `web/assets/js/core.js`, `web/assets/js/paginas.js`, `web/assets/css/app.css`
+- `docs/UX_UI.md` (§12.7: el informe descargable, sus dos vías y lo que declara)
+
+### Pendientes
+
+- **`STATE.md` sin regenerar, a propósito.** `snapshot.py` escribe los dos
+  archivos, pero en este contenedor no hay `data/interim/` ni las colas de
+  `internal/`: la corrida deja `docs/DECISIONS.md` correcto —sólo depende de
+  `SESSION_NOTES.md`, y ahí están D-508 a D-511— y vacía media tabla de cifras
+  canónicas de `STATE.md`. Se conservó el índice y se revirtió el estado, que
+  sigue diciendo «507 decisiones» hasta que se corra `make estado` donde esté
+  la capa de datos completa.
+- **La procedencia no viaja en cada hoja, sólo en la primera.** Chromium no
+  implementa los cuadros de margen de CSS Paged Media, así que un encabezado
+  repetido no sale de la hoja de estilo: hay que pasarlo por `headerTemplate`
+  en `informe_pdf.mjs`, y entonces el botón del navegador y el PDF construido
+  dejarían de tener el mismo origen. Decisión abierta.
+- **`informe_pdf.mjs` sigue sin aceptar parámetros**: abre seis secciones fijas
+  sin filtro, así que el informe a medida que pide el caso de uso todavía no se
+  puede generar desde ahí.
+- **Sin compuerta.** El defecto de esta sesión era un selector que no casaba con
+  nada, y ninguna verificación lo habría visto: la batería mira la pantalla, no
+  el papel. Una comprobación de medio `print` en `src/verify/` es el siguiente
+  paso natural, en la línea de `peso.mjs` («una compuerta, no una nota»).
+
+## Cierre: compuerta de impresión, informe a medida y PDF etiquetado (2026-09-07)
+
+### Contexto
+
+Continuación directa de la nota anterior. Sobre el plan que se le propuso al
+usuario —compuerta primero, limpiar la hoja después, informe parametrizado
+tercero— pidió avanzar con todo lo que se estimara conveniente. Queda fuera, a
+propósito, el filtro por persona: exige una decisión suya sobre qué puede
+afirmar un informe individual.
+
+### Lo que se encontró midiendo el PDF
+
+Dos defectos más de la familia del anterior, los dos invisibles para la batería
+porque la batería mira la pantalla:
+
+1. **El panel «Qué NO dice esta sección» imprimía su título y no su cuerpo.**
+   Es un `<details>` cerrado. En el PDF quedaba un titular de advertencia sin
+   la advertencia, que es peor que no ponerlo: `docs/EJES.md` dice que sin esa
+   parte el panel «sería un subtítulo».
+2. **El conmutador Gráfico ⇄ Tabla se imprimía** junto a cada figura. La regla
+   `.vistas { display: none }` del bloque de impresión pierde contra
+   `.js .vistas` (línea 994), que enciende el control con dos clases: pierde
+   por **especificidad**, no por orden, que es un caso distinto del que ya está
+   documentado al final del archivo.
+
+Y una tercera cosa, metodológica más que visual: **el DOM miente sobre el
+papel**. Con medio `print` emulado, el cuerpo de un desplegable cerrado
+devuelve una caja de 109 px de alto y no aparece en el PDF. La primera lectura
+de esta sesión se hizo con emulación y dio el resultado contrario al real. Por
+eso la compuerta lee el texto del PDF.
+
+### Cambios
+
+- **`src/verify/impresion.mjs`** (nuevo, en la batería): genera PDF de verdad de
+  tres casos —portada sin recorte, sección con recorte, anexo dentro de un
+  informe filtrado— y comprueba sobre su texto la procedencia, la declaración
+  del recorte, el cuerpo de los paneles metodológicos (leído de `ejes.json`, no
+  copiado), la ausencia de controles y el árbol de estructura. Tarda 5 s.
+- **`app.css`**: `details::details-content { content-visibility: visible }` y
+  `summary { list-style: none }` en papel; `.js .vistas { display: none }` para
+  ganar la especificidad; `.migas` fuera de la hoja.
+- **`informe_pdf.mjs`**: tercer argumento con el recorte, normalizado con
+  `URLSearchParams` —la misma consulta que el explorador escribe en la URL—, que
+  se pasa a cada sección. El recorte va en el nombre del archivo y declarado en
+  la hoja 1. Y pide el PDF **etiquetado**.
+- **`navegador.mjs`**: `pdfEtiquetado()`, un solo origen para pedir el árbol de
+  estructura y para degradar con aviso si la versión de Playwright no conoce la
+  opción. Lo usan el generador y la compuerta.
+- **`paginas.js`**: una página sin explorador dentro de un informe filtrado
+  declara el recorte (sin cifras: no tiene el corpus cargado).
+- **`deploy.yml`**: CI instala también `pdfjs-dist@6.3.289`.
+
+### Verificación
+
+Prueba **negativa** de la compuerta, que es la que dice si sirve: se degradó
+`dist/` a mano deshaciendo los tres arreglos y la compuerta cazó los tres, con
+cinco fallos nombrados. Restaurada, pasa.
+
+Batería completa con el paso nuevo dentro: contraste 0, estructura 0, flujos 0
+excepciones, responsive 0, impresión 0, higiene y peso OK.
+
+Informe a medida de punta a punta con
+`RECORTE="anio=2024&unidad=Facultad de Medicina y Salud"`: seis PDF, nombre con
+el recorte, hoja 1 con «Recorte aplicado: Año: 2024 · Unidad académica: Facultad
+de Medicina y Salud. 122 de 823 publicaciones», el anexo con la misma
+declaración sin cifras, y los seis con `/StructTreeRoot` y `/Marked true`
+verificados sobre el archivo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-512 | La batería tiene un paso de impresión, y lee el TEXTO DEL PDF, no el DOM | Los tres defectos de estas dos sesiones son reglas de impresión que no casan con el marcado, y ninguna verificación de pantalla los ve. Con medio `print` emulado el cuerpo de un desplegable cerrado mide 109 px de alto y no llega al papel: el DOM habría dado verde |
+| D-513 | En papel los desplegables van abiertos | Un `<details>` cerrado imprime su resumen y nada más. El panel que declara lo que la sección NO responde salía como un titular sin contenido, y ese texto es obligatorio por `docs/EJES.md` |
+| D-514 | El informe a medida se pide con la misma consulta que el explorador escribe en la URL | Se copia de la barra de direcciones tras filtrar. Inventar una sintaxis propia habría creado una segunda gramática de recorte que puede divergir de la del sitio |
+| D-515 | El recorte va en el nombre del archivo, pero la declaración va dentro | Dos informes distintos no pueden llamarse igual en la carpeta de descargas de nadie; y un nombre no sobrevive a que alguien renombre el archivo, la hoja 1 sí |
+| D-516 | Una página sin explorador dentro de un informe filtrado declara el recorte, sin cifras | El anexo metodológico no cuenta publicaciones, pero es parte del informe que alguien pidió: una hoja que se declare «informe completo» contradice a las demás del mismo PDF. Las cifras se omiten en vez de pedir el corpus sólo para eso |
+| D-517 | `make informe` pide el PDF etiquetado, y si la versión de Playwright no sabe, lo declara en vez de reventar o callar | Sin árbol de estructura un lector de pantalla recita el documento en vez de navegarlo. Comprobado sobre el archivo (`/StructTreeRoot`), no sobre que la API aceptara el parámetro |
+
+### Archivos
+
+- `src/verify/impresion.mjs` (nuevo), `src/verify/run_all.mjs`,
+  `src/verify/navegador.mjs`, `src/build/informe_pdf.mjs`
+- `web/assets/css/app.css`, `web/assets/js/paginas.js`
+- `Makefile`, `package.json`, `.github/workflows/deploy.yml`
+- `docs/UX_UI.md`, `docs/DEPLOYMENT.md`, `AGENTS.md`
+
+### Pendientes
+
+- **El filtro por persona no existe**, y es lo que falta para un informe de
+  productividad por investigador. Antes del código hace falta la decisión sobre
+  qué puede afirmar: la doctrina ya está escrita (`D-18`, umbral de muestra
+  pequeña, identidad no consolidada), falta aplicarla y que el usuario la valide.
+- **La procedencia sigue yendo sólo en la primera hoja.** Chromium no
+  implementa los cuadros de margen de CSS Paged Media; un encabezado repetido
+  saldría de `headerTemplate` y rompería el origen único con el botón.
+- **Las tarjetas «Ver la sección →» de la portada se imprimen.** No son un
+  control que prometa interacción y en papel funcionan como índice, así que se
+  dejan; conviene decidirlo a la vista de una hoja impresa.
+- **`STATE.md` sin regenerar**, por lo mismo que la sesión anterior: sin
+  `data/interim/` el snapshot vacía media tabla de cifras. `docs/DECISIONS.md`
+  sí, que sólo depende de este archivo.
+
+## Cierre: propuesta del filtro por persona, escrita y sin decidir (2026-09-07)
+
+### Contexto
+
+El usuario pidió redactar la propuesta que la sesión anterior dejó pendiente: el
+filtro por persona, que es la pieza que falta para un informe de productividad
+por investigador. Se redacta, no se implementa: la decisión es del responsable
+del proyecto y va antes del código.
+
+### Qué se escribió
+
+`docs/INFORME_POR_INVESTIGADOR.md`, marcado como propuesta pendiente de
+decisión, con cinco preguntas concretas y una recomendación para cada una.
+Entra en el mapa de lectura de `STATE.md` (`src/state/snapshot.py`), porque un
+documento que el punto de entrada no nombra es un documento que nadie abre.
+
+### Lo que se midió antes de proponer nada
+
+Sobre `data/processed/`, no de memoria:
+
+- **La consolidación ya está aplicada donde hace falta.** `publications.json`
+  trae 530 nombres distintos y **ninguno es una variante suelta**: todos son el
+  nombre canónico de una entidad, y ninguna entidad comparte nombre con otra.
+  El filtro por persona no exige tocar el build ni recalcular el corpus, que
+  era el supuesto con el que se entró.
+- **480 de 530 entidades están por debajo del umbral de interpretabilidad.** El
+  reparto es 360 con una publicación, 120 con dos a cuatro, 31 con cinco a
+  nueve y 19 con diez o más. Es el hecho que convierte esto en una decisión
+  metodológica y no en una tarea de interfaz.
+- 20 entidades con identidad no consolidada, 214 sin unidad determinada, 17 con
+  más de una, 268 con ORCID.
+- **Quinientas treinta pastillas no son un panel de filtros.** La dimensión
+  necesita búsqueda y entrada desde la ficha; una lista completa es una guía
+  telefónica.
+
+### Decisiones
+
+Ninguna. El documento las pide, no las toma.
+
+### Archivos
+
+- `docs/INFORME_POR_INVESTIGADOR.md` (nuevo), `src/state/snapshot.py`
+
+### Pendientes
+
+- **Las cinco preguntas del §5**, que son del usuario. La primera manda sobre
+  las demás: si el informe se ofrece a las 530 entidades o sólo a las 50
+  interpretables.
+- **`docs/AUTHOR_PROFILE.md` arrastra cifras viejas**: dice 84 formas fusionadas
+  en 37 personas y 538 entidades publicadas; el artefacto dice 94 en 39, 4
+  descartadas y 530 entidades. Corregirlo antes de implementar esta propuesta,
+  para que no se cite el número que ya no es.
+
+## Cierre: el filtro por persona, decidido e implementado (2026-09-07)
+
+### Contexto
+
+El usuario respondió la pregunta que gobernaba la propuesta: **el informe por
+investigador se ofrece a las 530 entidades, con la banda de muestra reducida
+donde corresponda**. Las otras cuatro preguntas quedaron sin responder, así que
+se implementaron con la recomendación escrita en el documento, marcada como tal
+para poder corregir cualquiera sin rehacer las demás.
+
+### Lo que se construyó
+
+- **Dimensión `autor`** en el explorador. Filtra por el nombre canónico, que el
+  corpus ya trae consolidado, así que no hay emparejamiento heurístico en el
+  navegador. Viaja en la URL, las secciones se recalculan y la línea de papel lo
+  declara sin escribir una segunda redacción.
+- **El panel no dibuja 530 pastillas.** Enseña las firmas elegidas y un campo
+  con `datalist` —autocompletado del navegador, sin librería y con teclado—,
+  cuyas sugerencias son las del recorte vigente.
+- **Salvaguardas** cuando el recorte es de una persona: la advertencia de
+  lectura que adhiere a DORA y a Leiden, siempre, y la de muestra reducida por
+  debajo del umbral. Van **sobre las cifras** y no en la barra de vigencia,
+  porque la barra es cromo y la hoja de impresión la retira: ahí no se
+  imprimirían, y un PDF nominal es justo donde hacen falta.
+- **Una sola redacción.** Las dos advertencias vivían escritas a mano en la
+  ficha; ahora las escribe `vista_explorador.js` y la ficha las llama. Copiar el
+  texto habría creado la segunda versión de una advertencia metodológica.
+- **Ida y vuelta.** La ficha enlaza al informe recortado; el pie del recorte
+  enlaza a `autores.html?q=…`, que ahora lee la búsqueda de la URL y **abre la
+  lista entera**: con el filtro por defecto, 480 de 530 firmas no aparecerían y
+  quien llegara buscando a alguien no lo encontraría.
+- **`make informe RECORTE="autor=Firma"`** produce el informe personal: la ficha
+  primero y las cinco secciones después.
+
+### Lo que se midió, y una cosa que se descartó por medirla
+
+- El corpus **ya trae los nombres canónicos**: 530 distintos, ninguno una
+  variante suelta, y `n_publicaciones` de `authors.json` coincide con el conteo
+  sobre `publications.json` para las 530. Ninguna entidad comparte nombre.
+- **El umbral no se metió en `meta.json`.** Se había añadido a `build_meta()`,
+  pero eso obliga a regenerar artefactos —imposible aquí, y con la fecha de
+  build cambiando en un solo archivo— cuando `authors.json` ya lo trae en
+  `parametros`, que es de donde lo toma la ficha. Se revirtió.
+- **Los identificadores de autor no se metieron en `publications.json`.** Habrían
+  hecho preciso el enlace del recorte a cada ficha, pero el presupuesto de datos
+  está al 81 % de su techo y el proyecto ya declara que ése es el punto de
+  presión. El enlace va por `autores.html?q=`, que cuesta cero.
+- **Coste del `datalist`:** la portada pasa de 39 a 60 KB en bruto y de 8 a 12
+  comprimidos. Se acepta: es la única forma de que la búsqueda funcione sin
+  repintar, y el margen de LCP medido es de más del doble. Conviene confirmarlo
+  con `make rendimiento` cuando haya ocasión.
+
+### Verificación
+
+Siete comprobaciones de punta a punta sobre el sitio construido: salvaguardas
+con y sin muestra reducida (39 publicaciones frente a 1), el panel con una
+pastilla y 529 sugerencias en vez de 530 pastillas, elegir una firma con el
+campo y ver el filtro en la URL, el enlace de la ficha, la vuelta a Autores con
+la lista abierta, y el PDF con el recorte y las dos advertencias dentro. Cero
+errores de consola.
+
+La **compuerta de impresión** incorpora el caso: toma del artefacto la primera
+firma bajo el umbral y exige que su informe declare la persona y lleve las dos
+advertencias. Batería completa sin fallos.
+
+Informe personal real generado con `autor=Orellana-Donoso M.`: siete PDF, la
+ficha abriendo, todas las hojas declarando el mismo recorte y las siete
+etiquetadas.
+
+Un defecto encontrado al leer el PDF: la frase terminaba en «Abara J.F..»,
+porque muchas firmas acaban en abreviatura. `fraseRecorte()` ya no dobla el
+punto, y de paso admite recorte sin cifras, que es lo que necesitaba la página
+sin explorador.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-518 | El informe por persona se ofrece a las 530 entidades, con la banda de muestra reducida donde corresponda | Decisión del usuario. 480 de 530 están bajo el umbral: excluirlas sería decidir sobre esas personas en silencio, y declararles la limitación es una decisión sobre el dato |
+| D-519 | La dimensión de persona no se dibuja como lista de pastillas | 530 pastillas no son un filtro: la lista deja de ser recorrible mucho antes del nombre buscado y empuja el resto del panel fuera de la pantalla. Firmas elegidas + campo con `datalist`, y entrada desde la ficha |
+| D-520 | Las salvaguardas van sobre las cifras, no en la barra de vigencia | La barra es cromo y la hoja de impresión la retira. Un PDF nominal circula sin el sitio al lado, que es exactamente donde la advertencia hace falta |
+| D-521 | La muestra reducida mide la producción de la persona en la ventana, no la del recorte | Alguien con seis publicaciones no pasa a ser muestra reducida porque se le añada un filtro de año: lo que baja es el tamaño del corte, y eso ya lo declara la línea del recorte |
+| D-522 | Una sola redacción de las advertencias, compartida entre la ficha y el recorte | Dos textos para la misma advertencia metodológica divergen sin que nadie lo note. Ya pasó con los paneles de eje |
+| D-523 | El umbral de interpretabilidad se toma de `authors.json`, no de `meta.json` | Es el mismo que aplica la ficha y ya viaja en un artefacto que estas páginas cargan. Añadirlo a `meta.json` obligaba a regenerar artefactos para una cifra que ya estaba |
+| D-524 | La ficha abre el PDF cuando el recorte es de una persona | Es lo único que declara identidad, ORCID con la evidencia de cada asignación y unidad. Sin ella las hojas siguientes son cifras de alguien sin decir de quién exactamente |
+| D-525 | El estado de identidad y la unidad no se repiten en el recorte | Viven en la ficha, con su evidencia, y la ficha abre el informe personal. Repetirlas sería la segunda redacción que `D-522` evita |
+| D-526 | `autores.html` lee la búsqueda de la URL y abre la lista entera cuando llega por ahí | La vista por defecto oculta las firmas bajo el umbral, que son 480: llegar buscando a alguien y no encontrarlo es peor que no ofrecer la búsqueda |
+| D-527 | La dimensión de persona no lleva cubo «sin dato declarado» | `unidad` lo lleva porque toda publicación tiene una o carece de ella; la autoría es una lista de personas y «sin autoría UFT nombrada» no es una persona. Esas publicaciones siguen en el informe y el listado las declara |
+
+### Archivos
+
+- `web/assets/js/explorador.js`, `vista_explorador.js`, `paginas.js`, `core.js`
+- `web/assets/css/app.css`, `src/build/prerender.mjs`, `src/build/informe_pdf.mjs`
+- `src/verify/impresion.mjs`
+- `docs/INFORME_POR_INVESTIGADOR.md`, `docs/UX_UI.md`
+
+### Pendientes
+
+- **Los cortes que cambian de significado sobre una persona.** Hoy se
+  recalculan como con cualquier otra dimensión. Una red de coautoría de un solo
+  autor es una estrella trivial y una mediana sobre una publicación no es una
+  mediana: falta declararlo o apagarlos, caso por caso.
+- **`docs/AUTHOR_PROFILE.md` sigue con cifras viejas** (84 en 37, 538
+  entidades). El artefacto dice 94 en 39 y 530.
+- **`STATE.md` sin regenerar**, por lo de siempre: sin `data/interim/` el
+  snapshot vacía media tabla de cifras canónicas.
+- Confirmar el LCP con `make rendimiento` tras el peso añadido por el
+  `datalist`.
+
+## Cierre: la red de coautoría se apaga en un informe personal (2026-09-07)
+
+### Contexto
+
+El usuario aprobó el punto que quedaba abierto del filtro por persona y pidió
+expresamente apagar la red de coautoría. Se resolvieron los tres cortes que
+cambian de significado sobre una sola firma, con el criterio que el proyecto ya
+aplica al resto: si el indicador cambia de significado, se dice.
+
+### Qué se hizo
+
+- **`C-05` se apaga y se declara.** En su sitio queda la sección, con su
+  encabezado y su ancla —el índice lateral y los enlaces del catálogo siguen
+  llegando— y un texto que explica que sobre una persona esa red sería una
+  estrella, que su forma no describiría la estructura de colaboración, y que
+  con quién coautoró está en su ficha.
+- **`I-04` se queda con aviso.** La mediana por año sobre una o dos
+  publicaciones es una cifra correcta que no describe una tendencia; el aviso lo
+  dice. Ocultarla habría dejado un hueco que se lee como ausencia de dato, que
+  es el error contrario.
+- **`C-04` no cambia**: ya declaraba que no responde al recorte.
+- La decisión de qué corte cae en cuál categoría vive en `cortePersonal()`, una
+  sola función con el porqué escrito, y no repartida por el marcado.
+
+### Verificación
+
+Medido sobre el sitio construido: sin recorte la sección de colaboración dibuja
+la red —tres vistas SVG— y con `?autor=` no dibuja ninguna, conserva los cinco
+cortes y enseña la declaración. La sección de impacto recortada a una persona
+trae el aviso de la mediana. Cero errores de consola.
+
+La compuerta de impresión incorpora el caso, y con una firma elegida por ser la
+**más prolífica** del artefacto: sobre alguien de una publicación la red saldría
+vacía por otra razón y la comprobación pasaría en falso. Probada en negativo
+sobre `dist/`: al deshacer el apagado, el informe personal de colaboración pasa
+de 8 a 12 hojas y la compuerta canta las dos cosas —que falta la declaración y
+que aparece el texto de la red dibujada—. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-528 | La red de coautoría no se dibuja cuando el informe está recortado a una persona | Recortada a una firma no es una red sino una estrella: esa persona al centro y sus coautores alrededor, con la misma forma para todo el mundo. Lo que el indicador mide —cómo se agrupan las personas entre sí— deja de existir, y dibujarla ofrecería una figura que se lee como estructura de colaboración sin serlo |
+| D-529 | La mediana por año se queda, con un aviso que dice sobre cuántas publicaciones se calcula | Es una cifra correcta sobre pocos valores. Apagarla dejaría un hueco que se lee como ausencia de dato, y apagar de más engaña igual que no advertir |
+| D-530 | El corte apagado conserva su sección, su encabezado y su ancla | El índice lateral de la sección y los enlaces del catálogo apuntan al código del indicador. Un corte que desaparece del marcado rompe esos enlaces y, peor, se lee como que el indicador no existe |
+
+### Archivos
+
+- `web/assets/js/vista_explorador.js`, `src/verify/impresion.mjs`
+- `docs/INFORME_POR_INVESTIGADOR.md`, `docs/UX_UI.md`
+
+### Pendientes
+
+Los mismos de la sesión anterior menos éste: `docs/AUTHOR_PROFILE.md` con
+cifras viejas, `STATE.md` sin regenerar por falta de `data/interim/`, y
+confirmar el LCP con `make rendimiento` tras el peso del `datalist`.
+
+## Cierre: las cifras de la ficha documentada, recalculadas (2026-09-07)
+
+### Contexto
+
+El usuario pidió corregir las cifras viejas de `docs/AUTHOR_PROFILE.md`, que
+esta serie de sesiones venía arrastrando como pendiente: decía 538 entidades
+publicadas y 84 formas fusionadas en 37 personas, cuando el artefacto declara
+530 y 94 en 39.
+
+### Qué se corrigió, y contra qué
+
+Ninguna cifra se copió de otro documento: todas salen de `authors.json` y de las
+530 fichas de `data/processed/author/`, recalculadas en esta sesión.
+
+| Dato | Decía | Dice |
+|---|---|---|
+| Entidades publicadas | 538 | **530** |
+| Consolidación | 84 formas en 37 personas | **94 en 39** (37 por revisión humana, 2 por diacríticos) y 4 descartadas |
+| Unidad académica | 353/589 (60 %) | **316/530 (59,6 %)** |
+| Scopus Author ID | 575/589 (97,6 %) | **522/530 (98,5 %)** |
+| ORCID | 274/538 (50,9 %) | **268/530 (50,6 %)** |
+| Bajo el umbral (n<5) | 538 de 589 | **480 de 530** |
+| ORCID `verificado` | 139 | **154** |
+| ORCID `declarado por el titular` | 43 | **37** |
+| ORCID `confirmado por revisión` | 15 | **21** |
+| ORCID `no verificable` | 16 | **18** |
+| ORCID `sin confirmar` | 3 | **8** |
+| ORCID `comprobado por revisión` | 0 | **29** |
+| ORCID `encontrado por revisión` | 0 | **1** |
+
+Los siete veredictos suman las 268 entidades con ORCID, comprobado. Las dos
+etiquetas de revisión ya no están en cero, así que el párrafo que explicaba su
+cero se reescribió en vez de dejarlo contradiciendo a su propia tabla.
+
+Todas las bases pasan a estar medidas sobre **entidades publicadas** y no sobre
+formas de firma de la fuente, que es la mezcla que hacía irreconciliables las
+cifras. El documento declara arriba su base y su fecha.
+
+### Dos hallazgos que no eran cifras
+
+- **La ficha no muestra colaboración internacional**, y el documento la daba
+  por disponible con un ✅. La ficha publica cinco cifras —publicaciones, citas,
+  citas por publicación, h-index en ventana y top 10 %—, la evolución temporal y
+  la coautoría interna. El indicador existe por publicación y en el informe
+  recortado a esa firma, no en la ficha. Corregido a ❌ con la explicación.
+- **El §5 seguía pidiendo una decisión ya tomada.** Preguntaba si se publican
+  todas las firmas o un subconjunto validado; el sitio publica las 530 con su
+  estado de identidad visible y ofrece n ≥ 5 como vista por defecto, que era
+  justo la recomendación de esa sección, y `D-518` extendió el mismo criterio al
+  informe personal. Se cierra la pregunta con lo implementado en vez de dejar
+  abierta una decisión que la práctica ya resolvió.
+
+Se añadió un §6 con cómo se rehace cada cifra, para que la próxima divergencia
+se resuelva mirando el artefacto y no discutiendo entre documentos.
+
+### Lo que NO se tocó, y hace falta decidir
+
+Las mismas cifras viejas viven en **nueve documentos más**: `ARCHITECTURE.md`
+(cuatro veces), `DEPLOYMENT.md`, `FUENTES_Y_APIS.md`, `INDICATORS.md` (`P-06` y
+`AU-05`, más una nota al pie), `LIMITATIONS.md`, `ORCID_COVERAGE.md`,
+`DATA_LICENSE.md`, `V2_BACKLOG.md` (`T-11`) y `AUDIT_REPORT.md`.
+
+No se barren de oficio porque **no todas son errores**: la nota al pie de
+`INDICATORS.md` describe a propósito la decisión de una revisión histórica
+fechada, y reescribirla borraría el historial en vez de corregirlo. Otras —«el
+build actual: 823 publicaciones, 538 fichas»— sí son afirmaciones falsas sobre
+el estado de hoy. Hay que leerlas una por una.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-531 | `AUTHOR_PROFILE.md` declara arriba su base y su fecha, y al final cómo se recalcula cada cifra | El documento mezclaba dos bases —formas de firma de la fuente y entidades publicadas— sin decir cuál era cuál, que es la misma razón por la que `STATE.md` declara la base de cada cifra canónica. Sin eso, dos números correctos parecen contradecirse y el que envejece no se distingue del que no |
+| D-532 | Las cifras del documento se miden sobre entidades publicadas | Es lo que describe: una ficha por entidad. Medir sobre 589 describía la fuente, no lo publicado, y ninguna de las dos lecturas quedaba clara |
+
+### Archivos
+
+- `docs/AUTHOR_PROFILE.md`
+
+### Pendientes
+
+- **Las mismas cifras en nueve documentos más**, listados arriba. Pendiente de
+  decidir el alcance: barrer sólo las afirmaciones sobre el estado actual, o
+  también las que describen decisiones históricas fechadas.
+- `STATE.md` sin regenerar por falta de `data/interim/`, y confirmar el LCP con
+  `make rendimiento`.
+
+## Cierre: barrido de cifras viejas, sólo donde hablan del presente (2026-09-07)
+
+### Contexto
+
+El usuario pidió corregir, de los nueve documentos que arrastraban las cifras
+anteriores a la última consolidación, **sólo las menciones que describen el
+estado actual**, dejando intactas las que describen decisiones o corridas
+fechadas.
+
+### Qué se corrigió
+
+Diez archivos. Todas las cifras salen de los artefactos, recalculadas en la
+sesión anterior y reutilizadas aquí sin volver a copiarlas de ningún documento.
+
+| Archivo | Qué decía | Dice |
+|---|---|---|
+| `README.md` | 538 fichas · `dist/` ~3,5 MB | 530 · ~3,8 MB |
+| `ARCHITECTURE.md` (×4) | 538 entidades, 538 archivos, 538 páginas | 530 |
+| `DEPLOYMENT.md` | 538 fichas; y la tabla de peso entera | 530; `dist/` 3,8 MB, `publications.json` 866 KB, portada 13 KB, ficha ~2 KB de mediana |
+| `FUENTES_Y_APIS.md` | 327 formas · 274 de 538 · revisión por afiliación 25 | 328 · 268 de 530 · 26 |
+| `LIMITATIONS.md` (×2) | 538 entidades · 84 en 37 · 327/274 | 530 · 94 en 39 · 328/268 |
+| `ORCID_COVERAGE.md` (×5) | 538 · 84 en 37 · 274 (50,9 %) · 327 | 530 · 94 en 39 · 268 (50,6 %) · 328 |
+| `DATA_LICENSE.md` | 84 formas en 37 personas | 94 en 39 |
+| `V2_BACKLOG.md` (×5) | 538 · 84 en 37 · 274 (50,9 %) · 327 | 530 · 94 en 39 · 268 (50,6 %) · 328 |
+| `INDICATORS.md` (×4) | 538 publicadas · 542 · 84 en 37 · 327/274 · n<5 538 de 589 | 530 · 534 · 94 en 39 · 328/268 · 480 de 530 |
+| `METHODOLOGY.md` | n<5: 538 de 589 autores | 480 de las 530 entidades publicadas |
+
+`T-11` en el backlog dejó de estar «sin confirmar»: el alcance de publicación lo
+confirmó `D-518` y la práctica ya lo aplicaba.
+
+### Qué se dejó intacto, y por qué
+
+Cuatro menciones sobreviven con la cifra vieja porque **son ciertas donde
+están**:
+
+- `AUDIT_REPORT.md` y `VALIDATION_REPORT.md` son salidas fechadas de los
+  scripts de auditoría, reejecutables. Su «538» no es la base publicada sino
+  los autores con n<5 de aquella corrida, y reescribirlo falsificaría un
+  informe con fecha.
+- `ORCID_GUIDE.md` explica el resultado de la primera corrida (2026-08-01) con
+  las cifras de ese día, bajo un encabezado que lo declara.
+- `DECISIONS.md` es generado, y la fila de `D-433` razona sobre lo que era
+  cierto cuando se decidió.
+
+### Lo que no se pudo recalcular
+
+`INDICATORS.md` (`AU-03`) dice que 497 de 589 autores tienen h ≤ 1. No se toca:
+el h-index sólo se publica por encima del umbral —50 fichas—, así que la cifra
+no se puede rehacer desde los artefactos sin recalcular el índice para las 480
+restantes. Queda anotado.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-533 | Una cifra vieja se corrige donde afirma el presente y se conserva donde describe una corrida o una decisión fechada | Un informe de auditoría con fecha y un reporte generado son evidencia de lo que se midió aquel día; reescribirlos no corrige un error, borra el historial. La distinción la marca el encabezado del documento, no la cifra |
+
+### Archivos
+
+`README.md`, `docs/ARCHITECTURE.md`, `docs/DEPLOYMENT.md`,
+`docs/FUENTES_Y_APIS.md`, `docs/LIMITATIONS.md`, `docs/ORCID_COVERAGE.md`,
+`docs/DATA_LICENSE.md`, `docs/V2_BACKLOG.md`, `docs/INDICATORS.md`,
+`docs/METHODOLOGY.md`
+
+### Pendientes
+
+- `AU-03`: 497 de 589 con h ≤ 1, sin recalcular.
+- `STATE.md` sin regenerar por falta de `data/interim/`; y confirmar el LCP con
+  `make rendimiento`.
+
+## Cierre: el h-index de AU-03, recalculado sobre la base publicada (2026-09-07)
+
+### Contexto
+
+El usuario pidió recalcular la cifra de `AU-03` que la sesión anterior dejó
+anotada como no rehacible: «497 de 589 autores tienen h ≤ 1».
+
+**Esto pisa terreno decidido, y conviene decirlo.** `D-396` resolvió que la
+advertencia de `AU-03` no se portara a otra base porque hacerlo implicaba
+computar el h de todas las entidades, cosa que `03_authors.py` no hace a
+propósito; y `D-397` dejó el 497/589 como nota interna de factibilidad,
+argumentando que cambiarlo exigiría re-correr ese análisis. Una petición
+explícita del usuario en la sesión actual manda sobre una decisión anterior
+(`CLAUDE.md`, orden de precedencia), así que se recalcula — pero se recalcula
+de forma que ninguno de los dos fundamentos quede violado.
+
+### Cómo se recalculó
+
+Con la **misma** función `h_index()` de `src/build/03_authors.py`, aplicada a
+las `publicaciones` de las 530 fichas. No es otra métrica ni otro criterio: es
+la del build sobre toda la base.
+
+La comprobación que lo sostiene: **reproduce sin una sola discrepancia los 50
+valores de h que el sitio publica**. Si el recálculo hubiera cambiado la
+definición, esos 50 no cuadrarían.
+
+| h | Entidades |
+|---:|---:|
+| 0 | 188 |
+| 1 | 254 |
+| 2 | 44 |
+| 3 o más | 44 |
+
+- **h ≤ 1: 442 de 530 (83,4 %)**, frente al 497 de 589 anterior.
+- Máximo 9.
+- Entre las **50 fichas donde el sitio sí publica el h** (n ≥ 5): mediana 3,
+  máximo 9 y sólo 4 con h ≤ 1.
+
+Ese último dato es el que faltaba y cambia la lectura: el indicador no
+discrimina **sobre el conjunto entero**, que es casi todo gente con una o dos
+publicaciones, pero sí separa donde se publica. Es el argumento del gate `n ≥ 5`
+medido en vez de afirmado.
+
+### Qué se tocó
+
+- `docs/INDICATORS.md` (`AU-03`) con la cifra nueva y una nota al pie que
+  declara el método, el reparto y la relación con la cifra vieja.
+- `docs/GLOSSARY.md`, que es la **fuente** del tooltip del sitio, con el mismo
+  cambio en el lenguaje del glosario.
+- `data/processed/glossary.json` y `ejes.json`, regenerados con
+  `04_glossary.py` porque CI **no** reconstruye los artefactos: el despliegue
+  ensambla `dist/` desde `data/processed/`, así que sin regenerar el artefacto
+  el sitio seguiría enseñando el texto viejo.
+
+`src/analysis/indicator_feasibility.py` **no se toca** (`D-397`): su 497/589
+mide formas de firma sin consolidar, que es otra población, y su campo dinámico
+ya recalcula el recuento cuando el análisis se re-corre.
+
+### Un efecto colateral declarado
+
+Los dos artefactos regenerados llevan `fecha_build` 2026-09-07 y el resto sigue
+en 2026-09-04. No se ve en el sitio —el pie lee `meta.json`— y se resuelve solo
+en el próximo `make sitio` completo. Se prefiere esa asimetría a dejar el
+tooltip mintiendo, y a editar a mano un artefacto generado.
+
+### Verificación
+
+Batería completa sin fallos, con el sitio reconstruido y el tooltip nuevo
+comprobado dentro de `dist/data/glossary.json`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-534 | La advertencia de `AU-03` se mide sobre las entidades publicadas y declara su base | La cifra anterior mezclaba población: describía firmas sin consolidar mientras la fila hablaba de lo publicado. `D-396` seguía en pie —el h se publica sólo con n ≥ 5— porque calcular una distribución para el análisis no es publicar el h de nadie |
+| D-535 | Recalcular con la función del propio build, y validar contra los 50 valores publicados antes de citar el resultado | Es lo que separa derivar de inventar, que es la línea que `D-396` defendía. Sin esa validación, cualquier reimplementación del h sería una métrica nueva con el mismo nombre |
+
+## Cierre: la ficha impresa por sí sola ya no se declara «informe completo» (2026-09-07)
+
+### Contexto
+
+El usuario preguntó si se puede generar un informe desde el sitio. Al
+comprobarlo apareció un defecto en lo entregado esta misma serie de sesiones.
+
+### El defecto
+
+El botón «Descargar informe» existe en las doce páginas, así que una ficha se
+puede imprimir directamente desde el directorio de autores. Al hacerlo, la
+línea de declaración decía **«Sin filtros: el informe completo, 823
+publicaciones»** sobre una hoja que enseña a UNA persona: el valor por defecto
+que el cromo deja pre-renderizado, correcto en la portada y falso aquí.
+
+Es el peor sitio posible para esa frase. Un PDF nominal presentándose como el
+informe institucional completo es justo la lectura que las salvaguardas del
+informe personal existen para impedir. Dentro de `make informe` no ocurría —el
+generador le pasa el recorte a la ficha—, sólo por la vía del navegador, que es
+la que usa cualquiera.
+
+Medido también en `publicaciones.html`, `autores.html` e `indicadores.html`:
+ahí la frase se queda, y es correcta. Ninguna de las tres muestra un
+subconjunto: enseñan el informe sin filtrar.
+
+### El arreglo
+
+`fichaAutor()` escribe su propia declaración con la misma redacción que el
+resto —`c.fraseRecorte()`— y con las cifras que la ficha ya tiene: sus
+publicaciones y el universo de su propio `meta`. Queda «Recorte aplicado:
+Autor: Abara J.F. 1 de 823 publicaciones». Cuando la ficha llega dentro de un
+informe recortado, el despachador ya había escrito esa línea desde la URL y
+ésta la confirma con las mismas palabras.
+
+### Verificación
+
+Caso nuevo en la compuerta de impresión, y probado en negativo sobre `dist/`:
+sin el arreglo canta las tres cosas —falta la declaración, falta la persona, y
+aparece «Sin filtros»—. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-536 | Una página que enseña a una persona declara a esa persona en el papel, aunque no haya filtro en la URL | El valor por defecto del cromo describe el informe, no la hoja. Donde la hoja es un subconjunto —la ficha— heredarlo convierte un PDF nominal en uno que dice ser el informe institucional completo |
+
+### Archivos
+
+- `web/assets/js/paginas.js`, `src/verify/impresion.mjs`
+
+### Pendientes
+
+Sin cambios: `STATE.md` sin regenerar por falta de `data/interim/`, y confirmar
+el LCP con `make rendimiento`.
+
+## Cierre: formato del gráfico en papel, y qué muestra cada uno (2026-09-07)
+
+### Contexto
+
+El usuario pidió dos cosas para el informe descargado: que los gráficos se vean
+bien, y que el documento explique qué significa el dato visualizado.
+
+### Lo que faltaba
+
+En pantalla, quien no entiende una figura tiene la ayuda contextual, el glosario
+y el panel de la sección a un clic. **En el PDF no tiene nada**: la ayuda es un
+panel que aparece al pasar el puntero. El informe archivado enseñaba figuras sin
+decir qué cuenta cada barra.
+
+Y el formato tenía dos defectos medidos, no supuestos:
+
+- **La sección de colaboración salía en 49 hojas.** En papel se despliegan todas
+  las vistas de cada módulo, y la red tiene cuatro: nodos, matriz, arcos y la
+  tabla de pares. Esa tabla —una fila por par de firmas que coautoró— ocupaba
+  unas cuarenta hojas de listado.
+- **Ningún bloque de gráfico cabía en una hoja.** `.corte` no estaba en ninguna
+  regla de corte de página —sólo `.modulo`, de las páginas antiguas—, y con el
+  interlineado de pantalla las 21 filas de «Áreas temáticas» ocupaban 1.048 px,
+  más que una hoja útil, empujando fuera la explicación y el sello del gráfico
+  al que pertenecen.
+
+### El formato
+
+Cinco partes por gráfico, en la misma hoja: título, figura, tabla equivalente,
+**Qué muestra** y **Cuidado**, y el sello con fuente, corte, N y cobertura.
+
+- **`docs/LECTURAS.md`** (nuevo): una lectura por gráfico, 18 en total. Describe
+  la figura —qué cuenta una barra, un punto o un segmento— y no repite ni la
+  advertencia metodológica ni la definición del indicador, que ya viven en
+  `config/indicators.yml` y en `docs/INDICATORS.md`.
+- **`04_glossary.py`** lo serializa a `lecturas.json`, junto al glosario y los
+  ejes, y **verifica** contra `vista_explorador.js` que ningún gráfico se quede
+  sin lectura y que ninguna lectura sobre. La lista de gráficos no se escribe en
+  el guion: se lee de donde se declara.
+- **Cuidado** es la advertencia del catálogo, y sólo se imprime si el corte no
+  trae aviso propio.
+- **Ajustes de papel**: figura con tope de 90 mm, tabla a 8 pt con 1,5 pt por
+  celda, sello sin marco de tarjeta, leyenda de trama apretada, y las cuatro
+  piezas indivisibles declaradas aparte para que, si un bloque no cupiera, el
+  corte caiga dentro de la tabla y nunca a mitad de una figura.
+- **La red imprime una vista**, la de nodos, y declara en la hoja que la matriz,
+  los arcos y la tabla de pares se consultan en el sitio.
+
+### Medido, antes y después
+
+| Sección | Hojas antes | Hojas después |
+|---|---:|---:|
+| Portada | 6 | 5 |
+| Producción | 10 | 8 |
+| Impacto | 8 | 6 |
+| Colaboración | **49** | **7** |
+| Temática | 8 | 5 |
+
+A ancho de A4, ningún bloque de gráfico supera la hoja útil: el más alto es 972
+px sobre 995 disponibles. Ninguna figura se parte. Las 18 lecturas llegan al PDF
+como texto.
+
+### Verificación
+
+Dos comprobaciones nuevas en la compuerta de impresión, y las lecturas se leen
+del artefacto en vez de copiarse: si alguien reescribe `LECTURAS.md`, la
+compuerta sigue midiendo que el texto revisado llega a la hoja. La de
+colaboración además prohíbe la cabecera de la tabla de pares y pone techo de 12
+hojas, que es lo que impide que un listado sin tope vuelva a convertir la
+sección en un anexo. Probada en negativo la guarda del build: quitando la
+lectura de `T-04`, el build aborta nombrándola. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-537 | Cada gráfico del informe lleva una línea «Qué muestra», y el build se detiene si falta | En el PDF no hay ayuda contextual que rescate a nadie: la figura sin su lectura es un dibujo sin unidad de medida. Un gráfico sin ella se imprime igual y sin señal de que falta, que es la familia de defectos que ya obligó a comprobar el PDF y no el DOM |
+| D-538 | Las lecturas viven en `docs/LECTURAS.md`, no en `config/indicators.yml` | Es prosa metodológica y se revisa como documento, igual que los ejes y el glosario. En config va el parámetro; en docs, la frase que alguien tiene que leer y aprobar |
+| D-539 | La advertencia del catálogo se imprime sólo si el corte no trae aviso propio | Dos textos sobre lo mismo, juntos en una hoja, se leen como dos advertencias distintas |
+| D-540 | El bloque de gráfico es la unidad de página, y para que quepa se aprieta la tabla, no la figura | La figura es lo que no se puede reconstruir mirando otra cosa; la tabla a 8 pt sigue siendo legible y es la misma información. Apretar la figura habría hecho ilegible lo único que la tabla no sustituye |
+| D-541 | La red de coautoría imprime una sola vista y su tabla de pares se queda en el sitio | Cuarenta hojas de pares no son parte de un informe, son un anexo que nadie lee: el mismo criterio por el que el PDF no vuelca publicaciones ni autores. Lo retirado se declara en la hoja |
+
+### Archivos
+
+- `docs/LECTURAS.md` (nuevo), `src/build/04_glossary.py`
+- `web/assets/js/vista_explorador.js`, `paginas.js`, `src/build/prerender.mjs`
+- `web/assets/css/app.css`, `src/verify/impresion.mjs`, `docs/UX_UI.md`
+
+### Pendientes
+
+- `data/processed/lecturas.json` es un artefacto nuevo y **CI ensambla `dist/`
+  desde `data/processed/`**, así que va versionado; el resto de artefactos
+  seguirá con su fecha de build hasta el próximo `make sitio` completo.
+- Los de siempre: `STATE.md` sin regenerar y confirmar el LCP con
+  `make rendimiento`.
+
+## Cierre: elegir gráficos, independiente de la sección (2026-09-07)
+
+### Contexto
+
+El usuario pidió un mecanismo para seleccionar un gráfico sin depender de en qué
+sección vive.
+
+### El mecanismo
+
+- **`grafico=I-04|T-05` en la URL**, junto al recorte y con la misma gramática:
+  se comparte, se cita y se descarga igual. Cada sección dibuja sólo los suyos
+  que estén elegidos.
+- **El catálogo de indicadores es la superficie de selección**, porque es la
+  única página donde los diecisiete se ven juntos: en una sección sólo están los
+  suyos, y elegir «independiente de la sección» exige verlos todos a la vez. Una
+  casilla por gráfico —el mismo patrón de casilla y barra de acciones que ya usa
+  el listado de publicaciones— y una barra que ofrece dos salidas: el informe en
+  pantalla y la orden lista para el PDF.
+- **`informe_pdf.mjs` salta las secciones sin ninguna figura elegida.** La
+  portada y el anexo metodológico se quedan siempre: la primera lleva las cifras
+  y la declaración, y el segundo es lo que hace interpretable cualquier figura.
+
+### La distinción que ordena el diseño
+
+Un filtro cambia **qué publicaciones se cuentan**; una selección cambia **qué
+figuras se muestran**. Por eso `grafico` NO es una dimensión: no filtra datos,
+no tiene facetas y no entra en `describir()`, que es la frase que declara sobre
+qué está medido el informe. Se declara en su propia línea —«Selección: 2 de los
+17 gráficos del informe. Las cifras no cambian»— y en todas las páginas.
+
+Mezclarlas habría producido una hoja que dice «recortado a I-04», como si los
+datos estuvieran restringidos a algo, sobre cifras que son las del conjunto
+entero.
+
+### Un detalle que lo habría dejado mudo
+
+El repintado inicial se salta cuando la página viene pre-renderizada y no hay
+recorte (`D-…`, para no destruir un LCP que ya ocurrió). Con una selección y sin
+filtros, esa condición se cumplía: la página enseñaba los dieciocho gráficos
+mientras la hoja declaraba que eran dos. La condición ahora mira también la
+selección. Se detectó midiendo, no leyendo: la primera corrida de la
+comprobación dibujó las cinco figuras de impacto.
+
+### La vista de escuelas
+
+No se elige aparte. Es la misma `P-07` un nivel más abajo, así que viene con
+ella (`seleccionCon: 'P-07'`). Conserva su lectura propia —son dos figuras y
+cada una explica qué cuenta— pero no cuenta como indicador seleccionable: son
+17 elegibles para 18 figuras, y cada cifra dice cuál de las dos cosas cuenta.
+
+### Verificación
+
+Ocho comprobaciones de punta a punta: las casillas del catálogo, el estado y las
+dos salidas de la barra, que impacto dibuje sólo `I-04` y temática sólo `T-05`,
+que producción declare que no tiene ninguno elegido, y que el PDF lleve la
+declaración de selección, traiga la figura elegida y no las otras. Cero errores
+de consola.
+
+Caso nuevo en la compuerta de impresión, con las lecturas leídas del artefacto:
+exige la línea de selección y la lectura del gráfico elegido, y prohíbe las de
+dos que no se eligieron. Informe generado con tres gráficos de dos secciones: se
+imprimieron cinco secciones en vez de seis, sin colaboración. Batería completa
+sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-542 | La selección de gráficos viaja en la URL junto al recorte, pero NO es una dimensión | Un filtro cambia qué se cuenta y una selección cambia qué se muestra. Como dimensión habría entrado en la frase del recorte y una hoja diría «recortado a I-04» sobre cifras del conjunto entero |
+| D-543 | El catálogo de indicadores es la superficie de selección | Es la única página donde los gráficos se ven todos juntos; en una sección sólo están los suyos, que es justo lo que el mecanismo tiene que superar |
+| D-544 | Una hoja con selección declara que es parcial, en su propia línea | Un informe de dos figuras que no lo diga se lee como el informe entero. La línea aclara además que las cifras no cambian, porque la selección no es una submuestra |
+| D-545 | Las secciones sin ninguna figura elegida no se imprimen; la portada y el anexo, siempre | Tres secciones diciendo que no tienen nada que enseñar no son parte de un informe. El anexo se queda porque un informe de tres figuras necesita más su clave de lectura, no menos |
+| D-546 | La vista de escuelas se elige con `P-07` y no aparte | No es otro indicador, es la misma producción por unidad un nivel más abajo. Conserva lectura propia porque son dos figuras |
+
+### Archivos
+
+- `web/assets/js/explorador.js`, `vista_explorador.js`, `vista.js`, `paginas.js`,
+  `core.js`, `web/assets/css/app.css`
+- `src/build/prerender.mjs`, `src/build/informe_pdf.mjs`, `src/verify/impresion.mjs`
+- `docs/UX_UI.md`
+
+### Pendientes
+
+Los de siempre: `STATE.md` sin regenerar por falta de `data/interim/`, y
+confirmar el LCP con `make rendimiento`.
+
+---
+
+## Cierre: el botón de descarga, documentado donde se busca (2026-09-08)
+
+### La pregunta
+
+«¿Cada vez que quiera generar un informe tendrá que ser a través de un
+comando?» La respuesta era no —el botón «Descargar informe» está en la barra de
+vigencia de las doce páginas del sitio— pero **no estaba escrita en ninguna
+parte donde alguien la fuera a buscar**. `docs/UX_UI.md` §12.7 bis explica el
+diseño del informe descargable con detalle, y es el documento correcto para el
+porqué; `docs/OPERACION.md`, que es la guía de uso paso a paso, no mencionaba ni
+el botón ni `make informe`.
+
+Una guía de operación que omite cómo obtener el entregable del proyecto empuja a
+su lector al comando, que es la vía cara para el caso normal.
+
+### Lo que se documentó
+
+Paso 4 bis, después de reconstruir el sitio y antes de los conectores, porque
+generar un informe exige `dist/` y nada más:
+
+- **El botón es la vía normal.** Imprime la página en la que se está, con el
+  recorte y la selección de gráficos ya aplicados, porque ambos viven en la
+  dirección. Lo que se ve es lo que sale.
+- **Los dos ajustes del diálogo que cambian el resultado**, con lo que se pierde
+  en cada caso: «Gráficos de fondo» apagado quita el tinte de las bandas de
+  aviso —que conservan borde y texto— y «Encabezados y pies» encendido estampa
+  la dirección web en cada hoja. Tamaño y márgenes NO dependen del diálogo: los
+  fija `@page`.
+- **El comando es para el informe completo**, con lo que eso significa de
+  verdad: recorre seis páginas y deja **seis archivos**, uno por sección. Se
+  dice explícitamente, porque «informe completo» se lee como un PDF único y no
+  lo es (unir PDF exigiría una dependencia de manipulación que el proyecto no
+  tiene).
+- **`npm install`**, que el Paso 1 no cubre: Node y Chromium hacen falta para
+  esto y para `make verificar`, no para el sitio.
+- **Los ejemplos de `RECORTE`**, corridos antes de escribirlos.
+
+### Dos correcciones que salieron de escribirlo
+
+**El valor de unidad estaba inventado.** El primer borrador traía
+`unidad="Facultad de Medicina"`. La unidad del corpus es **«Facultad de Medicina
+y Salud»**, 382 publicaciones. Un ejemplo que no corre es peor que ninguno.
+Corregido y verificado con el comando de verdad.
+
+**El resumen del generador se contradecía con el PDF.** `informe_pdf.mjs`
+terminaba diciendo «Declara en la hoja 1: el recorte aplicado» siempre que
+hubiera consulta, y una selección de gráficos sin filtros es consulta sin ser
+recorte: la hoja dice «Sin filtros: el informe completo» más la línea de
+selección, o sea lo contrario de lo que anunciaba la consola. Es la misma
+distinción de `D-542`, que se había aplicado al papel y no al mensaje. Ahora
+mira si queda alguna clave que no sea `grafico`, y nombra las dos cosas por
+separado. Comprobado en los cuatro casos: sin nada, sólo selección, sólo
+recorte, y ambos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-547 | El botón se documenta en `docs/OPERACION.md`, no sólo en `docs/UX_UI.md` | Son dos preguntas distintas: UX_UI responde por qué el informe es así, OPERACION responde cómo se obtiene. Quien quiere su PDF abre la guía de uso, y allí no estaba |
+| D-548 | El resumen de `informe_pdf.mjs` distingue recorte de selección | Una selección sin filtros es consulta sin ser recorte, y la consola afirmaba lo contrario de lo que declara la hoja. La distinción de `D-542` vale también para lo que el generador dice de sí mismo |
+
+### Archivos
+
+- `docs/OPERACION.md` — Paso 4 bis, cuatro filas nuevas en «Si algo sale mal» y
+  tres en «Dónde está lo demás»
+- `README.md` — el índice no listaba `docs/LECTURAS.md` ni
+  `docs/INFORME_POR_INVESTIGADOR.md`, que existen desde hace dos sesiones
+- `src/build/informe_pdf.mjs` — el resumen final
+
+### Verificación
+
+Los tres ejemplos documentados, corridos: completo (6 secciones), por unidad
+(6 secciones, recorte declarado) y por selección de gráficos (5 secciones). Los
+cuatro casos del mensaje corregido. Batería completa sin fallos.
+
+### Una trampa de `make estado` en un clon limpio
+
+`docs/DECISIONS.md` sí se regeneró: `D-547` y `D-548` están en el índice. Pero
+`STATE.md` **se revirtió**, y conviene que quede escrito por qué.
+
+`internal/*` está en `.gitignore` salvo su README, y `data/interim/` también.
+En un clon limpio —el entorno remoto lo es— esos archivos **no existen**, así
+que `src/state/snapshot.py` genera un `STATE.md` que ha perdido, en silencio:
+
+- cinco cifras canónicas (formas de firma 589, apariciones 1207, pares 1205,
+  reglas de validación 30, bloqueantes fallando 0);
+- la tabla entera de colas internas, quince filas, que queda vacía;
+- la frase de los 284 casos de revisión con 82 pendientes.
+
+Un `STATE.md` así no dice «no lo sé»: dice que no hay colas. Es el punto de
+entrada de la sesión siguiente, y afirmar cero pendientes internos donde hay
+ochenta y dos es peor que un archivo viejo. Revertido con `git checkout`, que
+es lo que corresponde a un derivado: no se arregla a mano, se vuelve a generar
+donde sus insumos existen.
+
+**Abierto, decisión del responsable:** que `snapshot.py` se detenga —o escriba
+«sin datos» en vez de una tabla vacía— cuando sus insumos no están. Es el mismo
+patrón de compuerta que el resto del proyecto ya usa, pero es un cambio al
+sistema de memoria y no se toma de paso.
+
+### Pendientes
+
+`STATE.md` sigue sin regenerar, ahora con la razón anotada arriba; hay que
+correr `make estado` en el equipo que tiene `internal/` y `data/interim/`.
+Y confirmar el LCP con `make rendimiento`.
+
+---
+
+## Cierre: la compuerta del generador de estado (2026-09-08)
+
+Cierra la ambigüedad que quedó abierta hace un rato en esta misma fecha: qué
+hace `src/state/snapshot.py` cuando no tiene con qué generar `STATE.md`.
+
+### El defecto
+
+`STATE.md` se deriva en parte de `internal/*` y de `data/interim/`, que están en
+`.gitignore` —capa interna y derivados regenerables—, así que **en un clon
+limpio no existen**. El generador los leía con `if p.exists()` y seguía adelante
+sin ellos. El resultado no era un archivo incompleto que se declarara
+incompleto: era un archivo que afirmaba de menos.
+
+Concretamente, corriendo `make estado` aquí se perdían cinco cifras canónicas
+—formas de firma, apariciones, pares, reglas de validación y bloqueantes
+fallando— y la tabla de colas de revisión quedaba con encabezado y sin filas,
+que es la forma tipográfica de decir «no hay ninguna» cuando hay quince colas y
+82 casos pendientes.
+
+Y es el archivo que `CLAUDE.md` designa punto de entrada: la sesión siguiente
+empieza leyendo eso. El Paso 7 de la guía de operación dice `git add -A`.
+
+### La compuerta
+
+Es el patrón que el proyecto ya usa tres veces en el build: detenerse, no
+avisar.
+
+- **Si faltan insumos, `STATE.md` no se toca.** El guion sale con 1 nombrando
+  cada archivo ausente, qué cifra o qué tabla se pierde con él y con qué orden
+  se rehace. El archivo bueno que había en el repositorio sigue ahí.
+- **`docs/DECISIONS.md` se regenera siempre.** Su única fuente es
+  `SESSION_NOTES.md`, que sí está versionada: ahí no hay nada que pueda faltar,
+  y bloquearlo habría quitado una capacidad que funciona bien en cualquier
+  clon. Por eso la compuerta está entre las dos escrituras y no al principio.
+- **`--parcial` es la salida explícita**, y el archivo se declara a sí mismo:
+  una advertencia en su primera línea, antes que nada, con la lista de lo que
+  falta. También sale con 1, para que ninguna automatización lo dé por bueno.
+- **La tabla de colas vacía se sustituye por una frase**: «no está vacía porque
+  no haya colas, está vacía porque no se han podido contar». Una tabla con
+  encabezado y sin filas es una afirmación, y era falsa.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-549 | `snapshot.py` no escribe `STATE.md` si le faltan insumos; `docs/DECISIONS.md` se regenera siempre | Los insumos de `STATE.md` no se versionan y en un clon limpio producían un archivo que afirmaba cero colas donde hay 82 casos pendientes. `DECISIONS.md` deriva sólo de `SESSION_NOTES.md`, que sí está versionada, y no puede degradarse |
+
+### Verificación
+
+Las tres vías, corridas: sin insumos se detiene con exit 1 y `STATE.md` queda
+byte a byte como estaba; con `--parcial` lo escribe con la advertencia en su
+primera línea y la frase en lugar de la tabla; y con los cuatro insumos
+presentes —sintéticos, creados y borrados en la misma corrida— vuelve a la vía
+normal, exit 0, sin advertencia, 19 cifras canónicas en vez de 13.
+
+### Archivos
+
+- `src/state/snapshot.py`
+- `docs/OPERACION.md` — Paso 8 y una fila más en «Si algo sale mal»
+
+### Pendientes
+
+`STATE.md` sigue sin regenerar, ahora por decisión del propio guion. Hay que
+correr `make estado` en el equipo que tiene `internal/` y `data/interim/`, y
+ahí entrarán `D-547`, `D-548` y `D-549`. Y confirmar el LCP con
+`make rendimiento`.
+
+---
+
+## Cierre: el informe descargado, mirado hoja por hoja (2026-09-08)
+
+Hasta hoy el papel se había comprobado leyendo el TEXTO del PDF: la compuerta
+de impresión extrae las cadenas y exige que estén. Eso encuentra lo que falta y
+no ve nada de lo que sobra, se parte o se imprime ilegible. Se montó un visor
+—Chromium y pdf.js, la pareja que el proyecto ya usa— que rasteriza hojas a
+PNG, y se miraron una por una las 47 del informe completo.
+
+Siete defectos, ninguno visible desde el código.
+
+### 1. Las tarjetas de cifra se partían por la mitad
+
+La hoja 1 terminaba con dos tarjetas cortadas y la 2 abría con «Citas por
+publicación · 816 sobre las que tienen métricas» **sin el número**, que se
+había quedado en la anterior. Un rótulo sin su cifra no es media tarjeta: es
+una afirmación sin sujeto.
+
+Tres causas encadenadas, y las tres había que quitarlas:
+
+1. La regla existía —`.kpi { break-inside: avoid }`— y **nunca se aplicó**: las
+   cifras no son `.kpi` sino `.ficha` dentro de `.tablero`; `.kpi` es el
+   tablero de las páginas antiguas.
+2. Puesta sobre la clase correcta, tampoco: Chromium no cumple
+   `break-inside: avoid` ni sobre una rejilla ni sobre sus hijos.
+3. Reescrita como bloques en línea, **seguía sin aplicarse**: el bloque
+   `@media print` grande vive en mitad de la hoja de estilo y una consulta de
+   medios NO añade especificidad, así que `.tablero { display: grid }`,
+   escrito más abajo para la pantalla, le ganaba por orden de aparición. Se vio
+   en el PDF —las fichas salían al 24 % de ancho, que es el 49 % de media
+   columna de rejilla—, no leyendo el archivo.
+
+La hoja de estilo ya tenía una cola al final para exactamente esto, con su
+comentario explicándolo. La regla se fue allí.
+
+### 2. La tabla repetía la figura
+
+«Autores por publicación» dibujaba seis barras rotuladas con su valor y debajo
+ponía seis filas con los mismos seis números y las mismas seis etiquetas. La
+regla era «en papel no hay conmutador, así que se imprimen las dos vistas», y
+es cierta a medias: vale para el treemap, el mapa de calor y la mediana por
+año, donde la figura no rotula cada valor; no vale para una barra que ya lleva
+su cifra escrita al lado.
+
+La condición no se escribió como una lista de formas —divergiría del generador
+en cuanto se añada un gráfico—: **cada figura declara en su SVG** si rotula
+todos sus valores y todas sus categorías (`data-cifras`), y `barrasH` se marca
+`parciales` en cuanto una etiqueta no cupo. Por eso «Unidad académica»
+conserva su tabla: es el único sitio donde «Facultad de Arquitectura, Diseño y
+Estudios Creativos» aparece entero, porque la barra lo recortó. Por omisión la
+tabla se imprime: una figura que no declara nada es una figura de la que no
+sabemos si basta.
+
+### 3. El anexo metodológico salía ilegible
+
+`.banda-contraste` invierte la paleta: fondo vino profundo, tinta clara. En
+pantalla funciona. En papel depende de «Gráficos de fondo», que va **apagado
+por defecto** en Chrome: el fondo no se pinta, la tinta clara queda sobre
+blanco y el resumen metodológico —lo que hace interpretable todo lo demás— sale
+en gris pálido. Comprobado generando el mismo documento con el ajuste en sus
+dos posiciones y mirando la hoja 9.
+
+Se resuelve del lado del papel y no pidiéndole al lector que acierte con una
+casilla: una hoja es blanca, y una banda oscura es un recurso de pantalla.
+
+### 4. Cuatro tarjetas que no llevan a ninguna parte
+
+La última hoja de la portada eran cuatro tarjetas «Producción · Ver la sección
+→». En papel son cuatro promesas muertas. La banda de texto que las acompaña se
+queda: dice que cada indicador declara su denominador, y eso vale igual
+impreso.
+
+### 5. «Producción — Informe Bibliométrico», cuatro veces
+
+El titular de cada sección repetía el nombre del informe, tres líneas debajo de
+la línea de crédito que ya lo dice. La causa: `title.split('·')`, cuando el
+separador del título es «—», así que no cortaba nada. Estaba escrito **dos
+veces —en el pre-renderizador y en el navegador— y mal las dos**. Ahora hay una
+sola función en `core.js` y los dos consumidores la llaman.
+
+### 6. Sin folio
+
+Cuarenta y seis hojas repartidas en seis archivos, sin un número de página.
+«Mire la página 12» no significaba nada y una hoja suelta no decía de qué
+documento salía. Lo pone ahora `informe_pdf.mjs` con la plantilla de pie de
+Chromium: «Informe bibliométrico · Producción» a la izquierda, «Hoja 3 de 8» a
+la derecha. No puede ir en la hoja de estilo porque Chromium no implementa los
+cuadros de margen de CSS Paged Media, y ésa es la diferencia real entre las dos
+vías: el botón ofrece el folio del diálogo, con la dirección web y la fecha del
+navegador; el comando pone el del informe.
+
+### 7. Una referencia que sólo vale en pantalla
+
+El aviso de «Unidad académica» decía «el treemap, más abajo **en esta misma
+página**». En el PDF está tres hojas más allá. Ahora dice «en esta misma
+sección», que es cierto en los dos medios.
+
+### Lo que se midió y NO se cambió
+
+Convertir `.cortes` de rejilla a flujo de bloque en papel: **cero diferencia**.
+A 182 mm de ancho útil la rejilla ya resuelve a una columna. Las hojas a medio
+llenar no vienen de ahí, vienen de que cinco bloques miden entre 205 y 267 mm
+sobre una hoja útil de 263 y no pueden compartir con nadie. Queda anotado en la
+hoja de estilo para que nadie lo intente otra vez.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-550 | La tabla equivalente se imprime sólo cuando añade algo, y lo decide la figura declarándolo en su SVG | Bajo una barra rotulada la tabla repite el mismo número y la misma etiqueta. Bajo una figura que recortó una etiqueta o que no rotula sus valores, la tabla es el único sitio donde el dato está entero. Una lista de formas escrita en la hoja de estilo divergiría del generador al primer gráfico nuevo |
+| D-551 | En papel las tarjetas de cifra son bloques en línea, no una rejilla | Chromium no cumple `break-inside: avoid` sobre una rejilla ni sobre sus hijos, y una tarjeta partida deja el rótulo sin su número. Se ven igual, dos por fila |
+| D-552 | La banda de contraste se imprime en tinta sobre blanco | Su tinta clara depende de un ajuste del diálogo que va apagado por defecto: sin fondo, el texto que hace interpretable el informe sale ilegible. El papel es blanco; la banda oscura es un recurso de pantalla |
+| D-553 | La navegación entre secciones no se imprime | «Ver la sección →» en una hoja es una promesa muerta. Mismo criterio que el conmutador Gráfico ⇄ Tabla y que el bloque de recorte |
+| D-554 | El folio lo pone el generador, no la hoja de estilo | Chromium no implementa los cuadros de margen de CSS Paged Media, así que el botón no puede numerar; el comando sí, y un informe archivable sin folio no se puede citar |
+| D-555 | El nombre de la sección se calcula en un solo sitio | Estaba escrito dos veces y las dos cortaban por un separador que el título no usa. Es el defecto que este proyecto ya vio tres veces: dos definiciones de la misma regla |
+
+### Archivos
+
+- `web/assets/js/core.js` — `data-cifras` en las tres figuras que se rotulan
+  solas, y `tituloDeSeccion()`
+- `web/assets/css/app.css` — la tabla condicionada, la banda en tinta negra, la
+  navegación fuera, las fichas indivisibles en la cola del archivo
+- `web/assets/js/vista_explorador.js` — el aviso sin referencia de pantalla
+- `web/assets/js/paginas.js`, `src/build/prerender.mjs` — los dos consumidores
+  del nombre de sección
+- `src/build/informe_pdf.mjs` — el pie con folio
+
+### Pendientes y ambigüedades abiertas
+
+- **Las cifras se repiten cinco veces.** Las mismas seis tarjetas abren la
+  portada y las cuatro secciones. En un documento de seis archivos que se leen
+  sueltos eso es contexto; leído del tirón es repetición. No se tocó: es una
+  decisión sobre qué es el informe, no un defecto.
+- **Las hojas a medio llenar.** Cinco bloques ocupan casi una hoja entera y
+  dejan el resto en blanco. Reducirlo exige acortar figuras o permitir que un
+  bloque se parta, y las dos cosas tienen coste; hoy `break-inside: avoid`
+  garantiza que ninguna figura se separe de su explicación ni de su sello.
+- **Sin índice.** Cuarenta y seis hojas sin tabla de contenidos.
+- `STATE.md` sigue sin regenerar; hay que correr `make estado` en el equipo que
+  tiene `internal/` y `data/interim/`.
+
+---
+
+## Cierre: el índice del informe (2026-09-08)
+
+Cierra el tercero de los pendientes que dejó la revisión hoja por hoja de esta
+misma fecha: cuarenta y seis hojas repartidas en seis archivos sin forma de
+saber dónde está nada.
+
+### Los números de hoja se leen, no se estiman
+
+La tentación era contar bloques y estimar dónde cae cada uno. No se hizo: el
+navegador miente sobre el papel —un `<details>` cerrado mide 109 px bajo el
+medio `print` y no llega al PDF, que es la razón por la que la compuerta de
+impresión lee el documento y no el DOM—. El generador compone las secciones,
+**abre cada PDF con pdf.js y busca el título de cada figura página por
+página**, y con eso escribe el índice.
+
+Sale gratis lo que habría costado una regla aparte: con `grafico=…` lo que no
+se dibujó no aparece en el índice, sin que nadie tenga que decidir qué entra.
+Comprobado con `grafico=P-07|I-04|T-05`: el índice lista cuatro figuras en tres
+secciones —P-07 se lleva consigo la vista de escuelas, como está decidido— y no
+menciona colaboración, que no se imprimió.
+
+El precio es que la portada se compone dos veces: una para que existan las
+demás y otra ya con el índice. Son unos segundos y ocurre sólo aquí.
+
+### La autocomprobación
+
+Sin selección, todos los gráficos declarados de una sección tienen que aparecer
+en su PDF. Si uno no aparece es que su título cambió en `vista_explorador.js` y
+la búsqueda dejó de casar; el índice se quedaría corto sin decirlo. El
+generador compara y nombra los que faltan por su código.
+
+Probado en negativo: cambiando «Tipo documental» por «Tipo de documento» en el
+HTML ya construido, el generador avisa «produccion: 4 de 5 gráficos localizados
+en el PDF. Sin hoja en el índice: P-03», y el índice baja de 18 a 17. Restaurado
+después.
+
+Con selección no se comprueba: ahí faltan a propósito, y exigir cuáles
+obligaría a reimplementar la regla de selección aquí, que es la segunda
+definición que este proyecto lleva media docena de sesiones evitando.
+
+### La guía de puntos
+
+Primera versión: una ristra fija de puntos en un `::after` del título. Como la
+ristra tiene largo fijo, cada línea terminaba en un sitio distinto —se ve en el
+PDF, no en el código— y alargarla sólo mueve el problema. La guía es ahora un
+elemento vacío que crece hasta el número de hoja, con el puntillado en su borde
+inferior: mide exactamente el hueco libre, sea cual sea el título.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-556 | El índice lleva números de hoja leídos del PDF compuesto, no estimados | El navegador no sabe dónde caerá un bloque en papel; es la misma razón por la que la compuerta de impresión lee el PDF y no el DOM. Además hace que la selección de gráficos funcione sin una regla aparte |
+| D-557 | El generador comprueba que encontró todos los gráficos declarados, y nombra los que no | Un índice corto no se nota al leerlo. Si un título cambia, la búsqueda deja de casar en silencio y el índice pierde una entrada |
+| D-558 | El índice abre hoja propia, después de la portada | Un índice que empieza a media página, debajo de las cifras, no se encuentra al hojear |
+
+### Archivos
+
+- `src/build/informe_pdf.mjs` — el índice, la lectura de hojas y la
+  autocomprobación
+- `web/assets/css/app.css` — `.indice-informe`, la maqueta del índice
+- `docs/UX_UI.md`, `docs/OPERACION.md`
+
+### Pendientes
+
+De los tres que dejó la revisión de hoy quedan dos, los dos decisión del
+responsable y no defectos: **las cifras repetidas** en la portada y en las
+cuatro secciones, y **las hojas a medio llenar**, que sólo se reducen acortando
+figuras o dejando que un bloque se separe de su explicación. Y `STATE.md` sigue
+sin regenerar por falta de `internal/` y `data/interim/`.
+
+---
+
+## Cierre: el informe completo, ofrecido desde el sitio (2026-09-08)
+
+Hasta ahora el informe de seis secciones con su índice sólo existía si alguien
+tenía el proyecto instalado y corría el comando. El botón de la interfaz da otra
+cosa —la página que se está mirando, con sus filtros—, y esa diferencia es
+deliberada, pero dejaba el informe completo fuera del alcance de quien sólo
+visita el sitio.
+
+### Derivado, no comiteado
+
+La vía corta era comitear los seis PDF en `web/` y enlazarlos. Se descartó por
+dos razones, y la segunda pesa más que la primera:
+
+1. Son 3,4 MB de binarios **por cada carga de datos**, en un repositorio que
+   guarda todas las versiones.
+2. Abre el hueco de siempre: alguien actualiza los datos, olvida regenerar el
+   informe, y el sitio ofrece un PDF que dice otra cosa que sus propias páginas.
+   Es exactamente el defecto que este proyecto lleva media docena de sesiones
+   cerrando en otros sitios.
+
+El informe es un derivado del sitio, así que se deriva donde el sitio se
+publica. El despliegue lo compone dentro del `dist/` que va a subir, después de
+verificarlo, **con el Chromium que la batería ya instaló**: no cuesta una
+dependencia nueva, sólo el minuto y medio de composición. Y va con
+`continue-on-error`: si falla, el sitio se publica igual, sin el bloque.
+
+### Cómo se evita ofrecer un enlace roto
+
+El sitio se ensambla ANTES de que el informe exista —el informe necesita el
+sitio para componerse—, así que las páginas no pueden traer los enlaces
+escritos: a esa altura no se sabe si los archivos existen ni cuántas hojas
+tienen.
+
+El generador deja un manifiesto, `dist/data/informe.json`, con lo que de verdad
+compuso: archivo, sección, hojas, peso, y la fecha de build del sitio con el que
+se compuso. La portada dibuja el bloque **sólo si lo encuentra con contenido**.
+
+Y el ensamblado deja ese manifiesto **vacío**, no ausente. La diferencia
+importa: con el archivo ausente, cada visita a la portada pediría un artefacto
+inexistente y dejaría un 404 en la consola —un error de red por una función que
+simplemente no está disponible—. Con la lista vacía no se pide nada y no se
+dibuja nada.
+
+Si las dos fechas de build no coinciden, el bloque lo dice sobre los enlaces en
+vez de callarlo: «Se compuso con los datos del … y el sitio sirve los del …».
+
+### Verificación
+
+Los tres casos, comprobados en el navegador: con informe, el bloque sale con sus
+seis enlaces, el primero responde 200 y `application/pdf`, cero errores de
+consola; con el manifiesto vacío, el bloque no aparece y no hay 404; con una
+fecha de build distinta, sale la banda de aviso con las dos fechas. Batería
+completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-559 | El informe descargable se compone en el despliegue, dentro del `dist/` que se publica, y no se versiona | Es un derivado del sitio: derivarlo donde el sitio se publica hace imposible que lo contradiga. Comitearlo habría metido megabytes de binarios por carga y habría dejado el hueco de «datos nuevos, informe viejo» |
+| D-560 | La portada dibuja el bloque de descarga desde un manifiesto, nunca desde enlaces escritos a mano | El sitio se ensambla antes de que el informe exista, así que a esa altura no se sabe si los archivos están. Un enlace fijo apuntaría a un archivo que puede no estar o ser de otra carga |
+| D-561 | El ensamblado deja el manifiesto vacío, no ausente | Un artefacto que falta es un 404 en la consola de cada visita. Una lista vacía es una función que no está disponible, que es lo que de verdad ocurre |
+| D-562 | El bloque declara cuando el informe es de una carga anterior | Dos fechas de build distintas significan que el PDF puede contradecir la página desde la que se descarga, y eso se dice sobre el enlace |
+
+### Archivos
+
+- `src/build/informe_pdf.mjs` — el manifiesto
+- `src/build/06_assemble_site.py` — el manifiesto vacío
+- `web/index.html`, `web/assets/js/paginas.js`, `web/assets/css/app.css` — el bloque
+- `.github/workflows/deploy.yml` — la composición en el despliegue
+- `docs/OPERACION.md`, `docs/UX_UI.md`
+
+### Pendientes
+
+Los dos de siempre, decisión del responsable: las cifras repetidas en la portada
+y en las cuatro secciones, y las hojas a medio llenar. Y `STATE.md` sin
+regenerar por falta de `internal/` y `data/interim/`.
+
+**Sin comprobar en el despliegue real:** el paso nuevo de `deploy.yml` no ha
+corrido todavía. Está escrito para no poder tumbar la publicación, pero eso hay
+que verlo en la primera corrida sobre `main`.

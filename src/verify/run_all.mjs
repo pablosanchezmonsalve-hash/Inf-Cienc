@@ -21,6 +21,9 @@
      flujos        conmutador de vista, scroll-spy, tema, tooltip, ayuda,
                    filtros, búsqueda, ordenación y ficha de autor
      responsive    desborde horizontal en 430 px y 860 px
+     impresión     el PDF descargado: procedencia, recorte declarado, cuerpo
+                   de los paneles metodológicos, ausencia de controles y
+                   árbol de estructura — leído del PDF, no del DOM
      higiene       tokens y clases declarados vs usados, exportaciones sin
                    consumidor, id que el JS busca y no existen, y que la capa
                    interna no haya viajado
@@ -61,6 +64,7 @@ const PASOS = [
   ['estructura', 'node', ['src/verify/estructura.mjs']],
   ['flujos', 'node', ['src/verify/flujos.mjs']],
   ['responsive', 'node', ['src/verify/responsive.mjs']],
+  ['impresión', 'node', ['src/verify/impresion.mjs', DIST]],
   ['higiene', 'python3', ['src/verify/higiene.py', DIST]],
   // Sólo lee archivos y los comprime: tarda menos de un segundo, así que
   // no hay razón para dejarlo fuera como a rendimiento.mjs.

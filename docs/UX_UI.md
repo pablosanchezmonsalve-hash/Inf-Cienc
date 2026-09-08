@@ -682,6 +682,172 @@ que los módulos se partan entre páginas y **despliega las dos vistas de cada
 módulo** —la figura y la tabla—, porque en papel no hay conmutador. Los enlaces
 externos imprimen su URL.
 
+### 12.7 bis El informe descargable
+
+Se descarga por dos vías y **una sola maquetación**. El botón «Descargar
+informe», en la barra de vigencia, es `window.print()`: el navegador ya pagina,
+embebe tipografías y produce texto seleccionable, y una librería de PDF costaría
+entre 300 KB y 1 MB para, o rasterizar el texto, o obligar a reescribir el
+informe en su API de maquetación. La otra vía es `make informe`
+(`src/build/informe_pdf.mjs`), que abre las mismas páginas de `dist/` con la
+misma hoja y pide el PDF al navegador; existe porque el botón resuelve a quien
+mira una sección y no un informe completo, idéntico en cada carga y archivable.
+Deja fuera las superficies de consulta —publicaciones, autores, ficha,
+catálogo—: son tablas paginadas y volcarlas produciría un anexo de cientos de
+páginas. Quien las quiera las exporta en CSV.
+
+La hoja **declara sobre qué está medida**, porque un PDF archivado no tiene el
+sitio al lado. La primera hoja abre con dos líneas que en pantalla no existen:
+la de crédito —institución, fuentes, ventana y fecha de corte de las citas— y la
+del recorte, que dice qué filtros están aplicados y sobre cuántas publicaciones,
+o que no hay ninguno y es el informe completo. El pie añade el universo y sus
+tres denominadores (`D-16`). El bloque de recorte de la pantalla no se imprime:
+trae controles que en una hoja no llevan a ninguna parte.
+
+**El informe por persona.** `autor` es una dimensión de filtro más, con los
+nombres canónicos que el corpus ya trae. No se dibuja como las demás: 530
+pastillas no son un filtro, así que el panel enseña las firmas elegidas y un
+campo con autocompletado, y la entrada natural es el enlace de cada ficha.
+Cuando el recorte es de una persona, sobre las cifras aparecen las salvaguardas
+—la advertencia de lectura que adhiere a DORA y al Manifiesto de Leiden, y la
+de muestra reducida por debajo del umbral—, con la misma redacción que la
+ficha y no una copia. Se ofrece a las 530 entidades, no sólo a las 50 que
+superan el umbral: `docs/INFORME_POR_INVESTIGADOR.md` explica por qué.
+
+Dos cortes cambian de significado sobre una sola persona y se tratan distinto.
+La **red de coautoría se apaga** y declara por qué: recortada a una firma es una
+estrella, no una estructura de colaboración, y con quién coautoró está en su
+ficha. La **mediana por año se queda con un aviso** que dice sobre cuántas
+publicaciones se calcula: es una cifra correcta sobre pocos valores, y ocultarla
+dejaría un hueco que se leería como ausencia de dato.
+
+### Elegir gráficos, independiente de la sección
+
+Los dieciocho gráficos del informe viven repartidos en cuatro secciones, y desde
+una sección sólo se ven los suyos. El **catálogo de indicadores** es la única
+página donde están todos juntos, así que es donde se eligen: una casilla por
+gráfico, y una barra que dice cuántos van y ofrece dos salidas, el informe en
+pantalla y la orden para el PDF.
+
+La selección viaja como `grafico=I-04|T-05` **junto al recorte y con la misma
+gramática**, así que se comparte, se cita y se descarga igual. Cada sección
+dibuja sólo los suyos que estén elegidos, y la que se queda sin ninguno lo dice
+en vez de aparecer vacía. En el PDF, las secciones sin figuras elegidas no se
+imprimen; la portada y el anexo metodológico sí, siempre.
+
+**No es un recorte, y la hoja lo distingue.** Un filtro cambia *qué
+publicaciones se cuentan*; una selección cambia *qué figuras se muestran*. Por
+eso `grafico` no es una dimensión —no filtra datos, no tiene facetas y no
+aparece en la frase del recorte— y se declara en su propia línea: «Selección: 2
+de los 17 gráficos del informe. Las cifras no cambian». Sin esa distinción, una
+hoja con dos figuras se leería como un informe medido sobre una submuestra que
+no existe.
+
+La vista de escuelas no se elige aparte: es la misma `P-07` un nivel más abajo,
+así que viene con ella. Tiene lectura propia porque son dos figuras, pero no es
+otro indicador.
+
+**El informe a medida.** `make informe RECORTE="anio=2024&tipo=Article"` toma la
+misma consulta que el explorador escribe en la URL —se copia de la barra de
+direcciones— y la pasa a cada sección: las cifras, los gráficos y las tablas se
+recalculan sobre ese recorte, que es lo que el sitio ya hacía en pantalla. El
+recorte va en el nombre del archivo y, sobre todo, declarado en la hoja 1. El
+anexo metodológico también lo declara, sin cifras: no cuenta publicaciones,
+pero es parte del informe que alguien pidió y una hoja suelta que se llame
+«informe completo» contradiría a las demás del mismo PDF. Si el recorte es de
+una persona (`RECORTE="autor=Firma"`), su ficha abre el informe: es lo único
+que declara identidad, ORCID con la evidencia de cada asignación y unidad.
+
+### El bloque de gráfico en papel
+
+Cada gráfico del informe descargado es **una unidad de lectura de cinco partes**,
+y las cinco caben en la misma hoja:
+
+| | Parte | De dónde sale |
+|---|---|---|
+| 1 | Título del corte | `vista_explorador.js`, tabla `SECCIONES` |
+| 2 | La figura | el mismo SVG de la pantalla, con tope de 90 mm de alto |
+| 3 | La tabla equivalente | la figura en cifras, con su encabezado repetido si se parte |
+| 4 | **Qué muestra** y **Cuidado** | `docs/LECTURAS.md` y la advertencia del catálogo |
+| 5 | El sello | fuente, fecha de corte, N y cobertura **del recorte** |
+
+**Qué muestra** es la pieza que faltaba. En pantalla, quien no entiende una
+figura tiene la ayuda contextual, el glosario y el panel de la sección a un
+clic; en el PDF no tiene nada, porque la ayuda es un panel que aparece al pasar
+el puntero. La línea dice qué cuenta cada barra, cada punto o cada segmento, y
+sobre qué. Vive en `docs/LECTURAS.md`, se serializa a `lecturas.json` y **el
+build se detiene** si un gráfico se queda sin ella o si sobra una que ningún
+gráfico usa.
+
+**Cuidado** es la advertencia que el catálogo ya publica para ese indicador, y
+sólo se imprime si el corte no trae un aviso propio: dos textos sobre lo mismo
+se leen en papel como dos advertencias distintas.
+
+**Que quepan no fue gratis.** Con el interlineado de pantalla, las 21 filas de
+«Áreas temáticas» ocupaban una hoja entera y empujaban fuera de la página la
+explicación y el sello del gráfico al que pertenecen. En papel la tabla baja a
+8 pt con 1,5 pt de aire por celda, el sello pierde su marco de tarjeta y la
+figura tiene tope de alto. Medido a ancho de A4: **ningún bloque supera una
+hoja** en las cuatro secciones ni en la portada.
+
+**La red de coautoría imprime una sola vista.** En pantalla el lector elige
+entre nodos, matriz, arcos y la tabla de pares; en papel se desplegaban las
+cuatro, y la tabla —una fila por par de firmas que coautoró— convertía la
+sección de colaboración en 49 hojas. Se imprime la vista de nodos, y la hoja
+declara qué se quedó en el sitio. Es el mismo criterio por el que el informe no
+vuelca publicaciones ni autores.
+
+**Qué llega al papel y qué no.** Los desplegables se imprimen abiertos: un
+`<details>` cerrado imprime su resumen y nada más, y eso vaciaba el panel «Qué
+NO dice esta sección» —el título de la advertencia sin la advertencia—. El
+conmutador Gráfico ⇄ Tabla no se imprime, porque en papel las dos vistas se
+despliegan y el control no conmuta nada. Todo esto lo comprueba
+`src/verify/impresion.mjs` **sobre el texto del PDF**, no sobre el DOM: con el
+medio `print` emulado, el cuerpo de un desplegable cerrado devuelve una caja de
+109 px de alto y aun así no aparece en el documento.
+
+**Accesibilidad del documento.** `make informe` pide el PDF etiquetado, con
+árbol de estructura para lectores de pantalla. El botón del navegador depende
+de los ajustes de quien imprime, que el sitio no controla.
+
+**El folio y el índice.** El PDF que genera `make informe` numera sus hojas
+—«Informe bibliométrico · Producción» a la izquierda, «Hoja 3 de 8» a la
+derecha— y abre con un índice: cada sección con su archivo y su número de
+hojas, y bajo ella cada gráfico con su código, su título y la hoja en la que
+cae. Los números de hoja **se leen del PDF ya compuesto**, buscando el título
+de cada figura página por página, por la misma razón por la que la compuerta de
+impresión lee el PDF y no el DOM: el navegador miente sobre el papel. Eso
+resuelve gratis la selección de gráficos —lo que no se dibujó no aparece— y
+permite una autocomprobación: sin selección, un gráfico declarado que no
+aparezca en su PDF significa que su título cambió y la búsqueda dejó de casar,
+y el generador lo dice por su código.
+
+Las dos cosas viven en el generador porque Chromium no implementa los cuadros
+de margen de CSS Paged Media y el botón del navegador no puede saber en qué
+hoja cae nada; su maqueta sí está en `app.css` (`.indice-informe`), que sigue
+siendo el único sitio donde se decide cómo se ve el papel. El precio es que la
+portada se compone dos veces: una para que existan las demás secciones y otra
+ya con el índice.
+
+**El sitio lo ofrece hecho.** El despliegue compone el informe dentro del
+`dist/` que publica —después de verificarlo, con el Chromium que la batería ya
+instaló— y la portada muestra un bloque con los seis archivos y sus hojas. Los
+PDF no se versionan: son un derivado del sitio y comitearlos habría metido
+megabytes de binarios por carga de datos, además del hueco de siempre —datos
+nuevos, informe viejo, un PDF que contradice a sus propias páginas—.
+
+El bloque se dibuja SÓLO si existe `data/informe.json`, el manifiesto que deja
+la corrida que compuso los PDF. Enlaces escritos a mano en el HTML habrían
+apuntado a archivos que pueden no estar. El ensamblado deja el manifiesto vacío,
+así que la ausencia del informe es un bloque que no aparece y no un 404 en la
+consola de cada visita. Y si el informe se compuso con datos más viejos que los
+del sitio, el bloque lo declara en vez de callarlo.
+
+**Límite conocido:** las líneas de procedencia van en la primera hoja, no en
+cada una. Chromium no implementa los cuadros de margen de CSS Paged Media, así
+que un encabezado repetido tendría que inyectarse desde `informe_pdf.mjs` y
+dejaría de valer para el botón del navegador.
+
 ### 12.8 Advertencias de lectura
 
 Además de la nota metodológica de cada indicador —que describe cómo se
