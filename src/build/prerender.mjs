@@ -77,6 +77,15 @@ async function main() {
   const unidadPorPersona = new Map(
     autoresJson.autores.map(a => [a.nombre, (a.unidades || [])[0]]));
   const umbral = autoresJson.parametros?.n_minimo_interpretable;
+  // Los textos que explican cada gráfico en el papel. Mismo origen que en el
+  // navegador: el documento revisado y el catálogo, no cadenas escritas aquí.
+  const { lecturas } = await leerJSON('lecturas.json');
+  const catalogoJson = await leerJSON('catalogo.json');
+  const textos = {
+    lecturas,
+    advertencias: Object.fromEntries(
+      catalogoJson.indicadores.filter(i => i.advertencia).map(i => [i.codigo, i.advertencia])),
+  };
   // Escuela -> facultad (P-07): mismo mapa que `meta.json` le da al navegador
   // (`common_build.build_meta()`), para que el pre-renderizado no diverja en
   // qué unidad agrega el gráfico.
@@ -114,7 +123,7 @@ async function main() {
       // las cifras y los gráficos del conjunto entero, y sólo pierde la
       // capacidad de recortarlo. Los `details` de los filtros se abren y se
       // leen igual sin guion.
-      const vacio = vx.explorador(publicaciones, {}, proc, jerarquia, meta, umbral);
+      const vacio = vx.explorador(publicaciones, {}, proc, jerarquia, meta, umbral, textos);
       html = rellenar(html, 'titular', vx.cabecera(meta), a);
       html = rellenar(html, 'estado-recorte', vacio.estado, a);
       html = rellenar(html, 'controles', vacio.controles, a);
@@ -129,7 +138,7 @@ async function main() {
       const a = [];
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
       const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
-      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia, meta, umbral);
+      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia, meta, umbral, textos);
       html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo, ejes[clave]), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);
       html = rellenar(html, 'controles', sec.controles, a);

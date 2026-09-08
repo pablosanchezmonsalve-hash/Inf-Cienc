@@ -12637,3 +12637,99 @@ aparece «Sin filtros»—. Batería completa sin fallos.
 
 Sin cambios: `STATE.md` sin regenerar por falta de `data/interim/`, y confirmar
 el LCP con `make rendimiento`.
+
+## Cierre: formato del gráfico en papel, y qué muestra cada uno (2026-09-07)
+
+### Contexto
+
+El usuario pidió dos cosas para el informe descargado: que los gráficos se vean
+bien, y que el documento explique qué significa el dato visualizado.
+
+### Lo que faltaba
+
+En pantalla, quien no entiende una figura tiene la ayuda contextual, el glosario
+y el panel de la sección a un clic. **En el PDF no tiene nada**: la ayuda es un
+panel que aparece al pasar el puntero. El informe archivado enseñaba figuras sin
+decir qué cuenta cada barra.
+
+Y el formato tenía dos defectos medidos, no supuestos:
+
+- **La sección de colaboración salía en 49 hojas.** En papel se despliegan todas
+  las vistas de cada módulo, y la red tiene cuatro: nodos, matriz, arcos y la
+  tabla de pares. Esa tabla —una fila por par de firmas que coautoró— ocupaba
+  unas cuarenta hojas de listado.
+- **Ningún bloque de gráfico cabía en una hoja.** `.corte` no estaba en ninguna
+  regla de corte de página —sólo `.modulo`, de las páginas antiguas—, y con el
+  interlineado de pantalla las 21 filas de «Áreas temáticas» ocupaban 1.048 px,
+  más que una hoja útil, empujando fuera la explicación y el sello del gráfico
+  al que pertenecen.
+
+### El formato
+
+Cinco partes por gráfico, en la misma hoja: título, figura, tabla equivalente,
+**Qué muestra** y **Cuidado**, y el sello con fuente, corte, N y cobertura.
+
+- **`docs/LECTURAS.md`** (nuevo): una lectura por gráfico, 18 en total. Describe
+  la figura —qué cuenta una barra, un punto o un segmento— y no repite ni la
+  advertencia metodológica ni la definición del indicador, que ya viven en
+  `config/indicators.yml` y en `docs/INDICATORS.md`.
+- **`04_glossary.py`** lo serializa a `lecturas.json`, junto al glosario y los
+  ejes, y **verifica** contra `vista_explorador.js` que ningún gráfico se quede
+  sin lectura y que ninguna lectura sobre. La lista de gráficos no se escribe en
+  el guion: se lee de donde se declara.
+- **Cuidado** es la advertencia del catálogo, y sólo se imprime si el corte no
+  trae aviso propio.
+- **Ajustes de papel**: figura con tope de 90 mm, tabla a 8 pt con 1,5 pt por
+  celda, sello sin marco de tarjeta, leyenda de trama apretada, y las cuatro
+  piezas indivisibles declaradas aparte para que, si un bloque no cupiera, el
+  corte caiga dentro de la tabla y nunca a mitad de una figura.
+- **La red imprime una vista**, la de nodos, y declara en la hoja que la matriz,
+  los arcos y la tabla de pares se consultan en el sitio.
+
+### Medido, antes y después
+
+| Sección | Hojas antes | Hojas después |
+|---|---:|---:|
+| Portada | 6 | 5 |
+| Producción | 10 | 8 |
+| Impacto | 8 | 6 |
+| Colaboración | **49** | **7** |
+| Temática | 8 | 5 |
+
+A ancho de A4, ningún bloque de gráfico supera la hoja útil: el más alto es 972
+px sobre 995 disponibles. Ninguna figura se parte. Las 18 lecturas llegan al PDF
+como texto.
+
+### Verificación
+
+Dos comprobaciones nuevas en la compuerta de impresión, y las lecturas se leen
+del artefacto en vez de copiarse: si alguien reescribe `LECTURAS.md`, la
+compuerta sigue midiendo que el texto revisado llega a la hoja. La de
+colaboración además prohíbe la cabecera de la tabla de pares y pone techo de 12
+hojas, que es lo que impide que un listado sin tope vuelva a convertir la
+sección en un anexo. Probada en negativo la guarda del build: quitando la
+lectura de `T-04`, el build aborta nombrándola. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-537 | Cada gráfico del informe lleva una línea «Qué muestra», y el build se detiene si falta | En el PDF no hay ayuda contextual que rescate a nadie: la figura sin su lectura es un dibujo sin unidad de medida. Un gráfico sin ella se imprime igual y sin señal de que falta, que es la familia de defectos que ya obligó a comprobar el PDF y no el DOM |
+| D-538 | Las lecturas viven en `docs/LECTURAS.md`, no en `config/indicators.yml` | Es prosa metodológica y se revisa como documento, igual que los ejes y el glosario. En config va el parámetro; en docs, la frase que alguien tiene que leer y aprobar |
+| D-539 | La advertencia del catálogo se imprime sólo si el corte no trae aviso propio | Dos textos sobre lo mismo, juntos en una hoja, se leen como dos advertencias distintas |
+| D-540 | El bloque de gráfico es la unidad de página, y para que quepa se aprieta la tabla, no la figura | La figura es lo que no se puede reconstruir mirando otra cosa; la tabla a 8 pt sigue siendo legible y es la misma información. Apretar la figura habría hecho ilegible lo único que la tabla no sustituye |
+| D-541 | La red de coautoría imprime una sola vista y su tabla de pares se queda en el sitio | Cuarenta hojas de pares no son parte de un informe, son un anexo que nadie lee: el mismo criterio por el que el PDF no vuelca publicaciones ni autores. Lo retirado se declara en la hoja |
+
+### Archivos
+
+- `docs/LECTURAS.md` (nuevo), `src/build/04_glossary.py`
+- `web/assets/js/vista_explorador.js`, `paginas.js`, `src/build/prerender.mjs`
+- `web/assets/css/app.css`, `src/verify/impresion.mjs`, `docs/UX_UI.md`
+
+### Pendientes
+
+- `data/processed/lecturas.json` es un artefacto nuevo y **CI ensambla `dist/`
+  desde `data/processed/`**, así que va versionado; el resto de artefactos
+  seguirá con su fecha de build hasta el próximo `make sitio` completo.
+- Los de siempre: `STATE.md` sin regenerar y confirmar el LCP con
+  `make rendimiento`.

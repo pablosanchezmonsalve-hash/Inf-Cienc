@@ -1,13 +1,15 @@
-"""Build 04 — Textos metodológicos: glosario y ejes.
+"""Build 04 — Textos metodológicos: glosario, ejes y lecturas de gráfico.
 
-Serializa `docs/GLOSSARY.md` y `docs/EJES.md` a JSON. La fuente de verdad es el
-Markdown: así el texto que ve el usuario —en un tooltip o en el panel que abre
-una sección— es literalmente el documento metodológico revisado, no una copia
-divergente mantenida a mano.
+Serializa `docs/GLOSSARY.md`, `docs/EJES.md` y `docs/LECTURAS.md` a JSON. La
+fuente de verdad es el Markdown: así el texto que ve el usuario —en un tooltip,
+en el panel que abre una sección o bajo un gráfico del informe descargado— es
+literalmente el documento metodológico revisado, no una copia divergente
+mantenida a mano.
 
 Salidas:
   data/processed/glossary.json
   data/processed/ejes.json
+  data/processed/lecturas.json
 """
 
 from __future__ import annotations
@@ -50,6 +52,61 @@ def parse_glossary(text: str) -> list[dict]:
             "extendido": limpiar(extendido.group(1)) if extendido else None,
         })
     return entradas
+
+
+def parse_lecturas(text: str) -> dict[str, dict]:
+    """Extrae de `docs/LECTURAS.md` qué muestra cada gráfico.
+
+    Un bloque por gráfico: `## CÓDIGO — Título` y un párrafo `**Muestra:**`. La
+    clave es el código del indicador, o el campo cuando el corte no tiene código
+    propio, que es como los declara `vista_explorador.js`.
+    """
+    lecturas = {}
+    for bloque in re.split(r"\n## ", text)[1:]:
+        lineas = bloque.split("\n")
+        cabecera = lineas[0].strip()
+        m = re.match(r"^([A-Za-z0-9-]+)\s+—\s+(.+)$", cabecera)
+        if not m:
+            continue
+        cuerpo = "\n".join(lineas[1:])
+        muestra = re.search(r"\*\*Muestra:\*\*\s*(.+?)(?=\n---|\Z)", cuerpo, re.S)
+        if not muestra:
+            continue
+        limpio = re.sub(r"\*\*(.+?)\*\*", r"\1", muestra.group(1))
+        limpio = re.sub(r"\s+", " ", limpio).strip()
+        lecturas[m.group(1)] = {"titulo": m.group(2).strip(), "muestra": limpio}
+    return lecturas
+
+
+def verificar_lecturas(lecturas: dict) -> None:
+    """Todo gráfico del informe tiene su lectura, y ninguna sobra.
+
+    POR QUÉ ES COMPUERTA Y NO AVISO
+        La lectura existe para el PAPEL, donde no hay ayuda contextual que
+        rescate a nadie. Un gráfico sin ella se imprime igual, sin señal de que
+        falta: el defecto no se ve al mirar el sitio, que es la misma familia de
+        problemas que ya obligó a comprobar el PDF en vez del DOM.
+
+        La lista de gráficos NO se escribe aquí: se lee de `vista_explorador.js`,
+        que es donde se declara qué dibuja cada sección. Mantener una segunda
+        lista sería inventar la forma de que las dos se separen.
+    """
+    fuente = (b.ROOT / "web/assets/js/vista_explorador.js").read_text(encoding="utf-8")
+    # `cod: 'I-04'` y, para el corte sin código propio, `campo: 'escuela'`.
+    codigos = set(re.findall(r"cod:\s*'([^']+)'", fuente))
+    sin_cod = {c for c in re.findall(r"\{\s*campo:\s*'([^']+)'", fuente)}
+    esperados = codigos | sin_cod
+
+    faltan = sorted(esperados - set(lecturas))
+    sobran = sorted(set(lecturas) - esperados)
+    problemas = []
+    if faltan:
+        problemas.append(f"gráficos sin lectura en LECTURAS.md: {faltan}")
+    if sobran:
+        problemas.append(f"lecturas que ningún gráfico usa: {sobran}")
+    if problemas:
+        raise SystemExit("BUILD ABORTADO: las lecturas y los gráficos no "
+                         "concuerdan:\n  · " + "\n  · ".join(problemas))
 
 
 def parse_ejes(text: str) -> dict[str, dict]:
@@ -220,6 +277,13 @@ def main() -> None:
     print(f"\n  ejes: {len(ejes)}")
     for clave, e in ejes.items():
         print(f"    - {clave}: {e['titulo']}")
+
+    lecturas = parse_lecturas((b.DOCS / "LECTURAS.md").read_text(encoding="utf-8"))
+    if not lecturas:
+        raise SystemExit("BUILD ABORTADO: no se extrajo ninguna lectura de LECTURAS.md")
+    verificar_lecturas(lecturas)
+    b.write_json({"meta": b.build_meta(), "lecturas": lecturas}, "lecturas.json")
+    print(f"\n  lecturas de gráfico: {len(lecturas)}")
 
 
 if __name__ == "__main__":

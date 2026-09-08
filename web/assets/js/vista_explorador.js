@@ -304,7 +304,7 @@ function selloCorte(sub, campo, cod, proc) {
   });
 }
 
-export function cortes(pubs_sel, proc, jerarquia) {
+export function cortes(pubs_sel, proc, jerarquia, textos) {
   // El aviso de P-07 se reutiliza tal cual del corte de sección, en vez de
   // escribirlo una segunda vez: dos textos para la misma advertencia
   // metodológica divergen sin que nadie lo note (ver SESSION_NOTES.md sobre
@@ -320,6 +320,8 @@ export function cortes(pubs_sel, proc, jerarquia) {
       ${MULTIVALUADO.has(clave)
         ? '<p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>' : ''}
       ${clave === 'unidad' && avisoUnidad ? `<p class="nota">${c.escapar(avisoUnidad)}</p>` : ''}
+      ${bloqueLectura(COD_PORTADA[clave], { cod: COD_PORTADA[clave],
+        aviso: clave === 'unidad' ? avisoUnidad : null }, textos)}
       ${selloCorte(pubs_sel, clave, COD_PORTADA[clave], proc)}
     </section>`).join('');
 }
@@ -330,7 +332,7 @@ export function cortes(pubs_sel, proc, jerarquia) {
     completo y el navegador con el recorte vigente. `jerarquia` (opcional,
     de meta.json) agrega 'unidad' a facultad — sin ella se ve tal como la
     afiliación la nombró, escuela o facultad indistinto. */
-export function explorador(pubs, sel, proc, jerarquia, meta, umbral) {
+export function explorador(pubs, sel, proc, jerarquia, meta, umbral, textos) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
@@ -338,7 +340,7 @@ export function explorador(pubs, sel, proc, jerarquia, meta, umbral) {
     // Las salvaguardas van pegadas a las cifras que califican, y por delante:
     // una advertencia debajo del número al que corrige llega tarde.
     cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
-    cortes: cortes(sub, proc, jerarquia),
+    cortes: cortes(sub, proc, jerarquia, textos),
   };
 }
 
@@ -501,7 +503,7 @@ function tablaRed(aristas) {
     académica, de `authors.json` (no hay forma de derivarla de `sub` sola:
     una publicación no lleva la unidad por autor individual, sólo el conjunto
     de unidades de TODOS sus firmantes). */
-function corteRed(sub, corte, unidadPorPersona, proc) {
+function corteRed(sub, corte, unidadPorPersona, proc, textos) {
   const id = corte.cod;
   const autoria = [];
   for (const p of sub) for (const persona of (p.autores_uft || [])) autoria.push([persona, p.eid]);
@@ -572,6 +574,11 @@ function corteRed(sub, corte, unidadPorPersona, proc) {
     <div class="vista" id="${id}-arcos" data-vista="arcos" data-activa="false">
       ${sinDibujo ? vacioDibujo : svgConTramaUnica(c.red(D, 'arcos'), id + '-arcos')}</div>
     <div class="vista" id="${id}-tabla" data-vista="tabla" data-activa="${sinDibujo}">${tablaRed(g.aristas)}</div>
+    ${bloqueLectura(id, corte, textos)}
+    <p class="solo-papel lectura-cuidado"><b>En papel</b>
+      Se dibuja sólo la vista de nodos. La matriz, los arcos y la tabla de pares
+      —una fila por cada par de firmas que coautoró— se consultan en el sitio: en
+      una hoja ocupaban cuarenta páginas de listado.</p>
     <p class="nota"><strong>${c.nf.format(g.nodos.length)}</strong> personas en el recorte ·
       <strong>${c.nf.format(conectadas)}</strong> con al menos una coautoría interna ·
       <strong>${c.nf.format(nComp)}</strong> componentes · <strong>${c.nf.format(nComs)}</strong>
@@ -579,6 +586,32 @@ function corteRed(sub, corte, unidadPorPersona, proc) {
       cubre a todas.</p>
     ${selloCorte(sub, corte.campo, corte.cod, proc)}
   </section>`;
+}
+
+/* Qué muestra el gráfico, para el papel.
+
+   En pantalla, quien no entiende una figura tiene la ayuda contextual, el
+   glosario y el panel de la sección a un clic. En el PDF no tiene nada: la
+   ayuda es un panel que aparece al pasar el puntero. Un informe que se archiva
+   y se cita necesita decir, junto a la figura, qué cuenta cada barra.
+
+   Dos párrafos y en este orden: qué muestra —de `docs/LECTURAS.md`, revisado
+   como documento— y qué cuidado exige —la advertencia del catálogo, que ya es
+   pública en `indicadores.html`—. El sello de procedencia va después y lo pone
+   el propio corte.
+
+   La advertencia del catálogo NO se imprime si el corte ya trae su propio
+   `aviso`: son dos textos sobre lo mismo y en papel se leerían como dos
+   advertencias distintas. */
+function bloqueLectura(clave, corte, textos) {
+  if (!textos) return '';
+  const l = (textos.lecturas || {})[clave];
+  const adv = corte.aviso ? null : (textos.advertencias || {})[corte.cod];
+  if (!l && !adv) return '';
+  return `${l ? `<p class="solo-papel lectura-grafico"><b>Qué muestra</b>
+      ${c.escapar(l.muestra)}</p>` : ''}
+    ${adv ? `<p class="solo-papel lectura-cuidado"><b>Cuidado</b>
+      ${c.escapar(adv)}</p>` : ''}`;
 }
 
 /* Un corte que sobre una sola persona diría otra cosa.
@@ -616,7 +649,7 @@ function cortePersonal(corte, persona) {
     `unidadPorPersona` sólo lo usa C-05 (red de coautoría); `jerarquia` sólo
     'unidad' y 'escuela' (P-07). `persona` (opcional) es la firma a la que está
     recortado el informe, y cambia qué se dibuja: ver `cortePersonal`. */
-export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, persona) {
+export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, persona, textos) {
   const s = SECCIONES[clave];
   if (!s) return '';
   return s.cortes.map(corte => {
@@ -624,7 +657,7 @@ export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, per
       const personal = cortePersonal(corte, persona);
       if (personal) return personal;
     }
-    if (corte.forma === 'red') return corteRed(sub, corte, unidadPorPersona, proc);
+    if (corte.forma === 'red') return corteRed(sub, corte, unidadPorPersona, proc, textos);
     const r = dibujar(sub, corte, jerarquia);
     const id = corte.cod || corte.campo;
     // 'escuela' no tiene indicador propio — es P-07 visto por escuela—, así
@@ -651,6 +684,7 @@ export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, per
       ${MULTIVALUADO.has(corte.campo)
         ? '<p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>' : ''}
       ${corte.aviso ? `<p class="nota">${c.escapar(corte.aviso)}</p>` : ''}
+      ${bloqueLectura(corte.cod || corte.campo, corte, textos)}
       ${persona && corte.forma === 'mediana-anio'
         ? `<p class="nota">Recortado a una persona, cada punto es la mediana de
             las publicaciones de esa firma en ese año, que pueden ser una o dos.
@@ -699,14 +733,14 @@ export function cabeceraSeccion(clave, titulo, eje) {
 /** Todo el cuerpo de una sección. `unidadPorPersona` (Map, opcional) sólo lo
     necesita C-05; `jerarquia` (objeto, opcional, de meta.json) sólo P-07.
     Las demás secciones los reciben y no los usan. */
-export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia, meta, umbral) {
+export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia, meta, umbral, textos) {
   const sub = X.recorte(pubs, sel);
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
     cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
     cortes: cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia,
-      X.personaDelRecorte(sel)),
+      X.personaDelRecorte(sel), textos),
   };
 }
 

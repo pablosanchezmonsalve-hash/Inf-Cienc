@@ -1704,6 +1704,85 @@ svg.chart .trama { pointer-events: none; }
   .credito-impreso { font-weight: 600; }
   .recorte-impreso { color: #333; }
 
+  /* ── El bloque de gráfico en papel ──────────────────────────────────────
+     Un gráfico del informe es una unidad de lectura de cinco partes, y las
+     cinco tienen que caber juntas o no se entiende ninguna:
+
+       1. el título del corte,
+       2. la figura,
+       3. la tabla equivalente, que es la figura en cifras,
+       4. qué muestra y qué cuidado exige,
+       5. el sello: fuente, corte, N y cobertura del recorte.
+
+     `.corte` no estaba en ninguna regla de corte de página —sólo `.modulo`, que
+     es de las páginas antiguas—, así que una sección podía dejar la figura al
+     final de una hoja y su tabla, su explicación y su procedencia en la
+     siguiente. Con eso, la hoja que alguien fotocopia o cita enseña un dibujo
+     sin decir sobre cuántos casos está medido. */
+  .corte, .corte-red { break-inside: avoid; }
+  /* Cuando el bloque entero no cabe —y con veinte barras y su tabla no cabe—,
+     `break-inside: avoid` no puede cumplirse y el navegador parte por donde
+     quiera. Estas cuatro piezas se declaran indivisibles aparte, así que el
+     corte se parte DENTRO de la tabla, que repite su encabezado, y nunca a
+     mitad de una figura ni de la frase que la explica. */
+  .corte .vista[data-vista="grafico"], .corte-red .vista[data-vista="nodos"],
+  .lectura-grafico, .lectura-cuidado, .sello { break-inside: avoid; }
+  /* La figura no crece a lo alto de la hoja: un gráfico de 20 cm de alto
+     empuja fuera todo lo que lo explica y obliga a partir el bloque, que es
+     justo lo que la regla de arriba evita. */
+  .corte .grafico svg, .corte .vista svg { max-height: 90mm; height: auto; }
+  .corte-red svg { max-height: 120mm; }
+
+  /* La red imprime UNA vista, no cuatro. En pantalla el lector elige entre
+     nodos, matriz, arcos y la tabla de pares; en papel se despliegan todas por
+     la regla de «las dos vistas de cada módulo», y aquí esa regla se vuelve en
+     contra: tres dibujos de lo mismo y un listado de una fila por par de
+     firmas, que medido son cuarenta páginas. La sección de colaboración pasaba
+     de 8 a 49 hojas por esa tabla sola.
+
+     Es la misma razón por la que el informe no vuelca publicaciones ni autores:
+     un anexo de cientos de páginas que nadie lee no es parte de un informe. Lo
+     que se retira se declara en la hoja. */
+  .corte-red .vista[data-vista="matriz"],
+  .corte-red .vista[data-vista="arcos"],
+  .corte-red .vista[data-vista="tabla"] { display: none; }
+
+  /* La tabla equivalente, en papel, es la figura en cifras y no una tabla de
+     interfaz. Con el interlineado de pantalla, las 21 filas de «Áreas
+     temáticas» ocupaban 1.048 px —más de una hoja útil— y empujaban fuera de
+     la página la explicación y el sello del gráfico al que pertenecen. Medido
+     a ancho de A4, no supuesto. */
+  .corte table, .corte-red table { font-size: 8pt; }
+  /* La leyenda de la trama no se retira —para algunos cortes es la única frase
+     que dice que las barras no suman— pero sí se aprieta: en pantalla ocupa 49
+     px y es una línea. */
+  .leyenda-trama { font-size: 8pt; line-height: 1.35; margin: 3pt 0 0; }
+  .corte th, .corte td,
+  .corte-red th, .corte-red td { padding: 1.5pt 6pt; line-height: 1.35; }
+  .corte .tabla-envoltura, .corte-red .tabla-envoltura {
+    box-shadow: none; border-color: #999; border-radius: 0;
+  }
+  /* El sello es una línea de crédito, no una tarjeta: en papel pierde el fondo
+     y el marco de interfaz y se aprieta a un par de líneas. */
+  .sello {
+    font-size: 7.5pt; gap: 2pt 10pt; padding: 3pt 0 0; margin-top: 4pt;
+    background: none; border: 0; border-top: .5pt solid #999; border-radius: 0;
+  }
+
+  /* Qué muestra y qué cuidado exige. Van entre la tabla y el sello: primero se
+     ve el dato, luego se lee qué cuenta, y al final de dónde sale. El rótulo en
+     versalitas es el mismo recurso del sello, para que se lean como una ficha y
+     no como prosa suelta. */
+  .lectura-grafico, .lectura-cuidado {
+    margin: 6pt 0 0; font-size: 8.5pt; line-height: 1.45; color: #000;
+    padding-left: 8pt; border-left: 1.5pt solid #000;
+  }
+  .lectura-cuidado { border-left-color: #666; color: #333; }
+  .lectura-grafico b, .lectura-cuidado b {
+    display: block; font-size: 7pt; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 1pt;
+  }
+
   /* Cortes. Un titular al pie de una hoja y su figura en la siguiente es el
      defecto clásico de imprimir una web sin decirle nada al navegador. */
   h1, h2, h3 { break-after: avoid; }

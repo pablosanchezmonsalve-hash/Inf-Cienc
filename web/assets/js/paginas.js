@@ -181,6 +181,21 @@ async function montarExplorador(claveSeccion) {
   // es la forma de que acaben diciendo cosas distintas.
   const umbral = autores.parametros?.n_minimo_interpretable;
 
+  /* Los textos que explican cada gráfico EN EL PAPEL: qué muestra —de
+     `docs/LECTURAS.md`, vía `lecturas.json`— y qué cuidado exige —la
+     advertencia que el catálogo ya publica en `indicadores.html`—. Se cargan
+     siempre, esté la página pre-renderizada o no, porque el botón de descarga
+     está en todas y el PDF no puede salir con la mitad de sus figuras
+     explicadas. */
+  const [{ lecturas }, catalogo] = await Promise.all([
+    c.cargar('lecturas.json'), c.cargar('catalogo.json'),
+  ]);
+  const textos = {
+    lecturas,
+    advertencias: Object.fromEntries(
+      catalogo.indicadores.filter(i => i.advertencia).map(i => [i.codigo, i.advertencia])),
+  };
+
   if (!yaPintado(zonas.cifras)) {
     const meta = await c.cargar('meta.json');
     if (cabecera) {
@@ -199,18 +214,16 @@ async function montarExplorador(claveSeccion) {
     // leería como que el fenómeno no existe. No responden al recorte —no se
     // calculan— y por eso van sobre su propio suelo, separados de lo que sí.
     const dif = document.getElementById('diferidos');
-    if (dif && claveSeccion) {
-      const catalogo = await c.cargar('catalogo.json');
-      dif.innerHTML = VX.diferidos(catalogo, claveSeccion);
-    }
+    if (dif && claveSeccion) dif.innerHTML = VX.diferidos(catalogo, claveSeccion);
   }
 
   let sel = X.leerURL();
 
   function pintar({ nuevaEntrada = false } = {}) {
     const partes = claveSeccion
-      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona, jerarquia, metaBase, umbral)
-      : VX.explorador(publicaciones, sel, proc, jerarquia, metaBase, umbral);
+      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona, jerarquia,
+          metaBase, umbral, textos)
+      : VX.explorador(publicaciones, sel, proc, jerarquia, metaBase, umbral, textos);
     // Se comparan los valores ANTES de reemplazar el marcado: la señal de
     // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
     const antes = new Map([...zonas.cifras.querySelectorAll('[data-valor]')]
