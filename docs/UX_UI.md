@@ -732,6 +732,45 @@ pero es parte del informe que alguien pidió y una hoja suelta que se llame
 una persona (`RECORTE="autor=Firma"`), su ficha abre el informe: es lo único
 que declara identidad, ORCID con la evidencia de cada asignación y unidad.
 
+### El bloque de gráfico en papel
+
+Cada gráfico del informe descargado es **una unidad de lectura de cinco partes**,
+y las cinco caben en la misma hoja:
+
+| | Parte | De dónde sale |
+|---|---|---|
+| 1 | Título del corte | `vista_explorador.js`, tabla `SECCIONES` |
+| 2 | La figura | el mismo SVG de la pantalla, con tope de 90 mm de alto |
+| 3 | La tabla equivalente | la figura en cifras, con su encabezado repetido si se parte |
+| 4 | **Qué muestra** y **Cuidado** | `docs/LECTURAS.md` y la advertencia del catálogo |
+| 5 | El sello | fuente, fecha de corte, N y cobertura **del recorte** |
+
+**Qué muestra** es la pieza que faltaba. En pantalla, quien no entiende una
+figura tiene la ayuda contextual, el glosario y el panel de la sección a un
+clic; en el PDF no tiene nada, porque la ayuda es un panel que aparece al pasar
+el puntero. La línea dice qué cuenta cada barra, cada punto o cada segmento, y
+sobre qué. Vive en `docs/LECTURAS.md`, se serializa a `lecturas.json` y **el
+build se detiene** si un gráfico se queda sin ella o si sobra una que ningún
+gráfico usa.
+
+**Cuidado** es la advertencia que el catálogo ya publica para ese indicador, y
+sólo se imprime si el corte no trae un aviso propio: dos textos sobre lo mismo
+se leen en papel como dos advertencias distintas.
+
+**Que quepan no fue gratis.** Con el interlineado de pantalla, las 21 filas de
+«Áreas temáticas» ocupaban una hoja entera y empujaban fuera de la página la
+explicación y el sello del gráfico al que pertenecen. En papel la tabla baja a
+8 pt con 1,5 pt de aire por celda, el sello pierde su marco de tarjeta y la
+figura tiene tope de alto. Medido a ancho de A4: **ningún bloque supera una
+hoja** en las cuatro secciones ni en la portada.
+
+**La red de coautoría imprime una sola vista.** En pantalla el lector elige
+entre nodos, matriz, arcos y la tabla de pares; en papel se desplegaban las
+cuatro, y la tabla —una fila por par de firmas que coautoró— convertía la
+sección de colaboración en 49 hojas. Se imprime la vista de nodos, y la hoja
+declara qué se quedó en el sitio. Es el mismo criterio por el que el informe no
+vuelca publicaciones ni autores.
+
 **Qué llega al papel y qué no.** Los desplegables se imprimen abiertos: un
 `<details>` cerrado imprime su resumen y nada más, y eso vaciaba el panel «Qué
 NO dice esta sección» —el título de la advertencia sin la advertencia—. El

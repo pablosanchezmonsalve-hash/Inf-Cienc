@@ -46,6 +46,10 @@ try {
 
 const meta = JSON.parse(await readFile(join(DIST, 'data/meta.json'), 'utf8'));
 const { ejes } = JSON.parse(await readFile(join(DIST, 'data/ejes.json'), 'utf8'));
+/* Las lecturas se leen del artefacto y no se copian aquí: si alguien reescribe
+   `docs/LECTURAS.md`, esta comprobación sigue midiendo lo mismo —que el texto
+   revisado llega a la hoja— en vez de exigir una frase que ya cambió. */
+const { lecturas } = JSON.parse(await readFile(join(DIST, 'data/lecturas.json'), 'utf8'));
 
 /* Una firma por debajo del umbral de interpretabilidad, tomada del artefacto y
    no escrita aquí: 480 de las 530 lo están, así que el caso normal de un
@@ -96,8 +100,25 @@ const CASOS = [
     // El cuerpo del panel metodológico, tomado del artefacto y no copiado: si
     // alguien reescribe el eje, esta comprobación sigue midiendo lo mismo.
     exige: ['Recorte aplicado', 'Año: 2024', 'Tipo documental: Article',
-            ejes.produccion.no_responde.slice(0, 80)],
+            ejes.produccion.no_responde.slice(0, 80),
+            // Cada gráfico dice qué muestra: es lo único que explica la figura
+            // cuando el PDF se lee sin el sitio al lado.
+            'QUÉ MUESTRA', lecturas['P-02'].muestra.slice(0, 60),
+            lecturas['P-05'].muestra.slice(0, 60)],
     prohibe: ['Sin filtros'],
+  },
+  {
+    /* La sección más pesada del informe, y la que enseña el formato entero: la
+       red con una sola vista, y la tabla de pares fuera del papel. Con las
+       cuatro vistas y ese listado la sección medía 49 hojas. */
+    nombre: 'colaboración: una vista de la red y su lectura',
+    ruta: 'colaboracion.html',
+    exige: ['QUÉ MUESTRA', lecturas['C-05'].muestra.slice(0, 60),
+            lecturas['C-03'].muestra.slice(0, 60),
+            'Se dibuja sólo la vista de nodos'],
+    // La cabecera de la tabla de pares: si vuelve al papel, vuelven las 49 hojas.
+    prohibe: ['Peso fraccional'],
+    maxHojas: 12,
   },
   {
     /* Un informe personal es el caso en que el papel más se puede leer mal: un
@@ -181,6 +202,11 @@ for (const caso of CASOS) {
   CONTROLES.forEach((ctl) => {
     if (tiene(texto, ctl)) anotar(`${caso.nombre}: imprime el control «${ctl}»`);
   });
+  /* Un techo de hojas donde el formato puede desbordarse solo. No es estética:
+     una tabla sin tope convierte una sección en un anexo, y eso ocurrió. */
+  if (caso.maxHojas && doc.numPages > caso.maxHojas) {
+    anotar(`${caso.nombre}: ${doc.numPages} hojas, más del techo de ${caso.maxHojas}`);
+  }
 
   /* Etiquetado: sin árbol de estructura, un lector de pantalla recita el PDF
      en vez de navegarlo. Si la versión instalada de Playwright no sabe pedirlo
