@@ -34,14 +34,23 @@
    Necesita Playwright y Chromium, que este proyecto ya usa para verificar el
    sitio. Sin ellos no corre y lo dice; el sitio se construye igual.
 
+   SELECCIÓN DE GRÁFICOS
+   `grafico=I-04|T-05` elige qué figuras se dibujan, de las dieciocho del
+   informe y sin importar en qué sección viven. NO es un recorte: las cifras
+   siguen siendo las del filtro de datos, y lo que se acota es qué se muestra.
+   Las secciones que se quedan sin ninguna figura no se imprimen; la portada y
+   el anexo metodológico sí, siempre.
+
    Uso:  node src/build/informe_pdf.mjs <dist> <salida.pdf> [recorte]
    Ej.:  node src/build/informe_pdf.mjs dist dist/informe.pdf "anio=2024&unidad=Medicina"
+         node src/build/informe_pdf.mjs dist dist/informe.pdf "grafico=I-04|T-05"
 */
 
 import { createServer } from 'node:http';
 import { readFile, stat, writeFile } from 'node:fs/promises';
 import { join, extname, resolve } from 'node:path';
 import { abrir, pdfEtiquetado } from '../verify/navegador.mjs';
+import * as vx from '../../web/assets/js/vista_explorador.js';
 
 const dist = resolve(process.argv[2] || 'dist');
 const salida = resolve(process.argv[3] || 'dist/informe-cienciometrico.pdf');
@@ -92,6 +101,18 @@ async function fichaDe(nombre) {
 const autores = recorte.getAll('autor');
 const ficha = autores.length === 1 ? await fichaDe(autores[0]) : null;
 
+/* Una selección de gráficos deja secciones sin ninguno. Se saltan: un informe
+   de tres figuras no debe traer cuatro secciones, tres de ellas diciendo que
+   no tienen nada que enseñar.
+
+   La portada y el anexo metodológico se quedan siempre. La primera lleva las
+   cifras y la declaración; el segundo es lo que hace interpretable cualquier
+   figura, y un informe recortado a tres gráficos lo necesita más, no menos. */
+const seleccion = (recorte.get('grafico') || '').split('|').filter(Boolean);
+const conGrafico = new Set(Object.entries(vx.seccionDeGrafico())
+  .filter(([cod]) => seleccion.includes(cod)).map(([, clave]) => clave));
+const SIEMPRE = new Set(['index.html', 'metodologia.html']);
+
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.css': 'text/css',
                 '.js': 'text/javascript', '.json': 'application/json',
                 '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
@@ -121,8 +142,13 @@ if (consulta) console.log(`  recorte: ${consulta}\n`);
    las demás en vez de contradecirlas. */
 const RUTAS = [
   ...(ficha ? [[ficha, 'ficha']] : []),
-  ...SECCIONES.map((s) => [s, s.replace(/\.html$/, '')]),
+  ...SECCIONES
+    .filter((s) => !seleccion.length || SIEMPRE.has(s) || conGrafico.has(s.replace(/\.html$/, '')))
+    .map((s) => [s, s.replace(/\.html$/, '')]),
 ];
+if (seleccion.length) {
+  console.log(`  selección: ${seleccion.length} gráfico(s) · ${RUTAS.length} secciones\n`);
+}
 
 const partes = [];
 for (const [ruta, seccion] of RUTAS) {

@@ -147,6 +147,19 @@ const CASOS = [
     prohibe: ['personas en el recorte'],
   },
   {
+    /* Selección de gráficos: no es un recorte de datos y la hoja tiene que
+       distinguirlo. Un informe de dos figuras que no declare que es parcial se
+       lee como el informe entero, y sus cifras siguen siendo las del conjunto
+       completo, no las de una submuestra. */
+    nombre: 'selección de gráficos, independiente de la sección',
+    ruta: 'impacto.html?grafico=I-04',
+    exige: ['Selección: 1 de los', 'gráficos del informe',
+            lecturas['I-04'].muestra.slice(0, 50)],
+    // El resto de la sección no se dibuja, así que su lectura no puede estar.
+    prohibe: [lecturas['I-05'].muestra.slice(0, 50),
+              lecturas['A-01'].muestra.slice(0, 50)],
+  },
+  {
     /* La ficha impresa POR SÍ SOLA, que es como llega a ella quien la abre
        desde el directorio. Sin declaración propia heredaba la del cromo —«el
        informe completo, 823 publicaciones»— sobre una hoja que enseña a una

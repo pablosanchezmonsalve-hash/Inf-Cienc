@@ -211,8 +211,29 @@ export function leerURL(busqueda = location.search) {
   }
   const texto = q.get('q');
   if (texto) sel.q = texto;
+  /* La SELECCIÓN de gráficos viaja con el recorte pero NO es un recorte: no
+     cambia qué publicaciones se cuentan, cambia qué figuras se dibujan. Por eso
+     no entra en `DIMENSIONES` —no filtra datos, no tiene facetas y no aparece
+     en `describir()`, que es lo que declara sobre qué está medido el informe—.
+     Confundirlas haría que una hoja dijera «recortado a I-04», como si los
+     datos estuvieran restringidos a algo. */
+  const graficos = q.get('grafico');
+  if (graficos) sel.grafico = graficos.split('|').filter(Boolean);
   return sel;
 }
+
+/** Los códigos de gráfico elegidos, o `null` si no hay selección.
+
+    `null` y lista vacía significan cosas distintas: sin selección se dibuja
+    todo, y una selección vacía sería un informe sin figuras que nadie pidió. */
+export const graficosDe = (sel) =>
+  (sel.grafico && sel.grafico.length) ? sel.grafico : null;
+
+/** ¿Se dibuja este gráfico? Sin selección, todos. */
+export const graficoElegido = (sel, clave) => {
+  const g = graficosDe(sel);
+  return !g || g.includes(clave);
+};
 
 /** El recorte serializado a query. Se calcula del RECORTE y no de
     `location.search`, por dos razones: es la verdad —la URL puede ir un paso
@@ -224,6 +245,7 @@ export function consulta(sel) {
     if (sel[clave] && sel[clave].length) q.set(clave, sel[clave].join('|'));
   }
   if (sel.q) q.set('q', sel.q);
+  if (sel.grafico && sel.grafico.length) q.set('grafico', sel.grafico.join('|'));
   return q.toString();
 }
 

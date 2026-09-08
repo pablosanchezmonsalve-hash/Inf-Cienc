@@ -335,7 +335,12 @@ async function montarExplorador(claveSeccion) {
   // que deshacer un filtro. Sin esto, volver saca al lector del sitio.
   addEventListener('popstate', () => { sel = X.leerURL(); pintar(); });
 
-  if (!yaPintado(zonas.cifras) || X.hayRecorte(sel)) pintar();
+  /* Repintar también cuando hay SELECCIÓN de gráficos, aunque no haya recorte
+     de datos. `hayRecorte` mira sólo los filtros —y hace bien: una selección no
+     restringe el conjunto—, pero el HTML pre-renderizado trae los gráficos de
+     la sección entera, así que sin este repintado la página enseñaría los
+     dieciocho mientras la hoja declara que son dos. */
+  if (!yaPintado(zonas.cifras) || X.hayRecorte(sel) || X.graficosDe(sel)) pintar();
 }
 
 /* Conmutador Gráfico ⇄ Tabla. Un solo escucha delegado para toda la página:
@@ -865,9 +870,63 @@ async function metodologia() {
 
 async function catalogo() {
   const cont = document.getElementById('catalogo');
+  const graficos = VX.seccionDeGrafico();
   // Pre-renderizado: repintar destruiría un LCP que ya ocurrió, y el marcado
   // sería idéntico porque lo produce esta misma función.
-  if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'));
+  if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'), graficos);
+
+  /* El selector de gráficos. El catálogo es la única página donde los dieciocho
+     se ven juntos —en una sección sólo están los suyos—, así que es donde se
+     eligen sin depender de en cuál viven.
+
+     La selección viaja como `grafico=` en la URL, junto al recorte y con la
+     misma gramática: quien la comparta o la descargue obtiene el mismo informe.
+     El orden lo fija el informe, no el orden en que se marcaron: un informe con
+     impacto antes que producción sería otro documento. */
+  const orden = Object.keys(graficos);
+  const elegidos = new Set();
+  const estado = document.getElementById('estado-graficos');
+  const enlace = document.getElementById('ver-seleccion');
+  const limpiar = document.getElementById('limpiar-graficos');
+  const cmd = document.getElementById('orden-graficos');
+  if (!estado || !enlace) return;
+
+  const pintarSeleccion = () => {
+    const cods = orden.filter(k => elegidos.has(k));
+    const n = cods.length;
+    estado.textContent = n
+      ? `${n} de ${orden.length} gráficos seleccionados`
+      : 'Ningún gráfico seleccionado';
+    enlace.hidden = !n;
+    limpiar.hidden = !n;
+    cmd.hidden = !n;
+    if (n) {
+      enlace.href = `index.html?grafico=${encodeURIComponent(cods.join('|'))}`;
+      // La misma selección, para quien genere el PDF de varias secciones.
+      cmd.textContent = `Para el PDF: make informe RECORTE="grafico=${cods.join('|')}"`;
+    }
+  };
+
+  document.addEventListener('change', e => {
+    const chk = e.target.closest('.chk-grafico');
+    if (!chk) return;
+    chk.checked ? elegidos.add(chk.dataset.cod) : elegidos.delete(chk.dataset.cod);
+    pintarSeleccion();
+  });
+  limpiar.addEventListener('click', () => {
+    elegidos.clear();
+    document.querySelectorAll('.chk-grafico').forEach(x => { x.checked = false; });
+    pintarSeleccion();
+  });
+
+  // Una selección que llega en la URL se refleja en las casillas: volver atrás
+  // desde el informe tiene que enseñar lo que se eligió, no un formulario en
+  // blanco.
+  (X.graficosDe(X.leerURL()) || []).forEach(cod => {
+    const chk = document.getElementById(`g-${cod}`);
+    if (chk) { chk.checked = true; elegidos.add(cod); }
+  });
+  pintarSeleccion();
 }
 
 async function produccionAmpliada() {
@@ -1119,10 +1178,25 @@ document.addEventListener('DOMContentLoaded', async () => {
        declarar «N de M» exigiría pedirlo sólo para eso. Donde sí hay
        explorador, `actualizarRecorteVivo()` reescribe la línea con las cifras
        en el primer repintado. */
-    const partesURL = X.describir(X.leerURL());
+    const selURL = X.leerURL();
+    const partesURL = X.describir(selURL);
     const papel = document.getElementById('recorte-impreso');
     if (papel && partesURL.length) {
       papel.textContent = c.fraseRecorte(null, null, partesURL);
+    }
+
+    /* La selección de gráficos se declara APARTE del recorte, y en todas las
+       páginas. No es un filtro de datos —las cifras siguen siendo las del
+       recorte entero— sino una elección de qué figuras se muestran, y una hoja
+       parcial tiene que decir que es parcial: sin esto, un informe de tres
+       gráficos se lee como el informe entero. */
+    const elegidos = X.graficosDe(selURL);
+    const linea = document.getElementById('seleccion-impresa');
+    if (linea && elegidos) {
+      const total = Object.keys(VX.seccionDeGrafico()).length;
+      linea.textContent = `Selección: ${elegidos.length} de los ${total} `
+        + 'gráficos del informe. '
+        + 'Las cifras no cambian: lo que se acota es qué figuras se muestran.';
     }
     await c.montarAyuda();
     c.montarTooltip();

@@ -304,7 +304,7 @@ function selloCorte(sub, campo, cod, proc) {
   });
 }
 
-export function cortes(pubs_sel, proc, jerarquia, textos) {
+export function cortes(pubs_sel, proc, jerarquia, textos, sel = {}) {
   // El aviso de P-07 se reutiliza tal cual del corte de sección, en vez de
   // escribirlo una segunda vez: dos textos para la misma advertencia
   // metodológica divergen sin que nadie lo note (ver SESSION_NOTES.md sobre
@@ -313,7 +313,9 @@ export function cortes(pubs_sel, proc, jerarquia, textos) {
   // dentro de la función, no al nivel del módulo: `SECCIONES` se declara
   // más abajo en este mismo archivo.)
   const avisoUnidad = SECCIONES.produccion.cortes.find(c2 => c2.campo === 'unidad')?.aviso || '';
-  return CORTES.map(([clave, titulo, forma]) => `
+  const elegidos = CORTES.filter(([clave]) => X.graficoElegido(sel, COD_PORTADA[clave]));
+  if (!elegidos.length) return sinGraficos();
+  return elegidos.map(([clave, titulo, forma]) => `
     <section class="corte" data-corte="${clave}">
       <h3>${c.escapar(titulo)}</h3>
       <div class="grafico">${grafico(pubs_sel, clave, titulo, forma, jerarquia)}</div>
@@ -340,7 +342,7 @@ export function explorador(pubs, sel, proc, jerarquia, meta, umbral, textos) {
     // Las salvaguardas van pegadas a las cifras que califican, y por delante:
     // una advertencia debajo del número al que corrige llega tarde.
     cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
-    cortes: cortes(sub, proc, jerarquia, textos),
+    cortes: cortes(sub, proc, jerarquia, textos, sel),
   };
 }
 
@@ -370,7 +372,13 @@ export const SECCIONES = {
       // P-07 vista a nivel de escuela. Con `cod: 'P-07'` el id chocaría con
       // el corte de arriba (dos secciones con el mismo id="P-07" en la
       // página) y el ancla del índice lateral aterrizaría en el equivocado.
-      { campo: 'escuela', titulo: 'Escuelas dentro de cada facultad',        forma: 'barrasH' },
+      //
+      // `seleccionCon` dice de qué indicador es una vista: al elegir `P-07` en
+      // el catálogo vienen las dos, la de facultades y la de escuelas. Su
+      // lectura sigue siendo propia —son dos figuras y cada una explica lo que
+      // cuenta—, pero no se elige por separado porque no es otro indicador.
+      { campo: 'escuela', titulo: 'Escuelas dentro de cada facultad',        forma: 'barrasH',
+        seleccionCon: 'P-07' },
     ],
   },
   impacto: {
@@ -588,6 +596,29 @@ function corteRed(sub, corte, unidadPorPersona, proc, textos) {
   </section>`;
 }
 
+/** Ninguna figura de esta sección está en la selección.
+
+    Se dice en vez de callar: una sección vacía sin explicación se lee como que
+    no hay dato, que es lo contrario de lo que pasa. */
+function sinGraficos() {
+  return `<p class="vacio">Ningún gráfico de esta sección está en la selección.
+    El informe completo los incluye todos.</p>`;
+}
+
+/** En qué sección vive cada gráfico. Lo consume el selector del catálogo, que
+    es la única página donde se ven los dieciocho juntos: sin esto tendría que
+    guardar su propia copia de la tabla `SECCIONES` y las dos divergirían. */
+export function seccionDeGrafico() {
+  const m = {};
+  for (const [clave, s] of Object.entries(SECCIONES)) {
+    // Las variantes no entran: se eligen con su indicador, no aparte.
+    for (const corte of s.cortes) {
+      if (!corte.seleccionCon) m[corte.cod || corte.campo] = clave;
+    }
+  }
+  return m;
+}
+
 /* Qué muestra el gráfico, para el papel.
 
    En pantalla, quien no entiende una figura tiene la ayuda contextual, el
@@ -649,10 +680,17 @@ function cortePersonal(corte, persona) {
     `unidadPorPersona` sólo lo usa C-05 (red de coautoría); `jerarquia` sólo
     'unidad' y 'escuela' (P-07). `persona` (opcional) es la firma a la que está
     recortado el informe, y cambia qué se dibuja: ver `cortePersonal`. */
-export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, persona, textos) {
+export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, sel, textos) {
   const s = SECCIONES[clave];
   if (!s) return '';
-  return s.cortes.map(corte => {
+  const persona = X.personaDelRecorte(sel || {});
+  /* La selección de gráficos se aplica ANTES que nada: una sección sin ninguno
+     elegido no dibuja nada y lo dice, en vez de dejar una página en blanco que
+     se lee como que la sección no tiene datos. */
+  const elegidos = s.cortes.filter(corte =>
+    X.graficoElegido(sel || {}, corte.seleccionCon || corte.cod || corte.campo));
+  if (!elegidos.length) return sinGraficos();
+  return elegidos.map(corte => {
     if (persona) {
       const personal = cortePersonal(corte, persona);
       if (personal) return personal;
@@ -739,8 +777,7 @@ export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia, met
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
     cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
-    cortes: cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia,
-      X.personaDelRecorte(sel), textos),
+    cortes: cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, sel, textos),
   };
 }
 
