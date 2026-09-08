@@ -247,6 +247,7 @@ export function cromo(meta, paginaActual, tema = 'auto') {
       </p>
       <p class="solo-papel recorte-impreso" id="recorte-impreso">${
         escapar(fraseRecorte(universo, universo))}</p>
+      <p class="solo-papel recorte-impreso" id="seleccion-impresa"></p>
       <label class="v-anio" id="recorte-anio-env" hidden>
         <span class="solo-lectores">Filtrar por año</span>
         <select id="recorte-anio" aria-label="Filtrar por año de publicación"></select>

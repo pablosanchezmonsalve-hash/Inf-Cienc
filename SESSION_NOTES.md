@@ -12733,3 +12733,89 @@ lectura de `T-04`, el build aborta nombrándola. Batería completa sin fallos.
   seguirá con su fecha de build hasta el próximo `make sitio` completo.
 - Los de siempre: `STATE.md` sin regenerar y confirmar el LCP con
   `make rendimiento`.
+
+## Cierre: elegir gráficos, independiente de la sección (2026-09-07)
+
+### Contexto
+
+El usuario pidió un mecanismo para seleccionar un gráfico sin depender de en qué
+sección vive.
+
+### El mecanismo
+
+- **`grafico=I-04|T-05` en la URL**, junto al recorte y con la misma gramática:
+  se comparte, se cita y se descarga igual. Cada sección dibuja sólo los suyos
+  que estén elegidos.
+- **El catálogo de indicadores es la superficie de selección**, porque es la
+  única página donde los diecisiete se ven juntos: en una sección sólo están los
+  suyos, y elegir «independiente de la sección» exige verlos todos a la vez. Una
+  casilla por gráfico —el mismo patrón de casilla y barra de acciones que ya usa
+  el listado de publicaciones— y una barra que ofrece dos salidas: el informe en
+  pantalla y la orden lista para el PDF.
+- **`informe_pdf.mjs` salta las secciones sin ninguna figura elegida.** La
+  portada y el anexo metodológico se quedan siempre: la primera lleva las cifras
+  y la declaración, y el segundo es lo que hace interpretable cualquier figura.
+
+### La distinción que ordena el diseño
+
+Un filtro cambia **qué publicaciones se cuentan**; una selección cambia **qué
+figuras se muestran**. Por eso `grafico` NO es una dimensión: no filtra datos,
+no tiene facetas y no entra en `describir()`, que es la frase que declara sobre
+qué está medido el informe. Se declara en su propia línea —«Selección: 2 de los
+17 gráficos del informe. Las cifras no cambian»— y en todas las páginas.
+
+Mezclarlas habría producido una hoja que dice «recortado a I-04», como si los
+datos estuvieran restringidos a algo, sobre cifras que son las del conjunto
+entero.
+
+### Un detalle que lo habría dejado mudo
+
+El repintado inicial se salta cuando la página viene pre-renderizada y no hay
+recorte (`D-…`, para no destruir un LCP que ya ocurrió). Con una selección y sin
+filtros, esa condición se cumplía: la página enseñaba los dieciocho gráficos
+mientras la hoja declaraba que eran dos. La condición ahora mira también la
+selección. Se detectó midiendo, no leyendo: la primera corrida de la
+comprobación dibujó las cinco figuras de impacto.
+
+### La vista de escuelas
+
+No se elige aparte. Es la misma `P-07` un nivel más abajo, así que viene con
+ella (`seleccionCon: 'P-07'`). Conserva su lectura propia —son dos figuras y
+cada una explica qué cuenta— pero no cuenta como indicador seleccionable: son
+17 elegibles para 18 figuras, y cada cifra dice cuál de las dos cosas cuenta.
+
+### Verificación
+
+Ocho comprobaciones de punta a punta: las casillas del catálogo, el estado y las
+dos salidas de la barra, que impacto dibuje sólo `I-04` y temática sólo `T-05`,
+que producción declare que no tiene ninguno elegido, y que el PDF lleve la
+declaración de selección, traiga la figura elegida y no las otras. Cero errores
+de consola.
+
+Caso nuevo en la compuerta de impresión, con las lecturas leídas del artefacto:
+exige la línea de selección y la lectura del gráfico elegido, y prohíbe las de
+dos que no se eligieron. Informe generado con tres gráficos de dos secciones: se
+imprimieron cinco secciones en vez de seis, sin colaboración. Batería completa
+sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-542 | La selección de gráficos viaja en la URL junto al recorte, pero NO es una dimensión | Un filtro cambia qué se cuenta y una selección cambia qué se muestra. Como dimensión habría entrado en la frase del recorte y una hoja diría «recortado a I-04» sobre cifras del conjunto entero |
+| D-543 | El catálogo de indicadores es la superficie de selección | Es la única página donde los gráficos se ven todos juntos; en una sección sólo están los suyos, que es justo lo que el mecanismo tiene que superar |
+| D-544 | Una hoja con selección declara que es parcial, en su propia línea | Un informe de dos figuras que no lo diga se lee como el informe entero. La línea aclara además que las cifras no cambian, porque la selección no es una submuestra |
+| D-545 | Las secciones sin ninguna figura elegida no se imprimen; la portada y el anexo, siempre | Tres secciones diciendo que no tienen nada que enseñar no son parte de un informe. El anexo se queda porque un informe de tres figuras necesita más su clave de lectura, no menos |
+| D-546 | La vista de escuelas se elige con `P-07` y no aparte | No es otro indicador, es la misma producción por unidad un nivel más abajo. Conserva lectura propia porque son dos figuras |
+
+### Archivos
+
+- `web/assets/js/explorador.js`, `vista_explorador.js`, `vista.js`, `paginas.js`,
+  `core.js`, `web/assets/css/app.css`
+- `src/build/prerender.mjs`, `src/build/informe_pdf.mjs`, `src/verify/impresion.mjs`
+- `docs/UX_UI.md`
+
+### Pendientes
+
+Los de siempre: `STATE.md` sin regenerar por falta de `data/interim/`, y
+confirmar el LCP con `make rendimiento`.

@@ -177,7 +177,8 @@ async function main() {
       // que alguien va a citar o archivar, y una que exige JavaScript para
       // decir qué se publica y qué no vale de poco archivada.
       const a = [];
-      html = rellenar(html, 'catalogo', v.catalogo(await leerJSON('catalogo.json')), a);
+      html = rellenar(html, 'catalogo',
+        v.catalogo(await leerJSON('catalogo.json'), vx.seccionDeGrafico()), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'produccionAmpliada') {
       const a = [];

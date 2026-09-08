@@ -74,8 +74,13 @@ export function cierrePortada() {
     Es una tabla y no tarjetas a propósito: cuarenta entradas que se comparan
     entre sí se leen en columnas. Y va sin JavaScript —se pre-renderiza— porque
     es justo el contenido que alguien va a querer citar o archivar. */
-export function catalogo(cat) {
+export function catalogo(cat, graficos = {}) {
   const { indicadores, resumen, categorias, etiquetas_estado: est } = cat;
+  /* Los códigos que además se dibujan como gráfico en alguna sección. El
+     catálogo es la única página donde los dieciocho se ven juntos, así que es
+     donde se eligen: en una sección sólo están los suyos, y elegir «un gráfico
+     independiente de la sección» exige verlos todos a la vez. */
+  const esGrafico = (cod) => Object.prototype.hasOwnProperty.call(graficos, cod);
 
   const resumenHTML = Object.entries(est)
     .filter(([e]) => resumen[e])
@@ -96,13 +101,17 @@ export function catalogo(cat) {
       .filter(Boolean).join(' ');
     const extra = (motivo || r.que_falta) ? `
       <tr class="cat-motivo">
-        <td colspan="6">
+        <td colspan="7">
           ${motivo ? `<strong>Por qué:</strong> ${c.escapar(motivo)}` : ''}
           ${r.que_falta ? `<br><strong>Qué falta:</strong> ${c.escapar(r.que_falta)}` : ''}
         </td>
       </tr>` : '';
     return `
       <tr id="${r.codigo}">
+        <td class="col-marca">${esGrafico(r.codigo)
+          ? `<label class="solo-lectores" for="g-${r.codigo}">Incluir ${c.escapar(r.nombre)} en la selección</label>
+             <input type="checkbox" class="chk-grafico" id="g-${r.codigo}" data-cod="${r.codigo}">`
+          : ''}</td>
         <td><span class="codigo">${r.codigo}</span></td>
         <td>
           <strong>${c.escapar(r.nombre)}</strong>
@@ -128,6 +137,7 @@ export function catalogo(cat) {
       <div class="tabla-envoltura tabla-datos tabla-catalogo">
         <table>
           <thead><tr>
+            <th scope="col"><span class="solo-lectores">Seleccionar</span></th>
             <th scope="col">Cód.</th><th scope="col">Indicador y definición</th>
             <th scope="col">Fuente</th><th scope="col">Denominador</th>
             <th scope="col">Cobertura medida</th><th scope="col">Estado</th>
@@ -141,8 +151,21 @@ export function catalogo(cat) {
   const indice = Object.entries(categorias).map(([clave, etiqueta]) =>
     `<li><a href="#cat-${clave}"><span class="rail-txt">${c.escapar(etiqueta)}</span></a></li>`).join('');
 
+  /* La barra de la selección. Vive arriba y no al final: se marca mientras se
+     recorre la tabla, y un botón al pie obligaría a volver. Sin JavaScript
+     queda un texto que explica para qué son las casillas, que es más honesto
+     que un control muerto. */
+  const barra = `
+    <div class="acciones-tabla acciones-graficos" id="acciones-graficos">
+      <span id="estado-graficos">Ningún gráfico seleccionado</span>
+      <a class="boton" id="ver-seleccion" href="index.html" hidden>Ver el informe con estos gráficos →</a>
+      <button type="button" class="boton" id="limpiar-graficos" hidden>Quitar la selección</button>
+    </div>
+    <p class="nota" id="orden-graficos" hidden></p>`;
+
   return `
     <div class="kpis" data-n="${Object.values(resumen).filter(Boolean).length}">${resumenHTML}</div>
+    ${barra}
     <p class="nota">Las coberturas están <strong>medidas sobre los datos</strong>,
     no estimadas: salen de <code>indicator_feasibility.csv</code>, que se
     regenera en cada build. Un indicador diferido está verificado como

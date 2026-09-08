@@ -2104,6 +2104,13 @@ svg.chart .trama { pointer-events: none; }
 .ficha-acciones { margin: var(--e4) 0 var(--e5); }
 
 .acciones-tabla { display: flex; align-items: center; gap: var(--e3); margin-bottom: var(--e4); }
+/* La barra de selección de gráficos del catálogo. Va pegada arriba de las
+   tablas y con su propio aire: se marca mientras se recorren las cuarenta
+   filas, y tiene que seguir a la vista. */
+.acciones-graficos { flex-wrap: wrap; margin-top: var(--e4); }
+.acciones-graficos #estado-graficos { margin-right: auto; font-weight: 650; color: var(--tinta-2); }
+#orden-graficos { font-family: var(--f-mono); font-size: var(--t-xs); margin: 0 0 var(--e4); }
+.tabla-catalogo .col-marca { width: 2.4rem; }
 .acciones-tabla #estado-seleccion { margin-right: auto; font-weight: 650; color: var(--tinta-2); }
 
 /* Columna de casillas de selección en Publicaciones: ancho fijo, angosto,

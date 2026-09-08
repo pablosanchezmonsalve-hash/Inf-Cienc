@@ -721,6 +721,32 @@ ficha. La **mediana por año se queda con un aviso** que dice sobre cuántas
 publicaciones se calcula: es una cifra correcta sobre pocos valores, y ocultarla
 dejaría un hueco que se leería como ausencia de dato.
 
+### Elegir gráficos, independiente de la sección
+
+Los dieciocho gráficos del informe viven repartidos en cuatro secciones, y desde
+una sección sólo se ven los suyos. El **catálogo de indicadores** es la única
+página donde están todos juntos, así que es donde se eligen: una casilla por
+gráfico, y una barra que dice cuántos van y ofrece dos salidas, el informe en
+pantalla y la orden para el PDF.
+
+La selección viaja como `grafico=I-04|T-05` **junto al recorte y con la misma
+gramática**, así que se comparte, se cita y se descarga igual. Cada sección
+dibuja sólo los suyos que estén elegidos, y la que se queda sin ninguno lo dice
+en vez de aparecer vacía. En el PDF, las secciones sin figuras elegidas no se
+imprimen; la portada y el anexo metodológico sí, siempre.
+
+**No es un recorte, y la hoja lo distingue.** Un filtro cambia *qué
+publicaciones se cuentan*; una selección cambia *qué figuras se muestran*. Por
+eso `grafico` no es una dimensión —no filtra datos, no tiene facetas y no
+aparece en la frase del recorte— y se declara en su propia línea: «Selección: 2
+de los 17 gráficos del informe. Las cifras no cambian». Sin esa distinción, una
+hoja con dos figuras se leería como un informe medido sobre una submuestra que
+no existe.
+
+La vista de escuelas no se elige aparte: es la misma `P-07` un nivel más abajo,
+así que viene con ella. Tiene lectura propia porque son dos figuras, pero no es
+otro indicador.
+
 **El informe a medida.** `make informe RECORTE="anio=2024&tipo=Article"` toma la
 misma consulta que el explorador escribe en la URL —se copia de la barra de
 direcciones— y la pasa a cada sección: las cifras, los gráficos y las tablas se
