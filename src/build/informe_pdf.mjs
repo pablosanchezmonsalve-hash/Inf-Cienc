@@ -182,4 +182,12 @@ const etiquetadas = partes.filter((p) => p.etiquetado).length;
 console.log(`\n  ${partes.length} secciones · ${base}-*.pdf`);
 console.log('  Texto seleccionable y buscable: el navegador embebe las tipografías.');
 console.log(`  Etiquetado para lectores de pantalla: ${etiquetadas} de ${partes.length}.`);
-console.log(`  Declara en la hoja 1: ${consulta ? 'el recorte aplicado' : 'que es el informe completo'}.`);
+/* Un `grafico=` suelto NO es un recorte: no filtra publicaciones, y la hoja
+   dice «Sin filtros: el informe completo» junto a la línea de selección. Este
+   resumen afirmaba «el recorte aplicado» en ese caso, que es justo lo contrario
+   de lo que el PDF declara. */
+const filtra = [...recorte.keys()].some((k) => k !== 'grafico');
+console.log(`  Declara en la hoja 1: ${[
+  filtra ? 'el recorte aplicado' : 'que es el informe completo',
+  seleccion.length ? 'y la selección de gráficos, sin cambiar las cifras' : '',
+].filter(Boolean).join(' ')}.`);

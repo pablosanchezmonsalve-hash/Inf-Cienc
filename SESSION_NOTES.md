@@ -12819,3 +12819,111 @@ sin fallos.
 
 Los de siempre: `STATE.md` sin regenerar por falta de `data/interim/`, y
 confirmar el LCP con `make rendimiento`.
+
+---
+
+## Cierre: el botón de descarga, documentado donde se busca (2026-09-08)
+
+### La pregunta
+
+«¿Cada vez que quiera generar un informe tendrá que ser a través de un
+comando?» La respuesta era no —el botón «Descargar informe» está en la barra de
+vigencia de las doce páginas del sitio— pero **no estaba escrita en ninguna
+parte donde alguien la fuera a buscar**. `docs/UX_UI.md` §12.7 bis explica el
+diseño del informe descargable con detalle, y es el documento correcto para el
+porqué; `docs/OPERACION.md`, que es la guía de uso paso a paso, no mencionaba ni
+el botón ni `make informe`.
+
+Una guía de operación que omite cómo obtener el entregable del proyecto empuja a
+su lector al comando, que es la vía cara para el caso normal.
+
+### Lo que se documentó
+
+Paso 4 bis, después de reconstruir el sitio y antes de los conectores, porque
+generar un informe exige `dist/` y nada más:
+
+- **El botón es la vía normal.** Imprime la página en la que se está, con el
+  recorte y la selección de gráficos ya aplicados, porque ambos viven en la
+  dirección. Lo que se ve es lo que sale.
+- **Los dos ajustes del diálogo que cambian el resultado**, con lo que se pierde
+  en cada caso: «Gráficos de fondo» apagado quita el tinte de las bandas de
+  aviso —que conservan borde y texto— y «Encabezados y pies» encendido estampa
+  la dirección web en cada hoja. Tamaño y márgenes NO dependen del diálogo: los
+  fija `@page`.
+- **El comando es para el informe completo**, con lo que eso significa de
+  verdad: recorre seis páginas y deja **seis archivos**, uno por sección. Se
+  dice explícitamente, porque «informe completo» se lee como un PDF único y no
+  lo es (unir PDF exigiría una dependencia de manipulación que el proyecto no
+  tiene).
+- **`npm install`**, que el Paso 1 no cubre: Node y Chromium hacen falta para
+  esto y para `make verificar`, no para el sitio.
+- **Los ejemplos de `RECORTE`**, corridos antes de escribirlos.
+
+### Dos correcciones que salieron de escribirlo
+
+**El valor de unidad estaba inventado.** El primer borrador traía
+`unidad="Facultad de Medicina"`. La unidad del corpus es **«Facultad de Medicina
+y Salud»**, 382 publicaciones. Un ejemplo que no corre es peor que ninguno.
+Corregido y verificado con el comando de verdad.
+
+**El resumen del generador se contradecía con el PDF.** `informe_pdf.mjs`
+terminaba diciendo «Declara en la hoja 1: el recorte aplicado» siempre que
+hubiera consulta, y una selección de gráficos sin filtros es consulta sin ser
+recorte: la hoja dice «Sin filtros: el informe completo» más la línea de
+selección, o sea lo contrario de lo que anunciaba la consola. Es la misma
+distinción de `D-542`, que se había aplicado al papel y no al mensaje. Ahora
+mira si queda alguna clave que no sea `grafico`, y nombra las dos cosas por
+separado. Comprobado en los cuatro casos: sin nada, sólo selección, sólo
+recorte, y ambos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-547 | El botón se documenta en `docs/OPERACION.md`, no sólo en `docs/UX_UI.md` | Son dos preguntas distintas: UX_UI responde por qué el informe es así, OPERACION responde cómo se obtiene. Quien quiere su PDF abre la guía de uso, y allí no estaba |
+| D-548 | El resumen de `informe_pdf.mjs` distingue recorte de selección | Una selección sin filtros es consulta sin ser recorte, y la consola afirmaba lo contrario de lo que declara la hoja. La distinción de `D-542` vale también para lo que el generador dice de sí mismo |
+
+### Archivos
+
+- `docs/OPERACION.md` — Paso 4 bis, cuatro filas nuevas en «Si algo sale mal» y
+  tres en «Dónde está lo demás»
+- `README.md` — el índice no listaba `docs/LECTURAS.md` ni
+  `docs/INFORME_POR_INVESTIGADOR.md`, que existen desde hace dos sesiones
+- `src/build/informe_pdf.mjs` — el resumen final
+
+### Verificación
+
+Los tres ejemplos documentados, corridos: completo (6 secciones), por unidad
+(6 secciones, recorte declarado) y por selección de gráficos (5 secciones). Los
+cuatro casos del mensaje corregido. Batería completa sin fallos.
+
+### Una trampa de `make estado` en un clon limpio
+
+`docs/DECISIONS.md` sí se regeneró: `D-547` y `D-548` están en el índice. Pero
+`STATE.md` **se revirtió**, y conviene que quede escrito por qué.
+
+`internal/*` está en `.gitignore` salvo su README, y `data/interim/` también.
+En un clon limpio —el entorno remoto lo es— esos archivos **no existen**, así
+que `src/state/snapshot.py` genera un `STATE.md` que ha perdido, en silencio:
+
+- cinco cifras canónicas (formas de firma 589, apariciones 1207, pares 1205,
+  reglas de validación 30, bloqueantes fallando 0);
+- la tabla entera de colas internas, quince filas, que queda vacía;
+- la frase de los 284 casos de revisión con 82 pendientes.
+
+Un `STATE.md` así no dice «no lo sé»: dice que no hay colas. Es el punto de
+entrada de la sesión siguiente, y afirmar cero pendientes internos donde hay
+ochenta y dos es peor que un archivo viejo. Revertido con `git checkout`, que
+es lo que corresponde a un derivado: no se arregla a mano, se vuelve a generar
+donde sus insumos existen.
+
+**Abierto, decisión del responsable:** que `snapshot.py` se detenga —o escriba
+«sin datos» en vez de una tabla vacía— cuando sus insumos no están. Es el mismo
+patrón de compuerta que el resto del proyecto ya usa, pero es un cambio al
+sistema de memoria y no se toma de paso.
+
+### Pendientes
+
+`STATE.md` sigue sin regenerar, ahora con la razón anotada arriba; hay que
+correr `make estado` en el equipo que tiene `internal/` y `data/interim/`.
+Y confirmar el LCP con `make rendimiento`.

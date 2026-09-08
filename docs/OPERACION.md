@@ -91,6 +91,106 @@ qué y dónde.
 
 ---
 
+## Paso 4 bis — Descargar un informe en PDF
+
+Hay dos vías y **una sola maquetación**: las dos imprimen las mismas páginas de
+`dist\` con la misma hoja de estilo, así que no pueden divergir. La diferencia
+no es el aspecto, es el alcance y quién decide los ajustes.
+
+### La vía normal es el botón, no un comando
+
+En la barra que trae la fecha de vigencia, presente en **todas** las páginas del
+sitio, está **«Descargar informe»**. Abre el diálogo de impresión del navegador;
+elija **«Guardar como PDF»** como destino.
+
+Imprime **la página en la que está**, con los filtros aplicados y los gráficos
+elegidos en el catálogo de indicadores. No hay que repetir nada al descargar: el
+recorte y la selección viven en la dirección de la página, y lo que se imprime
+es lo que ya está dibujado. Lo que se ve es lo que sale.
+
+Dos ajustes del diálogo, bajo **«Más ajustes»**, cambian el resultado:
+
+| Ajuste | Cómo conviene | Qué pasa si no |
+|---|---|---|
+| Gráficos de fondo | **Encendido** | Las bandas de aviso pierden su tinte. Se leen igual: conservan su borde y su texto, y los gráficos no dependen de este ajuste porque su color va en el propio SVG |
+| Encabezados y pies de página | **Apagado** | Cada hoja añade la dirección y la fecha del navegador sobre el informe |
+
+Tamaño de hoja y márgenes **no** dependen del diálogo: los fija la hoja de
+estilo (A4 vertical, regla `@page` en `web\assets\css\app.css`).
+
+**En publicaciones** el botón imprime la página de la tabla que esté viendo, no
+las 823 filas. Para llevarse esa lista está **«Exportar CSV (todo el recorte)»**,
+en la misma página.
+
+### La otra vía: el comando, para el informe completo
+
+El botón resuelve a quien mira una sección y quiere llevársela. No resuelve el
+informe completo, igual en cada corrida y archivable, que no puede depender de
+que alguien abra un navegador y acierte con los ajustes.
+
+```powershell
+node src\build\informe_pdf.mjs dist dist\informe-cienciometrico.pdf
+```
+
+En Linux o macOS, `make informe`, que además reconstruye el sitio antes.
+
+Recorre seis páginas —portada, producción, impacto, colaboración, temática y el
+anexo metodológico— y deja **un archivo por sección**,
+`dist\informe-cienciometrico-*.pdf`. No un PDF único: unir PDF exigiría una
+dependencia de manipulación que este proyecto no tiene, y se declara en vez de
+fingir un informe de una pieza.
+
+**Deja fuera** publicaciones, autores, las fichas y el catálogo. Son tablas con
+filtro y paginación, y volcarlas produciría un anexo de cientos de hojas que
+nadie lee.
+
+**Exige Node y Chromium**, que el Paso 1 no instala porque el sitio no los
+necesita. Sólo hacen falta para esto y para `make verificar`:
+
+```powershell
+npm install
+```
+
+#### El informe a medida
+
+`RECORTE` lleva **la misma consulta que el explorador escribe en la dirección**:
+se aplican los filtros en pantalla y se copia lo que va después del `?` en la
+barra de direcciones. El cuarto argumento del comando es esa cadena.
+
+| Qué quiere | Con `make` | Argumento en PowerShell |
+|---|---|---|
+| Un año y un tipo | `make informe RECORTE="anio=2024&tipo=Article"` | `"anio=2024&tipo=Article"` |
+| Una unidad académica | `make informe RECORTE="unidad=Facultad de Medicina y Salud"` | `"unidad=Facultad de Medicina y Salud"` |
+| Una persona | `make informe RECORTE="autor=Orellana-Donoso M."` | `"autor=Orellana-Donoso M."` |
+| Tres gráficos sueltos | `make informe RECORTE="grafico=P-07\|I-04\|T-05"` | `"grafico=P-07\|I-04\|T-05"` |
+
+Es decir, en Windows:
+
+```powershell
+node src\build\informe_pdf.mjs dist dist\informe.pdf "unidad=Facultad de Medicina y Salud"
+```
+
+El recorte va en el nombre del archivo —dos informes distintos no pueden
+llamarse igual en la carpeta de descargas de nadie— y, sobre todo, **declarado
+en la hoja 1**, que es lo único que sobrevive a que alguien renombre el archivo.
+
+Con `autor=` de una sola firma, la ficha de esa persona abre el informe y sobre
+las cifras aparecen las advertencias de lectura. Una selección de gráficos deja
+fuera las secciones que se quedan sin ninguno; la portada y el anexo
+metodológico se imprimen siempre.
+
+#### Cuándo hace falta el comando y no el botón
+
+- Necesita el PDF **etiquetado** para lectores de pantalla. El comando lo pide
+  explícitamente y dice cuántas secciones lo consiguieron; con el botón depende
+  del navegador y de los ajustes de quien imprime, que el sitio no controla.
+- Quiere **las seis secciones** de una vez, sin recorrerlas a mano.
+- Va a generar **varios informes seguidos**, o generarlos desde un servidor.
+
+Para leer y descargar el suyo, el botón basta.
+
+---
+
 ## Paso 5 — Los conectores externos
 
 Consultan API públicas y **no corren en el entorno de desarrollo remoto**, cuya
@@ -245,6 +345,10 @@ mes.
 | «la capa interna apareció en dist/» | La compuerta hizo su trabajo. Nada de `internal\` puede viajar al sitio |
 | Un conector no alcanza su API | Red o proxy. Los tres declaran qué pasó y qué hacer |
 | Las cifras del sitio no cambian | Falta rehacer el Paso 4: `dist\` no se regenera solo |
+| El PDF sale con la dirección web en cada hoja | Apague «Encabezados y pies de página» en el diálogo. Paso 4 bis |
+| El PDF sale sin los colores de fondo | Encienda «Gráficos de fondo» en el diálogo. Paso 4 bis |
+| El PDF descargado trae una sola sección | Es lo que hace el botón: imprime la página que ve. Las seis van con el comando. Paso 4 bis |
+| `informe_pdf.mjs` no arranca | Falta `npm install`: Node y Chromium no los instala el Paso 1 |
 
 ---
 
@@ -257,5 +361,8 @@ mes.
 | Cómo recuperar ORCID | `docs\ORCID_GUIDE.md` y `docs\ORCID_API_GUIDE.md` |
 | Qué fuentes se consultan | `docs\FUENTES_Y_APIS.md` |
 | Qué límites tienen los datos | `docs\LIMITATIONS.md` |
+| Cómo se ve el informe en papel, y por qué así | `docs\UX_UI.md` §12.7 bis |
+| Qué explica cada gráfico del informe | `docs\LECTURAS.md` |
+| Por qué hay informe por persona, y con qué salvaguardas | `docs\INFORME_POR_INVESTIGADOR.md` |
 | Cómo desplegar | `docs\DEPLOYMENT.md` |
 | Adaptarlo a otra institución | `docs\REPLICATION.md` |
