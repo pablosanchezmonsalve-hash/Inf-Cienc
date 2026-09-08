@@ -137,7 +137,7 @@ async function main() {
       // escrito el estado sin filtrar: el informe completo.
       const a = [];
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
-      const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
+      const titulo = c.tituloDeSeccion((html.match(/<title>([^<]*)/) || [])[1], clave);
       const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia, meta, umbral, textos);
       html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo, ejes[clave]), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);

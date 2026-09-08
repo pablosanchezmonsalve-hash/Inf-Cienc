@@ -12996,3 +12996,145 @@ normal, exit 0, sin advertencia, 19 cifras canónicas en vez de 13.
 correr `make estado` en el equipo que tiene `internal/` y `data/interim/`, y
 ahí entrarán `D-547`, `D-548` y `D-549`. Y confirmar el LCP con
 `make rendimiento`.
+
+---
+
+## Cierre: el informe descargado, mirado hoja por hoja (2026-09-08)
+
+Hasta hoy el papel se había comprobado leyendo el TEXTO del PDF: la compuerta
+de impresión extrae las cadenas y exige que estén. Eso encuentra lo que falta y
+no ve nada de lo que sobra, se parte o se imprime ilegible. Se montó un visor
+—Chromium y pdf.js, la pareja que el proyecto ya usa— que rasteriza hojas a
+PNG, y se miraron una por una las 47 del informe completo.
+
+Siete defectos, ninguno visible desde el código.
+
+### 1. Las tarjetas de cifra se partían por la mitad
+
+La hoja 1 terminaba con dos tarjetas cortadas y la 2 abría con «Citas por
+publicación · 816 sobre las que tienen métricas» **sin el número**, que se
+había quedado en la anterior. Un rótulo sin su cifra no es media tarjeta: es
+una afirmación sin sujeto.
+
+Tres causas encadenadas, y las tres había que quitarlas:
+
+1. La regla existía —`.kpi { break-inside: avoid }`— y **nunca se aplicó**: las
+   cifras no son `.kpi` sino `.ficha` dentro de `.tablero`; `.kpi` es el
+   tablero de las páginas antiguas.
+2. Puesta sobre la clase correcta, tampoco: Chromium no cumple
+   `break-inside: avoid` ni sobre una rejilla ni sobre sus hijos.
+3. Reescrita como bloques en línea, **seguía sin aplicarse**: el bloque
+   `@media print` grande vive en mitad de la hoja de estilo y una consulta de
+   medios NO añade especificidad, así que `.tablero { display: grid }`,
+   escrito más abajo para la pantalla, le ganaba por orden de aparición. Se vio
+   en el PDF —las fichas salían al 24 % de ancho, que es el 49 % de media
+   columna de rejilla—, no leyendo el archivo.
+
+La hoja de estilo ya tenía una cola al final para exactamente esto, con su
+comentario explicándolo. La regla se fue allí.
+
+### 2. La tabla repetía la figura
+
+«Autores por publicación» dibujaba seis barras rotuladas con su valor y debajo
+ponía seis filas con los mismos seis números y las mismas seis etiquetas. La
+regla era «en papel no hay conmutador, así que se imprimen las dos vistas», y
+es cierta a medias: vale para el treemap, el mapa de calor y la mediana por
+año, donde la figura no rotula cada valor; no vale para una barra que ya lleva
+su cifra escrita al lado.
+
+La condición no se escribió como una lista de formas —divergiría del generador
+en cuanto se añada un gráfico—: **cada figura declara en su SVG** si rotula
+todos sus valores y todas sus categorías (`data-cifras`), y `barrasH` se marca
+`parciales` en cuanto una etiqueta no cupo. Por eso «Unidad académica»
+conserva su tabla: es el único sitio donde «Facultad de Arquitectura, Diseño y
+Estudios Creativos» aparece entero, porque la barra lo recortó. Por omisión la
+tabla se imprime: una figura que no declara nada es una figura de la que no
+sabemos si basta.
+
+### 3. El anexo metodológico salía ilegible
+
+`.banda-contraste` invierte la paleta: fondo vino profundo, tinta clara. En
+pantalla funciona. En papel depende de «Gráficos de fondo», que va **apagado
+por defecto** en Chrome: el fondo no se pinta, la tinta clara queda sobre
+blanco y el resumen metodológico —lo que hace interpretable todo lo demás— sale
+en gris pálido. Comprobado generando el mismo documento con el ajuste en sus
+dos posiciones y mirando la hoja 9.
+
+Se resuelve del lado del papel y no pidiéndole al lector que acierte con una
+casilla: una hoja es blanca, y una banda oscura es un recurso de pantalla.
+
+### 4. Cuatro tarjetas que no llevan a ninguna parte
+
+La última hoja de la portada eran cuatro tarjetas «Producción · Ver la sección
+→». En papel son cuatro promesas muertas. La banda de texto que las acompaña se
+queda: dice que cada indicador declara su denominador, y eso vale igual
+impreso.
+
+### 5. «Producción — Informe Bibliométrico», cuatro veces
+
+El titular de cada sección repetía el nombre del informe, tres líneas debajo de
+la línea de crédito que ya lo dice. La causa: `title.split('·')`, cuando el
+separador del título es «—», así que no cortaba nada. Estaba escrito **dos
+veces —en el pre-renderizador y en el navegador— y mal las dos**. Ahora hay una
+sola función en `core.js` y los dos consumidores la llaman.
+
+### 6. Sin folio
+
+Cuarenta y seis hojas repartidas en seis archivos, sin un número de página.
+«Mire la página 12» no significaba nada y una hoja suelta no decía de qué
+documento salía. Lo pone ahora `informe_pdf.mjs` con la plantilla de pie de
+Chromium: «Informe bibliométrico · Producción» a la izquierda, «Hoja 3 de 8» a
+la derecha. No puede ir en la hoja de estilo porque Chromium no implementa los
+cuadros de margen de CSS Paged Media, y ésa es la diferencia real entre las dos
+vías: el botón ofrece el folio del diálogo, con la dirección web y la fecha del
+navegador; el comando pone el del informe.
+
+### 7. Una referencia que sólo vale en pantalla
+
+El aviso de «Unidad académica» decía «el treemap, más abajo **en esta misma
+página**». En el PDF está tres hojas más allá. Ahora dice «en esta misma
+sección», que es cierto en los dos medios.
+
+### Lo que se midió y NO se cambió
+
+Convertir `.cortes` de rejilla a flujo de bloque en papel: **cero diferencia**.
+A 182 mm de ancho útil la rejilla ya resuelve a una columna. Las hojas a medio
+llenar no vienen de ahí, vienen de que cinco bloques miden entre 205 y 267 mm
+sobre una hoja útil de 263 y no pueden compartir con nadie. Queda anotado en la
+hoja de estilo para que nadie lo intente otra vez.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-550 | La tabla equivalente se imprime sólo cuando añade algo, y lo decide la figura declarándolo en su SVG | Bajo una barra rotulada la tabla repite el mismo número y la misma etiqueta. Bajo una figura que recortó una etiqueta o que no rotula sus valores, la tabla es el único sitio donde el dato está entero. Una lista de formas escrita en la hoja de estilo divergiría del generador al primer gráfico nuevo |
+| D-551 | En papel las tarjetas de cifra son bloques en línea, no una rejilla | Chromium no cumple `break-inside: avoid` sobre una rejilla ni sobre sus hijos, y una tarjeta partida deja el rótulo sin su número. Se ven igual, dos por fila |
+| D-552 | La banda de contraste se imprime en tinta sobre blanco | Su tinta clara depende de un ajuste del diálogo que va apagado por defecto: sin fondo, el texto que hace interpretable el informe sale ilegible. El papel es blanco; la banda oscura es un recurso de pantalla |
+| D-553 | La navegación entre secciones no se imprime | «Ver la sección →» en una hoja es una promesa muerta. Mismo criterio que el conmutador Gráfico ⇄ Tabla y que el bloque de recorte |
+| D-554 | El folio lo pone el generador, no la hoja de estilo | Chromium no implementa los cuadros de margen de CSS Paged Media, así que el botón no puede numerar; el comando sí, y un informe archivable sin folio no se puede citar |
+| D-555 | El nombre de la sección se calcula en un solo sitio | Estaba escrito dos veces y las dos cortaban por un separador que el título no usa. Es el defecto que este proyecto ya vio tres veces: dos definiciones de la misma regla |
+
+### Archivos
+
+- `web/assets/js/core.js` — `data-cifras` en las tres figuras que se rotulan
+  solas, y `tituloDeSeccion()`
+- `web/assets/css/app.css` — la tabla condicionada, la banda en tinta negra, la
+  navegación fuera, las fichas indivisibles en la cola del archivo
+- `web/assets/js/vista_explorador.js` — el aviso sin referencia de pantalla
+- `web/assets/js/paginas.js`, `src/build/prerender.mjs` — los dos consumidores
+  del nombre de sección
+- `src/build/informe_pdf.mjs` — el pie con folio
+
+### Pendientes y ambigüedades abiertas
+
+- **Las cifras se repiten cinco veces.** Las mismas seis tarjetas abren la
+  portada y las cuatro secciones. En un documento de seis archivos que se leen
+  sueltos eso es contexto; leído del tirón es repetición. No se tocó: es una
+  decisión sobre qué es el informe, no un defecto.
+- **Las hojas a medio llenar.** Cinco bloques ocupan casi una hoja entera y
+  dejan el resto en blanco. Reducirlo exige acortar figuras o permitir que un
+  bloque se parta, y las dos cosas tienen coste; hoy `break-inside: avoid`
+  garantiza que ninguna figura se separe de su explicación ni de su sello.
+- **Sin índice.** Cuarenta y seis hojas sin tabla de contenidos.
+- `STATE.md` sigue sin regenerar; hay que correr `make estado` en el equipo que
+  tiene `internal/` y `data/interim/`.
