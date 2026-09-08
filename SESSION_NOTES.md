@@ -13138,3 +13138,76 @@ hoja de estilo para que nadie lo intente otra vez.
 - **Sin índice.** Cuarenta y seis hojas sin tabla de contenidos.
 - `STATE.md` sigue sin regenerar; hay que correr `make estado` en el equipo que
   tiene `internal/` y `data/interim/`.
+
+---
+
+## Cierre: el índice del informe (2026-09-08)
+
+Cierra el tercero de los pendientes que dejó la revisión hoja por hoja de esta
+misma fecha: cuarenta y seis hojas repartidas en seis archivos sin forma de
+saber dónde está nada.
+
+### Los números de hoja se leen, no se estiman
+
+La tentación era contar bloques y estimar dónde cae cada uno. No se hizo: el
+navegador miente sobre el papel —un `<details>` cerrado mide 109 px bajo el
+medio `print` y no llega al PDF, que es la razón por la que la compuerta de
+impresión lee el documento y no el DOM—. El generador compone las secciones,
+**abre cada PDF con pdf.js y busca el título de cada figura página por
+página**, y con eso escribe el índice.
+
+Sale gratis lo que habría costado una regla aparte: con `grafico=…` lo que no
+se dibujó no aparece en el índice, sin que nadie tenga que decidir qué entra.
+Comprobado con `grafico=P-07|I-04|T-05`: el índice lista cuatro figuras en tres
+secciones —P-07 se lleva consigo la vista de escuelas, como está decidido— y no
+menciona colaboración, que no se imprimió.
+
+El precio es que la portada se compone dos veces: una para que existan las
+demás y otra ya con el índice. Son unos segundos y ocurre sólo aquí.
+
+### La autocomprobación
+
+Sin selección, todos los gráficos declarados de una sección tienen que aparecer
+en su PDF. Si uno no aparece es que su título cambió en `vista_explorador.js` y
+la búsqueda dejó de casar; el índice se quedaría corto sin decirlo. El
+generador compara y nombra los que faltan por su código.
+
+Probado en negativo: cambiando «Tipo documental» por «Tipo de documento» en el
+HTML ya construido, el generador avisa «produccion: 4 de 5 gráficos localizados
+en el PDF. Sin hoja en el índice: P-03», y el índice baja de 18 a 17. Restaurado
+después.
+
+Con selección no se comprueba: ahí faltan a propósito, y exigir cuáles
+obligaría a reimplementar la regla de selección aquí, que es la segunda
+definición que este proyecto lleva media docena de sesiones evitando.
+
+### La guía de puntos
+
+Primera versión: una ristra fija de puntos en un `::after` del título. Como la
+ristra tiene largo fijo, cada línea terminaba en un sitio distinto —se ve en el
+PDF, no en el código— y alargarla sólo mueve el problema. La guía es ahora un
+elemento vacío que crece hasta el número de hoja, con el puntillado en su borde
+inferior: mide exactamente el hueco libre, sea cual sea el título.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-556 | El índice lleva números de hoja leídos del PDF compuesto, no estimados | El navegador no sabe dónde caerá un bloque en papel; es la misma razón por la que la compuerta de impresión lee el PDF y no el DOM. Además hace que la selección de gráficos funcione sin una regla aparte |
+| D-557 | El generador comprueba que encontró todos los gráficos declarados, y nombra los que no | Un índice corto no se nota al leerlo. Si un título cambia, la búsqueda deja de casar en silencio y el índice pierde una entrada |
+| D-558 | El índice abre hoja propia, después de la portada | Un índice que empieza a media página, debajo de las cifras, no se encuentra al hojear |
+
+### Archivos
+
+- `src/build/informe_pdf.mjs` — el índice, la lectura de hojas y la
+  autocomprobación
+- `web/assets/css/app.css` — `.indice-informe`, la maqueta del índice
+- `docs/UX_UI.md`, `docs/OPERACION.md`
+
+### Pendientes
+
+De los tres que dejó la revisión de hoy quedan dos, los dos decisión del
+responsable y no defectos: **las cifras repetidas** en la portada y en las
+cuatro secciones, y **las hojas a medio llenar**, que sólo se reducen acortando
+figuras o dejando que un bloque se separe de su explicación. Y `STATE.md` sigue
+sin regenerar por falta de `internal/` y `data/interim/`.

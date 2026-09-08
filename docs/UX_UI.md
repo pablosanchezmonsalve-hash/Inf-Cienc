@@ -810,6 +810,25 @@ medio `print` emulado, el cuerpo de un desplegable cerrado devuelve una caja de
 árbol de estructura para lectores de pantalla. El botón del navegador depende
 de los ajustes de quien imprime, que el sitio no controla.
 
+**El folio y el índice.** El PDF que genera `make informe` numera sus hojas
+—«Informe bibliométrico · Producción» a la izquierda, «Hoja 3 de 8» a la
+derecha— y abre con un índice: cada sección con su archivo y su número de
+hojas, y bajo ella cada gráfico con su código, su título y la hoja en la que
+cae. Los números de hoja **se leen del PDF ya compuesto**, buscando el título
+de cada figura página por página, por la misma razón por la que la compuerta de
+impresión lee el PDF y no el DOM: el navegador miente sobre el papel. Eso
+resuelve gratis la selección de gráficos —lo que no se dibujó no aparece— y
+permite una autocomprobación: sin selección, un gráfico declarado que no
+aparezca en su PDF significa que su título cambió y la búsqueda dejó de casar,
+y el generador lo dice por su código.
+
+Las dos cosas viven en el generador porque Chromium no implementa los cuadros
+de margen de CSS Paged Media y el botón del navegador no puede saber en qué
+hoja cae nada; su maqueta sí está en `app.css` (`.indice-informe`), que sigue
+siendo el único sitio donde se decide cómo se ve el papel. El precio es que la
+portada se compone dos veces: una para que existan las demás secciones y otra
+ya con el índice.
+
 **Límite conocido:** las líneas de procedencia van en la primera hoja, no en
 cada una. Chromium no implementa los cuadros de margen de CSS Paged Media, así
 que un encabezado repetido tendría que inyectarse desde `informe_pdf.mjs` y
