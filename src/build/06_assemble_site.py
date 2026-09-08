@@ -12,6 +12,7 @@ Salida:
 
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -129,6 +130,17 @@ def main() -> None:
 
     shutil.copytree(WEB, DIST, dirs_exist_ok=True)
     shutil.copytree(b.PROCESSED, DIST / "data", dirs_exist_ok=True)
+
+    # Manifiesto VACÍO del informe descargable. Lo rellena
+    # `src/build/informe_pdf.mjs`, que corre DESPUÉS del ensamblado porque
+    # necesita el sitio para componer el PDF; aquí sólo se deja el archivo
+    # puesto. Sin él, la portada pediría un artefacto inexistente y el 404
+    # aparecería en la consola de cada visita: un error de red por una función
+    # que simplemente no está disponible. Con la lista vacía, la portada no
+    # dibuja el bloque de descarga y nadie se entera de nada.
+    (DIST / "data" / "informe.json").write_text(
+        json.dumps({"archivos": [], "hojas": 0}, ensure_ascii=False) + "\n",
+        encoding="utf-8")
 
     # Verificación explícita de que la capa interna no viajó.
     for prohibido in NUNCA_DESPLEGAR:

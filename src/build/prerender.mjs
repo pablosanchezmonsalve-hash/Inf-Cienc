@@ -73,8 +73,19 @@ async function main() {
   // Sólo lo usa C-05 (red de coautoría); el mismo mapa que arma el navegador
   // en paginas.js, para que el prerenderizado no divergan en qué unidad
   // muestra cada nodo.
+  const autoresJson = await leerJSON('authors.json');
   const unidadPorPersona = new Map(
-    (await leerJSON('authors.json')).autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+    autoresJson.autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+  const umbral = autoresJson.parametros?.n_minimo_interpretable;
+  // Los textos que explican cada gráfico en el papel. Mismo origen que en el
+  // navegador: el documento revisado y el catálogo, no cadenas escritas aquí.
+  const { lecturas } = await leerJSON('lecturas.json');
+  const catalogoJson = await leerJSON('catalogo.json');
+  const textos = {
+    lecturas,
+    advertencias: Object.fromEntries(
+      catalogoJson.indicadores.filter(i => i.advertencia).map(i => [i.codigo, i.advertencia])),
+  };
   // Escuela -> facultad (P-07): mismo mapa que `meta.json` le da al navegador
   // (`common_build.build_meta()`), para que el pre-renderizado no diverja en
   // qué unidad agrega el gráfico.
@@ -112,7 +123,7 @@ async function main() {
       // las cifras y los gráficos del conjunto entero, y sólo pierde la
       // capacidad de recortarlo. Los `details` de los filtros se abren y se
       // leen igual sin guion.
-      const vacio = vx.explorador(publicaciones, {}, proc, jerarquia);
+      const vacio = vx.explorador(publicaciones, {}, proc, jerarquia, meta, umbral, textos);
       html = rellenar(html, 'titular', vx.cabecera(meta), a);
       html = rellenar(html, 'estado-recorte', vacio.estado, a);
       html = rellenar(html, 'controles', vacio.controles, a);
@@ -126,8 +137,8 @@ async function main() {
       // escrito el estado sin filtrar: el informe completo.
       const a = [];
       const clave = (html.match(/data-seccion="([^"]+)"/) || [])[1];
-      const titulo = (html.match(/<title>([^<·]+)/) || ['', clave])[1].trim();
-      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia);
+      const titulo = c.tituloDeSeccion((html.match(/<title>([^<]*)/) || [])[1], clave);
+      const sec = vx.seccion(publicaciones, {}, clave, proc, unidadPorPersona, jerarquia, meta, umbral, textos);
       html = rellenar(html, 'titular', vx.cabeceraSeccion(clave, titulo, ejes[clave]), a);
       html = rellenar(html, 'estado-recorte', sec.estado, a);
       html = rellenar(html, 'controles', sec.controles, a);
@@ -166,7 +177,8 @@ async function main() {
       // que alguien va a citar o archivar, y una que exige JavaScript para
       // decir qué se publica y qué no vale de poco archivada.
       const a = [];
-      html = rellenar(html, 'catalogo', v.catalogo(await leerJSON('catalogo.json')), a);
+      html = rellenar(html, 'catalogo',
+        v.catalogo(await leerJSON('catalogo.json'), vx.seccionDeGrafico()), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     } else if (tipo === 'produccionAmpliada') {
       const a = [];

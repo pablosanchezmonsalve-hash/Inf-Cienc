@@ -231,17 +231,23 @@ jobs:
           echo "Capas internas ausentes del control de versiones — verificado"
 
       # La batería de `src/verify/`: contraste WCAG, estructura y consola,
-      # flujos interactivos, responsive e higiene de CSS/JS. Existe en el
-      # repositorio desde `D-137` y hasta ahora había que acordarse de correrla
-      # a mano — que es la forma que tiene una verificación de no correrse.
+      # flujos interactivos, responsive, impresión e higiene de CSS/JS. Existe
+      # en el repositorio desde `D-137` y hasta ahora había que acordarse de
+      # correrla a mano — que es la forma que tiene una verificación de no
+      # correrse.
       #
-      # La versión se fija aquí y no en un package.json porque el sitio no tiene
-      # dependencias de JavaScript y no va a tenerlas por una herramienta de
-      # prueba. Es la misma con la que se verifica en local: una batería que
-      # corre contra otro navegador no comprueba lo mismo.
-      - name: Instalar Playwright y Chromium
+      # Las versiones se fijan aquí y no en un package.json porque el sitio no
+      # tiene dependencias de JavaScript y no va a tenerlas por una herramienta
+      # de prueba. Son las mismas con las que se verifica en local: una batería
+      # que corre contra otro navegador no comprueba lo mismo.
+      #
+      # `pdfjs-dist` lo pide `impresion.mjs`, que comprueba el informe
+      # descargado leyendo el TEXTO del PDF: el DOM con medio `print` emulado
+      # miente sobre lo que acaba en la hoja. Sin él ese paso se detiene y lo
+      # dice, en vez de dar verde sobre algo que no miró.
+      - name: Instalar Playwright, Chromium y pdf.js
         run: |
-          npm install --no-save playwright@1.56.1
+          npm install --no-save playwright@1.56.1 pdfjs-dist@6.3.289
           npx playwright install --with-deps chromium
 
       # Se invoca el guion directamente y no `make verificar`, que depende de
@@ -250,6 +256,28 @@ jobs:
       # que hay que verificar, no otro reconstruido a su lado.
       - name: Verificar el sitio construido
         run: node src/verify/run_all.mjs dist
+
+      # El informe completo en PDF, dentro del sitio que se va a publicar.
+      #
+      # POR QUÉ AQUÍ Y NO COMITEADO
+      #   Es un derivado: se compone del `dist/` que este mismo job acaba de
+      #   ensamblar y verificar, así que no puede contradecirlo. Comitear los
+      #   seis PDF habría metido 3,4 MB de binarios por carga de datos en un
+      #   repositorio que guarda cada versión, y habría abierto el hueco de
+      #   siempre: alguien actualiza los datos, olvida regenerar el informe, y
+      #   el sitio ofrece un PDF que dice otra cosa que sus propias páginas.
+      #
+      # POR QUÉ NO CUESTA CASI NADA
+      #   Chromium y Playwright ya están instalados arriba para la batería.
+      #
+      # POR QUÉ NO PUEDE TUMBAR EL DESPLIEGUE
+      #   `continue-on-error`: si la composición falla, el sitio se publica
+      #   igual, sin el bloque de descarga. El manifiesto que la portada
+      #   consulta lo deja vacío el ensamblado, así que la ausencia del informe
+      #   es un bloque que no aparece, no un enlace roto.
+      - name: Componer el informe descargable
+        continue-on-error: true
+        run: node src/build/informe_pdf.mjs dist dist/informe/informe-cienciometrico.pdf
 
       - name: Publicar informes de verificación
         uses: actions/upload-artifact@v5

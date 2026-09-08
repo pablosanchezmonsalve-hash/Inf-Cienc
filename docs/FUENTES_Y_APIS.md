@@ -141,9 +141,9 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 | Crossref | 174 |
 | Registro de ORCID (`doi-self`) | 48 |
 | OpenAlex (`doi-self`, vía autorías) | 79 |
-| Revisión humana sobre candidatos por afiliación | 25 |
+| Revisión humana sobre candidatos por afiliación | 26 |
 | Revisión humana (búsqueda manual en el registro) | 1 |
-| **Total** | **327 formas de firma · 274 de 538 entidades publicadas** |
+| **Total** | **328 formas de firma · 268 de 530 entidades publicadas** |
 
 El detalle metodológico y el argumento de por qué el 100 % no es alcanzable
 están en `docs/ORCID_COVERAGE.md`.

@@ -116,8 +116,14 @@ orcid-datos:
 # El informe institucional en PDF, desde el sitio ya construido. Usa la MISMA
 # hoja de impresión que el botón «Descargar informe» de la interfaz: un origen,
 # dos consumidores. Exige Playwright y Chromium, como `make verificar`.
+#
+# Informe a medida: RECORTE lleva la misma consulta que el explorador escribe en
+# la URL, así que se copia de la barra de direcciones tras aplicar los filtros.
+#   make informe RECORTE="anio=2024&tipo=Article"
+# El recorte va en el nombre del archivo y, sobre todo, declarado en la hoja 1.
+RECORTE ?=
 informe: sitio
-	node src/build/informe_pdf.mjs dist dist/informe-cienciometrico.pdf
+	node src/build/informe_pdf.mjs dist dist/informe-cienciometrico.pdf "$(RECORTE)"
 
 # En Windows: scripts/revisar-identidad.ps1 (clic derecho -> «Ejecutar con
 # PowerShell»). Hace la secuencia entera —generar, abrir, recoger el CSV

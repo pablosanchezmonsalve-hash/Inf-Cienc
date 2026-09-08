@@ -578,6 +578,13 @@ p:last-child { margin-bottom: 0; }
 .recorte-vivo[hidden] { display: none; }
 .recorte-vivo b { color: var(--accion); font-weight: 750; }
 
+/* Lo que existe SÓLO en el papel. Simétrico de `.solo-lectores`, que existe
+   sólo para quien no ve la pantalla: en los dos casos el contenido está en el
+   marcado y es un medio el que decide si se presenta. No se declara aquí
+   dónde se enseña —eso lo hace la hoja de impresión, más abajo—; aquí sólo se
+   retira de la pantalla. */
+.solo-papel { display: none; }
+
 /* Selector de año en la barra. Sólo se enseña en las páginas explorador, que
    es quienes lo rellenan con los años reales del corpus; en el resto queda
    oculto por el atributo hidden y por esta regla (`hidden` ya lo esconde, esto
@@ -1634,27 +1641,277 @@ svg.chart .trama { pointer-events: none; }
      filtros del explorador usa `.explorador-panel` (no el antiguo
      `.filtros`, que se deja por las páginas que aún lo arrancan); sin
      ocultarlo, la columna sticky de filtros imprimiría a la izquierda de
-     todas las páginas del informe. */
+     todas las páginas del informe.
+
+     `#estado-recorte` va por id y no por clase: `.estado-recorte` no existe en
+     ninguna página —el contenedor siempre fue un id—, así que la regla no
+     ocultaba nada y el bloque de pantalla se imprimía entero, con su botón
+     «Ver todo» y su enlace al listado. Lo que declara el recorte en papel es
+     `.recorte-impreso`, escrito para el papel. */
+  /* `.banda-salidas` son cuatro tarjetas de navegación —«Producción · Ver la
+     sección →»— que en papel no llevan a ninguna parte: cuatro promesas
+     muertas ocupando la última hoja de la portada. La banda de texto que las
+     acompaña sí se queda: dice que cada indicador declara su denominador, y
+     eso vale igual impreso. */
+  .banda-salidas,
   .cabecera, .tema, .filtros, .paginacion, .salto-contenido,
   .rail, .vigencia-guia, .descargar, .ayuda, .tooltip, .nav-toggle,
   .v-migas, .v-chip, .recorte-vivo, .v-anio, .minifoco,
-  .explorador-panel, .filtros-explorador, .estado-recorte,
-  #controles, .treemap-migas, .treemap-leyenda { display: none; }
+  .explorador-panel, .filtros-explorador, #estado-recorte,
+  #controles, .treemap-migas, .treemap-leyenda, .migas { display: none; }
+  /* El conmutador Gráfico ⇄ Tabla. `.vistas { display: none }` de arriba NO
+     bastaba: `.js .vistas` (línea 994) lo enciende con dos clases y gana por
+     especificidad, no por orden, así que el par «Gráfico Tabla» se imprimía
+     junto a cada figura. Medido en el PDF, no en la pantalla: en papel las dos
+     vistas se despliegan y el control no conmuta nada. */
+  .js .vistas { display: none; }
+
+  /* Los desplegables van abiertos en papel. Un `<details>` cerrado imprime su
+     resumen y nada más, y eso vaciaba justo el contenido que no puede
+     perderse: el panel «Qué NO dice esta sección» salía como un titular de
+     advertencia sin la advertencia, que es peor que no ponerlo (`docs/EJES.md`
+     dice que sin esa parte el panel «sería un subtítulo»). El triángulo se
+     retira porque en una hoja no hay nada que desplegar. */
+  details::details-content { content-visibility: visible; }
+  summary { list-style: none; }
+
   body { background: #fff; }
   .disposicion { display: block; }
   .modulo, .kpi, .tabla-envoltura { box-shadow: none; border-color: #999; break-inside: avoid; }
+  /* Las tarjetas de cifra no se parten por la mitad.
+
+     Medido en el PDF: la portada cortaba la tercera fila y la hoja siguiente
+     abría con «Citas por publicación · 816 sobre las que tienen métricas» sin
+     el número, que se había quedado en la anterior. Un rótulo sin su cifra no
+     es media tarjeta: es una afirmación sin sujeto.
+
+     La regla `.kpi` que ya estaba nunca se aplicó: las cifras de la portada y
+     de cada sección no son `.kpi` sino `.ficha` dentro de `.tablero` —`.kpi`
+     es el tablero de las páginas antiguas—, así que la declaración existía y
+     no tocaba nada. Además `break-inside: avoid` sobre una rejilla o sus
+     hijos Chromium no lo cumple, comprobado sobre el PDF. En papel las
+     tarjetas dejan de ser hijas de rejilla y pasan a ser bloques en línea de
+     media columna: se ven igual, dos por fila, y ahora sí son indivisibles.
+
+     `font-size: 0` en el contenedor come el espacio en blanco entre bloques en
+     línea, que si no abre un carril de un carácter entre las dos columnas; las
+     tarjetas recuperan su tamaño. */
+     La regla NO va aquí sino al final del archivo, en su propio bloque
+     `@media print`. Este bloque vive en MITAD de la hoja, y una consulta de
+     medios no añade especificidad: `.tablero { display: grid }`, escrito más
+     abajo para la pantalla, le gana por puro orden de aparición a cualquier
+     `.tablero { … }` escrito aquí. Se vio en el PDF —las tarjetas salían al
+     24 % de ancho, que es el 49 % de media columna de rejilla— y no leyendo
+     la hoja. Buscar «PAPEL, AL FINAL» al pie del archivo. */
   .vistas { display: none; }
   .js .vista[data-activa="false"] { display: block; }
   .hero-texto { display: block; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; color: #555; }
 
   /* La procedencia se queda, y sin el aspecto de barra de interfaz: en papel
-     es la línea de crédito del informe. */
+     es la línea de crédito del informe.
+
+     Ojo con lo que «quedarse» significaba antes: las tres pastillas que
+     llevan fuente, ventana y fecha de corte son `<details>` y están en la
+     lista de arriba, así que esta caja se imprimía con su filete y sin una
+     palabra dentro. Lo que hace de esto una línea de crédito de verdad son
+     los dos párrafos `.solo-papel` que el cromo escribe en la barra. */
   .vigencia {
     border: 0; border-bottom: 1.5px solid #000; background: #fff;
     padding: 0 0 6pt; margin-bottom: 12pt;
   }
-  .vigencia .contenedor { padding: 0; }
+  /* La barra es una fila flex en pantalla. En papel sus dos párrafos son dos
+     líneas, una debajo de otra: en flex se habrían repartido el ancho. */
+  .vigencia .contenedor { padding: 0; display: block; }
+
+  /* `:not(:empty)` y no `.solo-papel` a secas, por dos razones: un párrafo que
+     alguna vez quede sin texto no debe imprimir una línea en blanco, y la
+     especificidad extra gana a `.solo-papel { display: none }` sin depender
+     del orden del archivo. */
+  .solo-papel:not(:empty) { display: block; }
+  .credito-impreso, .recorte-impreso {
+    margin: 0; font-size: 8.5pt; line-height: 1.4; color: #000;
+  }
+  .credito-impreso { font-weight: 600; }
+  .recorte-impreso { color: #333; }
+
+  /* Nota medida, para que nadie la repita: convertir `.cortes` de rejilla a
+     flujo de bloque en papel NO cambia nada. A 182 mm de ancho útil la rejilla
+     ya resuelve a una sola columna, así que el apilado es el mismo y el
+     recuento de hojas fue idéntico. Las hojas a medio llenar no vienen de la
+     rejilla: vienen de que cinco bloques miden entre 205 y 267 mm sobre una
+     hoja útil de 263 y no pueden compartir con nadie. */
+
+  /* ── El índice ──────────────────────────────────────────────────────────
+     Sólo existe en el PDF que genera `informe_pdf.mjs`: el número de hoja lo
+     lee él del documento ya compuesto, y el botón del navegador no tiene forma
+     de saberlo. La MAQUETA vive aquí de todos modos, que es donde se decide
+     cómo se ve el papel; el generador inyecta el marcado y nada más.
+
+     Abre hoja propia y la cierra: un índice que empieza a media página, debajo
+     de las cifras, no se encuentra al hojear. */
+  .indice-informe {
+    break-before: page; break-after: page; break-inside: auto;
+    padding-top: 4mm;
+  }
+  .indice-informe h2 { font-size: 15pt; margin: 0 0 2mm; }
+  .indice-nota { font-size: 8.5pt; color: #444; margin: 0 0 6mm; max-width: 105mm; }
+  .indice-informe > ol { list-style: none; margin: 0; padding: 0; }
+  .indice-informe > ol > li { break-inside: avoid; margin: 0 0 6mm; }
+  .indice-sec {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 6mm; margin: 0; font-size: 11pt;
+    border-bottom: .5pt solid #999; padding-bottom: 1mm;
+  }
+  .indice-hojas { font-size: 8.5pt; color: #444; font-weight: 400; white-space: nowrap; }
+  .indice-archivo {
+    font-family: var(--f-mono, ui-monospace, monospace);
+    font-size: 7.5pt; color: #555; margin: 1mm 0 2mm;
+  }
+  .indice-informe ul { list-style: none; margin: 0; padding: 0; }
+  /* Cada gráfico en una línea: código, título y hoja. El puntillado une el
+     título con su número sin obligar a seguir un renglón vacío con el dedo. */
+  .indice-informe ul li {
+    display: flex; align-items: baseline; gap: 2mm;
+    font-size: 9.5pt; line-height: 1.7; break-inside: avoid;
+  }
+  .indice-cod {
+    font-family: var(--f-mono, ui-monospace, monospace);
+    font-size: 8pt; color: #555; min-width: 13mm;
+  }
+  .indice-tit { flex: 0 1 auto; overflow: hidden; white-space: nowrap; }
+  /* La guía de puntos es un elemento propio y VACÍO que crece hasta el número
+     de hoja, con el puntillado en su borde inferior. La primera versión ponía
+     una ristra fija de puntos en un `::after` del título: como la ristra tiene
+     largo fijo, cada línea terminaba en un sitio distinto —se ve en el PDF—, y
+     alargarla sólo mueve el problema. Un borde sobre una caja elástica mide
+     exactamente el hueco libre, sea cual sea el título. */
+  .indice-guia {
+    flex: 1 1 0; min-width: 4mm; align-self: center;
+    border-bottom: .5pt dotted #999; margin: 0 1.5mm;
+  }
+  .indice-hoja { font-size: 8.5pt; color: #333; white-space: nowrap; }
+
+  /* ── La banda oscura se imprime en tinta sobre blanco ───────────────────
+     `.banda-contraste` invierte la paleta: fondo vino profundo y tinta clara
+     (#f0e2d0). En pantalla funciona. En papel depende de un ajuste del
+     diálogo de impresión que el sitio no controla: «Gráficos de fondo» va
+     APAGADO por defecto en Chrome, así que el fondo no se pinta y la tinta
+     clara queda sobre blanco. Medido sobre dos PDF del mismo documento: el
+     resumen metodológico —lo que hace interpretable todo lo demás— sale
+     ilegible en la corrida por defecto.
+
+     Se resuelve en el lado del papel, no pidiéndole al lector que acierte con
+     una casilla: una hoja es blanca, y una banda oscura es un recurso de
+     pantalla. Afecta al anexo metodológico y a la banda de indicadores no
+     publicados de cada sección; ninguna de las dos lleva figuras, así que no
+     hay series de color que reajustar. */
+  .banda-contraste {
+    background: #fff;
+    --superficie: #fff; --superficie-2: #f2f2f2; --plano: #fff;
+    --tinta: #000; --tinta-2: #222; --tinta-3: #444;
+    --linea: #999; --linea-fuerte: #666;
+  }
+
+  /* ── El bloque de gráfico en papel ──────────────────────────────────────
+     Un gráfico del informe es una unidad de lectura de cinco partes, y las
+     cinco tienen que caber juntas o no se entiende ninguna:
+
+       1. el título del corte,
+       2. la figura,
+       3. la tabla equivalente, que es la figura en cifras,
+       4. qué muestra y qué cuidado exige,
+       5. el sello: fuente, corte, N y cobertura del recorte.
+
+     `.corte` no estaba en ninguna regla de corte de página —sólo `.modulo`, que
+     es de las páginas antiguas—, así que una sección podía dejar la figura al
+     final de una hoja y su tabla, su explicación y su procedencia en la
+     siguiente. Con eso, la hoja que alguien fotocopia o cita enseña un dibujo
+     sin decir sobre cuántos casos está medido. */
+  .corte, .corte-red { break-inside: avoid; }
+  /* Cuando el bloque entero no cabe —y con veinte barras y su tabla no cabe—,
+     `break-inside: avoid` no puede cumplirse y el navegador parte por donde
+     quiera. Estas cuatro piezas se declaran indivisibles aparte, así que el
+     corte se parte DENTRO de la tabla, que repite su encabezado, y nunca a
+     mitad de una figura ni de la frase que la explica. */
+  .corte .vista[data-vista="grafico"], .corte-red .vista[data-vista="nodos"],
+  .lectura-grafico, .lectura-cuidado, .sello { break-inside: avoid; }
+  /* La figura no crece a lo alto de la hoja: un gráfico de 20 cm de alto
+     empuja fuera todo lo que lo explica y obliga a partir el bloque, que es
+     justo lo que la regla de arriba evita. */
+  .corte .grafico svg, .corte .vista svg { max-height: 90mm; height: auto; }
+  .corte-red svg { max-height: 120mm; }
+
+  /* La red imprime UNA vista, no cuatro. En pantalla el lector elige entre
+     nodos, matriz, arcos y la tabla de pares; en papel se despliegan todas por
+     la regla de «las dos vistas de cada módulo», y aquí esa regla se vuelve en
+     contra: tres dibujos de lo mismo y un listado de una fila por par de
+     firmas, que medido son cuarenta páginas. La sección de colaboración pasaba
+     de 8 a 49 hojas por esa tabla sola.
+
+     Es la misma razón por la que el informe no vuelca publicaciones ni autores:
+     un anexo de cientos de páginas que nadie lee no es parte de un informe. Lo
+     que se retira se declara en la hoja. */
+  .corte-red .vista[data-vista="matriz"],
+  .corte-red .vista[data-vista="arcos"],
+  .corte-red .vista[data-vista="tabla"] { display: none; }
+
+  /* ── La tabla se imprime sólo cuando añade algo ─────────────────────────
+     «En papel no hay conmutador, así que se imprimen las dos vistas» era
+     cierto a medias. Vale para el treemap, el mapa de calor y la mediana por
+     año, donde la figura no rotula cada valor. No vale para una barra que ya
+     lleva su cifra escrita al lado: ahí la tabla repite fila por fila lo que
+     la figura acaba de decir. Medido sobre el PDF: «Autores por publicación»
+     dibujaba seis barras rotuladas y debajo seis filas con los mismos seis
+     números y las mismas seis etiquetas.
+
+     La condición no es una lista de formas escrita aquí —divergiría del
+     generador en cuanto se añada un gráfico—: cada figura declara en su SVG
+     si rotula todos sus valores Y todas sus categorías (`data-cifras`), y
+     `barrasH` la marca `parciales` en cuanto una etiqueta no cupo. Por eso
+     «Unidad académica» conserva su tabla: es donde «Facultad de Arquitectura,
+     Diseño y Estudios Creativos» aparece entero, y la barra lo recortó.
+
+     Por omisión la tabla se imprime: una figura que no declara nada es una
+     figura de la que no sabemos si basta. */
+  .corte:has(.vista[data-vista="grafico"] svg[data-cifras="completas"])
+    .vista[data-vista="tabla"] { display: none; }
+
+  /* La tabla equivalente, en papel, es la figura en cifras y no una tabla de
+     interfaz. Con el interlineado de pantalla, las 21 filas de «Áreas
+     temáticas» ocupaban 1.048 px —más de una hoja útil— y empujaban fuera de
+     la página la explicación y el sello del gráfico al que pertenecen. Medido
+     a ancho de A4, no supuesto. */
+  .corte table, .corte-red table { font-size: 8pt; }
+  /* La leyenda de la trama no se retira —para algunos cortes es la única frase
+     que dice que las barras no suman— pero sí se aprieta: en pantalla ocupa 49
+     px y es una línea. */
+  .leyenda-trama { font-size: 8pt; line-height: 1.35; margin: 3pt 0 0; }
+  .corte th, .corte td,
+  .corte-red th, .corte-red td { padding: 1.5pt 6pt; line-height: 1.35; }
+  .corte .tabla-envoltura, .corte-red .tabla-envoltura {
+    box-shadow: none; border-color: #999; border-radius: 0;
+  }
+  /* El sello es una línea de crédito, no una tarjeta: en papel pierde el fondo
+     y el marco de interfaz y se aprieta a un par de líneas. */
+  .sello {
+    font-size: 7.5pt; gap: 2pt 10pt; padding: 3pt 0 0; margin-top: 4pt;
+    background: none; border: 0; border-top: .5pt solid #999; border-radius: 0;
+  }
+
+  /* Qué muestra y qué cuidado exige. Van entre la tabla y el sello: primero se
+     ve el dato, luego se lee qué cuenta, y al final de dónde sale. El rótulo en
+     versalitas es el mismo recurso del sello, para que se lean como una ficha y
+     no como prosa suelta. */
+  .lectura-grafico, .lectura-cuidado {
+    margin: 6pt 0 0; font-size: 8.5pt; line-height: 1.45; color: #000;
+    padding-left: 8pt; border-left: 1.5pt solid #000;
+  }
+  .lectura-cuidado { border-left-color: #666; color: #333; }
+  .lectura-grafico b, .lectura-cuidado b {
+    display: block; font-size: 7pt; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 1pt;
+  }
 
   /* Cortes. Un titular al pie de una hoja y su figura en la siguiente es el
      defecto clásico de imprimir una web sin decirle nada al navegador. */
@@ -1858,6 +2115,36 @@ svg.chart .trama { pointer-events: none; }
 .chip-on { background: var(--accion); border-color: var(--accion); color: var(--boton-tinta); }
 .chip-on .chip-n { color: var(--boton-tinta); opacity: .8; }
 
+/* ---- el informe completo en PDF ----
+   Sólo aparece si la corrida que construyó el sitio también generó el informe
+   (`data/informe.json`). No compite con el botón «Descargar informe» de la
+   barra: aquél da la página que se está viendo con sus filtros, éste da las
+   seis secciones con su índice y sus hojas numeradas. */
+.informe-pdf {
+  border: 1px solid var(--linea); border-radius: var(--radio);
+  background: var(--superficie); padding: var(--e4) var(--e5);
+  margin: 0 0 var(--e5);
+}
+.informe-pdf h2 { font: 700 var(--t-l)/1.25 var(--f-ui); margin: 0 0 var(--e2); }
+.informe-pdf-intro { color: var(--tinta-2); margin: 0 0 var(--e3); max-width: 68ch; }
+.informe-pdf-lista {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: var(--e2) var(--e4);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.informe-pdf-lista li {
+  display: flex; align-items: baseline; gap: var(--e2);
+  border-top: 1px solid var(--linea); padding-top: var(--e2);
+}
+.informe-pdf-lista a { font-weight: 600; }
+.informe-pdf-dato {
+  color: var(--tinta-3); font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums; margin-left: auto; white-space: nowrap;
+}
+/* En papel no se ofrece: quien tiene la hoja delante ya tiene el informe, y un
+   enlace impreso no lleva a ninguna parte. Mismo criterio que la navegación. */
+@media print { .informe-pdf { display: none; } }
+
 /* ---- los cortes que responden ---- */
 .cortes { display: grid; gap: var(--e5); grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
 .corte {
@@ -1958,7 +2245,32 @@ svg.chart .trama { pointer-events: none; }
   border-radius: var(--radio-s); background: var(--plano); color: var(--tinta);
 }
 
+/* El campo de la dimensión «Autor». Mismo aspecto que el buscador general
+   —es la misma acción, escribir para acotar— pero dentro del desplegable de su
+   dimensión, junto a las firmas ya elegidas, que se quitan como cualquier otra
+   pastilla. */
+.busca-autor {
+  width: 100%; font: 400 var(--t-m)/1.4 var(--f-ui); margin-top: var(--e2);
+  padding: .5rem .65rem; border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-s); background: var(--plano); color: var(--tinta);
+}
+.dim-ops .nota { margin-top: var(--e2); }
+
+/* Las salvaguardas de un informe personal. Van sobre las cifras que califican
+   y se imprimen con ellas: son la advertencia que hace legible un PDF nominal
+   fuera del sitio. */
+.salvaguardas { margin-bottom: var(--e5); }
+.salvaguardas .nota { margin-top: var(--e3); }
+.ficha-acciones { margin: var(--e4) 0 var(--e5); }
+
 .acciones-tabla { display: flex; align-items: center; gap: var(--e3); margin-bottom: var(--e4); }
+/* La barra de selección de gráficos del catálogo. Va pegada arriba de las
+   tablas y con su propio aire: se marca mientras se recorren las cuarenta
+   filas, y tiene que seguir a la vista. */
+.acciones-graficos { flex-wrap: wrap; margin-top: var(--e4); }
+.acciones-graficos #estado-graficos { margin-right: auto; font-weight: 650; color: var(--tinta-2); }
+#orden-graficos { font-family: var(--f-mono); font-size: var(--t-xs); margin: 0 0 var(--e4); }
+.tabla-catalogo .col-marca { width: 2.4rem; }
 .acciones-tabla #estado-seleccion { margin-right: auto; font-weight: 650; color: var(--tinta-2); }
 
 /* Columna de casillas de selección en Publicaciones: ancho fijo, angosto,
@@ -1982,6 +2294,31 @@ svg.chart .trama { pointer-events: none; }
    filtros a la izquierda, los gráficos y las cifras aprovechan todo el ancho
    de la hoja en vez de quedar encerrados en ~390px frente a un panel vacío. */
 @media print {
+  /* Las tarjetas de cifra no se parten por la mitad. Medido en el PDF: la
+     portada cortaba la tercera fila y la hoja siguiente abría con «Citas por
+     publicación · 816 sobre las que tienen métricas» sin el número, que se
+     había quedado en la anterior. Un rótulo sin su cifra no es media tarjeta:
+     es una afirmación sin sujeto.
+
+     `break-inside: avoid` no lo cumple Chromium ni sobre una rejilla ni sobre
+     sus hijos, así que en papel las fichas dejan de ser hijas de rejilla y
+     pasan a ser bloques en línea de media columna: se ven igual, dos por
+     fila, y ahora sí son indivisibles. Va en esta cola y no en el bloque de
+     la mitad del archivo por la razón que encabeza esta sección: allí
+     `.tablero { display: grid }`, escrito después para la pantalla, le ganaba
+     por orden. Comprobado sobre el PDF, donde las fichas salían al 24 % de
+     ancho —el 49 % de media columna de rejilla— antes de moverla aquí.
+
+     `font-size: 0` en el contenedor come el espacio en blanco entre bloques
+     en línea, que si no abre un carril de un carácter entre las columnas; las
+     fichas recuperan su tamaño. */
+  .tablero { display: block; font-size: 0; margin-bottom: 6mm; }
+  .tablero > .ficha {
+    display: inline-block; width: 49%; vertical-align: top; box-sizing: border-box;
+    font-size: 10pt; break-inside: avoid; margin: 0 0 2%;
+  }
+  .tablero > .ficha:nth-child(odd) { margin-right: 2%; }
+
   .explorador { display: block; }
   .explorador-resultado { padding-bottom: 0; }
 

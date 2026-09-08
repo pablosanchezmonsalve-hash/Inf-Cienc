@@ -22,7 +22,55 @@ const yaPintado = el => el && el.dataset.prerender === '1';
    El HTML llega pre-renderizado con el recorte VACÍO —el informe completo—, así
    que sin JavaScript se ve el informe entero. Esta función no reescribe nada
    hasta que alguien toca un filtro: engancha el comportamiento y se aparta. */
-async function portada() { return montarExplorador(null); }
+async function portada() {
+  montarDescargaInforme();      // no se espera: es un añadido, no la portada
+  return montarExplorador(null);
+}
+
+/** El bloque de descarga del informe completo.
+
+    Existe porque el botón «Descargar informe» resuelve una cosa y no la otra:
+    da la página que se está mirando, con sus filtros, y no el informe entero
+    con sus seis secciones, su índice y sus hojas numeradas. Eso sólo lo compone
+    `make informe`, y hasta ahora había que tener el proyecto instalado para
+    conseguirlo.
+
+    Se dibuja SÓLO si existe `data/informe.json`, el manifiesto que deja la
+    corrida que generó los PDF. Sin manifiesto no hay bloque: enlaces escritos
+    a mano en el HTML apuntarían a archivos que pueden no estar, o que están y
+    son de otra carga de datos, y un informe que contradice al sitio del que
+    cuelga es peor que no ofrecerlo.
+
+    Por la misma razón compara la fecha de build del manifiesto con la del
+    sitio y lo dice cuando no coinciden, en vez de callarlo. */
+async function montarDescargaInforme() {
+  const caja = document.getElementById('informe-pdf');
+  if (!caja) return;
+  let inf, meta;
+  try {
+    [inf, meta] = await Promise.all([c.cargar('informe.json'), c.cargar('meta.json')]);
+  } catch { return; }                    // no se generó: no se ofrece
+  if (!inf?.archivos?.length) return;
+
+  const viejo = inf.build && meta.fecha_build && inf.build !== meta.fecha_build;
+  caja.innerHTML = `
+    <h2>El informe completo, en PDF</h2>
+    <p class="informe-pdf-intro">Las seis secciones con sus gráficos explicados,
+      hojas numeradas e índice. ${c.nf.format(inf.hojas)} hojas en
+      ${inf.archivos.length} archivos, uno por sección.
+      El botón «Descargar informe» de arriba hace otra cosa: da la página que
+      está viendo, con los filtros que tenga puestos.</p>
+    ${viejo ? `<p class="nota-destacada"><b>Informe de una carga anterior.</b>
+      Se compuso con los datos del ${c.escapar(inf.build)} y el sitio sirve los
+      del ${c.escapar(meta.fecha_build)}. Las cifras del PDF pueden no coincidir
+      con las de esta página.</p>` : ''}
+    <ul class="informe-pdf-lista">${inf.archivos.map(a => `
+      <li><a href="${c.escapar(a.archivo)}" download>${c.escapar(a.nombre)}</a>
+        <span class="informe-pdf-dato">${a.hojas} ${a.hojas === 1 ? 'hoja' : 'hojas'}
+          · ${c.nf.format(a.kb)} KB</span></li>`).join('')}
+    </ul>`;
+  caja.hidden = false;
+}
 
 /* Las secciones son el mismo explorador con OTROS cortes. Se comparte la
    función entera en vez de duplicarla: filtros, estado, URL y navegación son
@@ -32,21 +80,37 @@ async function seccion() {
   return montarExplorador(clave || null);
 }
 
-/* Estado del recorte en la barra de vigencia. La barra pertenece al cromo aux
+/* Estado del recorte en la barra de vigencia, en sus dos formas: el badge de
+   pantalla y la línea que se imprime. La barra pertenece al cromo aux
    (core.js) y existe en todas las páginas; éste es el único sitio donde se
    enciende el badge `.recorte-vivo`. En cualquier otra página queda oculto por
    su atributo hidden. Un vistazo a la parte superior debe bastar para saber
    que hay un recorte activo, sin bajar a los controles. */
 function actualizarRecorteVivo(publicaciones, sel) {
-  const badge = document.getElementById('recorte-vivo');
-  if (!badge) return;
   const n = X.recorte(publicaciones, sel).length;
   const total = publicaciones.length;
   const activo = X.hayRecorte(sel);
-  badge.hidden = !activo;
-  if (activo) {
-    badge.innerHTML = `Recorte <b>${c.nf.format(n)}</b> de ${c.nf.format(total)} publicaciones`;
+
+  const badge = document.getElementById('recorte-vivo');
+  if (badge) {
+    badge.hidden = !activo;
+    if (activo) {
+      badge.innerHTML = `Recorte <b>${c.nf.format(n)}</b> de ${c.nf.format(total)} publicaciones`;
+    }
   }
+
+  /* La misma declaración, para el informe que se descarga. `estado()` ya
+     escribe en la página la frase obligatoria «N de M · qué filtros», pero es
+     un bloque de pantalla: trae el botón «Ver todo» y el enlace al listado,
+     que en una hoja de papel no llevan a ninguna parte. La hoja de impresión
+     lo retira y esta línea ocupa su lugar, con la misma información y sin los
+     controles.
+
+     Mismo origen que la pantalla: la descripción sale de `X.describir(sel)`,
+     no de un segundo texto escrito aquí, y la redacción de `c.fraseRecorte()`,
+     que es la que el cromo deja pre-renderizada. */
+  const papel = document.getElementById('recorte-impreso');
+  if (papel) papel.textContent = c.fraseRecorte(n, total, X.describir(sel));
 }
 
 /* Selector de año en la barra de vigencia. Al elegir un año se filtra el
@@ -155,15 +219,38 @@ async function montarExplorador(claveSeccion) {
   // Persona → unidad académica, sólo para C-05 (red de coautoría): una
   // publicación no trae la unidad por autor individual, así que el corte de
   // colaboración necesita esta tabla aparte. Se carga siempre —barato, un
-  // Map de 538 entradas— para que funcione igual con o sin pre-renderizado.
+  // Map de una entrada por entidad— para que funcione igual con o sin
+  // pre-renderizado.
+  const autores = await c.cargar('authors.json');
   const unidadPorPersona = new Map(
-    (await c.cargar('authors.json')).autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+    autores.autores.map(a => [a.nombre, (a.unidades || [])[0]]));
+  // El umbral de interpretabilidad, del mismo artefacto y con el mismo valor
+  // que aplica la ficha. No se copia aquí: dos umbrales para una misma regla
+  // es la forma de que acaben diciendo cosas distintas.
+  const umbral = autores.parametros?.n_minimo_interpretable;
+
+  /* Los textos que explican cada gráfico EN EL PAPEL: qué muestra —de
+     `docs/LECTURAS.md`, vía `lecturas.json`— y qué cuidado exige —la
+     advertencia que el catálogo ya publica en `indicadores.html`—. Se cargan
+     siempre, esté la página pre-renderizada o no, porque el botón de descarga
+     está en todas y el PDF no puede salir con la mitad de sus figuras
+     explicadas. */
+  const [{ lecturas }, catalogo] = await Promise.all([
+    c.cargar('lecturas.json'), c.cargar('catalogo.json'),
+  ]);
+  const textos = {
+    lecturas,
+    advertencias: Object.fromEntries(
+      catalogo.indicadores.filter(i => i.advertencia).map(i => [i.codigo, i.advertencia])),
+  };
 
   if (!yaPintado(zonas.cifras)) {
     const meta = await c.cargar('meta.json');
     if (cabecera) {
       cabecera.innerHTML = claveSeccion
-        ? VX.cabeceraSeccion(claveSeccion, document.title.split('·')[0].trim(),
+        // `tituloDeSeccion` y no un `split()` aquí: el pre-renderizador hace
+        // lo mismo, y la regla estaba escrita dos veces y mal las dos.
+        ? VX.cabeceraSeccion(claveSeccion, c.tituloDeSeccion(document.title),
             (await c.cargar('ejes.json')).ejes[claveSeccion])
         : VX.cabecera(meta);
     }
@@ -177,18 +264,16 @@ async function montarExplorador(claveSeccion) {
     // leería como que el fenómeno no existe. No responden al recorte —no se
     // calculan— y por eso van sobre su propio suelo, separados de lo que sí.
     const dif = document.getElementById('diferidos');
-    if (dif && claveSeccion) {
-      const catalogo = await c.cargar('catalogo.json');
-      dif.innerHTML = VX.diferidos(catalogo, claveSeccion);
-    }
+    if (dif && claveSeccion) dif.innerHTML = VX.diferidos(catalogo, claveSeccion);
   }
 
   let sel = X.leerURL();
 
   function pintar({ nuevaEntrada = false } = {}) {
     const partes = claveSeccion
-      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona, jerarquia)
-      : VX.explorador(publicaciones, sel, proc, jerarquia);
+      ? VX.seccion(publicaciones, sel, claveSeccion, proc, unidadPorPersona, jerarquia,
+          metaBase, umbral, textos)
+      : VX.explorador(publicaciones, sel, proc, jerarquia, metaBase, umbral, textos);
     // Se comparan los valores ANTES de reemplazar el marcado: la señal de
     // cambio sólo debe encenderse en las cifras que de verdad cambiaron.
     const antes = new Map([...zonas.cifras.querySelectorAll('[data-valor]')]
@@ -269,6 +354,24 @@ async function montarExplorador(claveSeccion) {
     }
   });
 
+  /* El campo de persona. `change` y no `click`: se elige del autocompletado del
+     navegador, con el ratón o con el teclado, y ninguna de las dos vías pasa
+     por un clic sobre un elemento nuestro.
+
+     Sólo entra un nombre que exista en el corpus. Un texto a medio escribir
+     dejaría la página vacía y con un filtro que nadie puede quitar porque no
+     corresponde a nadie; escribir bien un apellido no es responsabilidad del
+     lector. El campo se limpia solo: el panel se repinta entero. */
+  document.addEventListener('change', e => {
+    if (e.target.id !== 'q-autor') return;
+    const nombre = e.target.value.trim();
+    if (!nombre || !X.publicacionesDe(publicaciones, nombre)) return;
+    const puestos = sel.autor || [];
+    if (!puestos.includes(nombre)) sel = { ...sel, autor: [...puestos, nombre] };
+    pintar({ nuevaEntrada: true });
+    zonas.controles.querySelector('#q-autor')?.focus();
+  });
+
   // El conmutador Gráfico ⇄ Tabla se engancha al CONTENEDOR, no a cada corte:
   // los cortes se reemplazan enteros a cada recorte y los escuchas colgados de
   // ellos morirían con el marcado anterior.
@@ -282,7 +385,12 @@ async function montarExplorador(claveSeccion) {
   // que deshacer un filtro. Sin esto, volver saca al lector del sitio.
   addEventListener('popstate', () => { sel = X.leerURL(); pintar(); });
 
-  if (!yaPintado(zonas.cifras) || X.hayRecorte(sel)) pintar();
+  /* Repintar también cuando hay SELECCIÓN de gráficos, aunque no haya recorte
+     de datos. `hayRecorte` mira sólo los filtros —y hace bien: una selección no
+     restringe el conjunto—, pero el HTML pre-renderizado trae los gráficos de
+     la sección entera, así que sin este repintado la página enseñaría los
+     dieciocho mientras la hoja declara que son dos. */
+  if (!yaPintado(zonas.cifras) || X.hayRecorte(sel) || X.graficosDe(sel)) pintar();
 }
 
 /* Conmutador Gráfico ⇄ Tabla. Un solo escucha delegado para toda la página:
@@ -508,7 +616,11 @@ async function exportar(filas, { esSeleccion = false } = {}) {
 async function autores() {
   const data = await c.cargar('authors.json');
   const { autores: lista, parametros } = data;
-  let soloInterpretables = true, orden = 'n_publicaciones', asc = false, q = '';
+  // `q` puede venir en la URL: es el camino de vuelta desde un informe
+  // recortado a una persona hacia su ficha, sin obligar a teclear el nombre
+  // otra vez. El resto del estado de esta página no viaja en la dirección.
+  let soloInterpretables = true, orden = 'n_publicaciones', asc = false;
+  let q = new URLSearchParams(location.search).get('q') || '';
 
   // El enlace de corrección va AQUÍ y no sólo en metodología: ésta es la página
   // donde alguien se encuentra a sí mismo mal representado, y es el momento en
@@ -578,10 +690,22 @@ async function autores() {
       : `<tr><td colspan="7"><div class="vacio">Ningún autor coincide.</div></td></tr>`;
   }
 
-  document.getElementById('solo-interpretables').addEventListener('change', e => {
+  const casilla = document.getElementById('solo-interpretables');
+  const campo = document.getElementById('buscar-autor');
+  /* Llegar buscando a alguien y no encontrarlo sería peor que no ofrecer la
+     búsqueda: la vista por defecto oculta las firmas por debajo del umbral, y
+     480 de las 530 lo están. Si la búsqueda viene en la URL se abre la lista
+     entera y los dos controles enseñan el estado real, en vez de filtrar por
+     detrás. */
+  if (q) {
+    soloInterpretables = false;
+    casilla.checked = false;
+    campo.value = q;
+  }
+  casilla.addEventListener('change', e => {
     soloInterpretables = e.target.checked; pintar();
   });
-  document.getElementById('buscar-autor').addEventListener('input',
+  campo.addEventListener('input',
     c.debounce(e => { q = e.target.value; pintar(); }, 250));
   document.querySelectorAll('th[data-orden]').forEach(th => {
     // Enter y Espacio, además del clic: sin esto la tabla no se podía ordenar
@@ -643,6 +767,26 @@ async function fichaAutor() {
   const i = a.indicadores;
   document.title = `${a.nombre_en_fuente} — Ficha de autor`;
 
+  /* Qué declara esta hoja si alguien la imprime desde aquí.
+
+     Sin esto decía «Sin filtros: el informe completo, 823 publicaciones», que
+     es lo que el cromo deja escrito por defecto y aquí es falso: la hoja
+     enseña a UNA persona. Un PDF nominal que se presenta como el informe
+     institucional completo es exactamente la lectura que este proyecto
+     persigue impedir.
+
+     Se declara con la misma redacción que el resto —`fraseRecorte()`— y con
+     las cifras que la ficha ya tiene: sus publicaciones y el universo que
+     viaja en su propio `meta`. Cuando la ficha llega dentro de un informe
+     recortado, el despachador ya escribió la línea con el recorte de la URL y
+     ésta la confirma con las mismas palabras. */
+  const papelFicha = document.getElementById('recorte-impreso');
+  if (papelFicha) {
+    papelFicha.textContent = c.fraseRecorte(
+      i.n_publicaciones, a.meta.denominadores.universo_total,
+      [`Autor: ${a.nombre_en_fuente}`]);
+  }
+
   const idents = `
     <div><span>Nombre en fuente</span>${c.escapar(a.nombre_en_fuente)}</div>
     <div><span>Unidad académica</span>${c.escapar(a.unidades_academicas.join(' · '))}</div>
@@ -682,22 +826,20 @@ async function fichaAutor() {
       <div class="identificadores">${idents}</div>
     </div>
 
-    <div class="nota-destacada"><b>Cómo leer esta ficha</b>
-      Los indicadores describen la producción indexada en Scopus entre
-      ${a.meta.ventana.inicio} y ${a.meta.ventana.fin}, con citas actualizadas al
-      ${a.meta.fecha_corte_citas}. No representan la trayectoria completa de la persona.
-      Las métricas individuales sobre ventanas cortas y pocas publicaciones no son
-      comparables entre personas ni deben usarse para evaluar desempeño individual.
-      Este informe adhiere a los principios de DORA y del Manifiesto de Leiden.</div>
+    ${VX.advertenciaLectura(a.meta, 'Cómo leer esta ficha')}
 
-    ${a.advertencia_muestra_reducida ? `<div class="nota-destacada"><b>Muestra reducida</b>
-      Con menos de ${a.umbral_interpretable} publicaciones en la ventana, los indicadores
-      de impacto no son interpretables individualmente. Se muestran por transparencia,
-      no para comparación.</div>` : ''}
+    ${a.advertencia_muestra_reducida ? VX.advertenciaMuestraReducida(a.umbral_interpretable) : ''}
 
     ${a.identidad_no_consolidada ? `<div class="nota-destacada"><b>Identidad no consolidada</b>
       Esta firma está asociada a más de un identificador de autor en la fuente. La
       consolidación de identidades requiere validación institucional u ORCID, pendientes.</div>` : ''}
+
+    <!-- La entrada al informe recortado a esta persona. Va aquí y no en un panel
+         de filtros: una lista de 530 firmas no es un filtro, y quien quiere el
+         informe de alguien suele estar mirando a ese alguien. -->
+    <p class="ficha-acciones"><a class="enlace-lista"
+      href="index.html?autor=${encodeURIComponent(a.nombre_en_fuente)}"
+      >Ver el informe recortado a esta firma →</a></p>
 
     <div class="kpis">
       ${kpi(i.n_publicaciones, 'Publicaciones')}
@@ -778,9 +920,63 @@ async function metodologia() {
 
 async function catalogo() {
   const cont = document.getElementById('catalogo');
+  const graficos = VX.seccionDeGrafico();
   // Pre-renderizado: repintar destruiría un LCP que ya ocurrió, y el marcado
   // sería idéntico porque lo produce esta misma función.
-  if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'));
+  if (!yaPintado(cont)) cont.innerHTML = v.catalogo(await c.cargar('catalogo.json'), graficos);
+
+  /* El selector de gráficos. El catálogo es la única página donde los dieciocho
+     se ven juntos —en una sección sólo están los suyos—, así que es donde se
+     eligen sin depender de en cuál viven.
+
+     La selección viaja como `grafico=` en la URL, junto al recorte y con la
+     misma gramática: quien la comparta o la descargue obtiene el mismo informe.
+     El orden lo fija el informe, no el orden en que se marcaron: un informe con
+     impacto antes que producción sería otro documento. */
+  const orden = Object.keys(graficos);
+  const elegidos = new Set();
+  const estado = document.getElementById('estado-graficos');
+  const enlace = document.getElementById('ver-seleccion');
+  const limpiar = document.getElementById('limpiar-graficos');
+  const cmd = document.getElementById('orden-graficos');
+  if (!estado || !enlace) return;
+
+  const pintarSeleccion = () => {
+    const cods = orden.filter(k => elegidos.has(k));
+    const n = cods.length;
+    estado.textContent = n
+      ? `${n} de ${orden.length} gráficos seleccionados`
+      : 'Ningún gráfico seleccionado';
+    enlace.hidden = !n;
+    limpiar.hidden = !n;
+    cmd.hidden = !n;
+    if (n) {
+      enlace.href = `index.html?grafico=${encodeURIComponent(cods.join('|'))}`;
+      // La misma selección, para quien genere el PDF de varias secciones.
+      cmd.textContent = `Para el PDF: make informe RECORTE="grafico=${cods.join('|')}"`;
+    }
+  };
+
+  document.addEventListener('change', e => {
+    const chk = e.target.closest('.chk-grafico');
+    if (!chk) return;
+    chk.checked ? elegidos.add(chk.dataset.cod) : elegidos.delete(chk.dataset.cod);
+    pintarSeleccion();
+  });
+  limpiar.addEventListener('click', () => {
+    elegidos.clear();
+    document.querySelectorAll('.chk-grafico').forEach(x => { x.checked = false; });
+    pintarSeleccion();
+  });
+
+  // Una selección que llega en la URL se refleja en las casillas: volver atrás
+  // desde el informe tiene que enseñar lo que se eligió, no un formulario en
+  // blanco.
+  (X.graficosDe(X.leerURL()) || []).forEach(cod => {
+    const chk = document.getElementById(`g-${cod}`);
+    if (chk) { chk.checked = true; elegidos.add(cod); }
+  });
+  pintarSeleccion();
 }
 
 async function produccionAmpliada() {
@@ -1022,6 +1218,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   const archivo = location.pathname.split('/').pop() || 'index.html';
   try {
     await c.montarCabecera(archivo);
+    /* Una página sin explorador dentro de un informe filtrado no puede afirmar
+       que es el informe completo, que es lo que el cromo deja escrito por
+       defecto. El anexo metodológico no cuenta publicaciones ni las filtra,
+       pero SÍ forma parte del recorte que alguien pidió, y una hoja suelta que
+       lo niegue contradice a las demás del mismo PDF.
+
+       Sin cifras a propósito: esta página no tiene el corpus cargado y
+       declarar «N de M» exigiría pedirlo sólo para eso. Donde sí hay
+       explorador, `actualizarRecorteVivo()` reescribe la línea con las cifras
+       en el primer repintado. */
+    const selURL = X.leerURL();
+    const partesURL = X.describir(selURL);
+    const papel = document.getElementById('recorte-impreso');
+    if (papel && partesURL.length) {
+      papel.textContent = c.fraseRecorte(null, null, partesURL);
+    }
+
+    /* La selección de gráficos se declara APARTE del recorte, y en todas las
+       páginas. No es un filtro de datos —las cifras siguen siendo las del
+       recorte entero— sino una elección de qué figuras se muestran, y una hoja
+       parcial tiene que decir que es parcial: sin esto, un informe de tres
+       gráficos se lee como el informe entero. */
+    const elegidos = X.graficosDe(selURL);
+    const linea = document.getElementById('seleccion-impresa');
+    if (linea && elegidos) {
+      const total = Object.keys(VX.seccionDeGrafico()).length;
+      linea.textContent = `Selección: ${elegidos.length} de los ${total} `
+        + 'gráficos del informe. '
+        + 'Las cifras no cambian: lo que se acota es qué figuras se muestran.';
+    }
     await c.montarAyuda();
     c.montarTooltip();
     if (PAGINAS[pagina]) await PAGINAS[pagina]();
