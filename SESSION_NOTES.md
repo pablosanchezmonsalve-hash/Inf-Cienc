@@ -12927,3 +12927,72 @@ sistema de memoria y no se toma de paso.
 `STATE.md` sigue sin regenerar, ahora con la razón anotada arriba; hay que
 correr `make estado` en el equipo que tiene `internal/` y `data/interim/`.
 Y confirmar el LCP con `make rendimiento`.
+
+---
+
+## Cierre: la compuerta del generador de estado (2026-09-08)
+
+Cierra la ambigüedad que quedó abierta hace un rato en esta misma fecha: qué
+hace `src/state/snapshot.py` cuando no tiene con qué generar `STATE.md`.
+
+### El defecto
+
+`STATE.md` se deriva en parte de `internal/*` y de `data/interim/`, que están en
+`.gitignore` —capa interna y derivados regenerables—, así que **en un clon
+limpio no existen**. El generador los leía con `if p.exists()` y seguía adelante
+sin ellos. El resultado no era un archivo incompleto que se declarara
+incompleto: era un archivo que afirmaba de menos.
+
+Concretamente, corriendo `make estado` aquí se perdían cinco cifras canónicas
+—formas de firma, apariciones, pares, reglas de validación y bloqueantes
+fallando— y la tabla de colas de revisión quedaba con encabezado y sin filas,
+que es la forma tipográfica de decir «no hay ninguna» cuando hay quince colas y
+82 casos pendientes.
+
+Y es el archivo que `CLAUDE.md` designa punto de entrada: la sesión siguiente
+empieza leyendo eso. El Paso 7 de la guía de operación dice `git add -A`.
+
+### La compuerta
+
+Es el patrón que el proyecto ya usa tres veces en el build: detenerse, no
+avisar.
+
+- **Si faltan insumos, `STATE.md` no se toca.** El guion sale con 1 nombrando
+  cada archivo ausente, qué cifra o qué tabla se pierde con él y con qué orden
+  se rehace. El archivo bueno que había en el repositorio sigue ahí.
+- **`docs/DECISIONS.md` se regenera siempre.** Su única fuente es
+  `SESSION_NOTES.md`, que sí está versionada: ahí no hay nada que pueda faltar,
+  y bloquearlo habría quitado una capacidad que funciona bien en cualquier
+  clon. Por eso la compuerta está entre las dos escrituras y no al principio.
+- **`--parcial` es la salida explícita**, y el archivo se declara a sí mismo:
+  una advertencia en su primera línea, antes que nada, con la lista de lo que
+  falta. También sale con 1, para que ninguna automatización lo dé por bueno.
+- **La tabla de colas vacía se sustituye por una frase**: «no está vacía porque
+  no haya colas, está vacía porque no se han podido contar». Una tabla con
+  encabezado y sin filas es una afirmación, y era falsa.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-549 | `snapshot.py` no escribe `STATE.md` si le faltan insumos; `docs/DECISIONS.md` se regenera siempre | Los insumos de `STATE.md` no se versionan y en un clon limpio producían un archivo que afirmaba cero colas donde hay 82 casos pendientes. `DECISIONS.md` deriva sólo de `SESSION_NOTES.md`, que sí está versionada, y no puede degradarse |
+
+### Verificación
+
+Las tres vías, corridas: sin insumos se detiene con exit 1 y `STATE.md` queda
+byte a byte como estaba; con `--parcial` lo escribe con la advertencia en su
+primera línea y la frase en lugar de la tabla; y con los cuatro insumos
+presentes —sintéticos, creados y borrados en la misma corrida— vuelve a la vía
+normal, exit 0, sin advertencia, 19 cifras canónicas en vez de 13.
+
+### Archivos
+
+- `src/state/snapshot.py`
+- `docs/OPERACION.md` — Paso 8 y una fila más en «Si algo sale mal»
+
+### Pendientes
+
+`STATE.md` sigue sin regenerar, ahora por decisión del propio guion. Hay que
+correr `make estado` en el equipo que tiene `internal/` y `data/interim/`, y
+ahí entrarán `D-547`, `D-548` y `D-549`. Y confirmar el LCP con
+`make rendimiento`.

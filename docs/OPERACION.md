@@ -329,6 +329,17 @@ py src\state\snapshot.py
 `STATE.md` es el punto de entrada de la sesión siguiente. Si se queda atrás, la
 próxima persona —o el próximo asistente— empieza leyendo un mapa viejo.
 
+**Córralo en este equipo, no en un clon limpio.** `STATE.md` se deriva en parte
+de `internal\` y de `data\interim\`, que no se versionan: donde no están, el
+archivo saldría sin cinco cifras canónicas y sin la tabla de colas de revisión,
+y esos huecos se leen como ceros. El guion lo comprueba y **no toca `STATE.md`**
+si le faltan insumos: dice qué falta y con qué se rehace. `docs\DECISIONS.md` sí
+se regenera siempre, porque su única fuente es `SESSION_NOTES.md`.
+
+Si aun así quiere el archivo a medias, `py src\state\snapshot.py --parcial` lo
+escribe declarando en su primera línea qué le falta. No lo commitee encima de
+uno completo.
+
 Y escriba en `SESSION_NOTES.md` qué se decidió y por qué. Un mensaje de commit
 explica un cambio; el diario explica una sesión, y es lo que se lee dentro de un
 mes.
@@ -349,6 +360,7 @@ mes.
 | El PDF sale sin los colores de fondo | Encienda «Gráficos de fondo» en el diálogo. Paso 4 bis |
 | El PDF descargado trae una sola sección | Es lo que hace el botón: imprime la página que ve. Las seis van con el comando. Paso 4 bis |
 | `informe_pdf.mjs` no arranca | Falta `npm install`: Node y Chromium no los instala el Paso 1 |
+| `snapshot.py` dice que no toca `STATE.md` | Está bien: le faltan insumos que no se versionan. Córralo donde estén. Paso 8 |
 
 ---
 
