@@ -47,8 +47,8 @@
 */
 
 import { createServer } from 'node:http';
-import { readFile, stat, writeFile } from 'node:fs/promises';
-import { join, extname, resolve, basename } from 'node:path';
+import { readFile, stat, writeFile, mkdir } from 'node:fs/promises';
+import { join, extname, resolve, basename, dirname } from 'node:path';
 import { abrir, pdfEtiquetado } from '../verify/navegador.mjs';
 import * as vx from '../../web/assets/js/vista_explorador.js';
 
@@ -331,8 +331,51 @@ s.close();
    una dependencia de manipulación que este proyecto no tiene, y añadirla por
    esto sería pagar un árbol entero por un grapado. Se declara en vez de
    fingir un informe de una pieza. */
+await mkdir(dirname(base), { recursive: true });
 for (const { seccion, buffer } of partes) {
   await writeFile(`${base}-${seccion}.pdf`, buffer);
+}
+
+/* ── El manifiesto, para que el sitio pueda ofrecer el informe ──────────────
+   El sitio se ensambla ANTES de que este guion corra —necesita `dist/` para
+   componer el PDF—, así que las páginas no pueden traer los enlaces escritos:
+   no sabrían si los archivos existen ni cuántas hojas tienen. Se deja aquí un
+   artefacto con lo que de verdad se generó, y la portada dibuja el bloque de
+   descarga sólo si lo encuentra.
+
+   Eso es lo que impide la versión que sí engaña: enlaces fijos en el HTML que
+   apuntan a archivos que puede que no estén, o que están pero son de otra
+   carga de datos. Sin manifiesto no hay bloque, y el manifiesto lo escribe la
+   misma corrida que escribió los PDF.
+
+   Sólo se escribe si la salida cae DENTRO de `dist/`: generar el informe en
+   otra carpeta —una entrega, una prueba— no debe anunciar en el sitio unos
+   archivos que no están junto a él. */
+const dentroDeDist = base.startsWith(dist + '/');
+if (dentroDeDist && getDocument) {
+  const archivos = [];
+  for (const { seccion, buffer } of partes) {
+    const { hojas } = await hojasDe(buffer, []);
+    archivos.push({
+      seccion,
+      nombre: NOMBRE_SECCION[seccion] || seccion,
+      archivo: `${base}-${seccion}.pdf`.slice(dist.length + 1),
+      hojas,
+      kb: Math.round(buffer.length / 1024),
+    });
+  }
+  const meta = JSON.parse(await readFile(join(dist, 'data/meta.json'), 'utf8'));
+  await writeFile(join(dist, 'data/informe.json'), JSON.stringify({
+    generado: new Date().toISOString().slice(0, 10),
+    // La fecha de build del sitio con el que se compuso. Si alguien reconstruye
+    // el sitio y no vuelve a generar el informe, las dos fechas dejan de
+    // coincidir y la portada lo dice en vez de ofrecer un PDF de otra carga.
+    build: meta.fecha_build,
+    recorte: consulta,
+    hojas: archivos.reduce((s, a) => s + a.hojas, 0),
+    archivos,
+  }, null, 1) + '\n', 'utf8');
+  console.log(`  manifiesto: dist/data/informe.json · ${archivos.length} archivos`);
 }
 const etiquetadas = partes.filter((p) => p.etiquetado).length;
 console.log(`\n  ${partes.length} secciones · ${base}-*.pdf`);

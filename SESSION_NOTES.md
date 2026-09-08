@@ -13211,3 +13211,86 @@ responsable y no defectos: **las cifras repetidas** en la portada y en las
 cuatro secciones, y **las hojas a medio llenar**, que sólo se reducen acortando
 figuras o dejando que un bloque se separe de su explicación. Y `STATE.md` sigue
 sin regenerar por falta de `internal/` y `data/interim/`.
+
+---
+
+## Cierre: el informe completo, ofrecido desde el sitio (2026-09-08)
+
+Hasta ahora el informe de seis secciones con su índice sólo existía si alguien
+tenía el proyecto instalado y corría el comando. El botón de la interfaz da otra
+cosa —la página que se está mirando, con sus filtros—, y esa diferencia es
+deliberada, pero dejaba el informe completo fuera del alcance de quien sólo
+visita el sitio.
+
+### Derivado, no comiteado
+
+La vía corta era comitear los seis PDF en `web/` y enlazarlos. Se descartó por
+dos razones, y la segunda pesa más que la primera:
+
+1. Son 3,4 MB de binarios **por cada carga de datos**, en un repositorio que
+   guarda todas las versiones.
+2. Abre el hueco de siempre: alguien actualiza los datos, olvida regenerar el
+   informe, y el sitio ofrece un PDF que dice otra cosa que sus propias páginas.
+   Es exactamente el defecto que este proyecto lleva media docena de sesiones
+   cerrando en otros sitios.
+
+El informe es un derivado del sitio, así que se deriva donde el sitio se
+publica. El despliegue lo compone dentro del `dist/` que va a subir, después de
+verificarlo, **con el Chromium que la batería ya instaló**: no cuesta una
+dependencia nueva, sólo el minuto y medio de composición. Y va con
+`continue-on-error`: si falla, el sitio se publica igual, sin el bloque.
+
+### Cómo se evita ofrecer un enlace roto
+
+El sitio se ensambla ANTES de que el informe exista —el informe necesita el
+sitio para componerse—, así que las páginas no pueden traer los enlaces
+escritos: a esa altura no se sabe si los archivos existen ni cuántas hojas
+tienen.
+
+El generador deja un manifiesto, `dist/data/informe.json`, con lo que de verdad
+compuso: archivo, sección, hojas, peso, y la fecha de build del sitio con el que
+se compuso. La portada dibuja el bloque **sólo si lo encuentra con contenido**.
+
+Y el ensamblado deja ese manifiesto **vacío**, no ausente. La diferencia
+importa: con el archivo ausente, cada visita a la portada pediría un artefacto
+inexistente y dejaría un 404 en la consola —un error de red por una función que
+simplemente no está disponible—. Con la lista vacía no se pide nada y no se
+dibuja nada.
+
+Si las dos fechas de build no coinciden, el bloque lo dice sobre los enlaces en
+vez de callarlo: «Se compuso con los datos del … y el sitio sirve los del …».
+
+### Verificación
+
+Los tres casos, comprobados en el navegador: con informe, el bloque sale con sus
+seis enlaces, el primero responde 200 y `application/pdf`, cero errores de
+consola; con el manifiesto vacío, el bloque no aparece y no hay 404; con una
+fecha de build distinta, sale la banda de aviso con las dos fechas. Batería
+completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-559 | El informe descargable se compone en el despliegue, dentro del `dist/` que se publica, y no se versiona | Es un derivado del sitio: derivarlo donde el sitio se publica hace imposible que lo contradiga. Comitearlo habría metido megabytes de binarios por carga y habría dejado el hueco de «datos nuevos, informe viejo» |
+| D-560 | La portada dibuja el bloque de descarga desde un manifiesto, nunca desde enlaces escritos a mano | El sitio se ensambla antes de que el informe exista, así que a esa altura no se sabe si los archivos están. Un enlace fijo apuntaría a un archivo que puede no estar o ser de otra carga |
+| D-561 | El ensamblado deja el manifiesto vacío, no ausente | Un artefacto que falta es un 404 en la consola de cada visita. Una lista vacía es una función que no está disponible, que es lo que de verdad ocurre |
+| D-562 | El bloque declara cuando el informe es de una carga anterior | Dos fechas de build distintas significan que el PDF puede contradecir la página desde la que se descarga, y eso se dice sobre el enlace |
+
+### Archivos
+
+- `src/build/informe_pdf.mjs` — el manifiesto
+- `src/build/06_assemble_site.py` — el manifiesto vacío
+- `web/index.html`, `web/assets/js/paginas.js`, `web/assets/css/app.css` — el bloque
+- `.github/workflows/deploy.yml` — la composición en el despliegue
+- `docs/OPERACION.md`, `docs/UX_UI.md`
+
+### Pendientes
+
+Los dos de siempre, decisión del responsable: las cifras repetidas en la portada
+y en las cuatro secciones, y las hojas a medio llenar. Y `STATE.md` sin
+regenerar por falta de `internal/` y `data/interim/`.
+
+**Sin comprobar en el despliegue real:** el paso nuevo de `deploy.yml` no ha
+corrido todavía. Está escrito para no poder tumbar la publicación, pero eso hay
+que verlo en la primera corrida sobre `main`.

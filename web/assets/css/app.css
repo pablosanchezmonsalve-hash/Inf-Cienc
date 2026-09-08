@@ -2115,6 +2115,36 @@ svg.chart .trama { pointer-events: none; }
 .chip-on { background: var(--accion); border-color: var(--accion); color: var(--boton-tinta); }
 .chip-on .chip-n { color: var(--boton-tinta); opacity: .8; }
 
+/* ---- el informe completo en PDF ----
+   Sólo aparece si la corrida que construyó el sitio también generó el informe
+   (`data/informe.json`). No compite con el botón «Descargar informe» de la
+   barra: aquél da la página que se está viendo con sus filtros, éste da las
+   seis secciones con su índice y sus hojas numeradas. */
+.informe-pdf {
+  border: 1px solid var(--linea); border-radius: var(--radio);
+  background: var(--superficie); padding: var(--e4) var(--e5);
+  margin: 0 0 var(--e5);
+}
+.informe-pdf h2 { font: 700 var(--t-l)/1.25 var(--f-ui); margin: 0 0 var(--e2); }
+.informe-pdf-intro { color: var(--tinta-2); margin: 0 0 var(--e3); max-width: 68ch; }
+.informe-pdf-lista {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: var(--e2) var(--e4);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.informe-pdf-lista li {
+  display: flex; align-items: baseline; gap: var(--e2);
+  border-top: 1px solid var(--linea); padding-top: var(--e2);
+}
+.informe-pdf-lista a { font-weight: 600; }
+.informe-pdf-dato {
+  color: var(--tinta-3); font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums; margin-left: auto; white-space: nowrap;
+}
+/* En papel no se ofrece: quien tiene la hoja delante ya tiene el informe, y un
+   enlace impreso no lleva a ninguna parte. Mismo criterio que la navegación. */
+@media print { .informe-pdf { display: none; } }
+
 /* ---- los cortes que responden ---- */
 .cortes { display: grid; gap: var(--e5); grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
 .corte {
