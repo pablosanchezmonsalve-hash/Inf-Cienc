@@ -945,9 +945,24 @@ compartido es ruido —la primera medición publicada dio 776 ms y la siguiente
 
 | Página | LCP sin pre-render | LCP pre-renderizado | Mejora |
 |---|---|---|---|
-| `index` | 1.940 ms [1.904–1.956] | **780 ms** [772–796] | −60 % |
-| `impacto` | 1.764 ms [1.748–1.808] | **784 ms** [780–812] | −56 % |
-| `tematica` | 1.300 ms [1.296–1.320] | **756 ms** [752–764] | −42 % |
+| `index` | 2.664 ms [2.656–2.664] | **1.424 ms** [1.416–1.448] | −47 % |
+| `impacto` | 2.652 ms [2.636–2.664] | **1.432 ms** [1.428–1.444] | −46 % |
+| `tematica` | 2.664 ms [2.652–2.668] | **1.428 ms** [1.420–1.452] | −46 % |
+
+Las cifras absolutas subieron respecto de la medición anterior —780 ms de
+portada contra 1.424— porque el contenedor donde se mide no es el mismo y su
+carga varía; lo comparable es la columna de mejora y la relación entre páginas,
+que se miden en la misma corrida. Las tres se comportan igual, que es lo que
+esta tabla tiene que enseñar.
+
+**El bloque de descarga del informe casi duplicó el LCP de la portada, y por eso
+está donde está.** Puesto bajo el titular, medía 3.156 ms contra 1.420 ms, y el
+elemento de mayor pintado era su propio párrafo. La causa es estructural y no se
+arregla optimizando: el bloque **no puede pre-renderizarse**, porque su
+manifiesto no existe cuando se escribe la página, así que siempre pinta tarde,
+después del guion y de dos peticiones. Arriba y grande, eso lo convierte en el
+elemento que define el LCP; abajo del pliegue no es candidato. Medido con el
+mismo sitio servido dos veces, la única diferencia el manifiesto lleno o vacío.
 
 Con JavaScript **desactivado**, lo que queda en la página:
 
@@ -1026,10 +1041,10 @@ después:
 
 | Medición | Resultado | Umbral |
 |---|---|---|
-| LCP en *Slow 4G* | **916 ms** | 2.500 ms (Core Web Vitals) |
+| LCP en *Slow 4G* | **1.424 ms** | 2.500 ms (Core Web Vitals) |
 | Latencia al recortar el conjunto | **21–37 ms** | 200 ms (INP) |
 
-Los dos con holgura de más del doble. El peso de los datos es el precio de la
+Los dos por debajo del umbral, el LCP con un 43 % de margen. El peso de los datos es el precio de la
 arquitectura —cualquier pregunta se responde sin volver al servidor— y está
 comprado con margen.
 
