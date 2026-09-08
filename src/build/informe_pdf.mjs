@@ -48,9 +48,20 @@
 
 import { createServer } from 'node:http';
 import { readFile, stat, writeFile } from 'node:fs/promises';
-import { join, extname, resolve } from 'node:path';
+import { join, extname, resolve, basename } from 'node:path';
 import { abrir, pdfEtiquetado } from '../verify/navegador.mjs';
 import * as vx from '../../web/assets/js/vista_explorador.js';
+
+/* pdf.js sólo para LEER en qué hoja cayó cada gráfico, y así poder escribir el
+   índice con números de hoja de verdad. Es la misma dependencia de desarrollo
+   que ya usa `src/verify/impresion.mjs`; si falta, el informe se genera igual
+   y sale sin índice, que es peor pero no es nada. */
+let getDocument = null;
+try {
+  ({ getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs'));
+} catch {
+  console.log('  ⚠ sin pdfjs-dist: el informe sale sin índice. `npm i -D pdfjs-dist`');
+}
 
 const dist = resolve(process.argv[2] || 'dist');
 const salida = resolve(process.argv[3] || 'dist/informe-cienciometrico.pdf');
@@ -198,6 +209,119 @@ for (const [ruta, seccion] of RUTAS) {
   partes.push({ seccion, buffer, etiquetado });
   console.log(`  ${seccion.padEnd(14)} ${(buffer.length / 1024).toFixed(0)} KB`
     + (etiquetado ? '' : `  ⚠ sin etiquetar${motivo ? `: ${motivo}` : ''}`));
+}
+
+/* ── El índice ──────────────────────────────────────────────────────────────
+   Cuarenta y seis hojas repartidas en seis archivos no se recorren sin un
+   índice: «mire el gráfico de tipos documentales» obliga a abrir los seis.
+
+   Los números de hoja NO se estiman ni se cuentan bloques: se LEEN del PDF ya
+   generado, buscando el título de cada gráfico página por página. Es la misma
+   razón por la que la compuerta de impresión lee el PDF y no el DOM —el
+   navegador miente sobre el papel—, y además resuelve gratis el caso de la
+   selección de gráficos: lo que no se dibujó no aparece, sin una segunda regla
+   que decida qué entra.
+
+   El precio es que la portada se compone dos veces: una para que existan las
+   demás y otra ya con el índice. Son unos segundos y ocurre sólo aquí.
+
+   Va en el generador y no en la hoja de estilo por lo mismo que el folio: el
+   botón del navegador no puede saber en qué hoja cae nada. Su MAQUETA sí vive
+   en `app.css` (`.indice-informe`), que sigue siendo el único sitio donde se
+   decide cómo se ve el papel. */
+const TITULOS = Object.fromEntries(Object.entries(vx.SECCIONES).map(
+  ([clave, s]) => [clave, s.cortes.map((c) => [c.cod || c.campo, c.titulo])]));
+
+async function hojasDe(buffer, titulos) {
+  // `Uint8Array.from` COPIA. pdf.js se queda con el ArrayBuffer que recibe y
+  // lo desprende, así que pasarle una vista del mismo Buffer dejaría a
+  // `writeFile` escribiendo un búfer vacío. Ya pasó una vez.
+  const doc = await getDocument({ data: Uint8Array.from(buffer), verbosity: 0 }).promise;
+  const donde = new Map();
+  for (let i = 1; i <= doc.numPages; i++) {
+    const texto = (await (await doc.getPage(i)).getTextContent())
+      .items.map((x) => x.str).join('').replace(/\s+/g, '');
+    for (const [cod, titulo] of titulos) {
+      if (!donde.has(cod) && texto.includes(titulo.replace(/\s+/g, ''))) donde.set(cod, i);
+    }
+  }
+  return { donde, hojas: doc.numPages };
+}
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const entradas = [];
+for (const { seccion, buffer } of (getDocument ? partes : [])) {
+  if (seccion === 'index') continue;   // la portada no se indexa a sí misma
+  const { donde, hojas } = await hojasDe(buffer, TITULOS[seccion] || []);
+  entradas.push({
+    seccion, hojas, archivo: `${basename(base)}-${seccion}.pdf`,
+    graficos: (TITULOS[seccion] || [])
+      .filter(([cod]) => donde.has(cod))
+      .map(([cod, titulo]) => ({ cod, titulo, hoja: donde.get(cod) })),
+  });
+}
+
+const indiceHTML = `<nav class="indice-informe solo-papel" aria-label="Índice del informe">
+  <h2>Índice</h2>
+  <p class="indice-nota">El informe se entrega en ${partes.length} archivos, uno por
+    sección; éste es el primero. Las hojas se cuentan dentro de cada archivo.</p>
+  <ol>${entradas.map((e) => `
+    <li>
+      <p class="indice-sec"><b>${esc(NOMBRE_SECCION[e.seccion] || e.seccion)}</b>
+        <span class="indice-hojas">${e.hojas} ${e.hojas === 1 ? 'hoja' : 'hojas'}</span></p>
+      <p class="indice-archivo">${esc(e.archivo)}</p>
+      ${e.graficos.length ? `<ul>${e.graficos.map((g) => `
+        <li><span class="indice-cod">${esc(g.cod)}</span>
+          <span class="indice-tit">${esc(g.titulo)}</span>
+          <span class="indice-guia"></span>
+          <span class="indice-hoja">hoja ${g.hoja}</span></li>`).join('')}</ul>` : ''}
+    </li>`).join('')}
+  </ol>
+</nav>`;
+
+const iPortada = partes.findIndex((p) => p.seccion === 'index');
+if (iPortada >= 0 && entradas.length) {
+  const union = 'index.html'.includes('?') ? '&' : '?';
+  await pag.goto(`http://127.0.0.1:${puerto}/index.html${consulta ? union + consulta : ''}`,
+    { waitUntil: 'networkidle' });
+  await pag.waitForTimeout(400);
+  await pag.evaluate((html) => {
+    const cab = document.querySelector('.portada-cabecera');
+    if (cab) cab.insertAdjacentHTML('afterend', html);
+  }, indiceHTML);
+  const { buffer, etiquetado } = await pdfEtiquetado(pag, {
+    format: 'A4', printBackground: true,
+    displayHeaderFooter: true, headerTemplate: '<span></span>',
+    footerTemplate: pieDeHoja('index'),
+  });
+  partes[iPortada] = { seccion: 'index', buffer, etiquetado };
+  /* Autocomprobación: sin selección, TODOS los gráficos declarados de una
+     sección tienen que aparecer en su PDF. Si uno no se encuentra es que su
+     título cambió en `vista_explorador.js` y la búsqueda dejó de casar, y el
+     índice se quedaría corto sin decirlo. Con selección no se comprueba: ahí
+     faltan a propósito, y decidir cuáles exigir obligaría a reimplementar la
+     regla de selección, que es la clase de segunda definición que este
+     proyecto evita. */
+  if (!seleccion.length) {
+    for (const e of entradas) {
+      const esperados = (TITULOS[e.seccion] || []).length;
+      if (e.graficos.length < esperados) {
+        const faltan = (TITULOS[e.seccion] || [])
+          .filter(([cod]) => !e.graficos.some((g) => g.cod === cod))
+          .map(([cod]) => cod).join(', ');
+        console.log(`  ⚠ ${e.seccion}: ${e.graficos.length} de ${esperados} gráficos `
+          + `localizados en el PDF. Sin hoja en el índice: ${faltan}.`);
+      }
+    }
+  }
+
+  const n = entradas.reduce((s, e) => s + e.graficos.length, 0);
+  // El peso de la portada se anunció antes de tener índice: se corrige aquí en
+  // vez de dejar en pantalla una cifra que ya no corresponde al archivo.
+  console.log(`\n  índice: ${entradas.length} secciones · ${n} gráficos, con su hoja`);
+  console.log(`  index          ${(buffer.length / 1024).toFixed(0)} KB (con el índice)`);
 }
 
 await nav.close();

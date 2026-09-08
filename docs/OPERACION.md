@@ -144,6 +144,12 @@ fingir un informe de una pieza.
 filtro y paginación, y volcarlas produciría un anexo de cientos de hojas que
 nadie lee.
 
+Numera las hojas y **abre con un índice**: cada sección con su archivo y su
+número de hojas, y cada gráfico con la hoja en la que cae. Los números son
+reales, leídos del PDF ya compuesto, así que si alguno faltara el comando lo
+diría por su código. Ninguna de las dos cosas puede hacerlas el botón: el
+navegador no sabe en qué hoja cae nada.
+
 **Exige Node y Chromium**, que el Paso 1 no instala porque el sitio no los
 necesita. Sólo hacen falta para esto y para `make verificar`:
 

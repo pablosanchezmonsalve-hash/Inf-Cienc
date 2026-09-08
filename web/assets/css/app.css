@@ -1742,6 +1742,56 @@ svg.chart .trama { pointer-events: none; }
      rejilla: vienen de que cinco bloques miden entre 205 y 267 mm sobre una
      hoja útil de 263 y no pueden compartir con nadie. */
 
+  /* ── El índice ──────────────────────────────────────────────────────────
+     Sólo existe en el PDF que genera `informe_pdf.mjs`: el número de hoja lo
+     lee él del documento ya compuesto, y el botón del navegador no tiene forma
+     de saberlo. La MAQUETA vive aquí de todos modos, que es donde se decide
+     cómo se ve el papel; el generador inyecta el marcado y nada más.
+
+     Abre hoja propia y la cierra: un índice que empieza a media página, debajo
+     de las cifras, no se encuentra al hojear. */
+  .indice-informe {
+    break-before: page; break-after: page; break-inside: auto;
+    padding-top: 4mm;
+  }
+  .indice-informe h2 { font-size: 15pt; margin: 0 0 2mm; }
+  .indice-nota { font-size: 8.5pt; color: #444; margin: 0 0 6mm; max-width: 105mm; }
+  .indice-informe > ol { list-style: none; margin: 0; padding: 0; }
+  .indice-informe > ol > li { break-inside: avoid; margin: 0 0 6mm; }
+  .indice-sec {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 6mm; margin: 0; font-size: 11pt;
+    border-bottom: .5pt solid #999; padding-bottom: 1mm;
+  }
+  .indice-hojas { font-size: 8.5pt; color: #444; font-weight: 400; white-space: nowrap; }
+  .indice-archivo {
+    font-family: var(--f-mono, ui-monospace, monospace);
+    font-size: 7.5pt; color: #555; margin: 1mm 0 2mm;
+  }
+  .indice-informe ul { list-style: none; margin: 0; padding: 0; }
+  /* Cada gráfico en una línea: código, título y hoja. El puntillado une el
+     título con su número sin obligar a seguir un renglón vacío con el dedo. */
+  .indice-informe ul li {
+    display: flex; align-items: baseline; gap: 2mm;
+    font-size: 9.5pt; line-height: 1.7; break-inside: avoid;
+  }
+  .indice-cod {
+    font-family: var(--f-mono, ui-monospace, monospace);
+    font-size: 8pt; color: #555; min-width: 13mm;
+  }
+  .indice-tit { flex: 0 1 auto; overflow: hidden; white-space: nowrap; }
+  /* La guía de puntos es un elemento propio y VACÍO que crece hasta el número
+     de hoja, con el puntillado en su borde inferior. La primera versión ponía
+     una ristra fija de puntos en un `::after` del título: como la ristra tiene
+     largo fijo, cada línea terminaba en un sitio distinto —se ve en el PDF—, y
+     alargarla sólo mueve el problema. Un borde sobre una caja elástica mide
+     exactamente el hueco libre, sea cual sea el título. */
+  .indice-guia {
+    flex: 1 1 0; min-width: 4mm; align-self: center;
+    border-bottom: .5pt dotted #999; margin: 0 1.5mm;
+  }
+  .indice-hoja { font-size: 8.5pt; color: #333; white-space: nowrap; }
+
   /* ── La banda oscura se imprime en tinta sobre blanco ───────────────────
      `.banda-contraste` invierte la paleta: fondo vino profundo y tinta clara
      (#f0e2d0). En pantalla funciona. En papel depende de un ajuste del
