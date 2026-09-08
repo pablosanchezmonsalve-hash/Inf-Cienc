@@ -70,6 +70,21 @@ export function anio(v) {
   return escapar(String(v));
 }
 
+/** El nombre de una sección, sin la coletilla del informe.
+
+    «Producción — Informe Bibliométrico» es un buen `<title>` para una pestaña
+    del navegador y un mal titular para la hoja 1 de la sección de producción,
+    donde la línea de crédito ya dice de qué informe se trata: el nombre se
+    repetía en las cuatro portadillas del PDF.
+
+    Vive aquí porque lo necesitan dos consumidores —el pre-renderizador y el
+    navegador— y ya se había escrito dos veces, mal las dos: ambas cortaban por
+    «·» y el separador del título es «—», así que no cortaban nada. Se aceptan
+    los dos: el título los ha usado en distintos momentos, y una regla que sólo
+    contemple el de hoy se rompe en cuanto alguien cambie el otro. */
+export const tituloDeSeccion = (t, sino = '') =>
+  String(t || '').split(/\s+[—·]\s+/)[0].trim() || sino;
+
 export function escapar(s) {
   return String(s).replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -515,6 +530,14 @@ export function barrasH(datos, {
   const cuota = d => (cuotaValida && sumaBarras
     ? `${(100 * d.n / sumaBarras).toFixed(1).replace('.', ',')} % de lo mostrado` : '');
 
+  /* ¿Sobrevivió alguna etiqueta al recorte? Lo necesita el papel: en pantalla
+     la etiqueta recortada tiene su nombre completo a un tooltip de distancia,
+     y en una hoja no hay tooltip. Cuando el recorte se comió un nombre, la
+     tabla equivalente es la única que lo dice entero, así que se imprime;
+     cuando no, la tabla repetiría barra por barra lo que la figura ya rotula.
+     Se marca en el SVG y lo lee la hoja de impresión (`data-cifras`). */
+  let recortadas = false;
+
   const filas = datos.map((d, i) => {
     const y = i * alto;
     const w = Math.max(2, anchoPista * (d.n / max));
@@ -526,6 +549,7 @@ export function barrasH(datos, {
     // la izquierda: exactamente el "lado equivocado" que el comentario de
     // más arriba decía resuelto.
     const etq = recortar(d.valor, anchoEtiqueta - 14, 13);
+    if (etq !== String(d.valor)) recortadas = true;
     const cy = y + alto / 2;
     const nota = d.nota || cuota(d);
 
@@ -581,6 +605,7 @@ export function barrasH(datos, {
   const pie = refEtiqueta
     ? `<p class="leyenda-ref">${escapar(refEtiqueta)}</p>` : '';
   return `<div class="grafico"><svg class="chart" id="${id}" viewBox="0 0 ${ancho} ${total}"
+    data-cifras="${recortadas ? 'parciales' : 'completas'}"
     role="list" aria-label="${escapar(etq)}">${defs}${filas}</svg></div>${pie}`;
 }
 
@@ -647,8 +672,10 @@ export function barrasV(datos, {
 
   const etq = titulo ? `${titulo} — gráfico de barras por año, ${datos.length} años`
                      : `Gráfico de barras verticales, ${datos.length} valores`;
+  // `completas`: cada barra lleva su valor encima y su categoría debajo, sin
+  // recorte. En papel, la tabla equivalente no añadiría nada. Ver `barrasH`.
   return `<div class="grafico" style="max-width:${ancho}px"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
-    role="list" aria-label="${escapar(etq)}">
+    data-cifras="completas" role="list" aria-label="${escapar(etq)}">
     ${red}${ref}${barras}
     <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
   </svg></div>`;
@@ -1149,8 +1176,9 @@ export function distribucion(datos, { titulo = '', ancho = 680, alto = 250, etiq
     ? `<text class="tick" x="${mIzq + (ancho - mIzq - mDer) / 2}" y="${alto - 10}" text-anchor="middle">${escapar(etiquetaEje)}</text>` : '';
   const etq = titulo ? `${titulo} — distribución en ${datos.length} tramos`
                      : `Distribución en ${datos.length} tramos`;
+  // `completas`: cada columna rotula su tramo y su recuento. Ver `barrasH`.
   return `<div class="grafico"><svg class="chart" viewBox="0 0 ${ancho} ${alto}"
-    role="list" aria-label="${escapar(etq)}">
+    data-cifras="completas" role="list" aria-label="${escapar(etq)}">
     ${red}${cols}${eje}
     <line class="eje" x1="${mIzq}" x2="${ancho - mDer}" y1="${base}" y2="${base}"/>
   </svg></div>`;

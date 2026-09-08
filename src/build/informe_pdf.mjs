@@ -150,6 +150,34 @@ if (seleccion.length) {
   console.log(`  selección: ${seleccion.length} gráfico(s) · ${RUTAS.length} secciones\n`);
 }
 
+/* El folio. Un informe de más de cuarenta hojas sin numerar no se puede citar
+   ni comentar: «mire la página 12» deja de significar algo, y una hoja suelta
+   no dice de qué documento salió.
+
+   Va aquí y no en la hoja de estilo porque Chromium no implementa los cuadros
+   de margen de CSS Paged Media (`@bottom-center`), así que en el navegador no
+   hay forma de escribirlo. Es la diferencia real entre las dos vías: el botón
+   ofrece el folio del propio diálogo —con la dirección web y la fecha del
+   navegador—, y este guion pone el del informe.
+
+   La plantilla no hereda NADA de la hoja de estilo: se le escriben las fuentes
+   y los tamaños, y `pageNumber`/`totalPages` los rellena Chromium. Los
+   nombres de sección se traducen a la palabra que el lector ve en la portada,
+   no al del archivo. */
+const NOMBRE_SECCION = {
+  index: 'Portada', produccion: 'Producción', impacto: 'Impacto',
+  colaboracion: 'Colaboración', tematica: 'Áreas temáticas',
+  metodologia: 'Metodología y limitaciones', ficha: 'Ficha del investigador',
+};
+
+const pieDeHoja = (seccion) => `
+  <div style="width:100%;margin:0 14mm;font:8pt -apple-system,'Segoe UI',Roboto,sans-serif;
+              color:#444;display:flex;justify-content:space-between;align-items:baseline;
+              border-top:.5pt solid #bbb;padding-top:2mm;">
+    <span>Informe bibliométrico · ${NOMBRE_SECCION[seccion] || seccion}</span>
+    <span>Hoja <span class="pageNumber"></span> de <span class="totalPages"></span></span>
+  </div>`;
+
 const partes = [];
 for (const [ruta, seccion] of RUTAS) {
   const union = ruta.includes('?') ? '&' : '?';
@@ -162,7 +190,11 @@ for (const [ruta, seccion] of RUTAS) {
   // Etiquetado: el árbol de estructura —encabezados, listas, tablas, orden de
   // lectura— es lo que hace navegable el PDF con un lector de pantalla. Sin
   // pedirlo el documento sale sin marcar, comprobado sobre el archivo.
-  const { buffer, etiquetado, motivo } = await pdfEtiquetado(pag, { format: 'A4', printBackground: true });
+  const { buffer, etiquetado, motivo } = await pdfEtiquetado(pag, {
+    format: 'A4', printBackground: true,
+    displayHeaderFooter: true, headerTemplate: '<span></span>',
+    footerTemplate: pieDeHoja(seccion),
+  });
   partes.push({ seccion, buffer, etiquetado });
   console.log(`  ${seccion.padEnd(14)} ${(buffer.length / 1024).toFixed(0)} KB`
     + (etiquetado ? '' : `  ⚠ sin etiquetar${motivo ? `: ${motivo}` : ''}`));

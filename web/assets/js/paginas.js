@@ -200,7 +200,9 @@ async function montarExplorador(claveSeccion) {
     const meta = await c.cargar('meta.json');
     if (cabecera) {
       cabecera.innerHTML = claveSeccion
-        ? VX.cabeceraSeccion(claveSeccion, document.title.split('·')[0].trim(),
+        // `tituloDeSeccion` y no un `split()` aquí: el pre-renderizador hace
+        // lo mismo, y la regla estaba escrita dos veces y mal las dos.
+        ? VX.cabeceraSeccion(claveSeccion, c.tituloDeSeccion(document.title),
             (await c.cargar('ejes.json')).ejes[claveSeccion])
         : VX.cabecera(meta);
     }

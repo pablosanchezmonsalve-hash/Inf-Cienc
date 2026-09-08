@@ -1648,6 +1648,12 @@ svg.chart .trama { pointer-events: none; }
      ocultaba nada y el bloque de pantalla se imprimía entero, con su botón
      «Ver todo» y su enlace al listado. Lo que declara el recorte en papel es
      `.recorte-impreso`, escrito para el papel. */
+  /* `.banda-salidas` son cuatro tarjetas de navegación —«Producción · Ver la
+     sección →»— que en papel no llevan a ninguna parte: cuatro promesas
+     muertas ocupando la última hoja de la portada. La banda de texto que las
+     acompaña sí se queda: dice que cada indicador declara su denominador, y
+     eso vale igual impreso. */
+  .banda-salidas,
   .cabecera, .tema, .filtros, .paginacion, .salto-contenido,
   .rail, .vigencia-guia, .descargar, .ayuda, .tooltip, .nav-toggle,
   .v-migas, .v-chip, .recorte-vivo, .v-anio, .minifoco,
@@ -1672,6 +1678,31 @@ svg.chart .trama { pointer-events: none; }
   body { background: #fff; }
   .disposicion { display: block; }
   .modulo, .kpi, .tabla-envoltura { box-shadow: none; border-color: #999; break-inside: avoid; }
+  /* Las tarjetas de cifra no se parten por la mitad.
+
+     Medido en el PDF: la portada cortaba la tercera fila y la hoja siguiente
+     abría con «Citas por publicación · 816 sobre las que tienen métricas» sin
+     el número, que se había quedado en la anterior. Un rótulo sin su cifra no
+     es media tarjeta: es una afirmación sin sujeto.
+
+     La regla `.kpi` que ya estaba nunca se aplicó: las cifras de la portada y
+     de cada sección no son `.kpi` sino `.ficha` dentro de `.tablero` —`.kpi`
+     es el tablero de las páginas antiguas—, así que la declaración existía y
+     no tocaba nada. Además `break-inside: avoid` sobre una rejilla o sus
+     hijos Chromium no lo cumple, comprobado sobre el PDF. En papel las
+     tarjetas dejan de ser hijas de rejilla y pasan a ser bloques en línea de
+     media columna: se ven igual, dos por fila, y ahora sí son indivisibles.
+
+     `font-size: 0` en el contenedor come el espacio en blanco entre bloques en
+     línea, que si no abre un carril de un carácter entre las dos columnas; las
+     tarjetas recuperan su tamaño. */
+     La regla NO va aquí sino al final del archivo, en su propio bloque
+     `@media print`. Este bloque vive en MITAD de la hoja, y una consulta de
+     medios no añade especificidad: `.tablero { display: grid }`, escrito más
+     abajo para la pantalla, le gana por puro orden de aparición a cualquier
+     `.tablero { … }` escrito aquí. Se vio en el PDF —las tarjetas salían al
+     24 % de ancho, que es el 49 % de media columna de rejilla— y no leyendo
+     la hoja. Buscar «PAPEL, AL FINAL» al pie del archivo. */
   .vistas { display: none; }
   .js .vista[data-activa="false"] { display: block; }
   .hero-texto { display: block; }
@@ -1703,6 +1734,34 @@ svg.chart .trama { pointer-events: none; }
   }
   .credito-impreso { font-weight: 600; }
   .recorte-impreso { color: #333; }
+
+  /* Nota medida, para que nadie la repita: convertir `.cortes` de rejilla a
+     flujo de bloque en papel NO cambia nada. A 182 mm de ancho útil la rejilla
+     ya resuelve a una sola columna, así que el apilado es el mismo y el
+     recuento de hojas fue idéntico. Las hojas a medio llenar no vienen de la
+     rejilla: vienen de que cinco bloques miden entre 205 y 267 mm sobre una
+     hoja útil de 263 y no pueden compartir con nadie. */
+
+  /* ── La banda oscura se imprime en tinta sobre blanco ───────────────────
+     `.banda-contraste` invierte la paleta: fondo vino profundo y tinta clara
+     (#f0e2d0). En pantalla funciona. En papel depende de un ajuste del
+     diálogo de impresión que el sitio no controla: «Gráficos de fondo» va
+     APAGADO por defecto en Chrome, así que el fondo no se pinta y la tinta
+     clara queda sobre blanco. Medido sobre dos PDF del mismo documento: el
+     resumen metodológico —lo que hace interpretable todo lo demás— sale
+     ilegible en la corrida por defecto.
+
+     Se resuelve en el lado del papel, no pidiéndole al lector que acierte con
+     una casilla: una hoja es blanca, y una banda oscura es un recurso de
+     pantalla. Afecta al anexo metodológico y a la banda de indicadores no
+     publicados de cada sección; ninguna de las dos lleva figuras, así que no
+     hay series de color que reajustar. */
+  .banda-contraste {
+    background: #fff;
+    --superficie: #fff; --superficie-2: #f2f2f2; --plano: #fff;
+    --tinta: #000; --tinta-2: #222; --tinta-3: #444;
+    --linea: #999; --linea-fuerte: #666;
+  }
 
   /* ── El bloque de gráfico en papel ──────────────────────────────────────
      Un gráfico del informe es una unidad de lectura de cinco partes, y las
@@ -1746,6 +1805,27 @@ svg.chart .trama { pointer-events: none; }
   .corte-red .vista[data-vista="matriz"],
   .corte-red .vista[data-vista="arcos"],
   .corte-red .vista[data-vista="tabla"] { display: none; }
+
+  /* ── La tabla se imprime sólo cuando añade algo ─────────────────────────
+     «En papel no hay conmutador, así que se imprimen las dos vistas» era
+     cierto a medias. Vale para el treemap, el mapa de calor y la mediana por
+     año, donde la figura no rotula cada valor. No vale para una barra que ya
+     lleva su cifra escrita al lado: ahí la tabla repite fila por fila lo que
+     la figura acaba de decir. Medido sobre el PDF: «Autores por publicación»
+     dibujaba seis barras rotuladas y debajo seis filas con los mismos seis
+     números y las mismas seis etiquetas.
+
+     La condición no es una lista de formas escrita aquí —divergiría del
+     generador en cuanto se añada un gráfico—: cada figura declara en su SVG
+     si rotula todos sus valores Y todas sus categorías (`data-cifras`), y
+     `barrasH` la marca `parciales` en cuanto una etiqueta no cupo. Por eso
+     «Unidad académica» conserva su tabla: es donde «Facultad de Arquitectura,
+     Diseño y Estudios Creativos» aparece entero, y la barra lo recortó.
+
+     Por omisión la tabla se imprime: una figura que no declara nada es una
+     figura de la que no sabemos si basta. */
+  .corte:has(.vista[data-vista="grafico"] svg[data-cifras="completas"])
+    .vista[data-vista="tabla"] { display: none; }
 
   /* La tabla equivalente, en papel, es la figura en cifras y no una tabla de
      interfaz. Con el interlineado de pantalla, las 21 filas de «Áreas
@@ -2134,6 +2214,31 @@ svg.chart .trama { pointer-events: none; }
    filtros a la izquierda, los gráficos y las cifras aprovechan todo el ancho
    de la hoja en vez de quedar encerrados en ~390px frente a un panel vacío. */
 @media print {
+  /* Las tarjetas de cifra no se parten por la mitad. Medido en el PDF: la
+     portada cortaba la tercera fila y la hoja siguiente abría con «Citas por
+     publicación · 816 sobre las que tienen métricas» sin el número, que se
+     había quedado en la anterior. Un rótulo sin su cifra no es media tarjeta:
+     es una afirmación sin sujeto.
+
+     `break-inside: avoid` no lo cumple Chromium ni sobre una rejilla ni sobre
+     sus hijos, así que en papel las fichas dejan de ser hijas de rejilla y
+     pasan a ser bloques en línea de media columna: se ven igual, dos por
+     fila, y ahora sí son indivisibles. Va en esta cola y no en el bloque de
+     la mitad del archivo por la razón que encabeza esta sección: allí
+     `.tablero { display: grid }`, escrito después para la pantalla, le ganaba
+     por orden. Comprobado sobre el PDF, donde las fichas salían al 24 % de
+     ancho —el 49 % de media columna de rejilla— antes de moverla aquí.
+
+     `font-size: 0` en el contenedor come el espacio en blanco entre bloques
+     en línea, que si no abre un carril de un carácter entre las columnas; las
+     fichas recuperan su tamaño. */
+  .tablero { display: block; font-size: 0; margin-bottom: 6mm; }
+  .tablero > .ficha {
+    display: inline-block; width: 49%; vertical-align: top; box-sizing: border-box;
+    font-size: 10pt; break-inside: avoid; margin: 0 0 2%;
+  }
+  .tablero > .ficha:nth-child(odd) { margin-right: 2%; }
+
   .explorador { display: block; }
   .explorador-resultado { padding-bottom: 0; }
 
