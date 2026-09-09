@@ -634,14 +634,32 @@ export function seccionDeGrafico() {
    La advertencia del catálogo NO se imprime si el corte ya trae su propio
    `aviso`: son dos textos sobre lo mismo y en papel se leerían como dos
    advertencias distintas. */
+/** «Qué muestra» y «Cuidado», pegados a la figura. EN PANTALLA TAMBIÉN.
+
+    Nacieron `solo-papel`, con este argumento: en pantalla quien no entiende una
+    figura tiene la ayuda contextual, el glosario y el panel de la sección a un
+    clic, y en el PDF no tiene nada. El argumento era cierto y la conclusión
+    estaba mal. «A un clic» es la parte que falla: quien no entiende un gráfico
+    no siempre sabe que no lo entiende, y menos aún qué término buscar. La
+    ayuda escondida sirve a quien ya sospecha; la frase junto a la figura sirve
+    a quien la mira por primera vez, que es el caso normal de alguien que llega
+    a un tablero bibliométrico desde su propia disciplina.
+
+    La consecuencia práctica era peor de lo que suena: el sitio, que es la
+    superficie que casi todo el mundo usa, era la única donde el gráfico no se
+    explicaba. Sólo lo veía quien descargaba el PDF.
+
+    El texto es el mismo en los dos medios —un origen, `docs/LECTURAS.md`— y lo
+    que cambia es la presentación, que la hoja de estilo resuelve: pie de figura
+    en pantalla, bloque compacto en papel. */
 function bloqueLectura(clave, corte, textos) {
   if (!textos) return '';
   const l = (textos.lecturas || {})[clave];
   const adv = corte.aviso ? null : (textos.advertencias || {})[corte.cod];
   if (!l && !adv) return '';
-  return `${l ? `<p class="solo-papel lectura-grafico"><b>Qué muestra</b>
+  return `${l ? `<p class="lectura-grafico"><b>Qué muestra</b>
       ${c.escapar(l.muestra)}</p>` : ''}
-    ${adv ? `<p class="solo-papel lectura-cuidado"><b>Cuidado</b>
+    ${adv ? `<p class="lectura-cuidado"><b>Cuidado</b>
       ${c.escapar(adv)}</p>` : ''}`;
 }
 

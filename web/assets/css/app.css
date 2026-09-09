@@ -1899,19 +1899,11 @@ svg.chart .trama { pointer-events: none; }
     background: none; border: 0; border-top: .5pt solid #999; border-radius: 0;
   }
 
-  /* Qué muestra y qué cuidado exige. Van entre la tabla y el sello: primero se
-     ve el dato, luego se lee qué cuenta, y al final de dónde sale. El rótulo en
-     versalitas es el mismo recurso del sello, para que se lean como una ficha y
-     no como prosa suelta. */
-  .lectura-grafico, .lectura-cuidado {
-    margin: 6pt 0 0; font-size: 8.5pt; line-height: 1.45; color: #000;
-    padding-left: 8pt; border-left: 1.5pt solid #000;
-  }
-  .lectura-cuidado { border-left-color: #666; color: #333; }
-  .lectura-grafico b, .lectura-cuidado b {
-    display: block; font-size: 7pt; letter-spacing: .08em;
-    text-transform: uppercase; margin-bottom: 1pt;
-  }
+  /* Qué muestra y qué cuidado exige: su versión de papel está en la cola del
+     archivo, no aquí. Las dos clases tienen ahora estilo de PANTALLA —dejaron
+     de ser `solo-papel`—, escrito más abajo, y una consulta de medios no añade
+     especificidad: puesta aquí, la regla de papel perdía por orden y el PDF
+     salía con el interlineado de la pantalla. Buscar «PAPEL, AL FINAL». */
 
   /* Cortes. Un titular al pie de una hoja y su figura en la siguiente es el
      defecto clásico de imprimir una web sin decirle nada al navegador. */
@@ -2115,6 +2107,33 @@ svg.chart .trama { pointer-events: none; }
 .chip-on { background: var(--accion); border-color: var(--accion); color: var(--boton-tinta); }
 .chip-on .chip-n { color: var(--boton-tinta); opacity: .8; }
 
+/* ---- qué muestra cada figura, y qué cuidado exige ----
+   Pie de figura, no nota al margen. Va debajo del gráfico y por encima del
+   sello, en el orden en que se lee: primero el dato, luego qué cuenta, luego
+   de dónde sale.
+
+   Estuvo `solo-papel` hasta que se vio el problema: la ayuda contextual y el
+   glosario sirven a quien ya sospecha que no entiende algo, y la persona que
+   llega a un tablero bibliométrico desde su propia disciplina no siempre lo
+   sospecha. La frase junto a la figura sirve al caso normal.
+
+   El rótulo va en versalitas, el mismo recurso del sello, para que las dos
+   piezas se lean como ficha del gráfico y no como prosa suelta. Se distinguen
+   por el color de la barra: la lectura describe, el cuidado advierte. */
+.lectura-grafico, .lectura-cuidado {
+  margin: var(--e3) 0 0; padding-left: var(--e3);
+  border-left: 2px solid var(--linea-fuerte);
+  font-size: var(--t-s); line-height: 1.55; color: var(--tinta-2);
+}
+.lectura-cuidado { border-left-color: var(--aviso-borde, var(--linea-fuerte)); }
+.lectura-grafico b, .lectura-cuidado b {
+  display: block; font-size: var(--t-xs); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--tinta-3); margin-bottom: 2px;
+}
+/* En una tarjeta bento la figura ya viene con su título propio, así que la
+   lectura se pega al borde inferior de la tarjeta y no a la figura. */
+.bento-card .lectura-grafico { margin-top: var(--e4); }
+
 /* ---- el informe completo en PDF ----
    Sólo aparece si la corrida que construyó el sitio también generó el informe
    (`data/informe.json`). No compite con el botón «Descargar informe» de la
@@ -2294,6 +2313,26 @@ svg.chart .trama { pointer-events: none; }
    filtros a la izquierda, los gráficos y las cifras aprovechan todo el ancho
    de la hoja en vez de quedar encerrados en ~390px frente a un panel vacío. */
 @media print {
+  /* Qué muestra y qué cuidado exige, en papel. Van entre la tabla y el sello:
+     primero se ve el dato, luego se lee qué cuenta, y al final de dónde sale.
+     El rótulo en versalitas es el mismo recurso del sello, para que se lean
+     como una ficha y no como prosa suelta.
+
+     Aquí y no en el bloque de la mitad del archivo: las dos clases tienen
+     estilo de pantalla desde que dejaron de ser `solo-papel`, y ese estilo se
+     escribe después. Sin esta cola, el papel heredaba el cuerpo y el
+     interlineado de la pantalla. */
+  .lectura-grafico, .lectura-cuidado {
+    margin: 6pt 0 0; font-size: 8.5pt; line-height: 1.45; color: #000;
+    padding-left: 8pt; border-left: 1.5pt solid #000;
+  }
+  .lectura-cuidado { border-left-color: #666; color: #333; }
+  .lectura-grafico b, .lectura-cuidado b {
+    display: block; font-size: 7pt; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 1pt; color: #000;
+  }
+  .bento-card .lectura-grafico { margin-top: 6pt; }
+
   /* Las tarjetas de cifra no se parten por la mitad. Medido en el PDF: la
      portada cortaba la tercera fila y la hoja siguiente abría con «Citas por
      publicación · 816 sobre las que tienen métricas» sin el número, que se
