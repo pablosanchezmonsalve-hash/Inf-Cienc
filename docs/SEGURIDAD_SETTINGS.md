@@ -84,8 +84,11 @@ Regla para `main` (branch protection) **o** ruleset equivalente (recomendado).
 - [x] **Repositorio de despliegue separado** creado el 2026-09-08:
   `pablosanchezmonsalve-hash/Inf-Cienc-site` (público, `gh-pages`). Recibe el
   `dist/` del repo de datos vía el workflow `publicar-site-publico.yml`
-  (ensambla desde la capa pública, verifica D-SEC-01/02 y publica con la
-  `DEPLOY_KEY` SSH por-repositorio).
+  (ensambla desde la capa pública, verifica D-SEC-01/02, compone el informe
+  descargable y publica con la `DEPLOY_KEY` SSH por-repositorio).
+  El informe se compone aquí y no se hereda de `deploy.yml` (`D-573`): este
+  despliegue no debe depender de que el otro haya corrido, que es justo lo que
+  el repositorio separado viene a cortar.
 - [x] **Pages activado** en `Inf-Cienc-site` (`gh-pages`, Legacy).
 - [ ] **Privatizar `Inf-Cienc`** (Sección 1) tras verificar el primer push
   real de CI al repositorio de despliegue.

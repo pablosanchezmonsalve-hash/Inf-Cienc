@@ -13630,3 +13630,82 @@ conviene correrlo para que el artefacto vuelva a ser íntegramente generado.
 
 Quedan las dos decisiones de diseño sobre el informe en papel: las cifras
 repetidas en la portada y en cada sección, y las hojas a medio llenar.
+
+## Cierre: el informe descargable, también en el sitio público (2026-09-09)
+
+Al traer `main` a la rama del umbral apareció el flujo `publicar-site-publico.yml`,
+que el punto 4 había fusionado poco antes: publica `dist/` en el repositorio de
+despliegue separado `Inf-Cienc-site`, para que el sitio siga en pie cuando este
+repositorio pase a privado.
+
+Ese flujo ensambla el sitio y lo publica, pero **no componía el informe en PDF**.
+Los dos despliegues salían del mismo `dist/` y sólo uno lo llevaba.
+
+### Por qué no se notaba
+
+Porque el mecanismo que se construyó para esto funcionó. La portada dibuja el
+bloque de descarga sólo si `data/informe.json` trae archivos, y el ensamblado
+escribe ese manifiesto **vacío** (`{"archivos": [], "hojas": 0}`); es
+`informe_pdf.mjs` quien lo reescribe con la lista real. Sin composición, el
+manifiesto se queda vacío y el bloque no aparece.
+
+Así que no había enlace roto ni PDF desactualizado: había una descarga ausente
+sin que nada lo dijera. Es la degradación que se quería, y también la razón de
+que el hueco pudiera durar.
+
+### Por qué se recompone y no se hereda
+
+Traer los PDF como artefacto del otro flujo ataría este despliegue a que aquél
+haya corrido y acertado, que es justo la dependencia que el repositorio separado
+viene a cortar. El informe es un derivado del `dist/` que el propio job acaba de
+ensamblar, así que recomponerlo no puede contradecirlo. Cuesta unos 20 segundos
+sobre un job que duraba 22, más la instalación de Chromium.
+
+`continue-on-error` en los dos pasos, y ésa es la diferencia con `deploy.yml`.
+Allí la instalación de Chromium sostiene además la batería de verificación y
+debe tumbar el despliegue si falla. Aquí el navegador se instala **sólo** para el
+informe, así que un fallo suyo tampoco debe impedir la publicación: el
+manifiesto se queda vacío y el sitio sale sin el bloque de descarga, que es
+exactamente el estado anterior. Dejarlo bloqueante habría cambiado un sitio sin
+descarga por ningún sitio.
+
+### Un segundo hueco, más callado, en el mismo flujo
+
+El flujo público no fijaba Node. El pre-renderizado es un requisito **blando**:
+sin Node, `06_assemble_site.py` no falla, avisa y se degrada a un sitio que exige
+JavaScript. El runner de `ubuntu-latest` trae uno, así que funcionaba por
+casualidad y con la versión que tocara. `deploy.yml` lo fija en 22 y además tiene
+una compuerta que comprueba que el sitio tiene contenido sin JavaScript; el flujo
+público no tenía ni lo uno ni lo otro. Queda fijado en 22, que es lo que la
+composición del informe necesitaba de todos modos.
+
+La compuerta de contenido sin JavaScript sigue faltando en el flujo público.
+Queda anotada como pendiente y no se añadió aquí para no ensanchar el cambio.
+
+### Verificación
+
+Ensamblado y composición corridos en local con los mismos comandos del flujo,
+sobre un `dist/` recién ensamblado: 12 páginas pre-renderizadas, y el informe
+compuesto en 20 segundos. Manifiesto con los 6 archivos y 49 hojas, y los 6 PDF
+en disco, uno por entrada. Etiquetado para lectores de pantalla: 6 de 6.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-573 | El flujo del sitio público compone el informe él mismo, no lo hereda del otro despliegue | Heredarlo ataría este despliegue a que el otro haya corrido y acertado, que es la dependencia que el repositorio separado viene a cortar |
+| D-574 | Node queda fijado en 22 también en el flujo público | El pre-renderizado es un requisito blando: sin Node el sitio se degrada sin fallar. Funcionaba por casualidad y con la versión que trajera el runner |
+
+### Archivos
+
+- `.github/workflows/publicar-site-publico.yml` — Node fijado, Chromium y la
+  composición del informe antes de publicar
+
+### Pendientes
+
+El flujo público no comprueba que el sitio tenga contenido sin JavaScript.
+`deploy.yml` sí. Mientras los dos publiquen el mismo `dist/` la compuerta del
+otro lo cubre de hecho, pero dejará de cubrirlo el día que diverjan.
+
+Sigue en pie lo anterior: `data/processed/meta.json` con una clave añadida a
+mano, y las dos decisiones de diseño sobre el informe en papel.
