@@ -13377,3 +13377,93 @@ en la primera pantalla.
 `make rendimiento` deja de estar pendiente. Quedan las dos decisiones de diseño
 sobre el informe en papel: las cifras repetidas en la portada y en cada sección,
 y las hojas a medio llenar.
+
+---
+
+## Cierre: la explicación de cada figura, también en pantalla (2026-09-09)
+
+El encargo: un mecanismo para que quien lee el sitio —investigadores que llegan
+desde su propia disciplina— entienda a qué se refiere cada gráfico.
+
+El mecanismo ya existía y estaba a medio construir. La primera parte del trabajo
+fue no inventar el segundo.
+
+### Lo que había, y sus dos huecos
+
+`docs/LECTURAS.md` registra una línea «Qué muestra» por gráfico, se serializa a
+`lecturas.json` y una compuerta detiene el build si falta alguna. Junto a ella,
+la advertencia del catálogo («Cuidado») y el sello con fuente, corte, N y
+cobertura. Cinco piezas por figura, bien pensadas.
+
+Dos huecos, los dos encontrados mirando y midiendo:
+
+**1. Todo eso era `solo-papel`.** Sólo lo veía quien descargaba el PDF. El
+argumento original era razonable —en pantalla la ayuda contextual y el glosario
+están a un clic— y la conclusión estaba mal. «A un clic» es la parte que falla:
+quien no entiende un gráfico no siempre sabe que no lo entiende, y menos aún qué
+término buscar. La ayuda escondida sirve a quien ya sospecha. El resultado era
+que el sitio, la superficie que casi todo el mundo usa, era la única donde el
+gráfico no se explicaba.
+
+**2. Dos figuras estaban fuera del registro.** El treemap y el mapa de calor de
+producción se montan aparte, desde `paginas.js`, y la compuerta lee la lista de
+`vista_explorador.js`: no existían para ella. El mapa llevaba su explicación
+escrita a mano en el HTML; el treemap tenía un párrafo de explicación **vacío**
+que nadie rellenaba nunca. La figura más difícil de leer del sitio llevaba en
+producción sin una sola frase que dijera qué mide un rectángulo.
+
+### Lo que se hizo
+
+- **La lectura se ve en pantalla**, como pie de figura, con el mismo texto que
+  el papel y distinta presentación. Un origen, dos medios.
+- **Las dos figuras bento entran al registro** y sus notas se borran del HTML.
+- **La compuerta las cubre**, leyendo el marcado de las páginas
+  (`id="…-contenedor"`) en vez de una lista escrita a mano: cualquier figura
+  bento nueva entra sola.
+
+Cobertura comprobada en el navegador: 4 de 4 figuras en la portada, 7 de 7 en
+producción, 5 de 5 en impacto, 5 de 5 en colaboración, 3 de 3 en temáticas.
+Cero errores de consola.
+
+### Dos trampas conocidas que volvieron a morder
+
+**El repintado que se salta.** Las dos llamadas nuevas estaban dentro de
+`pintar()`, y en una página pre-renderizada sin recorte el repintado no ocurre:
+las lecturas bento no aparecían hasta que alguien tocaba un filtro. Es la
+tercera vez que esta condición muerde. Ahora van fuera, que además es donde
+corresponde: el texto no depende del recorte.
+
+**La cascada del archivo de estilo.** Al dejar de ser `solo-papel`, las dos
+clases necesitaban estilo de pantalla, y escribirlo donde tocaba lo puso
+DESPUÉS del bloque `@media print` de la mitad del archivo. Una consulta de
+medios no añade especificidad: el papel empezó a heredar el cuerpo y el
+interlineado de la pantalla. La regla de papel se movió a la cola del archivo,
+que existe para esto y ya lo explica en su cabecera.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-564 | «Qué muestra» y «Cuidado» se ven en pantalla, no sólo en papel | La ayuda a un clic sirve a quien ya sospecha que no entiende algo; quien llega a un tablero bibliométrico desde otra disciplina no siempre lo sospecha. El sitio era la única superficie donde la figura no se explicaba |
+| D-565 | El registro de lecturas cubre TODA figura, incluidas las que no son cortes | Las dos figuras bento tenían mecanismo propio: una nota a mano y un párrafo vacío. Dos mecanismos para lo mismo es como divergen, y uno de los dos no pasaba por ninguna compuerta |
+| D-566 | La compuerta descubre las figuras bento leyendo el marcado, no una lista | Una lista escrita en la compuerta se separa del sitio en cuanto alguien añade una figura. El marcado es donde la figura de verdad está declarada |
+
+### Archivos
+
+- `docs/LECTURAS.md` — dos lecturas nuevas y el alcance corregido
+- `src/build/04_glossary.py` — la compuerta, ampliada a las figuras bento
+- `web/assets/js/vista_explorador.js` — la lectura deja de ser `solo-papel`
+- `web/assets/js/paginas.js` — `ponerLectura()`, fuera del repintado
+- `web/produccion.html` — las notas a mano, retiradas
+- `web/assets/css/app.css` — pie de figura en pantalla, y el papel a la cola
+- `docs/UX_UI.md`
+
+### Pendientes
+
+Las dos decisiones de diseño sobre el informe en papel siguen abiertas: las
+cifras repetidas en la portada y en cada sección, y las hojas a medio llenar.
+
+**Ambigüedad abierta:** las seis cifras grandes del tablero llevan su
+denominador pegado y cuatro de las seis tienen botón de glosario, pero no una
+línea de «qué muestra» como las figuras. No se tocó: puede que la base y el
+glosario basten, y decidirlo es sobre el tablero, no sobre este mecanismo.

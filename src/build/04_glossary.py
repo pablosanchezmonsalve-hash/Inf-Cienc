@@ -79,7 +79,7 @@ def parse_lecturas(text: str) -> dict[str, dict]:
 
 
 def verificar_lecturas(lecturas: dict) -> None:
-    """Todo gráfico del informe tiene su lectura, y ninguna sobra.
+    """Toda figura del sitio tiene su lectura, y ninguna sobra.
 
     POR QUÉ ES COMPUERTA Y NO AVISO
         La lectura existe para el PAPEL, donde no hay ayuda contextual que
@@ -95,7 +95,24 @@ def verificar_lecturas(lecturas: dict) -> None:
     # `cod: 'I-04'` y, para el corte sin código propio, `campo: 'escuela'`.
     codigos = set(re.findall(r"cod:\s*'([^']+)'", fuente))
     sin_cod = {c for c in re.findall(r"\{\s*campo:\s*'([^']+)'", fuente)}
-    esperados = codigos | sin_cod
+
+    # Las figuras BENTO —el treemap y el mapa de calor— no son cortes del
+    # explorador: se montan aparte, desde `paginas.js`, y por eso quedaban
+    # fuera de esta comprobación. Fuera de ella, el treemap llegó a producción
+    # con un párrafo de explicación VACÍO que nadie rellenaba: la figura más
+    # difícil de leer del sitio, sin una frase que dijera qué mide un
+    # rectángulo, y sin nada que lo denunciara.
+    #
+    # Se leen de donde de verdad están declaradas, el marcado de las páginas,
+    # y no de una lista escrita aquí: `id="treemap-contenedor"` exige la
+    # lectura `treemap`. Cualquier figura bento que se añada mañana entra sola
+    # en la compuerta.
+    bento = set()
+    for pagina in sorted((b.ROOT / "web").glob("*.html")):
+        bento |= set(re.findall(r'id="([a-z0-9-]+)-contenedor"',
+                                pagina.read_text(encoding="utf-8")))
+
+    esperados = codigos | sin_cod | bento
 
     faltan = sorted(esperados - set(lecturas))
     sobran = sorted(set(lecturas) - esperados)
