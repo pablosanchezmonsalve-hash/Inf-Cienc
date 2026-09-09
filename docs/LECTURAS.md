@@ -2,15 +2,27 @@
 
 **Capa:** pública · **Fase:** 3
 
-Fuente de la línea **«Qué muestra»** que acompaña a cada gráfico en el informe
-descargado. Se serializa a `lecturas.json` en el build (`src/build/04_glossary.py`),
-igual que el glosario y los paneles de eje.
+Fuente de la línea **«Qué muestra»** que acompaña a cada figura del sitio, en
+pantalla y en el informe descargado. Se serializa a `lecturas.json` en el build
+(`src/build/04_glossary.py`), igual que el glosario y los paneles de eje.
 
-**Por qué existe.** En pantalla, quien no entiende un gráfico tiene la ayuda
-contextual, el glosario y el panel de la sección a un clic. En el PDF no tiene
-nada: la ayuda es un panel que aparece al pasar el puntero y no se imprime.
-Un informe que se archiva y se cita necesita decir, junto a la figura, **qué
-cuenta cada barra**.
+**Por qué existe.** Quien mira un gráfico bibliométrico desde su propia
+disciplina no siempre sabe qué cuenta una barra, y muchas veces ni siquiera
+sabe que no lo sabe. La ayuda contextual y el glosario sirven a quien ya
+sospecha; la frase junto a la figura sirve a quien la ve por primera vez.
+
+Nació sólo para el papel, con el argumento de que en pantalla la ayuda está a
+un clic. El argumento era cierto y la conclusión estaba mal: el resultado fue
+que el sitio, la superficie que casi todo el mundo usa, era la única donde el
+gráfico no se explicaba. Desde el 2026-09-09 se ve en los dos medios, con el
+mismo texto y distinta presentación —pie de figura en pantalla, bloque compacto
+en papel—.
+
+**Alcance: TODA figura.** Los dieciocho cortes del explorador y las dos figuras
+bento de producción, el treemap y el mapa de calor. Estas dos estaban fuera:
+el mapa llevaba su explicación escrita a mano en el HTML y el treemap tenía un
+párrafo vacío que nadie rellenaba. La compuerta las cubre leyendo el marcado de
+las páginas (`id="…-contenedor"`), así que una figura bento nueva entra sola.
 
 **Qué es y qué no es cada línea.** La lectura describe la **figura**: qué
 representa una barra, un punto o un segmento, y sobre qué se cuenta. No es la
@@ -168,3 +180,22 @@ y cuenta sus publicaciones. Se dibujan las veinte con más.
 **Muestra:** Cada barra cuenta las publicaciones que la fuente asocia a ese
 Objetivo de Desarrollo Sostenible. Es un recuento, no un reparto del total: la
 mayoría de las publicaciones no tiene ninguno asignado.
+
+---
+
+## treemap — Producción por facultad y escuela
+
+**Muestra:** Cada rectángulo es una unidad, y su área es cuántos pares
+autor×publicación le corresponden: una publicación firmada por dos personas de
+la misma facultad cuenta dos veces aquí. Las barras de «Unidad académica»
+cuentan publicaciones distintas, así que sus totales no coinciden con éste y
+ninguno de los dos está mal. Pulsando una facultad se abren sus escuelas.
+
+---
+
+## heatmap — Temáticas ASJC más frecuentes por año
+
+**Muestra:** Cada celda cuenta las publicaciones de una temática en un año. Se
+dibujan las ocho temáticas con más publicaciones del período, no todas. La
+intensidad del color es la raíz cuadrada del recuento, para que un año con un
+pico no aplane el resto del mapa: compare celdas por su cifra, no por su tono.

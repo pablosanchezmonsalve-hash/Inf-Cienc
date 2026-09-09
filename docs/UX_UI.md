@@ -771,17 +771,37 @@ y las cinco caben en la misma hoja:
 | 4 | **Qué muestra** y **Cuidado** | `docs/LECTURAS.md` y la advertencia del catálogo |
 | 5 | El sello | fuente, fecha de corte, N y cobertura **del recorte** |
 
-**Qué muestra** es la pieza que faltaba. En pantalla, quien no entiende una
-figura tiene la ayuda contextual, el glosario y el panel de la sección a un
-clic; en el PDF no tiene nada, porque la ayuda es un panel que aparece al pasar
-el puntero. La línea dice qué cuenta cada barra, cada punto o cada segmento, y
-sobre qué. Vive en `docs/LECTURAS.md`, se serializa a `lecturas.json` y **el
-build se detiene** si un gráfico se queda sin ella o si sobra una que ningún
-gráfico usa.
+**Qué muestra** es la pieza que faltaba, y va en los dos medios. La línea dice
+qué cuenta cada barra, cada punto o cada segmento, y sobre qué. Vive en
+`docs/LECTURAS.md`, se serializa a `lecturas.json` y **el build se detiene** si
+una figura se queda sin ella o si sobra una que ninguna figura usa.
+
+Nació `solo-papel`, con este argumento: en pantalla la ayuda contextual, el
+glosario y el panel de la sección están a un clic, y en el PDF no hay nada. El
+argumento era cierto y la conclusión estaba mal. «A un clic» es la parte que
+falla: quien no entiende un gráfico no siempre sabe que no lo entiende, y menos
+aún qué término buscar. La ayuda escondida sirve a quien ya sospecha; la frase
+junto a la figura sirve a quien la mira por primera vez, que es el caso normal
+de alguien que llega a un tablero bibliométrico desde su propia disciplina. El
+resultado práctico era que el sitio, la superficie que casi todo el mundo usa,
+era la única donde el gráfico no se explicaba.
+
+Un texto, dos presentaciones: pie de figura en pantalla, bloque compacto en
+papel. La hoja de estilo resuelve la diferencia y `docs/LECTURAS.md` sigue
+siendo el único sitio donde se escribe.
+
+**La compuerta cubre TODA figura, no sólo los cortes.** El treemap y el mapa de
+calor de producción se montan aparte, desde `paginas.js`, y quedaban fuera: el
+mapa llevaba su explicación escrita a mano en el HTML y el treemap tenía un
+párrafo de explicación **vacío** que nadie rellenaba —la figura más difícil de
+leer del sitio, sin una frase que dijera qué mide un rectángulo, y sin nada que
+lo denunciara—. Ahora la compuerta lee las figuras bento del marcado de las
+páginas (`id="…-contenedor"`) en vez de una lista escrita a mano, así que
+cualquiera que se añada entra sola.
 
 **Cuidado** es la advertencia que el catálogo ya publica para ese indicador, y
-sólo se imprime si el corte no trae un aviso propio: dos textos sobre lo mismo
-se leen en papel como dos advertencias distintas.
+sólo se muestra si el corte no trae un aviso propio: dos textos sobre lo mismo
+se leen como dos advertencias distintas.
 
 **Que quepan no fue gratis.** Con el interlineado de pantalla, las 21 filas de
 «Áreas temáticas» ocupaban una hoja entera y empujaban fuera de la página la

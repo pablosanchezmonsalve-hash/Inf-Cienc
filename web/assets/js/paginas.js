@@ -43,6 +43,19 @@ async function portada() {
 
     Por la misma razón compara la fecha de build del manifiesto con la del
     sitio y lo dice cuando no coinciden, en vez de callarlo. */
+/** Escribe la lectura de una figura que no vive en un `.corte`.
+
+    Las figuras bento se montan desde `paginas.js` y no pasan por
+    `vista_explorador.js`, así que no reciben su `bloqueLectura()`. El texto es
+    el mismo y el registro también; lo único distinto es quién lo coloca. */
+function ponerLectura(id, textos, clave) {
+  const el = document.getElementById(id);
+  const l = (textos?.lecturas || {})[clave];
+  if (!el || !l) return;
+  el.innerHTML = `<b>Qué muestra</b> ${c.escapar(l.muestra)}`;
+  el.hidden = false;
+}
+
 async function montarDescargaInforme() {
   const caja = document.getElementById('informe-pdf');
   if (!caja) return;
@@ -308,6 +321,7 @@ async function montarExplorador(claveSeccion) {
         construirArbol(X.recorte(publicaciones, sel), jerarquia, metaBase.institucion_corta));
     }
 
+
     zonas.cifras.querySelectorAll('[data-valor]').forEach(e => {
       if (antes.size && antes.get(e.dataset.valor) !== e.textContent) e.classList.add('cambia');
     });
@@ -390,6 +404,22 @@ async function montarExplorador(claveSeccion) {
      restringe el conjunto—, pero el HTML pre-renderizado trae los gráficos de
      la sección entera, así que sin este repintado la página enseñaría los
      dieciocho mientras la hoja declara que son dos. */
+  /* La lectura de las dos figuras bento sale del MISMO registro que la de los
+     dieciocho cortes, `docs/LECTURAS.md`. Antes no: el mapa de calor llevaba su
+     explicación escrita a mano en el HTML y el treemap tenía un párrafo vacío
+     que nadie rellenaba nunca —la figura más difícil de leer del sitio, sin una
+     frase que dijera qué mide un rectángulo—. Dos mecanismos para lo mismo es
+     como divergen: uno pasaba por la compuerta que exige explicación y el otro
+     no existía para ella.
+
+     Va FUERA de `pintar()`, y no por elegancia: el repintado se salta en una
+     página pre-renderizada sin recorte, así que ahí dentro las dos lecturas no
+     aparecían hasta que alguien tocaba un filtro. Medido, no leído. Y además el
+     texto no depende del recorte: escribirlo en cada repintado sería reescribir
+     lo mismo. */
+  ponerLectura('treemap-lectura', textos, 'treemap');
+  ponerLectura('heatmap-lectura', textos, 'heatmap');
+
   if (!yaPintado(zonas.cifras) || X.hayRecorte(sel) || X.graficosDe(sel)) pintar();
 }
 
