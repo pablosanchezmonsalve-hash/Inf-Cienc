@@ -9,19 +9,40 @@ Lectura obligatoria antes: `docs/LAYERS.md` (D-SEC-01/D-SEC-02).
 
 ---
 
+## Estado de seguridad (registro vivo)
+
+Verificaciones hechas desde el clon / API pública **2026-09-08**, tras la
+purga de historial:
+
+| Punto | Estado |
+|---|---|
+| 1. Visibilidad del repositorio | ⬜ **Público** (`private: False` verificado por API) |
+| 2. Purga del historial (`data/raw/` + `internal/`) | ✅ Ejecutada y verificada (0 commits en las 15 ramas; `internal/README.md` re-creado en `cf573c0`) |
+| 3. Protección de rama `/` rulesets | ⬜ Sin protección: API devuelve `rulesets: 0` y sin branch protection en `main` |
+| 3. Rotación de secretos ORCID/Scopus | ⬜ Pendiente (repo fue público) |
+| 4. Repositorio de despliegue separado | ⬜ Pendiente (decisión de gobernanza) |
+
+Ojo: aunque el repo siga **público**, ya **no contiene datos sensibles en
+ninguna rama** tras la purga. Igual debe pasar a privado por política
+(D-SEC-01) y porque el historial previo a la purga se descargó antes de
+cerrarlo.
+
+---
+
 ## 1. Visibilidad y riesgo (bloquea la exposición)
 
 - [ ] **Settings → Danger Zone → Change visibility → Private**.
   Cierra el acceso al historial expuesto. En cuenta gratuita esto **apaga
   GitHub Pages**; decida antes el repositorio de despliegue separado
-  (Sección 6).
+  (Sección 5).
 - [ ] **Settings → Danger Zone → Transfer ownership**: verifique que el
   repositorio pertenece a la organización de la institución y no a una cuenta
   personal, si aplica.
 
 ## 2. Protección de rama (`Settings → Branches`) o Rulesets (`Settings → Rules`)
 
-Regla para `main` (branch protection) **o** ruleset equivalente (recomendado):
+Regla para `main` (branch protection) **o** ruleset equivalente (recomendado).
+**Estado actual: sin proteger** (verificado vía API 2026-09-08).
 
 - [ ] **Require a pull request before merging**: mínimo 1 revisor, sin
   auto-aprobación.
@@ -33,8 +54,7 @@ Regla para `main` (branch protection) **o** ruleset equivalente (recomendado):
 - [ ] **Require signed commits** si la institución lo exige.
 - [ ] **Restrict who can push** a escritura mínima.
 - [ ] Extender la política a una regla **global** (o ruleset en todas las
-  ramas) que **bloquee force-push y borrado** mientras las 10 ramas con
-  `data/raw/`/`internal/` no se purguen o eliminen.
+  ramas) que **bloquee force-push y borrado**.
 
 ## 3. Acceso y autenticación
 
@@ -45,12 +65,17 @@ Regla para `main` (branch protection) **o** ruleset equivalente (recomendado):
   write` solo si hace falta; por defecto `Read repository contents`.
 - [ ] Los **PRs de forks** no deben tener acceso a secretos (opción por
   defecto correcta; verificar).
+- [ ] **Secretos referenciados** (workflows): `ORCID_CLIENT_ID`,
+  `ORCID_CLIENT_SECRET`. No se detectaron valores inline en el historial
+  (solo placeholders).
 
 ## 4. Secretos y variables (`Settings → Secrets and variables → Actions`)
 
-- [ ] Rotar `ORCID_CLIENT_ID` y `ORCID_CLIENT_SECRET` (repo fue público).
+- [ ] Rotar `ORCID_CLIENT_ID` y `ORCID_CLIENT_SECRET` (repo fue público):
+  regenerar en el panel de desarrollador ORCID y actualizar en Settings →
+  Secrets and variables → Actions.
 - [ ] Rotar cualquier API key de Scopus/Elsevier que haya estado versionada
-  en algún commit.
+  en algún commit (verificación Sección 7).
 - [ ] Verificar que no haya secretos en el historial: ver Sección 7 de este
   documento (grep).
 
@@ -63,18 +88,18 @@ Regla para `main` (branch protection) **o** ruleset equivalente (recomendado):
   (`Settings → Pages → GitHub Actions`).
 - [ ] Configurar **ADN / IP allowlist / SSO** según política institucional.
 
-## 6. Tras ejecutar la purga
+## 6. Tras la purga del historial (registro de lo ejecutado)
 
-Orden recomendado (ver `docs/SEGURIDAD_PURGA.md`): backup → privado → purga
-→ force-push → proteger rama → rotar secretos.
+La **purga se ejecutó el 2026-09-08** con `git filter-repo` (1.5-2.6 s):
+backup mirror en `C:\Users\Pablo\Documents\Inf-Cienc-backup-mirror.git`,
+purga de `data/raw/` e `internal/` (`--invert-paths`) en las 15 ramas,
+force-push `--all`, y re-creación de `internal/README.md` (commit `cf573c0`).
 
-- [ ] Ejecutar `scripts/purgar-historial.ps1` (automatiza backup, purga,
-  force-push y verificación).
-- [ ] Decidir si las 10 ramas con datos sensibles se **purgan** o se
-  **eliminan** (borrarlas es más simple si son abandonadas).
-- [ ] Re-crear `internal/README.md` en `main` (la purga lo elimina) y
-  confirmar `.gitignore` (`internal/*` con `!internal/README.md`).
-- [ ] Verificar: `git log --all -- data/raw internal/` → sin resultados.
+- [x] Backup mirror creado antes de la purga (no destructivo).
+- [x] 15 ramas remotas reescritas y force-push (`forced update`).
+- [x] `data/raw/` y `internal/` ausentes del historial (0 commits).
+- [x] `internal/README.md` re-creado (único archivo versionado de `internal/`).
+- [x] `.gitignore` vigente: `internal/*` con `!internal/README.md`.
 - [ ] Re-clonar clientes y runners (los hashes cambian tras la purga).
 
 ## 7. Verificación de secretos en el historial (local, sin credenciales)
@@ -88,9 +113,11 @@ git log --all --oneline -S "api.elsevier.com" -- .
 git ls-files | Select-String -Pattern '(credential|secret|token|\.pem|\.key$)'
 ```
 
-Para el historial completo (no solo el árbol): si algo aparece, entra en el
-alcance de la purga o necesita rotación inmediata.
+Ejecutado el 2026-09-08: **sin valores reales de secretos** (solo
+placeholders `xxxxxxxx-...`); los scripts referencian secretos vía entorno
+(`${{ secrets.* }}`, `$env:`), patrón D-253 correcto.
 
 ---
 
-_Última revisión: 2026-09-08. Estado de visibilidad en esa fecha: público._
+_Última revisión: 2026-09-08 (punto 2 ejecutado; puntos 1, 3 y 4 pendientes
+de la sesión del propietario)._
