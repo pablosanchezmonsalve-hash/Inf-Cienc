@@ -790,7 +790,17 @@ Un texto, dos presentaciones: pie de figura en pantalla, bloque compacto en
 papel. La hoja de estilo resuelve la diferencia y `docs/LECTURAS.md` sigue
 siendo el único sitio donde se escribe.
 
-**La compuerta cubre TODA figura, no sólo los cortes.** El treemap y el mapa de
+**Las seis cifras del tablero también la llevan.** La ficha ya declaraba su
+denominador —sobre cuántas publicaciones está medida— y cuatro de las seis
+tenían botón de glosario. Faltaba lo otro: qué ES la cifra. «Citas por
+publicación 4,82» es el caso que lo justifica: sin una frase al lado, un
+promedio que unas pocas publicaciones muy citadas levantan para todas se lee
+como la publicación típica. La línea va bajo el denominador, separada por un
+filete, en cuerpo pequeño: acompaña a la cifra, no compite con ella. Medido
+después: el LCP de la portada no se movió y en papel las seis fichas siguen
+cabiendo en una hoja.
+
+**La compuerta cubre TODA figura y TODA cifra, no sólo los cortes.** El treemap y el mapa de
 calor de producción se montan aparte, desde `paginas.js`, y quedaban fuera: el
 mapa llevaba su explicación escrita a mano en el HTML y el treemap tenía un
 párrafo de explicación **vacío** que nadie rellenaba —la figura más difícil de

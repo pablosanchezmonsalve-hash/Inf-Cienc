@@ -18,11 +18,21 @@ gráfico no se explicaba. Desde el 2026-09-09 se ve en los dos medios, con el
 mismo texto y distinta presentación —pie de figura en pantalla, bloque compacto
 en papel—.
 
-**Alcance: TODA figura.** Los dieciocho cortes del explorador y las dos figuras
-bento de producción, el treemap y el mapa de calor. Estas dos estaban fuera:
-el mapa llevaba su explicación escrita a mano en el HTML y el treemap tenía un
-párrafo vacío que nadie rellenaba. La compuerta las cubre leyendo el marcado de
-las páginas (`id="…-contenedor"`), así que una figura bento nueva entra sola.
+**Alcance: TODA figura y TODA cifra.** Veintiséis lecturas: los dieciocho cortes
+del explorador, las dos figuras bento de producción —el treemap y el mapa de
+calor— y las seis cifras grandes del tablero.
+
+Las tres familias entraron por caminos distintos y la compuerta las descubre
+cada una donde de verdad está declarada, nunca en una lista escrita en la
+compuerta: los cortes en la tabla `SECCIONES`, las figuras bento en el marcado
+de las páginas (`id="…-contenedor"`) y las cifras en la tabla `FICHAS`. Una
+figura o una cifra nueva entra sola.
+
+**En una cifra, la lectura no es el denominador.** La ficha ya dice sobre
+cuántas publicaciones está medida; la lectura dice qué es la cifra. «Citas por
+publicación 4,82» es el caso que lo justifica: sin una frase al lado, un
+promedio que unas pocas publicaciones muy citadas levantan para todas se lee
+como la publicación típica.
 
 **Qué es y qué no es cada línea.** La lectura describe la **figura**: qué
 representa una barra, un punto o un segmento, y sobre qué se cuenta. No es la
@@ -199,3 +209,52 @@ ninguno de los dos está mal. Pulsando una facultad se abren sus escuelas.
 dibujan las ocho temáticas con más publicaciones del período, no todas. La
 intensidad del color es la raíz cuadrada del recuento, para que un año con un
 pico no aplane el resto del mapa: compare celdas por su cifra, no por su tono.
+
+---
+
+## publicaciones — Publicaciones
+
+**Muestra:** Cuántas publicaciones distintas caen en el recorte. Una publicación
+cuenta una sola vez aunque la firmen varias personas de la institución.
+
+---
+
+## citas — Citas recibidas
+
+**Muestra:** El total de citas que han recibido esas publicaciones hasta la
+fecha de corte que declara el pie. Es una suma acumulada, así que lo publicado
+antes lleva más tiempo reuniéndolas.
+
+---
+
+## citas_por_pub — Citas por publicación
+
+**Muestra:** Las citas totales divididas por las publicaciones que tienen
+métricas. Es un promedio: unas pocas publicaciones muy citadas lo levantan para
+todas, y no describe a la publicación típica.
+
+---
+
+## fwci_mediano — FWCI mediano
+
+**Muestra:** El FWCI compara las citas de cada publicación con las esperadas
+para su campo, su año y su tipo, y 1,00 es el promedio mundial. Se muestra la
+mediana del recorte y no el promedio, porque el promedio de los FWCI de un
+conjunto no es el FWCI del conjunto.
+
+---
+
+## internacional — Colaboración internacional
+
+**Muestra:** El porcentaje de publicaciones firmadas con al menos una
+institución de otro país, sobre las que declaran país. Mide con quién se
+publica, no la calidad de lo publicado.
+
+---
+
+## autores — Autores UFT
+
+**Muestra:** Cuántas firmas distintas de la institución aparecen en el recorte.
+Son formas de firma ya consolidadas por revisión humana, no necesariamente
+personas distintas: una persona que firma de dos maneras sin consolidar cuenta
+dos veces.
