@@ -41,6 +41,16 @@ jobs:
           python-version: '3.11'
           cache: pip
 
+      # Node lo necesitan dos cosas: el pre-renderizado que ejecuta los
+      # constructores de marcado, y la composición del informe descargable.
+      # Para el primero es un requisito BLANDO —sin Node el ensamblado no falla,
+      # se degrada a un sitio que exige JavaScript— y en CI nadie lee los
+      # avisos, así que el runner traía uno cualquiera. Se fija la misma versión
+      # que en deploy.yml para que los dos despliegues produzcan el mismo sitio.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
@@ -72,6 +82,39 @@ jobs:
           test ! -d dist/internal
           test ! -d dist/data/raw
           echo "Capa interna ausente de dist/ — verificado"
+
+      # El informe completo en PDF, dentro del sitio que se va a publicar.
+      #
+      # POR QUÉ ESTÁ AQUÍ Y NO SÓLO EN deploy.yml
+      #   Los dos flujos publican el mismo `dist/` en dos sitios distintos, y
+      #   sólo uno lo componía. El resultado no era un enlace roto —la portada
+      #   lee `data/informe.json` y sin manifiesto no dibuja el bloque— pero el
+      #   sitio público quedaba sin descarga y nada lo decía. Este repositorio
+      #   va a pasar a privado y éste será EL sitio: el informe tiene que salir
+      #   de aquí, no del despliegue que va a dejar de ser el visible.
+      #
+      # POR QUÉ SE RECOMPONE Y NO SE HEREDA
+      #   Es un derivado del `dist/` que este mismo job acaba de ensamblar, así
+      #   que no puede contradecirlo. Traerlo como artefacto del otro flujo
+      #   ataría este despliegue a que aquél haya corrido y acertado, que es
+      #   justo la dependencia que el repositorio separado viene a cortar.
+      #
+      # POR QUÉ NO PUEDE TUMBAR EL DESPLIEGUE
+      #   `continue-on-error` en LOS DOS pasos. Aquí el navegador se instala
+      #   sólo para el informe, así que un fallo suyo tampoco debe impedir la
+      #   publicación: sin él la composición falla, el manifiesto se queda
+      #   vacío y el sitio sale sin el bloque de descarga, como hasta ahora.
+      #   (En `deploy.yml` esa instalación SÍ debe tumbar el despliegue, porque
+      #   allí sostiene además la batería de verificación.)
+      - name: Instalar Playwright y Chromium
+        continue-on-error: true
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Componer el informe descargable
+        continue-on-error: true
+        run: node src/build/informe_pdf.mjs dist dist/informe/informe-cienciometrico.pdf
 
       - name: Publicar en el repositorio de despliegue Inf-Cienc-site
         uses: peaceiris/actions-gh-pages@v4
