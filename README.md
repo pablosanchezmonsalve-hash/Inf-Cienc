@@ -147,6 +147,7 @@ comprimidos— lo cachea el navegador entre páginas.
 | `docs/UX_UI.md` | Navegación, KPIs, módulos, filtros, estados y el informe descargable |
 | `docs/LECTURAS.md` | Qué muestra cada gráfico del informe, una lectura por indicador |
 | `docs/INFORME_POR_INVESTIGADOR.md` | Informe recortado a una persona: a quién se ofrece y con qué salvaguardas |
+| `docs/UMBRAL_POR_UNIDAD.md` | Propuesta de umbral de interpretabilidad para el informe de una unidad |
 | `docs/LAYERS.md` | Qué es público y qué es interno |
 | `docs/AUTHOR_PROFILE.md` | Estructura de la ficha pública de autor |
 | `docs/GLOSSARY.md` | Glosario y ayuda contextual |
