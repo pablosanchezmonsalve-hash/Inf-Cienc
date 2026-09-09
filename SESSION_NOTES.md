@@ -13540,3 +13540,93 @@ Quedan las dos decisiones de diseño sobre el informe en papel: las cifras
 repetidas en la portada y en cada sección, y las hojas a medio llenar. Ninguna
 ambigüedad abierta de este mecanismo: las veintiséis figuras y cifras del sitio
 están cubiertas.
+
+---
+
+## Cierre: umbral de interpretabilidad por unidad (2026-09-09)
+
+Decidido por el responsable sobre la propuesta medida: **20 publicaciones, y
+alcanza también a las escuelas.**
+
+### Lo implementado
+
+- **El umbral en `config/indicators.yml`**, con nombre propio
+  (`n_minimo_interpretable_unidad`) y su fundamento escrito al lado. Viaja en
+  `meta.json`, junto a la otra regla transversal que el explorador ya consume.
+- **La banda declara la sensibilidad medida**, no una etiqueta: cuántas
+  publicaciones sostienen el indicador y cuánto lo mueve una. El umbral decide
+  cuándo aparece; qué dice lo fija la aritmética.
+- **Alcanza al impacto, no al informe entero.** Una segunda línea lo acota:
+  «Esto califica los indicadores normalizados, no el recuento de lo publicado».
+- **Sin umbral no hay banda.** Si `meta.json` no trae la clave, no se dibuja
+  nada. Escribir un valor por omisión en el guion sería una segunda definición
+  de la misma regla.
+
+### Las escuelas salieron gratis, y por una razón
+
+No hay dimensión `escuela`: el corte por escuela es `P-07` visto un nivel más
+abajo, derivado de la jerarquía, y facultades y escuelas son valores del mismo
+campo `unidades`. Así que «alcanzar también a las escuelas» no costó código.
+Tres de ellas están por debajo del umbral.
+
+### Dos correcciones sobre la propia propuesta
+
+**`100/n` no era la sensibilidad, y la propuesta lo decía mal.** Al quitar una
+publicación cambia también el denominador, así que el jackknife da
+`100/(base−1)`. Con 17 publicaciones son 6,25 puntos y no 5,9. Se vio al
+comparar la banda contra la tabla del documento: la implementación y la
+medición discrepaban, y la equivocada era la fórmula que yo había escrito. El
+documento quedó corregido con la forma cerrada.
+
+**Los ceros necesitaban otra frase.** Cuando ninguna publicación está en el top
+10 %, el jackknife da cero y ese cero engaña: no es estabilidad, es que no hay
+nada que quitar. Ahí la banda dice lo que de verdad pasaría —«una sola que
+entrara llevaría la cifra a X %»—, que es lo contrario de tranquilizar.
+
+### Una prueba que no probaba lo que creía
+
+El caso «dos unidades elegidas no llevan banda» pasaba con la implementación
+rota y con la buena: la URL de la prueba usaba `unidad=A&unidad=B`, y el sitio
+separa los valores múltiples con `|`. `q.get()` devolvía sólo el primero, así
+que la prueba montaba un recorte de UNA unidad y la guarda nunca se ejercitaba.
+Corregida a la sintaxis real.
+
+### Verificación
+
+Siete comprobaciones de punta a punta: Medicina y Salud (382) y Ingeniería (46)
+sin banda; Economía y Negocios (17) y la Escuela de Nutrición (12) con la suya,
+cada una con su tamaño y su sensibilidad; dos unidades a la vez sin banda; y un
+filtro de año sobre una facultad grande que no la convierte en muestra reducida.
+Cero errores de consola.
+
+Caso nuevo en la compuerta de impresión, con la unidad tomada del corpus y no
+escrita en la compuerta: la mayor de las que están por debajo, que es la que
+peor se notaría si la banda dejara de salir. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-569 | El umbral de interpretabilidad de una unidad es 20 publicaciones, y alcanza a facultades y escuelas | Medido: con 17 una sola publicación vale 6,3 puntos de un indicador cuyo valor de referencia es 10. La distribución tiene un hueco entre 17 y 46, así que 20, 25 y 30 marcan las mismas diez unidades y la elección no se juega en el filo |
+| D-570 | La banda declara la sensibilidad medida, no una etiqueta | El umbral es un juicio; `100/(base−1)` no lo es. Si mañana se discute el 20, la cifra que el lector ve sigue siendo correcta |
+| D-571 | La banda califica los indicadores normalizados, no el informe entero | Una facultad con seis publicaciones publicó seis: la sección de producción es válida entera. Apagar de más también engaña |
+| D-572 | Sin umbral en `meta.json` no hay banda | Un valor por omisión en el guion sería una segunda definición de la misma regla, y las dos divergirían |
+
+### Archivos
+
+- `config/indicators.yml`, `src/build/common_build.py` — el umbral y su viaje
+- `data/processed/meta.json` — la clave, añadida a mano con el valor que el
+  generador ahora emite, porque el build completo necesita `data/interim/`
+- `web/assets/js/explorador.js` — `unidadDelRecorte`, `baseDeUnidad`, `vaivenTop10`
+- `web/assets/js/vista_explorador.js` — `salvaguardasUnidad`
+- `src/verify/impresion.mjs` — el caso nuevo
+- `docs/UMBRAL_POR_UNIDAD.md` — de propuesta a decidido, con la fórmula corregida
+
+### Pendientes
+
+`data/processed/meta.json` lleva una clave añadida a mano. El próximo build
+completo la reescribe con el mismo valor —sale de la misma configuración— pero
+conviene correrlo para que el artefacto vuelva a ser íntegramente generado.
+
+Quedan las dos decisiones de diseño sobre el informe en papel: las cifras
+repetidas en la portada y en cada sección, y las hojas a medio llenar.

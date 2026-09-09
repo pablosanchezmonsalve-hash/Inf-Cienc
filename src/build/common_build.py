@@ -517,6 +517,12 @@ def build_meta() -> dict:
         # para una misma regla es la forma de que digan cosas distintas.
         "cobertura_minima_sin_advertencia":
             INDICATORS["reglas_transversales"]["cobertura_minima_sin_advertencia"],
+        # Umbral por debajo del cual el informe recortado a una unidad declara
+        # que sus indicadores de impacto descansan sobre pocas publicaciones.
+        # Viaja aquí y no en authors.json porque no es una regla sobre autores;
+        # el del explorador y el del build tienen que ser el mismo número.
+        "n_minimo_interpretable_unidad":
+            INDICATORS["reglas_transversales"]["n_minimo_interpretable_unidad"],
         "advertencia_global": (
             "Los indicadores describen la producción indexada en Scopus, con las "
             "métricas normalizadas de SciVal. La cobertura de la base no es "

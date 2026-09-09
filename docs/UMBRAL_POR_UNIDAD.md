@@ -1,6 +1,6 @@
 # Umbral de interpretabilidad para el informe de una unidad
 
-**Capa:** pública · **Fase:** 3 · **Estado:** **propuesta, pendiente de decisión** (2026-09-09)
+**Capa:** pública · **Fase:** 3 · **Estado:** **decidido e implementado** (2026-09-09)
 
 Un informe recortado a la Facultad de Ingeniería sale con 46 publicaciones y
 presenta su mediana de FWCI y su porcentaje en el top 10 % con la misma cara que
@@ -8,9 +8,10 @@ el informe institucional, que descansa sobre 823. El proyecto ya resolvió esto
 para las personas —una banda de «muestra reducida» por debajo de cinco
 publicaciones— y para las unidades no existe nada.
 
-Este documento mide cuánto se mueven esos indicadores según el tamaño del
-conjunto y propone un umbral. No lo aplica: la decisión es del responsable,
-porque fijar el número tiene consecuencias sobre qué se dice de cada facultad.
+Este documento midió cuánto se mueven esos indicadores según el tamaño del
+conjunto y propuso un umbral. **El responsable decidió 20, alcanzando también a
+las escuelas**, y así está implementado. El documento se conserva porque la
+medición es la que justifica el número, y sin ella el 20 sería una convención.
 
 ---
 
@@ -33,8 +34,8 @@ esta facultad, ¿cuánto cambia la cifra que el informe presenta como suya?
 | Medicina y Salud | 382 | 0,52 | 0,015 | 11,5 % | 0,3 pp |
 | Educación y Ciencias Sociales | 47 | 0,83 | 0,040 | 6,4 % | 2,2 pp |
 | Ingeniería | 46 | 0,52 | 0,030 | 21,7 % | 2,2 pp |
-| Economía y Negocios | 17 | 0,36 | 0,055 | 5,9 % | 6,2 pp |
-| Escuela de Kinesiología | 17 | 0,41 | 0,035 | 5,9 % | 6,2 pp |
+| Economía y Negocios | 17 | 0,36 | 0,055 | 5,9 % | 6,3 pp |
+| Escuela de Kinesiología | 17 | 0,41 | 0,035 | 5,9 % | 6,3 pp |
 | Escuela de Nutrición y Dietética | 12 | 0,62 | 0,090 | 25,0 % | 9,1 pp |
 | Artes | 6 | 0,08 | 0,160 | 0,0 % | 0,0 pp |
 | Derecho | 5 | 0,06 | 0,085 | 0,0 % | 0,0 pp |
@@ -49,21 +50,27 @@ publicación cualquiera.
 
 ### El top 10 % es el indicador frágil, y su fragilidad es aritmética
 
-Una publicación vale exactamente `100/n` puntos porcentuales. No hay nada que
-estimar:
+Una publicación vale exactamente `100/(n−1)` puntos porcentuales, donde n son
+las publicaciones **con percentil de citación**, que es la base real del
+indicador. No hay nada que estimar: al quitar una sólo hay dos resultados
+posibles —estaba en el top o no—, y su diferencia es esa.
 
-| n | Lo que vale una publicación |
+`100/n` parecía la cifra evidente y no lo era: se separa de la medición porque
+al quitar una publicación cambia también el denominador. Con n = 17 da 5,9 y el
+jackknife da 6,25.
+
+| n con percentil | Lo que vale una publicación |
 |---:|---:|
-| 5 | 20,0 pp |
-| 10 | 10,0 pp |
-| 20 | 5,0 pp |
-| 30 | 3,3 pp |
+| 5 | 25,0 pp |
+| 10 | 11,1 pp |
+| 20 | 5,3 pp |
+| 30 | 3,4 pp |
 | 50 | 2,0 pp |
 | 100 | 1,0 pp |
 
 El valor de referencia del indicador es 10 % —por construcción, en un conjunto
 sin sesgo una de cada diez publicaciones cae en el top 10 % de su campo—. Con
-n = 17, una sola publicación vale 6,2 puntos sobre una cifra cuyo orden de
+n = 17, una sola publicación vale 6,3 puntos sobre una cifra cuyo orden de
 magnitud es 10: la unidad puede pasar de 5,9 % a 0 % o a 12 % por un trabajo.
 Eso no es una medición, es un lanzamiento de moneda con aspecto de porcentaje.
 
@@ -101,7 +108,7 @@ facultad con 46 publicaciones y un movimiento de 2,2 pp no está en la misma
 situación que una con 12 y 9,1 pp.
 
 **El umbral de personas, 5, no sirve aquí.** Marcaría cuatro unidades y dejaría
-pasar a Economía y Negocios y a Kinesiología con sus 6,2 puntos de vaivén. Que
+pasar a Economía y Negocios y a Kinesiología con sus 6,3 puntos de vaivén. Que
 el número sea distinto no es incoherencia: el de personas responde además a un
 argumento que no es estadístico —DORA y el Manifiesto de Leiden sobre evaluar
 individuos— y por eso puede permitirse ser más bajo y más tajante.
@@ -112,9 +119,15 @@ individuos— y por eso puede permitirse ser más bajo y más tajante.
 la banda declara **la sensibilidad medida**, que se calcula sin juicio:
 
 > **Muestra reducida.** Los indicadores de impacto de esta unidad se calculan
-> sobre 17 publicaciones. Una publicación más o menos mueve el top 10 % en 6,2
-> puntos porcentuales. Compare con cautela entre unidades de tamaño muy
-> distinto.
+> sobre 17 publicaciones en la ventana. Una publicación más o menos mueve el
+> «top 10 %» en 6,3 puntos porcentuales. Compare con cautela entre unidades de
+> tamaño muy distinto: la cobertura de Scopus tampoco es igual en todas las
+> disciplinas.
+
+Y cuando ninguna publicación de la unidad está en el top 10 %, el jackknife da
+cero y ese cero engaña. Ahí la frase cambia y dice lo que de verdad pasaría:
+«Ninguna está en el top 10 %, y eso no es estabilidad: una sola que entrara
+llevaría la cifra a X %».
 
 Así el umbral sólo decide **cuándo** aparece la banda; **qué dice** lo fija la
 aritmética. Si mañana alguien discute el 20, la cifra que el lector ve sigue

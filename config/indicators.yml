@@ -14,6 +14,18 @@ reglas_transversales:
   declarar_denominador: true
   # Umbral bajo el cual un indicador individual se marca no interpretable.
   n_minimo_interpretable: 5
+  # Lo mismo para una UNIDAD académica —facultad o escuela—, y es otro número
+  # a propósito. El de personas responde además a un argumento que no es
+  # estadístico (DORA y el Manifiesto de Leiden sobre evaluar individuos) y por
+  # eso puede ser más bajo y más tajante. El de unidades sale de medir cuánto
+  # se mueve el indicador al quitar una publicación, unidad por unidad:
+  # docs/UMBRAL_POR_UNIDAD.md. Con n=17 una sola publicación vale 6,2 puntos
+  # del «top 10 %», cuyo valor de referencia es 10.
+  #
+  # Veinte y no otro número porque la distribución tiene un hueco entre 17 y 46
+  # publicaciones: 20, 25 y 30 marcan hoy exactamente las mismas diez unidades,
+  # así que la elección no se juega en el filo.
+  n_minimo_interpretable_unidad: 20
   # Cobertura mínima para publicar sin advertencia obligatoria.
   cobertura_minima_sin_advertencia: 0.90
   # Fecha de corte visible en todo indicador de impacto.

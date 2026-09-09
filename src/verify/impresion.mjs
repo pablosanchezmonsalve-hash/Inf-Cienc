@@ -67,6 +67,24 @@ const escasa = autores.filter((a) => !a.interpretable)
 const prolifica = [...autores].sort(
   (a, b) => b.n_publicaciones - a.n_publicaciones || a.nombre.localeCompare(b.nombre))[0];
 
+/* Una unidad por debajo del umbral, tomada del corpus y no escrita aquí: si
+   mañana una facultad crece y lo cruza, la comprobación sigue apuntando a una
+   que de verdad lo esté. Se toma la mayor de las que están por debajo, porque
+   es la que más se parece a una que no lo está y por tanto la que peor se
+   notaría si la banda dejara de salir. */
+const { publicaciones: TODAS } = JSON.parse(
+  await readFile(join(DIST, 'data/publications.json'), 'utf8'));
+const META = JSON.parse(await readFile(join(DIST, 'data/meta.json'), 'utf8'));
+const porUnidad = new Map();
+for (const p of TODAS) {
+  for (const u of (p.unidades || [])) {
+    if (u !== 'No determinada') porUnidad.set(u, (porUnidad.get(u) || 0) + 1);
+  }
+}
+const unidadEscasa = [...porUnidad.entries()]
+  .filter(([, n]) => n < META.n_minimo_interpretable_unidad)
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+
 /* Se compara sin espacios: pdf.js parte el texto en fragmentos por tipografía y
    por salto de línea, así que «Citas actualizadas al» puede llegar en tres
    trozos. Lo que se comprueba es que el contenido esté, no cómo quedó
@@ -134,6 +152,24 @@ const CASOS = [
             'principios de DORA y del Manifiesto de Leiden',
             'no son interpretables individualmente'],
     prohibe: ['Sin filtros'],
+  },
+  {
+    /* Un informe recortado a una unidad presenta su mediana de FWCI y su top
+       10 % con la misma cara que el institucional. Por debajo del umbral, la
+       banda tiene que estar EN la hoja: es lo único que dice sobre cuántas
+       publicaciones descansa la cifra y cuánto la mueve una.
+
+       El rótulo va en versalitas por CSS —«MUESTRA REDUCIDA» en el PDF—, así
+       que se busca el cuerpo. Y se exige la frase que acota el alcance: la
+       banda califica el impacto, no el recuento de lo publicado, y perder esa
+       línea convertiría una advertencia proporcionada en una que apaga de más. */
+    nombre: 'informe recortado a una unidad pequeña',
+    ruta: `index.html?unidad=${encodeURIComponent(unidadEscasa[0])}`,
+    exige: ['Recorte aplicado', `Unidad académica: ${unidadEscasa[0]}`,
+            'Los indicadores de impacto de',
+            'puntos porcentuales',
+            'no el recuento de lo publicado'],
+    prohibe: ['Sin filtros', 'interpretables individualmente'],
   },
   {
     /* El corte que cambia de significado sobre una persona. La red recortada a
