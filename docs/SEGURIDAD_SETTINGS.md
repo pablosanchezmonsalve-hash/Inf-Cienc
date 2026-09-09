@@ -16,11 +16,11 @@ purga de historial:
 
 | Punto | Estado |
 |---|---|
-| 1. Visibilidad del repositorio | ⬜ **Público** (`private: False` verificado por API) |
+| 1. Visibilidad del repositorio | ⬜ **Público** (`private: False` verificado por API). Pendiente: privatizar sin apagar Pages (requiere cerrar el punto 4) |
 | 2. Purga del historial (`data/raw/` + `internal/`) | ✅ Ejecutada y verificada (0 commits en las 15 ramas; `internal/README.md` re-creado en `cf573c0`) |
-| 3. Protección de rama `/` rulesets | ⬜ Sin protección: API devuelve `rulesets: 0` y sin branch protection en `main` |
+| 3. Protección de rama `/` rulesets | ✅ Aplicada y verificada: branch protection en `main` (1+ revisor, checks `construir`+`desplegar`, no-bypass admin, sin force-push/borrado) + ruleset global `D-SEC-01: protegidas` en todas las ramas (deletion + non_fast_forward) |
 | 3. Rotación de secretos ORCID/Scopus | ⬜ Pendiente (repo fue público) |
-| 4. Repositorio de despliegue separado | ⬜ Pendiente (decisión de gobernanza) |
+| 4. Repositorio de despliegue separado | ✅ **`Inf-Cienc-site` creado, público, Pages activo en `gh-pages`** + workflow `publicar-site-publico.yml` (ensambla `dist/` desde capa pública y publica vía `DEPLOY_KEY`). Pendiente: primer push verificado desde CI; luego privatizar |
 
 Ojo: aunque el repo siga **público**, ya **no contiene datos sensibles en
 ninguna rama** tras la purga. Igual debe pasar a privado por política
@@ -81,11 +81,14 @@ Regla para `main` (branch protection) **o** ruleset equivalente (recomendado).
 
 ## 5. Gobernanza y despliegue
 
-- [ ] Crear el **repositorio de despliegue separado** (p. ej. `Inf-Cienc-site`,
-  público solo si el sitio debe ser visible) que reciba el `dist/` del repo
-  privado (ver `docs/SEGURIDAD_PURGA.md` §7).
-- [ ] Activar **Pages manualmente** solo en el repositorio de despliegue
-  (`Settings → Pages → GitHub Actions`).
+- [x] **Repositorio de despliegue separado** creado el 2026-09-08:
+  `pablosanchezmonsalve-hash/Inf-Cienc-site` (público, `gh-pages`). Recibe el
+  `dist/` del repo de datos vía el workflow `publicar-site-publico.yml`
+  (ensambla desde la capa pública, verifica D-SEC-01/02 y publica con la
+  `DEPLOY_KEY` SSH por-repositorio).
+- [x] **Pages activado** en `Inf-Cienc-site` (`gh-pages`, Legacy).
+- [ ] **Privatizar `Inf-Cienc`** (Sección 1) tras verificar el primer push
+  real de CI al repositorio de despliegue.
 - [ ] Configurar **ADN / IP allowlist / SSO** según política institucional.
 
 ## 6. Tras la purga del historial (registro de lo ejecutado)
@@ -119,5 +122,24 @@ placeholders `xxxxxxxx-...`); los scripts referencian secretos vía entorno
 
 ---
 
-_Última revisión: 2026-09-08 (punto 2 ejecutado; puntos 1, 3 y 4 pendientes
-de la sesión del propietario)._
+## 8. Registro de la sesión (2026-09-08)
+
+- **Punto 3 (protección)**: aplicada branch protection en `main` (1+ review,
+  checks `construir`/`desplegar`, no-bypass admin, bloqueo force-push y
+  borrado) y ruleset global `D-SEC-01: protegidas` (target `branch`) que aplica
+  `deletion` + `non_fast_forward` a todas las ramas (refs/heads/*). Verificado
+  por API (ruleset id 22600459). Los rulesets tipo `push`
+  (`file_path_restriction`) NO están disponibles en repos públicos
+  ("Source public repos cannot have push rules"); aplican al privatizar.
+- **Dependabot**: alerts y automated security fixes habilitados.
+- **Punto 4 (despliegue separado)**: repo `Inf-Cienc-site` creado y público;
+  ramas `main` + `gh-pages` (placeholder); Pages activo en `gh-pages`;
+  deploy key SSH "CI deploy (GitHub Actions)" (solo escritura en
+  `Inf-Cienc-site`, ed25519); secreto `DEPLOY_KEY` creado en `Inf-Cienc`;
+  workflow `publicar-site-publico.yml` añadido (ensamblado D-SEC-02 + publish a
+  `gh-pages` de `Inf-Cienc-site`).
+
+---
+
+_Última revisión: 2026-09-08 (puntos 2 ✅, 3 ✅ y base del 4 ✅; puntos 1
+[privatizar tras verificar despliegue] y rotación de secretos pendientes)._

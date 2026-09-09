@@ -1,0 +1,83 @@
+name: Publicar sitio público
+
+# Punto 4: despliega dist/ al repositorio de despliegue separado y público
+# Inf-Cienc-site (rama gh-pages), de modo que cuando este repositorio de datos
+# pase a privado (punto 1), el sitio siga en pie.
+#
+# D-SEC-02: la capa que se publica es la PÚBLICA versionada. El ensamblado
+# parte de data/processed/ + web/, nunca de exports de Elsevier (data/raw/) ni
+# de la capa interna (internal/): esas capas no viven en este repositorio
+# (D-SEC-01) ni viajan en el artefacto publicado. Las compuertas de filtración
+# son las mismas que en deploy.yml: si material interno llegara a dist/, la
+# publicación se detiene (o el repositorio de datos filtró, o el ensamblado
+# derivó de una fuente que no debía).
+#
+# El despliegue es por rama (gh-pages) mediante una DEPLOY_KEY SSH dedicada a
+# este único repositorio, "CI deploy (GitHub Actions)". Publicar por rama
+# mantiene el sitio servido por GitHub Pages aunque este repositorio cambie de
+# visibilidad; usar una deploy key por-repositorio limita el daño si el secreto
+# se filtrara (no da acceso a la cuenta, sólo a Inf-Cienc-site).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publicar-site-publico
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      # D-SEC-02: verificación de filtración idéntica a deploy.yml.
+      - name: Verificar que no haya filtración en la capa pública
+        run: |
+          set -e
+          if grep -rlE 'matching_log|ambiguities_|orcid_conflicts|identity_candidates|identity_decisions|data/raw/|internal/' data/processed/ >/dev/null 2>&1; then
+            echo "FALLA: la capa pública data/processed/ contiene material interno"
+            exit 1
+          fi
+          test -f data/processed/meta.json || { echo "FALLA: falta data/processed/meta.json"; exit 1; }
+          echo "Capa pública limpia y completa — verificado"
+
+      - name: Ensamblar el sitio desde la capa pública
+        run: python3 src/build/06_assemble_site.py
+
+      # D-SEC-01 / D-SEC-02: el artefacto que se publica no debe arrastrar
+      # material interno aunque estuviera en el árbol de trabajo.
+      - name: Comprobar que la capa interna no viaja en dist/
+        run: |
+          set -e
+          for prohibido in matching_log ambiguities_ orcid_conflicts identity_candidates; do
+            if grep -rl "$prohibido" dist/ >/dev/null 2>&1; then
+              echo "FALLA: '$prohibido' aparece en dist/"
+              exit 1
+            fi
+          done
+          test ! -d dist/internal
+          test ! -d dist/data/raw
+          echo "Capa interna ausente de dist/ — verificado"
+
+      - name: Publicar en el repositorio de despliegue Inf-Cienc-site
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.DEPLOY_KEY }}
+          external_repository: pablosanchezmonsalve-hash/Inf-Cienc-site
+          publish_branch: gh-pages
+          publish_dir: ./dist
+          enable_jekyll: false
