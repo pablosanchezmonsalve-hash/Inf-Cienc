@@ -13467,3 +13467,76 @@ cifras repetidas en la portada y en cada sección, y las hojas a medio llenar.
 denominador pegado y cuatro de las seis tienen botón de glosario, pero no una
 línea de «qué muestra» como las figuras. No se tocó: puede que la base y el
 glosario basten, y decidirlo es sobre el tablero, no sobre este mecanismo.
+
+---
+
+## Cierre: las seis cifras del tablero, explicadas (2026-09-09)
+
+Cierra la ambigüedad que quedó abierta en el cierre anterior: las cifras grandes
+llevaban su denominador y cuatro de las seis un botón de glosario, pero no la
+línea «Qué muestra» que sí tienen las figuras.
+
+### La distinción que hacía falta nombrar
+
+El denominador dice **sobre cuántas publicaciones** está medida la cifra. La
+lectura dice **qué es** la cifra. Son dos cosas y sólo estaba la primera.
+
+«Citas por publicación 4,82» es el caso que lo justifica: sin una frase al lado,
+un promedio que unas pocas publicaciones muy citadas levantan para todas se lee
+como la publicación típica. El botón de glosario no rescata a nadie ahí, porque
+para pulsarlo hay que sospechar primero que hace falta.
+
+Las seis entran al mismo registro, con las claves que ya usa el tablero, y la
+compuerta las descubre leyendo la tabla `FICHAS` en vez de una lista escrita en
+la compuerta. Veintiséis lecturas en total: dieciocho cortes, dos figuras bento
+y seis cifras.
+
+### Dos defectos que salieron al ampliar la compuerta
+
+**El analizador perdía claves en silencio.** El patrón de la cabecera era
+`[A-Za-z0-9-]+`, sin guion bajo, así que los bloques `citas_por_pub` y
+`fwci_mediano` se descartaban sin decir nada. No se notó porque la compuerta los
+reclamó como faltantes: pedía dos lecturas que estaban escritas. La compuerta
+hizo su trabajo, pero el analizador no debe perder nada callando, y ahora acepta
+el guion bajo.
+
+**La búsqueda de las cifras barría de más.** `CORTES` —los cuatro cortes de la
+portada— tiene exactamente la misma forma `['clave', 'Título', …]` que `FICHAS`,
+así que una búsqueda suelta exigía lecturas duplicadas para gráficos que ya la
+tienen bajo su código de indicador. Se acotó al bloque `FICHAS`.
+
+### Medido después, no supuesto
+
+Las fichas crecen: son seis frases más en la primera pantalla y en la primera
+hoja. Las dos cosas que podían romperse no se rompieron.
+
+| Medición | Antes | Ahora |
+|---|---|---|
+| LCP de la portada, Slow 4G | 1.424 ms | 1.444 ms |
+| Mejora por pre-renderizar | 46–47 % | 46 % |
+| Las seis fichas en papel | 1 hoja | 1 hoja |
+
+La diferencia de veinte milisegundos está dentro del rango observado entre
+corridas. El elemento de mayor pintado sigue siendo el titular.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-567 | Las seis cifras del tablero llevan su línea «Qué muestra», del mismo registro que las figuras | El denominador dice sobre cuántas está medida la cifra; faltaba decir qué es. Un promedio sin esa frase se lee como el caso típico, y el botón de glosario sólo sirve a quien ya sospecha |
+| D-568 | La compuerta descubre las cifras en la tabla que las declara, acotada | `CORTES` y `FICHAS` tienen la misma forma; sin acotar, la compuerta exigía lecturas duplicadas para cortes que ya la tienen bajo su código |
+
+### Archivos
+
+- `docs/LECTURAS.md` — seis lecturas nuevas y el alcance corregido
+- `src/build/04_glossary.py` — el guion bajo en la clave, y las cifras en la compuerta
+- `web/assets/js/vista_explorador.js` — `cifras()` recibe los textos
+- `web/assets/css/app.css` — `.ficha-lectura`, en pantalla y en papel
+- `docs/UX_UI.md`
+
+### Pendientes
+
+Quedan las dos decisiones de diseño sobre el informe en papel: las cifras
+repetidas en la portada y en cada sección, y las hojas a medio llenar. Ninguna
+ambigüedad abierta de este mecanismo: las veintiséis figuras y cifras del sitio
+están cubiertas.

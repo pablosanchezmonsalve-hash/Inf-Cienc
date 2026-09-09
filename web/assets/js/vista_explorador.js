@@ -69,14 +69,27 @@ function fmt(f) {
 }
 
 /** La fila de cifras. Cada una lleva SU denominador pegado (D-16): son bases
-    distintas y presentarlas juntas sin decirlo invita a dividir una por otra. */
-export function cifras(res) {
+    distintas y presentarlas juntas sin decirlo invita a dividir una por otra.
+
+    Y desde el 2026-09-09, su lectura: la misma línea «Qué muestra» que las
+    figuras, del mismo registro. El denominador dice SOBRE CUÁNTOS está medida
+    la cifra; la lectura dice QUÉ es la cifra. Son dos cosas distintas y la
+    segunda faltaba: cuatro de las seis tenían botón de glosario y dos no, y un
+    botón es ayuda para quien ya sospecha que no entiende algo.
+
+    «Citas por publicación 4,82» es el caso que lo justifica: sin una frase al
+    lado, un promedio que unas pocas publicaciones muy citadas levantan para
+    todas se lee como la publicación típica. */
+export function cifras(res, textos) {
+  const lecturas = (textos || {}).lecturas || {};
   return `<div class="tablero">${FICHAS.map(([k, etq, base, termino]) => {
     const f = res[k];
+    const l = lecturas[k];
     return `<article class="ficha" data-k="${k}">
       <p class="ficha-valor" data-valor="${k}">${fmt(f)}</p>
       <h3 class="ficha-etq">${c.escapar(etq)}${termino ? c.botonAyuda(termino) : ''}</h3>
       <p class="ficha-base"><b data-base="${k}">${c.nf.format(f.base)}</b> ${c.escapar(base)}</p>
+      ${l ? `<p class="ficha-lectura">${c.escapar(l.muestra)}</p>` : ''}
     </article>`;
   }).join('')}</div>`;
 }
@@ -341,7 +354,7 @@ export function explorador(pubs, sel, proc, jerarquia, meta, umbral, textos) {
     controles: controles(pubs, sel),
     // Las salvaguardas van pegadas a las cifras que califican, y por delante:
     // una advertencia debajo del número al que corrige llega tarde.
-    cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
+    cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub), textos),
     cortes: cortes(sub, proc, jerarquia, textos, sel),
   };
 }
@@ -794,7 +807,7 @@ export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia, met
   return {
     estado: estado(sub.length, pubs.length, sel, { enlaceLista: true }),
     controles: controles(pubs, sel) + indice(clave),
-    cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub)),
+    cifras: salvaguardasPersona(pubs, sel, meta, umbral) + cifras(X.resumen(sub), textos),
     cortes: cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, sel, textos),
   };
 }

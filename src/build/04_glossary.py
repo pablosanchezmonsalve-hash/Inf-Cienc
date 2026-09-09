@@ -65,7 +65,11 @@ def parse_lecturas(text: str) -> dict[str, dict]:
     for bloque in re.split(r"\n## ", text)[1:]:
         lineas = bloque.split("\n")
         cabecera = lineas[0].strip()
-        m = re.match(r"^([A-Za-z0-9-]+)\s+—\s+(.+)$", cabecera)
+        # `_` en la clase: las claves del tablero son `citas_por_pub` y
+        # `fwci_mediano`, y sin él sus bloques se descartaban en silencio.
+        # Lo cazó la compuerta —pedía dos lecturas que existían—, que es
+        # para lo que está, pero el analizador no debe perder nada callando.
+        m = re.match(r"^([A-Za-z0-9_-]+)\s+—\s+(.+)$", cabecera)
         if not m:
             continue
         cuerpo = "\n".join(lineas[1:])
@@ -112,7 +116,18 @@ def verificar_lecturas(lecturas: dict) -> None:
         bento |= set(re.findall(r'id="([a-z0-9-]+)-contenedor"',
                                 pagina.read_text(encoding="utf-8")))
 
-    esperados = codigos | sin_cod | bento
+    # Las seis cifras grandes del tablero. Se leen de `FICHAS`, la tabla que las
+    # declara, por la misma razón que todo lo demás: una lista escrita aquí se
+    # separa de la de allá en cuanto alguien añada o quite una cifra.
+    # Acotado al bloque FICHAS: `CORTES`, la tabla de los cuatro cortes de la
+    # portada, tiene exactamente la misma forma `['clave', 'Título', …]`, y una
+    # búsqueda suelta la barría también, exigiendo lecturas duplicadas para
+    # gráficos que ya la tienen bajo su código de indicador.
+    bloque_fichas = re.search(r"const FICHAS = \[(.*?)\n\];", fuente, re.S)
+    ficha = (set(re.findall(r"\['([a-z_]+)'", bloque_fichas.group(1)))
+             if bloque_fichas else set())
+
+    esperados = codigos | sin_cod | bento | ficha
 
     faltan = sorted(esperados - set(lecturas))
     sobran = sorted(set(lecturas) - esperados)

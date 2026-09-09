@@ -2066,6 +2066,16 @@ svg.chart .trama { pointer-events: none; }
 .ficha-etq { font: 700 var(--t-m)/1.3 var(--f-ui); margin: 0; color: var(--tinta); }
 .ficha-base { font-size: var(--t-s); color: var(--tinta-3); margin: 0; }
 .ficha-base b { color: var(--tinta-2); font-variant-numeric: tabular-nums; }
+/* Qué es la cifra, no sobre cuántos está medida: eso lo dice `.ficha-base`.
+   Va separada por un filete porque son dos registros distintos —el
+   denominador es dato, la lectura es explicación— y pegadas se leen como una
+   sola frase larga. Cuerpo pequeño y tinta apagada: acompaña a la cifra, no
+   compite con ella. */
+.ficha-lectura {
+  margin: var(--e2) 0 0; padding-top: var(--e2);
+  border-top: 1px solid var(--linea);
+  font-size: var(--t-xs); line-height: 1.5; color: var(--tinta-3);
+}
 
 /* Al recalcular, la cifra parpadea una vez. Sin señal, un filtro que cambia
    poco parece no haber hecho nada. Con `prefers-reduced-motion` no ocurre. */
@@ -2332,6 +2342,13 @@ svg.chart .trama { pointer-events: none; }
     text-transform: uppercase; margin-bottom: 1pt; color: #000;
   }
   .bento-card .lectura-grafico { margin-top: 6pt; }
+
+  /* La lectura de la cifra, apretada. Seis fichas con su frase ocupan una hoja
+     entera si conservan el interlineado de pantalla. */
+  .ficha-lectura {
+    margin: 3pt 0 0; padding-top: 3pt; font-size: 7pt; line-height: 1.35;
+    color: #333; border-top: .5pt solid #999;
+  }
 
   /* Las tarjetas de cifra no se parten por la mitad. Medido en el PDF: la
      portada cortaba la tercera fila y la hoja siguiente abría con «Citas por
