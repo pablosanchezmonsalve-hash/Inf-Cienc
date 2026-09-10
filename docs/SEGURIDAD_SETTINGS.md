@@ -16,11 +16,11 @@ purga de historial:
 
 | Punto | Estado |
 |---|---|
-| 1. Visibilidad del repositorio | ⬜ **Público** (`private: False` verificado por API). Pendiente: privatizar sin apagar Pages (requiere cerrar el punto 4) |
+| 1. Visibilidad del repositorio | ⬜ **Público** (`private: False` verificado por API). Pendiente: privatizar. Ya **no está bloqueado**: el punto 4 se cerró, así que el sitio sobrevive a que este repositorio deje de ser público |
 | 2. Purga del historial (`data/raw/` + `internal/`) | ✅ Ejecutada y verificada (0 commits en las 15 ramas; `internal/README.md` re-creado en `cf573c0`) |
 | 3. Protección de rama `/` rulesets | ✅ Aplicada y verificada: branch protection en `main` (1+ revisor, checks `construir`+`desplegar`, no-bypass admin, sin force-push/borrado) + ruleset global `D-SEC-01: protegidas` en todas las ramas (deletion + non_fast_forward) |
 | 3. Rotación de secretos ORCID/Scopus | ⬜ Pendiente (repo fue público) |
-| 4. Repositorio de despliegue separado | ✅ **`Inf-Cienc-site` creado, público, Pages activo en `gh-pages`** + workflow `publicar-site-publico.yml` (ensambla `dist/` desde capa pública y publica vía `DEPLOY_KEY`). Pendiente: primer push verificado desde CI; luego privatizar |
+| 4. Repositorio de despliegue separado | ✅ **Cerrado.** `Inf-Cienc-site` creado, público, Pages activo en `gh-pages`; workflow `publicar-site-publico.yml` ensambla `dist/` desde la capa pública, comprueba contenido sin JavaScript, compone el informe descargable y publica vía `DEPLOY_KEY`. Push desde CI verificado: 6 corridas, las 6 verdes (5 por `push` a `main` y 1 manual), del 2026-09-09 al 2026-09-10; la última llevó los seis PDF del informe a `gh-pages`. **Desbloquea el punto 1** |
 
 Ojo: aunque el repo siga **público**, ya **no contiene datos sensibles en
 ninguna rama** tras la purga. Igual debe pasar a privado por política
@@ -90,8 +90,10 @@ Regla para `main` (branch protection) **o** ruleset equivalente (recomendado).
   despliegue no debe depender de que el otro haya corrido, que es justo lo que
   el repositorio separado viene a cortar.
 - [x] **Pages activado** en `Inf-Cienc-site` (`gh-pages`, Legacy).
-- [ ] **Privatizar `Inf-Cienc`** (Sección 1) tras verificar el primer push
-  real de CI al repositorio de despliegue.
+- [ ] **Privatizar `Inf-Cienc`** (Sección 1). La condición que lo bloqueaba
+  —un push real de CI al repositorio de despliegue— **ya se cumplió**: 6
+  corridas del workflow, las 6 verdes, la última el 2026-09-10 con los seis
+  PDF del informe.
 - [ ] Configurar **ADN / IP allowlist / SSO** según política institucional.
 
 ## 6. Tras la purga del historial (registro de lo ejecutado)

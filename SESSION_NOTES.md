@@ -13859,3 +13859,59 @@ informe, no un defecto, y queda para el propietario.
 
 Sigue en pie lo anterior: `data/processed/meta.json` con una clave añadida a
 mano, y las decisiones de diseño sobre el informe en papel.
+
+## Cierre: cifras caducadas en la documentación (2026-09-10)
+
+Repaso de lo pendiente que era mío y podía aplicarse aquí. Cuatro correcciones,
+todas medidas antes de escribirlas; nada de diseño, que sigue siendo del
+propietario.
+
+### Lo que se corrigió
+
+| Dónde | Decía | Dice | Cómo se comprobó |
+|---|---|---|---|
+| `README.md` | «las 400 decisiones» | 579 | contando las filas `D-` de `docs/DECISIONS.md` |
+| `README.md` | Páginas: 11 | 12 | lo que imprime `06_assemble_site.py` |
+| `README.md` | Peso de `dist/`: ~3,8 MB | ~3,9 MB | 3.999 KB del ensamblado, 3,91 MB medidos con `du` sin `dist/informe` |
+| `docs/DECISIONS.md` | `D-575` citaba una sesión con otro título | el título real | contra la cabecera de `SESSION_NOTES.md` |
+
+### El punto 4 de seguridad estaba cerrado y el documento no lo decía
+
+`docs/SEGURIDAD_SETTINGS.md` daba el repositorio de despliegue separado como
+«pendiente: primer push verificado desde CI». Ese push ocurrió seis veces, las
+seis verdes, y la última llevó los seis PDF del informe a `gh-pages`. El punto
+queda cerrado, y con él **desbloqueado el punto 1**: privatizar `Inf-Cienc` ya
+no apaga el sitio, porque el sitio vive en otro repositorio.
+
+La primera redacción decía «tres publicaciones desde CI». Era una cifra de
+memoria; al contarlas eran seis. Corregida antes de comitear.
+
+### Lo que NO se tocó, y por qué
+
+- **`STATE.md`** dice 562 decisiones y está caducado, pero es una VISTA
+  GENERADA y editarla a mano es justo lo que la compuerta de `snapshot.py`
+  existe para impedir. En este clon no hay `internal/` ni `data/interim/`, así
+  que el guion se niega, como debe. Se regenera con `make estado` en el equipo
+  que tiene los datos.
+- **`data/processed/meta.json`** sigue con la clave del umbral añadida a mano,
+  por lo mismo: el build completo necesita `data/interim/`.
+- **Las decisiones de diseño del informe en papel** —las seis cifras repetidas,
+  las hojas a medio llenar, el orden ficha/carátula en el informe de una
+  persona, la tercera regla de `PD-04`— no son cosas que aplicar: son cosas que
+  decidir, y no me corresponden.
+
+### Decisiones
+
+Ninguna. Es una corrección de hechos, no un cambio de criterio.
+
+### Archivos
+
+- `README.md` — tres cifras
+- `docs/DECISIONS.md` — el título de una sesión
+- `docs/SEGURIDAD_SETTINGS.md` — punto 4 cerrado, punto 1 desbloqueado
+
+### Pendientes
+
+Los mismos, menos uno: privatizar `Inf-Cienc`, rotar los secretos de ORCID y
+Scopus, `T-06`, `T-19`, los 83 casos de revisión de identidad, `make estado` y
+un build completo en el equipo con los datos.
