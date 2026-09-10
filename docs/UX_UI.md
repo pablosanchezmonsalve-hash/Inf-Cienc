@@ -840,6 +840,39 @@ medio `print` emulado, el cuerpo de un desplegable cerrado devuelve una caja de
 árbol de estructura para lectores de pantalla. El botón del navegador depende
 de los ajustes de quien imprime, que el sitio no controla.
 
+**La carátula.** La hoja 1 traía el titular de la página web: «Informe
+bibliométrico», la procedencia en letra chica y el desplegable de método.
+Servía, pero se leía como el borde superior de un sitio, no como la carátula de
+un documento que alguien va a archivar, citar o mandar por correo. Ahora la
+hoja 1 es una carátula: institución, título, **alcance**, ventana, y una tabla
+de procedencia con las cuatro fechas que definen la carga.
+
+Lo que añade y no estaba en el papel: el alcance arriba y en grande —un informe
+recortado a una facultad se distinguía de otro sólo por una línea de 8 pt—, la
+fecha de **exportación** de los datos, que no se imprimía en ninguna parte, y
+la fecha en que se generó **ese** PDF, que tampoco.
+
+El alcance no se redacta en el generador: se **lee** del párrafo que la propia
+página escribe con el recorte ya aplicado (`fraseRecorte`, en `core.js`). Una
+segunda redacción del mismo hecho acaba divergiendo, y aquí una de las dos
+mentiría sobre qué publicaciones sostienen el informe.
+
+Las cuatro bases de cálculo —universo, con métricas, con autoría, con área—
+sólo se imprimen en el informe **completo**. Sobre un recorte engañan: bajo
+«46 de 823 publicaciones» se leerían como el suelo de ese informe, que no lo
+son. Ahí la línea de alcance ya dice sobre cuántas descansa, y cada cifra
+declara la suya dentro.
+
+Con carátula se apagan, sólo en ese archivo, el titular de la página y la barra
+de crédito: dicen lo mismo, más corto y una hoja después. Las demás secciones
+la conservan, porque una hoja suelta tiene que seguir diciendo de qué informe
+salió. El aviso de ventana —«lo publicado después no está aquí»— **no** se
+apaga: la carátula da los años, no la advertencia.
+
+El orden de la portada es carátula · índice · qué mide. Puesto el índice
+después del titular, su `break-before: page` dejaba el desplegable de método
+solo en una hoja con cuatro líneas.
+
 **El folio y el índice.** El PDF que genera `make informe` numera sus hojas
 —«Informe bibliométrico · Producción» a la izquierda, «Hoja 3 de 8» a la
 derecha— y abre con un índice: cada sección con su archivo y su número de
