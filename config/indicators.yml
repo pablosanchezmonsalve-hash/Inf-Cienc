@@ -22,10 +22,16 @@ reglas_transversales:
   multivaluados_no_suman_cien: true
 
 denominadores:
-  universo_total: 823          # todas las publicaciones
-  con_metricas: 816            # base de indicadores de impacto
-  con_autoria_detallada: 818   # base de rankings de autor
-  con_area_tematica: 816       # base de vistas temáticas
+  # Carga 2026-09-08, ventana 2020-2025. Tomados de
+  # data/interim/reconciliation_summary.csv, no escritos a ojo
+  # (docs/UPDATING.md §1 paso 6). Los cuatro coinciden porque el join por EID
+  # entre Scopus y SciVal es 1 a 1 completo sobre los 1342 registros: ninguna
+  # publicación aparece en una sola fuente, a diferencia de la carga anterior,
+  # donde 12 lo hacían y separaban los denominadores en 823 / 816 / 818 / 816.
+  universo_total: 1342         # todas las publicaciones
+  con_metricas: 1342           # base de indicadores de impacto
+  con_autoria_detallada: 1342  # base de rankings de autor
+  con_area_tematica: 1342      # base de vistas temáticas
 
 kpis_portada:
   - P-01   # Publicaciones totales
@@ -42,7 +48,7 @@ indicadores:
          denominador: universo_total, confiabilidad: alta, advertencia: null}
   P-02: {nombre: "Producción anual", categoria: descriptivo, publicar: true,
          denominador: universo_total, confiabilidad: alta,
-         advertencia: "Serie de 3 años: no sostiene tendencia de largo plazo."}
+         advertencia: "Serie de 6 años: no sostiene tendencia de largo plazo."}
   P-03: {nombre: "Distribución por tipo documental", categoria: descriptivo,
          publicar: true, denominador: universo_total, confiabilidad: alta, advertencia: null}
   P-04: {nombre: "Fuentes distintas", categoria: descriptivo, publicar: true,
@@ -56,7 +62,7 @@ indicadores:
   P-07: {nombre: "Producción por unidad académica", categoria: descriptivo,
          publicar: true, denominador: con_autoria_detallada, confiabilidad: baja,
          advertencia_destacada: true,
-         advertencia: "Cobertura 63,8 % de los pares autor × publicación. La cobertura desigual de Scopus entre disciplinas distorsiona la comparación entre unidades."}
+         advertencia: "Cobertura 64,2 % de los pares autor × publicación. La cobertura desigual de Scopus entre disciplinas distorsiona la comparación entre unidades."}
   P-08: {nombre: "Distribución por idioma", categoria: descriptivo, publicar: false,
          version: V2, denominador: con_autoria_detallada, confiabilidad: alta, advertencia: null}
   # Multivaluado y por partida doble: una misma publicación puede ser Gold en la
@@ -64,12 +70,12 @@ indicadores:
   A-01: {nombre: "Acceso abierto", categoria: descriptivo, publicar: true,
          denominador: con_metricas, confiabilidad: media, multivaluado: true,
          advertencia_destacada: true,
-         advertencia: "Multivaluado: una publicación puede tener varias vías de acceso abierto a la vez, así que las barras no suman el total. La ausencia de valor no equivale a acceso cerrado: 226 publicaciones sin estado declarado."}
+         advertencia: "Multivaluado: una publicación puede tener varias vías de acceso abierto a la vez, así que las barras no suman el total. La ausencia de valor no equivale a acceso cerrado: 399 publicaciones sin estado declarado."}
 
   # ------------------------------------------------------------- impacto
   I-01: {nombre: "Citas totales", categoria: impacto, publicar: true,
          denominador: con_metricas, confiabilidad: alta,
-         advertencia: "Corte 2026-07-22. Fuente única: SciVal."}
+         advertencia: "Corte 2026-08-30. Fuente única: SciVal."}
   I-02: {nombre: "Citas por publicación", categoria: impacto, publicar: true,
          denominador: con_metricas, confiabilidad: alta, advertencia: null}
   I-03: {nombre: "FWCI institucional", categoria: impacto, publicar: true,
@@ -79,7 +85,7 @@ indicadores:
   I-04: {nombre: "FWCI por año", categoria: impacto, publicar: true,
          denominador: con_metricas, confiabilidad: baja,
          advertencia_destacada: true,
-         advertencia: "El 46 % de las publicaciones de 2025 aún no tiene citas: su FWCI no es comparable con el de 2023."}
+         advertencia: "El 42 % de las publicaciones de 2025 aún no tiene citas: su FWCI no es comparable con el de 2020."}
   I-05: {nombre: "Publicaciones en el top 10 % de citación", categoria: impacto,
          publicar: true, denominador: con_metricas, confiabilidad: alta,
          advertencia: null}
@@ -88,7 +94,7 @@ indicadores:
          advertencia: "Mide visibilidad, no impacto."}
   R-01: {nombre: "Publicaciones en revistas Q1", categoria: impacto, publicar: true,
          denominador: con_metricas, confiabilidad: media,
-         advertencia: "Métrica de la revista, no del artículo. Cobertura 762 de 816."}
+         advertencia: "Métrica de la revista, no del artículo. Cobertura 1.223 de 1.342."}
   R-02: {nombre: "Percentil CiteScore de la fuente", categoria: impacto,
          publicar: false, version: V2, denominador: con_metricas, confiabilidad: media,
          advertencia: null}
@@ -123,22 +129,22 @@ indicadores:
          advertencia: "Multivaluado: los porcentajes no suman 100 %."}
   T-01: {nombre: "Áreas temáticas ASJC", categoria: tematico, publicar: true,
          denominador: con_area_tematica, confiabilidad: media, multivaluado: true,
-         advertencia: "Clasifica la revista, no el artículo. 1.796 asignaciones para 816 publicaciones."}
+         advertencia: "Clasifica la revista, no el artículo. 2.973 asignaciones para 1.342 publicaciones."}
   T-02: {nombre: "Topics de SciVal", categoria: tematico, publicar: false,
          version: V2, confiabilidad: media,
-         advertencia: "632 topics para 794 publicaciones: demasiado disperso para vista principal."}
+         advertencia: "932 topics para 1.313 publicaciones: demasiado disperso para vista principal."}
   T-03: {nombre: "Prominencia temática", categoria: tematico, publicar: false,
          version: V2, confiabilidad: baja,
          advertencia: "Mide la atención del campo, no el desempeño institucional."}
   T-04: {nombre: "Objetivos de Desarrollo Sostenible", categoria: tematico,
          publicar: true, denominador: con_metricas, confiabilidad: baja,
          solo_recuento: true,
-         # Una publicación puede tener varios ODS: 391 asignaciones sobre las
-         # 310 publicaciones que tienen alguno. Faltaba la marca, y sin ella el
+         # Una publicación puede tener varios ODS: 638 asignaciones sobre las
+         # 521 publicaciones que tienen alguno. Faltaba la marca, y sin ella el
          # gráfico se dibujaba igual que uno cuyas barras sí suman.
          multivaluado: true,
          advertencia_destacada: true,
-         advertencia: "Cobertura 38 %. Se reporta como recuento, nunca como distribución porcentual del total."}
+         advertencia: "Cobertura 38,8 %. Se reporta como recuento, nunca como distribución porcentual del total."}
 
   # -------------------------------------------------------- nivel autor
   AU-01: {nombre: "Publicaciones por autor", categoria: descriptivo, publicar: true,
@@ -147,13 +153,13 @@ indicadores:
   AU-02: {nombre: "Citas por autor", categoria: impacto, publicar: true,
           denominador: con_autoria_detallada, confiabilidad: media, conteo: completo,
           advertencia: "Atribución completa: no sumable a nivel institucional."}
-  AU-03: {nombre: "h-index en ventana 2023-2025", categoria: impacto, publicar: true,
+  AU-03: {nombre: "h-index en ventana 2020-2025", categoria: impacto, publicar: true,
           solo_en: ficha_autor, n_minimo: 5, confiabilidad: baja,
           advertencia_destacada: true,
-         advertencia: "No es el h-index de carrera. Ventana 2023-2025; sólo se muestra cuando la muestra lo hace mínimamente legible (n≥5, 50 de las 538 entidades publicadas)."}
+         advertencia: "No es el h-index de carrera. Ventana 2020-2025; sólo se muestra cuando la muestra lo hace mínimamente legible (n≥5, 68 de las 829 entidades publicadas)."}
   AU-06: {nombre: "Evolución temporal por autor", categoria: descriptivo, publicar: true,
           solo_en: ficha_autor, confiabilidad: media,
-          advertencia: "Tres puntos: se presenta como barras, no como línea de tendencia."}
+          advertencia: "Seis puntos: se presenta como barras, no como línea de tendencia."}
 
   # --------------------------------------- no calculables: placeholders
   AU-04: {nombre: "FWCI por autor", categoria: impacto, publicar: false,
@@ -177,12 +183,18 @@ indicadores:
          razon: "Excluido por PROJECT_SPEC.md <out_of_scope_for_v1>."}
   X-03: {nombre: "Indicadores de financiamiento", categoria: descriptivo, publicar: false,
          estado: no_calculable,
-         razon: "Cobertura 37,4 %: insuficiente para reportar sin sesgo.",
+         razon: "Cobertura 36,5 %: insuficiente para reportar sin sesgo.",
          que_falta: "Fuente complementaria de financiamiento: src/enrich/crossref_financiamiento.py está implementado y probado (--test), pero api.crossref.org no es alcanzable desde este entorno (config/sources.yml -> crossref_financiamiento_api, ejecutada: false). Falta correrlo con acceso de red real y medir la cobertura combinada."}
+  # La razón anterior —«la ventana 2023-2025 no sostiene una tendencia», con
+  # «datos anteriores a 2023» como lo que faltaba— caducó con la carga del
+  # 2026-09-08: esos datos ya están, y son 524 publicaciones de 2020 a 2022.
+  # El indicador sigue sin publicarse, pero por una razón que hoy es cierta y
+  # no por una que dejó de serlo. Reevaluarlo con seis puntos es una decisión
+  # de metodología, no un efecto secundario de cargar datos.
   X-04: {nombre: "Tendencia de largo plazo", categoria: descriptivo, publicar: false,
          estado: no_calculable,
-         razon: "La ventana 2023-2025 no sostiene una tendencia.",
-         que_falta: "Datos anteriores a 2023."}
+         razon: "Seis puntos anuales no sostienen una afirmación de tendencia de largo plazo, y el último está incompleto por ventana de citación.",
+         que_falta: "Una serie más larga, o un método declarado que diga qué se afirma con seis puntos y con qué incertidumbre."}
 
   # ------------------------------- producción declarada (corpus paralelo, no Scopus)
   # Deliberadamente AUSENTE de kpis_portada: eso es lo que mantiene este dato

@@ -25,9 +25,15 @@ sección usa de verdad. El build la contrasta contra los indicadores que la pág
 declara en `data-indicadores` y **falla si no coinciden**. Está porque la primera
 versión de este documento se equivocó justo en eso: el panel de producción decía
 «las publicaciones del universo» y explicaba el caso de la unidad académica, pero
-el ranking de fuentes corre sobre las publicaciones con métricas, que son 816 y
-no 823. Un lector habría contado mal exactamente en la frase que promete impedir
-que cuente mal.
+el ranking de fuentes corre sobre las publicaciones con métricas, que entonces
+eran 816 y no 823. Un lector habría contado mal exactamente en la frase que
+promete impedir que cuente mal.
+
+En la carga del 2026-09-08 los dos denominadores **coinciden**: 1.342 y 1.342,
+porque el cruce Scopus–SciVal por EID es completo y ninguna publicación quedó en
+una sola fuente. Ese lector ya no se equivocaría, y aun así la comprobación
+sigue en pie: la coincidencia es un hecho de esta carga, no una propiedad del
+modelo.
 
 El texto es **institucionalmente neutro**: describe la metodología, no a esta
 universidad. Otra institución lo reutiliza sin tocarlo.
@@ -49,8 +55,9 @@ actividad de las personas.
 
 **Sobre qué:** Tres bases distintas, y conviene no sumarlas de memoria. La
 producción anual y el tipo documental se calculan sobre **todo el universo**; el
-ranking de fuentes, sólo sobre las publicaciones **con métricas**, que son menos;
-y la producción por unidad académica, sobre **pares autor × publicación** y no
+ranking de fuentes, sólo sobre las publicaciones **con métricas**, que en esta
+carga son las 1.342 del universo pero no tienen por qué serlo; y la producción
+por unidad académica, sobre **pares autor × publicación** y no
 sobre publicaciones —un trabajo firmado desde dos unidades cuenta en las dos, y
 por eso esas barras no suman el total—. Cada gráfico lleva su denominador en el
 sello.
@@ -73,8 +80,9 @@ disciplinas. Tampoco es visibilidad —cuánta gente lo vio— que es otra cosa 
 mide aparte. Y el cuartil o el percentil de una revista describen a la revista,
 no al artículo que se publicó en ella.
 
-**Sobre qué:** Las publicaciones con métricas normalizadas, que son menos que el
-universo. Las de los años más recientes han tenido menos tiempo para acumular
+**Sobre qué:** Las publicaciones con métricas normalizadas: en esta carga son las
+1.342 del universo, porque ninguna quedó fuera del export de SciVal, y en otra
+podrían ser menos. Las de los años más recientes han tenido menos tiempo para acumular
 citas: su impacto es provisional por construcción, no bajo.
 
 **Denominadores:** con_metricas

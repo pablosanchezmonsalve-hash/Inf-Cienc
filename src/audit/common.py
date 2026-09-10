@@ -62,6 +62,28 @@ def resolucion_duplicado(eid: str) -> dict | None:
     return None
 
 
+def resolucion_sin_deteccion(eid: str) -> dict | None:
+    """Resolución humana de una publicación sin detección institucional blanda.
+
+    La regla I-01 es bloqueante porque una publicación sin ninguna firma
+    atribuible a la institución no puede aportar autoría. Pero existe un caso
+    real que ningún patrón puede resolver: que la fuente escriba el nombre
+    institucional de forma que no lo contenga —"Universidad Finis, Chile"—
+    mientras el Affiliation ID sí confirma la afiliación.
+
+    Resolver aquí NO inventa autoría ni añade la publicación al log de matching:
+    la publicación sigue sin autoría UFT nombrada y así se declara. Lo único que
+    cambia es que deja de bloquear, porque una persona verificó el caso y dejó
+    la evidencia. El reporte distingue lo revisado de lo pendiente.
+    """
+    casos = ((RESOLUCIONES.get("publicaciones") or {})
+             .get("sin_deteccion_institucional") or [])
+    for caso in casos:
+        if caso.get("eid") == eid:
+            return caso
+    return None
+
+
 def source_path(key: str) -> Path:
     return ROOT / SOURCES[key]["archivo"]
 

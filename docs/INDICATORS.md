@@ -7,9 +7,9 @@
 La columna «Disponible» y las coberturas son **medidas sobre los datos**, no
 estimadas. Ningún indicador entró al catálogo sin verificación.
 
-Base: 823 publicaciones (2023–2025) · 816 con métricas · 818 con autoría
-detallada · 589 formas de firma · 1.207 apariciones firma × publicación
-(1.205 pares distintos: una firma se repite en tres posiciones de un mismo
+Base: 1.342 publicaciones (2020–2025) · 1.342 con métricas · 1.342 con autoría
+detallada · 888 formas de firma · 1.962 apariciones firma × publicación
+(1.960 pares distintos: una firma se repite en tres posiciones de un mismo
 trabajo).
 
 ---
@@ -20,66 +20,66 @@ trabajo).
 
 | Cód. | Indicador | Definición | Lógica | Campos requeridos | Disp. | Confiab. | V1 | Nota metodológica |
 |---|---|---|---|---|---|---|---|---|
-| `P-01` | Publicaciones totales | Recuento de publicaciones únicas | `count(distinct eid)` | `eid` | **sí** 823/823 | alta | ✅ | Denominador institucional base |
-| `P-02` | Producción anual | Publicaciones por año | `group by anio` | `eid`, `anio` | **sí** 228/276/319 | alta | ✅ | Serie de 3 puntos; no sostiene tendencia de largo plazo |
+| `P-01` | Publicaciones totales | Recuento de publicaciones únicas | `count(distinct eid)` | `eid` | **sí** 1.342/1.342 | alta | ✅ | Denominador institucional base |
+| `P-02` | Producción anual | Publicaciones por año | `group by anio` | `eid`, `anio` | **sí** 131/199/194/227/273/318 | alta | ✅ | Serie de 6 puntos; no sostiene tendencia de largo plazo |
 | `P-03` | Tipo documental | Distribución por tipo | `group by tipo` | `tipo_documental` | **sí** 100 % | alta | ✅ | Permite excluir tipos no citables del impacto |
-| `P-04` | Fuentes distintas | Revistas y otras fuentes | `count(distinct Source ID)` | `Source ID` | **sí** 495 | alta | ✅ | `Source ID` mejor clave que ISSN |
+| `P-04` | Fuentes distintas | Revistas y otras fuentes | `count(distinct Source ID)` | `Source ID` | **sí** 713 | alta | ✅ | `Source ID` mejor clave que ISSN |
 | `P-05` | Ranking de fuentes | Fuentes por volumen | `group by fuente, order desc` | `Scopus Source title` | **sí** | alta | ✅ | Volumen ≠ calidad. No ordenar por métrica de revista |
-| `P-06` | Autores UFT distintos | Formas de firma detectadas | `count(distinct autor)` | tabla maestra | **parcial** 530 publicadas de 589 en la fuente[^p06] | media | ✅ | **No son personas.** 589 en la fuente → 534 tras fusionar 94 variantes en 39 personas por revisión humana → **530 publicadas** tras descartar 4 fragmentos de afiliación (regla `E-09`, ya resuelto, ver `docs/LIMITATIONS.md` §7). Quedan 31 grupos de variantes y 20 perfiles fragmentados sin revisar |
+| `P-06` | Autores UFT distintos | Formas de firma detectadas | `count(distinct autor)` | tabla maestra | **parcial** 829 publicadas de 888 en la fuente[^p06] | media | ✅ | **No son personas.** 888 en la fuente → 833 tras fusionar 94 variantes en 39 personas por revisión humana → **829 publicadas** tras descartar 4 fragmentos de afiliación (regla `E-09`, ya resuelto, ver `docs/LIMITATIONS.md` §7). Quedan 50 grupos de variantes y 29 perfiles fragmentados sin revisar |
 
-[^p06]: Este recuento describe la decisión de la revisión histórica del 2026-07-31. Consolidaciones posteriores de identidad (94 formas en 39 personas, más 4 descartadas por `E-09`) bajaron la base publicada a **530 entidades**, y el sitio sirve esa. Ver `STATE.md`. La nota metodológica («no son personas») no cambia.
-| `P-07` | Producción por unidad académica | Pares por unidad | `group by unidad` | `unidad_academica` | **parcial** 63,8 % | **baja** | ⚠️ | Cobertura parcial + sesgo de cobertura Scopus. Advertencia obligatoria |
+[^p06]: Este recuento describe la decisión de la revisión histórica del 2026-07-31. Consolidaciones posteriores de identidad (94 formas en 39 personas, más 4 descartadas por `E-09`) bajaron la base publicada a **829 entidades**, y el sitio sirve esa. Ver `STATE.md`. La nota metodológica («no son personas») no cambia.
+| `P-07` | Producción por unidad académica | Pares por unidad | `group by unidad` | `unidad_academica` | **parcial** 64,2 % | **baja** | ⚠️ | Cobertura parcial + sesgo de cobertura Scopus. Advertencia obligatoria |
 | `P-08` | Distribución por idioma | Idioma del documento | `group by idioma` | `Language` | **sí** 100 % | alta | V2 | Bajo valor analítico inmediato |
-| `A-01` | Acceso abierto | Publicaciones con estado OA | `count(OA not null)` | `Open Access` | **parcial** 72,3 % | media | ⚠️ | **Ausencia ≠ «no OA»**. Reportar como «n con estado declarado» |
+| `A-01` | Acceso abierto | Publicaciones con estado OA | `count(OA not null)` | `Open Access` | **parcial** 70,3 % | media | ⚠️ | **Ausencia ≠ «no OA»**. Reportar como «n con estado declarado» |
 
 ### 1.2 Impacto
 
 | Cód. | Indicador | Definición | Lógica | Campos requeridos | Disp. | Confiab. | V1 | Nota metodológica |
 |---|---|---|---|---|---|---|---|---|
-| `I-01` | Citas totales | Citas acumuladas al corte | `sum(Citations)` | `Citations` | **sí** 3.935 | alta | ✅ | Fuente única SciVal, corte 2026-07-22 |
-| `I-02` | Citas por publicación | Media de citas | `sum(citas)/816` | `Citations` | **sí** 4,82 | alta | ✅ | Denominador 816, no 823. Declararlo junto al valor |
-| `I-03` | FWCI institucional | Impacto normalizado por campo, año y tipo | agregado sobre el conjunto | `FWCI` | **sí** media 0,87 · **mediana 0,41** | media | ✅ | **Nunca promedio de FWCI individuales.** Distribución muy asimétrica: mostrar media y mediana |
-| `I-04` | FWCI por año | Serie anual de FWCI | `group by anio` | `FWCI`, `anio` | **parcial** 0,83/1,03/0,76 | **baja** | ⚠️ | **46 % de las publicaciones de 2025 aún sin citas.** El año reciente no es comparable |
-| `I-05` | Top 10 % de citación | Publicaciones en el decil superior | `count(percentil <= 10)` | `Outputs in Top Citation Percentiles` | **sí** 75/816 (9,2 %) | alta | ✅ | Semántica verificada empíricamente (§3) |
+| `I-01` | Citas totales | Citas acumuladas al corte | `sum(Citations)` | `Citations` | **sí** 14.245 | alta | ✅ | Fuente única SciVal, corte 2026-08-30 |
+| `I-02` | Citas por publicación | Media de citas | `sum(citas)/1342` | `Citations` | **sí** 10,61 | alta | ✅ | Denominador 1.342: universo y publicaciones con métrica coinciden. Declararlo junto al valor |
+| `I-03` | FWCI institucional | Impacto normalizado por campo, año y tipo | agregado sobre el conjunto | `FWCI` | **sí** media 1,14 · **mediana 0,48** | media | ✅ | **Nunca promedio de FWCI individuales.** Distribución muy asimétrica: mostrar media y mediana |
+| `I-04` | FWCI por año | Serie anual de FWCI | `group by anio` | `FWCI`, `anio` | **parcial** 0,83/1,04/0,77 | **baja** | ⚠️ | **42 % de las publicaciones de 2025 aún sin citas.** El año reciente no es comparable |
+| `I-05` | Top 10 % de citación | Publicaciones en el decil superior | `count(percentil <= 10)` | `Outputs in Top Citation Percentiles` | **sí** 115/1.342 (8,6 %) | alta | ✅ | Semántica verificada empíricamente (§3) |
 | `I-06` | Visualizaciones | Views en Scopus | `sum(Views)` | `Views` | **sí** 100 % | media | V2 | **Visibilidad, no impacto.** Módulo separado |
-| `R-01` | Publicaciones en revistas Q1 | Percentil SJR ≤ 25 | `count(sjr_pct <= 25)` | `SJR percentile` | **parcial** 378/762 | media | ✅ | **Métrica de la revista, no del artículo** |
-| `R-02` | Percentil CiteScore | Posición de la fuente | `CiteScore percentile` | idem | **sí** 94,6 % | media | V2 | Redundante con `R-01`; elegir uno principal |
-| `R-03` | SNIP de la fuente | Impacto normalizado de la fuente | `SNIP` | idem | **sí** 95,6 % | media | V2 | Tercera métrica de revista; redundante para V1 |
+| `R-01` | Publicaciones en revistas Q1 | Percentil SJR ≤ 25 | `count(sjr_pct <= 25)` | `SJR percentile` | **parcial** 578/1.223 | media | ✅ | **Métrica de la revista, no del artículo** |
+| `R-02` | Percentil CiteScore | Posición de la fuente | `CiteScore percentile` | idem | **sí** 92,5 % | media | V2 | Redundante con `R-01`; elegir uno principal |
+| `R-03` | SNIP de la fuente | Impacto normalizado de la fuente | `SNIP` | idem | **sí** 94,3 % | media | V2 | Tercera métrica de revista; redundante para V1 |
 
 ### 1.3 Colaboración
 
 | Cód. | Indicador | Definición | Lógica | Campos requeridos | Disp. | Confiab. | V1 | Nota metodológica |
 |---|---|---|---|---|---|---|---|---|
-| `C-01` | Colaboración internacional | Publicaciones con más de un país | `count(n_paises > 1)` | `Number of Countries` | **sí** 418/816 (51,2 %) | alta | ✅ | Indicador robusto: cobertura 100 % |
-| `C-02` | Sin colaboración institucional | Una sola institución | `count(n_inst == 1)` | `Number of Institutions` | **sí** 119 (14,6 %) | alta | ✅ | Complemento de `C-01` |
+| `C-01` | Colaboración internacional | Publicaciones con más de un país | `count(n_paises > 1)` | `Number of Countries` | **sí** 668/1.342 (49,8 %) | alta | ✅ | Indicador robusto: cobertura 100 % |
+| `C-02` | Sin colaboración institucional | Una sola institución | `count(n_inst == 1)` | `Number of Institutions` | **sí** 213 (15,9 %) | alta | ✅ | Complemento de `C-01` |
 | `C-03` | Países colaboradores | Ranking de países | `explode(Country/Region)` | `Country/Region` | **sí** 100 % | alta | ✅ | Multivaluado: **no sumable** |
 | `C-04` | Instituciones colaboradoras | Ranking de instituciones | `explode(Institution IDs)` | `Institution IDs` | **sí** 100 % | alta | ✅ | SciVal advierte truncamiento en nombres: usar IDs |
-| `C-06` | Autores por publicación | Tamaño de equipo | `Number of Authors` | idem | **sí** media 7,0 · mediana 5 | alta | ✅ | Asimétrica: **preferir mediana** |
+| `C-06` | Autores por publicación | Tamaño de equipo | `Number of Authors` | idem | **sí** media 7,3 · mediana 5 | alta | ✅ | Asimétrica: **preferir mediana** |
 | `C-05` | Red de coautoría | Grafo autor–autor | derivado de `Autoria` | tabla maestra | **sí** | media | V2 | **Publicado el 2026-08-26 (T-10)**, tras cerrarse T-03: ya no hereda nodos duplicados. Se muestra la componente (hecho objetivo) y la comunidad Louvain (heurística), declaradas por separado — ver `docs/GLOSSARY.md` |
-| `C-07` | Liderazgo autoral | Primer/último/correspondencia | cruce por Scopus Author ID | roles SciVal | **parcial** 91,4 % | media | V2 | Depende de resolver los 20 perfiles fragmentados (T-04) |
+| `C-07` | Liderazgo autoral | Primer/último/correspondencia | cruce por Scopus Author ID | roles SciVal | **parcial** 90,4 % | media | V2 | Depende de resolver los 29 perfiles fragmentados (T-04) |
 
 ### 1.4 Conceptuales y temáticos
 
 | Cód. | Indicador | Definición | Lógica | Campos requeridos | Disp. | Confiab. | V1 | Nota metodológica |
 |---|---|---|---|---|---|---|---|---|
-| `T-05` | Áreas QS | 5 grandes áreas | `explode(QS area)` | `QS Subject area` | **sí** 98,0 % | media | ✅ | Vista de entrada antes de bajar a ASJC |
-| `T-01` | Áreas ASJC | 249 categorías temáticas | `explode(ASJC field name)` | `ASJC field name` | **sí** 100 % · 1.796 asignaciones | media | ✅ | **Clasifica la revista, no el artículo.** Multivaluado: no sumar a 100 % |
-| `T-02` | Topics de SciVal | Clúster de co-citación del documento | `Topic name` | idem | **sí** 97,3 % · 632 topics | media | V2 | Demasiado disperso para vista principal; útil en ficha de publicación |
-| `T-03` | Prominencia temática | Atención del campo | `Topic Prominence Percentile` | idem | **sí** 100 % | **baja** | V2 | **Mide el campo, no el desempeño UFT.** Alto riesgo de malinterpretación |
-| `T-04` | ODS | Objetivos de Desarrollo Sostenible | `explode(SDG)` | `SDG 2025` | **parcial** 38,0 % | **baja** | ⚠️ | Publicable **sólo** como recuento, nunca como distribución del total |
+| `T-05` | Áreas QS | 5 grandes áreas | `explode(QS area)` | `QS Subject area` | **sí** 98,1 % | media | ✅ | Vista de entrada antes de bajar a ASJC |
+| `T-01` | Áreas ASJC | 271 categorías temáticas | `explode(ASJC field name)` | `ASJC field name` | **sí** 100 % · 2.973 asignaciones | media | ✅ | **Clasifica la revista, no el artículo.** Multivaluado: no sumar a 100 % |
+| `T-02` | Topics de SciVal | Clúster de co-citación del documento | `Topic name` | idem | **sí** 97,8 % · 932 topics | media | V2 | Demasiado disperso para vista principal; útil en ficha de publicación |
+| `T-03` | Prominencia temática | Atención del campo | `Topic Prominence Percentile` | idem | **sí** 97,8 % | **baja** | V2 | **Mide el campo, no el desempeño UFT.** Alto riesgo de malinterpretación |
+| `T-04` | ODS | Objetivos de Desarrollo Sostenible | `explode(SDG)` | `SDG 2025` | **parcial** 38,8 % | **baja** | ⚠️ | Publicable **sólo** como recuento, nunca como distribución del total |
 
 ### 1.5 Nivel autor
 
 | Cód. | Indicador | Definición | Lógica | Campos requeridos | Disp. | Confiab. | V1 | Nota metodológica |
 |---|---|---|---|---|---|---|---|---|
-| `AU-01` | Publicaciones por autor | Conteo completo | `count(distinct eid) by autor` | `Autoria` | **sí** | media | ✅ | Suma por autor (1.205) > total (823). No es total institucional |
+| `AU-01` | Publicaciones por autor | Conteo completo | `count(distinct eid) by autor` | `Autoria` | **sí** | media | ✅ | Suma por autor (1.960) > total (1.342). No es total institucional |
 | `AU-02` | Citas por autor | Citas atribuidas | `sum(citas) by autor` | `Autoria` + `Citations` | **sí** | media | ✅ | Atribución completa: una publicación aporta sus citas a cada autor UFT |
-| `AU-06` | Evolución temporal del autor | Publicaciones por año | `group by autor, anio` | `Autoria` | **sí** | media | ✅ | 3 puntos: **barras, no línea de tendencia** |
-| `AU-03` | h-index en ventana | h sobre 2023–2025 | h clásico sobre el subconjunto | `Autoria` + `Citations` | **parcial** | **baja** | ⚠️ | **442 de las 530 entidades tienen h ≤ 1 (83 %): sobre el conjunto no discrimina**[^au03]. Entre las 50 fichas donde sí se publica (n ≥ 5) la mediana es 3, el máximo 9 y sólo 4 quedan en h ≤ 1. Sólo en ficha, siempre etiquetado |
-| `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 328/589 firmas · 268/530 entidades | media | ✅ | Ya no es placeholder: se publicó al cerrarse `T-01` (2026-08-01); revisiones de identidad posteriores consolidaron más grupos y retiraron asignaciones erróneas. Cada asignación viaja con su veredicto; sin ORCID se muestra «no disponible», no se oculta |
+| `AU-06` | Evolución temporal del autor | Publicaciones por año | `group by autor, anio` | `Autoria` | **sí** | media | ✅ | 6 puntos: **barras, no línea de tendencia** |
+| `AU-03` | h-index en ventana | h sobre 2020–2025 | h clásico sobre el subconjunto | `Autoria` + `Citations` | **parcial** | **baja** | ⚠️ | **675 de las 829 entidades tienen h ≤ 1 (81 %): sobre el conjunto no discrimina**[^au03]. Entre las 68 fichas donde sí se publica (n ≥ 5) la mediana es 4, el máximo 20 y sólo 5 quedan en h ≤ 1. Sólo en ficha, siempre etiquetado |
+| `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 328/888 firmas · 268/829 entidades | media | ✅ | Ya no es placeholder: se publicó al cerrarse `T-01` (2026-08-01); revisiones de identidad posteriores consolidaron más grupos y retiraron asignaciones erróneas. Cada asignación viaja con su veredicto; sin ORCID se muestra «no disponible», no se oculta |
 | `AU-04` | FWCI por autor | Impacto normalizado del autor | — | — | **no** | no aplicable | ❌ | **Descartado.** El FWCI de un autor no es el promedio de sus publicaciones y SciVal no lo entrega a nivel autor. Calcularlo sería inventar la métrica |
 
-[^au03]: Recalculado el 2026-09-07 con la **misma** función `h_index()` de `src/build/03_authors.py`, aplicada a las `publicaciones` de las 530 fichas: reproduce sin una sola discrepancia los 50 valores que el sitio publica, así que no es otra métrica sino la misma sobre toda la base. El reparto es 188 entidades con h = 0, 254 con h = 1, 44 con h = 2 y 44 con h ≥ 3. Que se calcule para el análisis no cambia lo que se publica: la ficha sigue mostrando h sólo con n ≥ 5 (`D-396`). La cifra anterior —497 de 589— la produce `src/analysis/indicator_feasibility.py` sobre **formas de firma sin consolidar**, que es otra población; se conserva ahí como nota interna de factibilidad (`D-397`) y sólo cambia si se re-corre ese análisis.
+[^au03]: Recalculado el 2026-09-09 con la **misma** función `h_index()` de `src/build/03_authors.py`, aplicada a las `publicaciones` de las 829 fichas: reproduce sin una sola discrepancia los 68 valores que el sitio publica, así que no es otra métrica sino la misma sobre toda la base. El reparto es 221 entidades con h = 0, 454 con h = 1, 75 con h = 2 y 79 con h ≥ 3. Que se calcule para el análisis no cambia lo que se publica: la ficha sigue mostrando h sólo con n ≥ 5 (`D-396`). La cifra anterior —729 de 888— la produce `src/analysis/indicator_feasibility.py` sobre **formas de firma sin consolidar**, que es otra población; se conserva ahí como nota interna de factibilidad (`D-397`) y sólo cambia si se re-corre ese análisis.
 
 ### 1.6 Declarado — fuera del corpus Scopus/SciVal
 
@@ -94,7 +94,7 @@ trabajo).
 | `X-01` | Autocitas | El export declara `Self-citations: -` | Reexportar SciVal con la opción activada |
 | `X-02` | Benchmarking interinstitucional | Sin datos de instituciones comparables | Fuera de alcance V1 por `PROJECT_SPEC` |
 | `X-03` | Financiamiento | Cobertura 37,4 % | Fuente complementaria |
-| `X-04` | Tendencia de largo plazo | Ventana 2023–2025 | Datos previos a 2023 |
+| `X-04` | Tendencia de largo plazo | Ventana 2020–2025 | Datos previos a 2020 |
 
 ---
 
@@ -109,12 +109,12 @@ exigidos por `PROJECT_SPEC.md` y llevan advertencia visible.
 
 | # | KPI | Valor actual | Denominador declarado |
 |---|---|---|---|
-| 1 | Publicaciones totales | **823** | 2023–2025 |
-| 2 | Citas totales | **3.935** | 816 con métrica, corte 2026-07-22 |
-| 3 | Citas por publicación | **4,82** | 816 |
-| 4 | FWCI institucional | **0,87** (mediana 0,41) | 816 |
-| 5 | Colaboración internacional | **51,2 %** | 816 |
-| 6 | Autores UFT | **589 firmas** | 2023–2025 |
+| 1 | Publicaciones totales | **1.342** | 2020–2025 |
+| 2 | Citas totales | **14.245** | 1.342 con métrica, corte 2026-08-30 |
+| 3 | Citas por publicación | **10,61** | 1.342 |
+| 4 | FWCI institucional | **1,14** (mediana 0,48) | 1.342 |
+| 5 | Colaboración internacional | **49,8 %** | 1.342 |
+| 6 | Autores UFT | **829 firmas** | 2020–2025 |
 
 ### Módulos analíticos V1
 
@@ -138,18 +138,19 @@ Fase 2 tal como se tomó, no el estado actual del sitio.
 
 | | n |
 |---|---|
-| Indicadores evaluados | **41** |
-| Publicados | **29** |
-| ├ calculables | 29 |
+| Indicadores evaluados | **44** |
+| Publicados | **32** |
+| ├ calculables | 32 |
 | └ placeholder declarado | 0 |
-| Diferidos a V2 | 8 |
-| No calculables o fuera de alcance | 4 |
+| Diferidos a V2 | 7 |
+| No calculables o fuera de alcance | 5 |
 
 `AU-05` (ORCID) dejó de ser placeholder al cerrarse `T-01` y se publica, y
 `C-05` (red de coautoría) se publicó con `T-10` (2026-08-26); por eso el total es
-28. De los publicados, **19 llevan nota metodológica contextual** (tooltip) y
-**5 llevan advertencia destacada** — banda visible junto al módulo, no
-ocultable: `P-07`, `I-04`, `A-01`, `T-04`, `AU-03`.
+32. De los publicados, **25 llevan nota metodológica** y **9 de ellas son
+advertencia destacada** — banda visible junto al módulo, no ocultable: `P-07`,
+`A-01`, `I-04`, `T-04`, `AU-03` y los cuatro indicadores de producción
+declarada, `PD-01` a `PD-04`.
 
 Los dos niveles son distintos por diseño: la nota contextual explica cómo leer
 un indicador correcto; la advertencia destacada señala que el indicador tiene
@@ -174,11 +175,11 @@ nombre qué representa. Se determinó empíricamente antes de usarlo:
 **Conclusión:** el valor es el percentil de citación de la publicación, donde
 **menor = mejor**. Permite calcular `I-05` (top 10 % = percentil ≤ 10).
 
-Distribución resultante: top 1 % → 3 publicaciones · top 5 % → 34 · top 10 % →
-75 (9,2 %) · top 25 % → 210 (25,7 %).
+Distribución resultante: top 1 % → 11 publicaciones · top 5 % → 53 · top 10 % →
+115 (8,6 %) · top 25 % → 345 (25,7 %).
 
-Un corpus sin sesgo tendría ~10 % en el top 10 %. El 9,2 % observado es
-consistente con el FWCI mediano de 0,41: **la UFT está cerca del promedio
+Un corpus sin sesgo tendría ~10 % en el top 10 %. El 8,6 % observado es
+consistente con el FWCI mediano de 0,48: **la UFT está cerca del promedio
 mundial en la cola alta, y por debajo en la mediana.** Ese contraste es un
 resultado real y debe presentarse, no suavizarse.
 
@@ -187,7 +188,9 @@ resultado real y debe presentarse, no suavizarse.
 ## 4. Reglas de cálculo transversales
 
 1. **Denominador explícito.** Todo indicador declara sobre cuántas
-   publicaciones se calcula: 823, 818 o 816 según sus banderas.
+   publicaciones se calcula. En esta carga los cuatro denominadores coinciden
+   en 1.342, porque ninguna publicación queda fuera de las banderas de
+   disponibilidad; declararlo sigue siendo obligatorio, no opcional.
 2. **FWCI agregado sobre el conjunto**, nunca como media de FWCI individuales.
 3. **Multivaluados no suman al total.** ASJC, QS, ODS, países e instituciones
    producen más asignaciones que publicaciones. Prohibido presentarlos como
@@ -197,5 +200,5 @@ resultado real y debe presentarse, no suavizarse.
 5. **Mediana junto a media** cuando la distribución es asimétrica (`I-03`,
    `C-06`).
 6. **n < 5 marca el indicador como no interpretable** en vistas individuales
-   (480 de las 530 entidades publicadas).
-7. **Fecha de corte visible** en todo indicador de impacto: 2026-07-22.
+   (761 de las 829 entidades publicadas).
+7. **Fecha de corte visible** en todo indicador de impacto: 2026-08-30.

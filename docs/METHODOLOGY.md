@@ -13,8 +13,8 @@ La **publicación** es la unidad de análisis. El **autor afiliado** es la unida
 de atribución. No son intercambiables.
 
 El conteo completo (*full counting*) atribuye una publicación entera a cada
-autor UFT participante. Por eso la suma de publicaciones por autor (1.205) es
-mayor que el total de publicaciones del universo (823): una publicación con
+autor UFT participante. Por eso la suma de publicaciones por autor (1.960) es
+mayor que el total de publicaciones del universo (1.342): una publicación con
 tres autores UFT aparece tres veces. **Esa suma no es un total institucional.**
 
 Convención adoptada:
@@ -33,7 +33,7 @@ otra. La afiliación **no** es un atributo fijo de la persona.
 Consecuencia estructural: el modelo de datos incluye una entidad puente
 `Autoria`, y es ahí donde vive la afiliación. La tabla maestra de autores no
 tiene columna «facultad»; tiene la lista de unidades observadas y su recuento.
-En la auditoría, 24 autores presentan más de una unidad académica entre sus
+En la auditoría, 34 autores presentan más de una unidad académica entre sus
 publicaciones. Eso se declara, no se colapsa.
 
 ## 3. Cobertura no es realidad
@@ -42,22 +42,22 @@ Scopus indexa una parte de la producción académica, y esa parte no es uniforme
 entre disciplinas. Humanidades, ciencias sociales, libros y revistas locales
 chilenas están sistemáticamente subrepresentados.
 
-En este corpus el efecto es medible: Medicina concentra 527 de los 770 pares
-autor × publicación con unidad identificada, mientras Derecho registra 6 y
-Arquitectura y Diseño 3. **Esa diferencia no mide productividad relativa**: mide
+En este corpus el efecto es medible: Medicina concentra 903 de los 1.259
+pares autor × publicación con unidad identificada, mientras Derecho registra 10
+y Arquitectura y Diseño 3. **Esa diferencia no mide productividad relativa**: mide
 productividad indexada en Scopus.
 
 Toda comparación entre unidades académicas debe mostrar esta advertencia.
 
 ## 4. Ventanas cortas hacen inestables las métricas normalizadas
 
-El corpus cubre 2023–2025 con corte de citas al **22 de julio de 2026**. Las
-publicaciones de 2025 acumulan entre 7 y 19 meses de citación.
+El corpus cubre 2020–2025 con corte de citas al **30 de agosto de 2026**. Las
+publicaciones de 2025 acumulan entre 8 y 20 meses de citación.
 
 Consecuencias operativas:
 
 - El FWCI de una publicación reciente tiene varianza muy alta.
-- 480 de las 530 entidades publicadas tienen menos de 5 publicaciones en la
+- 761 de las 829 entidades publicadas tienen menos de 5 publicaciones en la
   ventana. A ese n, las métricas normalizadas individuales no son
   interpretables.
 - El **FWCI de un conjunto se calcula sobre el conjunto**, nunca como promedio
@@ -69,9 +69,9 @@ explícita, o no se muestra.
 
 ## 5. h-index en ventana ≠ h-index
 
-Con datos de 2023–2025 solamente puede calcularse un h-index restringido a esa
+Con datos de 2020–2025 solamente puede calcularse un h-index restringido a esa
 ventana. **No es el h-index de carrera** y presentarlo como tal sería engañoso.
-Se etiqueta siempre «h-index en ventana 2023–2025».
+Se etiqueta siempre «h-index en ventana 2020–2025».
 
 ## 6. Clasificación temática: de la revista o del documento, nunca del contenido
 

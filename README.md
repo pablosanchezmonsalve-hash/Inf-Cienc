@@ -63,7 +63,7 @@ scripts/         Asistentes de ejecución para Windows.
 
 ```
 data/raw/  →  src/audit/  →  data/interim/  →  src/build/  →  data/processed/  →  dist/
-(inmutable)   (29 reglas)     (validado)       (compuertas)    (publicable)      (desplegable)
+(inmutable)   (30 reglas)     (validado)       (compuertas)    (publicable)      (desplegable)
 ```
 
 Tres compuertas detienen el proceso si algo está mal, no avisan:
@@ -82,35 +82,44 @@ Tres compuertas detienen el proceso si algo está mal, no avisan:
 
 | | |
 |---|---|
-| Publicaciones en el universo canónico | **823** (2023–2025) |
-| Con métricas normalizadas | 816 |
-| Con autoría detallada | 818 |
-| Formas de firma de autor | **589** |
-| Pares autor × publicación | **1.207** |
-| Firmas con ORCID (sin consolidar) | **322** |
-| Entidades publicadas con ORCID | **277** |
-| Reglas de validación | **30** · 29 pasan · 0 fallas bloqueantes |
+| Publicaciones en el universo canónico | **1.342** (2020–2025) |
+| Con métricas normalizadas | 1.342 |
+| Con autoría detallada | 1.342 |
+| Formas de firma de autor | **888** |
+| Pares autor × publicación | **1.960** |
+| Firmas con ORCID (sin consolidar) | **328** |
+| Entidades publicadas con ORCID | **268** |
+| Reglas de validación | **30** · 27 pasan · 3 fallan · 0 fallas bloqueantes |
+
+Los tres denominadores coinciden en esta carga, y no por casualidad de
+redondeo: el cruce Scopus–SciVal por EID es 1 a 1 completo, así que ninguna
+publicación está en una sola de las dos fuentes. En la carga anterior había 7
+sólo en Scopus y 5 sólo en SciVal, y por eso las tres cifras diferían entre sí.
 
 ### Indicadores (Fase 2)
 
 | | |
 |---|---|
-| Evaluados contra los datos | **41** |
-| Publicados | **29** |
-| Diferidos a V2 | 8 |
-| No calculables, declarados | 5 |
+| Evaluados contra los datos | **44** |
+| Publicados | **32** |
+| Diferidos a V2 | 7 |
+| No calculables, declarados | 4 |
+| Fuera de alcance, declarados | 1 |
 
 ### Sitio (Fase 3)
 
 | | |
 |---|---|
-| Páginas | 11 |
-| Fichas de autor | **530**, una por archivo |
-| Peso total de `dist/` | ~3,8 MB |
+| Páginas | 12 |
+| Fichas de autor | **829**, una por archivo |
+| Peso total de `dist/` | ~5,6 MB |
 | Dependencias externas en el navegador | **0** |
 
-Peso por página, medido en navegador. La segunda columna es lo que realmente
-viaja: GitHub Pages sirve con gzip, y estos artefactos son JSON muy repetitivo.
+Peso por página, medido en navegador **sobre la carga anterior, la de 823
+publicaciones**: con las 1.342 de hoy la medición hay que rehacerla, y hasta
+entonces esta tabla describe un sitio más liviano que el que se sirve. La
+segunda columna es lo que realmente viaja: GitHub Pages sirve con gzip, y estos
+artefactos son JSON muy repetitivo.
 
 | Página | Sin comprimir | **Transferido** | Qué domina |
 |---|---|---|---|
@@ -119,10 +128,11 @@ viaja: GitHub Pages sirve con gzip, y estos artefactos son JSON muy repetitivo.
 | Autores | 267 KB | **~44 KB** | `authors.json` 171 → 14 KB |
 | Publicaciones | 808 KB | **~181 KB** | `publications.json` 699 → 146 KB |
 
-`publications.json` comprime al **20 %** de su tamaño y `authors.json` al **8 %**.
+`publications.json` comprime al **20 %** de su tamaño y `authors.json` al **6 %**.
 Las dos tablas grandes cargan su conjunto completo porque el filtrado ocurre en
-el cliente, sin servidor que consultar; a 146 KB comprimidos eso es un precio
-razonable por filtrar 823 publicaciones sin una sola petición más.
+el cliente, sin servidor que consultar; a 288 KB comprimidos eso sigue siendo un
+precio defendible por filtrar 1.342 publicaciones sin una sola petición más —
+ver `docs/UX_UI.md` §15.1, donde el techo de datos ya quedó excedido.
 
 El armazón común —hoja de estilo, motor de gráficos y glosario, unos 26 KB
 comprimidos— lo cachea el navegador entre páginas.
@@ -140,7 +150,7 @@ comprimidos— lo cachea el navegador entre páginas.
 | `docs/METHODOLOGY.md` | Criterios metodológicos que gobiernan todo cálculo |
 | `docs/METODOLOGIA_FUERA_DE_SCOPUS.md` | Cómo se clasifica y publica una fuente que no es Scopus/SciVal |
 | `docs/LIMITATIONS.md` | **Limitaciones declaradas. Leer antes de interpretar cualquier indicador** |
-| `docs/INDICATORS.md` | Catálogo de 41 indicadores y selección V1 |
+| `docs/INDICATORS.md` | Catálogo de 44 indicadores y selección V1 |
 | `docs/FUENTES_Y_APIS.md` | De dónde sale cada dato hoy, y qué plataformas podrían aportar lo que falta |
 | `docs/ORCID_COVERAGE.md` | Cobertura de ORCID: hasta dónde llega y por qué no llega al 100 % |
 | `docs/ARCHITECTURE.md` | Pipeline, artefactos y rendimiento |

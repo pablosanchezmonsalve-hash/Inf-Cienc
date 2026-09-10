@@ -33,7 +33,7 @@ data/raw/          →  src/audit/     →  data/interim/  →  src/build/  → 
 | `data/interim/` | Universo, tabla maestra, log de matching, factibilidad | ✅ implementado |
 | `src/build/` | Construcción de artefactos publicables (`01_publications.py`…`09_produccion_declarada.py`) | ✅ implementado |
 | `data/processed/` | JSON preagregados que consume la web | ✅ implementado |
-| `web/` | Sitio estático, 11 páginas | ✅ implementado y desplegado |
+| `web/` | Sitio estático, 12 páginas | ✅ implementado y desplegado |
 
 **Regla de barrera:** `src/build/` no lee de `data/raw/`. Sólo consume
 `data/interim/`, que ya pasó las 30 reglas de validación. Si la validación
@@ -45,21 +45,21 @@ falla con severidad bloqueante, el build no debe ejecutarse.
 
 ### Archivo maestro
 
-`data/interim/publications_universe.csv` (823 filas) es la tabla canónica de
+`data/interim/publications_universe.csv` (1.342 filas) es la tabla canónica de
 publicaciones, con las banderas `tiene_metricas`, `tiene_autoria_detallada` y
 `tiene_area_tematica` que determinan el denominador de cada indicador.
 
-`data/interim/authors_master_draft.csv` (589 filas) es el borrador inicial de
+`data/interim/authors_master_draft.csv` (888 filas) es el borrador inicial de
 la tabla maestra de autores, una fila por forma de firma sin consolidar. El
 plan original era promoverlo a `authors_master.csv` al cerrarse `T-03`/`T-04`
 (ambos cerrados, 2026-08-26); en la práctica la consolidación tomó otra forma:
 `config/identidades_consolidadas.yml` y `config/firmas_e09_resueltas.yml`
 —generados por `src/review/apply_decisions.py` desde decisiones humanas en
 `make revision`, nunca a mano (`D-08`)— son hoy el mecanismo real de
-consolidación, y `data/processed/authors.json` (530 entidades) es el
+consolidación, y `data/processed/authors.json` (829 entidades) es el
 artefacto final que sirve el sitio. `authors_master.csv` nunca se creó.
 
-`internal/matching_log.csv` (1.207 filas) es la tabla de autoría — la entidad
+`internal/matching_log.csv` (1.962 filas) es la tabla de autoría — la entidad
 puente del modelo. **Capa interna:** contiene las cadenas de afiliación crudas y
 el método de detección.
 
@@ -73,9 +73,9 @@ detalle comprimido).
 |---|---|
 | `kpis.json` | Los 6 KPIs de portada + fecha de corte |
 | `series.json` | Series anuales preagregadas de todos los módulos |
-| `publications.json` | 823 registros, campos de tabla y filtro |
-| `authors.json` | 530 entidades de autor con agregados |
-| `author/<id>.json` | Ficha individual con sus publicaciones, una por entidad (530 archivos) |
+| `publications.json` | 1.342 registros, campos de tabla y filtro |
+| `authors.json` | 829 entidades de autor con agregados |
+| `author/<id>.json` | Ficha individual con sus publicaciones, una por entidad (829 archivos) |
 | `facets.json` | Valores de cada filtro con su recuento |
 | `glossary.json` | Definiciones de métricas para tooltips |
 | `meta.json` | Fuentes, cortes, ventana, versión del build |
@@ -116,7 +116,7 @@ Node) para que cada página tenga contenido real sin JavaScript. Cumple los
 requisitos que motivaron la decisión:
 
 - Salida completamente estática, sin runtime de servidor.
-- Generación de 530 páginas de autor en build (una por entidad publicada).
+- Generación de 829 páginas de autor en build (una por entidad publicada).
 - Carga diferida por módulo.
 - Sin dependencia de CDN externo en runtime (los datos son institucionales;
   `README.md` declara **0** dependencias externas en el navegador).
@@ -171,7 +171,7 @@ resueltas— están en `docs/FUENTES_Y_APIS.md` §4.
 | Paginación | Tabla de publicaciones en páginas de 50; sin scroll infinito |
 | Fichas individuales | Un archivo por autor, no un bundle monolítico |
 
-El corpus (823 publicaciones, 530 entidades de autor) es lo bastante pequeño para filtrar
+El corpus (1.342 publicaciones, 829 entidades de autor) es lo bastante pequeño para filtrar
 en cliente sobre `publications.json` sin índice invertido. Se registra que este
 supuesto deja de valer alrededor de ~10.000 publicaciones, umbral a partir del
 cual haría falta un índice precomputado.

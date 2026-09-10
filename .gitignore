@@ -71,3 +71,6 @@ src/graphify-out/
 # corrida, como data/cache/. Se versionan solo los scripts y docs de informes/,
 # no el contenido de run/.
 informes/run/
+
+# Estado operacional del asistente (oh-my-claudecode): no es fuente ni derivado del proyecto.
+.omc/

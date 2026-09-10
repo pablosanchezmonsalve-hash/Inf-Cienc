@@ -347,14 +347,20 @@ def main() -> None:
            "Atribución completa: una publicación con 3 autores afiliados aporta sus "
            "citas 3 veces. No sumable a nivel institucional.")
 
-    record("AU-03", "h-index en ventana 2023-2025", "impacto", "parcial",
+    # La ventana y el reparto se derivan; escritos a mano sobrevivían a la carga
+    # que los volvía falsos, y esta etiqueta viaja a cada ficha de autor.
+    _vt = c.INSTITUTION["ventana_temporal"]
+    _ventana = f"{_vt['anio_inicio']}-{_vt['anio_fin']}"
+    _anios = _vt["anio_fin"] - _vt["anio_inicio"] + 1
+    _bajos = int((por_autor["h"] <= 1).sum())
+    record("AU-03", f"h-index en ventana {_ventana}", "impacto", "parcial",
            f"calculable para {len(por_autor)} autores · "
            f"max={int(por_autor['h'].max())} · "
-           f"{int((por_autor['h'] <= 1).sum())} autores con h<=1",
+           f"{_bajos} autores con h<=1",
            "baja", "V1 sólo en ficha, etiquetado",
-           "NO es el h-index de carrera. Con ventana de 3 años, 497 de 589 "
-           "autores tienen h<=1: el indicador no discrimina. Etiquetar "
-           "siempre 'h-index en ventana 2023-2025'.")
+           f"NO es el h-index de carrera. Con ventana de {_anios} años, {_bajos} de "
+           f"{len(por_autor)} autores tienen h<=1: el indicador no discrimina. "
+           f"Etiquetar siempre 'h-index en ventana {_ventana}'.")
 
     record("AU-04", "FWCI por autor", "impacto", "no", "—", "no aplicable",
            "descartado",

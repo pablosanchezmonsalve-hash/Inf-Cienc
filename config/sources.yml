@@ -7,7 +7,7 @@ fuentes:
 
   scopus_export:
     nombre: "Scopus — export nativo"
-    archivo: "data/raw/export_1667ea7a-7c7a-4b10-ae93-6fca216096cc_2026-07-31T161030.249574865.csv"
+    archivo: "data/raw/Scopus_Sept.csv"
     formato: "csv"
     encoding: "utf-8-sig"
     header_row: 0
@@ -19,29 +19,42 @@ fuentes:
       - referencias
       - financiamiento
     fecha_corte: null            # Sigue sin declararla el export en sí (Ambigüedad
-                                  # A-05). No se aplica retroactivamente al CSV
-                                  # vigente (docs/UPDATING_REQUEST.md §5) — esto es
-                                  # para LA PRÓXIMA carga, que sí debe traerla.
-    fecha_export: "2026-07-31"
-    ventana_declarada: "2023-2025"
+                                  # A-05). El CSV nativo de Scopus no trae filas de
+                                  # metadatos: la reexportación del 2026-09-08 se
+                                  # verificó columna a columna y tampoco la declara,
+                                  # de modo que T-06 NO se cierra con esta carga
+                                  # (PLAN.md → T-06; docs/UPDATING_REQUEST.md §5).
+    fecha_export: "2026-09-08"
+    ventana_declarada: "2020-2025"
     filtros_aplicados: "ninguno declarado"
     n_registros_declarado: null
-    n_registros_leido: 818
-    verificacion_api:            # T-06 — NO es la fecha de corte del export: es la
-                                  # confirmación, por API, de que el conteo del CSV
-                                  # de 2026-07-31 seguía vigente en esta fecha.
-                                  # Ver src/enrich/scopus_api.py, data/enriched/scopus_api_consulta.json.
-      fecha_consulta: "2026-08-26"
-      consulta: "AF-ID(60105368) AND PUBYEAR > 2022 AND PUBYEAR < 2026"
-      total_resultados: 818
-      coincide_con_n_registros_leido: true
+    n_registros_leido: 1342
+    reemplaza_a:                 # Trazabilidad de la carga del 2026-09-08 (D-563).
+                                  # El archivo anterior se conserva en data/raw/ sin
+                                  # borrar: la comparación entre ambos es la única
+                                  # evidencia de qué cambió Elsevier entre cortes.
+      archivo: "data/raw/export_1667ea7a-7c7a-4b10-ae93-6fca216096cc_2026-07-31T161030.249574865.csv"
+      fecha_export: "2026-07-31"
+      ventana_declarada: "2023-2025"
+      n_registros_leido: 818
+    verificacion_api: null       # T-06 — La confirmación por API del 2026-08-26
+                                  # (818 registros, consulta PUBYEAR > 2022 AND
+                                  # PUBYEAR < 2026) describía el export ANTERIOR y
+                                  # su ventana. No se traslada: afirmaría de esta
+                                  # carga algo que no se ha comprobado. Reejecutar
+                                  # src/enrich/scopus_api.py con PUBYEAR > 2019
+                                  # antes de volver a declararla (pendiente T-20).
 
   scival_export:
     nombre: "SciVal — export nativo"
-    archivo: "data/raw/Publications_at_Universidad_Finis_Terrae_2023_-_2025.xlsx"
+    archivo: "data/raw/Scival_Sept.xlsx"
     formato: "xlsx"
     hoja: "Sheet0"
-    header_row: 19               # filas 0-18 son metadatos del export
+    header_row: 20               # filas 0-19 son metadatos del export. El export
+                                  # del 2026-09-08 trae UNA fila más que el anterior
+                                  # (que usaba 19). La regla E-03 falla ruidosamente
+                                  # si este número no coincide, en vez de producir
+                                  # una tabla corrida en silencio.
     rol: "primaria"
     aporta:
       - metricas_normalizadas
@@ -50,15 +63,23 @@ fuentes:
       - colaboracion
       - scopus_affiliation_ids
       - roles_autorales
-    fecha_corte: "2026-07-22"    # "Date last updated" declarado por el export
-    fecha_export: "2026-07-31"
-    ventana_declarada: "2023 to 2025"
+    fecha_corte: "2026-08-30"    # "Date last updated" declarado por el export
+    fecha_export: "2026-09-08"   # "Date exported" declarado por el export
+    ventana_declarada: "2020 to 2025"
     filtros_aplicados: "not filtered; all publication types"
-    n_registros_declarado: 816
-    n_registros_leido: 818
+    n_registros_declarado: 1342  # "1342 publications match the selected filter options"
+    n_registros_leido: 1342
     advertencias_del_export:
-      - "Some Affiliation names cells are truncated"
+      - "Some Institutions cells are truncated"
       - "Some publication dates might be approximate"
+    reemplaza_a:                 # Trazabilidad de la carga del 2026-09-08 (D-563).
+      archivo: "data/raw/Publications_at_Universidad_Finis_Terrae_2023_-_2025.xlsx"
+      header_row: 19
+      fecha_corte: "2026-07-22"
+      fecha_export: "2026-07-31"
+      ventana_declarada: "2023 to 2025"
+      n_registros_declarado: 816
+      n_registros_leido: 818
 
   rdata_scopus:
     nombre: "bibliometrix — Scopus normalizado"

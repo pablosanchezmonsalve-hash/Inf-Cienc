@@ -30,8 +30,20 @@ deteccion_institucional:
     # Patrón con límite de palabra, insensible a caso y a acentos.
     # El separador admite espacio o guion: la variante "Universidad Finis-Terrae"
     # existe en los datos y con '\s+' se perdía (falso negativo verificado).
+    #
+    # ERRATAS DE LA FUENTE (carga 2026-09-08, decisión D-565). El export nuevo
+    # trae seis formas mal escritas del nombre institucional que el patrón
+    # original no capturaba, dejando 16 publicaciones sin detección blanda pese
+    # a estar confirmadas por el Affiliation ID. Son erratas de Scopus, no
+    # instituciones distintas: "Finnis Terrae", "Finis Terra" (sin la e final),
+    # "Finis Terrrae", "Finis Tarrae" y "Finis, Terrae" (coma intercalada).
+    # El patrón ampliado se midió sobre las 5972 cadenas de afiliación distintas
+    # del corpus: captura 11 cadenas más que el original y las 11 son de la
+    # institución. Cero falsos positivos. Sigue exigiendo las dos palabras del
+    # nombre con límite de palabra, así que no relaja la regla I-05.
     patrones:
       - '\bfinis[\s\-]+terrae\b'
+      - '\bfin{1,2}is[\s\-,]+t[ae]rr{1,3}ae?\b'
     # Regla I-05: prohibido el matching por subcadena suelta.
     # Verificado empíricamente en Fase 1: la subcadena 'inis' produce 16 cadenas
     # de falso positivo ("Ministerio de Salud", "Faculty of Business
