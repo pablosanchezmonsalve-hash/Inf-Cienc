@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `6e4b9e6` · Merge pull request #49: cifras caducadas en la documentación
+Último commit: `f2cbeea` · La carga de septiembre, con seis años en vez de tres
 Snapshot: 2026-09-10
 
 ---
@@ -60,7 +60,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Pendientes abiertos (6)
+## Pendientes abiertos (5)
 
 | # | Pendiente |
 |---|---|
@@ -68,12 +68,11 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 | `T-20` | Reejecutar la verificación por API de Scopus con la ventana 2020-2025 |
 | `T-21` | Recuperar ORCID para las 299 formas de firma que trajo la ventana 2020-2025 |
 | `T-22` | Validar las 11 variantes de unidad académica que trajo la ventana 2020-2025 |
-| `T-23` | Resolver el presupuesto de peso de datos, excedido por la carga 2020-2025 |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 586
+## Decisiones tomadas: 593
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

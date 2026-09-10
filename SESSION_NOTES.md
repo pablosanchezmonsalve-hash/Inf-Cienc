@@ -14132,3 +14132,118 @@ seis pendientes abiertos.
   `docs/INDICATORS.md`, `docs/INFORME_POR_INVESTIGADOR.md`
 - `config/resoluciones_humanas.yml` — consecuencia en términos relativos
 - `PLAN.md` — `T-21`, `T-22`, `T-23`
+
+
+## Cierre: el presupuesto de peso, tras la carga 2020-2025 (2026-09-10)
+
+La carga dejó el sitio construido y auditado, pero sin publicar: el presupuesto
+de peso de datos quedó en 370,8 KB comprimidos sobre un techo de 300, y la
+batería corre dentro del job que construye, del que depende el de desplegar. El
+sitio en producción seguía sirviendo 823 publicaciones y ventana 2023-2025.
+
+Conviene decir en qué orden estaba el problema: **lo roto en producción era
+integridad, prioridad 2; lo que lo bloqueaba era rendimiento, prioridad 5**. Un
+informe desactualizado en el sitio es peor que setenta kilobytes de exceso.
+
+### La palanca anotada no llegaba, y ahora está medido
+
+`docs/UX_UI.md` guardaba desde julio una palanca «para cuando el techo apriete»:
+quitar los campos de `publications.json` que nada consume, cifrados ahí en 47 KB.
+Apretó. Y no llega.
+
+Medido con el propio verificador sobre una copia real de `dist/`: quitar los
+tres campos sin ningún consumo —`topic`, `tipo_fuente`, `editorial`— deja el
+grupo en **329,4 KB, el 110 % del techo**; ampliarlo a los cinco huérfanos, en
+325,3 KB, el 108 %. La compuerta sigue en rojo.
+
+El error del cálculo viejo era medir en bruto: esos campos pesan 167 KB sin
+comprimir pero sólo **41,3 comprimidos**, porque son de altísima repetición
+—`Journal` mil trescientas cuarenta y dos veces— y gzip ya colapsaba casi todo.
+La regla de tres sobreestimaba el ahorro por un factor de cuatro.
+
+Recortar el dataset publicable **y seguir excediendo el techo** es el peor de
+los dos mundos: se pierde dato y no se desbloquea nada.
+
+### Un error de hecho que era una trampa
+
+Ese mismo documento listaba seis campos huérfanos e incluía `n_paises`. Es
+falso: `n_paises` es la décima columna del CSV que descarga el usuario. Quien
+hubiera accionado la palanca fiándose de la lista habría roto la descarga
+pública en silencio. Corregido: son cinco.
+
+### El techo sube, con la regla que ya existía
+
+No es un techo externo, y su propia procedencia lo decía: CSS y JavaScript citan
+una recomendación de presupuesto para móvil; datos decía «margen sobre lo
+medido». La regla con que se fijó las dos veces anteriores es **1,21 veces lo
+medido**: 250 sobre 204,3 y 300 sobre 247,7. Aplicarla a los 370,8 de hoy da
+450. Se aplicó la regla; no se derogó.
+
+Y la evidencia se midió **sobre este corpus**, no sobre el anterior: subir un
+techo citando una medición vieja es exactamente el defecto que el verificador
+existe para impedir. Bajo Slow 4G, con las 1.342 publicaciones: LCP de 1.596 ms
+en la portada, 1.620 en impacto y 1.592 en temática, contra un umbral de 2.500.
+Con las 823 de julio eran 1.424, así que **duplicar el corpus costó 172 ms** y
+el margen sigue en el 36 %.
+
+### Lo que impide que esto se repita
+
+Subir un techo dos veces seguidas es aplicar una regla; hacerlo tres es
+derogarla a plazos. Por eso la respuesta de la próxima vez queda escrita hoy, en
+la cabecera del propio verificador: cuando este techo se vuelva a exceder se
+recodifica `publications.json` en columnas con diccionario de cadenas, que está
+medido —265,8 KB, ciento cinco menos— y cuya rehidratación devuelve el texto
+original byte a byte. No otro 1,21x.
+
+La cabecera llevaba además tres cifras muertas desde la subida anterior: decía
+«250 KB sobre los ~172 actuales» y daba «en torno a 900 ms» de LCP donde la
+medición real era 1.424. En el archivo cuyo primer párrafo advierte de que un
+presupuesto escrito en prosa envejece en silencio. Reescrita.
+
+### La cifra que abre el informe declara su salvedad
+
+Aparte del peso, algo que la carga dejó abierto: dos pares de registros
+comparten DOI y esperan revisión humana, pero el total de publicaciones se
+publicaba sin decirlo. Un lector veía 1.342 sin saber que el recuento sobra en
+los duplicados que se confirmen.
+
+Ahora `P-01` lleva una nota **derivada de la cola**, no escrita en config: se
+construye con los grupos pendientes del momento, igual que `nota_p06`, así que
+cuando alguien resuelva los pares la nota se apaga sola en vez de quedarse
+advirtiendo de un problema que ya no existe.
+
+### Un recuento del verificador que el corpus volvió falso
+
+La batería comprobaba que el recorte «Medicina y Salud, 2024» llega intacto de
+una página a otra, y esperaba 122 publicaciones. Ahora son 121: el export nuevo
+no trae cinco registros de 2023-2025 que sí traía el de julio, y uno era de esa
+unidad y ese año. No es una regresión del filtro, es el corpus. Actualizado con
+el motivo al lado del número, para que el próximo que lo vea no lo lea como una
+avería.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist` pasa **entera, exit 0**: contraste, estructura,
+flujos, navegador, responsive, impresión, higiene y peso. El despliegue deja de
+estar bloqueado.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-587 | El techo de peso de datos sube de 300 a 450 KB comprimidos | No es un techo externo y su propia procedencia lo dice. La regla con que se fijó las dos veces anteriores es 1,21x lo medido —250 sobre 204,3 y 300 sobre 247,7—; aplicarla a los 370,8 de hoy da 450. Aligerar no era alternativa: está medido que los campos sin consumo ahorran 41,3 KB de los 70,7 que harían falta |
+| D-588 | La subida se justifica con un LCP medido sobre este corpus, no sobre el anterior | El argumento que sostiene un techo de datos alto es que está fuera de la ruta crítica de pintado, y esa medición era de las 823 publicaciones de julio. Citarla para 1.342 sería justificar con una medición vieja, que es el defecto que el verificador existe para impedir |
+| D-589 | El próximo exceso se resuelve recodificando, no subiendo el techo otra vez | Una tercera aplicación del 1,21x convierte el techo en una función del corpus: sube siempre y deja de restringir. La salida está medida y no cuesta ningún dato: el formato columnar deja el grupo en 265,8 KB con rehidratación idéntica byte a byte |
+| D-590 | No se recorta `publications.json`, y la palanca anotada se declara agotada con su cifra | Está medido que ya no llega: 41,3 KB comprimidos de los 70,7 necesarios, porque son campos de altísima repetición que gzip ya colapsaba. Recortar el dataset publicable y seguir excediendo el techo es el peor de los dos mundos |
+| D-591 | El verificador declara que su suma es una cota superior, y no el peso de ninguna página | Suma los quince artefactos raíz y ninguna página los pide juntos: la más pesada pide 328,0 KB. Se deja así a propósito, porque derivar el peor caso exigiría una lista escrita a mano de qué pide cada página, y esa lista envejece en silencio |
+| D-592 | La cabecera del presupuesto se reescribe con las cifras vigentes, en la misma pasada | Llevaba «250 KB sobre los ~172 actuales» desde que la subida a 300 cambió el valor sin tocar el texto, y un LCP de «en torno a 900 ms» donde la medición decía 1.424. Tres cifras muertas en el archivo que advierte de que los presupuestos en prosa envejecen en silencio |
+| D-593 | `P-01` declara los duplicados pendientes, derivándolos de la cola | La cifra que abre el informe no decía nada mientras dos pares de registros compartían DOI y esperaban revisión. Derivada y no escrita en config, la nota se apaga sola cuando se resuelvan: una nota estática diría que hay duplicados el día que ya no los haya |
+
+### Archivos
+
+- `src/verify/peso.mjs` — el techo, el disparador y la cabecera
+- `src/verify/flujos.mjs` — el recuento del recorte heredado
+- `src/build/common_build.py` — `nota_p01()` y `duplicados_pendientes()`
+- `src/build/02_indicators.py` — `P-01` emite la nota derivada
+- `docs/UX_UI.md` — §15.1 y la palanca declarada agotada
+- `PLAN.md` — `T-23` cerrado

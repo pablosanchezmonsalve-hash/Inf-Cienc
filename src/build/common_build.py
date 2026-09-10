@@ -403,6 +403,58 @@ def nota_p06(publicadas: int) -> dict:
     return {"texto": t, "destacada": bool(encoladas)}
 
 
+def duplicados_pendientes() -> list[list[str]]:
+    """Grupos de publicaciones con el mismo DOI que nadie ha revisado todavía.
+
+    Se leen de la cola de ambigüedades, no de una lista en config: la cola es
+    donde el pipeline las encola y donde una persona las resuelve (`D-08`).
+    """
+    ruta = INTERNAL / "ambiguities_publications.csv"
+    if not ruta.exists():
+        return []
+    filas = pd.read_csv(ruta, dtype=str)
+    filas = filas[filas["resolucion"] == "NO_RESOLVER_AUTOMATICAMENTE"]
+    if filas.empty:
+        return []
+    # Se agrupa por DOI, que es el criterio de la regla `D-02`, y no por el
+    # texto del detalle: los títulos del mismo trabajo difieren entre registros
+    # justo en lo que los hace sospechosos, la capitalización.
+    grupos: dict[str, list[str]] = {}
+    for _, f in filas.iterrows():
+        detalle = str(f.get("detalle", ""))
+        doi = detalle.rsplit("doi=", 1)[-1].strip() if "doi=" in detalle else ""
+        if not doi or doi.lower() == "nan":
+            continue
+        grupos.setdefault(doi.lower(), []).append(str(f["eid"]))
+    return [g for g in grupos.values() if len(g) > 1]
+
+
+def nota_p01(total: int) -> dict | None:
+    """La cifra que abre el informe declara lo que puede estar sobrecontando.
+
+    Mientras haya grupos de publicaciones con el mismo DOI sin resolver, el
+    total sobra en los duplicados que se confirmen. Decirlo donde está la cifra
+    es lo que separa un recuento de una afirmación: quien la cite tiene que
+    poder citar también su salvedad.
+
+    Derivada, no escrita en config (mismo motivo que `nota_p06`): cuando la
+    revisión humana resuelva los grupos, la nota se apaga sola en vez de
+    quedarse advirtiendo de un problema que ya no existe.
+    """
+    grupos = duplicados_pendientes()
+    if not grupos:
+        return nota("P-01")
+    n_grupos = len(grupos)
+    n_registros = sum(len(g) for g in grupos)
+    sobrantes = n_registros - n_grupos
+    plural = "grupos" if n_grupos > 1 else "grupo"
+    t = (f"Recuento de registros del universo. {n_grupos} {plural} de registros "
+         f"comparten DOI y esperan revisión humana: si se confirman como el mismo "
+         f"trabajo, el total sobra en {sobrantes}. No se fusionan por su cuenta "
+         f"(`D-08`) y quedan visibles en la tabla de validación, regla `D-02`.")
+    return {"texto": t, "destacada": False}
+
+
 def denominadores() -> dict:
     return INDICATORS["denominadores"]
 

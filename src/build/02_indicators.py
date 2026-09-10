@@ -61,7 +61,7 @@ def main() -> None:
         return item
 
     kpis = [
-        kpi("P-01", len(uni)),
+        kpi("P-01", len(uni), extra={"nota": b.nota_p01(len(uni))}),
         kpi("I-01", sum(citas)),
         kpi("I-02", round(sum(citas) / den["con_metricas"], 2)),
         kpi("I-03", round(statistics.mean(fwci), 2),

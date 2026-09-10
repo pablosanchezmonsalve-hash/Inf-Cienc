@@ -107,11 +107,15 @@ console.log('  Filtros de publicaciones');
 // cerrar T-02 (2026-08-26, consolidación de vocabulario de unidades
 // académicas); el nombre viejo ya no matchea nada y el recuento subió de
 // 113 a 122 al incorporar las publicaciones que antes eran de Odontología.
+// La carga del 2026-09-08 lo dejó en 121: el export nuevo no trae cinco
+// registros de 2023-2025 que sí traía el de julio, y uno de ellos era de
+// esta unidad y este año. No es una regresión del filtro, es que el corpus
+// cambió; la comparación entre los dos exports está en docs/LIMITATIONS.md §1.
 await pg.goto(`http://127.0.0.1:${P}/publicaciones.html?anio=2024&unidad=Facultad+de+Medicina+y+Salud`,
   { waitUntil: 'networkidle' });
 await pg.waitForTimeout(700);
 const heredado = await pg.textContent('.recorte-n');
-ok(heredado.trim() === '122', `el recorte de la portada llega intacto (${heredado.trim()})`);
+ok(heredado.trim() === '121', `el recorte de la portada llega intacto (${heredado.trim()})`);
 ok(await pg.locator('.chip-on').count() === 2, 'los controles reflejan el recorte heredado');
 const filas = await pg.locator('#tabla-cuerpo tr').count();
 ok(filas > 0, `la tabla trae filas (${filas})`);

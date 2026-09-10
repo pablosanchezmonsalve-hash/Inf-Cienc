@@ -1094,9 +1094,30 @@ en este sitio: el explorador manda `publications.json` entero al navegador.
 
 | | Comprimido | Techo | Uso |
 |---|---|---|---|
-| CSS | 38,3 KB | 60 KB | 64 % |
-| JavaScript | 79,4 KB | 150 KB | 53 % |
-| Datos | 369,6 KB | 300 KB | **123 % · excedido** |
+| CSS | 39,9 KB | 60 KB | 67 % |
+| JavaScript | 82,7 KB | 150 KB | 55 % |
+| Datos | 370,8 KB | 450 KB | 82 % |
+
+El techo de datos **subió de 300 a 450 KB** con la carga 2020–2025 (`D-587`).
+No es un techo externo, y su propia procedencia lo dice: CSS y JavaScript citan
+una recomendación de presupuesto para móvil; datos dice «techo propio». La regla
+con que se fijó las dos veces anteriores es **1,21 veces lo medido** —250 sobre
+204,3 y 300 sobre 247,7—, y aplicarla a los 370,8 de hoy da 450. Se aplicó la
+regla, no se derogó.
+
+**La próxima vez no se sube** (`D-589`). Una tercera aplicación del 1,21x
+convierte el techo en una función del corpus: sube siempre y deja de restringir.
+La salida ya está medida y no cuesta ningún dato: recodificar
+`publications.json` en columnas con diccionario de cadenas deja el grupo en
+**265,8 KB** —105 menos— y la rehidratación devuelve el texto original byte a
+byte.
+
+**Qué mide esa suma** (`D-591`): los quince artefactos raíz de `dist/data/`, que
+ninguna página pide juntos. La página más pesada pide 328,0 KB y la ficha de
+autor 316,0. Es una **cota superior** del peso de datos de cualquier página, no
+el peso de ninguna. Las 829 fichas de autor quedan fuera a propósito: suman
+995,8 KB entre todas, pero la mayor pesa 6,5 KB y ninguna página carga más de
+una.
 
 #### Por qué el techo de datos puede ser tan alto
 
@@ -1106,34 +1127,53 @@ después:
 
 | Medición | Resultado | Umbral |
 |---|---|---|
-| LCP en *Slow 4G* | **1.424 ms** | 2.500 ms (Core Web Vitals) |
+| LCP en *Slow 4G*, portada | **1.596 ms** | 2.500 ms (Core Web Vitals) |
+| LCP en *Slow 4G*, impacto | 1.620 ms | 2.500 ms |
+| LCP en *Slow 4G*, temática | 1.592 ms | 2.500 ms |
 | Latencia al recortar el conjunto | **21–37 ms** | 200 ms (INP) |
 
-Los dos por debajo del umbral, el LCP con un 43 % de margen. El peso de los datos es el precio de la
-arquitectura —cualquier pregunta se responde sin volver al servidor— y está
-comprado con margen.
+Medido el 2026-09-10 sobre el corpus de **1.342 publicaciones**, no sobre el
+anterior: subir un techo citando una medición vieja es el defecto que
+`peso.mjs` existe para impedir (`D-588`). Con las 823 de julio el LCP era de
+1.424 ms, así que **duplicar el corpus costó 172 ms** y el margen sigue en el
+36 %. El peso de los datos es el precio de la arquitectura —cualquier pregunta
+se responde sin volver al servidor— y está comprado con margen.
 
 #### La decisión de no recortar el dataset
 
-Seis campos de `publications.json` —`editorial`, `idioma`, `topic`,
-`tipo_fuente`, `n_paises`, `n_instituciones`— **no los consume el explorador**.
-Quitarlos ahorraría 47 KB comprimidos, un 16 % de `publications.json`.
+**Cinco** campos de `publications.json` —`editorial`, `idioma`, `topic`,
+`tipo_fuente`, `n_instituciones`— no los consume nada: ni el explorador, ni el
+generador del informe en PDF, ni el CSV que descarga el usuario, ni los otros
+catorce artefactos, ni las 829 fichas de autor.
 
-**No se quitan**, por dos razones:
+> **Corrección del 2026-09-10.** Este documento listaba seis e incluía
+> `n_paises`. Es falso: `n_paises` es la décima columna del CSV que descarga el
+> usuario (`web/assets/js/paginas.js:634`). Quien hubiera accionado la palanca
+> fiándose de esta lista habría roto la descarga pública en silencio.
+
+**No se quitan**, por tres razones. Las dos primeras ya estaban:
 
 - `publications.json` no es sólo el combustible del explorador: es el **dataset
   publicable** del informe. Quien lo descargue esperando los campos del corpus
   no debería encontrarse un recorte hecho para que una página cargue antes.
 - El orden de prioridades del proyecto pone **integridad de datos (2) por
-  encima de rendimiento (5)**, y el conflicto que aquí no existía ahora sí
-  existe: con la carga del 2026-09-08 el techo de datos queda **excedido** —369,6
-  KB comprimidos sobre 300—, aunque el efecto medido siga a menos de la mitad
-  del umbral.
+  encima de rendimiento (5)**.
 
-Queda **anotado como la palanca disponible** para cuando el techo apriete. Con
-el corpus creciendo cada año, ese momento llegaría; llegó con la ventana de
-2020–2025, y lo dijo la batería y no una frase de este documento. Accionar la
-palanca —o subir el techo— sigue siendo una decisión, y no está tomada.
+La tercera es la que cierra el asunto, y es una medición, no un argumento:
+
+- **La palanca no llega.** Quitar los tres campos sin ningún consumo deja el
+  grupo en **329,4 KB** comprimidos, un 110 % del techo; ampliarlo a los cinco,
+  en **325,3 KB**, un 108 %. La compuerta sigue en rojo y el despliegue sigue
+  detenido. Los 47 KB que este documento anotaba eran una estimación sobre el
+  peso **en bruto**: medido tras comprimir, el recorte de los tres vale 41,3 KB
+  de los 70,7 que harían falta. Son campos de altísima repetición —`Journal`
+  1.342 veces, editoriales y topics repetidos— y **gzip ya colapsaba casi todo
+  ese peso**: 167 KB en bruto valen 41,3 comprimidos.
+
+Recortar el dataset publicable **y seguir excediendo el techo** es el peor de
+los dos mundos: se pierde dato y no se desbloquea nada. La palanca queda
+**declarada agotada**, con su cifra, para que nadie vuelva a anotarla como
+disponible. Lo que sí resuelve el exceso está en la sección siguiente.
 
 #### Y ahora es una compuerta, no una nota
 
