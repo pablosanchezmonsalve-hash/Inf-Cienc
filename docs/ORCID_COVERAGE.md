@@ -3,14 +3,26 @@
 **Capa:** pública · **Pendientes que ataca:** `T-19` y la pregunta de cuánta
 cobertura es alcanzable
 
-> **Las cifras van sobre la base publicada: 530 entidades de autor**, que son las
-> 589 formas de firma de la fuente con las variantes ya fusionadas por revisión
+> **Las cifras van sobre la base publicada: 829 entidades de autor**, que son las
+> 888 formas de firma de la fuente con las variantes ya fusionadas por revisión
 > humana (94 formas en 39 personas en la consolidación vigente) y 4 formas
 > descartadas por la regla `E-09` (fragmentos de cadena de afiliación, no
 > personas — ver `docs/LIMITATIONS.md` §7). Este documento se escribió sobre
-> la base de 556, se actualizó el 2026-09-01 a 542, el 2026-09-02 a 538 y el
-> 2026-09-07 a la base que sirve el sitio hoy; si vuelve a divergir, manda
+> la base de 556, se actualizó el 2026-09-01 a 542, el 2026-09-02 a 538, el
+> 2026-09-07 a 530 y el 2026-09-09 —con la carga que amplió la ventana a
+> 2020-2025— a la base que sirve el sitio hoy; si vuelve a divergir, manda
 > `STATE.md`, que se deriva del repositorio.
+
+> **Advertencia de la carga del 2026-09-08.** La cobertura de ORCID **no se
+> volvió a medir**. Las 328 formas de firma y las 268 entidades que tenían
+> identificador siguen todas ahí, pero sin él quedan 560 formas de firma, de
+> las que **299 son las que añadió la ampliación** y ninguna vía ha consultado
+> todavía; las otras 261 ya estaban en el corpus 2023-2025 y se consultaron sin
+> encontrarles identificador, que es un hueco distinto y más duro. Toda
+> cobertura que este documento afirma en presente es, por tanto, un numerador
+> medido sobre el corpus 2023-2025 contra un denominador que ya es el universo
+> 2020-2025: baja por dilución, no porque se haya perdido un dato. Volver a
+> consultarlas es el pendiente `T-21`.
 
 ---
 
@@ -46,10 +58,11 @@ el registro, sin resolverlos.
 
 Después vino la revisión humana, que consolidó variantes y confirmó candidatos
 por afiliación. **Sobre la base que hoy publica el sitio la cobertura es de 268
-de 530 entidades (50,6 %)**, y son 328 asignaciones si se cuentan sobre las
-formas de firma sin consolidar. Las dos cifras son ciertas y miden poblaciones
+de 829 entidades (32,3 %)**, y son 328 asignaciones sobre las 888 formas de
+firma sin consolidar (36,9 %). Las dos cifras son ciertas y miden poblaciones
 distintas; citar una donde corresponde la otra es el error que este proyecto
-persigue.
+persigue. Ninguna de las dos es una medición nueva: las asignaciones son las
+mismas de antes de la carga, y sólo cambió el denominador (`T-21`).
 
 La tercera es distinta y por eso no publica. Las dos primeras exigen que la
 firma y el titular coincidan en nombre **y** aparezcan en el mismo artículo. La
@@ -109,25 +122,32 @@ dominado por firmas de una sola publicación:
 
 | Publicaciones de la entidad | Entidades | Con ORCID | Cobertura |
 |---|---:|---:|---:|
-| 1 | 375 | 146 | 38,9 % |
-| 2 | 74 | 50 | 67,6 % |
-| 3–4 | 43 | 35 | 81,4 % |
-| 5–9 | 31 | 27 | 87,1 % |
-| 10 o más | 19 | 19 | **100 %** |
+| 1 | 567 | 111 | 19,6 % |
+| 2 | 119 | 50 | 42,0 % |
+| 3–4 | 75 | 46 | 61,3 % |
+| 5–9 | 41 | 35 | 85,4 % |
+| 10 o más | 27 | 26 | **96,3 %** |
 
-**69,2 % de las entidades tienen una sola publicación.** Una entidad con una
+Las dos últimas columnas arrastran el límite de la advertencia de arriba: el
+numerador se midió sobre el corpus 2023-2025 y el denominador ya es el universo
+2020-2025, de modo que la cobertura de cada tramo está subestimada mientras
+`T-21` siga abierto. Lo que la tabla sí describe sin reservas es la forma de la
+distribución.
+
+**68,4 % de las entidades tienen una sola publicación.** Una entidad con una
 publicación tiene exactamente una oportunidad de ser encontrada: si su ORCID no
 aparece en ese único DOI, no hay una segunda vía por la que pueda aparecer.
-Entre quienes tienen diez o más, la cobertura es del **100 %**: **entre los autores
-con obra sostenida en la ventana, la cobertura está completa**, y lo que falta
-se concentra en la cola de entidades con una sola publicación.
+Entre quienes tienen diez o más, la cobertura llega al **96,3 %** —26 de 27
+entidades—: **entre los autores con obra sostenida en la ventana apenas quedan
+huecos**, y lo que falta se concentra en la cola de entidades con una sola
+publicación.
 
 La forma de la distribución no cambió con la consolidación —sigue dominada por
 la cola de una publicación— pero las cifras sí: fusionar variantes junta las
 publicaciones de una misma persona, y por eso hay menos entidades de una sola
 publicación y más de diez o más.
 
-A esto se añade un límite estructural: **10 entidades no tienen ninguna
+A esto se añade un límite estructural: **20 entidades no tienen ninguna
 publicación con DOI**. Ninguna vía basada en DOI puede alcanzarlas, ni la de
 Crossref ni la del registro. Para ellas sólo queda la búsqueda por afiliación,
 que no publica.
@@ -136,20 +156,20 @@ que no publica.
 
 ## 4. Lo que el 100 % exigiría
 
-Para que las 530 tuvieran ORCID harían falta las cuatro cosas a la vez:
+Para que las 829 tuvieran ORCID harían falta las cuatro cosas a la vez:
 
-1. que las 530 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
+1. que las 829 personas **tengan** un ORCID —es voluntario y no todas lo crean—;
 2. que su registro sea **público** —puede configurarse como privado—;
 3. que alguna fuente **conecte** ese ORCID con alguna de sus publicaciones de
    este corpus, o que la persona declare la universidad;
 4. que el nombre permita distinguirla de sus homónimos.
 
 Las cuatro se cumplen para una parte de los autores y no para el resto. Escribir
-530 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
+829 asignaciones exigiría inventar las que faltan, que es lo primero que prohíben
 las reglas del proyecto: *«No inventes datos, columnas, métricas, relaciones ni
 resultados»*.
 
-**Y 530 entidades tampoco son 530 personas.** Una revisión humana ya fusionó
+**Y 829 entidades tampoco son 829 personas.** Una revisión humana ya fusionó
 variantes (94 formas en 39 personas en la consolidación vigente) y descartó
 cuatro firmas que resultaron ser fragmentos de cadena de afiliación, no
 personas (`E-09`, ya resuelto — ver `docs/LIMITATIONS.md` §7), pero quedan

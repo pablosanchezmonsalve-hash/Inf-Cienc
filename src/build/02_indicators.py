@@ -27,6 +27,14 @@ import common_build as b
 import grafo_coautoria as GC
 
 
+def _derivada(code: str) -> str | None:
+    """Texto de la advertencia de los indicadores que la construyen medida."""
+    if code == "P-01":
+        n = b.nota_p01(0)
+        return n["texto"] if n else None
+    return None
+
+
 def main() -> None:
     b.banner("BUILD 02 — KPIS Y SERIES")
     b.require_validation()
@@ -61,7 +69,7 @@ def main() -> None:
         return item
 
     kpis = [
-        kpi("P-01", len(uni)),
+        kpi("P-01", len(uni), extra={"nota": b.nota_p01(len(uni))}),
         kpi("I-01", sum(citas)),
         kpi("I-02", round(sum(citas) / den["con_metricas"], 2)),
         kpi("I-03", round(statistics.mean(fwci), 2),
@@ -355,7 +363,13 @@ def catalogo() -> None:
             # que sí se publica. No son lo mismo y no se funden en un campo.
             "razon": spec.get("razon"),
             "que_falta": spec.get("que_falta"),
-            "advertencia": spec.get("advertencia"),
+            # Dos indicadores construyen su advertencia con las cifras del
+            # momento en vez de leerla de config: `P-06` desde la consolidación
+            # de identidades y `P-01` desde la cola de duplicados. El catálogo
+            # tiene que servir la misma que el tablero, o la página de
+            # indicadores diría que `P-01` no tiene nada que advertir mientras
+            # la portada advierte (`D-593`).
+            "advertencia": (_derivada(code) or spec.get("advertencia")),
             "advertencia_destacada": bool(spec.get("advertencia_destacada")),
             "cobertura": f.get("cobertura_medida") or None,
             "definicion": f.get("nota_metodologica") or None,

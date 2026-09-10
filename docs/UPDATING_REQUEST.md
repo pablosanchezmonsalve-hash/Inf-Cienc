@@ -11,14 +11,23 @@ pedir, y a quién.
 ## 1. El problema, en una frase
 
 **La exportación de Scopus no declara su fecha de corte.** La de SciVal sí
-(2026-07-22), y por eso el sitio puede afirmar «citas actualizadas al
-2026-07-22». La de Scopus sólo sabe cuándo se descargó el archivo (2026-07-31),
+(2026-08-30), y por eso el sitio puede afirmar «citas actualizadas al
+2026-08-30». La de Scopus sólo sabe cuándo se descargó el archivo (2026-09-08),
 que no es lo mismo.
 
 | Fuente | Rol | Fecha de corte declarada | Fecha de descarga |
 |---|---|---|---|
-| `scival_export` | primaria | **2026-07-22** | 2026-07-31 |
-| `scopus_export` | primaria | **ninguna** | 2026-07-31 |
+| `scival_export` | primaria | **2026-08-30** | 2026-09-08 |
+| `scopus_export` | primaria | **ninguna** | 2026-09-08 |
+
+> **Comprobado en la reexportación del 2026-09-08.** No es que nadie la haya
+> pedido: es que el CSV nativo de Scopus **no trae filas de metadatos**. Su
+> primera línea ya es la cabecera de columnas, así que no hay dónde declarar
+> una fecha de corte. El export de SciVal sí las trae —veinte filas antes de la
+> cabecera— y por eso puede declararla. Pedir el dato a la fuente sigue siendo
+> `T-06`, pero la petición tiene que ir por otro camino que el formato de
+> archivo: una consulta a la API con su fecha, o una constancia del
+> administrador de la licencia.
 
 ---
 
@@ -26,7 +35,7 @@ que no es lo mismo.
 
 **Por qué importa.** Una base bibliográfica crece hacia atrás: un artículo de
 2024 puede indexarse en 2026. Sin fecha de corte declarada no se puede afirmar
-«estas son todas las publicaciones de 2023–2025», sólo «estas son las que había
+«estas son todas las publicaciones de 2020–2025», sólo «estas son las que había
 cuando se descargó el archivo». Para un informe institucional que se compara
 consigo mismo año a año, esa distinción es la diferencia entre una serie
 reproducible y una que se mueve sola.
@@ -64,7 +73,7 @@ En `config/sources.yml`, sin tocar código:
 ```yaml
   scopus_export:
     fecha_corte: "AAAA-MM-DD"      # la que devuelva la consulta
-    consulta: "AF-ID(60105368) AND PUBYEAR > 2022 AND PUBYEAR < 2026"
+    consulta: "AF-ID(60105368) AND PUBYEAR > 2019 AND PUBYEAR < 2026"
     n_resultados_declarado: 000    # lo que mostraba Scopus
 ```
 

@@ -13915,3 +13915,403 @@ Ninguna. Es una corrección de hechos, no un cambio de criterio.
 Los mismos, menos uno: privatizar `Inf-Cienc`, rotar los secretos de ORCID y
 Scopus, `T-06`, `T-19`, los 83 casos de revisión de identidad, `make estado` y
 un build completo en el equipo con los datos.
+
+## Cierre: la carga de septiembre, con seis años en vez de tres (2026-09-09)
+
+Ambas fuentes primarias se reexportaron con la ventana ampliada a 2020-2025. El
+universo pasa de 823 a 1342 publicaciones y el corte de métricas del 2026-07-22
+al 2026-08-30. Es la primera carga de datos desde que el proyecto existe, así
+que también es la primera vez que `docs/UPDATING.md` se usa de verdad en vez de
+leerse.
+
+### Lo que el procedimiento no decía
+
+El paso 2 avisa de que el export de SciVal puede cambiar sus filas de metadatos
+y que hay que ajustar `header_row`. Cambió: el nuevo trae una fila más, la
+cabecera está en el índice 20 y no en el 19. La regla `E-03` hizo exactamente lo
+que promete —la aserción de `read_scival()` detiene la corrida antes de producir
+un solo número— pero conviene decir en voz alta lo que habría pasado sin ella:
+`pandas` habría devuelto una tabla corrida con la primera columna llamada
+`Unnamed: 0`, y el build habría seguido leyendo el `validation_report.csv`
+viejo, el de 818 publicaciones, sin que nada avisara.
+
+### El corpus no es acumulativo
+
+Comparados los dos exports por EID, la subventana 2023-2025 tiene 818 registros
+en los dos, pero no son los mismos: **5 salen y 5 entran**. Las que salen no son
+marginales —una acumula 9 citas, otra 4, otra 2—; las que entran son cinco de
+las publicaciones cuya afiliación Scopus escribe mal. Que el total coincida es
+casualidad, y esa casualidad es precisamente lo que haría pasar el cambio
+inadvertido si sólo se mirara el recuento.
+
+Esto no se puede arreglar: es la fuente. Se declara en `docs/LIMITATIONS.md`,
+porque afecta a cualquier comparación entre dos cortes del mismo período.
+
+### Diecisiete publicaciones que la institución firma y el patrón no veía
+
+La regla bloqueante `I-01` falló con 17 publicaciones sin ninguna detección
+institucional blanda, las 17 confirmadas por el Affiliation ID. No era un fallo
+del patrón ni del parser: son **erratas de la fuente**. Seis formas distintas de
+escribir mal el nombre: `Finnis Terrae`, `Finis Terra` sin la e final,
+`Finis Terrrae`, `Finis Tarrae`, `Finis, Terrae` con una coma en medio, y
+`Universidad Finis` a secas.
+
+El patrón se amplió con una segunda entrada que tolera esas variantes y sigue
+exigiendo los dos términos del nombre con límite de palabra. La ampliación se
+midió antes de aplicarla, sobre las 5972 cadenas de afiliación distintas del
+corpus: captura 11 cadenas más que el patrón canónico y las 11 son de la
+institución. Cero falsos positivos. No es la subcadena suelta que `I-05`
+prohíbe: el texto del patrón no contiene los literales vetados.
+
+Queda una irreducible. Scopus escribe `Universidad Finis, Chile`: omite
+`Terrae`, y capturarla exigiría casar `Finis` a secas, que es exactamente lo
+prohibido con evidencia empírica desde la Fase 1. Se resolvió como caso de
+revisión humana, con su evidencia, y **sin inventar autoría**: la publicación
+sigue en el universo porque su afiliación está confirmada, y sigue sin autoría
+UFT nombrada, igual que las que dejan las firmas descartadas por `E-09`.
+
+Eso obligó a un mecanismo que no existía. `I-01` era binaria: o cero
+publicaciones sin detección, o build detenido. Ahora cuenta por separado lo
+revisado y lo pendiente, y exige cero pendientes, la misma forma que `P-01` usa
+desde la Fase 1 para los duplicados probables. `I-04` se alineó con ella: un
+caso que una persona ya miró no puede seguir figurando como
+`PENDIENTE_REVISION_HUMANA` en `matching_reconciliation.csv`.
+
+### Dos cifras que el reporte publicaba de memoria
+
+`V-10` declaraba «ODS 37,9 % · Open Access 72,2 %» con los dos porcentajes
+escritos a mano en el código. Medidos sobre el universo nuevo son 38,8 % y
+70,3 %. La regla siempre pasa, así que nada los habría contradicho, y esa tabla
+no se queda en `docs/`: el sitio la publica. Ahora se calculan en cada corrida
+desde el universo, como ya se hacía con la cobertura de unidad académica.
+
+### Lo que se decidió no arreglar
+
+`X-04` compara el recuento de citas entre fuentes y tolera un 1 %. Ahora la
+diferencia es del -1,22 % y **cambia de signo**: en julio SciVal iba por encima
+de Scopus, ahora va por debajo. Con SciVal cortado el 2026-08-30 y Scopus
+exportado el 2026-09-08, que la fuente más antigua tenga menos citas es lo
+esperable; el signo positivo anterior era el raro. Subir el umbral para que la
+regla pase sería calibrarla contra el dato que debe vigilar. Se deja fallando y
+se declara.
+
+`D-02` encontró dos artículos que Scopus indexa dos veces cada uno, con el mismo
+DOI y el título en distinta capitalización. Quedan encolados sin resolver, que
+es lo que manda `D-08`. El universo sigue en 1342.
+
+### T-06 no se cierra
+
+El pendiente pedía una reexportación de Scopus con fecha de corte declarada por
+la fuente. La reexportación existe, pero el CSV nativo de Scopus no trae filas
+de metadatos y no la declara. El 2026-08-30 es de SciVal y no se traslada:
+`D-260` y `D-261` fijaron esa frontera. `scopus_export.fecha_corte` sigue
+`null`, a propósito.
+
+La verificación por API que acompañaba a T-06 sí caducó: consultaba
+`PUBYEAR > 2022` y afirmaba 818 resultados. Se retiró en vez de reescribirla a
+ojo, porque declararla vigente sin volver a consultar sería afirmar algo no
+comprobado. Queda como `T-20`.
+
+### Verificación
+
+Auditoría completa: 30 reglas, 27 pasan, 3 fallan (`E-06` igual que antes de la
+carga, `D-02` y `X-04` por lo dicho), **0 bloqueantes**. Build completo y
+barrera pública/interna sin fallas sobre 843 artefactos y 829 fichas de autor.
+Sitio ensamblado: 12 páginas, 829 fichas, capa interna no incluida.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-580 | El export reemplazado se declara en `reemplaza_a` dentro de su propia fuente, y no se borra de `data/raw/` | La comparación entre dos cortes es la única evidencia de qué cambió la fuente entre ellos. Sin el archivo viejo no se habría podido ver que 5 publicaciones salieron del corpus |
+| D-581 | La ventana temporal se amplía a 2020-2025 | El criterio no cambia: la ventana es la que cubren los exports, no un recorte propio. Ambas fuentes se reexportaron con seis años |
+| D-582 | El patrón blando admite las variantes ortográficas de la fuente, en una segunda entrada y con la medición al lado | Son erratas de Scopus, no instituciones distintas. Medido antes de aplicarlo sobre 5972 cadenas: 11 capturas nuevas, las 11 institucionales, cero falsos positivos. El patrón canónico sigue visible para que la ampliación sea auditable por separado |
+| D-583 | `I-01` e `I-04` cuentan por separado lo revisado y lo pendiente, y exigen cero pendientes | Una afiliación que la fuente escribe sin el nombre completo no la resuelve ningún patrón legítimo. Resolver no borra la cola ni añade autoría: sólo distingue lo verificado de lo no verificado, como `P-01` desde la Fase 1 |
+| D-584 | La cobertura de ODS y de acceso abierto se mide en cada corrida, no se escribe en el código | Estaban fijas y la carga las volvió falsas sin que nada avisara. La regla siempre pasa y el sitio publica esa tabla |
+
+### Archivos
+
+- `config/sources.yml` — las dos fuentes primarias, `header_row`, fechas de corte, `reemplaza_a`
+- `config/institution.yml` — la ventana
+- `config/indicators.yml` — los cuatro denominadores, ahora 1342
+- `config/matching_rules.yml` — la segunda entrada del patrón blando
+- `config/resoluciones_humanas.yml` — la publicación sin forma de nombre
+- `src/audit/common.py` — `resolucion_sin_deteccion()`
+- `src/audit/03_affiliation_variants.py` — la columna `resolucion`
+- `src/audit/05_validation_rules.py` — `I-01`, `I-04`, `V-10`
+- `docs/LIMITATIONS.md` — la rotación del corpus entre cortes
+- `PLAN.md` — `T-20`
+
+
+## Cierre: lo que la verificación encontró en la propia carga (2026-09-10)
+
+La carga quedó auditada y construida, pero una verificación adversarial de la
+propia carga encontró que actualizar los datos no había actualizado las frases
+que los describen. Ninguna cifra inventada —eso se comprobó reproduciendo con
+`pandas` cada número nuevo contra los artefactos—, pero sí islas de texto viejo
+en documentos que afirman el presente.
+
+### El sitio publicaba el dato nuevo y la frase vieja, en la misma fila
+
+Lo más grave no estaba en `docs/`, sino en `config/indicators.yml`. Las
+advertencias del catálogo no son comentarios: el build las copia a
+`catalogo.json` y a `series.json`, y el sitio las imprime bajo cada gráfico.
+Estaban escritas sobre el corpus anterior, así que la página publicaba:
+
+- «Corte 2026-07-22» cuando `V-07` declara 2026-08-30,
+- «Serie de 3 años» debajo de un gráfico de seis barras,
+- «226 publicaciones sin estado declarado» junto a una barra que dibuja 399,
+- «Cobertura 762 de 816» sobre un universo de 1342,
+- «1.796 asignaciones para 816 publicaciones» donde hay 2.973 sobre 1.342,
+- y `AU-03` llamándose «h-index en ventana 2023-2025» en las 829 fichas de autor.
+
+Es exactamente el defecto que `D-584` acababa de cerrar en `V-10`, en otro
+sitio. Se remidieron todas contra los artefactos, y la etiqueta de `AU-03` y su
+nota pasaron a derivarse de la ventana declarada en `config/institution.yml`:
+escrita a mano, ya había sobrevivido una vez a la carga que la volvía falsa.
+
+### Una compuerta que se podía abrir por dentro
+
+`I-01` es la única regla bloqueante de coherencia institucional, y tal como
+quedó implementada bastaba escribir un EID en `resoluciones_humanas.yml` para
+descontarlo: la función emparejaba por identificador y nada más. Una compuerta
+que se abre escribiendo su nombre en una lista no es una compuerta.
+
+Ahora la resolución sólo cuenta si el método duro la corrobora —el Affiliation
+ID en el registro de SciVal—, que es lo que hace verificable la afirmación «esta
+publicación sí es de la institución aunque su cadena de afiliación no lo diga».
+Una resolución sin corroborar no se descuenta y se declara aparte, porque es un
+error de la revisión, no un caso resuelto.
+
+### Un error propio, corregido
+
+La carga declaró que la ampliación «trajo 560 formas de firma para las que nunca
+se ha consultado ORCID». Es falso: 560 es `888 − 328`, el total sin
+identificador. Las que trajo la ampliación son **299**; las otras 261 ya estaban
+en el corpus 2023-2025 y se consultaron sin encontrarles identificador, que es
+un hueco distinto y bastante más duro. Corregido en `docs/LIMITATIONS.md`,
+`docs/ORCID_COVERAGE.md` y en el enunciado de `T-21`, cuyo alcance real es 299.
+
+### Tres pendientes que la carga abre
+
+Ninguno se resuelve solo y los tres son decisión de una persona:
+
+- **`T-21`** — ORCID de las 299 formas nuevas. Los conectores salen a red.
+- **`T-22`** — 11 variantes de unidad académica fuera del vocabulario validado,
+  con 17 pares afectados: formas inglesas de facultades conocidas, un duplicado
+  ortográfico de postgrado, un error de codificación de la fuente y tres
+  escuelas que antes no aparecían. Declarar que dos formas son la misma unidad
+  es una afirmación institucional, no una deducción.
+- **`T-23`** — el presupuesto de peso de datos quedó en 369,6 KB comprimidos
+  sobre un techo de 300, un 123 %. **Bloquea el despliegue**: la batería de
+  verificación corre dentro del job que construye y el de publicar depende de
+  él. O se sube el techo declarando contra qué evidencia, o se aligeran los
+  artefactos.
+
+### Verificación
+
+Auditoría: 30 reglas, 27 pasan, 3 fallan (`E-06`, `D-02`, `X-04`), **0
+bloqueantes**. Build y barrera pública/interna sin fallas. Sitio de 12 páginas y
+829 fichas, capa interna verificada fuera. `STATE.md` regenerado declara los
+seis pendientes abiertos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-585 | Una resolución humana de `I-01` sólo cuenta si el método duro la corrobora | Sin corroboración, la única regla bloqueante de coherencia institucional se desactiva escribiendo un EID en una lista de YAML. Una resolución que ningún método confirma es un error de la revisión, y como tal se declara aparte en vez de descontarse |
+| D-586 | La etiqueta y las cifras de `AU-03` se derivan de la ventana declarada, no se escriben | El nombre del indicador viaja a las 829 fichas de autor y al catálogo del sitio. Escrito a mano ya había sobrevivido a la carga que lo volvió falso, que es el defecto que `D-584` cerró en otro sitio |
+
+### Archivos
+
+- `config/indicators.yml` — quince advertencias remedidas y la razón de `X-04`
+- `src/analysis/indicator_feasibility.py` — `AU-03` derivado
+- `src/audit/05_validation_rules.py` — `I-01` con corroboración
+- `docs/LIMITATIONS.md` — secciones 1 a 9
+- `docs/ORCID_COVERAGE.md`, `docs/DATA_LICENSE.md`, `docs/UPDATING_REQUEST.md`,
+  `docs/INDICATORS.md`, `docs/INFORME_POR_INVESTIGADOR.md`
+- `config/resoluciones_humanas.yml` — consecuencia en términos relativos
+- `PLAN.md` — `T-21`, `T-22`, `T-23`
+
+
+## Cierre: el presupuesto de peso, tras la carga 2020-2025 (2026-09-10)
+
+La carga dejó el sitio construido y auditado, pero sin publicar: el presupuesto
+de peso de datos quedó en 370,8 KB comprimidos sobre un techo de 300, y la
+batería corre dentro del job que construye, del que depende el de desplegar. El
+sitio en producción seguía sirviendo 823 publicaciones y ventana 2023-2025.
+
+Conviene decir en qué orden estaba el problema: **lo roto en producción era
+integridad, prioridad 2; lo que lo bloqueaba era rendimiento, prioridad 5**. Un
+informe desactualizado en el sitio es peor que setenta kilobytes de exceso.
+
+### La palanca anotada no llegaba, y ahora está medido
+
+`docs/UX_UI.md` guardaba desde julio una palanca «para cuando el techo apriete»:
+quitar los campos de `publications.json` que nada consume, cifrados ahí en 47 KB.
+Apretó. Y no llega.
+
+Medido con el propio verificador sobre una copia real de `dist/`: quitar los
+tres campos sin ningún consumo —`topic`, `tipo_fuente`, `editorial`— deja el
+grupo en **329,4 KB, el 110 % del techo**; ampliarlo a los cinco huérfanos, en
+325,3 KB, el 108 %. La compuerta sigue en rojo.
+
+El error del cálculo viejo era medir en bruto: esos campos pesan 167 KB sin
+comprimir pero sólo **41,3 comprimidos**, porque son de altísima repetición
+—`Journal` mil trescientas cuarenta y dos veces— y gzip ya colapsaba casi todo.
+La regla de tres sobreestimaba el ahorro por un factor de cuatro.
+
+Recortar el dataset publicable **y seguir excediendo el techo** es el peor de
+los dos mundos: se pierde dato y no se desbloquea nada.
+
+### Un error de hecho que era una trampa
+
+Ese mismo documento listaba seis campos huérfanos e incluía `n_paises`. Es
+falso: `n_paises` es la décima columna del CSV que descarga el usuario. Quien
+hubiera accionado la palanca fiándose de la lista habría roto la descarga
+pública en silencio. Corregido: son cinco.
+
+### El techo sube, con la regla que ya existía
+
+No es un techo externo, y su propia procedencia lo decía: CSS y JavaScript citan
+una recomendación de presupuesto para móvil; datos decía «margen sobre lo
+medido». La regla con que se fijó las dos veces anteriores es **1,21 veces lo
+medido**: 250 sobre 204,3 y 300 sobre 247,7. Aplicarla a los 370,8 de hoy da
+450. Se aplicó la regla; no se derogó.
+
+Y la evidencia se midió **sobre este corpus**, no sobre el anterior: subir un
+techo citando una medición vieja es exactamente el defecto que el verificador
+existe para impedir. Bajo Slow 4G, con las 1.342 publicaciones: LCP de 1.596 ms
+en la portada, 1.620 en impacto y 1.592 en temática, contra un umbral de 2.500.
+Con las 823 de julio eran 1.424, así que **duplicar el corpus costó 172 ms** y
+el margen sigue en el 36 %.
+
+### Lo que impide que esto se repita
+
+Subir un techo dos veces seguidas es aplicar una regla; hacerlo tres es
+derogarla a plazos. Por eso la respuesta de la próxima vez queda escrita hoy, en
+la cabecera del propio verificador: cuando este techo se vuelva a exceder se
+recodifica `publications.json` en columnas con diccionario de cadenas, que está
+medido —265,8 KB, ciento cinco menos— y cuya rehidratación devuelve el texto
+original byte a byte. No otro 1,21x.
+
+La cabecera llevaba además tres cifras muertas desde la subida anterior: decía
+«250 KB sobre los ~172 actuales» y daba «en torno a 900 ms» de LCP donde la
+medición real era 1.424. En el archivo cuyo primer párrafo advierte de que un
+presupuesto escrito en prosa envejece en silencio. Reescrita.
+
+### La cifra que abre el informe declara su salvedad
+
+Aparte del peso, algo que la carga dejó abierto: dos pares de registros
+comparten DOI y esperan revisión humana, pero el total de publicaciones se
+publicaba sin decirlo. Un lector veía 1.342 sin saber que el recuento sobra en
+los duplicados que se confirmen.
+
+Ahora `P-01` lleva una nota **derivada de la cola**, no escrita en config: se
+construye con los grupos pendientes del momento, igual que `nota_p06`, así que
+cuando alguien resuelva los pares la nota se apaga sola en vez de quedarse
+advirtiendo de un problema que ya no existe.
+
+### Un recuento del verificador que el corpus volvió falso
+
+La batería comprobaba que el recorte «Medicina y Salud, 2024» llega intacto de
+una página a otra, y esperaba 122 publicaciones. Ahora son 121: el export nuevo
+no trae cinco registros de 2023-2025 que sí traía el de julio, y uno era de esa
+unidad y ese año. No es una regresión del filtro, es el corpus. Actualizado con
+el motivo al lado del número, para que el próximo que lo vea no lo lea como una
+avería.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist` pasa **entera, exit 0**: contraste, estructura,
+flujos, navegador, responsive, impresión, higiene y peso. El despliegue deja de
+estar bloqueado.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-587 | El techo de peso de datos sube de 300 a 450 KB comprimidos | No es un techo externo y su propia procedencia lo dice. La regla con que se fijó las dos veces anteriores es 1,21x lo medido —250 sobre 204,3 y 300 sobre 247,7—; aplicarla a los 370,8 de hoy da 450. Aligerar no era alternativa: está medido que los campos sin consumo ahorran 41,3 KB de los 70,7 que harían falta |
+| D-588 | La subida se justifica con un LCP medido sobre este corpus, no sobre el anterior | El argumento que sostiene un techo de datos alto es que está fuera de la ruta crítica de pintado, y esa medición era de las 823 publicaciones de julio. Citarla para 1.342 sería justificar con una medición vieja, que es el defecto que el verificador existe para impedir |
+| D-589 | El próximo exceso se resuelve recodificando, no subiendo el techo otra vez | Una tercera aplicación del 1,21x convierte el techo en una función del corpus: sube siempre y deja de restringir. La salida está medida y no cuesta ningún dato: el formato columnar deja el grupo en 265,8 KB con rehidratación idéntica byte a byte |
+| D-590 | No se recorta `publications.json`, y la palanca anotada se declara agotada con su cifra | Está medido que ya no llega: 41,3 KB comprimidos de los 70,7 necesarios, porque son campos de altísima repetición que gzip ya colapsaba. Recortar el dataset publicable y seguir excediendo el techo es el peor de los dos mundos |
+| D-591 | El verificador declara que su suma es una cota superior, y no el peso de ninguna página | Suma los quince artefactos raíz y ninguna página los pide juntos: la más pesada pide 328,0 KB. Se deja así a propósito, porque derivar el peor caso exigiría una lista escrita a mano de qué pide cada página, y esa lista envejece en silencio |
+| D-592 | La cabecera del presupuesto se reescribe con las cifras vigentes, en la misma pasada | Llevaba «250 KB sobre los ~172 actuales» desde que la subida a 300 cambió el valor sin tocar el texto, y un LCP de «en torno a 900 ms» donde la medición decía 1.424. Tres cifras muertas en el archivo que advierte de que los presupuestos en prosa envejecen en silencio |
+| D-593 | `P-01` declara los duplicados pendientes, derivándolos de la cola | La cifra que abre el informe no decía nada mientras dos pares de registros compartían DOI y esperaban revisión. Derivada y no escrita en config, la nota se apaga sola cuando se resuelvan: una nota estática diría que hay duplicados el día que ya no los haya |
+
+### Archivos
+
+- `src/verify/peso.mjs` — el techo, el disparador y la cabecera
+- `src/verify/flujos.mjs` — el recuento del recorte heredado
+- `src/build/common_build.py` — `nota_p01()` y `duplicados_pendientes()`
+- `src/build/02_indicators.py` — `P-01` emite la nota derivada
+- `docs/UX_UI.md` — §15.1 y la palanca declarada agotada
+- `PLAN.md` — `T-23` cerrado
+
+
+## Cierre: las notas del catálogo, medidas y no escritas (2026-09-10)
+
+Al mirar el sitio construido apareció lo que ninguna de las pasadas anteriores
+había visto: **la página de indicadores publicaba la nota vieja al lado de la
+medición nueva, en la misma fila**. Decía «Cobertura 63,8 % de los pares autor ×
+publicación» junto a la celda que mide «1259/1962 pares (64,2 %)». Del mismo
+indicador. En la misma línea.
+
+### Por qué se escapó a dos barridos
+
+Porque el texto no venía de donde se buscó. Las dos rondas anteriores corrigieron
+`config/indicators.yml`, que alimenta el campo `advertencia`; pero la columna que
+esa página imprime es `definicion`, y sale de `nota_metodologica` en
+`data/interim/indicator_feasibility.csv`, escrita a mano en
+`src/analysis/indicator_feasibility.py`.
+
+Nueve notas seguían describiendo el corpus de 823 publicaciones: «589 formas de
+firma», «Scopus reporta 3.909 (Δ +26)», «las asignaciones (1.796) exceden las
+publicaciones (816)», «la suma por autor (1.205) excede el total (823)», «Serie
+de 3 puntos», «Con 3 años», «Denominador = publicaciones con métrica (816), no
+823», «ventana 2023-2025» y la cobertura del 63,8 %.
+
+### La corrección, y por qué es la misma de siempre
+
+Las nueve se derivan ahora de la medición que ya se calculaba dos líneas más
+arriba: `unidad_ok / len(log)` para la cobertura, `len(por_anio)` para los puntos
+de la serie, la ventana desde `config/institution.yml`, el delta de citas desde
+`reconciliation_summary.csv`, las colas desde `ambiguities_authors.csv`. No hay
+nada nuevo que medir; había que dejar de reescribirlo.
+
+Es la tercera vez en esta carga que aparece el mismo defecto —`V-10`, `AU-03` y
+ahora estas nueve—, y siempre con la misma forma: una cifra correcta el día que
+se escribió, en una frase que sobrevive a la carga que la vuelve falsa. La
+diferencia entre las tres es sólo dónde estaba escrita.
+
+### La razón de X-04 también caducó
+
+Decía «Sin datos previos a 2023. Tres puntos no sostienen una tendencia». Los
+datos previos ya están: 524 publicaciones de 2020 a 2022. El indicador sigue sin
+publicarse, pero ahora por una razón que es cierta —seis puntos anuales, con el
+último incompleto por ventana de citación— y no por una que dejó de serlo.
+
+### Y la salvedad llega a donde se lee
+
+La nota derivada de `P-01` vivía en `kpis.json`, que la portada no usa para las
+fichas del tablero. Se llevó también a la nota del catálogo, que es la que el
+lector ve en la página de indicadores: dos grupos de registros comparten DOI y
+esperan revisión, y si se confirman el total sobra en dos.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist` pasa entera, exit 0. Comprobado en el sitio
+servido: ninguna de las cifras viejas aparece ya en `indicadores.html` ni en
+`metodologia.html`, y sí aparecen las nuevas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-594 | Las notas de factibilidad se derivan de la medición, no se escriben | La página de indicadores publica esa columna, así que una nota fija se convierte en una cifra falsa impresa al lado de la medición correcta, en la misma fila. Es el mismo defecto que `D-584` cerró en `V-10` y `D-586` en `AU-03`, en el tercer sitio donde estaba escrito |
+| D-595 | El catálogo sirve la advertencia derivada de los indicadores que la construyen medida | `P-06` y `P-01` construyen la suya con las cifras del momento. Si el catálogo leyera sólo `config`, la página de indicadores diría que `P-01` no tiene nada que advertir mientras el tablero advierte |
+
+### Archivos
+
+- `src/analysis/indicator_feasibility.py` — nueve notas derivadas y la razón de `X-04`
+- `src/build/02_indicators.py` — el catálogo sirve la advertencia derivada

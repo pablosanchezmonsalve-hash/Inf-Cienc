@@ -40,12 +40,47 @@ publicaciones:
         resuelven a textos diferentes en Obesity Surgery. Comprobado abriendo
         las dos páginas del editor.
       consecuencia: >-
-        Ambos permanecen en el universo canónico. El universo sigue siendo 823 y
-        ningún denominador cambia. La coincidencia de título es real y por eso
+        Ambos permanecen en el universo canónico: esta resolución no cambia el
+        universo ni ningún denominador. (Cuando se tomó, el universo era 823;
+        una consecuencia expresada en términos relativos no caduca con la
+        siguiente carga.) La coincidencia de título es real y por eso
         el par se sigue declarando, pero como caso revisado y descartado, no
         como duplicado pendiente.
       revisado_por: "Propietario del proyecto"
       fecha: "2026-08-03"
+
+  # Regla I-01: la publicación no tiene ninguna detección institucional blanda,
+  # es decir, ninguna firma cuya cadena de afiliación contenga el nombre de la
+  # institución. Resolver aquí NO añade autoría: la publicación queda sin
+  # autoría UFT nombrada y así se declara. Sólo deja de bloquear el build.
+  sin_deteccion_institucional:
+
+    - eid: "2-s2.0-85161259618"
+      veredicto: es_institucional_sin_forma_de_nombre
+      titulo: >-
+        Initial Teachers' Education Based on the Practicum: The Reflective
+        Academy as a Fundamental Praxis for Teachers' Education
+      evidencia: >-
+        Scopus escribe la afiliación como "Universidad Finis, Chile": omite la
+        palabra "Terrae", de modo que ningún patrón que exija las dos palabras
+        del nombre puede capturarla, y capturarla por "Finis" a secas es el
+        matching por subcadena suelta que la regla I-05 prohíbe con evidencia
+        empírica de Fase 1. La afiliación sí está confirmada por el método duro:
+        el Affiliation ID 60105368 figura en el registro de SciVal. El artículo
+        no estaba en el export del 2026-07-31 pese a ser de 2023, así que el
+        registro entró o se corrigió entre ambos cortes. Comprobado sobre
+        data/raw/Scopus_Sept.csv, campos Affiliations y Authors with
+        affiliations, y sobre las 5972 cadenas de afiliación distintas del
+        corpus.
+      consecuencia: >-
+        La publicación permanece en el universo canónico porque su afiliación
+        está confirmada, y sigue sin autoría UFT nombrada: la firma
+        Ibáñez-Muñozo R. no se atribuye a la institución, porque hacerlo sería
+        deducirlo del Affiliation ID, que es de la publicación y no de la
+        persona. No se rellena con nada. La regla I-01 la cuenta como resuelta,
+        no como detectada.
+      revisado_por: "Propietario del proyecto"
+      fecha: "2026-09-09"
 
 # ─────────────────────────────────────────────────── identidad de autor
 #

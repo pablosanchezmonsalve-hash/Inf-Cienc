@@ -142,15 +142,50 @@ def main() -> None:
 
     # -------------------------------------------- coherencia institucional
     detectadas = set(log["eid"])
+    sin_deteccion = set(scopus["EID"]) - detectadas
+    # Una publicación puede quedar sin detección blanda porque la fuente escribe
+    # el nombre institucional de forma que ningún patrón con límite de palabra
+    # puede contener —"Universidad Finis, Chile"—, mientras el Affiliation ID sí
+    # confirma la afiliación. Ese caso se resuelve por revisión humana, con su
+    # evidencia, en config/resoluciones_humanas.yml (decisión D-583). Resolverlo
+    # no añade autoría: la publicación sigue sin autoría UFT nombrada. Lo
+    # revisado y lo pendiente se cuentan por separado, como en P-01.
+    #
+    # La resolución NO basta por sí sola. Ésta es la única regla bloqueante de
+    # coherencia institucional, y si se pudiera silenciar escribiendo un EID en
+    # una lista de YAML, dejaría de ser una compuerta: sería un interruptor. Se
+    # exige corroboración del método duro —el Affiliation ID en el registro de
+    # SciVal—, que es lo que hace verificable la afirmación «esta publicación sí
+    # es de la institución aunque su cadena de afiliación no lo diga». Una
+    # resolución sin esa corroboración no se descuenta y además se declara
+    # aparte, porque un EID resuelto que ningún método confirma es un error de
+    # la revisión, no un caso resuelto.
+    sv_idx = scival.set_index("EID")
+    def _corroborada(eid: str) -> bool:
+        if eid not in sv_idx.index:
+            return False
+        return c.matches_institution_hard(sv_idx.loc[eid]["Scopus Affiliation IDs"])
+
+    declaradas = {e for e in sin_deteccion if c.resolucion_sin_deteccion(e)}
+    resueltas = {e for e in declaradas if _corroborada(e)}
+    sin_corroborar = declaradas - resueltas
+    pendientes = sin_deteccion - resueltas
     check("I-01", "bloqueante", "Toda publicación tiene al menos una detección institucional",
-          len(set(scopus["EID"]) - detectadas) == 0,
-          f"sin detección={len(set(scopus['EID']) - detectadas)}")
+          len(pendientes) == 0,
+          f"sin detección={len(sin_deteccion)} · {len(resueltas)} resuelta(s) "
+          f"por una persona y corroborada(s) por el método duro · "
+          f"{len(pendientes)} pendiente(s)"
+          + (f" · {len(sin_corroborar)} resolución(es) SIN corroborar"
+             if sin_corroborar else ""))
 
     recon = pd.read_csv(c.INTERIM / "matching_reconciliation.csv")
-    solo_duro = int((recon["caso"] == "solo_metodo_duro").sum())
+    duro = recon[recon["caso"] == "solo_metodo_duro"]
+    solo_duro = len(duro)
+    duro_pendientes = int((duro["resolucion"] == "PENDIENTE_REVISION_HUMANA").sum())
     check("I-04", "alta", "Métodos duro y blando reconciliados sin contradicción",
-          solo_duro == 0,
-          f"solo_duro={solo_duro} "
+          duro_pendientes == 0,
+          f"solo_duro={solo_duro} ({solo_duro - duro_pendientes} revisado(s) por una "
+          f"persona · {duro_pendientes} pendiente(s)) "
           f"solo_blando={int((recon['caso'] == 'solo_metodo_blando').sum())}")
 
     prohibidos = c.MATCHING["deteccion_institucional"]["metodo_blando"]["patrones_prohibidos"]
@@ -216,11 +251,21 @@ def main() -> None:
           f"scopus={_corte_scopus}")
 
     # La cobertura de unidad académica tiene dos denominadores legítimos y no
-    # deben confundirse: 65,0 % sobre cadenas de afiliación ponderadas por
-    # frecuencia (regla I-06 en el script 03) y 63,8 % sobre pares
-    # autor x publicación (aquí). Se declaran ambos.
+    # deben confundirse: el de las cadenas de afiliación ponderadas por
+    # frecuencia (regla I-06 en el script 03) y el de pares autor x publicación
+    # (aquí). Se declaran ambos.
+    #
+    # ODS y acceso abierto se miden sobre el universo en cada corrida (D-584).
+    # Estaban escritos a mano —«ODS 37,9 % · Open Access 72,2 %»— y esta tabla
+    # no se queda en docs/: V2-27 la publica en el sitio. Una cifra fija en el
+    # código sobrevive a la carga que la vuelve falsa y nadie se entera.
+    def _cobertura(col: str) -> float:
+        v = universe[col].fillna("").astype(str).str.strip()
+        return (v.ne("") & v.ne("-")).mean() * 100
+
     check("V-10", "alta", "Campos bajo el umbral de cobertura (80 %) identificados",
-          True, f"ODS 37,9 % · Open Access 72,2 % · unidad académica "
+          True, f"ODS {_cobertura('ods'):.1f} % · Open Access "
+                f"{_cobertura('open_access'):.1f} % · unidad académica "
                 f"{cobertura:.1f} % (pares autor x publicación)")
 
     # --------------------------------------------------------------- reporte

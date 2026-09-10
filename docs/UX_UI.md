@@ -49,7 +49,7 @@ Profundidad máxima 3 niveles. Breadcrumbs desde el nivel 2.
 |---|---|---|
 | Identidad | Logo y nombre institucional (desde `config/institution.yml`) | Atribución |
 | Título | «Informe Bibliométrico Institucional» | Contexto |
-| **Barra de vigencia** | «Datos: Scopus/SciVal · Ventana 2023–2025 · Corte 22-07-2026» | **Persistente en todas las páginas** |
+| **Barra de vigencia** | «Datos: Scopus/SciVal · Ventana 2020–2025 · Corte 30-08-2026» | **Persistente en todas las páginas** |
 
 La barra de vigencia es una decisión deliberada: es la única forma de que una
 captura de pantalla del dashboard siga siendo interpretable fuera de contexto.
@@ -83,9 +83,9 @@ tres propiedades que un tablero sin URL no tiene:
 - el recorte **viaja entre páginas**: se hace en el tablero y el listado lo
   hereda.
 
-Medido: 823 → 113 publicaciones al pedir Medicina 2024, con las seis cifras y
-los cuatro gráficos recalculados, y esas mismas 113 en la tabla al seguir el
-enlace.
+Medido sobre la carga anterior: 823 → 113 publicaciones al pedir Medicina
+2024, con las seis cifras y los cuatro gráficos recalculados, y esas mismas 113
+en la tabla al seguir el enlace.
 
 ### 4.2 Qué NO recalcula, y por qué
 
@@ -221,9 +221,9 @@ así que son cortes de pleno derecho. La forma la elige **la relación del dato*
 
 | Corte | Forma | Por qué esa forma |
 |---|---|---|
-| `P-02` Publicaciones por año | Barras verticales | 3 puntos no son una serie temporal |
+| `P-02` Publicaciones por año | Barras verticales | Se eligió cuando la ventana tenía 3 puntos; desde 2020–2025 son 6 y esa razón ya no la sostiene |
 | `P-03` Tipo documental | Barras horizontales | 10 categorías muy desbalanceadas |
-| `P-05` Fuentes | Barras horizontales, top 15 | 495 fuentes: hay que recortar y decirlo |
+| `P-05` Fuentes | Barras horizontales, top 15 | 713 fuentes: hay que recortar y decirlo |
 | `P-07` Unidad académica | Barras horizontales | Cobertura parcial: la advertencia es obligatoria |
 | `I-01` Citas por año | Barras verticales | Con advertencia de ventana de citación |
 | `I-04` FWCI mediano por año | Desviación contra 1,00 | Se lee CONTRA el mundo, no en magnitud |
@@ -234,7 +234,7 @@ así que son cortes de pleno derecho. La forma la elige **la relación del dato*
 | `C-03` Países | Barras horizontales, top 15 | Mapa descartado: 23 países sobre ~200 |
 | `C-04` Instituciones | Barras horizontales, top 15 | Nombres largos |
 | `C-06` Autores por publicación | Distribución | Continuo tramificado: el eje ES el dato |
-| `T-05` / `T-01` / `T-04` | Barras horizontales | 249 ASJC: top 20 + acceso al resto |
+| `T-05` / `T-01` / `T-04` | Barras horizontales | 271 ASJC: top 20 + acceso al resto |
 
 > **C-04 era el único que no se podía derivar.** «Instituciones colaboradoras»
 > salía de una columna que no viajaba por publicación: `publications.json` traía
@@ -268,7 +268,7 @@ dimensiones y las reglas que las gobiernan.
 
 | Dimensión | Origen | Notas |
 |---|---|---|
-| Año | `anio` | 3 valores |
+| Año | `anio` | 6 valores |
 | Área QS | `qs_area` | 5 valores · multivaluado |
 | Unidad académica | `unidades` | incluye «Sin dato declarado» como opción real |
 | Tipo documental | `tipo` | 10 valores |
@@ -296,7 +296,7 @@ Campo único sobre título, fuente y autor. Debounce 250 ms. Coincidencia por
 subcadena insensible a acentos y caso — la misma normalización que el matching
 institucional, reutilizada.
 
-No se implementa búsqueda semántica ni ranking por relevancia: con 823
+No se implementa búsqueda semántica ni ranking por relevancia: con 1.342
 registros, la coincidencia literal es suficiente y verificable.
 
 ---
@@ -315,9 +315,10 @@ Al abrir una publicación:
 | Colaboración | Países, instituciones |
 | Trazabilidad | EID, banderas de disponibilidad |
 
-Si la publicación carece de métricas (7 casos), la sección de impacto muestra
-«Sin métricas disponibles: esta publicación no está en el export de SciVal», no
-un cero ni un guion.
+Si la publicación carece de métricas, la sección de impacto muestra «Sin
+métricas disponibles: esta publicación no está en el export de SciVal», no un
+cero ni un guion. El tratamiento sigue implementado y en esta carga no lo usa
+ninguna publicación: las 1.342 del universo están todas en el export de SciVal.
 
 ---
 
@@ -561,9 +562,9 @@ categoría equivocada:
 | `R-01` | cuartiles Q1–Q4 de un total conocido | `proporcional()` |
 
 `I-05` era un problema de **correctitud**, no de estética: los tramos son
-anidados —las 3 publicaciones del top 1 % están también en el top 5, 10 y 25— y
+anidados —las 11 publicaciones del top 1 % están también en el top 5, 10 y 25— y
 cuatro barras hermanas sugerían cuatro grupos disjuntos que podían sumarse. La
-suma daba 322, una cifra sin significado.
+suma daba 524, una cifra sin significado.
 
 > **Corrección sobre una primera versión.** El déficit de `I-04` se pintaba con
 > `--sin-dato`. Ese gris significa **ausencia** de dato (`D-09`) y un FWCI bajo
@@ -637,11 +638,11 @@ teñirlo. Por eso el rayado se lee igual en los dos temas, con cualquier
 daltonismo y sobre papel en blanco y negro — comprobado con un filtro de escala
 de grises sobre el módulo entero.
 
-`T-04` no estaba marcado como multivaluado y lo es: 391 asignaciones sobre las
-310 publicaciones que tienen algún ODS.
+`T-04` no estaba marcado como multivaluado y lo es: 638 asignaciones sobre las
+521 publicaciones que tienen algún ODS.
 
-**Marca del valor esperado.** `I-05` mostraba cuatro recuentos —3, 34, 75, 210—
-sin nada contra qué compararlos. Ahora cada umbral lleva el trazo de lo que
+**Marca del valor esperado.** `I-05` mostraba cuatro recuentos —11, 53, 115 y
+345— sin nada contra qué compararlos. Ahora cada umbral lleva el trazo de lo que
 cabría esperar bajo el promedio mundial: por definición, el top *k* % de la
 distribución mundial contiene el *k* % de las publicaciones. Se lee de un
 vistazo que la institución queda **por debajo en el 1 %, el 5 % y el 10 %, y
@@ -653,16 +654,17 @@ la marca: es el caso que más importa leer y taparlo lo volvería ilegible justo
 ahí.
 
 **Sello de procedencia.** Franja monoespaciada bajo cada gráfico con fuente,
-corte, N y cobertura. El N **no es global**: 823 en producción, 816 en impacto,
-1.207 apariciones firma × publicación en `P-07`. Publicar un denominador genérico
+corte, N y cobertura. El N **no es global**: 1.342 en producción y 1.342 en
+impacto —que en esta carga coinciden, y no tienen por qué—, pero 1.962
+apariciones firma × publicación en `P-07`. Publicar un denominador genérico
 sería el error que este proyecto persigue.
 
 Por debajo del umbral de cobertura declarado en `config/indicators.yml` el sello
-cambia de registro y advierte. Dispara solo en `A-01` (72,3 %) y `T-04` (38 %).
+cambia de registro y advierte. Dispara solo en `A-01` (70,3 %) y `T-04` (38,8 %).
 
 `P-07` obligó a corregir su denominador: se calcula sobre pares autor ×
 publicación, no sobre publicaciones, y con el denominador de config el sello
-daba 94,1 % donde la auditoría mide 63,8 %.
+daba 94,1 % donde la auditoría mide 64,2 %.
 
 ### 12.7 Responsive
 
@@ -705,13 +707,13 @@ tres denominadores (`D-16`). El bloque de recorte de la pantalla no se imprime:
 trae controles que en una hoja no llevan a ninguna parte.
 
 **El informe por persona.** `autor` es una dimensión de filtro más, con los
-nombres canónicos que el corpus ya trae. No se dibuja como las demás: 530
+nombres canónicos que el corpus ya trae. No se dibuja como las demás: 829
 pastillas no son un filtro, así que el panel enseña las firmas elegidas y un
 campo con autocompletado, y la entrada natural es el enlace de cada ficha.
 Cuando el recorte es de una persona, sobre las cifras aparecen las salvaguardas
 —la advertencia de lectura que adhiere a DORA y al Manifiesto de Leiden, y la
 de muestra reducida por debajo del umbral—, con la misma redacción que la
-ficha y no una copia. Se ofrece a las 530 entidades, no sólo a las 50 que
+ficha y no una copia. Se ofrece a las 829 entidades, no sólo a las 68 que
 superan el umbral: `docs/INFORME_POR_INVESTIGADOR.md` explica por qué.
 
 Dos cortes cambian de significado sobre una sola persona y se tratan distinto.
@@ -1063,7 +1065,7 @@ estilos:
 | Flujos interactivos | recorte, recálculo, URL, botón de volver, «Ver todo», conmutador, índice, glosario, buscador, enlaces antiguos | **0 fallos**, 0 excepciones de JavaScript |
 | Desborde horizontal | 430 px y 860 px | **0 px** |
 | Sitio sin JavaScript | `index`, `impacto`, `produccion`, `colaboracion`, `tematica` | cifras, gráficos, tablas y sellos presentes |
-| Auditoría de datos | 30 reglas | 29 pasan, **0 bloqueantes fallando** |
+| Auditoría de datos | 30 reglas | 27 pasan · 3 fallan, **0 bloqueantes fallando** |
 | Barrera pública/interna | artefactos de `dist/` | **0 fallas** |
 
 Tres de esas comprobaciones **se reformularon, no se debilitaron**, cuando la
@@ -1092,9 +1094,30 @@ en este sitio: el explorador manda `publications.json` entero al navegador.
 
 | | Comprimido | Techo | Uso |
 |---|---|---|---|
-| CSS | 22,4 KB | 60 KB | 37 % |
-| JavaScript | 51,4 KB | 150 KB | 34 % |
-| Datos | 204,3 KB | 250 KB | **82 %** |
+| CSS | 39,9 KB | 60 KB | 67 % |
+| JavaScript | 82,7 KB | 150 KB | 55 % |
+| Datos | 370,8 KB | 450 KB | 82 % |
+
+El techo de datos **subió de 300 a 450 KB** con la carga 2020–2025 (`D-587`).
+No es un techo externo, y su propia procedencia lo dice: CSS y JavaScript citan
+una recomendación de presupuesto para móvil; datos dice «techo propio». La regla
+con que se fijó las dos veces anteriores es **1,21 veces lo medido** —250 sobre
+204,3 y 300 sobre 247,7—, y aplicarla a los 370,8 de hoy da 450. Se aplicó la
+regla, no se derogó.
+
+**La próxima vez no se sube** (`D-589`). Una tercera aplicación del 1,21x
+convierte el techo en una función del corpus: sube siempre y deja de restringir.
+La salida ya está medida y no cuesta ningún dato: recodificar
+`publications.json` en columnas con diccionario de cadenas deja el grupo en
+**265,8 KB** —105 menos— y la rehidratación devuelve el texto original byte a
+byte.
+
+**Qué mide esa suma** (`D-591`): los quince artefactos raíz de `dist/data/`, que
+ninguna página pide juntos. La página más pesada pide 328,0 KB y la ficha de
+autor 316,0. Es una **cota superior** del peso de datos de cualquier página, no
+el peso de ninguna. Las 829 fichas de autor quedan fuera a propósito: suman
+995,8 KB entre todas, pero la mayor pesa 6,5 KB y ninguna página carga más de
+una.
 
 #### Por qué el techo de datos puede ser tan alto
 
@@ -1104,31 +1127,53 @@ después:
 
 | Medición | Resultado | Umbral |
 |---|---|---|
-| LCP en *Slow 4G* | **1.424 ms** | 2.500 ms (Core Web Vitals) |
+| LCP en *Slow 4G*, portada | **1.596 ms** | 2.500 ms (Core Web Vitals) |
+| LCP en *Slow 4G*, impacto | 1.620 ms | 2.500 ms |
+| LCP en *Slow 4G*, temática | 1.592 ms | 2.500 ms |
 | Latencia al recortar el conjunto | **21–37 ms** | 200 ms (INP) |
 
-Los dos por debajo del umbral, el LCP con un 43 % de margen. El peso de los datos es el precio de la
-arquitectura —cualquier pregunta se responde sin volver al servidor— y está
-comprado con margen.
+Medido el 2026-09-10 sobre el corpus de **1.342 publicaciones**, no sobre el
+anterior: subir un techo citando una medición vieja es el defecto que
+`peso.mjs` existe para impedir (`D-588`). Con las 823 de julio el LCP era de
+1.424 ms, así que **duplicar el corpus costó 172 ms** y el margen sigue en el
+36 %. El peso de los datos es el precio de la arquitectura —cualquier pregunta
+se responde sin volver al servidor— y está comprado con margen.
 
 #### La decisión de no recortar el dataset
 
-Seis campos de `publications.json` —`editorial`, `idioma`, `topic`,
-`tipo_fuente`, `n_paises`, `n_instituciones`— **no los consume el explorador**.
-Quitarlos ahorraría 28 KB comprimidos, un 17 %.
+**Cinco** campos de `publications.json` —`editorial`, `idioma`, `topic`,
+`tipo_fuente`, `n_instituciones`— no los consume nada: ni el explorador, ni el
+generador del informe en PDF, ni el CSV que descarga el usuario, ni los otros
+catorce artefactos, ni las 829 fichas de autor.
 
-**No se quitan**, por dos razones:
+> **Corrección del 2026-09-10.** Este documento listaba seis e incluía
+> `n_paises`. Es falso: `n_paises` es la décima columna del CSV que descarga el
+> usuario (`web/assets/js/paginas.js:634`). Quien hubiera accionado la palanca
+> fiándose de esta lista habría roto la descarga pública en silencio.
+
+**No se quitan**, por tres razones. Las dos primeras ya estaban:
 
 - `publications.json` no es sólo el combustible del explorador: es el **dataset
   publicable** del informe. Quien lo descargue esperando los campos del corpus
   no debería encontrarse un recorte hecho para que una página cargue antes.
 - El orden de prioridades del proyecto pone **integridad de datos (2) por
-  encima de rendimiento (5)**, y aquí no hay conflicto real: el techo está en el
-  82 % y el efecto medido está a menos de la mitad del umbral.
+  encima de rendimiento (5)**.
 
-Queda **anotado como la palanca disponible** para cuando el techo apriete. Con
-el corpus creciendo cada año, ese momento llegará; lo dirá la batería, no una
-frase de este documento.
+La tercera es la que cierra el asunto, y es una medición, no un argumento:
+
+- **La palanca no llega.** Quitar los tres campos sin ningún consumo deja el
+  grupo en **329,4 KB** comprimidos, un 110 % del techo; ampliarlo a los cinco,
+  en **325,3 KB**, un 108 %. La compuerta sigue en rojo y el despliegue sigue
+  detenido. Los 47 KB que este documento anotaba eran una estimación sobre el
+  peso **en bruto**: medido tras comprimir, el recorte de los tres vale 41,3 KB
+  de los 70,7 que harían falta. Son campos de altísima repetición —`Journal`
+  1.342 veces, editoriales y topics repetidos— y **gzip ya colapsaba casi todo
+  ese peso**: 167 KB en bruto valen 41,3 comprimidos.
+
+Recortar el dataset publicable **y seguir excediendo el techo** es el peor de
+los dos mundos: se pierde dato y no se desbloquea nada. La palanca queda
+**declarada agotada**, con su cifra, para que nadie vuelva a anotarla como
+disponible. Lo que sí resuelve el exceso está en la sección siguiente.
 
 #### Y ahora es una compuerta, no una nota
 
@@ -1147,7 +1192,7 @@ sube.
 
 Los dos techos se fijaron para un sitio que servía indicadores ya calculados.
 El explorador cambió el trato: **`publications.json` viaja entero al navegador**
-—699 KB, 823 registros con sus 28 campos— y a cambio cualquier pregunta se
+—1.429 KB, 1.342 registros con sus 29 campos— y a cambio cualquier pregunta se
 responde sin volver al servidor. Un sitio que sólo pintaba series no necesitaba
 ese peso; uno que se interroga, sí.
 

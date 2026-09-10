@@ -6,13 +6,14 @@ Responde a `PROJECT_SPEC.md` `<public_author_profile>`. Cada campo exigido por
 la especificación aparece abajo con su disponibilidad **verificada**, no
 supuesta.
 
-> **Base de las cifras: 2026-09-07.** Todas las de este documento se
-> recalcularon contra los artefactos que sirve el sitio —`authors.json` y las
-> 530 fichas de `data/processed/author/`— y están medidas sobre **entidades
-> publicadas**, no sobre las formas de firma de la fuente. Antes mezclaban las
-> dos bases y arrastraban un recuento anterior a la última consolidación: decían
-> 538 entidades donde hoy hay 530, y 84 firmas fusionadas en 37 personas donde
-> el artefacto declara 94 en 39. Cómo se rehacen, al final del documento.
+> **Base de las cifras: 2026-09-09**, sobre la carga exportada el 2026-09-08.
+> Todas las de este documento se recalcularon contra los artefactos que sirve el
+> sitio —`authors.json` y las **829** fichas de `data/processed/author/`— y están
+> medidas sobre **entidades publicadas**, no sobre las formas de firma de la
+> fuente. En su día mezclaban las dos bases y arrastraban un recuento anterior a
+> la consolidación —decían 538 entidades y 84 firmas fusionadas en 37 personas—;
+> el artefacto declara hoy **829 entidades** y **94 formas en 39 personas**. Cómo
+> se rehacen, al final del documento.
 
 ---
 
@@ -20,38 +21,40 @@ supuesta.
 
 ### Cabecera
 
-Sobre las **530 entidades publicadas**, una por ficha.
+Sobre las **829 entidades publicadas**, una por ficha.
 
 | Campo | Disponible | Fuente | Tratamiento si falta |
 |---|---|---|---|
-| Nombre en fuente | ✅ 530/530 | Scopus | — |
-| Nombre normalizado | ✅ 530/530 | derivado | Se muestra sólo si difiere del nombre en fuente |
-| Afiliación UFT | ✅ 530/530 | matching | — |
-| Unidad académica | ⚠️ 316/530 (59,6 %) | inferida | «No determinada» |
-| Scopus Author ID | ✅ 522/530 (98,5 %) | Scopus | «No resuelto» + explicación |
-| **ORCID** | ✅ **268/530 (50,6 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
-| Otros identificadores | ❌ 0/530 | — | Sección oculta si no hay ninguno |
+| Nombre en fuente | ✅ 829/829 | Scopus | — |
+| Nombre normalizado | ✅ 829/829 | derivado | Se muestra sólo si difiere del nombre en fuente |
+| Afiliación UFT | ✅ 829/829 | matching | — |
+| Unidad académica | ⚠️ 498/829 (60,1 %) | inferida | «No determinada» |
+| Scopus Author ID | ✅ 818/829 (98,7 %) | Scopus | «No resuelto» + explicación |
+| **ORCID** | ✅ **268/829 (32,3 %)** | Crossref + registro de ORCID | **«No disponible en las fuentes actuales»** con enlace a la nota metodológica |
+| Otros identificadores | ❌ 0/829 | — | Sección oculta si no hay ninguno |
 
 ### Indicadores
 
 | Indicador | Disponible | Tratamiento |
 |---|---|---|
 | Total de publicaciones | ✅ | Con nota de conteo completo |
-| Total de citas | ✅ | Con fecha de corte 2026-07-22 |
+| Total de citas | ✅ | Con fecha de corte 2026-08-30 |
 | Citas por publicación | ✅ | Denominador visible |
-| **h-index en ventana 2023–2025** | ⚠️ 50/530 | **Sólo si n ≥ 5.** Etiquetado siempre «en ventana» |
+| **h-index en ventana 2020–2025** | ⚠️ 68/829 | **Sólo si n ≥ 5.** Etiquetado siempre «en ventana» |
 | **FWCI del autor** | ❌ | **No se muestra.** Ver §3 |
-| Evolución temporal | ✅ | 3 barras, no línea |
+| Evolución temporal | ✅ | 6 barras, no línea |
 | Publicaciones en top 10 % | ✅ | Recuento |
 | Colaboración internacional | ❌ | **No está en la ficha.** La especificación la pedía y este documento la daba por puesta; la ficha publica cinco cifras, la evolución y la coautoría. Existe por publicación (`C-01`) y en el informe recortado a esa firma, no como indicador de la ficha |
 
-Las 50 fichas con h-index son exactamente las que superan el umbral de
+Las 68 fichas con h-index son exactamente las que superan el umbral de
 interpretabilidad: comprobado contra las fichas, no deducido de la regla.
 
 ### Listado de publicaciones
 
-Tabla con año, título, fuente, tipo, citas y DOI enlazado. Ordenable.
-Las 7 publicaciones sin métricas muestran «sin métricas» en vez de 0.
+Tabla con año, título, fuente, tipo, citas y DOI enlazado. Ordenable. El
+tratamiento «sin métricas» en vez de 0 sigue implementado, y en esta carga no lo
+usa ninguna publicación: las 1.342 del universo están todas en el export de
+SciVal.
 
 ### Coautoría
 
@@ -68,15 +71,15 @@ desglose de la red completa, que vive en `colaboracion.html` (`C-05`).
 Fija, visible sin desplegar, en todas las fichas:
 
 > **Cómo leer esta ficha.** Los indicadores describen la producción indexada en
-> Scopus entre 2023 y 2025, con citas actualizadas al 22 de julio de 2026. No
+> Scopus entre 2020 y 2025, con citas actualizadas al 30 de agosto de 2026. No
 > representan la trayectoria completa de la persona: publicaciones anteriores a
-> 2023, o en medios no indexados por Scopus, no aparecen aquí.
+> 2020, o en medios no indexados por Scopus, no aparecen aquí.
 >
 > Las métricas individuales sobre ventanas cortas y pocas publicaciones no son
 > comparables entre personas ni deben usarse para evaluar desempeño individual.
 > Este informe adhiere a los principios de DORA y del Manifiesto de Leiden.
 
-Cuando el autor tiene **n < 5 publicaciones** (480 de 530), se añade:
+Cuando el autor tiene **n < 5 publicaciones** (761 de 829), se añade:
 
 > **Muestra reducida.** Con menos de 5 publicaciones en la ventana, los
 > indicadores de impacto no son interpretables individualmente. Se muestran por
@@ -106,21 +109,26 @@ es normalizado por campo y **sí está disponible por publicación** (`I-05`).
 
 La ficha corresponde a **una forma de firma**, no necesariamente a una persona.
 
-### 589 en la auditoría, 530 en el sitio: no es una incoherencia
+### 888 en la auditoría, 829 en el sitio: no es una incoherencia
 
 Las cifras son correctas y miden cosas distintas.
 
-- **589** son las formas de firma que la auditoría detecta en Scopus. Describe
+- **888** son las formas de firma que la auditoría detecta en Scopus. Describe
   la fuente, y no cambia porque nosotros revisemos nada.
-- **530** son las entidades que el sitio publica hoy, en dos pasos:
+- **829** son las entidades que el sitio publica hoy, en dos pasos:
   **94 formas de firma se fusionaron en 39 personas** —37 tras revisión humana
   caso por caso y 2 por ser la misma firma con distintos diacríticos o
-  separadores— (589 − 94 + 39 = 534, `config/identidades_consolidadas.yml`), y
+  separadores— (888 − 94 + 39 = 833, `config/identidades_consolidadas.yml`), y
   la regla `E-09` marcó 4 formas como fragmentos de cadena de afiliación —no
-  personas—, confirmados y descartados tras revisión (534 − 4 = 530,
-  `config/firmas_e09_resueltas.yml`; ver `docs/LIMITATIONS.md` §7). Las **491
+  personas—, confirmados y descartados tras revisión (833 − 4 = 829,
+  `config/firmas_e09_resueltas.yml`; ver `docs/LIMITATIONS.md` §7). Las **790
   restantes** siguen sin consolidar y pueden incluir variantes de una misma
   persona.
+
+  Que las no consolidadas pasaran de 491 a 790 no es un retroceso de la
+  revisión: la ventana pasó de 2023–2025 a 2020–2025 y con ella las formas de
+  firma que la fuente declara, de 589 a 888, mientras las decisiones humanas
+  siguen siendo las mismas —94 fusionadas en 39, 4 descartadas—.
 
 La aritmética es la que declara el propio artefacto en su nota de identidad, y
 es la que hay que citar: este documento decía 84 en 37 y 538 entidades, cifras
@@ -129,7 +137,7 @@ de una consolidación anterior que ya no describen lo publicado.
 La consolidación no la hace ninguna heurística (decisión `D-08`). La única vía
 es `config/identidades_consolidadas.yml`, que genera `apply_decisions.py` a
 partir de lo que una persona decidió en `make revision`. Sin ese archivo el
-sitio publica las 589 y todo funciona igual.
+sitio publica las 888 y todo funciona igual.
 
 Cada ficha fusionada declara **qué formas de firma la componen**, y el buscador
 encuentra por cualquiera de ellas: quien llegue desde Scopus con «Giglio A.»
@@ -204,25 +212,25 @@ la capa interna.
 La pregunta que abría esta sección —**¿se publican todas las firmas o sólo un
 subconjunto validado?**— está respondida, y por dos vías que coinciden.
 
-**Lo implementado.** Se publican **las 530 entidades**, cada una con su estado
+**Lo implementado.** Se publican **las 829 entidades**, cada una con su estado
 de identidad visible, y el ranking de `autores.html` ofrece por defecto la vista
-filtrada por n ≥ 5, que son 50. Es exactamente la recomendación que esta sección
+filtrada por n ≥ 5, que son 68. Es exactamente la recomendación que esta sección
 proponía: nadie queda excluido arbitrariamente y la vista principal mantiene
 calidad. La casilla se puede desmarcar, y una búsqueda que llegue por la URL la
 desmarca sola, porque llegar buscando a alguien y no encontrarlo sería peor que
 no ofrecer la búsqueda.
 
 **Lo decidido el 2026-09-07** (`D-518`), sobre el informe de productividad por
-persona: se ofrece también a las 530, con la banda de muestra reducida donde
-corresponda. Los argumentos son los mismos que aquí se enumeraban. Excluir a
+persona: se ofrece también a todas las entidades publicadas —hoy 829—, con la
+banda de muestra reducida donde corresponda. Los argumentos son los mismos que aquí se enumeraban. Excluir a
 alguien de su propio informe es una decisión sobre esa persona tomada en
 silencio; declararle la limitación es una decisión sobre el dato.
 `docs/INFORME_POR_INVESTIGADOR.md` desarrolla el razonamiento y sus
 salvaguardas.
 
 Lo que sigue abierto no es el alcance sino la **calidad** de las fichas cortas:
-480 de las 530 tienen menos de cinco publicaciones en la ventana, 20 arrastran
-identidad no consolidada y 214 no tienen unidad determinada. Nada de eso se
+761 de las 829 tienen menos de cinco publicaciones en la ventana, 42 arrastran
+identidad no consolidada y 331 no tienen unidad determinada. Nada de eso se
 oculta: cada ficha lo declara.
 
 ---
@@ -235,7 +243,7 @@ sitio, y se recalculan así:
 - **Entidades, cobertura de unidad, ORCID y sus veredictos**: `authors.json`,
   campos `unidades`, `orcid` y `orcid_veredicto_etiqueta`; el bloque
   `parametros` trae los totales que el propio build calcula.
-- **Scopus Author ID y h-index**: las 530 fichas de `data/processed/author/`,
+- **Scopus Author ID y h-index**: las 829 fichas de `data/processed/author/`,
   campos `scopus_author_ids` e `indicadores.h_index_ventana`.
 - **La aritmética de identidad**: la nota de identidad de `authors.json`, que la
   declara en palabras, y los dos archivos de `config/` que la sostienen.

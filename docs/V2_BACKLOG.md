@@ -19,9 +19,9 @@ lugar.
 
 | # | Pendiente | Desbloquea | Origen |
 |---|---|---|---|
-| **V2-01** | Subir la cobertura de ORCID desde el 50,6 % actual (268 de 530), confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
+| **V2-01** | Subir la cobertura de ORCID desde el 32,3 % actual (268 de 829), confirmando candidatos por afiliación | Identidad persistente; campo exigido por `PROJECT_SPEC` | T-01 (cerrado), T-19 |
 | **V2-02** | ~~Resolver los grupos de variantes de nombre que siguen pendientes~~ | `C-05` red de coautoría; recuento real de personas | T-03 (cerrado, 2026-08-26) |
-| **V2-03** | Revisión humana de los 20 identificadores fragmentados | `C-07` liderazgo autoral | T-04 |
+| **V2-03** | Revisión humana de los 29 identificadores fragmentados | `C-07` liderazgo autoral | T-04 |
 | **V2-04** | Validar institucionalmente el vocabulario de unidades | Retirar la advertencia destacada de `P-07` | T-02 |
 | **V2-05** | Reexportar Scopus con fecha de corte declarada | Cierra la única brecha de trazabilidad que queda | T-06 |
 | **V2-06** | Reexportar SciVal con autocitas | `X-01` tasa de autocitación | Fase 2 |
@@ -33,24 +33,24 @@ afirmaciones caducaron:
 
 - **La vía Crossref ya se recorrió.** `T-01` se cerró el 2026-08-01 con 174
   firmas, y la ampliación desde el registro, OpenAlex y las decisiones humanas
-  la dejaron en **328 asignaciones sobre 589 formas de firma sin consolidar**,
-  que son **268 de 530 entidades publicadas (50,6 %)**. El 100 % no es
-  alcanzable sin inventar datos: el argumento está en `docs/ORCID_COVERAGE.md`
-  §5.
+  la dejaron en **328 asignaciones sobre las 888 formas de firma que la fuente
+  declara (36,9 %)**, que son **268 de 829 entidades publicadas (32,3 %)**. El
+  100 % no es alcanzable sin inventar datos: el argumento está en
+  `docs/ORCID_COVERAGE.md` §5.
 - **La consolidación no esperó al ORCID.** De los 110 casos que `make revision`
   puso delante de una persona —repartidos en cuatro colas—, 52 se resolvieron:
   51 «misma persona» y 1 «personas distintas». Su cierre transitivo, sumado a
   revisiones posteriores, dejó **94 formas de firma convertidas en 39 personas**
-  (`config/identidades_consolidadas.yml`) — la consolidación del 2026-09-01
-  llevó la base a 542 entidades, y la regla `E-09` descartó 4 formas más que
-  resultaron ser fragmentos de cadena de afiliación, no personas
-  (`config/firmas_e09_resueltas.yml`, ver `docs/LIMITATIONS.md` §7), dejando
-  la base publicada hoy en **530 entidades**. El camino fue humano y caso por
-  caso, que es justo lo que `D-08` exige y lo que este párrafo daba por
-  imposible.
+  (`config/identidades_consolidadas.yml`) — esas mismas fusiones se aplican hoy
+  sobre las 888 formas de firma de la ventana 2020–2025 (888 − 94 + 39 = 833), y
+  la regla `E-09` descartó 4 formas más que resultaron ser fragmentos de cadena
+  de afiliación, no personas (`config/firmas_e09_resueltas.yml`, ver
+  `docs/LIMITATIONS.md` §7), dejando la base publicada hoy en **829
+  entidades**. El camino fue humano y caso por caso, que es justo lo que `D-08`
+  exige y lo que este párrafo daba por imposible.
 
 No confundir dos recuentos que coinciden en el número: la cola de variantes de
-nombre tiene **51 grupos** (`T-03`, 123 filas en `internal/ambiguities_authors.csv`),
+nombre tiene **51 grupos** (`T-03`, 207 filas en `internal/ambiguities_authors.csv`),
 y **51** es también el total de veredictos «misma» sumando las cuatro colas. Son
 conjuntos distintos.
 
@@ -105,7 +105,7 @@ Ya evaluados en Fase 2 y verificados como calculables. Están en
 
 | # | Decisión | Estado |
 |---|---|---|
-| **T-11** | Alcance de publicación de fichas de autor | **Confirmado el 2026-09-07** (`D-518`, y `docs/AUTHOR_PROFILE.md` §5): se publican las **530 entidades** —las 589 formas de firma de la fuente, con 94 ya fusionadas en 39 personas y 4 descartadas por la regla `E-09` (no son personas)—, ranking por defecto n ≥ 5 (`config/publication.yml`). El informe por investigador se ofrece con el mismo alcance |
+| **T-11** | Alcance de publicación de fichas de autor | **Confirmado el 2026-09-07** (`D-518`, y `docs/AUTHOR_PROFILE.md` §5): se publican las **829 entidades** —las 888 formas de firma de la fuente, con 94 ya fusionadas en 39 personas y 4 descartadas por la regla `E-09` (no son personas)—, ranking por defecto n ≥ 5 (`config/publication.yml`). El informe por investigador se ofrece con el mismo alcance |
 | ~~T-13~~ | ~~Confirmar la semántica del percentil de citación con documentación de SciVal~~ | **Cerrado (2026-08-26)**: empírica (correlación −0,66) y ahora también documental — `docs/METHODOLOGY.md` §7 bis |
 | — | Licencia de datos derivados (CC BY 4.0) | Propuesta en `DATA_LICENSE.md`, sin validar |
 | — | Alcance de publicación de métricas de Elsevier | Sin verificación jurídica |
@@ -198,7 +198,7 @@ había propuesto ejecutar.
   indexación distintos, no un error de carga) — el informe hoy no la muestra
   en ninguna parte.
 
-**Lo que esto NO es:** no propone tocar las 823 publicaciones del universo
+**Lo que esto NO es:** no propone tocar las 1.342 publicaciones del universo
 canónico, ni su cifra, ni ningún indicador que dependa de ese denominador
 (`D-16`). Sumar produciría exactamente la cifra irreconciliable que §6 arriba y
 `D-206` prohíben.
@@ -211,7 +211,10 @@ apartado que indique la producción total fuera de Scopus"):
   por revisión de cobertura OpenAlex (V2-26)") —, con su propio
   denominador declarado (`D-16`), que agrega por año los casos con
   veredicto `CONFIRMADO_PRODUCCION_UFT` de `internal/openalex_cobertura.csv`
-  dentro de la ventana 2023-2025 (**20** hoy). Nunca mezclada con
+  dentro de la ventana declarada, hoy 2020–2025 (**20** casos confirmados en la
+  carga anterior; con la del 2026-09-08 la cola de OpenAlex no se ha vuelto a
+  correr y `produccion_declarada.json` declara la fuente como no disponible,
+  con `PD-02` en 0). Nunca mezclada con
   `P-01`/`P-03` ni con ningún indicador del universo primario. Se agrega
   sólo por año, no por Facultad: esta evidencia es por autor, no una
   declaración editorial de una unidad.
@@ -242,8 +245,8 @@ canónica sólo donde esa relación está validada institucionalmente
 (reutilizando `common.canonical_academic_unit()`/`facultad_de()`, las
 mismas funciones que `P-07`), y publica el resto por unidad declarada, sin
 forzar ninguna Facultad sin validar. Resultado: 808 leídos → 498 fuera del
-universo → 341 con Facultad validada (125 en ventana 2023-2025, la cifra
-que entra al total) + 157 sin Facultad validada (57 en ventana, publicadas
+universo → 341 con Facultad validada (247 en ventana 2020–2025, la cifra
+que entra al total) + 157 sin Facultad validada (104 en ventana, publicadas
 aparte, nunca ocultas). El total combinado de la página pasó a unir las
 TRES fuentes por DOI: hay solapamiento real entre las tres, no sólo entre
 pares (Medicina aparece declarada en su propio sitio Y autoarchivada por

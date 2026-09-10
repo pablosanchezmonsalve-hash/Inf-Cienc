@@ -80,10 +80,11 @@ sólo para contarlos. Nunca `detalle`, `consecuencia` ni `resolucion`, que son
 material de conciliación interna.
 
 Lo que llega a un artefacto público es un **recuento**, nunca la lista nominal:
-«4 de las 556 fichas son probables fragmentos de cadena de afiliación,
-pendientes de revisión». Se publica porque es una limitación del dato —parte de
-las fichas probablemente no correspondan a personas— y publicar el recuento de
-autores sin ella sería publicar una cifra que ya sabemos que sobra.
+«4 de las 888 formas de firma son fragmentos de cadena de afiliación y no
+personas, y quedan fuera del recuento de fichas». Se publica porque es una
+limitación del dato —parte de las firmas detectadas no corresponde a personas—
+y publicar el recuento de autores sin ella sería publicar una cifra que ya
+sabemos que sobra.
 
 Queda escrita aquí y en el docstring del módulo por la misma razón que la
 anterior: `src/build/05_verify_public_layer.py` comprueba nombres de campo en
@@ -96,10 +97,10 @@ El **recuento agregado** y su explicación metodológica. Es la forma de ser
 transparente sobre la incertidumbre sin exponer afirmaciones no verificadas
 sobre personas:
 
-> «589 formas de firma detectadas. 123 corresponden a apellidos con más de una
-> variante de nombre y 20 a nombres con más de un Scopus Author ID; ambas
+> «888 formas de firma detectadas. 207 corresponden a apellidos con más de una
+> variante de nombre y 29 a nombres con más de un Scopus Author ID; ambas
 > situaciones están declaradas sin resolver. El número de personas distintas es
-> menor que 589.»
+> menor que 888.»
 
 Eso es público. La lista nominal que lo sustenta, no.
 

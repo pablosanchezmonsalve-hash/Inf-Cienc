@@ -44,7 +44,7 @@ presentacion:
 
 **Cómo obtener el `scopus_affiliation_id`:** buscar la institución en Scopus;
 el identificador aparece en la URL del perfil de afiliación. En este proyecto es
-`60105368`, presente en 816 de 818 registros del export de SciVal.
+`60105368`, presente en los 1.342 registros del export de SciVal.
 
 ### `config/matching_rules.yml`
 

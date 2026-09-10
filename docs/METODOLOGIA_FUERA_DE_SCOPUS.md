@@ -62,7 +62,7 @@ institución declarados?**
 | **Ejemplo real** | `PD-01` — Facultad de Medicina y Salud; `PD-03` — autoarchivo institucional | `PD-02` — cola OpenAlex, `internal/openalex_cobertura.csv` (`V2-26`); `PD-04` — cola de repositorios externos, `internal/obras_externas_cobertura.csv` |
 | **Estado** | Publicado (`produccion-ampliada.html`) | Publicado (`produccion-ampliada.html`): `PD-02` desde 2026-09-02, `PD-04` desde 2026-09-03 (mecanismo publicado; la cola se llena cuando el conector corra desde una red que alcance las tres APIs) |
 | **Mecanismo de "cuenta"** | `corpus_paralelo_declarado: true` en `config/sources.yml` + `09_produccion_declarada.py` (`PD-01`); lectura directa de `data/enriched/autoarchivo_produccion.json` en el mismo build, agregada sólo donde la Facultad está validada (`PD-03`) | `internal/openalex_cobertura_decisiones.csv` (veredicto humano) → `apply_openalex_review.py` → `resolucion: CONFIRMADO_PRODUCCION_UFT` → agregado por año en `09_produccion_declarada.py` |
-| **Cifras reales (2026-09-02)** | `PD-01`: 609 leídos → 63 duplicados por DOI colapsados → 325 fuera del universo Scopus → 83 en ventana 2023-2025 (cifra publicada), 222 fuera de ventana + 20 sin año. `PD-03`: 808 leídos → 7 duplicados colapsados → 498 fuera del universo → 341 con Facultad validada (125 en ventana, cifra publicada) + 157 sin Facultad validada (57 en ventana, publicadas por unidad declarada, nunca forzadas) | 414 candidatos → 20 confirmados (`CONFIRMADO_PRODUCCION_UFT`), 394 `PENDIENTE_REVISION_HUMANA` — ninguno se promueve solo (`D-313`) |
+| **Cifras reales** | Build 2026-09-09 — `PD-01`: 609 leídos → 63 duplicados por DOI colapsados → 325 fuera del universo Scopus → 180 en ventana 2020-2025 (cifra publicada), 125 fuera de ventana + 20 sin año. `PD-03`: 808 leídos → 7 duplicados colapsados → 498 fuera del universo → 341 con Facultad validada (247 en ventana, cifra publicada) + 157 sin Facultad validada (104 en ventana, publicadas por unidad declarada, nunca forzadas) | Revisión al 2026-09-02, sobre la cola levantada el 2026-08-26 contra el universo anterior — 414 candidatos → 20 confirmados (`CONFIRMADO_PRODUCCION_UFT`), 394 `PENDIENTE_REVISION_HUMANA` — ninguno se promueve solo (`D-313`) |
 | **Corroboración cruzada** | Ninguna prevista: es la propia institución declarando | `PD-02`: Crossref, cuando el DOI existe (`internal/openalex_cobertura_crossref.csv`). `PD-04`: las tres fuentes entre sí — el mismo DOI en dos repositorios es una obra corroborada dos veces, y el recuento la cuenta una (Regla 3). Refuerza, no reemplaza la revisión humana |
 
 Mezclar estos dos niveles bajo un mismo número sería el mismo error que
@@ -266,7 +266,7 @@ entre fuentes" dejaría de cuadrar.
 ### Regla 5 — El denominador del universo no se toca, en ningún nivel
 
 Ya establecido por `D-16`/`D-206`, reafirmado aquí explícitamente: ningún
-corpus paralelo, de ningún nivel, cambia el recuento de las 823
+corpus paralelo, de ningún nivel, cambia el recuento de las 1.342
 publicaciones del universo canónico ni ningún indicador que dependa de ese
 denominador. `data/interim/publications_universe.csv` es de solo lectura
 para todo lo que este documento describe.

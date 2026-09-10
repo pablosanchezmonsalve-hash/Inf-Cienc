@@ -17,18 +17,45 @@
      tiene que cumplirlas.
 
      El tercer techo, el de DATOS, no existía y es el que de verdad pesa en
-     este sitio: el explorador manda publications.json entero al navegador. Se
-     fija en 250 KB con margen deliberado sobre los ~172 KB actuales, porque el
+     este sitio: el explorador manda publications.json entero al navegador. No
+     es externo y por eso su procedencia dice otra cosa que la de los otros
+     dos: es un techo propio, fijado con margen sobre lo medido, porque el
      corpus crece cada año y un techo que se rompe con el crecimiento normal
      obliga a subirlo cada vez, que es la forma de que deje de significar algo.
+
+     Historial, con la regla que lo fijó cada vez —siempre 1,21x lo medido—:
+       250 KB sobre 204,3 medidos  (carga de 2026-07)
+       300 KB sobre 247,7 medidos  (2026-09-04)
+       450 KB sobre 370,7 medidos  (2026-09-10, carga 2020-2025 · D-587)
+
+     LA PRÓXIMA VEZ NO SE SUBE (D-589)
+     Una tercera aplicación del 1,21x convierte el techo en una función del
+     corpus: sube siempre y deja de restringir. Cuando este techo se vuelva a
+     exceder, la respuesta es recodificar publications.json en columnas con
+     diccionario de cadenas, que está medido y deja el grupo en 265,8 KB —105
+     menos— con rehidratación idéntica byte a byte al texto original. No otro
+     1,21x.
+
+     QUÉ MIDE ESTA SUMA, Y QUÉ NO (D-591)
+     Suma los quince artefactos raíz de dist/data/, y NINGUNA página los pide
+     juntos: la más pesada pide 328,0 KB y la ficha de autor 316,0. Es una COTA
+     SUPERIOR del peso de datos de cualquier página, no el peso de ninguna. Se
+     deja así a propósito: derivar el peor caso exigiría mantener a mano la
+     lista de qué pide cada página, y esa lista envejece en silencio. La
+     afirmación deja de ser cierta si algún día una página carga a la vez
+     publications.json y fuentes_externas.json.
 
    POR QUÉ EL TECHO DE DATOS PUEDE SER TAN ALTO
      Porque está FUERA de la ruta crítica de pintado y eso está medido: el
      contenido llega pre-renderizado en el HTML y el JSON se descarga después.
-     Con Slow 4G el LCP queda en torno a 900 ms sobre un umbral de 2.500, y
-     recortar el conjunto tarda decenas de milisegundos sobre un umbral de 200.
-     Si algún día ese margen se estrecha, lo dirá rendimiento.mjs, no este
-     archivo: aquí se vigila el tamaño, allí el efecto. */
+     Medido con rendimiento.mjs el 2026-09-10, sobre el corpus de 1.342
+     publicaciones y en Slow 4G, el LCP es de 1.596 ms en la portada, 1.620 en
+     impacto y 1.592 en temática, sobre un umbral de 2.500: un 36 % de margen.
+     Con el corpus anterior, de 823, eran 1.424 ms; duplicar el número de
+     publicaciones costó 172 ms. Recortar el conjunto tarda decenas de
+     milisegundos sobre un umbral de 200. Si algún día ese margen se estrecha,
+     lo dirá rendimiento.mjs, no este archivo: aquí se vigila el tamaño, allí
+     el efecto. */
 
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -41,7 +68,7 @@ const KB = 1024;
 const TECHOS = [
   ['CSS', 60, 'recomendación de presupuesto para móvil'],
   ['JavaScript', 150, 'recomendación de presupuesto para móvil'],
-  ['Datos', 300, 'margen sobre lo medido; corpus crece + fuentes externas'],
+  ['Datos', 450, 'techo propio, 1,21x lo medido: el mismo criterio con que se fijaron 250 y 300'],
 ];
 
 function pesar(archivos) {
