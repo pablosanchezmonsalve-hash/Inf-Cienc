@@ -13709,3 +13709,58 @@ otro lo cubre de hecho, pero dejará de cubrirlo el día que diverjan.
 
 Sigue en pie lo anterior: `data/processed/meta.json` con una clave añadida a
 mano, y las dos decisiones de diseño sobre el informe en papel.
+
+## Cierre: la compuerta de contenido sin JavaScript, también en el flujo público (2026-09-09)
+
+Cierra el pendiente que dejó el cambio anterior. `deploy.yml` comprueba que el
+sitio ensamblado trae contenido sin JavaScript; `publicar-site-publico.yml` no,
+y es el que sobrevive a que el repositorio de datos pase a privado.
+
+### Cuál es exactamente el agujero
+
+Al medirlo salió que es más estrecho de lo que yo había escrito. El
+pre-renderizado es un requisito blando **en un solo caso**:
+
+- **Node no está** → `FileNotFoundError`, `06_assemble_site.py` avisa en voz
+  alta, sigue, y publica un sitio que exige JavaScript. Éste es el agujero.
+- **Node está y el guion falla** → `sys.exit("BUILD ABORTADO")`. Aquí no hay
+  nada que vigilar: el build se detiene solo.
+
+El comentario que yo había puesto en el flujo decía «si Node falta o el guion
+revienta, avisa y sigue». La segunda mitad era falsa y quedó corregida.
+
+### Verificación, con el caso negativo primero
+
+- **Node ausente** (`PATH` sin él): el ensamblado imprime «OMITIDO — no hay Node
+  en el entorno» y termina bien. La compuerta sobre ese `dist/`:
+  `FALLA: dist/index.html no está pre-renderizado`, salida 1.
+- **Node roto** (un `node` que sale con 127): el ensamblado aborta solo, como
+  dice el código. La compuerta ni llega a correr.
+- **Sitio bien ensamblado**: «Contenido presente sin JavaScript — verificado»,
+  salida 0.
+
+Una compuerta que no se ha visto fallar no está verificada, sólo escrita.
+
+### Por qué duplicada y no compartida
+
+Es la misma comprobación que en `deploy.yml`, palabra por palabra. Mientras los
+dos flujos publiquen el mismo `dist/` la de allá cubre a ésta de hecho; el día
+que diverjan, dejará de cubrirla. Extraerla a un guion común es la respuesta
+obvia y no se hizo: son nueve líneas de `grep` y un guion compartido añade un
+archivo que hay que ir a leer para saber qué publica cada flujo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-575 | El flujo público comprueba por su cuenta que el sitio tiene contenido sin JavaScript | Es el despliegue que sobrevive a que el repositorio de datos pase a privado. Que la compuerta del otro lo cubra hoy es una coincidencia de que publican el mismo `dist/` |
+
+### Archivos
+
+- `.github/workflows/publicar-site-publico.yml` — la compuerta, entre el
+  ensamblado y la comprobación de capa interna, en el mismo orden que `deploy.yml`
+
+### Pendientes
+
+Sigue en pie lo anterior: `data/processed/meta.json` con una clave añadida a
+mano, y las dos decisiones de diseño sobre el informe en papel.

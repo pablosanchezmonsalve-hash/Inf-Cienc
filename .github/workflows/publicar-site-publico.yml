@@ -68,6 +68,34 @@ jobs:
       - name: Ensamblar el sitio desde la capa pública
         run: python3 src/build/06_assemble_site.py
 
+      # El pre-renderizado es un requisito BLANDO del ensamblado, y sólo en un
+      # caso: si Node NO ESTÁ, `06_assemble_site.py` avisa en voz alta y sigue,
+      # y lo que se publica es un sitio que exige JavaScript para mostrar una
+      # cifra. (Si Node está y el guion falla, el build aborta solo; ése no es
+      # el agujero.) Un sitio así no es un informe institucional, y el aviso lo
+      # lee la consola de CI, o sea nadie.
+      #
+      # Fijar Node (arriba) hace improbable la causa; esta compuerta comprueba
+      # el EFECTO, que es lo que de verdad importa y lo único que no depende de
+      # acertar con la causa.
+      #
+      # Misma comprobación que en deploy.yml, y a propósito duplicada: mientras
+      # los dos flujos publiquen el mismo `dist/` la de allá cubre a ésta de
+      # hecho, pero dejaría de cubrirla el día que diverjan. Este despliegue es
+      # el que sobrevive a que el repositorio de datos pase a privado.
+      - name: Comprobar que el sitio tiene contenido sin JavaScript
+        run: |
+          set -e
+          for p in index impacto produccion colaboracion tematica; do
+            grep -q 'data-prerender="1"' "dist/$p.html" \
+              || { echo "FALLA: dist/$p.html no está pre-renderizado"; exit 1; }
+          done
+          grep -q '<svg class="chart"' dist/impacto.html \
+            || { echo "FALLA: dist/impacto.html no trae ningún gráfico"; exit 1; }
+          grep -q 'class="sello"' dist/impacto.html \
+            || { echo "FALLA: dist/impacto.html no trae los sellos de procedencia"; exit 1; }
+          echo "Contenido presente sin JavaScript — verificado"
+
       # D-SEC-01 / D-SEC-02: el artefacto que se publica no debe arrastrar
       # material interno aunque estuviera en el árbol de trabajo.
       - name: Comprobar que la capa interna no viaja en dist/
