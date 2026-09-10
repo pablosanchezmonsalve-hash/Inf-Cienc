@@ -94,12 +94,53 @@ def main() -> None:
 
     n_uni = len(universe)
     n_met = int(universe["tiene_metricas"].sum())
+
+    # Las notas de esta tabla las publica el catálogo del sitio, así que sus
+    # cifras se derivan igual que las medidas: escritas a mano sobreviven a la
+    # carga que las vuelve falsas, y entonces la página imprime la nota vieja
+    # al lado de la medición nueva, en la misma fila (D-594).
+    _amb = pd.read_csv(c.INTERNAL / "ambiguities_authors.csv", dtype=str)
+
+    def _encoladas(tipo: str) -> int:
+        return int((_amb["tipo"] == tipo).sum())
+
+    def _dup_pendientes() -> int:
+        """Grupos de publicaciones con el mismo DOI que nadie ha revisado.
+
+        La cifra que abre el informe tiene que declarar lo que puede estar
+        sobrecontando, y esta tabla es donde el catálogo la publica.
+        """
+        ruta = c.INTERNAL / "ambiguities_publications.csv"
+        if not ruta.exists():
+            return 0
+        f = pd.read_csv(ruta, dtype=str)
+        f = f[f["resolucion"] == "NO_RESOLVER_AUTOMATICAMENTE"]
+        dois = {str(d).rsplit("doi=", 1)[-1].strip().lower()
+                for d in f["detalle"] if "doi=" in str(d)}
+        return len({d for d in dois if d and d != "nan"})
+
+    _recon = pd.read_csv(c.INTERIM / "reconciliation_summary.csv", dtype=str)
+    _rec = dict(zip(_recon["metrica"], _recon["valor"]))
+    _citas_scopus = int(float(_rec.get("citas_totales_scopus", 0)))
+    _citas_scival = int(float(_rec.get("citas_totales_scival", 0)))
+    _delta = _citas_scival - _citas_scopus
+
+    _vt = c.INSTITUTION["ventana_temporal"]
+    _ventana = f"{_vt['anio_inicio']}-{_vt['anio_fin']}"
+    _anios = _vt["anio_fin"] - _vt["anio_inicio"] + 1
+
+    def _mil(n: int) -> str:
+        return f"{n:,}".replace(",", ".")
     n_aut = int(universe["tiene_autoria_detallada"].sum())
 
     # ------------------------------------------------ descriptivos / desempeño
+    _dup = _dup_pendientes()
     record("P-01", "Publicaciones totales", "descriptivo", "sí",
            f"{n_uni}/{n_uni} (100 %)", "alta", "V1",
-           "Conteo de publicaciones únicas. Denominador institucional base.")
+           "Conteo de publicaciones únicas. Denominador institucional base."
+           + (f" {_dup} grupo(s) de registros comparten DOI y esperan revisión "
+              f"humana: si se confirman como el mismo trabajo, el total sobra "
+              f"en {_dup} (regla D-02, decisión D-08)." if _dup else ""))
 
     por_anio = universe["anio"].value_counts().sort_index()
     # Se formatea como texto, no se vuelca el diccionario: `dict()` sobre una
@@ -112,7 +153,8 @@ def main() -> None:
            f"{int(por_anio.sum())}/{n_uni} · "
            + " · ".join(f"{int(a)}: {int(n)}" for a, n in por_anio.items()),
            "alta", "V1",
-           "Serie de 3 puntos. Insuficiente para tendencia de largo plazo.")
+           f"Serie de {len(por_anio)} puntos. Insuficiente para tendencia de "
+           "largo plazo.")
 
     tipos = universe["tipo_documental"].value_counts()
     record("P-03", "Distribución por tipo documental", "descriptivo", "sí",
@@ -130,16 +172,18 @@ def main() -> None:
 
     record("P-06", "Autores afiliados distintos", "descriptivo", "parcial",
            f"{len(master)} formas de firma", "media", "V1",
-           "589 formas de firma, no 589 personas: 123 variantes de nombre y 20 "
-           "perfiles Scopus fragmentados sin resolver (ver LIMITATIONS §2).")
+           f"{len(master)} formas de firma, no {len(master)} personas: "
+           f"{_encoladas('P-03_variantes_de_nombre')} variantes de nombre y "
+           f"{_encoladas('P-04_nombre_con_multiples_scopus_id')} perfiles Scopus "
+           "fragmentados sin resolver (ver LIMITATIONS §2).")
 
     unidad_ok = int((log["unidad_academica"] != "No determinada").sum())
     record("P-07", "Producción por unidad académica", "descriptivo", "parcial",
            f"{unidad_ok}/{len(log)} pares ({100 * unidad_ok / len(log):.1f} %)",
            "baja", "V1 con advertencia",
-           "Cobertura 63,8 % de los pares autor × publicación. Además el sesgo "
-           "de cobertura de Scopus distorsiona la comparación entre unidades. "
-           "Requiere advertencia visible obligatoria.")
+           f"Cobertura {100 * unidad_ok / len(log):.1f} % de los pares autor × "
+           "publicación. Además el sesgo de cobertura de Scopus distorsiona la "
+           "comparación entre unidades. Requiere advertencia visible obligatoria.")
 
     idioma = c.read_scopus()["Language of Original Document"]
     record("P-08", "Distribución por idioma", "descriptivo", "sí",
@@ -151,14 +195,18 @@ def main() -> None:
     record("I-01", "Citas totales", "impacto", "sí",
            f"{int(citas.notna().sum())}/{n_uni} · total={int(citas.sum())}",
            "alta", "V1",
-           "Fuente única SciVal, corte 2026-07-22. Scopus reporta 3.909 "
-           "(Δ +26); se adopta SciVal por declarar fecha de corte.")
+           f"Fuente única SciVal, corte {c.SOURCES['scival_export']['fecha_corte']}. "
+           f"Scopus reporta {_mil(_citas_scopus)} (Δ {_delta:+d}); se adopta SciVal "
+           "por declarar fecha de corte.")
 
     record("I-02", "Citas por publicación", "impacto", "sí",
            f"{citas.sum() / n_met:.2f} sobre {n_met} publicaciones con métrica",
            "alta", "V1",
-           "Denominador = publicaciones con métrica (816), no 823. "
-           "Declarar denominador junto al valor.")
+           (f"Denominador = publicaciones con métrica ({n_met}), no {n_uni}. "
+            if n_met != n_uni else
+            f"Denominador = publicaciones con métrica ({n_met}), que en esta carga "
+            "coincide con el universo. ")
+           + "Declarar denominador junto al valor.")
 
     fwci = numeric(scival, "Field-Weighted Citation Impact")
     record("I-03", "FWCI institucional", "impacto", "sí",
@@ -285,9 +333,9 @@ def main() -> None:
     record("T-01", "Áreas temáticas ASJC", "tematico", "sí",
            f"{cov}/{n_met} · {cats} categorías · {asg} asignaciones",
            "media", "V1",
-           "Clasifica la REVISTA, no el artículo. Multivaluado: las "
-           "asignaciones (1.796) exceden las publicaciones (816). No "
-           "presentar como partición ni sumar porcentajes a 100 %.")
+           f"Clasifica la REVISTA, no el artículo. Multivaluado: las "
+           f"asignaciones ({_mil(asg)}) exceden las publicaciones ({_mil(n_met)}). "
+           "No presentar como partición ni sumar porcentajes a 100 %.")
 
     cov, cats, _ = multivalued("Topic name")
     record("T-02", "Topics de SciVal", "tematico", "sí",
@@ -338,8 +386,9 @@ def main() -> None:
 
     record("AU-01", "Publicaciones por autor", "descriptivo", "sí",
            f"{len(por_autor)} autores · {n5} con n>=5", "media", "V1",
-           "Conteo completo: la suma por autor (1.205) excede el total de "
-           "publicaciones (823). No presentar como total institucional.")
+           f"Conteo completo: la suma por autor "
+           f"({_mil(int(por_autor['n_pub'].sum()))}) excede el total de "
+           f"publicaciones ({_mil(n_uni)}). No presentar como total institucional.")
 
     record("AU-02", "Citas por autor", "impacto", "sí",
            f"{int(por_autor['citas'].sum())} citas atribuidas (conteo completo)",
@@ -347,11 +396,8 @@ def main() -> None:
            "Atribución completa: una publicación con 3 autores afiliados aporta sus "
            "citas 3 veces. No sumable a nivel institucional.")
 
-    # La ventana y el reparto se derivan; escritos a mano sobrevivían a la carga
-    # que los volvía falsos, y esta etiqueta viaja a cada ficha de autor.
-    _vt = c.INSTITUTION["ventana_temporal"]
-    _ventana = f"{_vt['anio_inicio']}-{_vt['anio_fin']}"
-    _anios = _vt["anio_fin"] - _vt["anio_inicio"] + 1
+    # La ventana y el reparto se derivan (ver arriba): esta etiqueta viaja a
+    # cada ficha de autor y escrita a mano ya sobrevivió a una carga.
     _bajos = int((por_autor["h"] <= 1).sum())
     record("AU-03", f"h-index en ventana {_ventana}", "impacto", "parcial",
            f"calculable para {len(por_autor)} autores · "
@@ -377,8 +423,8 @@ def main() -> None:
 
     record("AU-06", "Evolución temporal por autor", "descriptivo", "sí",
            f"{len(por_autor)} autores con anio_min/anio_max", "media", "V1",
-           "Con 3 años, es un gráfico de 3 puntos. Presentar como barras, no "
-           "como línea de tendencia.")
+           f"Con {_anios} años, es un gráfico de {_anios} puntos. Presentar como "
+           "barras, no como línea de tendencia.")
 
     # --------------------------------------------------------- no calculables
     record("X-01", "Autocitas / tasa de autocitación", "impacto", "no",
@@ -397,8 +443,10 @@ def main() -> None:
            "Cobertura demasiado baja para reportar sin sesgo.")
 
     record("X-04", "Tendencia de largo plazo", "descriptivo", "no",
-           "ventana 2023-2025", "no disponible", "fuera de alcance V1",
-           "Sin datos previos a 2023. Tres puntos no sostienen una tendencia.")
+           f"ventana {_ventana}", "no disponible", "fuera de alcance V1",
+           f"{_anios} puntos anuales no sostienen una afirmación de tendencia de "
+           "largo plazo, y el último está incompleto por ventana de citación. La "
+           "razón anterior —falta de datos previos— caducó con la carga 2020-2025.")
 
     # ------------------------------------------------------------- salida
     df = pd.DataFrame(RESULTS)

@@ -14247,3 +14247,71 @@ estar bloqueado.
 - `src/build/02_indicators.py` — `P-01` emite la nota derivada
 - `docs/UX_UI.md` — §15.1 y la palanca declarada agotada
 - `PLAN.md` — `T-23` cerrado
+
+
+## Cierre: las notas del catálogo, medidas y no escritas (2026-09-10)
+
+Al mirar el sitio construido apareció lo que ninguna de las pasadas anteriores
+había visto: **la página de indicadores publicaba la nota vieja al lado de la
+medición nueva, en la misma fila**. Decía «Cobertura 63,8 % de los pares autor ×
+publicación» junto a la celda que mide «1259/1962 pares (64,2 %)». Del mismo
+indicador. En la misma línea.
+
+### Por qué se escapó a dos barridos
+
+Porque el texto no venía de donde se buscó. Las dos rondas anteriores corrigieron
+`config/indicators.yml`, que alimenta el campo `advertencia`; pero la columna que
+esa página imprime es `definicion`, y sale de `nota_metodologica` en
+`data/interim/indicator_feasibility.csv`, escrita a mano en
+`src/analysis/indicator_feasibility.py`.
+
+Nueve notas seguían describiendo el corpus de 823 publicaciones: «589 formas de
+firma», «Scopus reporta 3.909 (Δ +26)», «las asignaciones (1.796) exceden las
+publicaciones (816)», «la suma por autor (1.205) excede el total (823)», «Serie
+de 3 puntos», «Con 3 años», «Denominador = publicaciones con métrica (816), no
+823», «ventana 2023-2025» y la cobertura del 63,8 %.
+
+### La corrección, y por qué es la misma de siempre
+
+Las nueve se derivan ahora de la medición que ya se calculaba dos líneas más
+arriba: `unidad_ok / len(log)` para la cobertura, `len(por_anio)` para los puntos
+de la serie, la ventana desde `config/institution.yml`, el delta de citas desde
+`reconciliation_summary.csv`, las colas desde `ambiguities_authors.csv`. No hay
+nada nuevo que medir; había que dejar de reescribirlo.
+
+Es la tercera vez en esta carga que aparece el mismo defecto —`V-10`, `AU-03` y
+ahora estas nueve—, y siempre con la misma forma: una cifra correcta el día que
+se escribió, en una frase que sobrevive a la carga que la vuelve falsa. La
+diferencia entre las tres es sólo dónde estaba escrita.
+
+### La razón de X-04 también caducó
+
+Decía «Sin datos previos a 2023. Tres puntos no sostienen una tendencia». Los
+datos previos ya están: 524 publicaciones de 2020 a 2022. El indicador sigue sin
+publicarse, pero ahora por una razón que es cierta —seis puntos anuales, con el
+último incompleto por ventana de citación— y no por una que dejó de serlo.
+
+### Y la salvedad llega a donde se lee
+
+La nota derivada de `P-01` vivía en `kpis.json`, que la portada no usa para las
+fichas del tablero. Se llevó también a la nota del catálogo, que es la que el
+lector ve en la página de indicadores: dos grupos de registros comparten DOI y
+esperan revisión, y si se confirman el total sobra en dos.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist` pasa entera, exit 0. Comprobado en el sitio
+servido: ninguna de las cifras viejas aparece ya en `indicadores.html` ni en
+`metodologia.html`, y sí aparecen las nuevas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-594 | Las notas de factibilidad se derivan de la medición, no se escriben | La página de indicadores publica esa columna, así que una nota fija se convierte en una cifra falsa impresa al lado de la medición correcta, en la misma fila. Es el mismo defecto que `D-584` cerró en `V-10` y `D-586` en `AU-03`, en el tercer sitio donde estaba escrito |
+| D-595 | El catálogo sirve la advertencia derivada de los indicadores que la construyen medida | `P-06` y `P-01` construyen la suya con las cifras del momento. Si el catálogo leyera sólo `config`, la página de indicadores diría que `P-01` no tiene nada que advertir mientras el tablero advierte |
+
+### Archivos
+
+- `src/analysis/indicator_feasibility.py` — nueve notas derivadas y la razón de `X-04`
+- `src/build/02_indicators.py` — el catálogo sirve la advertencia derivada

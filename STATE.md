@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `f2cbeea` · La carga de septiembre, con seis años en vez de tres
+Último commit: `1ebbc76` · El presupuesto de peso, y la salvedad de la cifra que abre el informe
 Snapshot: 2026-09-10
 
 ---
@@ -72,7 +72,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 593
+## Decisiones tomadas: 595
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
