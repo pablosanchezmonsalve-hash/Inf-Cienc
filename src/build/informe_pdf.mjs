@@ -73,6 +73,13 @@ const salida = resolve(process.argv[3] || 'dist/informe-cienciometrico.pdf');
 const recorte = new URLSearchParams((process.argv[4] || '').replace(/^\?/, ''));
 const consulta = recorte.toString();
 
+/* Un `grafico=` suelto NO es un recorte: no filtra publicaciones, y la hoja
+   dice «Sin filtros: el informe completo» junto a la línea de selección. El
+   resumen de consola afirmaba «el recorte aplicado» en ese caso, que es justo
+   lo contrario de lo que el PDF declara. La carátula usa la misma distinción
+   para decidir si imprime las bases del universo. */
+const filtra = [...recorte.keys()].some((k) => k !== 'grafico');
+
 /* El nombre del archivo lleva el recorte, porque dos informes distintos no
    pueden llamarse igual en la carpeta de descargas de nadie. Es una etiqueta
    para encontrarlo, no la declaración: ésa va dentro, en la primera hoja, que
@@ -140,6 +147,9 @@ const servir = (raiz) => new Promise((ok) => {
   s.listen(0, '127.0.0.1', () => ok({ s, puerto: s.address().port }));
 });
 
+/* Se lee una vez: lo necesitan la portada del informe y el manifiesto. */
+const meta = JSON.parse(await readFile(join(dist, 'data/meta.json'), 'utf8'));
+
 const { s, puerto } = await servir(dist);
 const nav = await abrir();
 const ctx = await nav.newContext();
@@ -188,6 +198,93 @@ const pieDeHoja = (seccion) => `
     <span>Informe bibliométrico · ${NOMBRE_SECCION[seccion] || seccion}</span>
     <span>Hoja <span class="pageNumber"></span> de <span class="totalPages"></span></span>
   </div>`;
+
+/* El texto de UNA hoja, sin espacios, para comprobar qué acabó impreso en
+   ella. Mismo cuidado con `Uint8Array.from` que en `hojasDe`: pdf.js desprende
+   el ArrayBuffer que recibe, y pasarle una vista del mismo Buffer dejaría el
+   PDF vacío al escribirlo. */
+async function textoDeHoja(buffer, n) {
+  const doc = await getDocument({ data: Uint8Array.from(buffer), verbosity: 0 }).promise;
+  if (n > doc.numPages) return '';
+  return (await (await doc.getPage(n)).getTextContent())
+    .items.map((x) => x.str).join('').replace(/\s+/g, '');
+}
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ── La portada del informe ─────────────────────────────────────────────────
+   La hoja 1 traía el titular de la PÁGINA WEB: «Informe bibliométrico», la
+   línea de procedencia en letra chica y el desplegable de método. Servía, pero
+   se leía como el borde superior de un sitio, no como la carátula de un
+   documento que alguien va a archivar, citar o mandar por correo.
+
+   Qué añade que no estuviera ya en el papel:
+     · el ALCANCE arriba y en grande — un informe recortado a una facultad se
+       distinguía de otro sólo por una línea de 8 pt;
+     · la fecha de EXPORTACIÓN de los datos, que no se imprimía en ninguna
+       parte (la de corte de citas está en la banda, la de build en el pie);
+     · la fecha en que se generó ESTE PDF, que tampoco;
+     · las cuatro bases de cálculo juntas — el pie imprime tres.
+
+   Va en el generador y no en la hoja de estilo por lo mismo que el índice: es
+   el informe compuesto quien sabe que hay un documento, y no una página suelta
+   que alguien mandó a imprimir. Su MAQUETA sí vive en `app.css`
+   (`.portada-informe`), que sigue siendo el único sitio donde se decide cómo
+   se ve el papel.
+
+   El alcance NO se redacta aquí: se LEE de `#recorte-impreso`, el párrafo que
+   la propia página escribe con el recorte ya aplicado (`fraseRecorte` en
+   `core.js`). Una segunda redacción del mismo hecho es la forma de que las dos
+   acaben diciendo cosas distintas, y en este caso una de ellas mentiría sobre
+   qué publicaciones sostienen el informe. */
+/* El rótulo por el que se reconoce la carátula en el PDF compuesto. Se declara
+   aquí, junto a la maqueta que lo imprime, para que la autocomprobación y lo
+   comprobado no puedan separarse: si alguien lo reescribe, lo reescribe en el
+   único sitio donde está. */
+const SELLO_CARATULA = 'Informe generado el';
+
+const fila = (rotulo, valor) => valor
+  ? `<p class="pi-fila"><span class="pi-rotulo">${esc(rotulo)}</span>
+       <span class="pi-valor">${esc(valor)}</span></p>` : '';
+
+function portadaHTML(meta, declara) {
+  const v = meta.ventana || {};
+  const d = meta.denominadores || {};
+  const hoy = new Date().toISOString().slice(0, 10);
+  /* Las cuatro bases son del UNIVERSO institucional, y sobre un recorte
+     engañan: bajo «46 de 823 publicaciones» se leen como el suelo de este
+     informe, que no lo son. La línea de alcance ya declara sobre cuántas
+     descansa, y cada cifra declara la suya dentro. Recalcularlas para el
+     recorte sería reimplementar en el generador un cálculo que el sitio ya
+     hace, que es la clase de segunda definición que este proyecto evita. */
+  const bases = filtra ? [] : [
+    [d.universo_total, 'en el universo'],
+    [d.con_metricas, 'con métricas normalizadas'],
+    [d.con_autoria_detallada, 'con autoría detallada'],
+    [d.con_area_tematica, 'con área temática'],
+  ].filter(([n]) => n !== undefined && n !== null);
+  return `<section class="portada-informe solo-papel" aria-label="Portada del informe">
+    <p class="pi-institucion">${esc(meta.institucion || '')}</p>
+    <h1 class="pi-titulo">${esc(meta.titulo_plataforma || 'Informe bibliométrico')}</h1>
+    <p class="pi-alcance">${esc(declara.recorte)}</p>
+    ${declara.seleccion ? `<p class="pi-seleccion">${esc(declara.seleccion)}</p>` : ''}
+    <p class="pi-ventana">Publicaciones de ${esc(String(v.inicio ?? ''))} a ${esc(String(v.fin ?? ''))}</p>
+    <div class="pi-datos">
+      ${fila('Fuentes', (meta.fuentes || []).join(' · '))}
+      ${fila('Exportación de los datos', meta.fecha_export)}
+      ${fila('Citas actualizadas al', meta.fecha_corte_citas)}
+      ${fila('Sitio construido el', meta.fecha_build)}
+      ${fila(SELLO_CARATULA, hoy)}
+    </div>
+    ${bases.length ? `<div class="pi-bases">
+      <p class="pi-bases-tit">Bases de cálculo</p>
+      <p class="pi-bases-cifras">${bases.map(([n, q]) =>
+        `<b>${esc(new Intl.NumberFormat('es-CL').format(n))}</b> ${esc(q)}`).join(' · ')}.</p>
+      <p class="pi-bases-nota">Cada indicador declara la suya, y no es la misma para todos.</p>
+    </div>` : ''}
+  </section>`;
+}
 
 const partes = [];
 for (const [ruta, seccion] of RUTAS) {
@@ -248,9 +345,6 @@ async function hojasDe(buffer, titulos) {
   return { donde, hojas: doc.numPages };
 }
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
 const entradas = [];
 for (const { seccion, buffer } of (getDocument ? partes : [])) {
   if (seccion === 'index') continue;   // la portada no se indexa a sí misma
@@ -287,16 +381,49 @@ if (iPortada >= 0 && entradas.length) {
   await pag.goto(`http://127.0.0.1:${puerto}/index.html${consulta ? union + consulta : ''}`,
     { waitUntil: 'networkidle' });
   await pag.waitForTimeout(400);
-  await pag.evaluate((html) => {
+  /* El alcance se lee de la página YA CARGADA con el recorte: es el párrafo
+     que `core.js` escribe, no una segunda redacción del mismo hecho. */
+  const declara = await pag.evaluate(() => ({
+    recorte: (document.getElementById('recorte-impreso')?.textContent || '').trim(),
+    seleccion: (document.getElementById('seleccion-impresa')?.textContent || '').trim(),
+  }));
+  /* Los dos van ANTES del titular, y en este orden. El índice lleva
+     `break-before: page`, así que puesto DESPUÉS del titular dejaba el
+     desplegable de método solo en una hoja, entre la carátula y el índice: una
+     hoja con cuatro líneas. Delante, la portada del documento queda
+     carátula · índice · qué mide, que es el orden en que se lee. */
+  /* No se devuelve si encontró el ancla: lo que vale es lo que quedó en la
+     hoja, y eso se comprueba abajo leyendo el PDF. Un `return true` del DOM
+     diría que se insertó el marcado, no que se imprimió. */
+  await pag.evaluate(({ portada, indice }) => {
     const cab = document.querySelector('.portada-cabecera');
-    if (cab) cab.insertAdjacentHTML('afterend', html);
-  }, indiceHTML);
+    if (!cab) return;
+    cab.insertAdjacentHTML('beforebegin', portada + indice);
+  }, { portada: portadaHTML(meta, declara), indice: indiceHTML });
   const { buffer, etiquetado } = await pdfEtiquetado(pag, {
     format: 'A4', printBackground: true,
     displayHeaderFooter: true, headerTemplate: '<span></span>',
     footerTemplate: pieDeHoja('index'),
   });
   partes[iPortada] = { seccion: 'index', buffer, etiquetado };
+
+  /* Autocomprobación de la carátula. La inyección depende de encontrar
+     `.portada-cabecera`: si esa clase se renombra en `index.html`, el
+     `if (!cab) return` deja el informe SIN carátula y sin índice, y el guion
+     terminaría anunciando las dos. Se comprueba sobre el PDF ya compuesto —no
+     sobre el DOM— por la misma razón que todo lo demás del papel: lo que
+     importa es lo que quedó en la hoja.
+     Se busca `SELLO_CARATULA` y NO la línea de alcance: el alcance sale de
+     `fraseRecorte`, que la banda de crédito también imprime, así que sin
+     carátula la comprobación habría pasado igual. Medido: con el selector
+     roto a propósito, la hoja 1 seguía trayendo esa frase. Una comprobación
+     que no puede fallar no comprueba nada. */
+  const hoja1 = await textoDeHoja(buffer, 1);
+  const conCaratula = hoja1.includes(SELLO_CARATULA.replace(/\s+/g, ''));
+  if (!conCaratula) {
+    console.log('  ⚠ sin carátula ni índice: la inyección no encontró '
+      + '`.portada-cabecera` en index.html. El informe sale igual, sin las dos.');
+  }
   /* Autocomprobación: sin selección, TODOS los gráficos declarados de una
      sección tienen que aparecer en su PDF. Si uno no se encuentra es que su
      título cambió en `vista_explorador.js` y la búsqueda dejó de casar, y el
@@ -320,8 +447,10 @@ if (iPortada >= 0 && entradas.length) {
   const n = entradas.reduce((s, e) => s + e.graficos.length, 0);
   // El peso de la portada se anunció antes de tener índice: se corrige aquí en
   // vez de dejar en pantalla una cifra que ya no corresponde al archivo.
-  console.log(`\n  índice: ${entradas.length} secciones · ${n} gráficos, con su hoja`);
-  console.log(`  index          ${(buffer.length / 1024).toFixed(0)} KB (con el índice)`);
+  if (conCaratula) {
+    console.log(`\n  índice: ${entradas.length} secciones · ${n} gráficos, con su hoja`);
+    console.log(`  index          ${(buffer.length / 1024).toFixed(0)} KB (con carátula e índice)`);
+  }
 }
 
 await nav.close();
@@ -364,7 +493,6 @@ if (dentroDeDist && getDocument) {
       kb: Math.round(buffer.length / 1024),
     });
   }
-  const meta = JSON.parse(await readFile(join(dist, 'data/meta.json'), 'utf8'));
   await writeFile(join(dist, 'data/informe.json'), JSON.stringify({
     generado: new Date().toISOString().slice(0, 10),
     // La fecha de build del sitio con el que se compuso. Si alguien reconstruye
@@ -381,11 +509,6 @@ const etiquetadas = partes.filter((p) => p.etiquetado).length;
 console.log(`\n  ${partes.length} secciones · ${base}-*.pdf`);
 console.log('  Texto seleccionable y buscable: el navegador embebe las tipografías.');
 console.log(`  Etiquetado para lectores de pantalla: ${etiquetadas} de ${partes.length}.`);
-/* Un `grafico=` suelto NO es un recorte: no filtra publicaciones, y la hoja
-   dice «Sin filtros: el informe completo» junto a la línea de selección. Este
-   resumen afirmaba «el recorte aplicado» en ese caso, que es justo lo contrario
-   de lo que el PDF declara. */
-const filtra = [...recorte.keys()].some((k) => k !== 'grafico');
 console.log(`  Declara en la hoja 1: ${[
   filtra ? 'el recorte aplicado' : 'que es el informe completo',
   seleccion.length ? 'y la selección de gráficos, sin cambiar las cifras' : '',

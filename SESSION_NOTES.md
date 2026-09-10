@@ -13764,3 +13764,98 @@ archivo que hay que ir a leer para saber qué publica cada flujo.
 
 Sigue en pie lo anterior: `data/processed/meta.json` con una clave añadida a
 mano, y las dos decisiones de diseño sobre el informe en papel.
+
+## Cierre: la carátula del informe (2026-09-10)
+
+La hoja 1 del informe descargable era el titular de la PÁGINA WEB: «Informe
+bibliométrico», la procedencia en letra chica y el desplegable de método. Nunca
+estuvo mal; simplemente se leía como el borde superior de un sitio y no como la
+carátula de un documento que alguien archiva, cita o manda por correo.
+
+### Qué añade que no estuviera ya en el papel
+
+- **El alcance, arriba y en grande.** Dos informes de esta plataforma se
+  distinguían por una línea de 8 pt. Ahora la hoja 1 dice «Recorte aplicado:
+  Unidad académica: Facultad de Ingeniería. 46 de 823 publicaciones».
+- **La fecha de exportación de los datos**, que no se imprimía en ninguna parte
+  —la de corte de citas está en la banda, la de build en el pie—.
+- **La fecha en que se generó ese PDF**, que tampoco.
+- **Las cuatro bases de cálculo juntas.** El pie imprime tres.
+
+### El alcance no se redacta dos veces
+
+Se LEE de `#recorte-impreso`, el párrafo que la propia página escribe con el
+recorte ya aplicado (`fraseRecorte`, en `core.js`). Escribirlo otra vez en el
+generador es la forma de que las dos redacciones acaben diciendo cosas
+distintas, y aquí una de ellas mentiría sobre qué publicaciones sostienen el
+informe.
+
+### Las bases del universo NO van sobre un recorte
+
+Salió al mirar la carátula de Ingeniería: bajo «46 de 823 publicaciones» venía
+«823 en el universo · 816 con métricas…», que ahí se lee como el suelo de ese
+informe. Se imprimen sólo en el informe completo. Recalcularlas para el recorte
+habría sido reimplementar en el generador un cálculo que el sitio ya hace.
+
+### Tres defectos de maqueta, encontrados mirando la hoja
+
+1. **Una hoja con cuatro líneas.** El índice lleva `break-before: page`, así que
+   inyectado DESPUÉS del titular dejaba el desplegable de método solo en la
+   hoja 2, entre carátula e índice. Las tres piezas van ahora en el orden en
+   que se leen: carátula · índice · qué mide.
+2. **Una raya suelta sobre la carátula.** Apagados los dos párrafos de la banda
+   de crédito, `.vigencia` seguía imprimiendo su filete inferior sobre una caja
+   vacía. Es el mismo defecto que el comentario de esa barra dejó anotado hace
+   sesiones, reaparecido por el otro lado. Se apaga la barra entera.
+3. **El titular duplicado.** `.portada-informe + .portada-cabecera` dejó de
+   casar en cuanto el índice se puso en medio. Con `:has()`, y apagando sólo el
+   `h1` y su línea de procedencia: `.ventana-cierre` avisa de lo que NO está en
+   el informe y eso la carátula no lo dice.
+
+### Una autocomprobación que primero no comprobaba nada
+
+La primera versión buscaba en la hoja 1 la línea de alcance. Con el selector
+roto a propósito, PASÓ igual: sin carátula la banda de crédito no se apaga y
+imprime esa misma frase, que sale de la misma función. Se ancló a
+`SELLO_CARATULA` («Informe generado el»), un rótulo que sólo existe en la
+carátula y que se declara junto a la maqueta que lo imprime.
+
+Verificada en los dos sentidos: con el selector roto avisa; con el selector
+bueno calla. Y el resumen de consola dejó de afirmar «(con el índice)» cuando
+no se inyectó ninguno.
+
+### Verificación
+
+Batería completa sin fallos. Carátula mirada rasterizada, no sólo leída como
+texto: las dos primeras versiones se veían mal y el texto extraído no lo decía.
+Cuatro casos compuestos: informe completo, facultad grande (46), facultad
+pequeña (17, con su banda de muestra reducida intacta) y una persona (39, donde
+la ficha sigue abriendo el juego de archivos). El informe completo sigue en 6
+hojas: la carátula no costó ninguna, porque el titular anterior ya se llevaba
+esa hoja con 34 mm de aire.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-576 | La hoja 1 del informe es una carátula, escrita por el generador | Es el informe compuesto quien sabe que hay un documento, y no una página suelta mandada a imprimir. La maqueta sigue en `app.css` |
+| D-577 | El alcance de la carátula se lee de la página, no se redacta en el generador | Dos redacciones del mismo hecho divergen, y aquí una mentiría sobre qué publicaciones sostienen el informe |
+| D-578 | Las bases del universo sólo se imprimen en el informe completo | Bajo «46 de 823» se leen como el suelo de ese informe. Cada cifra ya declara la suya dentro |
+| D-579 | La autocomprobación se ancla a un rótulo exclusivo de la carátula | Anclada a la línea de alcance pasaba con la carátula ausente: la banda de crédito imprime esa misma frase |
+
+### Archivos
+
+- `src/build/informe_pdf.mjs` — la carátula, su autocomprobación y el orden de
+  las tres piezas de portada
+- `web/assets/css/app.css` — `.portada-informe` y los tres apagados que la
+  carátula hace innecesarios
+- `docs/UX_UI.md` — la carátula, en la sección del informe descargable
+
+### Pendientes
+
+En un informe recortado a una persona, el juego abre con la FICHA y la carátula
+va en el archivo siguiente. Cambiar ese orden es una decisión sobre la forma del
+informe, no un defecto, y queda para el propietario.
+
+Sigue en pie lo anterior: `data/processed/meta.json` con una clave añadida a
+mano, y las decisiones de diseño sobre el informe en papel.
