@@ -119,7 +119,7 @@ Tamaño de hoja y márgenes **no** dependen del diálogo: los fija la hoja de
 estilo (A4 vertical, regla `@page` en `web\assets\css\app.css`).
 
 **En publicaciones** el botón imprime la página de la tabla que esté viendo, no
-las 823 filas. Para llevarse esa lista está **«Exportar CSV (todo el recorte)»**,
+las 1.342 filas. Para llevarse esa lista está **«Exportar CSV (todo el recorte)»**,
 en la misma página.
 
 ### La otra vía: el comando, para el informe completo

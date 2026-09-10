@@ -75,7 +75,7 @@ conector de `PD-04` (§2.10) — otro endpoint, otra salida, misma fuente.
 declaró el editor al depositar la publicación, y empareja esos titulares con
 las firmas UFT detectadas en esa misma publicación por apellido e inicial.
 
-- **Qué la hace viable:** el 97,7 % del corpus tiene DOI.
+- **Qué la hace viable:** el 96,3 % del corpus tiene DOI.
 - **Qué NO resuelve:** sólo ve el ORCID que alguien escribió en el formulario
   de envío. Si el editor no lo transmitió, Crossref no lo tiene.
 - **Límite metodológico declarado:** emparejar por apellido e inicial es una
@@ -143,7 +143,14 @@ mismo**, y confundirlos sería confundir tres calidades de evidencia:
 | OpenAlex (`doi-self`, vía autorías) | 79 |
 | Revisión humana sobre candidatos por afiliación | 26 |
 | Revisión humana (búsqueda manual en el registro) | 1 |
-| **Total** | **328 formas de firma · 268 de 530 entidades publicadas** |
+| **Total** | **328 formas de firma · 268 de 829 entidades publicadas** |
+
+Las 328 asignaciones se midieron sobre el corpus 2023-2025 y **no se han
+vuelto a medir** tras la carga del 2026-09-08, que amplió la ventana a
+2020-2025: siguen ahí las mismas 328 formas de firma con identificador, pero
+las 560 que no lo tienen incluyen a todas las que entraron con los años
+2020-2022 y que ninguna vía ha consultado todavía. Ponerles cifra es el
+pendiente `T-21`.
 
 El detalle metodológico y el argumento de por qué el 100 % no es alcanzable
 están en `docs/ORCID_COVERAGE.md`.
@@ -235,7 +242,7 @@ En cambio, alimenta un **corpus paralelo declarado**: el indicador `PD-01`
 ("Producción declarada por las Facultades, fuera de Scopus"), calculado por
 `src/build/09_produccion_declarada.py`, publicado en su propia página
 (`produccion-ampliada.html`) — sólo recuentos por Facultad × año, dentro de
-la ventana 2023-2025, con nota explícita de cuántos registros adicionales
+la ventana 2020-2025, con nota explícita de cuántos registros adicionales
 quedan fuera de ventana o sin año. El mecanismo es general, no hardcodeado
 a Medicina: cualquier fuente que declare `corpus_paralelo_declarado: true`
 en `config/sources.yml` con un JSON del mismo esquema (documentado en el
@@ -305,10 +312,10 @@ sigue marcada "sin verificar" y NO se usa aquí). Cada registro trae
 `unidad_declarada` (siempre) y `facultad` (sólo si está validada) por
 separado — nunca se fuerza la segunda a partir de la primera.
 
-**Resultado (2026-09-02):** 808 leídos, 7 duplicados colapsados por DOI,
-498 fuera del universo Scopus. De esas, 341 con Facultad validada (125 en
-la ventana 2023-2025 — la cifra que entra a `PD-03`) y 157 sin Facultad
-validada (57 en ventana), publicadas por unidad declarada en vez de
+**Resultado (build 2026-09-09):** 808 leídos, 7 duplicados colapsados por
+DOI, 498 fuera del universo Scopus. De esas, 341 con Facultad validada (247
+en la ventana 2020-2025 — la cifra que entra a `PD-03`) y 157 sin Facultad
+validada (104 en ventana), publicadas por unidad declarada en vez de
 adivinar a qué Facultad pertenecen — nunca ocultas.
 
 **Solapamiento real con §2.6 y §2.7, verificado antes de publicar el
@@ -326,8 +333,8 @@ distinta.
 ### 2.9 Scopus Author Search — directorio de autores por afiliación — **entregado y ejecutado el 2026-09-02**
 
 Distinta en naturaleza de todo lo demás que este proyecto usa de Scopus:
-no es un export de publicaciones (`scopus_export`, 823 filas, ventana
-2023-2025), es el directorio de AUTORES que Scopus Author Search asocia a
+no es un export de publicaciones (`scopus_export`, 1.342 filas, ventana
+2020-2025), es el directorio de AUTORES que Scopus Author Search asocia a
 la afiliación "Universidad Finis Terrae" — 812 perfiles (nombre, Scopus
 Author ID, N° de documentos según Scopus, área temática, ORCID cuando
 existe), sin ventana temporal ni filtro de año (confirmado con el usuario:
@@ -337,7 +344,7 @@ directamente (D-08): alimenta dos colas de revisión, nunca decide.
 **Por qué hacía falta, y qué no puede ver el detector automático del
 proyecto.** `P-04` (`src/audit/04_author_population.py`) ya detecta
 "nombre con más de un Scopus Author ID" — pero sólo cuando los dos
-identificadores aparecen, DENTRO del corpus de 823 publicaciones, bajo la
+identificadores aparecen, DENTRO del corpus de 1.342 publicaciones, bajo la
 misma cadena de nombre exacta. No puede ver un identificador cuyas
 publicaciones caen fuera del corpus (otra ventana, otro tipo documental),
 ni conectar dos identificadores que aparecen bajo grafías distintas del
@@ -422,7 +429,7 @@ invierte la dirección.
   en el registro. Es matching por cadena suelta, que `I-05` prohíbe como base
   de una atribución — por eso aquí **no atribuye nada**: sólo propone un
   candidato que una persona confirma. Se conserva porque recupera obras de
-  las 267 firmas sin ORCID, que la vía fuerte no puede ver por construcción.
+  las 560 firmas sin ORCID, que la vía fuerte no puede ver por construcción.
 
 Cada fila declara por cuál de las dos llegó, y la herramienta de revisión
 advierte del homónimo en la tarjeta del caso, no en una nota al pie.
@@ -615,7 +622,7 @@ No es una integración nueva: es usar más del conector que ya existe.
 - **Financiadores** (`funder`) — **implementado y probado el 2026-09-02;
   falta ejecutar la consulta.** `PROJECT_SPEC` no incluye financiamiento,
   pero el export de Scopus sí trae el campo (`Funding Details`/`Funding
-  Texts`, 306 de 818 filas, 37,4 %) y hasta ahora ningún paso del pipeline
+  Texts`, 490 de 1.342 filas, 36,5 %) y hasta ahora ningún paso del pipeline
   lo extraía —no llega a `publications_universe.csv`, verificado antes de
   escribir código—. Es, literalmente, la "fuente complementaria de
   financiamiento" que `config/indicators.yml` -> `X-03` declara que falta
@@ -737,8 +744,8 @@ este entorno, igual que `api.ror.org` en `V2-20`.
   instante de ejecución quedan capturados por código, no copiados a mano — que
   es exactamente lo que `docs/UPDATING_REQUEST.md` §3 pide como mínimo
   aceptable cuando la fuente no declara su propio corte.
-- **Qué NO hace:** no reemplaza `scopus_export` ni el universo publicado (823,
-  `D-16`). Si el recuento que devuelve difiere del vigente, lo declara como
+- **Qué NO hace:** no reemplaza `scopus_export` ni el universo publicado
+  (1.342, `D-16`). Si el recuento que devuelve difiere del vigente, lo declara como
   hallazgo — nunca lo aplica solo. Promover un nuevo export a fuente primaria
   sigue siendo una decisión humana posterior.
 - **Confirmado por el usuario, sesión 2026-08-25:** tiene API Key, sin
@@ -875,7 +882,7 @@ existentes ya cumplen, y por las que un quinto se aceptará o no.
 1. **Modo `--test` sin red.** La lógica de emparejamiento se verifica sin salir
    a internet, o no se puede verificar.
 2. **Caché en disco.** Reejecutar no vuelve a golpear la API.
-3. **`--limit` para probar corto.** Nadie depura contra 823 consultas.
+3. **`--limit` para probar corto.** Nadie depura contra 1.342 consultas.
 4. **Fuente declarada por dato.** Cada asignación dice de dónde vino, y ese
    campo llega hasta la ficha pública.
 5. **Las ambigüedades se encolan, no se resuelven.** `D-08`: la identidad la

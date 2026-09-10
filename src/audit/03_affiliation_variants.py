@@ -138,10 +138,18 @@ def main() -> None:
     print(f"\nRiesgo de parsing · publicaciones con nº de bloques != nº de autores: "
           f"{len(desalineadas)}")
 
+    # Un caso revisado por una persona no puede seguir declarándose pendiente:
+    # config/resoluciones_humanas.yml es la única fuente de esa distinción
+    # (decisión D-583). Resolver no lo saca del archivo ni cambia la
+    # consecuencia; sólo deja de contarlo como pendiente.
+    def _resolucion(eid: str) -> str:
+        caso = c.resolucion_sin_deteccion(eid)
+        return f"REVISADO · {caso['veredicto']}" if caso else "PENDIENTE_REVISION_HUMANA"
+
     recon = pd.DataFrame(
         [{"eid": e, "caso": "solo_metodo_duro",
           "consecuencia": "afiliación institucional confirmada, pero ningún autor identificable como de la institución",
-          "resolucion": "PENDIENTE_REVISION_HUMANA"} for e in sorted(solo_duro)]
+          "resolucion": _resolucion(e)} for e in sorted(solo_duro)]
         + [{"eid": e, "caso": "solo_metodo_blando",
             "consecuencia": "cadena de afiliación coincide, pero sin Scopus Affiliation ID institucional",
             "resolucion": "PENDIENTE_REVISION_HUMANA"} for e in sorted(solo_blando)]

@@ -26,7 +26,7 @@ Se calcula **sobre el conjunto completo**, no promediando los FWCI
 individuales. Es inestable con pocas publicaciones o ventanas cortas: no debe
 usarse para comparar personas.
 
-En este informe: media **0,87**, mediana **0,41** sobre 816 publicaciones. La
+En este informe: media **1,14**, mediana **0,48** sobre 1.342 publicaciones. La
 diferencia entre ambas indica una distribución muy asimétrica — unas pocas
 publicaciones muy citadas elevan la media.
 
@@ -41,7 +41,7 @@ es mejor: el top 10 % son las más citadas.
 su campo y año. El «top 10 %» agrupa las que están en el decil más citado.
 
 En un conjunto sin sesgo, ~10 % de las publicaciones caen en el top 10 %. Aquí
-son **75 de 816 (9,2 %)**.
+son **115 de 1.342 (8,6 %)**.
 
 ---
 
@@ -66,14 +66,14 @@ de un artículo concreto es el error que DORA identifica explícitamente.
 Describe la revista, no el artículo.
 
 **Extendido:** Se calcula con el percentil SJR del año de publicación: Q1 =
-percentil ≤ 25. Cobertura **762 de 816** publicaciones; las restantes no tienen
+percentil ≤ 25. Cobertura **1.223 de 1.342** publicaciones; las restantes no tienen
 percentil SJR y se muestran como «sin dato», no como Q4.
 
 ---
 
 ## Colaboración internacional
 
-**Corto:** Publicaciones con autores de más de un país. Aquí: 51,2 %.
+**Corto:** Publicaciones con autores de más de un país. Aquí: 49,8 %.
 
 **Extendido:** Cuenta países distintos entre las afiliaciones. No mide la
 intensidad ni la calidad de la colaboración: una publicación con un coautor
@@ -111,9 +111,9 @@ hecho.
 **Corto:** Clasificación temática de la **revista**, no del artículo. Una
 publicación puede estar en varias áreas.
 
-**Extendido:** Elsevier clasifica cada fuente en una o más de 249 categorías.
-Como es multivaluada, **las asignaciones (1.796) superan a las publicaciones
-(816)** y los porcentajes no suman 100 %.
+**Extendido:** Elsevier clasifica cada fuente en una o más categorías; en este
+corpus aparecen 271. Como es multivaluada, **las asignaciones (2.973) superan a
+las publicaciones (1.342)** y los porcentajes no suman 100 %.
 
 Que un artículo esté en «General Medicine» significa que su revista está
 clasificada así, no que ese sea su tema exacto.
@@ -134,18 +134,18 @@ mundial; no dice nada sobre la calidad del trabajo institucional en ella.
 
 ---
 
-## h-index en ventana 2023–2025
+## h-index en ventana 2020–2025
 
-**Corto:** h publicaciones con al menos h citas, **contando sólo 2023–2025**.
+**Corto:** h publicaciones con al menos h citas, **contando sólo 2020–2025**.
 No es el h-index de carrera.
 
 **Extendido:** Restringido a la ventana del informe, es sistemáticamente mucho
-menor que el h-index de trayectoria completa. Con 3 años, **442 de las 530
+menor que el h-index de trayectoria completa. Con 6 años, **675 de las 829
 entidades publicadas tienen h ≤ 1**: sobre el conjunto entero el indicador casi
 no discrimina.
 
 Se muestra sólo en fichas con 5 o más publicaciones, y siempre etiquetado «en
-ventana». Entre esas 50, la mediana es 3 y el máximo 9: donde se publica sí
+ventana». Entre esas 68, la mediana es 4 y el máximo 20: donde se publica sí
 separa, y por eso se publica ahí y no en todas.
 
 ---
@@ -155,22 +155,22 @@ separa, y por eso se publica ahí y no en todas.
 **Corto:** Estado OA declarado por Scopus. La ausencia de valor no significa
 «no es OA».
 
-**Extendido:** Disponible en **590 de 816** publicaciones (72,3 %). Tipos: Gold,
+**Extendido:** Disponible en **943 de 1.342** publicaciones (70,3 %). Tipos: Gold,
 Green, Hybrid gold, Bronze; una publicación puede tener varios.
 
-Las 226 sin valor se muestran como «sin dato declarado», no como acceso
+Las 399 sin valor se muestran como «sin dato declarado», no como acceso
 cerrado.
 
 ---
 
 ## ODS — Objetivos de Desarrollo Sostenible
 
-**Corto:** Mapeo de la publicación a los ODS de Naciones Unidas. Sólo 38 % del
+**Corto:** Mapeo de la publicación a los ODS de Naciones Unidas. Sólo 38,8 % del
 corpus tiene ODS asignado.
 
-**Extendido:** Con cobertura del 38 %, se reporta como **recuento** de
+**Extendido:** Con cobertura del 38,8 %, se reporta como **recuento** de
 publicaciones con ODS asignado, nunca como distribución porcentual del total:
-eso implicaría que el 62 % restante no se relaciona con ningún ODS, lo cual no
+eso implicaría que el 61,2 % restante no se relaciona con ningún ODS, lo cual no
 está establecido.
 
 ---
@@ -181,19 +181,19 @@ está establecido.
 autor supera el total institucional.
 
 **Extendido:** Una publicación con 3 autores UFT aporta 1 a cada uno. La suma de
-publicaciones por autor (**1.205**) excede el total de publicaciones
-(**823**). Es correcto y esperado: **esa suma no es un total institucional**.
+publicaciones por autor (**1.960**) excede el total de publicaciones
+(**1.342**). Es correcto y esperado: **esa suma no es un total institucional**.
 
 ---
 
 ## Formas de firma vs. personas
 
-**Corto:** 589 formas de firma detectadas. El número de personas distintas es
+**Corto:** 888 formas de firma detectadas. El número de personas distintas es
 menor: hay variantes de nombre sin consolidar.
 
 **Extendido:** Sin un identificador persistente como ORCID —ausente en las
-fuentes— no es posible afirmar que dos variantes son la misma persona. 123
-firmas comparten apellido base con otra variante y 20 nombres tienen más de un
+fuentes— no es posible afirmar que dos variantes son la misma persona. 207
+firmas comparten apellido base con otra variante y 29 nombres tienen más de un
 Scopus Author ID.
 
 Estas ambigüedades se declaran sin resolver: consolidarlas por similitud de
@@ -203,19 +203,19 @@ nombre produciría fusiones erróneas entre homónimos.
 
 ## Fecha de corte
 
-**Corto:** Las citas están actualizadas al 22 de julio de 2026. Un corte
+**Corto:** Las citas están actualizadas al 30 de agosto de 2026. Un corte
 posterior daría cifras mayores.
 
 **Extendido:** Las citas se acumulan continuamente. Toda cifra de impacto es
-válida sólo respecto de su corte. Las publicaciones de 2025 tienen entre 7 y 19
-meses de ventana de citación: **el 46 % aún no tiene citas**, lo que hace sus
+válida sólo respecto de su corte. Las publicaciones de 2025 tienen entre 8 y 20
+meses de ventana de citación: **el 42 % aún no tiene citas**, lo que hace sus
 indicadores provisionales.
 
 ---
 
 ## Unidad académica
 
-**Corto:** Inferida desde la afiliación declarada. Disponible en el 63,8 % de
+**Corto:** Inferida desde la afiliación declarada. Disponible en el 64,2 % de
 los casos; el resto figura como «No determinada».
 
 **Extendido:** No existe como campo en las fuentes: se extrae de la cadena de

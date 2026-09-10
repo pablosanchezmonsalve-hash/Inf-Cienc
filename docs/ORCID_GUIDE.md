@@ -3,7 +3,7 @@
 **Pendiente V2-01** · Tiempo estimado: 10 minutos, la mayoría de espera.
 
 ORCID no viene en los exports de Scopus ni de SciVal. Crossref lo publica por
-DOI, gratis y sin registro, y el corpus tiene DOI en el 97,7 % de los
+DOI, gratis y sin registro, y el corpus tiene DOI en el 96,3 % de los
 registros.
 
 **Requisitos:** una máquina con Python 3.11+ y salida a internet. Nada más: sin
@@ -74,7 +74,7 @@ Si esto falla, no sigas: hay algo roto en la instalación.
 
 ## Paso 5 — Prueba corta con 20 publicaciones
 
-Antes de lanzar las 799, comprueba que hay conexión con Crossref:
+Antes de lanzar las 1.293, comprueba que hay conexión con Crossref:
 
 ```bash
 python3 src/enrich/orcid_crossref.py --limit 20
@@ -154,9 +154,9 @@ git push origin main
 
 El resultado va a `data/enriched/`, **no** a `data/interim/`: ese directorio
 está fuera del control de versiones porque contiene derivados que se regeneran
-sin red, y este archivo cuesta ~800 consultas a Crossref reconstruirlo.
+sin red, y este archivo cuesta ~1.300 consultas a Crossref reconstruirlo.
 
-El caché (`data/cache/`) sí se queda fuera: son ~800 archivos que se regeneran
+El caché (`data/cache/`) sí se queda fuera: son ~1.300 archivos que se regeneran
 solos.
 
 ---

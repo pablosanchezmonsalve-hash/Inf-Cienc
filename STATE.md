@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `3623f9e` · Merge pull request #40: el informe descargable
-Snapshot: 2026-09-08
+Último commit: `6e4b9e6` · Merge pull request #49: cifras caducadas en la documentación
+Snapshot: 2026-09-10
 
 ---
 
@@ -27,14 +27,14 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 
 | Cifra | Valor | Base |
 |---|---|---|
-| Ventana temporal | **2023–2025** | `config/institution.yml` |
-| Publicaciones (universo) | **823** | denominador `universo_total` · `D-16` |
-| Con métricas | **816** | denominador `con_metricas` · `D-16` |
-| Con autoría detallada | **818** | denominador `con_autoria_detallada` · `D-16` |
-| Formas de firma en la fuente | **589** | sin consolidar · `internal/matching_log.csv` |
-| Entidades de autor publicadas | **530** | tras consolidación humana · **la que sirve el sitio** |
-| Apariciones firma × publicación | **1207** | filas de `internal/matching_log.csv` |
-| Pares firma × publicación distintos | **1205** | sin repetir una firma dentro de la misma publicación |
+| Ventana temporal | **2020–2025** | `config/institution.yml` |
+| Publicaciones (universo) | **1342** | denominador `universo_total` · `D-16` |
+| Con métricas | **1342** | denominador `con_metricas` · `D-16` |
+| Con autoría detallada | **1342** | denominador `con_autoria_detallada` · `D-16` |
+| Formas de firma en la fuente | **888** | sin consolidar · `internal/matching_log.csv` |
+| Entidades de autor publicadas | **829** | tras consolidación humana · **la que sirve el sitio** |
+| Apariciones firma × publicación | **1962** | filas de `internal/matching_log.csv` |
+| Pares firma × publicación distintos | **1960** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **328** | sin consolidar · `data/enriched/authors_orcid.csv` |
 | Entidades con ORCID | **268** | tras consolidación humana · **la que sirve el sitio** |
 | Indicadores evaluados | **44** | `config/indicators.yml` |
@@ -53,38 +53,27 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 414 |
-| `internal/ambiguities_publications.csv` | 14 |
-| `internal/autoarchivo_candidatos.csv` | 4 |
-| `internal/autoarchivo_unidad_candidatos.csv` | 73 |
-| `internal/dspace_candidatos.csv` | 20 |
-| `internal/identity_candidates.csv` | 17 |
-| `internal/obras_externas_cobertura.csv` | 1967 |
-| `internal/obras_externas_depuradas.csv` | 877 |
-| `internal/openalex_cobertura.csv` | 414 |
-| `internal/openalex_desacuerdos.csv` | 6 |
-| `internal/openalex_deteccion.csv` | 68 |
-| `internal/orcid_candidatos_afiliacion.csv` | 20 |
-| `internal/orcid_conflicts.csv` | 1 |
-| `internal/orcid_desacuerdos.csv` | 2 |
-| `internal/orcid_hallazgos.csv` | 56 |
-| `internal/scopus_author_search_multiples_id.csv` | 8 |
-| `internal/scopus_author_search_orcid.csv` | 50 |
+| `internal/ambiguities_authors.csv` | 721 |
+| `internal/ambiguities_publications.csv` | 6 |
 
-`make revision` reúne estas colas en 290 casos, de los que **83 siguen pendientes**: 207 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
+`make revision` reúne estas colas en 184 casos, de los que **184 siguen pendientes**: 0 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
 
 ---
 
-## Pendientes abiertos (2)
+## Pendientes abiertos (6)
 
 | # | Pendiente |
 |---|---|
 | `T-06` | Reexportar Scopus con fecha de corte declarada |
+| `T-20` | Reejecutar la verificación por API de Scopus con la ventana 2020-2025 |
+| `T-21` | Recuperar ORCID para las 299 formas de firma que trajo la ventana 2020-2025 |
+| `T-22` | Validar las 11 variantes de unidad académica que trajo la ventana 2020-2025 |
+| `T-23` | Resolver el presupuesto de peso de datos, excedido por la carga 2020-2025 |
 | `T-19` | Ampliar cobertura de ORCID buscando por afiliación en el registro |
 
 ---
 
-## Decisiones tomadas: 562
+## Decisiones tomadas: 586
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

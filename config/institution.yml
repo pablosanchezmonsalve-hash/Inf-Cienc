@@ -25,7 +25,10 @@ institucion:
 
 ventana_temporal:
   # Decisión del usuario, sesión 2026-07-31: cobertura completa de las fuentes.
-  anio_inicio: 2023
+  # Ampliada a 2020 en la sesión 2026-09-09 (D-581), al reexportar ambas fuentes
+  # primarias con ventana 2020-2025. El criterio no cambia: la ventana es la que
+  # cubren los exports, no un recorte propio.
+  anio_inicio: 2020
   anio_fin: 2025
 
 universo_publicaciones:

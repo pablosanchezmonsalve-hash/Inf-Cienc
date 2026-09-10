@@ -64,9 +64,10 @@ sistema no las resuelve por su cuenta y no debe hacerlo.
 
 ```yaml
 denominadores:
-  universo_total: 823
-  con_metricas: 816
-  con_autoria_detallada: 818
+  universo_total: 1342
+  con_metricas: 1342
+  con_autoria_detallada: 1342
+  con_area_tematica: 1342
 ```
 
 Tomar los valores nuevos de la salida del paso 4 (`reconciliation_summary.csv`).

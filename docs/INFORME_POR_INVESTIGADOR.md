@@ -3,8 +3,8 @@
 **Capa:** pública · **Fase:** 3 · **Estado:** **decidido e implementado** (2026-09-07)
 
 La pregunta que gobernaba el diseño la respondió el responsable del proyecto:
-**se ofrece a las 530 entidades, con la banda de muestra reducida donde
-corresponda.** Las otras cuatro se implementaron con la recomendación de este
+**se ofrece a todas las entidades publicadas —hoy 829—, con la banda de muestra
+reducida donde corresponda.** Las otras cuatro se implementaron con la recomendación de este
 documento, que queda marcada como tal en el §5 para que se pueda corregir
 cualquiera sin rehacer las demás.
 
@@ -34,8 +34,8 @@ conectar dos superficies que ya existen.
 
 | Pieza | Estado |
 |---|---|
-| Ficha de autor por entidad | 530 fichas publicadas, con sus indicadores, su evolución, su coautoría interna y sus advertencias |
-| Nombre canónico en el corpus | `publications.json` ya trae los nombres **consolidados**: 530 nombres distintos, ninguno es una variante suelta |
+| Ficha de autor por entidad | 829 fichas publicadas, con sus indicadores, su evolución, su coautoría interna y sus advertencias |
+| Nombre canónico en el corpus | `publications.json` ya trae los nombres **consolidados**: 829 nombres distintos, ninguno es una variante suelta |
 | Unicidad | Ninguna entidad comparte nombre con otra: la correspondencia nombre ↔ entidad es 1 a 1 |
 | Recorte en la URL | El filtro viaja en la dirección y el informe descargado ya declara cuál es |
 | Informe a medida | `make informe RECORTE="…"` genera el PDF del recorte |
@@ -52,13 +52,13 @@ sirve el sitio:
 
 | Publicaciones en la ventana | Entidades |
 |---|---:|
-| 1 | 360 |
-| 2 a 4 | 120 |
-| 5 a 9 | 31 |
-| 10 o más | 19 |
-| **Total** | **530** |
+| 1 | 567 |
+| 2 a 4 | 194 |
+| 5 a 9 | 41 |
+| 10 o más | 27 |
+| **Total** | **829** |
 
-**480 de 530 entidades quedan por debajo del umbral de interpretabilidad** que
+**761 de 829 entidades quedan por debajo del umbral de interpretabilidad** que
 el propio proyecto declara (`n_minimo_interpretable: 5` en
 `config/indicators.yml`). Para ellas, un «informe de productividad» es un
 extracto de una o dos referencias con indicadores de impacto que no significan
@@ -68,9 +68,9 @@ Y sobre la identidad y la afiliación:
 
 | Situación | Entidades |
 |---|---:|
-| Identidad marcada como no consolidada | 20 |
-| Sin unidad académica determinada | 214 |
-| Con más de una unidad | 17 |
+| Identidad marcada como no consolidada | 42 |
+| Sin unidad académica determinada | 331 |
+| Con más de una unidad | 33 |
 | Con ORCID | 268 |
 
 Un informe personal que no diga esto sobre sí mismo es un informe que engaña
@@ -89,7 +89,7 @@ primera hoja, todo con el mecanismo que ya existe. `Autor: Orellana-Donoso M.`
 aparecería en la línea de declaración sin escribir una segunda redacción.
 
 **Restricción de interfaz, no cosmética:** el panel de filtros dibuja una
-pastilla por valor con su recuento. Quinientas treinta pastillas no son un
+pastilla por valor con su recuento. Ochocientas veintinueve pastillas no son un
 filtro, son una guía telefónica. La dimensión `autor` necesita un campo de
 búsqueda con sugerencias, y su entrada natural es la ficha: un enlace «ver el
 informe de esta persona» que aplica el recorte. Nunca una lista completa.
@@ -108,7 +108,7 @@ hoja** del informe descargado, no enterradas:
 - la advertencia de lectura fija, la que adhiere a DORA y al Manifiesto de
   Leiden y dice que estas métricas no comparan personas;
 - **muestra reducida** cuando la persona tiene menos de cinco publicaciones en
-  la ventana, que es el caso de 480 de 530.
+  la ventana, que es el caso de 761 de 829.
 
 Las otras dos —el estado de identidad y la unidad no determinada— **no se
 repiten en el recorte**: viven en la ficha, con su evidencia, y la ficha abre
@@ -145,11 +145,11 @@ El recorte enlaza a la ficha en su pie.
 
 ## 5. Lo decidido
 
-1. **A quién se le ofrece.** **Decidido por el usuario: a las 530 entidades**,
-   con la banda de muestra reducida donde corresponda. Excluir a alguien de su
-   propio informe es una decisión sobre esa persona, tomada en silencio;
-   declararle la limitación es una decisión sobre el dato. La alternativa
-   —sólo las 50 interpretables— habría dejado fuera al 90 %.
+1. **A quién se le ofrece.** **Decidido por el usuario: a todas las entidades
+   publicadas, hoy 829**, con la banda de muestra reducida donde corresponda.
+   Excluir a alguien de su propio informe es una decisión sobre esa persona,
+   tomada en silencio; declararle la limitación es una decisión sobre el dato. La
+   alternativa —sólo las 68 interpretables— habría dejado fuera al 92 %.
 2. **La ficha abre el PDF cuando el recorte es una persona.** Implementado con
    la recomendación: es lo único que declara identidad, ORCID con su evidencia
    y unidad.
@@ -160,7 +160,7 @@ El recorte enlaza a la ficha en su pie.
    no convierte a nadie en muestra reducida.
 4. **La dimensión no entra como lista.** El panel dibuja las firmas elegidas y
    un campo con autocompletado del navegador; la entrada natural es el enlace
-   de la ficha. Nunca 530 pastillas.
+   de la ficha. Nunca 829 pastillas.
 5. **Uso previsto en la primera hoja.** La advertencia de lectura —DORA y
    Leiden— va sobre las cifras y viaja al papel con ellas.
 
@@ -168,13 +168,14 @@ Cualquiera de las cuatro últimas se puede corregir sin tocar la primera.
 
 ---
 
-## 6. Pendiente de higiene documental
+## 6. Higiene documental, cerrada el 2026-09-09
 
-`docs/AUTHOR_PROFILE.md` arrastra cifras anteriores a la última consolidación:
-habla de 84 formas fusionadas en 37 personas y de 538 entidades publicadas. El
-artefacto que sirve el sitio dice **94 en 39** (37 por revisión humana y 2 por
-diacríticos), 4 descartadas por no ser personas, y **530 entidades**. Conviene
-corregirlo antes de que esta propuesta se implemente citando el número viejo.
+`docs/AUTHOR_PROFILE.md` arrastraba cifras anteriores a la última
+consolidación: hablaba de 84 formas fusionadas en 37 personas y de 538
+entidades publicadas. Quedó corregido en la carga del 2026-09-08 y hoy declara
+la aritmética vigente: **94 formas en 39 personas** (37 por revisión humana y 2
+por diacríticos), 4 descartadas por no ser personas, y **829 entidades**, que
+es lo que sirve el sitio.
 
 ---
 
