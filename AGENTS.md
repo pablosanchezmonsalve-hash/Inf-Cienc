@@ -43,7 +43,7 @@ Windows:
 
 ## Configuración ≠ código
 
-La replicabilidad es por configuración, no por reescritura: la institución se adapta tocando `config/institution.yml`, `config/matching_rules.yml`, `config/sources.yml`, `config/indicators.yml`. **Nunca** hardcodear datos institucionales (nombres, IDs Scopus, fechas de corte) en `src/` ni `web/`; se verifica vía `grep -ri "finis" src/ web/` = 0.
+La replicabilidad es por configuración, no por reescritura: la institución se adapta tocando `config/institution.yml`, `config/matching_rules.yml`, `config/sources.yml`, `config/indicators.yml`. **Nunca** hardcodear datos institucionales paramétricos (nombres, IDs Scopus, fechas de corte) en `src/` ni `web/`; se verifica vía `grep -ri "finis" src/ web/` = 0, entendiendo que NO devuelve 0: devuelve comentarios, fixtures de autotest y dos literales funcionales declarados (fallback de marca y la URL del conector de la facultad, ambos descritos en `README.md`). Lo que debe devolver 0 es el grep sobre los datos paramétricos (nombres institucionales, IDs, fechas), que viven en `config/`.
 
 ## Verificación y tests
 
@@ -63,5 +63,5 @@ Sin dependencias en el navegador, **sin CDN**: SVG generados en JS propio + nodo
 
 ## Higiene
 
-- `data/interim/`, `data/processed/`, `dist/`, `design-system/` no se versionan (derivados; gitignore). `internal/` y `data/raw/` tampoco se versionan (D-SEC-01): capa sensible, véase «Regla cardinal: capas de datos».
+- `data/interim/`, `dist/`, `design-system/` no se versionan (derivados; gitignore). `data/processed/` **sí se versiona**: es la capa pública de artefactos validados (PÚBLICA en .gitignore). `internal/` y `data/raw/` tampoco se versionan (D-SEC-01): capa sensible, véase «Regla cardinal: capas de datos».
 - Cerrar sesión dejando decisiones, pendientes, archivos tocados, supuestos descartados, ambigüedades y próximo paso (regla de cierre en CLAUDE.md).

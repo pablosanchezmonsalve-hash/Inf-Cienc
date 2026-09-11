@@ -247,7 +247,7 @@ jobs:
       # dice, en vez de dar verde sobre algo que no miró.
       - name: Instalar Playwright, Chromium y pdf.js
         run: |
-          npm install --no-save playwright@1.56.1 pdfjs-dist@6.3.289
+          npm install --no-save playwright@1.62.1 pdfjs-dist@6.3.289
           npx playwright install --with-deps chromium
 
       # Se invoca el guion directamente y no `make verificar`, que depende de

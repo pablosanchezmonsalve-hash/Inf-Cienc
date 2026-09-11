@@ -93,7 +93,7 @@ trabajo).
 |---|---|---|---|
 | `X-01` | Autocitas | El export declara `Self-citations: -` | Reexportar SciVal con la opción activada |
 | `X-02` | Benchmarking interinstitucional | Sin datos de instituciones comparables | Fuera de alcance V1 por `PROJECT_SPEC` |
-| `X-03` | Financiamiento | Cobertura 37,4 % | Fuente complementaria |
+| `X-03` | Financiamiento | Cobertura 36,5 % | Fuente complementaria |
 | `X-04` | Tendencia de largo plazo | Ventana 2020–2025 | Datos previos a 2020 |
 
 ---

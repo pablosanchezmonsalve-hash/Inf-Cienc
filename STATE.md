@@ -4,8 +4,8 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `1ebbc76` · El presupuesto de peso, y la salvedad de la cifra que abre el informe
-Snapshot: 2026-09-10
+Último commit: `9ce98b7` · Merge pull request #50: la carga 2020-2025
+Snapshot: 2026-09-11
 
 ---
 

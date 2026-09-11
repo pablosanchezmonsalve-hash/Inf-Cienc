@@ -142,7 +142,7 @@ cifras de esta institución** y hay que revisarlos. Un despliegue que copie
 
 | Comprobación | Cómo | Esperado |
 |---|---|---|
-| Sin cadenas institucionales en el código | `grep -ri "finis" src/ web/` | Sólo comentarios explicativos |
+| Sin datos institucionales paramétricos en el código | `grep -ri "finis" src/ web/` | No devuelve 0: sólo comentarios, fixtures de autotest y los literales declarados (fallback de marca y URL del conector; ver `README.md`) |
 | Detección institucional funciona | salida de `03_affiliation_variants.py` | 0 publicaciones sin detección |
 | Barrera de capas | `docs/BUILD_VERIFICATION.md` | Sin fallas |
 | Denominadores coherentes | `config/indicators.yml` vs. `reconciliation_summary.csv` | Iguales |

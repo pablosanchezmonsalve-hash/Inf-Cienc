@@ -216,12 +216,23 @@ Se cambian cuatro archivos de configuración:
 | `config/sources.yml` | Rutas, fechas de corte y roles de los archivos |
 | `config/indicators.yml` | Qué indicadores se publican y con qué advertencias |
 
-Esto se verifica, no se afirma: `grep -ri "finis" src/ web/` devuelve 0, y
-también los nombres de hoja del libro Excel de validación, la columna de autor y
-la ventana de ese archivo viven en `config/sources.yml`. La auditoría del
-2026-08-01 encontró que sólo la cadena «finis» se había comprobado, y que
-`Publicaciones_UFT_detalle` y un `>= 2024` seguían escritos en `src/`; ambos
-están ahora en configuración.
+Esto se verifica, no se afirma: `grep -ri "finis" src/ web/` devuelve **no
+cero** — hay 67 coincidencias en `src/` y 3 en `web/`. Se reparten en comentarios,
+fixtures de autotest y dos literales funcionales, ninguno un dato paramétrico
+de configuración: el fallback de marca `Universidad Finis Terrae` en
+`web/assets/js/vista_explorador.js:26` (sólo actúa si falta `meta.institucion`),
+y la URL del conector de la facultad en
+`src/enrich/facultad_medicina_publicaciones.py:68` (el endpoint también está
+declarado en `config/sources.yml`). La regla es que los datos institucionales
+paramétricos —nombres, IDs Scopus, fechas de corte— vivan en configuración, no
+que la cadena «finis» no aparezca nunca; las variantes que usan los conectores
+se leen de `config/institution.yml` (ver `variantes_institucion()` en
+`src/review/senales_obras_externas.py`), y el grep que buscara esos datos
+paramétricos sí devuelve 0. Los nombres de hoja del libro Excel de validación,
+la columna de autor y la ventana de ese archivo también viven en
+`config/sources.yml`. La auditoría del 2026-08-01 encontró que sólo la cadena
+«finis» se había comprobado, y que `Publicaciones_UFT_detalle` y un `>= 2024`
+seguían escritos en `src/`; ambos están ahora en configuración.
 
 Dos límites honestos, ninguno resuelto por configuración:
 

@@ -123,7 +123,7 @@ orcid-datos:
 # El recorte va en el nombre del archivo y, sobre todo, declarado en la hoja 1.
 RECORTE ?=
 informe: sitio
-	node src/build/informe_pdf.mjs dist dist/informe-cienciometrico.pdf "$(RECORTE)"
+	node src/build/informe_pdf.mjs dist dist/informe/informe-cienciometrico.pdf "$(RECORTE)"
 
 # En Windows: scripts/revisar-identidad.ps1 (clic derecho -> «Ejecutar con
 # PowerShell»). Hace la secuencia entera —generar, abrir, recoger el CSV
