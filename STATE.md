@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `870e42c` · Coherencia de documentación, dependencias y rutas tras la auditoría
+Último commit: `62f5ad6` · Estado tras la corrección de documentación y rutas
 Snapshot: 2026-09-11
 
 ---
