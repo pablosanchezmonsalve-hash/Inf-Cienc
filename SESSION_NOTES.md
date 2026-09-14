@@ -14315,3 +14315,79 @@ servido: ninguna de las cifras viejas aparece ya en `indicadores.html` ni en
 
 - `src/analysis/indicator_feasibility.py` — nueve notas derivadas y la razón de `X-04`
 - `src/build/02_indicators.py` — el catálogo sirve la advertencia derivada
+
+
+## Web of Science entra al universo: diagnóstico y decisiones de alcance (2026-09-14)
+
+### El diagnóstico, medido antes de tocar `config/`
+
+Dos lotes nativos de WoS Core Collection (`savedrecs (4).xls`, 1000 registros;
+`savedrecs (6).xls`, 161), 1161 registros en total, sin solape ni hueco entre
+lotes (0 UT compartidos, 161 = 1161 − 1000, contiguo). Dos intentos previos
+—`savedrecs (1).xls` (plantilla de campos incompleta, sin `WC`/`SC`/`AF`/`RP`/
+`FU`) y `savedrecs (5).xls` (codificación corrupta, mojibake en nombres de
+autor)— se descartaron sin conservarlos.
+
+A diferencia de Scopus (`T-06`), WoS **sí** declara fecha de exportación: el
+campo `Date of Export` es uniforme en los 1161 registros, `2026-09-14`. Los 27
+campos declarados (`UT, DI, TI, PY, AU, AF, C1, RP, OI, RI, TC, Z9, WC, SC, DT,
+LA, FU`, entre otros) están presentes con cobertura medida; `C3`
+(Organization-Enhanced) **no existe** en este export, sólo `C1` en texto libre.
+No hay Affiliation ID numérico: WoS no tiene método duro equivalente al de
+Scopus, así que `I-01`/`I-04` no tienen con qué corroborar una resolución
+humana sobre una publicación exclusiva de WoS.
+
+Cruce por DOI contra el universo Scopus/SciVal vigente: 941 en ambas bases, 93
+sólo en WoS con DOI (76 dentro de la ventana 2020-2025), 122 sólo en WoS sin
+DOI y sin candidato por título+año, 4 con coincidencia exacta de título+año (n
+insuficiente para medir una tasa de error generalizable). Un DOI duplicado
+dentro del propio export de WoS (`10.5380/atoz.v11.81419`, dos UT distintos),
+encolado, no resuelto. FWCI no existe en el export de WoS Core: vive en
+InCites, que no se ha exportado — se declara qué indicadores de impacto no se
+pueden calcular con este dato. `WoS Categories`/`Research Areas` no son
+conmensurables con ASJC/QS: no hay tabla de correspondencia y no se
+construye una a ciegas. `docs/DATA_LICENSE.md` no menciona Clarivate en
+ningún punto: los términos de WoS no se pueden asumir iguales a los de
+Elsevier.
+
+### Las decisiones, del usuario
+
+El usuario eligió que WoS sea **fuente primaria que amplía el universo**, no
+enriquecimiento ni sólo contraste — en contra de mi recomendación, que era la
+opción más segura dado que `D-206`/`D-398` fijan que un corpus nuevo nunca se
+suma al universo, y que se ofreció como alternativa un Nivel V (verificado
+obra por obra) igual al de `PD-02`/`PD-04`. El usuario, informado de la
+tensión, decidió reabrir `D-206`/`D-398` explícitamente en vez de mantenerlos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-596 | Se reabren `D-206` y `D-398`: WoS no entra como corpus paralelo declarado ni como referencia de contraste, sino como fuente primaria que amplía `universo_total` | Decisión de alcance del usuario, informado de que contradice el precedente que las cuatro fuentes no-Scopus previas (`PD-01` a `PD-04`) respetaron. `D-206`/`D-398` siguen vigentes para cualquier fuente futura que no sea WoS |
+| D-597 | Las publicaciones exclusivas de WoS entran con bandera `solo_wos`: cuentan en `universo_total`, quedan fuera de `con_metricas` y de `con_area_tematica` | No hay Affiliation ID en WoS (sin método duro), y `WoS Categories`/`Research Areas` no son conmensurables con ASJC/QS sin tabla declarada. `D-16` exige que cada denominador se declare aparte cuando una fuente no cubre todos los campos |
+| D-598 | Ningún valor de una fuente prevalece sobre el otro en conflicto (año, tipo documental); ambos se declaran lado a lado. Las citas de WoS (`TC`/`Z9`) y las de Scopus nunca se suman ni se promedian | Son recuentos de bases con cobertura y metodología de conteo distintas; sumarlos o promediarlos produce una cifra que nadie puede reconciliar, el mismo razonamiento de `D-206` |
+| D-599 | El identificador `UT` de WoS se publica en el sitio, con una salvedad explícita de licencia pendiente de confirmar | El usuario decidió publicarlo en contra de mi recomendación de esperar confirmación de los términos de Clarivate. Se publica declarando la salvedad, siguiendo el mismo patrón que `docs/DATA_LICENSE.md` §5 ya usa para el punto pendiente de confirmación con Elsevier |
+
+### Pendiente que la carga abre
+
+- **`T-24`** — los términos de licencia de Clarivate/WoS no están confirmados:
+  `docs/DATA_LICENSE.md` no los menciona. `D-599` publica `UT` mientras esto
+  sigue abierto; si Clarivate resulta más restrictivo que Elsevier, hay que
+  retirar el campo publicado, no derivarlo de nuevo.
+
+### Archivos
+
+- `config/sources.yml` — declarada `wos_export` con el mismo rigor que
+  `scopus_export`/`scival_export`: archivos, formato, codificación, rol,
+  fecha de exportación, ventana leída vs. declarada, filtros, cruce medido
+  contra el universo vigente, y la traza de los dos intentos descartados
+- `data/raw/` — copiados `savedrecs (4).xls` y `savedrecs (6).xls` (no
+  versionados, `.gitignore`)
+
+**Fase 3 continúa**: falta la tubería de ingesta/cruce (matching por DOI,
+patrón blando de afiliación, población de `solo_wos`), las reglas de
+validación nuevas con severidad declarada, encolar las ambigüedades medidas
+(1 DOI duplicado, 93 candidatos `solo_wos` con DOI, 122 sin DOI ni candidato)
+en `internal/ambiguities_*.csv` siguiendo el patrón `D-08`, actualizar
+`config/indicators.yml` y regenerar `STATE.md`/`docs/DECISIONS.md` con
+`python3 src/state/snapshot.py`.

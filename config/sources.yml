@@ -81,6 +81,68 @@ fuentes:
       n_registros_declarado: 816
       n_registros_leido: 818
 
+  wos_export:
+    nombre: "Web of Science Core Collection — export nativo (Full Record)"
+    archivos:                    # Dos lotes: WoS exporta como máximo 1000 filas
+                                  # por archivo. Verificado sin solape (0 UT
+                                  # compartidos) y sin hueco (161 = 1161-1000,
+                                  # contiguo) antes de tratarlos como un solo
+                                  # corpus (D-596).
+      - "data/raw/savedrecs (4).xls"
+      - "data/raw/savedrecs (6).xls"
+    formato: "xls"
+    encoding: "utf-8"             # verificado sin mojibake en (4) y (6); el
+                                   # primer intento (descartado) sí lo tenía
+    header_row: 0
+    rol: "primaria"                # D-596 reabre D-206/D-398 para este caso
+    aporta:
+      - autoria
+      - afiliacion_por_autor      # sólo texto libre: no existe C3
+                                   # (Organization-Enhanced) en este export
+      - abstract
+      - referencias
+      - financiamiento
+      - orcid_declarado_por_wos   # campo OI, a nivel de registro completo
+      - clasificacion_wos_categories_y_research_areas   # WC/SC, NO conmensurable
+                                                          # con ASJC/QS (D-08:
+                                                          # sin tabla de
+                                                          # correspondencia)
+      - indice_core_collection    # SCIE/SSCI/AHCI/ESCI/CPCI-S/CPCI-SSH/BKCI-S/BKCI-SSH
+    fecha_corte: null              # WoS no declara "fecha de corte de citas"
+                                    # como campo per se; ver fecha_export
+    fecha_export: "2026-09-14"     # Campo "Date of Export" del propio export,
+                                    # uniforme en los 1161 registros — a
+                                    # diferencia de Scopus (T-06), WoS SÍ
+                                    # declara esto
+    ventana_declarada: "sin filtro de año en la búsqueda"
+    ventana_leida: "2020-2026"     # incluye 18 registros de 2026 (early access);
+                                    # ventana institucional es 2020-2025
+                                    # (config/institution.yml) — filtrar antes
+                                    # de fusionar al universo
+    filtros_aplicados: "búsqueda por organización (Universidad Finis Terrae); sin filtro de tipo documental ni de año"
+    n_registros_declarado: null    # WoS no imprime un total en el propio export
+    n_registros_leido: 1161
+    metodo_duro_disponible: false  # WoS no tiene Affiliation ID numérico; I-01/I-04
+                                    # no tienen con qué corroborar publicaciones
+                                    # exclusivas de WoS (sólo evidencia blanda)
+    cruce_con_universo_scopus_scival:
+      con_doi_en_ambas: 941
+      solo_wos_con_doi: 93         # 76 dentro de la ventana 2020-2025
+      solo_wos_sin_doi_sin_candidato: 122   # de 126 sin DOI; 4 con coincidencia
+                                              # exacta de título+año (0 falsos
+                                              # positivos en n=4, muestra
+                                              # insuficiente para generalizar)
+      doi_duplicados_dentro_de_wos: 1        # "10.5380/atoz.v11.81419", dos UT
+                                              # distintos — anomalía de origen,
+                                              # encolada, no resuelta (D-08)
+    reemplaza_a:                   # savedrecs (1).xls y (5).xls, primer intento:
+                                    # plantilla de campos incompleta (sin WC/SC/
+                                    # AF/RP/FU) y, en (5), codificación corrupta.
+                                    # Descartados por decisión del usuario
+                                    # (2026-09-14): no se conservan en data/raw/.
+      archivos: null
+      nota: "Sin trazabilidad de archivo porque se decidió no conservarlos; la decisión y el motivo quedan en SESSION_NOTES.md"
+
   rdata_scopus:
     nombre: "bibliometrix — Scopus normalizado"
     archivo: "data/raw/Scopus_Normalizado.RData"
