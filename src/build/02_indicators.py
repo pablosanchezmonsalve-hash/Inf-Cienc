@@ -48,6 +48,12 @@ def main() -> None:
     fwci = [b.to_num(f) for f in uni["fwci"] if b.to_num(f) is not None]
     pct = [b.to_num(p) for p in uni["percentil_citacion"] if b.to_num(p) is not None]
     intl = sum(1 for x in uni["es_internacional"] if x == "True")
+    nacional = sum(1 for x in uni["es_internacional"] if x == "False")
+    sin_dato_intl = int(den["con_metricas"]) - intl - nacional
+    datos_c01 = [{"valor": "Internacional", "n": intl},
+                 {"valor": "Nacional", "n": nacional}]
+    if sin_dato_intl > 0:
+        datos_c01.append({"valor": "Sin dato declarado", "n": sin_dato_intl})
 
     def nota_firmas():
         return b.nota_p06(authorship["nombre_en_fuente"].nunique())
@@ -216,8 +222,7 @@ def main() -> None:
                  "datos": [{"valor": k, "n": v} for k, v in oa.most_common()],
                  "con_varias_etiquetas": oa_multi, "nota": b.nota("A-01")},
         "C-01": {"nombre": b.indicador("C-01")["nombre"],
-                 "datos": [{"valor": "Internacional", "n": intl},
-                           {"valor": "Nacional", "n": den["con_metricas"] - intl}],
+                 "datos": datos_c01,
                  "nota": b.nota("C-01")},
         "C-03": {"nombre": b.indicador("C-03")["nombre"], "datos": multi_top("paises", 15), "nota": b.nota("C-03")},
         "C-04": {"nombre": b.indicador("C-04")["nombre"], "datos": multi_top("instituciones", 15), "nota": b.nota("C-04")},

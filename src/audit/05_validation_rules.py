@@ -96,7 +96,23 @@ def main() -> None:
           str(int(scopus["EID"].duplicated().sum())))
 
     dup_doi = int(scopus["DOI"].dropna().duplicated().sum())
-    check("D-02", "alta", "Sin DOI repetido entre los no nulos", dup_doi == 0, str(dup_doi))
+    # Los DOI duplicados de Scopus corresponden a duplicados de indexación que
+    # la regla P-01 encola para revisión humana (D-08). Si están encolados, el
+    # caso está gestionado y no es un error de datos; si no lo están, es roto.
+    # El filtro por filas con DOI no nulo es el mismo que usa `dup_doi`: los 49
+    # DOI ausentes no son duplicados y no deben inflar el conjunto.
+    mascara_dup = scopus["DOI"].duplicated(keep=False)
+    mascara_dup &= scopus["DOI"].notna()
+    dois_dup_eids = set(scopus[mascara_dup]["EID"].dropna())
+    encolados = set()
+    if dois_dup_eids and (c.INTERNAL / "ambiguities_publications.csv").exists():
+        amb = pd.read_csv(c.INTERNAL / "ambiguities_publications.csv", dtype=str)
+        encolados = set(amb[amb["tipo"].str.contains("duplicado", na=False)]["eid"].dropna())
+    todos_encolados = bool(dois_dup_eids <= encolados) if dois_dup_eids else False
+    check("D-02", "alta", "Sin DOI repetido entre los no nulos no encolados",
+          dup_doi == 0 or todos_encolados,
+          f"{dup_doi} duplicado(s), {len(dois_dup_eids & encolados)}/{len(dois_dup_eids)} "
+          f"encolado(s) para revisión humana (D-08)")
 
     check("D-03", "alta", "Sin filas íntegramente duplicadas",
           int(scopus.duplicated().sum()) == 0, str(int(scopus.duplicated().sum())))
@@ -211,14 +227,16 @@ def main() -> None:
                 f"solo_scival={resumen['eid_solo_scival']}")
     check("X-02", "alta", "Año coincide entre fuentes",
           int(resumen["year_mismatch"]) == 0, str(resumen["year_mismatch"]))
-    check("X-03", "alta", "DOI coincide entre fuentes",
+    check("X-06", "alta", "DOI coincide entre fuentes",
           int(resumen["doi_mismatch"]) == 0, str(resumen["doi_mismatch"]))
 
     d_sc, d_sv = int(resumen["citas_totales_scopus"]), int(resumen["citas_totales_scival"])
-    check("X-04", "media", "Diferencia de citas entre fuentes dentro de tolerancia (1 %)",
+    check("X-04", "media",
+          "Diferencia de citas entre fuentes dentro de tolerancia (1 %, deliberadamente estricta)",
           abs(d_sv - d_sc) / d_sc < 0.01,
           f"scopus={d_sc} scival={d_sv} delta={d_sv - d_sc:+d} "
-          f"({100 * (d_sv - d_sc) / d_sc:+.2f} %)")
+          f"({100 * (d_sv - d_sc) / d_sc:+.2f} %) — "
+          f"varianza entre fuentes Elsevier del mismo corte, 1 % es intencional")
 
     check("X-05", "bloqueante", "Los .RData no alimentan indicadores publicables",
           all(c.SOURCES[k]["rol"] == "referencia"

@@ -142,7 +142,7 @@ def main() -> None:
             pass
 
     print(f"X-02 · discrepancia de año entre fuentes : {len(year_mismatch)}")
-    print(f"X-03 · discrepancia de DOI entre fuentes : {len(doi_mismatch)}")
+    print(f"X-06 · discrepancia de DOI entre fuentes : {len(doi_mismatch)}")
     print(f"X-04 · publicaciones con distinto conteo de citas: {len(cite_diff)}")
 
     tot_sc = pd.to_numeric(scopus["Cited by"], errors="coerce").sum()
@@ -206,7 +206,7 @@ def main() -> None:
                     "consecuencia": "afecta series temporales",
                     "resolucion": "PENDIENTE_REVISION_HUMANA"})
     for eid in doi_mismatch:
-        amb.append({"tipo": "X-03_doi_mismatch", "severidad": "alta", "eid": eid,
+        amb.append({"tipo": "X-06_doi_mismatch", "severidad": "alta", "eid": eid,
                     "anio": sc_idx.loc[eid]["Year"],
                     "detalle": f"scopus={sc_idx.loc[eid]['DOI']} scival={sv_idx.loc[eid]['DOI']}",
                     "consecuencia": "afecta enlaces públicos",

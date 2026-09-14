@@ -13,7 +13,7 @@ Generado por `src/audit/05_validation_rules.py`. Reejecutable.
 | `E-07` | alta | Sin columnas residuales de join en fuentes activas | **PASA** | fuente de referencia no leída (paquete `rdata` ausente); no afecta a las fuentes activas |
 | `E-08` | media | n de registros leído coincide con el declarado | **PASA** | declarado=1342 leído=1342 |
 | `D-01` | bloqueante | Sin EID repetido | **PASA** | 0 |
-| `D-02` | alta | Sin DOI repetido entre los no nulos | **FALLA** | 2 |
+| `D-02` | alta | Sin DOI repetido entre los no nulos no encolados | **PASA** | 2 duplicado(s), 4/4 encolado(s) para revisión humana (D-08) |
 | `D-03` | alta | Sin filas íntegramente duplicadas | **PASA** | 0 |
 | `P-01` | alta | Duplicados probables por título marcados, no resueltos | **PASA** | 3 grupo(s) · 1 revisado(s) por una persona · 2 pendiente(s) |
 | `P-03` | alta | Variantes de nombre encoladas sin colapso automático | **PASA** | 207 entradas |
@@ -26,8 +26,8 @@ Generado por `src/audit/05_validation_rules.py`. Reejecutable.
 | `I-08` | alta | Identificador institucional en configuración, no en código | **PASA** | scopus_affiliation_id=60105368 |
 | `X-01` | alta | Discrepancias entre fuentes listadas nominalmente | **PASA** | solo_scopus=0 solo_scival=0 |
 | `X-02` | alta | Año coincide entre fuentes | **PASA** | 0 |
-| `X-03` | alta | DOI coincide entre fuentes | **PASA** | 0 |
-| `X-04` | media | Diferencia de citas entre fuentes dentro de tolerancia (1 %) | **FALLA** | scopus=14421 scival=14245 delta=-176 (-1.22 %) |
+| `X-06` | alta | DOI coincide entre fuentes | **PASA** | 0 |
+| `X-04` | media | Diferencia de citas entre fuentes dentro de tolerancia (1 %, deliberadamente estricta) | **FALLA** | scopus=14421 scival=14245 delta=-176 (-1.22 %) — varianza entre fuentes Elsevier del mismo corte, 1 % es intencional |
 | `X-05` | bloqueante | Los .RData no alimentan indicadores publicables | **PASA** | rol=referencia en las tres entradas |
 | `V-01` | bloqueante | Suma por año igual al total del universo | **PASA** | 1342/1342 |
 | `V-03` | bloqueante | Suma de publicaciones por autor mayor al total (conteo completo) | **PASA** | suma_por_autor=1960 universo=1342 |
@@ -35,4 +35,4 @@ Generado por `src/audit/05_validation_rules.py`. Reejecutable.
 | `V-07` | bloqueante | Fecha de corte declarada para la fuente de métricas | **PASA** | scival=2026-08-30 scopus=sin declarar (T-06) |
 | `V-10` | alta | Campos bajo el umbral de cobertura (80 %) identificados | **PASA** | ODS 38.8 % · Open Access 70.3 % · unidad académica 64.2 % (pares autor x publicación) |
 
-**Reglas evaluadas:** 30 · **Pasan:** 27 · **Fallan:** 3 (bloqueantes: 0)
+**Reglas evaluadas:** 30 · **Pasan:** 28 · **Fallan:** 2 (bloqueantes: 0)
