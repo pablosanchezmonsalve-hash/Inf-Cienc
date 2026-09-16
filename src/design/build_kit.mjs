@@ -40,6 +40,16 @@ const meta = await dato('meta.json');
 const series = await dato('series.json');
 const { kpis } = await dato('kpis.json');
 
+/* El valor vigente de un KPI, por código. Las fichas lo usan en vez de escribir
+   la cifra: la de tipografía llevaba «823» y un FWCI de «0,87» congelados desde
+   una carga anterior, y una ficha que promete datos reales enseñaba dos que ya
+   no lo eran. */
+const kpi = (codigo) => {
+  const k = kpis.find((x) => x.codigo === codigo);
+  if (!k) throw new Error(`No hay KPI ${codigo} en kpis.json`);
+  return k.valor;
+};
+
 /* ─────────────────────────────────────────────── medición de contraste */
 const lin = (x) => (x /= 255, x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4);
 const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -47,12 +57,74 @@ const lum = (h) => { const [r, g, b] = rgb(h).map(lin); return 0.2126 * r + 0.71
 const ct = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 const ratio = (a, b) => ct(a, b).toFixed(2).replace('.', ',');
 
+/* Distancia perceptual en OKLab, ×100. Es un PORTE literal de la que usa
+   src/design/validar_paleta.py (`oklab()` y `delta_e()`), y tiene que dar el
+   mismo número que ella: las fichas publican la misma medida que valida el
+   sistema, así que dos matemáticas distintas serían dos verdades.
+
+   Existe porque hasta el 2026-09-16 las separaciones ΔE de estas fichas eran
+   prosa escrita a mano, y sobrevivieron a un cambio de paleta entero: el kit
+   publicaba «la advertencia ámbar, ΔE 28,6» con la advertencia ya en verde
+   moneda y la separación real en 26,0. Una cifra que no se calcula deja de ser
+   cierta en silencio, que es lo que este archivo promete no hacer. */
+const oklab = (h) => {
+  const [r, g, b] = rgb(h).map(lin);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+          1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+          0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s];
+};
+const dE = (a, b) => 100 * Math.hypot(...oklab(a).map((v, i) => v - oklab(b)[i]));
+const deltaE = (a, b) => dE(a, b).toFixed(1).replace('.', ',');
+
 /* Lee los tokens de la hoja: `--x: light-dark(#aaa, #bbb);`. La ficha de color
-   se dibuja con estos valores, así que cambiar la hoja cambia la ficha. */
+   se dibuja con estos valores, así que cambiar la hoja cambia la ficha.
+
+   SÓLO del bloque `:root`. Recorrer la hoja entera y quedarse con la ÚLTIMA
+   aparición de cada token era un error real: `.banda-contraste` redefine
+   --superficie, --superficie-2, --plano, --linea, --linea-fuerte y --red en su
+   propio ámbito, y esos valores pisaban los de :root. La ficha de color medía
+   entonces la tinta de :root contra el suelo OSCURO de la banda y publicaba
+   razones de contraste que no le pasan a ningún lector.
+
+   Es el mismo fallo que src/design/validar_paleta.py documenta haber corregido
+   en su `_bloque()`, en el otro archivo del sistema de diseño. Se corrigió allí
+   y siguió vivo aquí porque este generador no arranca desde el 2026-08-26. */
+const bloqueRaiz = (() => {
+  const i = css.indexOf(':root');
+  const a = css.indexOf('{', i);
+  return css.slice(a + 1, css.indexOf('}', a));
+})();
 const TOKENS = {};
-for (const m of css.matchAll(/(--[a-z0-9-]+):\s*light-dark\(\s*(#[0-9a-f]{6})\s*,\s*(#[0-9a-f]{6})\s*\)/gi)) {
+for (const m of bloqueRaiz.matchAll(/(--[a-z0-9-]+):\s*light-dark\(\s*(#[0-9a-f]{6})\s*,\s*(#[0-9a-f]{6})\s*\)/gi)) {
   TOKENS[m[1]] = { claro: m[2].toLowerCase(), oscuro: m[3].toLowerCase() };
 }
+if (!TOKENS['--superficie']) throw new Error('No se leyó ningún token light-dark() de :root en app.css');
+
+/* Atajos para escribir una medida DENTRO de la prosa de una ficha, que es
+   justo donde las cifras se congelaban: `sep('--serie-1','--aviso-borde','claro')`
+   se lee casi como la frase que sustituye, y se recalcula al generar. */
+const sep = (a, b, t) => deltaE(TOKENS[a][t], TOKENS[b][t]);
+const cr = (a, b, t) => ratio(TOKENS[a][t], TOKENS[b][t]);
+/* Separador de miles del proyecto: 1.342, no 1,342 ni 1342. */
+const miles = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+/* El fondo de una banda no es un token: vive en su propia regla, como
+   `background: light-dark(#f0ddca, #180609)`. Se lee de ahí en vez de
+   deducirlo de un token que hoy coincida —--marca-tinta vale ese mismo
+   champán—, porque esa coincidencia no la declara nadie y se rompería sola. */
+function fondoDeRegla(selector) {
+  const m = css.match(
+    new RegExp(`\\${selector}\\s*\\{[^}]*background:\\s*light-dark\\(\\s*(#[0-9a-f]{6})\\s*,\\s*(#[0-9a-f]{6})\\s*\\)`, 'i'));
+  if (!m) throw new Error(`No se encuentra el fondo light-dark() de ${selector} en app.css`);
+  return { claro: m[1].toLowerCase(), oscuro: m[2].toLowerCase() };
+}
+const BANDA_ENFASIS = fondoDeRegla('.banda-enfasis');
+/* Contraste de un token de :root sobre el fondo de una banda que NO redefine
+   tokens: es lo que ve de verdad quien lee dentro de ella. */
+const sobreBanda = (tok, banda, t) => ratio(TOKENS[tok][t], banda[t]);
 
 /* ─────────────────────────────────────────────── armazón de cada ficha */
 
@@ -199,7 +271,7 @@ añadir('fundamentos/color.html', ficha({
     ${muestrasColor([
       ['--ord-1', 'Q1', 3], ['--ord-2', 'Q2', 3], ['--ord-3', 'Q3', 3], ['--ord-4', 'Q4', 3],
     ], '--superficie')}
-    <p class="panel-etq" style="margin-top:var(--e5)">Advertencia metodológica · ámbar, fuera de la familia del dato</p>
+    <p class="panel-etq" style="margin-top:var(--e5)">Advertencia metodológica · verde moneda, fuera de la familia del dato</p>
     ${muestrasColor([
       ['--aviso-borde', 'línea de referencia', null],
       ['--aviso-tinta-grafico', 'etiqueta de referencia', 4.5],
@@ -210,9 +282,14 @@ añadir('fundamentos/color.html', ficha({
       su posición: al filtrar, un color ligado al rango saltaría de una entidad a
       otra. Y si el nombre de la categoría ya es un color —Gold, Green, Bronze— el
       color deja de estar disponible para codificar.</p>
-    <p class="regla"><b>Separación dato ↔ advertencia.</b> El dato es rojo y la
-      advertencia ámbar. Medido en OKLab: ΔE 28,6 en claro y 21,2 en oscuro, sobre
-      un piso de 20. Es la razón por la que el ámbar no se movió al cambiar el rojo.</p>
+    <p class="regla"><b>Separación dato ↔ advertencia.</b> El dato es bordeaux y la
+      advertencia verde moneda: familias opuestas en temperatura, no dos cálidos
+      contiguos. Medido en OKLab al generar esta ficha: ΔE
+      <b>${sep('--serie-1', '--aviso-borde', 'claro')}</b> en claro y
+      <b>${sep('--serie-1', '--aviso-borde', 'oscuro')}</b> en oscuro, sobre un piso
+      de 20. La advertencia es verde <em>porque</em> el dato es bordeaux: con el
+      ámbar anterior, cálido como el dato, la separación caía a 17,9 y no llegaba
+      al piso. No se bajó el piso, se movió el color.</p>
     <p class="regla"><b>Cuatro ranuras categóricas siguen reservadas y sin validar.</b>
       Nunca se han dibujado juntas. Quien las estrene debe revalidarlas para el
       número de ranuras que vaya a usar, no para seis.</p>`,
@@ -227,9 +304,9 @@ añadir('fundamentos/tipografia.html', ficha({
     que salta — una plataforma de indicadores tiene que dejar que el número gane la página.`,
   cuerpo: `
     <div style="display:grid;gap:var(--e4)">
-      <div><span class="cifra-display">823</span>
+      <div><span class="cifra-display">${miles(kpi('P-01'))}</span>
         <div class="cifra-etq">--t-display · titular<span>tabular-nums · interletrado −0,042em</span></div></div>
-      <div><div class="valor" style="font:700 var(--t-cifra)/1.04 var(--f-cifra);color:var(--cifra);letter-spacing:-.028em">0,87</div>
+      <div><div class="valor" style="font:700 var(--t-cifra)/1.04 var(--f-cifra);color:var(--cifra);letter-spacing:-.028em">${String(kpi('I-03')).replace('.', ',')}</div>
         <div class="cifra-etq">--t-cifra · valor de KPI<span>el sufijo va en &lt;small&gt;, no dentro del número</span></div></div>
       <h1 style="margin:0">Áreas temáticas</h1>
       <h2 style="margin:0">Publicaciones en el top 10 % de citación</h2>
@@ -323,10 +400,14 @@ añadir('componentes/sello.html', ficha({
   grupo: 'Componentes', nombre: 'Sello de procedencia', ancho: 900,
   subtitulo: 'Fuente, corte, N y cobertura · con su variante de advertencia',
   intro: `Responde, sin que haya que buscarlo, a las cuatro preguntas que deciden si una
-    cifra puede citarse. <strong>El N no es global</strong> —823 en producción, 816 en
-    impacto, 1.207 pares autor × publicación en P-07— y por eso viaja pegado al gráfico
-    y no en el pie de la página. Por debajo del umbral de cobertura declarado en
-    configuración, el sello cambia de registro y pasa a advertir. Lo decide el dato.`,
+    cifra puede citarse. <strong>El N no es global</strong> —${miles(series['P-02'].procedencia.n)}
+    en producción, ${miles(series['I-05'].procedencia.n)} en impacto,
+    ${miles(series['P-07'].procedencia.n)} ${series['P-07'].procedencia.unidad} en P-07— y
+    por eso viaja pegado al gráfico y no en el pie de la página. Esas tres cifras se leen
+    de <code style="display:inline">series.json</code> al generar esta ficha: escritas a
+    mano sobrevivían a la carga que las volvía falsas, que es justo lo que el sello
+    existe para impedir. Por debajo del umbral de cobertura declarado en configuración,
+    el sello cambia de registro y pasa a advertir. Lo decide el dato.`,
   cuerpo: [c.sello(series['I-05'].procedencia), c.sello(series['T-04'].procedencia)].join(''),
 }));
 
@@ -363,9 +444,11 @@ añadir('componentes/controles.html', ficha({
   grupo: 'Componentes', nombre: 'Controles', ancho: 900,
   subtitulo: 'Botones, pastillas de filtro, chips, conmutador de tema',
   intro: `El botón primario <strong>no puede llevar tinta blanca fija</strong>: el mismo
-    token de fondo es un rojo hondo en tema claro y un rosa en oscuro, donde el blanco
-    caería a 2,84:1. La tinta del botón es un token que cambia con el tema, igual que
-    su fondo.`,
+    token de fondo es bordeaux hondo en tema claro y <em>champán claro</em> en oscuro,
+    donde el blanco caería a <b>${ratio('#ffffff', TOKENS['--accion'].oscuro)}:1</b>. Con
+    <code style="display:inline">--boton-tinta</code>, que cambia con el tema igual que su
+    fondo, mide <b>${cr('--boton-tinta', '--accion', 'claro')}:1</b> en claro y
+    <b>${cr('--boton-tinta', '--accion', 'oscuro')}:1</b> en oscuro.`,
   cuerpo: `
     <div style="display:flex;gap:var(--e3);flex-wrap:wrap;align-items:center">
       <button class="boton">Limpiar filtros</button>
@@ -422,7 +505,7 @@ añadir('componentes/bandas.html', ficha({
     <p class="panel-etq" style="margin-top:0">Los cuatro suelos</p>
     <div class="banda banda-papel"><div style="padding:var(--e4)">
       <p class="banda-gancho">papel</p>
-      <p style="margin:0">El suelo por defecto. Papel teñido con Peach al 6–10 %.</p></div></div>
+      <p style="margin:0">El suelo por defecto. Papel hueso, teñido champán.</p></div></div>
     <div class="banda banda-papel-2"><div style="padding:var(--e4)">
       <p class="banda-gancho">papel-2</p>
       <p style="margin:0">El segundo suelo, FRÍO. Admite figuras, incluida la marca de
@@ -443,16 +526,28 @@ añadir('componentes/bandas.html', ficha({
       como la banda es oscura en los DOS temas, en claro conservaban su valor claro y
       caían sobre suelo oscuro, con --ord-1 en 1,06:1.</p>
 
-    <p class="regla">La banda de énfasis <b>no lleva figuras</b>. Medido: sobre Peach Glow
-      el color del dato cae a 3,21:1 y la marca de ausencia a 2,35:1. Por eso el cierre es
-      sólo tipografía y enlaces, y la regla queda escrita junto al componente.</p>
+    <p class="regla">La banda de énfasis <b>no lleva figuras</b>, y lo que lo decide es
+      la marca de AUSENCIA, no el dato. Sobre el champán del cierre el dato aún mide
+      <b>${sobreBanda('--serie-1', BANDA_ENFASIS, 'claro')}:1</b>, de sobra; pero
+      <code style="display:inline">--sin-dato</code> cae a
+      <b>${sobreBanda('--sin-dato', BANDA_ENFASIS, 'claro')}:1</b>, bajo el piso de 3.
+      Una figura ahí dibujaría lo no medido de forma que se confunde con lo medido, que
+      es exactamente lo que <code style="display:inline">D-09</code> prohíbe. Por eso el
+      cierre es sólo tipografía y enlaces, y la regla queda escrita junto al componente.</p>
 
-    <p class="regla">El segundo papel es frío y no un peach más oscuro por la misma razón:
-      oscurecer el papel hacia el peach rompe la marca de ausencia —cae bajo 3:1 pasado
-      #dbe3df— y lo acercaba al cierre. #e1e7e4 es el límite útil, con la ausencia en
-      3,10:1. Su borde contra el papel mide 1,10:1, que es real pero no sostiene solo un
-      corte de sección, así que en tema claro las bandas de papel llevan una costura de
-      1px; en oscuro los dos suelos ya se separan ΔE 11,75 y la costura sobra.</p>`,
+    <p class="regla">El segundo papel <b>no puede oscurecerse más</b>, y el techo lo fija
+      una medida, no el gusto: tiene que sostener la marca de ausencia con el dato
+      bordeaux encima. Hoy <code style="display:inline">--sin-dato</code> mide
+      <b>${cr('--sin-dato', '--banda-papel-2', 'claro')}:1</b> sobre él, contra
+      <b>${cr('--sin-dato', '--plano', 'claro')}:1</b> sobre el primer papel: un paso más
+      de champán y la ausencia cae bajo 3.</p>
+
+    <p class="regla">Los dos suelos de banda se separan poco por definición —son papel
+      contra papel—: ΔE <b>${sep('--plano', '--banda-papel-2', 'claro')}</b> en claro y
+      <b>${sep('--plano', '--banda-papel-2', 'oscuro')}</b> en oscuro, con un borde de
+      <b>${cr('--plano', '--banda-papel-2', 'claro')}:1</b>. Es real pero no sostiene solo
+      un corte de sección, así que en tema claro las bandas llevan una costura de 1px. En
+      oscuro la separación es algo mayor y la costura se apaga.</p>`,
 }));
 
 /* ─────────────────────────────────────────────────────────── gráficos */
@@ -552,8 +647,8 @@ añadir('graficos/codificacion.html', ficha({
 
     <p class="panel-etq" style="margin-top:var(--e5)">Marca del valor esperado · I-05</p>
     ${v.RENDER['I-05'](series['I-05'])}
-    <p class="regla">Un recuento sin escala no dice si es mucho o poco. El trazo ámbar
-      marca lo que cabría esperar bajo el promedio mundial: por definición, el top
+    <p class="regla">Un recuento sin escala no dice si es mucho o poco. El trazo verde de
+      referencia marca lo que cabría esperar bajo el promedio mundial: por definición, el top
       <i>k</i> % de la distribución mundial contiene el <i>k</i> % de las publicaciones.
       Se lee de un vistazo que la institución queda <b>por debajo en el 1 %, el 5 % y el
       10 %, y por encima en el 25 %</b>.</p>

@@ -18,10 +18,14 @@ QUÉ COMPRUEBA
      dibuja, con el piso que fija su USO y no el gusto: 4,5:1 texto normal
      (1.4.3), 3,0:1 texto grande y objeto gráfico (1.4.11).
 
-  2. SEPARACIÓN DATO ↔ ADVERTENCIA (OKLab ΔE ≥ 20). El dato es rojo y la
-     advertencia metodológica ámbar. Dos familias cálidas contiguas se pueden
-     confundir, y confundir «esto es el dato» con «esto es una advertencia
-     sobre el dato» es un fallo metodológico, no estético.
+  2. SEPARACIÓN DATO ↔ ADVERTENCIA (OKLab ΔE ≥ 20). El dato es bordeaux y la
+     advertencia metodológica verde moneda. Confundir «esto es el dato» con
+     «esto es una advertencia sobre el dato» es un fallo metodológico, no
+     estético.
+
+     La advertencia es verde PORQUE el dato es bordeaux. Hasta la paleta H era
+     ámbar, y dos familias cálidas contiguas caían a ΔE 17,9, bajo el piso: se
+     movió el color, no el piso. Esta comprobación es la que lo detectó.
 
   3. RAMPA ORDINAL (ΔE ≥ 8 entre escalones, luminosidad monótona). Q1–Q4 es una
      escala ORDENADA: tiene que verse ordenada, y los cuatro escalones tienen
@@ -229,7 +233,9 @@ REGLAS_BENTO = [
 # El segundo suelo de banda lleva figuras, así que tiene que sostener la tinta
 # fina, el color del dato y —sobre todo— la marca de ausencia. Ese último piso
 # es el que fija cuánto puede oscurecerse el papel: es la regla que impide
-# repetir en papel-2 el error de poner figuras sobre el Peach del cierre.
+# repetir en papel-2 el error de poner figuras sobre el champán del cierre,
+# donde la ausencia no llega al piso de 3 (la banda de énfasis es sólo
+# tipográfica por eso, y no por el color del dato, que ahí sí cumple).
 REGLAS_BANDA_PAPEL_2 = [
     ("--tinta",    "--banda-papel-2", 4.5, "texto principal"),
     ("--tinta-3",  "--banda-papel-2", 4.5, "metadatos"),

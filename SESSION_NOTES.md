@@ -14464,3 +14464,117 @@ sus líneas.
 Decidir qué gobierna `design/informe/`. Es lo que bloquea todo lo demás: mientras
 no se decida, hay dos fuentes de formato para el informe en papel y la
 implementada no es la documentada.
+
+## Sesión 2026-09-16 (cont.) — El generador del sistema de diseño, medido en vez de escrito
+
+Continuación de la anterior. Se autorizó corregir los dos archivos de
+`src/design/` que quedaron declarados: la prosa que describía la paleta
+retirada. Al ir a verificarlo aparecieron **dos defectos mayores que la prosa**.
+
+### Hallazgo 1: `make kit` lleva roto desde antes del explorador
+
+`node src/design/build_kit.mjs` aborta con `TypeError: v.kpisRestantes is not a
+function`. No es cosa de esta sesión: comprobado en `HEAD` limpio, con los
+cambios guardados aparte, falla igual.
+
+`build_kit.mjs` llama a seis funciones de `vista.js` —`hero`, `rail`, `kpis`,
+`kpisRestantes`, `modulo`, `RENDER`— de las que `vista.js` hoy no exporta
+ninguna: sólo tiene `lectura`, `cierrePortada`, `catalogo`,
+`produccionDeclarada`, `procedencia`, `validacion` y `glosario`. El generador
+está escrito contra la API **anterior al explorador**, que sustituyó el módulo
+por el corte y el índice lateral por los controles del recorte (`docs/UX_UI.md`
+§4 ter y §5).
+
+Las fechas lo confirman: `build_kit.mjs` no se toca desde el **2026-08-26** y
+`vista.js` cambió seis veces después.
+
+**Esto explica por qué la prosa se congeló.** `make kit` no está en la batería
+de verificación, así que nada lo corre; y como nada lo corre, nadie vio que sus
+fichas hablaran de Peach Glow y de ámbar. La promesa de §16.1 —«el sistema de
+diseño no puede desactualizarse respecto del producto; si divergen, es que no se
+ha vuelto a generar»— es cierta y vacía: no se puede volver a generar.
+
+**No se repara aquí.** Reescribir el generador contra la API del explorador es
+rehacer una funcionalidad, con decisiones de diseño propias (qué sustituye al
+«módulo» cuando la unidad es el corte), no corregir un hecho falso.
+
+### Hallazgo 2: el generador tenía el bug que el validador documenta haber corregido
+
+`build_kit.mjs` leía los tokens recorriendo **la hoja entera** y quedándose con
+la última aparición de cada uno. `.banda-contraste` redefine `--superficie`,
+`--superficie-2`, `--plano`, `--linea`, `--linea-fuerte` y `--red` en forma
+`light-dark()`, así que esos seis pisaban a los de `:root`.
+
+Consecuencia: la ficha de color medía la tinta de `:root` **contra el suelo
+oscuro de la banda** y publicaba razones de contraste que no le pasan a ningún
+lector. Medido en el banco de verificación: la ausencia sobre `--plano` daba
+**5,05:1** en vez de 3,42:1, y la separación entre los dos suelos de banda
+**ΔE 76,4** en vez de 3,9.
+
+Es exactamente el fallo que `validar_paleta.py` documenta haber corregido en su
+`_bloque()` —«declaraba 12 fallos inexistentes»— en el otro archivo del mismo
+sistema. Se arregló allí y siguió vivo aquí, porque este archivo no arranca.
+
+**Sí se corrige**, porque sin ello las cifras que ahora se derivan saldrían mal.
+
+### Lo que se hizo: derivar en vez de escribir
+
+Se portó a `build_kit.mjs` la matemática OKLab del validador (`oklab()`, `dE()`)
+para que las fichas calculen también las separaciones ΔE, no sólo los
+contrastes. Comprobado que da el mismo número que la de Python: eran dos
+matemáticas para la misma medida y habrían divergido.
+
+Con eso, once cifras que eran prosa pasan a derivarse: la separación dato ↔
+advertencia, el dato y la ausencia sobre la banda de énfasis, la ausencia sobre
+los dos suelos de banda, su ΔE y su borde, el blanco y la tinta del botón sobre
+`--accion`, las tres N del sello y las dos cifras de muestra de la ficha de
+tipografía.
+
+**Una regla cambió de razón al medirla.** «La banda de énfasis no lleva figuras»
+seguía siendo cierta, pero no por lo que decía: sobre el champán del cierre el
+dato mide **6,69:1**, de sobra. Quien no llega es la marca de ausencia, en
+**2,95:1**, bajo el piso de 3. La regla la sostiene `D-09` —lo no medido no
+puede parecerse a lo medido—, no el color del dato.
+
+### Verificación
+
+El generador no arranca, así que **no hay salida real que leer**. Se verificó
+con un banco que reproduce literalmente los helpers añadidos y evalúa las mismas
+llamadas escritas en las fichas, contrastando cada una contra
+`validar_paleta.py`: **17 de 17 coinciden**. Ese banco es el que encontró el
+Hallazgo 2, porque al reproducir el lector de tokens reprodujo también su fallo.
+
+`node --check src/design/build_kit.mjs` pasa, y el generador sigue muriendo en
+el mismo `v.kpisRestantes` preexistente y no en nada nuevo. `validar_paleta.py`
+→ SISTEMA CROMÁTICO VÁLIDO. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-599 | `build_kit.mjs` lee los tokens **sólo del bloque `:root`** | Recorrer la hoja entera y quedarse con la última aparición hacía que los seis tokens que `.banda-contraste` redefine pisaran a los de `:root`: la ficha de color publicaba la tinta medida contra el suelo oscuro de la banda. Es el mismo fallo que `validar_paleta.py` corrigió en `_bloque()`, vivo aquí porque este archivo no arranca desde el 2026-08-26 |
+| D-600 | Las separaciones ΔE de las fichas se calculan al generar, con la matemática del validador portada | Eran prosa y sobrevivieron a un cambio de paleta entero: el kit publicaba «la advertencia ámbar, ΔE 28,6» con la advertencia ya en verde y la separación real en 26,0. Se porta en vez de reimplementarse para que las dos den el mismo número: dos matemáticas para la misma medida divergen |
+| D-601 | La banda de énfasis no lleva figuras **por la marca de ausencia**, no por el color del dato | Medido sobre el champán del cierre: el dato queda en 6,69:1 y cumple; `--sin-dato` cae a 2,95:1, bajo el piso de 3. La regla anterior daba una razón que la paleta H volvió falsa, y la regla seguía siendo correcta por otra causa. Una regla con el fundamento equivocado se deroga en cuanto alguien comprueba el fundamento |
+| D-602 | `make kit` se declara **inoperante** y no se repara en esta pasada | Llama a seis funciones que `vista.js` dejó de exportar al llegar el explorador. Reescribirlo contra la API nueva es rehacer una funcionalidad, con decisiones de diseño propias —qué sustituye al «módulo» cuando la unidad es el corte—, no corregir un hecho falso. Queda declarado con su error y su fecha |
+
+### Archivos
+
+- `src/design/build_kit.mjs` — lectura de `:root`, matemática OKLab portada, once
+  cifras derivadas y la prosa de la paleta retirada
+- `src/design/validar_paleta.py` — el encabezado y la nota de `papel-2` se
+  describían con el ámbar y el Peach
+- `SESSION_NOTES.md` — esta entrada
+
+### Ambigüedades abiertas
+
+- **`make kit` sigue sin correr** (`D-602`). Mientras siga así, las fichas no se
+  pueden ver ni publicar, y las cifras derivadas de esta sesión están
+  verificadas por banco pero no leídas de una salida real.
+- **`design/informe/`**, sin cambios desde la entrada anterior: sigue en la
+  paleta `D-381`, con la banda como sistema y cifras del corpus de 823.
+
+### Próximo paso recomendado
+
+Decidir si `make kit` se repara o se retira. Reparado, la batería debería
+correrlo: un generador que nadie ejecuta vuelve a congelarse, y es lo que acaba
+de pasar durante tres semanas.
