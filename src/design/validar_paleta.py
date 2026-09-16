@@ -31,7 +31,7 @@ QUÉ COMPRUEBA
      escala ORDENADA: tiene que verse ordenada, y los cuatro escalones tienen
      que distinguirse incluso impresos en gris.
 
-  4. PAR CATEGÓRICO EN USO bajo daltonismo. El anillo de C-01 gasta dos ranuras.
+  4. PAR CATEGÓRICO bajo daltonismo. --serie-1 y --serie-2 medidas como par.
      Se simula protanopía, deuteranopía y tritanopía y se exige separación en
      las tres — el peor caso es la deuteranopía, y es el que decide.
 
@@ -194,7 +194,7 @@ REGLAS = [
     ("--accion",              "--superficie",   4.5, "texto de enlace"),
     ("--accion",              "--superficie-2", 4.5, "enlace sobre superficie alterna"),
     ("--serie-1",             "--superficie",   3.0, "barra de dato"),
-    ("--serie-2",             "--superficie",   3.0, "segunda ranura · anillo C-01"),
+    ("--serie-2",             "--superficie",   3.0, "segunda ranura categórica"),
 ("--sin-dato", "--superficie",   3.0, "barra de ausencia"),
     ("--ord-1",    "--superficie",   3.0, "ordinal 1 · Q1"),
     ("--ord-2",    "--superficie",   3.0, "ordinal 2 · Q2"),
@@ -351,7 +351,7 @@ def main() -> None:
               f"(piso {PISO_CELDA_MAPA:.0f}) · tinta legible ya medido en §1  {tema}")
 
     # ---- 4. El par categórico en uso, bajo daltonismo
-    print("\n  PAR CATEGÓRICO EN USO (anillo C-01) BAJO DALTONISMO")
+    print("\n  PAR CATEGÓRICO (--serie-1 · --serie-2) BAJO DALTONISMO")
     for tema in ("claro", "oscuro"):
         a, b = (val(t, tema) for t in PAR_CATEGORICO)
         medidas = {"normal": delta_e(a, b)}

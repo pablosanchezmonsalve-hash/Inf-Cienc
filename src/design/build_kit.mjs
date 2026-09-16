@@ -34,11 +34,61 @@ const css = await readFile(join(RAIZ, 'web/assets/css/app.css'), 'utf8');
 const mod = (n) => import(pathToFileURL(join(RAIZ, 'web/assets/js', n)).href);
 const c = await mod('core.js');
 const v = await mod('vista.js');
+/* El explorador es hoy el dueño del marcado del sitio: la portada y las cuatro
+   secciones se dibujan desde aquí. Hasta el 2026-09-16 este generador llamaba a
+   `v.hero`, `v.rail`, `v.modulo`, `v.kpis`, `v.kpisRestantes` y `v.RENDER`, que
+   `vista.js` dejó de exportar cuando el corte sustituyó al módulo — y con eso
+   `make kit` llevaba tres semanas sin arrancar (`D-602`). */
+const vx = await mod('vista_explorador.js');
+const X = await mod('explorador.js');
 const dato = async (n) => JSON.parse(await readFile(join(DATOS, n), 'utf8'));
 
 const meta = await dato('meta.json');
 const series = await dato('series.json');
 const { kpis } = await dato('kpis.json');
+
+/* Los mismos artefactos y con los mismos nombres que `src/build/prerender.mjs`:
+   si el kit se alimentara distinto, enseñaría un componente que el sitio no
+   sirve. Ésa es la única razón por la que esta sección existe. */
+const { publicaciones } = await dato('publications.json');
+const catalogo = await dato('catalogo.json');
+const autoresJson = await dato('authors.json');
+const { lecturas } = await dato('lecturas.json');
+const proc = vx.procedencias(series, meta);
+const jerarquia = meta.jerarquia || {};
+const umbral = autoresJson.parametros?.n_minimo_interpretable;
+const unidadPorPersona = new Map(
+  autoresJson.autores.map((a) => [a.nombre, (a.unidades || [])[0]]));
+const textos = {
+  lecturas,
+  advertencias: Object.fromEntries(
+    catalogo.indicadores.filter((i) => i.advertencia).map((i) => [i.codigo, i.advertencia])),
+};
+
+/** El corte de un indicador, tal cual lo declara la sección que lo publica.
+    Se busca en `SECCIONES` en vez de escribirlo aquí: la forma de cada gráfico
+    la fija esa tabla (`D-378`), y una segunda copia divergiría. */
+const corteDe = (cod) => {
+  for (const s of Object.values(vx.SECCIONES)) {
+    const x = (s.cortes || []).find((k) => k.cod === cod);
+    if (x) return x;
+  }
+  throw new Error(`No hay corte declarado para ${cod} en SECCIONES`);
+};
+/** Ese corte, dibujado sobre el corpus entero y con el componente real. */
+const corte = (cod) => vx.corteUno(publicaciones, corteDe(cod),
+  { proc, jerarquia, unidadPorPersona, textos });
+
+/** Sólo la FIGURA de ese corte, para las fichas del grupo «Gráficos», que
+    documentan la forma y no el componente que la envuelve. Sale del mismo
+    `dibujar()` que usa el sitio: antes estas fichas llamaban a `v.RENDER[cod]`
+    sobre `series.json`, es decir a una serie ya calculada, y el sitio dejó de
+    servirlas cuando el explorador pasó a derivarlas de las publicaciones. */
+const figura = (cod) => {
+  const r = vx.dibujar(publicaciones, corteDe(cod), jerarquia);
+  if (!r) throw new Error(`${cod} no dibuja nada sobre el corpus entero`);
+  return r.svg;
+};
 
 /* El valor vigente de un KPI, por código. Las fichas lo usan en vez de escribir
    la cifra: la de tipografía llevaba «823» y un FWCI de «0,87» congelados desde
@@ -344,35 +394,43 @@ añadir('fundamentos/espacio-trazo.html', ficha({
 /* ───────────────────────────────────────────────────────── componentes */
 
 añadir('componentes/kpi.html', ficha({
-  grupo: 'Componentes', nombre: 'Tarjeta de indicador (KPI)', ancho: 1000,
-  subtitulo: 'Cifra, denominador, unidad y advertencia · datos reales',
-  intro: `Un KPI sin su denominador y su fecha de corte está incompleto: la advertencia
-    metodológica <strong>es parte del componente</strong>, no una nota al pie. Estas
-    tarjetas se dibujan con los indicadores reales del informe.`,
-  cuerpo: `<div class="kpis" data-n="3">${v.kpis(v.kpisRestantes(kpis))}</div>
-    <p class="regla"><b>Los porcentajes llevan un decimal; los enteros, ninguno.</b>
-      Dos decimales en un porcentaje sugieren una precisión que el dato no tiene.
-      La unidad del valor va bajo la etiqueta, nunca intercalada en el número.</p>`,
+  grupo: 'Componentes', nombre: 'Tablero de cifras', ancho: 1000,
+  subtitulo: 'Seis fichas · cada una con su propio denominador y su lectura',
+  intro: `Una cifra sin su denominador y su fecha de corte está incompleta: la
+    advertencia metodológica <strong>es parte del componente</strong>, no una nota al
+    pie. Son las seis del tablero real, calculadas aquí sobre el corpus entero con
+    <code>X.resumen()</code> — la misma función que las recalcula en el navegador a
+    cada recorte. Cada una declara su base, porque son bases distintas
+    (<code>D-16</code>) y presentarlas juntas sin decirlo invita a dividir una por
+    otra.`,
+  cuerpo: () => vx.cifras(X.resumen(publicaciones), textos),
 }));
 
 añadir('componentes/titular.html', ficha({
-  grupo: 'Componentes', nombre: 'Titular de portada', ancho: 1000,
-  subtitulo: 'Tres cifras a tamaño display, con denominador y referencia',
-  intro: `Abrir con la magnitud, no con el índice. Son <strong>tres y no seis</strong>:
-    un titular con seis cifras no tiene titular. Cada una arrastra su denominador y,
-    si la tiene, su referencia — un 0,87 de FWCI sin el «1 = promedio mundial» al lado
-    no es un titular, es un número suelto.`,
-  cuerpo: v.hero(meta, kpis),
+  grupo: 'Componentes', nombre: 'Cabecera de portada', ancho: 1000,
+  subtitulo: 'Sin cifras: nombre, procedencia y el método tras un control',
+  intro: `La cabecera <strong>no lleva cifras</strong>, y es una decisión medida: la
+    anterior gastaba media pantalla en un titular de tres líneas y tres cifras que el
+    tablero repetía justo debajo. En un explorador eso es ruido dos veces — gasta la
+    pantalla que le toca al dato y enseña una cifra del total mientras el lector mira
+    un recorte. Queda el nombre, la procedencia —que dice de dónde salen las cifras—
+    y la explicación detrás de un control.`,
+  cuerpo: () => vx.cabecera(meta),
 }));
 
 añadir('componentes/modulo.html', ficha({
-  grupo: 'Componentes', nombre: 'Módulo de indicador', ancho: 1000,
-  subtitulo: 'Cabecera, conmutador de vista, figura, sello y notas',
-  intro: `El orden no es decorativo: primero lo que condiciona la lectura —advertencia
-    metodológica y nota de lectura del gráfico—, después la figura, después el sello
-    que dice de dónde sale y sobre cuántos casos, y al final el detalle. El sello al
-    final se convertía en letra pequeña.`,
-  cuerpo: () => v.modulo('I-05', series['I-05']),
+  grupo: 'Componentes', nombre: 'Corte', ancho: 1000,
+  subtitulo: 'La unidad de la sección: figura, tabla equivalente, lectura y sello',
+  intro: `El <strong>corte</strong> sustituyó al módulo cuando el sitio dejó de servir
+    series ya calculadas: responde al recorte, se deriva de las publicaciones y trae
+    su conmutador. El orden no es decorativo: primero lo que condiciona la lectura,
+    después la figura, después el sello que dice de dónde sale y sobre cuántos casos.
+    El sello al final se convertía en letra pequeña. Es el componente real, no una
+    reconstrucción: sale de <code>vx.corteUno()</code>, la misma función que dibuja
+    cada corte del sitio. Se enseña con <code>P-07</code> porque es el que trae las
+    tres cosas a la vez: trama de multivaluado, advertencia propia y un sello que
+    advierte por cobertura.`,
+  cuerpo: () => corte('P-07'),
 }));
 
 añadir('componentes/vistas.html', ficha({
@@ -383,17 +441,12 @@ añadir('componentes/vistas.html', ficha({
     y la tabla. <strong>Sin JavaScript se muestran las dos</strong> — la tabla es la vía
     equivalente al gráfico— y el control desaparece, porque un conmutador que no conmuta
     nada es una promesa falsa. Cuando el indicador trae valor esperado, la tabla gana
-    las columnas que convierten un recuento en un juicio.`,
-  cuerpo: `<div class="modulo">
-      <header>
-        <div class="modulo-id"><h2>${c.escapar(series['I-05'].nombre)}</h2><span class="codigo">I-05</span></div>
-        <div class="vistas" role="group" aria-label="Forma de presentación">
-          <button type="button" data-vista="grafico" aria-pressed="false">Gráfico</button>
-          <button type="button" data-vista="tabla" aria-pressed="true">Tabla</button>
-        </div>
-      </header>
-      ${c.tablaEquivalente(series['I-05'].datos)}
-    </div>`,
+    las columnas que convierten un recuento en un juicio.
+
+    Las dos vistas están <b>las dos en el DOM</b>, y lo que decide cuál se ve es
+    <code>data-activa</code>. Por eso sin JavaScript se leen ambas: no hay nada que
+    revelar, sólo un control que no llega a esconder la segunda.`,
+  cuerpo: () => corte('I-05'),
 }));
 
 añadir('componentes/sello.html', ficha({
@@ -436,8 +489,7 @@ añadir('componentes/rail.html', ficha({
     página de cinco indicadores largos, saber qué hay y poder saltar sin recorrerla
     entera es la diferencia entre consultar y resignarse a leer en orden. Sin JavaScript
     sigue siendo una lista de anclas útil.`,
-  cuerpo: v.rail(['I-01', 'I-04', 'I-05', 'R-01', 'A-01'].filter((k) => series[k]), series)
-    .replace('<li><a href="#I-04"', '<li><a class="activo" href="#I-04"'),
+  cuerpo: () => vx.indice('impacto'),
 }));
 
 añadir('componentes/controles.html', ficha({
@@ -559,7 +611,7 @@ añadir('graficos/barras-horizontales.html', ficha({
     lleva una leyenda sino la etiqueta de la propia barra y su valor visible al lado:
     <strong>el color nunca es el único canal</strong>. La columna de etiquetas se
     dimensiona con el contenido real y se acota a un tercio del lienzo.`,
-  cuerpo: () => v.RENDER['P-03'](series['P-03']) + v.RENDER['T-05'](series['T-05']),
+  cuerpo: () => figura('P-03') + figura('T-05'),
 }));
 
 añadir('graficos/barras-verticales.html', ficha({
@@ -571,17 +623,25 @@ añadir('graficos/barras-verticales.html', ficha({
     medición. Un gráfico de citas por año de publicación induce a leer «el impacto
     está cayendo»: lo que cae es el tiempo disponible para acumular citas, y por eso
     el módulo lleva esa advertencia pegada.`,
-  cuerpo: () => v.RENDER['I-01'](series['I-01']) + v.RENDER['P-02'](series['P-02']),
+  cuerpo: () => figura('I-01') + figura('P-02'),
 }));
 
-añadir('graficos/anillo.html', ficha({
-  grupo: 'Gráficos', nombre: 'Anillo', ancho: 700,
-  subtitulo: 'Reservado a proporciones binarias · el único que lleva leyenda',
-  intro: `Reservado a proporciones binarias, que es donde se lee bien. Es el único
-    gráfico con leyenda, porque sus segmentos no admiten etiqueta interior — y el único
-    que gasta la escala categórica: usa las dos primeras ranuras, medidas como par
-    incluso bajo deuteranopía (ΔE 12,2, sobre un piso de 8).`,
-  cuerpo: () => v.RENDER['C-01'](series['C-01']),
+añadir('graficos/red.html', ficha({
+  grupo: 'Gráficos', nombre: 'Red de coautoría', ancho: 1000,
+  subtitulo: 'La única figura que no es una serie · comunidades declaradas como heurística',
+  intro: `La única figura del sitio cuya unidad no es una categoría con un recuento,
+    sino un par: quién firma con quién. Las comunidades se calculan con Louvain y se
+    <strong>declaran como heurística</strong>, no como estructura real de equipos —
+    un algoritmo de partición siempre devuelve particiones, incluso donde no las hay.
+    En pantalla el lector elige entre nodos, matriz, arcos y la tabla de pares; en
+    papel se imprime sólo la vista de nodos, porque la tabla convertía la sección en
+    49 hojas.
+
+    <b>Esta ficha sustituyó a la del «Anillo»</b>, que documentaba un componente
+    inexistente: no hay ningún gráfico de anillo en el código —<code>proporcional()</code>
+    dibuja una barra apilada— y <code>C-01</code> se dibuja hoy como barras
+    horizontales de una sola serie.`,
+  cuerpo: () => corte('C-05'),
 }));
 
 /* Cuatro formas que antes eran barrasH. La forma la elige la RELACIÓN que
@@ -597,7 +657,7 @@ añadir('graficos/desviacion.html', ficha({
     La dirección la lleva sólo la POSICIÓN respecto del eje: pintar el déficit de otro
     color habría gastado color en algo que la posición ya dice, y el gris del sitio
     significa ausencia de dato, no valor bajo.`,
-  cuerpo: () => v.RENDER['I-04'](series['I-04']),
+  cuerpo: () => figura('I-04'),
 }));
 
 añadir('graficos/acumulada.html', ficha({
@@ -608,7 +668,7 @@ añadir('graficos/acumulada.html', ficha({
     hermanas sugería cuatro grupos disjuntos que se podían sumar —322, una cifra sin
     significado—. <strong>Era un problema de correctitud, no de estética.</strong>
     La forma anidada hace visible la contención y vuelve imposible la suma.`,
-  cuerpo: () => v.RENDER['I-05'](series['I-05']),
+  cuerpo: () => figura('I-05'),
 }));
 
 añadir('graficos/distribucion.html', ficha({
@@ -618,7 +678,7 @@ añadir('graficos/distribucion.html', ficha({
     Ordenarlo por frecuencia, como haría un ranking, <strong>destruye el eje</strong>,
     que es justo lo que hay que leer. La media y la mediana van juntas al pie porque
     la distribución es asimétrica y la media sola describe mal el caso típico.`,
-  cuerpo: () => v.RENDER['C-06'](series['C-06']),
+  cuerpo: () => figura('C-06'),
 }));
 
 añadir('graficos/proporcional.html', ficha({
@@ -628,7 +688,7 @@ añadir('graficos/proporcional.html', ficha({
     barra y no como cuatro barras sueltas que obliguen a sumar de cabeza. Q1–Q4 es una
     escala <strong>ordenada</strong>: un solo tono en cuatro pasos, del más oscuro al
     más claro, con luminosidad monótona y ΔE mínimo de 11,4 entre escalones.`,
-  cuerpo: () => v.RENDER['R-01'](series['R-01']),
+  cuerpo: () => figura('R-01'),
 }));
 
 añadir('graficos/codificacion.html', ficha({
@@ -639,14 +699,14 @@ añadir('graficos/codificacion.html', ficha({
     diseño que ilustra una regla con un ejemplo que no la cumple es peor que no tenerla.`,
   cuerpo: () => `
     <p class="panel-etq" style="margin-top:0">Trama diagonal · T-05, multivaluado</p>
-    ${v.RENDER['T-05'](series['T-05'])}
+    ${figura('T-05')}
     <p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>
     <p class="regla">Las líneas van en el color de la superficie y <b>cortan</b> el
       relleno en vez de teñirlo. Por eso el rayado se lee igual en los dos temas, con
       cualquier daltonismo y sobre papel en blanco y negro.</p>
 
     <p class="panel-etq" style="margin-top:var(--e5)">Marca del valor esperado · I-05</p>
-    ${v.RENDER['I-05'](series['I-05'])}
+    ${figura('I-05')}
     <p class="regla">Un recuento sin escala no dice si es mucho o poco. El trazo verde de
       referencia marca lo que cabría esperar bajo el promedio mundial: por definición, el top
       <i>k</i> % de la distribución mundial contiene el <i>k</i> % de las publicaciones.
@@ -654,7 +714,7 @@ añadir('graficos/codificacion.html', ficha({
       10 %, y por encima en el 25 %</b>.</p>
 
     <p class="panel-etq" style="margin-top:var(--e5)">Gris de ausencia · P-07</p>
-    ${v.RENDER['P-07'](series['P-07'])}
+    ${figura('P-07')}
     <p class="regla"><b>«No determinada» siempre es gris</b>, ignorando la escala pedida.
       Un valor no medido no puede parecerse a uno medido. Nótese que P-07
       <b>no</b> lleva trama: no es multivaluado, y ponérsela para que la ficha quedara

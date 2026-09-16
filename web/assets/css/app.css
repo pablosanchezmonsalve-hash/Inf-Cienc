@@ -1680,10 +1680,11 @@ svg.chart .trama { pointer-events: none; }
   .modulo, .kpi, .tabla-envoltura { box-shadow: none; border-color: #999; break-inside: avoid; }
   /* Las tarjetas de cifra no se parten por la mitad.
 
-     Medido en el PDF: la portada cortaba la tercera fila y la hoja siguiente
-     abría con «Citas por publicación · 816 sobre las que tienen métricas» sin
-     el número, que se había quedado en la anterior. Un rótulo sin su cifra no
-     es media tarjeta: es una afirmación sin sujeto.
+     Medido en el PDF sobre la carga de 823 publicaciones: la portada cortaba
+     la tercera fila y la hoja siguiente abría con «Citas por publicación · 816
+     sobre las que tienen métricas» sin el número, que se había quedado en la
+     anterior. Las dos cifras son de esa corrida y se citan como tal. Un rótulo
+     sin su cifra no es media tarjeta: es una afirmación sin sujeto.
 
      La regla `.kpi` que ya estaba nunca se aplicó: las cifras de la portada y
      de cada sección no son `.kpi` sino `.ficha` dentro de `.tablero` —`.kpi`
@@ -2350,11 +2351,12 @@ svg.chart .trama { pointer-events: none; }
     color: #333; border-top: .5pt solid #999;
   }
 
-  /* Las tarjetas de cifra no se parten por la mitad. Medido en el PDF: la
-     portada cortaba la tercera fila y la hoja siguiente abría con «Citas por
-     publicación · 816 sobre las que tienen métricas» sin el número, que se
-     había quedado en la anterior. Un rótulo sin su cifra no es media tarjeta:
-     es una afirmación sin sujeto.
+  /* Las tarjetas de cifra no se parten por la mitad. Medido en el PDF sobre
+     la carga de 823 publicaciones: la portada cortaba la tercera fila y la
+     hoja siguiente abría con «Citas por publicación · 816 sobre las que tienen
+     métricas» sin el número, que se había quedado en la anterior. Las dos
+     cifras son de esa corrida y se citan como tal. Un rótulo sin su cifra no es
+     media tarjeta: es una afirmación sin sujeto.
 
      `break-inside: avoid` no lo cumple Chromium ni sobre una rejilla ni sobre
      sus hijos, así que en papel las fichas dejan de ser hijas de rejilla y

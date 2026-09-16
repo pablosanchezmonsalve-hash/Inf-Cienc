@@ -14578,3 +14578,133 @@ el mismo `v.kpisRestantes` preexistente y no en nada nuevo. `validar_paleta.py`
 Decidir si `make kit` se repara o se retira. Reparado, la batería debería
 correrlo: un generador que nadie ejecuta vuelve a congelarse, y es lo que acaba
 de pasar durante tres semanas.
+
+## Sesión 2026-09-16 (cont. 2) — `make kit` reparado, y metido en la batería
+
+Se autorizó reparar el generador declarado inoperante en `D-602` y meterlo en
+la batería, que era el próximo paso recomendado de la entrada anterior.
+
+### Por qué estaba roto, en una línea
+
+`build_kit.mjs` estaba escrito contra la API **anterior al explorador**: pedía
+`v.hero`, `v.rail`, `v.modulo`, `v.kpis`, `v.kpisRestantes` y `v.RENDER`, y
+dibujaba desde `series.json`. El explorador cambió el trato —el sitio deriva los
+gráficos de `publications.json`, el corte sustituyó al módulo y el índice lateral
+pasó a colgar de los filtros— y `vista.js` dejó de exportar las seis.
+
+### La reparación, y la regla que la gobierna
+
+**El kit no rearma componentes: enseña los del sitio.** Es la única forma de que
+la promesa de §16.1 signifique algo. Para eso hicieron falta dos aperturas en
+`vista_explorador.js`:
+
+- **`corteUno()`**, extraída del cuerpo del `map` de `cortesSeccion()` sin tocar
+  una línea del marcado. Es el componente completo: título, conmutador, las dos
+  vistas, la trama, la advertencia, el bloque de lectura y el sello.
+- **`dibujar()`**, que ya existía y era privada. Devuelve `{svg, datos}`, que es
+  lo que quieren las fichas del grupo «Gráficos».
+
+> **El refactor se comprobó por igualdad, no por confianza.** Se guardó la huella
+> MD5 de las 12 páginas de `dist/` antes de tocar nada y se reconstruyó después:
+> **idénticas byte a byte**. Extraer una función del cuerpo de un bucle es
+> exactamente el cambio que parece inocuo y no lo es.
+
+El generador ahora carga los mismos artefactos y con los mismos nombres que
+`src/build/prerender.mjs` —`publications.json`, `authors.json`, `lecturas.json`,
+`catalogo.json`, más `procedencias()` y `jerarquia`—, y busca la forma de cada
+gráfico en `SECCIONES`, que es donde `D-378` la declara.
+
+### Dos fichas que documentaban componentes inexistentes
+
+**«Anillo».** No hay ningún gráfico de anillo en el código: `proporcional()`
+dibuja una barra apilada de `<rect>`, y los únicos `<circle>` son nodos de la
+red. Además la ficha lo ilustraba con `C-01`, que hoy es `barrasH` de una sola
+serie. Era una ficha de un componente que no existe, ilustrada con un indicador
+que no lo usa. Sustituida por **«Red de coautoría»** (`C-05`, forma `red`), que
+es una figura real y era la única sin ficha.
+
+**«Conmutador Gráfico ⇄ Tabla».** Rearmaba a mano el marcado del módulo antiguo
+—`.modulo`, `.modulo-id`, `.vistas`— que el sitio dejó de emitir. Ahora enseña el
+corte real, donde las dos vistas están las dos en el DOM y `data-activa` decide
+cuál se ve: que es, literalmente, por qué sin JavaScript se leen ambas.
+
+### La compuerta
+
+`src/verify/kit.mjs` **ya existía**, a medias y sin conectar: no levantaba
+servidor, no estaba en `PASOS` y —lo decisivo— **no llamaba a `process.exit()`
+nunca**. Imprimía los fallos y salía 0. Una compuerta que no puede fallar no es
+una compuerta.
+
+Completada, comprueba cuatro cosas:
+
+1. **Que el generador corre.** Es la regresión que costó tres semanas.
+2. Que cada ficha se pinta en los dos temas con fondos distintos, que es lo que
+   prueba que `light-dark()` resuelve por contenedor.
+3. Que ninguna lanza excepciones.
+4. **Que la ficha de color mide contra `:root`** y no contra los tokens que una
+   banda redefine. Es el `D-599`, y no se ve mirando la ficha: hay que comparar
+   con la hoja.
+
+> **Se probó que falla.** Se reinyectó el bug de `D-599` y la compuerta lo cazó
+> con las tres discrepancias y sus valores («la ficha dice #200b0e · #200b0e y
+> :root dice #fdf6ef · #17080a»), exit 1. Se rompió el arranque del generador y
+> lo declaró con el error de Node, exit 1. Un verificador que nunca se ve fallar
+> no está verificado.
+
+Entra en `PASOS` como paso «sistema de diseño», con su propio servidor en otro
+puerto para no pisar al de `dist/`.
+
+### De paso
+
+- `validar_paleta.py` llamaba «anillo C-01» al par categórico en tres sitios. No
+  hay anillo, y `C-01` no gasta el par. Corregidas las etiquetas, no la medida.
+- Dos comentarios de `app.css` citaban «816» y la portada de 823 sin decir de qué
+  carga eran. El kit incrusta la hoja entera en cada ficha, así que esas cifras
+  se publican. Fechadas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-603 | La batería **regenera** el sistema de diseño y lo comprueba | Un generador que nadie ejecuta se congela: éste llevaba tres semanas publicando una paleta retirada y nada lo decía. Comprobar el directorio sin regenerarlo habría validado la salida de una corrida vieja, que es el mismo hueco con otra forma |
+| D-604 | `corteUno()` y `dibujar()` se exportan para que el kit enseñe el componente REAL | El kit tenía su propia vía de dibujo y murió al cambiar la del sitio. Una segunda forma de dibujar lo mismo es la que diverge; exportar la del sitio es más barato que mantener dos. El refactor se comprobó dejando `dist/` idéntico byte a byte |
+| D-605 | La ficha «Anillo» se retira: no existe tal gráfico | `proporcional()` dibuja una barra apilada y `C-01` es `barrasH`. Una ficha de sistema de diseño que documenta un componente inexistente es peor que una ausencia: afirma que el sitio tiene algo que no tiene. Su hueco lo ocupa `C-05`, que sí es una forma publicada y no tenía ficha |
+| D-606 | La compuerta compara la ficha de color con `:root`, no sólo con que pinte | El fallo de `D-599` producía una ficha perfectamente pintada con las cifras equivocadas. Lo que no se compara contra la fuente no se comprueba |
+
+### Archivos
+
+- `web/assets/js/vista_explorador.js` — `corteUno()` extraída y exportada,
+  `dibujar()` exportada
+- `src/design/build_kit.mjs` — reescrito contra la API del explorador
+- `src/verify/kit.mjs` — completado: genera, sirve, comprueba y **falla**
+- `src/verify/run_all.mjs`, `Makefile` — el paso entra en la batería
+- `src/design/validar_paleta.py` — las etiquetas del anillo
+- `web/assets/css/app.css` — dos cifras de la carga anterior, fechadas
+
+### Verificación
+
+Batería entera, ocho pasos: contraste, estructura, flujos, responsive, impresión,
+higiene, peso y **sistema de diseño** (21 fichas, 21 s). `VERIFICACIÓN COMPLETA ·
+sin fallos`, exit 0.
+
+> **Un falso fallo, y de qué era.** Una corrida intermedia dio «VERIFICACIÓN
+> FALLIDA · responsive, impresión». No era el cambio: eran **dos baterías
+> solapadas** peleándose por el puerto 8841, lanzadas por error desde esta
+> sesión. Con una sola, las dos pasan. Vale la pena anotarlo porque el síntoma
+> —dos pasos de navegador fallando a la vez, sin relación con lo tocado— es
+> reconocible y no lleva a ninguna parte si se busca en el diff.
+
+### Ambigüedades abiertas
+
+- **`graficos/red.html` pesa 1,2 MB**, frente a los ~135 KB de las demás: la red
+  de coautoría lleva la hoja incrustada más el SVG de todos los nodos. No es un
+  fallo —`design-system/` no se versiona ni se sirve al público— pero conviene
+  saberlo antes de sincronizar con Claude Design.
+- **`design/informe/`** sigue igual: paleta `D-381`, banda como sistema y cifras
+  del corpus de 823. Es la decisión que sigue bloqueando lo demás.
+
+### Próximo paso recomendado
+
+Decidir qué gobierna `design/informe/`. Es lo único de la lista original que
+sigue sin tocarse, y ahora es lo único que queda entre la documentación y el
+producto.

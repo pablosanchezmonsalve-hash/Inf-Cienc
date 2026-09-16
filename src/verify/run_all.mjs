@@ -69,6 +69,12 @@ const PASOS = [
   // Sólo lee archivos y los comprime: tarda menos de un segundo, así que
   // no hay razón para dejarlo fuera como a rendimiento.mjs.
   ['peso', 'node', ['src/verify/peso.mjs', DIST]],
+  // Regenera el sistema de diseño y lo comprueba. Está DENTRO de la batería
+  // porque un generador que nadie ejecuta se congela: `build_kit.mjs` llevaba
+  // tres semanas sin arrancar, publicando fichas de una paleta retirada, y no
+  // había nada que lo dijera (`D-602`, `D-603`). Levanta y baja su propio
+  // servidor en otro puerto, así que no pisa al de `DIST`.
+  ['sistema de diseño', 'node', ['src/verify/kit.mjs']],
 ];
 
 const correr = (cmd, args) => new Promise((res) => {
