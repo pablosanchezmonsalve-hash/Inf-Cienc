@@ -81,6 +81,8 @@ await pg.goto(`http://127.0.0.1:${P}/index.html`, { waitUntil: 'networkidle' });
 await pg.waitForTimeout(500);
 const antes = await pg.textContent('.ficha-valor[data-valor="publicaciones"]');
 ok(/^[\d.]+$/.test(antes.trim()), `las cifras llegan pre-renderizadas (${antes.trim()})`);
+// Los filtros son píldoras que nacen cerradas: hay que abrir la de año.
+await pg.click('details.dim:has(.chip[data-dim="anio"]) > summary');
 await pg.locator('.chip[data-dim="anio"]').first().click();
 await pg.waitForTimeout(400);
 const luego = await pg.textContent('.ficha-valor[data-valor="publicaciones"]');
@@ -96,6 +98,52 @@ await pg.waitForTimeout(400);
 await pg.click('#limpiar-recorte');
 await pg.waitForTimeout(400);
 ok(await pg.locator('.recorte-chip').count() === 0, '«Ver todo» limpia el recorte');
+
+// La barra superior y las píldoras de filtro. Los años de la barra recortan
+// igual que el chip de año; la píldora en la que se elige no se cierra al
+// repintar, porque elegir dos valores obligaba a abrirla dos veces.
+console.log('  Barra superior y píldoras');
+await pg.click('#recorte-anio-env button[data-anio="2024"]');
+await pg.waitForTimeout(400);
+ok(new URL(pg.url()).searchParams.get('anio') === '2024', 'el año de la barra recorta y viaja en la URL');
+ok(await pg.getAttribute('#recorte-anio-env button[data-anio="2024"]', 'aria-pressed') === 'true',
+   'el año elegido queda marcado');
+ok((await pg.textContent('#lateral-filtros')).includes('1 aplicado'),
+   'la barra lateral declara el filtro activo');
+await pg.click('details.dim:has(.chip[data-dim="tipo"]) > summary');
+await pg.locator('.chip[data-dim="tipo"]').first().click();
+await pg.waitForTimeout(400);
+ok(await pg.locator('details.dim[open]:has(.chip[data-dim="tipo"])').count() === 1,
+   'la píldora sigue abierta tras elegir un valor');
+await pg.keyboard.press('Escape');
+await pg.waitForTimeout(150);
+ok(await pg.locator('details.dim[open]').count() === 0, 'Escape cierra la píldora');
+await pg.click('#limpiar-recorte');
+await pg.waitForTimeout(400);
+
+// Las dos tablas de la portada responden al recorte; la banda no lleva cifras.
+// Los años esperados salen de la ventana declarada, no de un número escrito aquí.
+console.log('  Tablas de la portada');
+const ventana = await pg.evaluate(async () => (await (await fetch('data/meta.json')).json()).ventana);
+ok(await pg.locator('#dinamica tbody tr').count() === ventana.fin - ventana.inicio + 1,
+   'la dinámica anual trae un año por fila de la ventana');
+ok(await pg.locator('#mas-citadas tbody tr').count() === 10, 'la tabla de más citadas trae diez filas');
+ok(await pg.locator('#titular [data-valor], #titular table').count() === 0,
+   'la banda de cabecera no lleva cifras del recorte');
+await pg.click('#recorte-anio-env button[data-anio="2024"]');
+await pg.waitForTimeout(500);
+ok(await pg.locator('#dinamica tbody tr').count() === 1, 'con un año elegido, la dinámica anual trae una fila');
+const aniosCitadas = await pg.locator('#mas-citadas tbody tr td:nth-child(5)').allTextContents();
+ok(aniosCitadas.length > 0 && aniosCitadas.every((t) => t.trim() === '2024'),
+   'las más citadas son del año elegido');
+await pg.click('#limpiar-recorte');
+await pg.waitForTimeout(400);
+await pg.goto(`http://127.0.0.1:${P}/index.html?autor=${encodeURIComponent('Mujika I.')}`,
+  { waitUntil: 'networkidle' });
+await pg.waitForTimeout(600);
+ok(await pg.locator('#mas-citadas tbody tr').count() === 0
+   && await pg.locator('#mas-citadas .vacio').count() === 1,
+   'recortada a una persona, la tabla de más citadas no se dibuja');
 
 // ─────────────────────────────────────────────────────────────────── filtros
 // Publicaciones usa EL MISMO motor que la portada y las secciones. Lo que se
@@ -177,6 +225,77 @@ await pg.waitForTimeout(800);
 ok(/autor\.html\?id=/.test(pg.url()), `navega a la ficha (${pg.url().split('/').pop()})`);
 ok(await pg.locator('h1').count() === 1, 'la ficha tiene su h1');
 ok(await pg.locator('.identificadores').count() === 1, 'trae el bloque de identificadores');
+
+// ───────────────────────────────────────────────────────── menú en un teléfono
+// Por debajo de 1040 px la barra lateral es un cajón. Tiene que nacer fuera del
+// orden de tabulación, abrirse con «Menú» y cerrarse con Escape.
+console.log('  Menú en teléfono');
+const movil = await b.newContext({ viewport: { width: 430, height: 900 } });
+const pm = await movil.newPage();
+pm.on('pageerror', e => err.push(e.message));
+await pm.goto(`http://127.0.0.1:${P}/impacto.html`, { waitUntil: 'networkidle' });
+await pm.waitForTimeout(400);
+const enlaceMenu = '.lateral .nav a[href="index.html"]';
+ok(!await pm.isVisible(enlaceMenu), 'la barra lateral nace cerrada');
+await pm.click('.nav-toggle');
+await pm.waitForTimeout(350);
+ok(await pm.isVisible(enlaceMenu), 'el botón «Menú» la abre');
+ok(await pm.getAttribute('.nav-toggle', 'aria-expanded') === 'true', 'aria-expanded sigue al estado');
+await pm.keyboard.press('Escape');
+await pm.waitForTimeout(350);
+ok(!await pm.isVisible(enlaceMenu), 'Escape la cierra');
+await movil.close();
+
+// ─────────────────────────────────────── cabecera y no publicados de sección
+// El «qué NO dice» va a la vista, no plegado. Y producción y temática declaran
+// sus indicadores no publicados: la banda no aparecía nunca en esas dos páginas
+// porque su clave no coincide con la categoría del catálogo.
+console.log('  Cabecera y no publicados de las secciones');
+for (const [pagina, codigo] of [['produccion', 'P-08'], ['tematica', 'T-02']]) {
+  await pg.goto(`http://127.0.0.1:${P}/${pagina}.html`, { waitUntil: 'networkidle' });
+  await pg.waitForTimeout(400);
+  ok(await pg.isVisible('.seccion-limite'), `${pagina}: el «qué NO dice» está a la vista`);
+  ok(await pg.locator(`.no-publicados .codigo:text-is("${codigo}")`).count() === 1,
+     `${pagina}: declara ${codigo} entre los no publicados`);
+}
+
+// ────────────────────────────────────────────────────────── descarga de datos
+// El inventario se mide en el build; aquí se comprueba que llegó y que el
+// botón, que sólo existe con JavaScript, descarga de verdad el CSV.
+console.log('  Descarga de datos');
+await pg.goto(`http://127.0.0.1:${P}/datos.html`, { waitUntil: 'networkidle' });
+await pg.waitForTimeout(500);
+ok(await pg.locator('#datos-inventario tbody tr').count() >= 10, 'el inventario lista los archivos de datos');
+ok(!(await pg.textContent('#datos-inventario')).includes('NaN'), 'ningún recuento ni tamaño sale como NaN');
+const [descarga] = await Promise.all([
+  pg.waitForEvent('download', { timeout: 15000 }),
+  pg.click('#descargar-csv'),
+]);
+ok(/^publicaciones-.+\.csv$/.test(descarga.suggestedFilename()),
+   `el botón descarga el CSV (${descarga.suggestedFilename()})`);
+
+// ───────────────────────────────────────────────── glosario y ficha técnica
+// La ficha se contrasta con meta.json, no con cifras escritas aquí: una prueba
+// con 1.342 a mano pasaría a mentir en la próxima carga.
+console.log('  Glosario y ficha técnica');
+await pg.goto(`http://127.0.0.1:${P}/metodologia.html`, { waitUntil: 'networkidle' });
+await pg.waitForTimeout(400);
+const metaM = await pg.evaluate(() => fetch('data/meta.json').then(r => r.json()));
+const nGlosario = await pg.evaluate(() => fetch('data/glossary.json').then(r => r.json()))
+  .then(g => g.entradas.length);
+const ficha = await pg.textContent('#ficha-tecnica');
+ok(await pg.locator('#ficha-tecnica dl.ficha-datos').count() === 4, 'la ficha tiene sus cuatro bloques');
+ok(ficha.includes(new Intl.NumberFormat('es-CL').format(metaM.denominadores.universo_total)),
+   'la ficha declara el universo de meta.json');
+ok(ficha.includes(metaM.fecha_corte_citas) && ficha.includes(metaM.exports.Scopus.fecha_export),
+   'la ficha da la fecha de SciVal y la del export de Scopus');
+ok(metaM.exports.Scopus.fecha_corte || ficha.includes('El export no lo declara'),
+   'la ficha no atribuye a Scopus el corte de SciVal');
+ok(await pg.locator('.glosario-entrada').count() === nGlosario,
+   `el glosario lista las ${nGlosario} entradas`);
+await pg.goto(`http://127.0.0.1:${P}/metodologia.html#fwci-field-weighted-citation-impact`,
+  { waitUntil: 'networkidle' });
+ok(await pg.locator('.glosario-entrada:target').count() === 1, 'un enlace #slug aterriza en su definición');
 
 console.log(`\n  excepciones JS durante todo el recorrido: ${err.length}`);
 err.forEach(e => console.log(`    ✗ ${e}`));

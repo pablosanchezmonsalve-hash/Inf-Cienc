@@ -38,8 +38,12 @@ kit: artefactos
 	node src/design/build_kit.mjs
 
 # Batería de verificación del sitio construido: contraste WCAG, estructura y
-# consola, flujos interactivos, responsive e higiene de CSS/JS. Levanta y baja
-# su propio servidor. Exige Playwright y Chromium.
+# consola, flujos interactivos, responsive, higiene de CSS/JS, presupuesto de
+# peso y el sistema de diseño. Levanta y baja su propio servidor. Exige
+# Playwright y Chromium.
+#
+# El paso de sistema de diseño REGENERA el kit y lo comprueba: `make kit` llevó
+# tres semanas roto sin que nada lo dijera, porque nada lo corría.
 #
 # Vive aquí y no en un directorio temporal a propósito: una verificación que hay
 # que reescribir en cada sesión no es una verificación, y una reescrita de

@@ -133,8 +133,8 @@ def construir(authorship: pd.DataFrame, uni: pd.DataFrame) -> dict:
             "n_publicaciones": "Pares autor × publicación, mismo criterio y "
                 "cobertura que P-07 (docs/INDICATORS.md). Una publicación con "
                 "autores de dos unidades cuenta en ambas.",
-            "citas_totales": "Suma de `citas` (Scopus) sobre las mismas parejas "
-                "autor × publicación de n_publicaciones — hereda su mismo "
+            "citas_totales": "Suma de las citas de Scopus sobre las mismas parejas "
+                "autor × publicación que cuenta la producción — hereda su mismo "
                 "efecto de doble conteo entre unidades.",
             "excluido_a_proposito": "FWCI y percentil de citación agregados por "
                 "unidad. D-18: el FWCI de un autor no es el promedio de sus "

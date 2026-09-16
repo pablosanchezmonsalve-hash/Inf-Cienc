@@ -451,7 +451,7 @@ def nota_p01(total: int) -> dict | None:
     t = (f"Recuento de registros del universo. {n_grupos} {plural} de registros "
          f"comparten DOI y esperan revisión humana: si se confirman como el mismo "
          f"trabajo, el total sobra en {sobrantes}. No se fusionan por su cuenta "
-         f"(`D-08`) y quedan visibles en la tabla de validación, regla `D-02`.")
+         f"(D-08) y quedan visibles en la tabla de validación, regla D-02.")
     return {"texto": t, "destacada": False}
 
 
@@ -476,15 +476,23 @@ def nota(code: str) -> dict | None:
 # venía atribuyendo todo a «Scopus» mientras la metodología decía «Scopus y
 # SciVal», y sin SciVal no existirían el FWCI ni los percentiles de citación.
 # Decirlo por indicador es más preciso que decirlo una vez en el pie.
+#
+# La fuente es la del CAMPO del que sale cada indicador, y el campo lo fija
+# `src/audit/02_reconcile_sources.py`: título, año, tipo, fuente y autoría vienen
+# del export de Scopus; acceso abierto, países, instituciones, número de autores
+# y áreas ASJC y QS, del de SciVal. Hasta el 2026-09-15 A-01, C-01, C-03, C-04,
+# C-06 y T-01 figuraban aquí como Scopus, y sus sellos lo publicaban.
 FUENTE_POR_INDICADOR = {
     "P-01": "Scopus", "P-02": "Scopus", "P-03": "Scopus", "P-04": "Scopus",
     "P-05": "Scopus", "P-06": "Scopus", "P-07": "Scopus",
-    "A-01": "Scopus",
+    "A-01": "SciVal",
     "I-01": "SciVal", "I-02": "SciVal", "I-03": "SciVal",
     "I-04": "SciVal", "I-05": "SciVal",
     "R-01": "SciVal",
-    "C-01": "Scopus", "C-03": "Scopus", "C-04": "Scopus", "C-06": "Scopus", "C-05": "Scopus",
-    "T-01": "Scopus", "T-04": "SciVal", "T-05": "SciVal",
+    # El listado sale de Scopus y las citas de SciVal: la tabla lleva los dos sellos.
+    "I-07": "Scopus · SciVal",
+    "C-01": "SciVal", "C-03": "SciVal", "C-04": "SciVal", "C-06": "SciVal", "C-05": "Scopus",
+    "T-01": "SciVal", "T-04": "SciVal", "T-05": "SciVal",
     # ORCID no está en ninguna de las dos fuentes: se recupera aparte. El
     # catálogo publica esta columna, así que dejarlo caer en el genérico
     # «Scopus · SciVal» sería publicar una procedencia falsa.
@@ -550,9 +558,13 @@ def procedencia(code: str, cubiertas: int | None = None,
 def build_meta() -> dict:
     """Procedencia del build. Se incrusta en todos los artefactos."""
     scival = SOURCES["scival_export"]
+    scopus = SOURCES["scopus_export"]
     return {
         "institucion": INSTITUTION["institucion"]["nombre_canonico"],
         "institucion_corta": INSTITUTION["institucion"]["nombre_corto"],
+        # Identificador público. Lo usa la detección institucional (regla
+        # I-02); la ficha técnica de metodologia.html lo declara.
+        "scopus_affiliation_id": INSTITUTION["institucion"]["scopus_affiliation_id"],
         "titulo_plataforma": INSTITUTION["presentacion"]["titulo_plataforma"],
         "ventana": {
             "inicio": INSTITUTION["ventana_temporal"]["anio_inicio"],
@@ -561,6 +573,16 @@ def build_meta() -> dict:
         "fuentes": ["Scopus", "SciVal"],
         "fecha_corte_citas": scival["fecha_corte"],
         "fecha_export": scival["fecha_export"],
+        # Las dos fechas de las dos fuentes. `fecha_corte_citas` y
+        # `fecha_export` de arriba son las de SciVal, y leídas solas parecen
+        # cubrir también a Scopus, cuyo export no declara corte (T-06): aquí
+        # queda `null`, no la fecha de SciVal.
+        "exports": {
+            "Scopus": {"fecha_export": scopus["fecha_export"],
+                       "fecha_corte": scopus["fecha_corte"]},
+            "SciVal": {"fecha_export": scival["fecha_export"],
+                       "fecha_corte": scival["fecha_corte"]},
+        },
         "fecha_build": date.today().isoformat(),
         "denominadores": denominadores(),
         # Lo consume el explorador para decidir cuándo el sello de un corte

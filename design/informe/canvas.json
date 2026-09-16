@@ -39,25 +39,32 @@
   ],
   "annotations": [
     {
+      "id": "congelado",
+      "x": 0,
+      "y": -420,
+      "w": 1280,
+      "text": "FUENTE HISTÓRICA CONGELADA · 2026-09-16 (D-607).\n\nEste lienzo NO describe el producto actual. Se conserva como registro del criterio con que se diseñó el informe en papel, no como especificación.\n\nLo que fija aquí abajo ya no rige: la paleta es la institucional de D-381 y el sitio sirve la H (vino y champán, D-596) desde el 2026-09-01; la banda dejó de ser la unidad de composición cuando llegó el explorador (D-597); las cifras son las del corpus de 823, hoy 1.342.\n\nY su regla 2 —la ausencia sobre Ink Black— es NULA en papel: D-552 imprime la banda de contraste en tinta sobre blanco, así que ese suelo no existe donde se dibujó para existir.\n\nEl formato del papel lo mandan hoy web/assets/css/app.css (hoja de impresión), src/build/informe_pdf.mjs y docs/UX_UI.md §12.7 bis. No refrescar este lienzo: ver design/informe/README.md."
+    },
+    {
       "id": "bandas",
       "x": 0,
       "y": -215,
       "w": 620,
-      "text": "El informe, en narrativa por bandas.\n\nSe adopta el sistema elegido en el rediseño: Newsreader + Public Sans, papel #fdf8f2, papel-2 #f7efe5, contraste #071e22, énfasis #f4c095, dato teal #1d7874.\n\nLas dos reglas medidas que gobiernan estas cuatro páginas:\n\n1. La banda Peach es TIPOGRÁFICA, nunca de datos: el color del dato cae a 3,21:1 y la marca de ausencia a 2,35:1. Aquí sólo lleva titular, prosa y los denominadores como texto.\n\n2. La ausencia va sobre Ink Black, donde mide 4,71:1. Lo que el informe no sabe ocupa el suelo más fuerte, no una nota al pie: en la portada y en el apéndice."
+      "text": "[HISTÓRICO] El informe, en narrativa por bandas.\n\nSe adoptó el sistema elegido en aquel rediseño: Newsreader + Public Sans, papel #fdf8f2, papel-2 #f7efe5, contraste #071e22, énfasis #f4c095, dato teal #1d7874.\n\nLas dos reglas medidas que gobiernan estas cuatro páginas:\n\n1. La banda Peach es TIPOGRÁFICA, nunca de datos: el color del dato cae a 3,21:1 y la marca de ausencia a 2,35:1. Aquí sólo lleva titular, prosa y los denominadores como texto.\n\n2. La ausencia va sobre Ink Black, donde mide 4,71:1. Lo que el informe no sabe ocupa el suelo más fuerte, no una nota al pie: en la portada y en el apéndice."
     },
     {
       "id": "composicion",
       "x": 660,
       "y": -215,
       "w": 560,
-      "text": "Composición, según las reglas del sistema:\n\n· una afirmación por banda;\n· los fondos alternan, nunca se repiten seguidos;\n· contraste y énfasis, una vez por página;\n· una figura por banda;\n· el sello viaja con su figura, nunca agrupado al final.\n\nLa advertencia va ANTES de la figura que califica. En la página de eje, «lo que el volumen no responde» precede a las áreas temáticas.\n\nApertura y cierre se aplican al DOCUMENTO, no a cada hoja: la portada abre, el apéndice cierra en Peach. Las interiores son bandas de trabajo."
+      "text": "[HISTÓRICO] Composición, según las reglas de aquel sistema:\n\n· una afirmación por banda;\n· los fondos alternan, nunca se repiten seguidos;\n· contraste y énfasis, una vez por página;\n· una figura por banda;\n· el sello viaja con su figura, nunca agrupado al final.\n\nLa advertencia va ANTES de la figura que califica. En la página de eje, «lo que el volumen no responde» precede a las áreas temáticas.\n\nApertura y cierre se aplican al DOCUMENTO, no a cada hoja: la portada abre, el apéndice cierra en Peach. Las interiores son bandas de trabajo."
     },
     {
       "id": "tabla",
       "x": 1320,
       "y": -215,
       "w": 480,
-      "text": "La página de tabla mantiene la banda como marco y deja la tabla como superficie de consulta, tal como pide la regla «dónde NO manda la banda».\n\nEs el mismo criterio que deja fuera a Publicaciones, Autores, la ficha y el catálogo: quien mira una tabla viene a buscar, no a que le cuenten."
+      "text": "[HISTÓRICO] La página de tabla mantenía la banda como marco y deja la tabla como superficie de consulta, tal como pide la regla «dónde NO manda la banda».\n\nEs el mismo criterio que deja fuera a Publicaciones, Autores, la ficha y el catálogo: quien mira una tabla viene a buscar, no a que le cuenten."
     }
   ],
   "launch": {

@@ -24,9 +24,12 @@
 
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 
-const RAIZ = resolve(dirname(new URL(import.meta.url).pathname), '../..');
+// `fileURLToPath` y no `new URL(...).pathname`: la ruta de la URL conserva la
+// barra inicial y los caracteres codificados, y en Windows daba
+// «C:\C:\…\CIENCIOMETR%C3%8DA»: el generador no arrancaba en ese equipo.
+const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const SALIDA = resolve(process.argv[2] || join(RAIZ, 'design-system'));
 const DATOS = join(RAIZ, 'data', 'processed');
 
@@ -34,11 +37,71 @@ const css = await readFile(join(RAIZ, 'web/assets/css/app.css'), 'utf8');
 const mod = (n) => import(pathToFileURL(join(RAIZ, 'web/assets/js', n)).href);
 const c = await mod('core.js');
 const v = await mod('vista.js');
+/* El explorador es hoy el dueño del marcado del sitio: la portada y las cuatro
+   secciones se dibujan desde aquí. Hasta el 2026-09-16 este generador llamaba a
+   `v.hero`, `v.rail`, `v.modulo`, `v.kpis`, `v.kpisRestantes` y `v.RENDER`, que
+   `vista.js` dejó de exportar cuando el corte sustituyó al módulo — y con eso
+   `make kit` llevaba tres semanas sin arrancar (`D-602`). */
+const vx = await mod('vista_explorador.js');
+const X = await mod('explorador.js');
 const dato = async (n) => JSON.parse(await readFile(join(DATOS, n), 'utf8'));
 
 const meta = await dato('meta.json');
 const series = await dato('series.json');
 const { kpis } = await dato('kpis.json');
+
+/* Los mismos artefactos y con los mismos nombres que `src/build/prerender.mjs`:
+   si el kit se alimentara distinto, enseñaría un componente que el sitio no
+   sirve. Ésa es la única razón por la que esta sección existe. */
+const { publicaciones } = await dato('publications.json');
+const catalogo = await dato('catalogo.json');
+const autoresJson = await dato('authors.json');
+const { lecturas } = await dato('lecturas.json');
+const proc = vx.procedencias(series, meta);
+const jerarquia = meta.jerarquia || {};
+const umbral = autoresJson.parametros?.n_minimo_interpretable;
+const unidadPorPersona = new Map(
+  autoresJson.autores.map((a) => [a.nombre, (a.unidades || [])[0]]));
+const textos = {
+  lecturas,
+  advertencias: Object.fromEntries(
+    catalogo.indicadores.filter((i) => i.advertencia).map((i) => [i.codigo, i.advertencia])),
+};
+
+/** El corte de un indicador, tal cual lo declara la sección que lo publica.
+    Se busca en `SECCIONES` en vez de escribirlo aquí: la forma de cada gráfico
+    la fija esa tabla (`D-378`), y una segunda copia divergiría. */
+const corteDe = (cod) => {
+  for (const s of Object.values(vx.SECCIONES)) {
+    const x = (s.cortes || []).find((k) => k.cod === cod);
+    if (x) return x;
+  }
+  throw new Error(`No hay corte declarado para ${cod} en SECCIONES`);
+};
+/** Ese corte, dibujado sobre el corpus entero y con el componente real. */
+const corte = (cod) => vx.corteUno(publicaciones, corteDe(cod),
+  { proc, jerarquia, unidadPorPersona, textos });
+
+/** Sólo la FIGURA de ese corte, para las fichas del grupo «Gráficos», que
+    documentan la forma y no el componente que la envuelve. Sale del mismo
+    `dibujar()` que usa el sitio: antes estas fichas llamaban a `v.RENDER[cod]`
+    sobre `series.json`, es decir a una serie ya calculada, y el sitio dejó de
+    servirlas cuando el explorador pasó a derivarlas de las publicaciones. */
+const figura = (cod) => {
+  const r = vx.dibujar(publicaciones, corteDe(cod), jerarquia);
+  if (!r) throw new Error(`${cod} no dibuja nada sobre el corpus entero`);
+  return r.svg;
+};
+
+/* El valor vigente de un KPI, por código. Las fichas lo usan en vez de escribir
+   la cifra: la de tipografía llevaba «823» y un FWCI de «0,87» congelados desde
+   una carga anterior, y una ficha que promete datos reales enseñaba dos que ya
+   no lo eran. */
+const kpi = (codigo) => {
+  const k = kpis.find((x) => x.codigo === codigo);
+  if (!k) throw new Error(`No hay KPI ${codigo} en kpis.json`);
+  return k.valor;
+};
 
 /* ─────────────────────────────────────────────── medición de contraste */
 const lin = (x) => (x /= 255, x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4);
@@ -47,12 +110,74 @@ const lum = (h) => { const [r, g, b] = rgb(h).map(lin); return 0.2126 * r + 0.71
 const ct = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 const ratio = (a, b) => ct(a, b).toFixed(2).replace('.', ',');
 
+/* Distancia perceptual en OKLab, ×100. Es un PORTE literal de la que usa
+   src/design/validar_paleta.py (`oklab()` y `delta_e()`), y tiene que dar el
+   mismo número que ella: las fichas publican la misma medida que valida el
+   sistema, así que dos matemáticas distintas serían dos verdades.
+
+   Existe porque hasta el 2026-09-16 las separaciones ΔE de estas fichas eran
+   prosa escrita a mano, y sobrevivieron a un cambio de paleta entero: el kit
+   publicaba «la advertencia ámbar, ΔE 28,6» con la advertencia ya en verde
+   moneda y la separación real en 26,0. Una cifra que no se calcula deja de ser
+   cierta en silencio, que es lo que este archivo promete no hacer. */
+const oklab = (h) => {
+  const [r, g, b] = rgb(h).map(lin);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+          1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+          0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s];
+};
+const dE = (a, b) => 100 * Math.hypot(...oklab(a).map((v, i) => v - oklab(b)[i]));
+const deltaE = (a, b) => dE(a, b).toFixed(1).replace('.', ',');
+
 /* Lee los tokens de la hoja: `--x: light-dark(#aaa, #bbb);`. La ficha de color
-   se dibuja con estos valores, así que cambiar la hoja cambia la ficha. */
+   se dibuja con estos valores, así que cambiar la hoja cambia la ficha.
+
+   SÓLO del bloque `:root`. Recorrer la hoja entera y quedarse con la ÚLTIMA
+   aparición de cada token era un error real: `.banda-contraste` redefine
+   --superficie, --superficie-2, --plano, --linea, --linea-fuerte y --red en su
+   propio ámbito, y esos valores pisaban los de :root. La ficha de color medía
+   entonces la tinta de :root contra el suelo OSCURO de la banda y publicaba
+   razones de contraste que no le pasan a ningún lector.
+
+   Es el mismo fallo que src/design/validar_paleta.py documenta haber corregido
+   en su `_bloque()`, en el otro archivo del sistema de diseño. Se corrigió allí
+   y siguió vivo aquí porque este generador no arranca desde el 2026-08-26. */
+const bloqueRaiz = (() => {
+  const i = css.indexOf(':root');
+  const a = css.indexOf('{', i);
+  return css.slice(a + 1, css.indexOf('}', a));
+})();
 const TOKENS = {};
-for (const m of css.matchAll(/(--[a-z0-9-]+):\s*light-dark\(\s*(#[0-9a-f]{6})\s*,\s*(#[0-9a-f]{6})\s*\)/gi)) {
+for (const m of bloqueRaiz.matchAll(/(--[a-z0-9-]+):\s*light-dark\(\s*(#[0-9a-f]{6})\s*,\s*(#[0-9a-f]{6})\s*\)/gi)) {
   TOKENS[m[1]] = { claro: m[2].toLowerCase(), oscuro: m[3].toLowerCase() };
 }
+if (!TOKENS['--superficie']) throw new Error('No se leyó ningún token light-dark() de :root en app.css');
+
+/* Atajos para escribir una medida DENTRO de la prosa de una ficha, que es
+   justo donde las cifras se congelaban: `sep('--serie-1','--aviso-borde','claro')`
+   se lee casi como la frase que sustituye, y se recalcula al generar. */
+const sep = (a, b, t) => deltaE(TOKENS[a][t], TOKENS[b][t]);
+const cr = (a, b, t) => ratio(TOKENS[a][t], TOKENS[b][t]);
+/* Separador de miles del proyecto: 1.342, no 1,342 ni 1342. */
+const miles = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+/* El fondo de una banda no es un token: vive en su propia regla, como
+   `background: light-dark(#f0ddca, #180609)`. Se lee de ahí en vez de
+   deducirlo de un token que hoy coincida —--marca-tinta vale ese mismo
+   champán—, porque esa coincidencia no la declara nadie y se rompería sola. */
+function fondoDeRegla(selector) {
+  const m = css.match(
+    new RegExp(`\\${selector}\\s*\\{[^}]*background:\\s*light-dark\\(\\s*(#[0-9a-f]{6})\\s*,\\s*(#[0-9a-f]{6})\\s*\\)`, 'i'));
+  if (!m) throw new Error(`No se encuentra el fondo light-dark() de ${selector} en app.css`);
+  return { claro: m[1].toLowerCase(), oscuro: m[2].toLowerCase() };
+}
+const BANDA_ENFASIS = fondoDeRegla('.banda-enfasis');
+/* Contraste de un token de :root sobre el fondo de una banda que NO redefine
+   tokens: es lo que ve de verdad quien lee dentro de ella. */
+const sobreBanda = (tok, banda, t) => ratio(TOKENS[tok][t], banda[t]);
 
 /* ─────────────────────────────────────────────── armazón de cada ficha */
 
@@ -199,7 +324,7 @@ añadir('fundamentos/color.html', ficha({
     ${muestrasColor([
       ['--ord-1', 'Q1', 3], ['--ord-2', 'Q2', 3], ['--ord-3', 'Q3', 3], ['--ord-4', 'Q4', 3],
     ], '--superficie')}
-    <p class="panel-etq" style="margin-top:var(--e5)">Advertencia metodológica · ámbar, fuera de la familia del dato</p>
+    <p class="panel-etq" style="margin-top:var(--e5)">Advertencia metodológica · verde moneda, fuera de la familia del dato</p>
     ${muestrasColor([
       ['--aviso-borde', 'línea de referencia', null],
       ['--aviso-tinta-grafico', 'etiqueta de referencia', 4.5],
@@ -210,9 +335,14 @@ añadir('fundamentos/color.html', ficha({
       su posición: al filtrar, un color ligado al rango saltaría de una entidad a
       otra. Y si el nombre de la categoría ya es un color —Gold, Green, Bronze— el
       color deja de estar disponible para codificar.</p>
-    <p class="regla"><b>Separación dato ↔ advertencia.</b> El dato es rojo y la
-      advertencia ámbar. Medido en OKLab: ΔE 28,6 en claro y 21,2 en oscuro, sobre
-      un piso de 20. Es la razón por la que el ámbar no se movió al cambiar el rojo.</p>
+    <p class="regla"><b>Separación dato ↔ advertencia.</b> El dato es bordeaux y la
+      advertencia verde moneda: familias opuestas en temperatura, no dos cálidos
+      contiguos. Medido en OKLab al generar esta ficha: ΔE
+      <b>${sep('--serie-1', '--aviso-borde', 'claro')}</b> en claro y
+      <b>${sep('--serie-1', '--aviso-borde', 'oscuro')}</b> en oscuro, sobre un piso
+      de 20. La advertencia es verde <em>porque</em> el dato es bordeaux: con el
+      ámbar anterior, cálido como el dato, la separación caía a 17,9 y no llegaba
+      al piso. No se bajó el piso, se movió el color.</p>
     <p class="regla"><b>Cuatro ranuras categóricas siguen reservadas y sin validar.</b>
       Nunca se han dibujado juntas. Quien las estrene debe revalidarlas para el
       número de ranuras que vaya a usar, no para seis.</p>`,
@@ -227,9 +357,9 @@ añadir('fundamentos/tipografia.html', ficha({
     que salta — una plataforma de indicadores tiene que dejar que el número gane la página.`,
   cuerpo: `
     <div style="display:grid;gap:var(--e4)">
-      <div><span class="cifra-display">823</span>
+      <div><span class="cifra-display">${miles(kpi('P-01'))}</span>
         <div class="cifra-etq">--t-display · titular<span>tabular-nums · interletrado −0,042em</span></div></div>
-      <div><div class="valor" style="font:700 var(--t-cifra)/1.04 var(--f-cifra);color:var(--cifra);letter-spacing:-.028em">0,87</div>
+      <div><div class="valor" style="font:700 var(--t-cifra)/1.04 var(--f-cifra);color:var(--cifra);letter-spacing:-.028em">${String(kpi('I-03')).replace('.', ',')}</div>
         <div class="cifra-etq">--t-cifra · valor de KPI<span>el sufijo va en &lt;small&gt;, no dentro del número</span></div></div>
       <h1 style="margin:0">Áreas temáticas</h1>
       <h2 style="margin:0">Publicaciones en el top 10 % de citación</h2>
@@ -267,35 +397,43 @@ añadir('fundamentos/espacio-trazo.html', ficha({
 /* ───────────────────────────────────────────────────────── componentes */
 
 añadir('componentes/kpi.html', ficha({
-  grupo: 'Componentes', nombre: 'Tarjeta de indicador (KPI)', ancho: 1000,
-  subtitulo: 'Cifra, denominador, unidad y advertencia · datos reales',
-  intro: `Un KPI sin su denominador y su fecha de corte está incompleto: la advertencia
-    metodológica <strong>es parte del componente</strong>, no una nota al pie. Estas
-    tarjetas se dibujan con los indicadores reales del informe.`,
-  cuerpo: `<div class="kpis" data-n="3">${v.kpis(v.kpisRestantes(kpis))}</div>
-    <p class="regla"><b>Los porcentajes llevan un decimal; los enteros, ninguno.</b>
-      Dos decimales en un porcentaje sugieren una precisión que el dato no tiene.
-      La unidad del valor va bajo la etiqueta, nunca intercalada en el número.</p>`,
+  grupo: 'Componentes', nombre: 'Tablero de cifras', ancho: 1000,
+  subtitulo: 'Seis fichas · cada una con su propio denominador y su lectura',
+  intro: `Una cifra sin su denominador y su fecha de corte está incompleta: la
+    advertencia metodológica <strong>es parte del componente</strong>, no una nota al
+    pie. Son las seis del tablero real, calculadas aquí sobre el corpus entero con
+    <code>X.resumen()</code> — la misma función que las recalcula en el navegador a
+    cada recorte. Cada una declara su base, porque son bases distintas
+    (<code>D-16</code>) y presentarlas juntas sin decirlo invita a dividir una por
+    otra.`,
+  cuerpo: () => vx.cifras(X.resumen(publicaciones), textos),
 }));
 
 añadir('componentes/titular.html', ficha({
-  grupo: 'Componentes', nombre: 'Titular de portada', ancho: 1000,
-  subtitulo: 'Tres cifras a tamaño display, con denominador y referencia',
-  intro: `Abrir con la magnitud, no con el índice. Son <strong>tres y no seis</strong>:
-    un titular con seis cifras no tiene titular. Cada una arrastra su denominador y,
-    si la tiene, su referencia — un 0,87 de FWCI sin el «1 = promedio mundial» al lado
-    no es un titular, es un número suelto.`,
-  cuerpo: v.hero(meta, kpis),
+  grupo: 'Componentes', nombre: 'Cabecera de portada', ancho: 1000,
+  subtitulo: 'Sin cifras: nombre, procedencia y el método tras un control',
+  intro: `La cabecera <strong>no lleva cifras</strong>, y es una decisión medida: la
+    anterior gastaba media pantalla en un titular de tres líneas y tres cifras que el
+    tablero repetía justo debajo. En un explorador eso es ruido dos veces — gasta la
+    pantalla que le toca al dato y enseña una cifra del total mientras el lector mira
+    un recorte. Queda el nombre, la procedencia —que dice de dónde salen las cifras—
+    y la explicación detrás de un control.`,
+  cuerpo: () => vx.cabecera(meta),
 }));
 
 añadir('componentes/modulo.html', ficha({
-  grupo: 'Componentes', nombre: 'Módulo de indicador', ancho: 1000,
-  subtitulo: 'Cabecera, conmutador de vista, figura, sello y notas',
-  intro: `El orden no es decorativo: primero lo que condiciona la lectura —advertencia
-    metodológica y nota de lectura del gráfico—, después la figura, después el sello
-    que dice de dónde sale y sobre cuántos casos, y al final el detalle. El sello al
-    final se convertía en letra pequeña.`,
-  cuerpo: () => v.modulo('I-05', series['I-05']),
+  grupo: 'Componentes', nombre: 'Corte', ancho: 1000,
+  subtitulo: 'La unidad de la sección: figura, tabla equivalente, lectura y sello',
+  intro: `El <strong>corte</strong> sustituyó al módulo cuando el sitio dejó de servir
+    series ya calculadas: responde al recorte, se deriva de las publicaciones y trae
+    su conmutador. El orden no es decorativo: primero lo que condiciona la lectura,
+    después la figura, después el sello que dice de dónde sale y sobre cuántos casos.
+    El sello al final se convertía en letra pequeña. Es el componente real, no una
+    reconstrucción: sale de <code>vx.corteUno()</code>, la misma función que dibuja
+    cada corte del sitio. Se enseña con <code>P-07</code> porque es el que trae las
+    tres cosas a la vez: trama de multivaluado, advertencia propia y un sello que
+    advierte por cobertura.`,
+  cuerpo: () => corte('P-07'),
 }));
 
 añadir('componentes/vistas.html', ficha({
@@ -306,27 +444,26 @@ añadir('componentes/vistas.html', ficha({
     y la tabla. <strong>Sin JavaScript se muestran las dos</strong> — la tabla es la vía
     equivalente al gráfico— y el control desaparece, porque un conmutador que no conmuta
     nada es una promesa falsa. Cuando el indicador trae valor esperado, la tabla gana
-    las columnas que convierten un recuento en un juicio.`,
-  cuerpo: `<div class="modulo">
-      <header>
-        <div class="modulo-id"><h2>${c.escapar(series['I-05'].nombre)}</h2><span class="codigo">I-05</span></div>
-        <div class="vistas" role="group" aria-label="Forma de presentación">
-          <button type="button" data-vista="grafico" aria-pressed="false">Gráfico</button>
-          <button type="button" data-vista="tabla" aria-pressed="true">Tabla</button>
-        </div>
-      </header>
-      ${c.tablaEquivalente(series['I-05'].datos)}
-    </div>`,
+    las columnas que convierten un recuento en un juicio.
+
+    Las dos vistas están <b>las dos en el DOM</b>, y lo que decide cuál se ve es
+    <code>data-activa</code>. Por eso sin JavaScript se leen ambas: no hay nada que
+    revelar, sólo un control que no llega a esconder la segunda.`,
+  cuerpo: () => corte('I-05'),
 }));
 
 añadir('componentes/sello.html', ficha({
   grupo: 'Componentes', nombre: 'Sello de procedencia', ancho: 900,
   subtitulo: 'Fuente, corte, N y cobertura · con su variante de advertencia',
   intro: `Responde, sin que haya que buscarlo, a las cuatro preguntas que deciden si una
-    cifra puede citarse. <strong>El N no es global</strong> —823 en producción, 816 en
-    impacto, 1.207 pares autor × publicación en P-07— y por eso viaja pegado al gráfico
-    y no en el pie de la página. Por debajo del umbral de cobertura declarado en
-    configuración, el sello cambia de registro y pasa a advertir. Lo decide el dato.`,
+    cifra puede citarse. <strong>El N no es global</strong> —${miles(series['P-02'].procedencia.n)}
+    en producción, ${miles(series['I-05'].procedencia.n)} en impacto,
+    ${miles(series['P-07'].procedencia.n)} ${series['P-07'].procedencia.unidad} en P-07— y
+    por eso viaja pegado al gráfico y no en el pie de la página. Esas tres cifras se leen
+    de <code style="display:inline">series.json</code> al generar esta ficha: escritas a
+    mano sobrevivían a la carga que las volvía falsas, que es justo lo que el sello
+    existe para impedir. Por debajo del umbral de cobertura declarado en configuración,
+    el sello cambia de registro y pasa a advertir. Lo decide el dato.`,
   cuerpo: [c.sello(series['I-05'].procedencia), c.sello(series['T-04'].procedencia)].join(''),
 }));
 
@@ -355,17 +492,18 @@ añadir('componentes/rail.html', ficha({
     página de cinco indicadores largos, saber qué hay y poder saltar sin recorrerla
     entera es la diferencia entre consultar y resignarse a leer en orden. Sin JavaScript
     sigue siendo una lista de anclas útil.`,
-  cuerpo: v.rail(['I-01', 'I-04', 'I-05', 'R-01', 'A-01'].filter((k) => series[k]), series)
-    .replace('<li><a href="#I-04"', '<li><a class="activo" href="#I-04"'),
+  cuerpo: () => vx.indice('impacto'),
 }));
 
 añadir('componentes/controles.html', ficha({
   grupo: 'Componentes', nombre: 'Controles', ancho: 900,
   subtitulo: 'Botones, pastillas de filtro, chips, conmutador de tema',
   intro: `El botón primario <strong>no puede llevar tinta blanca fija</strong>: el mismo
-    token de fondo es un rojo hondo en tema claro y un rosa en oscuro, donde el blanco
-    caería a 2,84:1. La tinta del botón es un token que cambia con el tema, igual que
-    su fondo.`,
+    token de fondo es bordeaux hondo en tema claro y <em>champán claro</em> en oscuro,
+    donde el blanco caería a <b>${ratio('#ffffff', TOKENS['--accion'].oscuro)}:1</b>. Con
+    <code style="display:inline">--boton-tinta</code>, que cambia con el tema igual que su
+    fondo, mide <b>${cr('--boton-tinta', '--accion', 'claro')}:1</b> en claro y
+    <b>${cr('--boton-tinta', '--accion', 'oscuro')}:1</b> en oscuro.`,
   cuerpo: `
     <div style="display:flex;gap:var(--e3);flex-wrap:wrap;align-items:center">
       <button class="boton">Limpiar filtros</button>
@@ -422,7 +560,7 @@ añadir('componentes/bandas.html', ficha({
     <p class="panel-etq" style="margin-top:0">Los cuatro suelos</p>
     <div class="banda banda-papel"><div style="padding:var(--e4)">
       <p class="banda-gancho">papel</p>
-      <p style="margin:0">El suelo por defecto. Papel teñido con Peach al 6–10 %.</p></div></div>
+      <p style="margin:0">El suelo por defecto. Papel hueso, teñido champán.</p></div></div>
     <div class="banda banda-papel-2"><div style="padding:var(--e4)">
       <p class="banda-gancho">papel-2</p>
       <p style="margin:0">El segundo suelo, FRÍO. Admite figuras, incluida la marca de
@@ -443,16 +581,28 @@ añadir('componentes/bandas.html', ficha({
       como la banda es oscura en los DOS temas, en claro conservaban su valor claro y
       caían sobre suelo oscuro, con --ord-1 en 1,06:1.</p>
 
-    <p class="regla">La banda de énfasis <b>no lleva figuras</b>. Medido: sobre Peach Glow
-      el color del dato cae a 3,21:1 y la marca de ausencia a 2,35:1. Por eso el cierre es
-      sólo tipografía y enlaces, y la regla queda escrita junto al componente.</p>
+    <p class="regla">La banda de énfasis <b>no lleva figuras</b>, y lo que lo decide es
+      la marca de AUSENCIA, no el dato. Sobre el champán del cierre el dato aún mide
+      <b>${sobreBanda('--serie-1', BANDA_ENFASIS, 'claro')}:1</b>, de sobra; pero
+      <code style="display:inline">--sin-dato</code> cae a
+      <b>${sobreBanda('--sin-dato', BANDA_ENFASIS, 'claro')}:1</b>, bajo el piso de 3.
+      Una figura ahí dibujaría lo no medido de forma que se confunde con lo medido, que
+      es exactamente lo que <code style="display:inline">D-09</code> prohíbe. Por eso el
+      cierre es sólo tipografía y enlaces, y la regla queda escrita junto al componente.</p>
 
-    <p class="regla">El segundo papel es frío y no un peach más oscuro por la misma razón:
-      oscurecer el papel hacia el peach rompe la marca de ausencia —cae bajo 3:1 pasado
-      #dbe3df— y lo acercaba al cierre. #e1e7e4 es el límite útil, con la ausencia en
-      3,10:1. Su borde contra el papel mide 1,10:1, que es real pero no sostiene solo un
-      corte de sección, así que en tema claro las bandas de papel llevan una costura de
-      1px; en oscuro los dos suelos ya se separan ΔE 11,75 y la costura sobra.</p>`,
+    <p class="regla">El segundo papel <b>no puede oscurecerse más</b>, y el techo lo fija
+      una medida, no el gusto: tiene que sostener la marca de ausencia con el dato
+      bordeaux encima. Hoy <code style="display:inline">--sin-dato</code> mide
+      <b>${cr('--sin-dato', '--banda-papel-2', 'claro')}:1</b> sobre él, contra
+      <b>${cr('--sin-dato', '--plano', 'claro')}:1</b> sobre el primer papel: un paso más
+      de champán y la ausencia cae bajo 3.</p>
+
+    <p class="regla">Los dos suelos de banda se separan poco por definición —son papel
+      contra papel—: ΔE <b>${sep('--plano', '--banda-papel-2', 'claro')}</b> en claro y
+      <b>${sep('--plano', '--banda-papel-2', 'oscuro')}</b> en oscuro, con un borde de
+      <b>${cr('--plano', '--banda-papel-2', 'claro')}:1</b>. Es real pero no sostiene solo
+      un corte de sección, así que en tema claro las bandas llevan una costura de 1px. En
+      oscuro la separación es algo mayor y la costura se apaga.</p>`,
 }));
 
 /* ─────────────────────────────────────────────────────────── gráficos */
@@ -464,7 +614,7 @@ añadir('graficos/barras-horizontales.html', ficha({
     lleva una leyenda sino la etiqueta de la propia barra y su valor visible al lado:
     <strong>el color nunca es el único canal</strong>. La columna de etiquetas se
     dimensiona con el contenido real y se acota a un tercio del lienzo.`,
-  cuerpo: () => v.RENDER['P-03'](series['P-03']) + v.RENDER['T-05'](series['T-05']),
+  cuerpo: () => figura('P-03') + figura('T-05'),
 }));
 
 añadir('graficos/barras-verticales.html', ficha({
@@ -476,17 +626,25 @@ añadir('graficos/barras-verticales.html', ficha({
     medición. Un gráfico de citas por año de publicación induce a leer «el impacto
     está cayendo»: lo que cae es el tiempo disponible para acumular citas, y por eso
     el módulo lleva esa advertencia pegada.`,
-  cuerpo: () => v.RENDER['I-01'](series['I-01']) + v.RENDER['P-02'](series['P-02']),
+  cuerpo: () => figura('I-01') + figura('P-02'),
 }));
 
-añadir('graficos/anillo.html', ficha({
-  grupo: 'Gráficos', nombre: 'Anillo', ancho: 700,
-  subtitulo: 'Reservado a proporciones binarias · el único que lleva leyenda',
-  intro: `Reservado a proporciones binarias, que es donde se lee bien. Es el único
-    gráfico con leyenda, porque sus segmentos no admiten etiqueta interior — y el único
-    que gasta la escala categórica: usa las dos primeras ranuras, medidas como par
-    incluso bajo deuteranopía (ΔE 12,2, sobre un piso de 8).`,
-  cuerpo: () => v.RENDER['C-01'](series['C-01']),
+añadir('graficos/red.html', ficha({
+  grupo: 'Gráficos', nombre: 'Red de coautoría', ancho: 1000,
+  subtitulo: 'La única figura que no es una serie · comunidades declaradas como heurística',
+  intro: `La única figura del sitio cuya unidad no es una categoría con un recuento,
+    sino un par: quién firma con quién. Las comunidades se calculan con Louvain y se
+    <strong>declaran como heurística</strong>, no como estructura real de equipos —
+    un algoritmo de partición siempre devuelve particiones, incluso donde no las hay.
+    En pantalla el lector elige entre nodos, matriz, arcos y la tabla de pares; en
+    papel se imprime sólo la vista de nodos, porque la tabla convertía la sección en
+    49 hojas.
+
+    <b>Esta ficha sustituyó a la del «Anillo»</b>, que documentaba un componente
+    inexistente: no hay ningún gráfico de anillo en el código —<code>proporcional()</code>
+    dibuja una barra apilada— y <code>C-01</code> se dibuja hoy como barras
+    horizontales de una sola serie.`,
+  cuerpo: () => corte('C-05'),
 }));
 
 /* Cuatro formas que antes eran barrasH. La forma la elige la RELACIÓN que
@@ -502,7 +660,7 @@ añadir('graficos/desviacion.html', ficha({
     La dirección la lleva sólo la POSICIÓN respecto del eje: pintar el déficit de otro
     color habría gastado color en algo que la posición ya dice, y el gris del sitio
     significa ausencia de dato, no valor bajo.`,
-  cuerpo: () => v.RENDER['I-04'](series['I-04']),
+  cuerpo: () => figura('I-04'),
 }));
 
 añadir('graficos/acumulada.html', ficha({
@@ -513,7 +671,7 @@ añadir('graficos/acumulada.html', ficha({
     hermanas sugería cuatro grupos disjuntos que se podían sumar —322, una cifra sin
     significado—. <strong>Era un problema de correctitud, no de estética.</strong>
     La forma anidada hace visible la contención y vuelve imposible la suma.`,
-  cuerpo: () => v.RENDER['I-05'](series['I-05']),
+  cuerpo: () => figura('I-05'),
 }));
 
 añadir('graficos/distribucion.html', ficha({
@@ -523,7 +681,7 @@ añadir('graficos/distribucion.html', ficha({
     Ordenarlo por frecuencia, como haría un ranking, <strong>destruye el eje</strong>,
     que es justo lo que hay que leer. La media y la mediana van juntas al pie porque
     la distribución es asimétrica y la media sola describe mal el caso típico.`,
-  cuerpo: () => v.RENDER['C-06'](series['C-06']),
+  cuerpo: () => figura('C-06'),
 }));
 
 añadir('graficos/proporcional.html', ficha({
@@ -533,7 +691,7 @@ añadir('graficos/proporcional.html', ficha({
     barra y no como cuatro barras sueltas que obliguen a sumar de cabeza. Q1–Q4 es una
     escala <strong>ordenada</strong>: un solo tono en cuatro pasos, del más oscuro al
     más claro, con luminosidad monótona y ΔE mínimo de 11,4 entre escalones.`,
-  cuerpo: () => v.RENDER['R-01'](series['R-01']),
+  cuerpo: () => figura('R-01'),
 }));
 
 añadir('graficos/codificacion.html', ficha({
@@ -544,22 +702,22 @@ añadir('graficos/codificacion.html', ficha({
     diseño que ilustra una regla con un ejemplo que no la cumple es peor que no tenerla.`,
   cuerpo: () => `
     <p class="panel-etq" style="margin-top:0">Trama diagonal · T-05, multivaluado</p>
-    ${v.RENDER['T-05'](series['T-05'])}
+    ${figura('T-05')}
     <p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>
     <p class="regla">Las líneas van en el color de la superficie y <b>cortan</b> el
       relleno en vez de teñirlo. Por eso el rayado se lee igual en los dos temas, con
       cualquier daltonismo y sobre papel en blanco y negro.</p>
 
     <p class="panel-etq" style="margin-top:var(--e5)">Marca del valor esperado · I-05</p>
-    ${v.RENDER['I-05'](series['I-05'])}
-    <p class="regla">Un recuento sin escala no dice si es mucho o poco. El trazo ámbar
-      marca lo que cabría esperar bajo el promedio mundial: por definición, el top
+    ${figura('I-05')}
+    <p class="regla">Un recuento sin escala no dice si es mucho o poco. El trazo verde de
+      referencia marca lo que cabría esperar bajo el promedio mundial: por definición, el top
       <i>k</i> % de la distribución mundial contiene el <i>k</i> % de las publicaciones.
       Se lee de un vistazo que la institución queda <b>por debajo en el 1 %, el 5 % y el
       10 %, y por encima en el 25 %</b>.</p>
 
     <p class="panel-etq" style="margin-top:var(--e5)">Gris de ausencia · P-07</p>
-    ${v.RENDER['P-07'](series['P-07'])}
+    ${figura('P-07')}
     <p class="regla"><b>«No determinada» siempre es gris</b>, ignorando la escala pedida.
       Un valor no medido no puede parecerse a uno medido. Nótese que P-07
       <b>no</b> lleva trama: no es multivaluado, y ponérsela para que la ficha quedara

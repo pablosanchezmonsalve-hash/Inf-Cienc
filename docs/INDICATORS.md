@@ -38,9 +38,10 @@ trabajo).
 |---|---|---|---|---|---|---|---|---|
 | `I-01` | Citas totales | Citas acumuladas al corte | `sum(Citations)` | `Citations` | **sí** 14.245 | alta | ✅ | Fuente única SciVal, corte 2026-08-30 |
 | `I-02` | Citas por publicación | Media de citas | `sum(citas)/1342` | `Citations` | **sí** 10,61 | alta | ✅ | Denominador 1.342: universo y publicaciones con métrica coinciden. Declararlo junto al valor |
-| `I-03` | FWCI institucional | Impacto normalizado por campo, año y tipo | agregado sobre el conjunto | `FWCI` | **sí** media 1,14 · **mediana 0,48** | media | ✅ | **Nunca promedio de FWCI individuales.** Distribución muy asimétrica: mostrar media y mediana |
+| `I-03` | FWCI institucional | Impacto normalizado por campo, año y tipo | `mean(FWCI)` de cada publicación | `FWCI` | **sí** media 1,14 · **mediana 0,48** | media | ✅ | **Promedio de los FWCI individuales.** Distribución muy asimétrica: publicar siempre junto a la mediana |
 | `I-04` | FWCI por año | Serie anual de FWCI | `group by anio` | `FWCI`, `anio` | **parcial** 0,83/1,04/0,77 | **baja** | ⚠️ | **42 % de las publicaciones de 2025 aún sin citas.** El año reciente no es comparable |
 | `I-05` | Top 10 % de citación | Publicaciones en el decil superior | `count(percentil <= 10)` | `Outputs in Top Citation Percentiles` | **sí** 115/1.342 (8,6 %) | alta | ✅ | Semántica verificada empíricamente (§3) |
+| `I-07` | Publicaciones más citadas | Las diez del recorte con más citas | `sort(citas desc, eid)` top 10 | `Citations`, `DOI`, `Source title`, `FWCI` | **sí** | media | ✅ | **Sin normalizar**: favorece los primeros años y las áreas y tipos que citan más. Sin autores ni cuartil; no se dibuja recortada a una persona |
 | `I-06` | Visualizaciones | Views en Scopus | `sum(Views)` | `Views` | **sí** 100 % | media | V2 | **Visibilidad, no impacto.** Módulo separado |
 | `R-01` | Publicaciones en revistas Q1 | Percentil SJR ≤ 25 | `count(sjr_pct <= 25)` | `SJR percentile` | **parcial** 578/1.223 | media | ✅ | **Métrica de la revista, no del artículo** |
 | `R-02` | Percentil CiteScore | Posición de la fuente | `CiteScore percentile` | idem | **sí** 92,5 % | media | V2 | Redundante con `R-01`; elegir uno principal |
@@ -191,7 +192,8 @@ resultado real y debe presentarse, no suavizarse.
    publicaciones se calcula. En esta carga los cuatro denominadores coinciden
    en 1.342, porque ninguna publicación queda fuera de las banderas de
    disponibilidad; declararlo sigue siendo obligatorio, no opcional.
-2. **FWCI agregado sobre el conjunto**, nunca como media de FWCI individuales.
+2. **FWCI institucional = promedio de los FWCI individuales, junto a su mediana.**
+   Sobre un recorte se publica sólo la mediana (`docs/UX_UI.md` §4.2).
 3. **Multivaluados no suman al total.** ASJC, QS, ODS, países e instituciones
    producen más asignaciones que publicaciones. Prohibido presentarlos como
    partición porcentual.

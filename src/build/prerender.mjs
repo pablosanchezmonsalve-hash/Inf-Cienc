@@ -31,7 +31,7 @@
    Uso:  node src/build/prerender.mjs <dist>
 */
 
-import { readFile, writeFile, readdir } from 'node:fs/promises';
+import { readFile, writeFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -52,6 +52,100 @@ function rellenar(html, id, contenido, aviso) {
   const m = html.match(re);
   if (!m) { aviso.push(id); return html; }
   return html.replace(re, `${m[1].replace('>', ' data-prerender="1">')}\n${contenido}\n${m[4]}`);
+}
+
+/* ── Inventario de la página «Descarga de datos» ──────────────────────────
+   Qué se lista y cómo se cuenta cada archivo se declara aquí, junto a la
+   lectura de los bytes reales: registros y tamaños no se escriben a mano. Un
+   archivo de dist/data que no esté ni en CONJUNTOS ni en NO_LISTADOS, o uno
+   declarado que falte, aborta el build: una página que dice listar lo que el
+   sitio sirve no puede quedarse atrás en silencio. */
+const PROC_ELSEVIER = (m) => `${m.fuentes.join(' · ')} · citas al ${m.fecha_corte_citas}`;
+const CONJUNTOS = [
+  { archivo: 'publications.json', unidad: 'publicaciones',
+    describe: 'Una fila por publicación del universo, con sus metadatos y sus métricas.',
+    registros: (j) => j.publicaciones.length, procedencia: (j, m) => PROC_ELSEVIER(m) },
+  { archivo: 'authors.json', unidad: 'formas de firma',
+    describe: 'Una entrada por forma de firma de la institución, con sus recuentos.',
+    registros: (j) => j.autores.length, procedencia: (j, m) => PROC_ELSEVIER(m),
+    nota: (j) => `Formas de firma, no personas. Sólo ${j.parametros.firmas_interpretables} de `
+      + `${j.parametros.total_firmas} tienen al menos ${j.parametros.n_minimo_interpretable} publicaciones; `
+      + 'por debajo, sus cifras no son interpretables ni comparables entre personas (DORA, Manifiesto de Leiden).' },
+  { archivo: 'author/', dir: true, unidad: 'fichas',
+    describe: 'Una ficha por forma de firma: lo mismo que muestra la página de cada autor.',
+    procedencia: (j, m) => PROC_ELSEVIER(m), nota: () => 'Con las mismas salvedades que authors.json.' },
+  { archivo: 'series.json', unidad: 'indicadores',
+    describe: 'La serie de cada indicador publicado, calculada sobre el universo completo.',
+    registros: (j) => Object.keys(j).filter((k) => k !== 'meta').length, procedencia: (j, m) => PROC_ELSEVIER(m) },
+  { archivo: 'kpis.json', unidad: 'cifras',
+    describe: 'Las cifras de cabecera del universo, con su denominador y su nota.',
+    registros: (j) => j.kpis.length, procedencia: (j, m) => PROC_ELSEVIER(m) },
+  { archivo: 'catalogo.json', unidad: 'indicadores',
+    describe: 'Todos los indicadores evaluados, publicados o no, con la razón de los que no.',
+    registros: (j) => j.indicadores.length, procedencia: (j, m) => PROC_ELSEVIER(m) },
+  { archivo: 'facets.json', unidad: 'dimensiones',
+    describe: 'Los valores de cada dimensión de filtro, con su recuento sobre el universo.',
+    registros: (j) => Object.keys(j).filter((k) => k !== 'meta').length, procedencia: (j, m) => PROC_ELSEVIER(m) },
+  { archivo: 'hierarchy.json', unidad: 'unidades',
+    describe: 'Producción y citas por facultad y escuela.',
+    registros: (j) => { const n = (x) => 1 + (x.hijos || []).reduce((a, h) => a + n(h), 0); return n(j.raiz) - 1; },
+    // Sin fecha: el sello de este archivo hereda por defecto el corte de SciVal,
+    // y sus citas son las del export de Scopus, que no declara fecha de corte.
+    procedencia: (j) => `${j.procedencia.fuente} · citas del export de Scopus, que no declara fecha de corte`,
+    // Las dos advertencias del propio archivo, no prosa aparte: cuenta pares y
+    // suma citas de Scopus sobre ellos, así que no es un total institucional.
+    nota: (j) => `${j.metodologia.n_publicaciones} ${j.metodologia.citas_totales}` },
+  { archivo: 'validacion.json', unidad: 'reglas',
+    describe: 'Las reglas de la auditoría de datos y el resultado de cada una.',
+    registros: (j) => j.reglas.length, procedencia: (j, m) => `Auditoría del build del ${m.fecha_build}` },
+  { archivo: 'glossary.json', unidad: 'entradas',
+    describe: 'Las definiciones del glosario.',
+    registros: (j) => j.entradas.length, procedencia: (j, m) => `Documentación del proyecto · build del ${m.fecha_build}` },
+  { archivo: 'produccion_declarada.json', unidad: 'obras en la ventana, sin repetir entre fuentes',
+    describe: 'Producción de la institución fuera de Scopus, declarada por las facultades o recuperada de repositorios y fuentes abiertas.',
+    registros: (j) => j.total_fuera_de_scopus.en_ventana,
+    procedencia: (j) => [j.procedencia, j.openalex_cobertura?.procedencia, j.autoarchivo_produccion?.procedencia,
+      j.obras_externas?.procedencia].filter(Boolean).map((p) => p.fuente).join(' · ') },
+  { archivo: 'fuentes_externas.json', unidad: 'obras',
+    describe: 'Inventario de obras de fuentes institucionales que no están en el universo de Scopus.',
+    registros: (j) => j.publicaciones.length,
+    procedencia: (j) => `${(j.meta.fuentes || []).join(' · ')} · generado el ${j.meta.fecha_generacion}` },
+  { archivo: 'meta.json', unidad: 'bloque',
+    describe: 'La procedencia del build: fuentes, ventana, fechas y denominadores.',
+    registros: () => 1, procedencia: (j) => `Build del ${j.fecha_build}` },
+];
+const NO_LISTADOS = [
+  { archivo: 'ejes.json', motivo: 'textos de los paneles de sección' },
+  { archivo: 'lecturas.json', motivo: 'textos «Qué muestra» de las figuras' },
+  { archivo: 'informe.json', motivo: 'manifiesto del informe en PDF' },
+];
+
+async function inventarioDatos(meta) {
+  const dir = join(dist, 'data');
+  const nombres = (await readdir(dir, { withFileTypes: true }))
+    .map((e) => (e.isDirectory() ? `${e.name}/` : e.name));
+  const declarados = new Set([...CONJUNTOS, ...NO_LISTADOS].map((x) => x.archivo));
+  const problemas = nombres.filter((n) => !declarados.has(n)).map((n) => `${n} sin clasificar`);
+  const filas = [];
+  for (const cj of CONJUNTOS) {
+    if (!nombres.includes(cj.archivo)) { problemas.push(`${cj.archivo} declarado y ausente`); continue; }
+    if (cj.dir) {
+      const archivos = await readdir(join(dir, cj.archivo));
+      let bytes = 0;
+      for (const a of archivos) bytes += (await stat(join(dir, cj.archivo, a))).size;
+      filas.push({ archivo: `data/${cj.archivo}`, ruta: null, describe: cj.describe, unidad: cj.unidad,
+        registros: archivos.length, bytes, procedencia: cj.procedencia(null, meta), nota: cj.nota ? cj.nota(null) : null });
+      continue;
+    }
+    const texto = await readFile(join(dir, cj.archivo), 'utf8');
+    const j = JSON.parse(texto);
+    const registros = cj.registros(j);
+    if (!Number.isFinite(registros)) problemas.push(`${cj.archivo}: el recuento no es un número`);
+    filas.push({ archivo: `data/${cj.archivo}`, ruta: `data/${cj.archivo}`, describe: cj.describe, unidad: cj.unidad,
+      registros, bytes: Buffer.byteLength(texto, 'utf8'), procedencia: cj.procedencia(j, meta),
+      nota: cj.nota ? cj.nota(j) : null });
+  }
+  return { filas, problemas };
 }
 
 async function main() {
@@ -129,6 +223,8 @@ async function main() {
       html = rellenar(html, 'controles', vacio.controles, a);
       html = rellenar(html, 'cifras', vacio.cifras, a);
       html = rellenar(html, 'cortes', vacio.cortes, a);
+      html = rellenar(html, 'dinamica', vacio.dinamica, a);
+      html = rellenar(html, 'mas-citadas', vacio.masCitadas, a);
       html = rellenar(html, 'lectura', v.lectura(kpis), a);
       html = rellenar(html, 'cierre', v.cierrePortada(), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
@@ -192,9 +288,11 @@ async function main() {
       // esos enlaces aterrizaban en un contenedor vacío: el ancla no existía.
       const a = [];
       const { entradas } = await leerJSON('glossary.json');
+      const val = await leerJSON('validacion.json');
+      const notaP01 = (kpis.find((k) => k.codigo === 'P-01') || {}).nota;
       html = rellenar(html, 'glosario', v.glosario(entradas), a);
-      html = rellenar(html, 'procedencia', v.procedencia(meta), a);
-      html = rellenar(html, 'validacion', v.validacion(await leerJSON('validacion.json')), a);
+      html = rellenar(html, 'ficha-tecnica-datos', v.fichaTecnica(meta, val, notaP01 && notaP01.texto), a);
+      html = rellenar(html, 'validacion', v.validacion(val), a);
       // Misma razón que unidadPorPersona más abajo: esta cifra crece sola
       // (T-19 corre por cron), y sin pre-renderizarla un lector sin
       // JavaScript vería el hueco vacío que "hoy hay X de Y" deja al medio
@@ -208,29 +306,37 @@ async function main() {
       const a = [];
       try {
         const fe = await leerJSON('fuentes_externas.json');
-        const { meta: fm, resumen, publicaciones: fp, autores: fa } = fe;
+        const { meta: fm, resumen, publicaciones: fp } = fe;
         html = rellenar(html, 'aviso-fuentes',
           `<b>Sobre este listado</b> ${c.escapar(fm.advertencia)}`, a);
-        html = rellenar(html, 'kpis-fuentes',
-          `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_publicaciones)}</div><div class="etiqueta">Publicaciones fuera de Scopus</div></article>`
-          + `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_autores)}</div><div class="etiqueta">Autores UFT</div></article>`
-          + `<article class="kpi"><div class="valor">${c.nf.format(fm.universo_scopus_dois)}</div><div class="etiqueta">DOIs en universo Scopus</div></article>`, a);
+        // El mismo constructor que usa el navegador. Aquí había una copia que
+        // pedía `resumen.total_autores`, que el artefacto no trae, y publicaba
+        // «NaN · Autores UFT».
+        html = rellenar(html, 'kpis-fuentes', v.kpisFuentesExternas(fm, resumen), a);
         // Primera página de la tabla (50 filas), suficiente para sin-JS.
         const pag = fp.slice(0, 50);
         const tablaHtml = pag.map(p => `<tr><td>${p.anio || ''}</td>`
           + `<td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>` : c.escapar(p.titulo)}<br><span class="nota">${c.escapar(p.autor_uft)}</span></td>`
           + `<td>${c.escapar(p.fuente)}</td><td>${c.escapar(p.tipo)}</td></tr>`).join('');
         html = rellenar(html, 'tabla-cuerpo', tablaHtml, a);
-        // Autores
-        const autoresHtml = fa.map(au => `<tr><td>${c.escapar(au.nombre)}</td>`
-          + `<td class="num">${au.obras_facultad_medicina || ''}</td>`
-          + `<td class="num">${au.obras_dspace || ''}</td>`
-          + `<td class="num">${au.obras_autoarchivo || ''}</td>`
-          + `<td class="num">${au.total}</td></tr>`).join('');
-        html = rellenar(html, 'tabla-autores', autoresHtml, a);
+        // Aquí se rellenaba también una tabla de autores. La capa pública ya no
+        // trae `autores` ni la página tiene ese contenedor: la línea lanzaba
+        // una excepción que el `catch` de abajo tragaba, después de haber escrito
+        // lo anterior y sin que el build lo dijera.
       } catch (e) {
         console.error(`  fuentes-externas.html: sin datos fuentes_externas.json (${e.message})`);
       }
+      if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
+    }
+
+    if (tipo === 'datos') {
+      const a = [];
+      const { filas, problemas } = await inventarioDatos(meta);
+      problemas.forEach((p) => faltantes.push(`${archivo}: inventario · ${p}`));
+      const notaP01 = (kpis.find((k) => k.codigo === 'P-01') || {}).nota;
+      html = rellenar(html, 'datos-csv', v.datosCsv(meta), a);
+      html = rellenar(html, 'datos-condiciones', v.datosCondiciones(meta, notaP01 && notaP01.texto), a);
+      html = rellenar(html, 'datos-inventario', v.datosInventario(filas, NO_LISTADOS), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);
     }
 

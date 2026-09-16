@@ -14315,3 +14315,1049 @@ servido: ninguna de las cifras viejas aparece ya en `indicadores.html` ni en
 
 - `src/analysis/indicator_feasibility.py` — nueve notas derivadas y la razón de `X-04`
 - `src/build/02_indicators.py` — el catálogo sirve la advertencia derivada
+
+## Sesión 2026-09-16 — La paleta que el producto servía y la documentación no
+
+Se pidió retomar desde un handoff en `.omc/handoffs/rediseno-stitch/HANDOFF.md`.
+**No existe en este entorno**: `.gitignore:76` excluye `.omc/` («estado
+operacional del asistente»), y esta sesión corre en un contenedor remoto que
+clonó el repositorio desde `origin`. Comprobado en el árbol, en la historia de
+todas las ramas (`--diff-filter=A`), en `git stash` y en el sistema de archivos
+entero: no está. El documento sigue en la máquina local del usuario.
+
+A falta de él, se reconstruyó el plan desde lo versionado y se ejecutó su
+primera fase, la única que no dependía de decisiones pendientes.
+
+### El hallazgo: tres paletas vivas a la vez
+
+| Artefacto | Paleta | Estado |
+|---|---|---|
+| `web/assets/css/app.css` — autoridad | H, vino + champán | vigente |
+| `docs/UX_UI.md` §12.1 y §12.6 | índigo `#2b44d9` sobre blanco puro | **describía una paleta muerta** |
+| `design/informe/*.dc.html` | `D-381`: `#071e22 · #1d7874 · #f4c095` | anterior a la H |
+
+La genealogía, de `D-381` y de la sesión del 2026-09-01: identidad roja → la
+paleta institucional que fijó el usuario → **un índigo aplicado sin
+consultarle**, que `D-381` registra como incidente → la H, elegida el
+2026-09-01 de ocho candidatas servidas en vivo y pedida «íntegra».
+
+`docs/UX_UI.md` §12.1 era la memoria de ese incidente que nadie borró: publicaba
+como sistema vigente exactamente la paleta que `D-381` declara perdida, con una
+tabla entera de contrastes de un producto que no existe. Y no era inocuo: `make
+kit` genera `design-system/` desde `app.css` (§16.1, «no puede desactualizarse
+respecto del producto»), así que el kit decía vino mientras el documento que lo
+explica decía índigo.
+
+### El hueco de memoria que se había reabierto
+
+`D-382` existe porque una elección cromática del usuario no estaba registrada y
+«nada la sostuvo cuando el rediseño cambió de rumbo. El hueco no era de código:
+era de memoria».
+
+**La Paleta H no estaba en el índice de decisiones.** Vivía sólo en la narrativa
+de `SESSION_NOTES.md`. `docs/DECISIONS.md` seguía declarando en `D-381` que la
+paleta institucional es Ink Black · Deep Ocean · Jungle Teal · Peach Glow ·
+Racing Red. El hueco que `D-382` abrió para no repetirse se repitió en la paleta
+siguiente.
+
+### Lo medido, que es lo que sustituye a lo escrito
+
+`python3 src/design/validar_paleta.py` → **SISTEMA CROMÁTICO VÁLIDO**, 44 tokens,
+0 fallos. Las cifras que la documentación daba contra las reales:
+
+| | Documentado (índigo) | Medido (H) |
+|---|---|---|
+| `--tinta` sobre `--superficie` | 19,34 / 16,58 | **16,91 / 15,34** |
+| `--cifra` | 19,34 / 16,58 | **9,50 / 14,78** |
+| `--serie-1`, el dato | 7,16 / 6,40 | **8,25 / 9,08** |
+| `--sin-dato` | 3,42 / 3,78 | **3,63 / 5,33** |
+| ΔE dato ↔ advertencia | 36,0 / 33,3 | **26,0 / 22,2** |
+| Rampa ordinal, paso mínimo | 11,8 / 11,2 | **8,1 / 11,3** |
+| Par categórico, daltonismo | 37,9 / 22,0 | **16,8 / 18,2** |
+
+Ninguna fila coincidía. Y tres afirmaciones del documento eran falsas, no
+inexactas:
+
+- **«La cifra no lleva color.»** `--cifra` es hoy `#7a2028`, vino. La H se tomó
+  íntegra y la tiñe; el argumento anterior quedó derogado de hecho, sin decisión
+  que lo registrara.
+- **«Las dos familias —índigo y ámbar— están lejos en el círculo.»** No hay
+  índigo y no hay ámbar. Con el dato en bordeaux el ámbar caía a **ΔE 17,9**,
+  bajo el piso de 20, y la advertencia se movió entera a verde moneda. El
+  documento presentaba como holgura la separación que había obligado a mover un
+  color.
+- **«Papel blanco puro `#ffffff`.»** Es `#fdf6ef`, hueso.
+
+### Dos sitios más, declarados y no corregidos
+
+Los dos son código, no documentación, y por eso quedan fuera de esta pasada: lo
+autorizado era corregir hechos sin tocar producto.
+
+**`src/design/build_kit.mjs`** calcula los contrastes desde los tokens de la
+hoja —eso está bien—, pero tiene **prosa con cifras congeladas** que el
+generador emite tal cual: «la advertencia ámbar, ΔE 28,6 / 21,2» (L213-215),
+«sobre Peach Glow el dato cae a 3,21:1 y la ausencia a 2,35:1» (L446), «papel
+teñido con Peach» (L425), «el trazo ámbar» (L555), «deuteranopía ΔE 12,2»
+(L488). Peach Glow no está en la paleta; `.banda-enfasis` es champán `#f0ddca`.
+Y L215 afirma que «el ámbar no se movió al cambiar el rojo», que es exactamente
+lo contrario de lo que pasó.
+
+Es el sitio más caro de los cinco, porque `make kit` publica esas fichas en
+`claude.ai/design` bajo la promesa de §16.1 de que el sistema de diseño «no
+puede desactualizarse respecto del producto».
+
+**`src/design/validar_paleta.py`**, en su propio encabezado: «el dato es rojo y
+la advertencia metodológica **ámbar**» (L21-22) y «el Peach del cierre» (L232).
+El instrumento mide bien —lee los tokens que haya— pero se describe con la
+paleta anterior.
+
+**No se corrigen aquí, a propósito.** Hacerlo bien exige medir los ámbitos de
+banda con la matemática del validador, y escribir una cifra sin medirla sería
+cometer el mismo defecto que esta sesión vino a cerrar. Quedan declarados con
+sus líneas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-596 | La paleta vigente es **H · vino y champán**, y queda registrada como decisión del usuario | La eligió el 2026-09-01 de una comparativa de ocho candidatas servidas en vivo y pidió tomarla íntegra. Vivía sólo en la narrativa: el índice seguía declarando la institucional de `D-381`. Es el hueco que `D-382` abrió para no repetirse, reabierto en la paleta siguiente — y `D-382` exige que una elección cromática del usuario se registre como decisión |
+| D-597 | `D-375` queda acotada: la banda **ya no** es la unidad de composición de las páginas narrativas | El explorador la sustituyó en la portada y en las cuatro secciones (`docs/UX_UI.md` §4 ter); sobrevive como suelo de contraste de los indicadores diferidos, que no responden al recorte. El índice de decisiones servía la regla retirada a quien lo consultara, que es de lo que el índice existe para proteger |
+| D-598 | La tabla de contrastes de `docs/UX_UI.md` se declara foto fechada y cede ante `validar_paleta.py` | Es una copia a mano de una salida calculada. Declararla foto con su fecha no impide que envejezca, pero impide que se lea como fuente y dice contra qué contrastarla. Mientras sea prosa, ninguna compuerta la mira: la batería pasó entera con el documento diciendo índigo y el producto sirviendo vino |
+
+### Archivos
+
+- `docs/UX_UI.md` — §12.1 reescrita contra el validador, §12.6 contra los tokens
+  reales, y la marca de valor esperado de §12.6 bis, que seguía diciendo ámbar
+- `SESSION_NOTES.md` — esta entrada
+- `docs/DECISIONS.md` — regenerado con `src/state/snapshot.py`
+
+### Verificación
+
+- `validar_paleta.py` → SISTEMA CROMÁTICO VÁLIDO, 0 fallos
+- `06_assemble_site.py` → 12 páginas, 829 fichas, capa interna no incluida
+- `node src/verify/run_all.mjs dist` → VERIFICACIÓN COMPLETA, sin fallos
+- `grep` de la paleta muerta en `docs/UX_UI.md`: las nueve apariciones que quedan
+  son referencias históricas explícitas, ninguna afirmación vigente
+
+### Supuestos descartados
+
+- Que el handoff estuviera versionado en alguna rama. No lo está, y `.omc/` está
+  ignorado a propósito.
+- Que `D-322` siguiera con su condición abierta («ver una paleta medida antes de
+  aplicarla»). Se cerró el 2026-09-01: la comparativa se sirvió en vivo y el
+  validador la declaró válida. La nota de `D-322` es anterior a ese cierre.
+
+### Ambigüedades abiertas
+
+- **`design/informe/` está en la paleta `D-381`**, con la banda como sistema y
+  cifras del corpus de 823. Tres derivas a la vez. Además su regla 2 —«la
+  ausencia va sobre Ink Black»— ya es nula en papel por `D-552`, que imprime la
+  banda de contraste en tinta sobre blanco. Requiere decisión: refrescar,
+  congelar como fuente histórica o retirar.
+- **`src/design/build_kit.mjs` y `src/design/validar_paleta.py`**, arriba: prosa
+  que describe la paleta anterior en los dos archivos del sistema de diseño.
+- **El «rediseño stitch» propiamente dicho** no se puede reconstruir: la cadena
+  «stitch» no aparece ni una vez en el repositorio.
+
+### Próximo paso recomendado
+
+Decidir qué gobierna `design/informe/`. Es lo que bloquea todo lo demás: mientras
+no se decida, hay dos fuentes de formato para el informe en papel y la
+implementada no es la documentada.
+
+## Sesión 2026-09-16 (cont.) — El generador del sistema de diseño, medido en vez de escrito
+
+Continuación de la anterior. Se autorizó corregir los dos archivos de
+`src/design/` que quedaron declarados: la prosa que describía la paleta
+retirada. Al ir a verificarlo aparecieron **dos defectos mayores que la prosa**.
+
+### Hallazgo 1: `make kit` lleva roto desde antes del explorador
+
+`node src/design/build_kit.mjs` aborta con `TypeError: v.kpisRestantes is not a
+function`. No es cosa de esta sesión: comprobado en `HEAD` limpio, con los
+cambios guardados aparte, falla igual.
+
+`build_kit.mjs` llama a seis funciones de `vista.js` —`hero`, `rail`, `kpis`,
+`kpisRestantes`, `modulo`, `RENDER`— de las que `vista.js` hoy no exporta
+ninguna: sólo tiene `lectura`, `cierrePortada`, `catalogo`,
+`produccionDeclarada`, `procedencia`, `validacion` y `glosario`. El generador
+está escrito contra la API **anterior al explorador**, que sustituyó el módulo
+por el corte y el índice lateral por los controles del recorte (`docs/UX_UI.md`
+§4 ter y §5).
+
+Las fechas lo confirman: `build_kit.mjs` no se toca desde el **2026-08-26** y
+`vista.js` cambió seis veces después.
+
+**Esto explica por qué la prosa se congeló.** `make kit` no está en la batería
+de verificación, así que nada lo corre; y como nada lo corre, nadie vio que sus
+fichas hablaran de Peach Glow y de ámbar. La promesa de §16.1 —«el sistema de
+diseño no puede desactualizarse respecto del producto; si divergen, es que no se
+ha vuelto a generar»— es cierta y vacía: no se puede volver a generar.
+
+**No se repara aquí.** Reescribir el generador contra la API del explorador es
+rehacer una funcionalidad, con decisiones de diseño propias (qué sustituye al
+«módulo» cuando la unidad es el corte), no corregir un hecho falso.
+
+### Hallazgo 2: el generador tenía el bug que el validador documenta haber corregido
+
+`build_kit.mjs` leía los tokens recorriendo **la hoja entera** y quedándose con
+la última aparición de cada uno. `.banda-contraste` redefine `--superficie`,
+`--superficie-2`, `--plano`, `--linea`, `--linea-fuerte` y `--red` en forma
+`light-dark()`, así que esos seis pisaban a los de `:root`.
+
+Consecuencia: la ficha de color medía la tinta de `:root` **contra el suelo
+oscuro de la banda** y publicaba razones de contraste que no le pasan a ningún
+lector. Medido en el banco de verificación: la ausencia sobre `--plano` daba
+**5,05:1** en vez de 3,42:1, y la separación entre los dos suelos de banda
+**ΔE 76,4** en vez de 3,9.
+
+Es exactamente el fallo que `validar_paleta.py` documenta haber corregido en su
+`_bloque()` —«declaraba 12 fallos inexistentes»— en el otro archivo del mismo
+sistema. Se arregló allí y siguió vivo aquí, porque este archivo no arranca.
+
+**Sí se corrige**, porque sin ello las cifras que ahora se derivan saldrían mal.
+
+### Lo que se hizo: derivar en vez de escribir
+
+Se portó a `build_kit.mjs` la matemática OKLab del validador (`oklab()`, `dE()`)
+para que las fichas calculen también las separaciones ΔE, no sólo los
+contrastes. Comprobado que da el mismo número que la de Python: eran dos
+matemáticas para la misma medida y habrían divergido.
+
+Con eso, once cifras que eran prosa pasan a derivarse: la separación dato ↔
+advertencia, el dato y la ausencia sobre la banda de énfasis, la ausencia sobre
+los dos suelos de banda, su ΔE y su borde, el blanco y la tinta del botón sobre
+`--accion`, las tres N del sello y las dos cifras de muestra de la ficha de
+tipografía.
+
+**Una regla cambió de razón al medirla.** «La banda de énfasis no lleva figuras»
+seguía siendo cierta, pero no por lo que decía: sobre el champán del cierre el
+dato mide **6,69:1**, de sobra. Quien no llega es la marca de ausencia, en
+**2,95:1**, bajo el piso de 3. La regla la sostiene `D-09` —lo no medido no
+puede parecerse a lo medido—, no el color del dato.
+
+### Verificación
+
+El generador no arranca, así que **no hay salida real que leer**. Se verificó
+con un banco que reproduce literalmente los helpers añadidos y evalúa las mismas
+llamadas escritas en las fichas, contrastando cada una contra
+`validar_paleta.py`: **17 de 17 coinciden**. Ese banco es el que encontró el
+Hallazgo 2, porque al reproducir el lector de tokens reprodujo también su fallo.
+
+`node --check src/design/build_kit.mjs` pasa, y el generador sigue muriendo en
+el mismo `v.kpisRestantes` preexistente y no en nada nuevo. `validar_paleta.py`
+→ SISTEMA CROMÁTICO VÁLIDO. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-599 | `build_kit.mjs` lee los tokens **sólo del bloque `:root`** | Recorrer la hoja entera y quedarse con la última aparición hacía que los seis tokens que `.banda-contraste` redefine pisaran a los de `:root`: la ficha de color publicaba la tinta medida contra el suelo oscuro de la banda. Es el mismo fallo que `validar_paleta.py` corrigió en `_bloque()`, vivo aquí porque este archivo no arranca desde el 2026-08-26 |
+| D-600 | Las separaciones ΔE de las fichas se calculan al generar, con la matemática del validador portada | Eran prosa y sobrevivieron a un cambio de paleta entero: el kit publicaba «la advertencia ámbar, ΔE 28,6» con la advertencia ya en verde y la separación real en 26,0. Se porta en vez de reimplementarse para que las dos den el mismo número: dos matemáticas para la misma medida divergen |
+| D-601 | La banda de énfasis no lleva figuras **por la marca de ausencia**, no por el color del dato | Medido sobre el champán del cierre: el dato queda en 6,69:1 y cumple; `--sin-dato` cae a 2,95:1, bajo el piso de 3. La regla anterior daba una razón que la paleta H volvió falsa, y la regla seguía siendo correcta por otra causa. Una regla con el fundamento equivocado se deroga en cuanto alguien comprueba el fundamento |
+| D-602 | `make kit` se declara **inoperante** y no se repara en esta pasada | Llama a seis funciones que `vista.js` dejó de exportar al llegar el explorador. Reescribirlo contra la API nueva es rehacer una funcionalidad, con decisiones de diseño propias —qué sustituye al «módulo» cuando la unidad es el corte—, no corregir un hecho falso. Queda declarado con su error y su fecha |
+
+### Archivos
+
+- `src/design/build_kit.mjs` — lectura de `:root`, matemática OKLab portada, once
+  cifras derivadas y la prosa de la paleta retirada
+- `src/design/validar_paleta.py` — el encabezado y la nota de `papel-2` se
+  describían con el ámbar y el Peach
+- `SESSION_NOTES.md` — esta entrada
+
+### Ambigüedades abiertas
+
+- **`make kit` sigue sin correr** (`D-602`). Mientras siga así, las fichas no se
+  pueden ver ni publicar, y las cifras derivadas de esta sesión están
+  verificadas por banco pero no leídas de una salida real.
+- **`design/informe/`**, sin cambios desde la entrada anterior: sigue en la
+  paleta `D-381`, con la banda como sistema y cifras del corpus de 823.
+
+### Próximo paso recomendado
+
+Decidir si `make kit` se repara o se retira. Reparado, la batería debería
+correrlo: un generador que nadie ejecuta vuelve a congelarse, y es lo que acaba
+de pasar durante tres semanas.
+
+## Sesión 2026-09-16 (cont. 2) — `make kit` reparado, y metido en la batería
+
+Se autorizó reparar el generador declarado inoperante en `D-602` y meterlo en
+la batería, que era el próximo paso recomendado de la entrada anterior.
+
+### Por qué estaba roto, en una línea
+
+`build_kit.mjs` estaba escrito contra la API **anterior al explorador**: pedía
+`v.hero`, `v.rail`, `v.modulo`, `v.kpis`, `v.kpisRestantes` y `v.RENDER`, y
+dibujaba desde `series.json`. El explorador cambió el trato —el sitio deriva los
+gráficos de `publications.json`, el corte sustituyó al módulo y el índice lateral
+pasó a colgar de los filtros— y `vista.js` dejó de exportar las seis.
+
+### La reparación, y la regla que la gobierna
+
+**El kit no rearma componentes: enseña los del sitio.** Es la única forma de que
+la promesa de §16.1 signifique algo. Para eso hicieron falta dos aperturas en
+`vista_explorador.js`:
+
+- **`corteUno()`**, extraída del cuerpo del `map` de `cortesSeccion()` sin tocar
+  una línea del marcado. Es el componente completo: título, conmutador, las dos
+  vistas, la trama, la advertencia, el bloque de lectura y el sello.
+- **`dibujar()`**, que ya existía y era privada. Devuelve `{svg, datos}`, que es
+  lo que quieren las fichas del grupo «Gráficos».
+
+> **El refactor se comprobó por igualdad, no por confianza.** Se guardó la huella
+> MD5 de las 12 páginas de `dist/` antes de tocar nada y se reconstruyó después:
+> **idénticas byte a byte**. Extraer una función del cuerpo de un bucle es
+> exactamente el cambio que parece inocuo y no lo es.
+
+El generador ahora carga los mismos artefactos y con los mismos nombres que
+`src/build/prerender.mjs` —`publications.json`, `authors.json`, `lecturas.json`,
+`catalogo.json`, más `procedencias()` y `jerarquia`—, y busca la forma de cada
+gráfico en `SECCIONES`, que es donde `D-378` la declara.
+
+### Dos fichas que documentaban componentes inexistentes
+
+**«Anillo».** No hay ningún gráfico de anillo en el código: `proporcional()`
+dibuja una barra apilada de `<rect>`, y los únicos `<circle>` son nodos de la
+red. Además la ficha lo ilustraba con `C-01`, que hoy es `barrasH` de una sola
+serie. Era una ficha de un componente que no existe, ilustrada con un indicador
+que no lo usa. Sustituida por **«Red de coautoría»** (`C-05`, forma `red`), que
+es una figura real y era la única sin ficha.
+
+**«Conmutador Gráfico ⇄ Tabla».** Rearmaba a mano el marcado del módulo antiguo
+—`.modulo`, `.modulo-id`, `.vistas`— que el sitio dejó de emitir. Ahora enseña el
+corte real, donde las dos vistas están las dos en el DOM y `data-activa` decide
+cuál se ve: que es, literalmente, por qué sin JavaScript se leen ambas.
+
+### La compuerta
+
+`src/verify/kit.mjs` **ya existía**, a medias y sin conectar: no levantaba
+servidor, no estaba en `PASOS` y —lo decisivo— **no llamaba a `process.exit()`
+nunca**. Imprimía los fallos y salía 0. Una compuerta que no puede fallar no es
+una compuerta.
+
+Completada, comprueba cuatro cosas:
+
+1. **Que el generador corre.** Es la regresión que costó tres semanas.
+2. Que cada ficha se pinta en los dos temas con fondos distintos, que es lo que
+   prueba que `light-dark()` resuelve por contenedor.
+3. Que ninguna lanza excepciones.
+4. **Que la ficha de color mide contra `:root`** y no contra los tokens que una
+   banda redefine. Es el `D-599`, y no se ve mirando la ficha: hay que comparar
+   con la hoja.
+
+> **Se probó que falla.** Se reinyectó el bug de `D-599` y la compuerta lo cazó
+> con las tres discrepancias y sus valores («la ficha dice #200b0e · #200b0e y
+> :root dice #fdf6ef · #17080a»), exit 1. Se rompió el arranque del generador y
+> lo declaró con el error de Node, exit 1. Un verificador que nunca se ve fallar
+> no está verificado.
+
+Entra en `PASOS` como paso «sistema de diseño», con su propio servidor en otro
+puerto para no pisar al de `dist/`.
+
+### De paso
+
+- `validar_paleta.py` llamaba «anillo C-01» al par categórico en tres sitios. No
+  hay anillo, y `C-01` no gasta el par. Corregidas las etiquetas, no la medida.
+- Dos comentarios de `app.css` citaban «816» y la portada de 823 sin decir de qué
+  carga eran. El kit incrusta la hoja entera en cada ficha, así que esas cifras
+  se publican. Fechadas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-603 | La batería **regenera** el sistema de diseño y lo comprueba | Un generador que nadie ejecuta se congela: éste llevaba tres semanas publicando una paleta retirada y nada lo decía. Comprobar el directorio sin regenerarlo habría validado la salida de una corrida vieja, que es el mismo hueco con otra forma |
+| D-604 | `corteUno()` y `dibujar()` se exportan para que el kit enseñe el componente REAL | El kit tenía su propia vía de dibujo y murió al cambiar la del sitio. Una segunda forma de dibujar lo mismo es la que diverge; exportar la del sitio es más barato que mantener dos. El refactor se comprobó dejando `dist/` idéntico byte a byte |
+| D-605 | La ficha «Anillo» se retira: no existe tal gráfico | `proporcional()` dibuja una barra apilada y `C-01` es `barrasH`. Una ficha de sistema de diseño que documenta un componente inexistente es peor que una ausencia: afirma que el sitio tiene algo que no tiene. Su hueco lo ocupa `C-05`, que sí es una forma publicada y no tenía ficha |
+| D-606 | La compuerta compara la ficha de color con `:root`, no sólo con que pinte | El fallo de `D-599` producía una ficha perfectamente pintada con las cifras equivocadas. Lo que no se compara contra la fuente no se comprueba |
+
+### Archivos
+
+- `web/assets/js/vista_explorador.js` — `corteUno()` extraída y exportada,
+  `dibujar()` exportada
+- `src/design/build_kit.mjs` — reescrito contra la API del explorador
+- `src/verify/kit.mjs` — completado: genera, sirve, comprueba y **falla**
+- `src/verify/run_all.mjs`, `Makefile` — el paso entra en la batería
+- `src/design/validar_paleta.py` — las etiquetas del anillo
+- `web/assets/css/app.css` — dos cifras de la carga anterior, fechadas
+
+### Verificación
+
+Batería entera, ocho pasos: contraste, estructura, flujos, responsive, impresión,
+higiene, peso y **sistema de diseño** (21 fichas, 21 s). `VERIFICACIÓN COMPLETA ·
+sin fallos`, exit 0.
+
+> **Un falso fallo, y de qué era.** Una corrida intermedia dio «VERIFICACIÓN
+> FALLIDA · responsive, impresión». No era el cambio: eran **dos baterías
+> solapadas** peleándose por el puerto 8841, lanzadas por error desde esta
+> sesión. Con una sola, las dos pasan. Vale la pena anotarlo porque el síntoma
+> —dos pasos de navegador fallando a la vez, sin relación con lo tocado— es
+> reconocible y no lleva a ninguna parte si se busca en el diff.
+
+### Ambigüedades abiertas
+
+- **`graficos/red.html` pesa 1,2 MB**, frente a los ~135 KB de las demás: la red
+  de coautoría lleva la hoja incrustada más el SVG de todos los nodos. No es un
+  fallo —`design-system/` no se versiona ni se sirve al público— pero conviene
+  saberlo antes de sincronizar con Claude Design.
+- **`design/informe/`** sigue igual: paleta `D-381`, banda como sistema y cifras
+  del corpus de 823. Es la decisión que sigue bloqueando lo demás.
+
+### Próximo paso recomendado
+
+Decidir qué gobierna `design/informe/`. Es lo único de la lista original que
+sigue sin tocarse, y ahora es lo único que queda entre la documentación y el
+producto.
+
+## Sesión 2026-09-16 (cont. 3) — `design/informe/` congelado como fuente histórica
+
+Última de las decisiones que el plan reconstruido dejó abiertas. Se eligió
+**congelar**, de las tres opciones (refrescar, congelar, retirar).
+
+### Por qué congelar y no refrescar
+
+Porque **la vía que esos artboards especificaban ya se recorrió sin ellos**. Su
+propia sección «vía de implementación acordada» pedía una hoja de impresión con
+0 KB de JavaScript servida al botón «Exportar», y la misma hoja usada por
+Playwright en el build. Eso está construido y verificado desde principios de
+septiembre: carátula, índice con hojas leídas del PDF compuesto, folio, unidad
+de lectura de cinco partes y `src/verify/impresion.mjs` comprobando sobre el
+texto del PDF.
+
+Refrescarlos no añadía nada al producto y creaba **dos fuentes para el mismo
+formato**, que es la condición para que diverjan. Y mantenerlos al día es
+trabajo recurrente por cada carga: `D-387` ya lo había declarado abierto.
+
+### Ni retirar
+
+Retirarlos habría perdido la trazabilidad del criterio. Las cinco reglas que
+separan este informe de uno que publica métricas sin sus límites —denominador
+visible, sello de procedencia, panel «responde / no responde», advertencia fuera
+de la familia del dato, apéndice no opcional— nacieron ahí. Siguen vivas en la
+hoja de impresión; el registro de por qué, no.
+
+### Qué se congela, medido y no citado
+
+Se leyeron los cuatro artboards en vez de fiarse del README:
+
+| | Los artboards | Lo vigente |
+|---|---|---|
+| Paleta | `D-381`: `#071e22`, `#1d7874`, `#f4c095`, papel `#fdf8f2` | Paleta H, vino y champán (`D-596`) |
+| Composición | La banda como unidad narrativa | Sustituida por el explorador (`D-597`) |
+| Corpus | 823 · 816 · 818 · 3.935 citas · 556 · 1.207 pares · 51,2 % · 36,2 % · 63,8 % | **1.342**, ventana 2020–2025 |
+| Consolidación | 63 formas → 30 personas | **94 → 39** |
+
+Ninguna cifra sobrevive. Y **una de sus dos reglas medidas es nula en el medio
+para el que se dibujó**: «la ausencia va sobre Ink Black, donde mide 4,71:1» no
+se cumple en papel, porque `D-552` imprime la banda de contraste en tinta sobre
+blanco. Ese suelo no existe donde el lienzo lo daba por hecho.
+
+### Dónde se puso el sello, y por qué no sólo en el README
+
+En **los cuatro `.dc.html`**, como comentario de cabecera, además del README y
+de una anotación nueva en `canvas.json`. Quien abre un artboard lo abre desde un
+editor de diseño, no pasando por el README de la carpeta: un aviso que hay que
+ir a buscar no protege de nada. El sello dice qué refleja, por qué no rige,
+dónde manda hoy el formato, y que no se refresque.
+
+Las tres anotaciones que ya tenía `canvas.json` hablaban en presente del sistema
+vigente. Van marcadas `[HISTÓRICO]`.
+
+### Verificación
+
+Comprobado que **ningún paso del pipeline lee `design/informe/`**: sólo lo
+referencian `.gitignore` —que versiona los `.dc.html` y excluye el ensamblado— y
+la propia `D-387`. `canvas.json` sigue siendo JSON válido tras editarlo.
+Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-607 | `design/informe/` se congela como **fuente histórica** y no se refresca | La vía de implementación que especificaba está construida y verificada desde septiembre, así que refrescarlo no añade nada al producto y crea dos fuentes para el mismo formato. Retirarlo perdería el registro del criterio, que es lo único que sigue valiendo de ahí. Cierra el pendiente que `D-387` dejó abierto sobre el apéndice: no se corrige, y ahora por decisión y no por omisión |
+| D-608 | La autoridad del formato del informe en papel es `app.css` más `informe_pdf.mjs` | Un formato con dos fuentes diverge; y de las dos, la que produce el PDF que la gente archiva es ésa. El lienzo pasa a registro, no a especificación |
+| D-609 | El sello de congelación va en **cada archivo**, no sólo en el README de la carpeta | Un artboard se abre desde un editor de diseño, no navegando la carpeta. Un aviso que hay que ir a buscar no protege a quien no sabe que tiene que buscarlo — que es exactamente el caso al que va dirigido |
+
+### Archivos
+
+- `design/informe/README.md` — reescrito como fuente congelada, con la tabla de
+  lo que refleja contra lo vigente
+- `design/informe/*.dc.html` — sello de congelación en los cuatro
+- `design/informe/canvas.json` — anotación de congelación y las tres antiguas
+  marcadas `[HISTÓRICO]`
+
+### Estado del plan reconstruido
+
+De las cuatro decisiones que quedaron abiertas tras la reconstrucción:
+
+- **Fase 0** (deriva documental) — hecha
+- **Fase 0b** (los dos archivos de `src/design/`) — hecha
+- **`make kit`** — reparado y dentro de la batería
+- **`design/informe/`** — congelado, aquí
+
+Queda **una sola**, y no se puede cerrar desde el repositorio: **el material de
+Stitch**. La cadena «stitch» no aparece ni una vez en el proyecto, así que la
+sección 2 del handoff perdido sigue sin reconstruirse. Si existía un rediseño de
+superficie propuesto con esa herramienta, tiene que venir de fuera.
+
+### Próximo paso recomendado
+
+Ninguno pendiente en el repositorio. Si aparece el material de Stitch, las
+restricciones medidas para cualquier propuesta están en la entrada del
+2026-09-16: 20,2 KB de margen de CSS comprimido, cero dependencias externas,
+`vista.js` sin DOM, y la paleta la fija el usuario (`D-381`, `D-382`).
+
+
+## Rediseño con Stitch, etapa 1: barra lateral y barra superior (2026-09-14)
+
+El usuario conectó el servidor MCP de Stitch y pidió aplicar al sitio el
+proyecto «Institutional Scientific Productivity Dashboard», con quince pantallas
+generadas el mismo día. Antes de tocar nada se revisaron las quince contra
+`data/processed/`, y el resultado fijó el alcance.
+
+### Qué traía el diseño, y qué no puede entrar
+
+Buena parte de las cifras del «Dossier» son reales: 1.342 publicaciones, 14.245
+citas, FWCI 1,14, 49,8 % de colaboración internacional, 744 / 730 / 133 en
+acceso abierto y la serie anual 131…318. Otras son inventadas: la serie anual de
+la «Propuesta 1» (162/194/246/288/312/140), los cuartiles (612 en Q1 contra 578
+reales), las cifras por facultad, un investigador que no existe, artículos y DOIs
+ficticios, «Documento oficial de estado», SHA-256, depósito legal, alineación con
+ANID y conformidad WCAG declarada sin medir. Todas las pantallas cargan Tailwind y
+Google Fonts desde CDN y usan azul marino con Inter.
+
+El usuario decidió tomar **sólo la estructura** de cuatro pantallas —Cockpit
+bento, Dossier editorial, Inicio con barra lateral y Data Hub— y conservar la
+identidad del sitio y los datos reales. Sobre la navegación, que chocaba con la
+columna de filtros, pidió aplicarla **como en el diseño original**.
+
+### Lo que cambió
+
+La cabecera en banda roja se sustituye por una **barra lateral fija** —marca,
+ventana, navegación agrupada con iconos, filtros activos, tema y documentación—
+y una **barra superior** con buscador, años y «Descargar informe». Por debajo de
+1040 px la lateral es un cajón que abre «Menú».
+
+El explorador pasa a **una columna**: con la navegación y los filtros a la
+izquierda, el dato quedaba en unos 740 px. Los filtros son píldoras `<details>`
+sobre el resultado, que siguen abriéndose sin JavaScript, y el índice de sección
+es una fila de píldoras en la misma tarjeta.
+
+Todo color es un token existente de `app.css`. La navegación activa y el botón
+de descarga usan el par del botón primario, ya medido en los dos temas.
+
+### Dos defectos que salieron al mirarlo
+
+- **La lupa tapaba el texto del buscador.** `input[type="search"]`, más abajo en
+  la hoja y con la misma especificidad, anulaba el relleno izquierdo. Los
+  selectores del buscador llevan ahora el tipo.
+- **El script de la hoja abortó** porque el marcador final aparecía dos veces.
+  Aborta sin escribir, que es para lo que se hizo así.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist` pasa entera, exit 0, con la misma batería
+que el sitio anterior, también en verde. `flujos.mjs` abre la píldora de año
+antes de elegir y gana dos bloques: la barra superior con las píldoras, y el
+menú en un teléfono.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-610 | Del proyecto de Stitch se toma la estructura y no la identidad ni los datos | Decisión del usuario tras ver el cotejo. Varias cifras, personas y sellos del diseño son inventados, y su paleta y tipografía sustituirían un sistema medido. Un diseño externo es propuesta, no aplicación (`docs/DESIGN_SYNC_GUIDE.md` §7) |
+| D-611 | La navegación pasa a una barra lateral fija, como en la pantalla «Inicio» | Decisión explícita del usuario: «aplícalo justo como se entrega en el diseño original». Por debajo de 1040 px es un cajón, porque fija se come la pantalla de un teléfono (el mismo criterio de `D-125`) |
+| D-612 | La campana, el acceso SSO y el avatar del diseño no entran | El sitio es estático y público. Un control que no hace nada es una promesa falsa, el criterio de `D-121` |
+| D-613 | Los filtros del explorador dejan la columna lateral y pasan a píldoras sobre el resultado | Con dos columnas de interfaz a la izquierda el dato quedaba en unos 740 px. Se pierde tener causa y efecto lado a lado (`docs/UX_UI.md` §4.4); lo compensan los años de la barra superior y el bloque de filtros activos, siempre a la vista |
+| D-614 | Las píldoras nacen cerradas, la lista se despliega a lo ancho de la barra y la abierta sobrevive al repintado | Abiertas de partida taparían las cifras. Bajo la última píldora la lista se salía por la derecha. Y sin recordar cuál estaba abierta, elegir dos valores obligaba a abrirla dos veces |
+| D-615 | El índice de sección (`D-122`) pasa a una fila de píldoras en la tarjeta de filtros | Ya no hay columna lateral donde fijarlo. Conserva el ancla y el scroll-spy |
+| D-616 | El año de la barra es un grupo de botones: los tres más recientes y «Todos» | Así lo enseña el diseño. Un año elegido fuera de esos tres se añade marcado: si lo que se mira no aparece, el control diría que no hay filtro |
+| D-617 | Los iconos son trazos SVG escritos en `core.js` | El diseño usa Material Symbols, que se sirve desde un CDN (`D-30`) |
+| D-618 | El buscador global es un formulario GET a `publicaciones.html?q=` | Funciona sin JavaScript y usa el parámetro que el motor del explorador ya lee |
+
+### Archivos
+
+- `web/assets/js/core.js` — `navHtml()` con iconos, `cromo()` con barra lateral y superior, cajón del menú
+- `web/assets/js/paginas.js` — años como botones, filtros activos en la lateral, `repintarControles()`, cierre de píldoras
+- `web/assets/js/vista_explorador.js` — las píldoras nacen cerradas
+- `web/assets/css/app.css` — cromo nuevo, explorador en una columna, píldoras, índice en fila
+- `src/verify/flujos.mjs` — la píldora de año, la barra superior y el menú en teléfono
+
+### Pendiente
+
+Etapas 2 a 5 del mismo rediseño: portada cockpit, secciones editoriales, Data
+Hub y ficha técnica de metodología. `docs/UX_UI.md` §2, §3, §4.4 y §5.1 describen
+todavía la disposición anterior: se actualizan al cerrar el rediseño, en una
+pasada, para no reescribirlos cuatro veces.
+
+
+## Corrección: el cuartil de revista se publicaba al revés (2026-09-15)
+
+Lo encontró la especificación de la portada del rediseño, al revisar de dónde
+saldría el cuartil de la tabla de publicaciones más citadas.
+
+### El defecto
+
+`R-01` se calcula dos veces. El build, en `02_indicators.py`, cuenta Q1 como
+percentil SJR ≤ 25: en este export el percentil menor es la mejor posición, y
+eso está verificado contra el propio SJR y contra CiteScore
+(`docs/INDICATORS.md`). Publica en `series.json` Q1 578, Q2 265, Q3 192, Q4 188 y
+119 sin dato.
+
+El navegador, en `CAMPOS.cuartil` de `explorador.js`, contaba Q1 como percentil
+≥ 75, con un comentario que afirmaba lo contrario de la verificación: «el
+percentil alto es el mejor». Da 194 / 194 / 292 / 543 / 119. Como el
+pre-renderizado usa el mismo motor, **eso es lo que publicaba la figura de
+Impacto** y su tabla equivalente, y lo que devolvía cada recorte.
+
+### Por qué no lo vio nadie
+
+Cada implementación pasaba todas las comprobaciones por su cuenta. La batería
+medía contraste, estructura, flujos y peso, pero nada comparaba las dos
+implementaciones de una misma cifra. La tabla de `series.json` era correcta; lo
+equivocado era la figura construida al lado.
+
+### La corrección
+
+- `CAMPOS.cuartil` usa el mismo corte que el build, con el comentario corregido y
+  el motivo.
+- `src/verify/coherencia.mjs` entra en la batería. Importa el motor del navegador
+  bajo Node y compara su reparto sin filtros con `series.json`, categoría a
+  categoría. Hoy cubre `R-01`. Hay un barrido en curso sobre el resto de los
+  indicadores que se calculan dos veces, y lo que confirme se añade aquí.
+
+### Verificación
+
+- `coherencia.mjs` **falla** contra la copia del sitio anterior (Q1 194 frente a
+  578) y **pasa** contra el corregido.
+- `dist/impacto.html` publica ahora 578 / 265 / 192 / 188 / 119.
+- `node src/verify/run_all.mjs dist` pasa entera, exit 0, con el paso nuevo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-619 | `CAMPOS.cuartil` usa el corte del build: percentil SJR menor es mejor, Q1 ≤ 25 | Es la dirección verificada y documentada (`docs/INDICATORS.md`, `02_indicators.py`). El navegador contaba al revés, y la figura de Impacto, pre-renderizada con ese motor, publicaba Q1 = 194 donde la serie dice 578 |
+| D-620 | La batería compara el motor del navegador sin filtros con `series.json` | Dos implementaciones del mismo cálculo pasaban cada una todas sus comprobaciones. Sin una que las compare, una divergencia no la detecta nada |
+| D-621 | La corrección va aparte del rediseño | Decisión del usuario. Es un error publicado: no espera a la portada, y separado se revisa y se publica solo |
+
+### Archivos
+
+- `web/assets/js/explorador.js` — `CAMPOS.cuartil`
+- `src/verify/coherencia.mjs` — nuevo
+- `src/verify/run_all.mjs` — el paso `coherencia`
+
+### Pendiente
+
+- Si se generó y publicó un informe PDF con la versión anterior, su figura de
+  cuartiles también está invertida: hay que regenerarlo (`make informe`).
+- Ampliar `coherencia.mjs` con los indicadores que confirme el barrido.
+
+
+## Correcciones: cinco errores que el sitio publicaba (2026-09-16)
+
+Los encontraron los críticos de la especificación de las etapas 2 a 5 del
+rediseño, y cada uno se comprobó contra los datos antes de tocarlo. El usuario
+decidió corregirlos todos, aparte del rediseño.
+
+### Lo que se publicaba y lo que se publica
+
+| Dónde | Antes | Ahora |
+|---|---|---|
+| Sellos de A-01, C-01, C-03, C-04, C-06, T-01 | Fuente Scopus | **SciVal**: esos campos salen del export de SciVal (`02_reconcile_sources.py`) |
+| T-05, sello del build y texto de temática | 100 %, «las bases coinciden» | **98,1 %**: 1.317 de 1.342 traen área QS |
+| Sello de P-07 (sección y portada) | «N 1.342 pares autor × publicación, 99,6 %» | **«N 1.342 publicaciones, 64,9 % · 871 con dato»** |
+| Sello de C-05 | «N 1.342 personas» | «N 1.342 publicaciones» |
+| Fuentes externas, pre-renderizado | «NaN · Autores UFT» | las tres cifras que ya pintaba el navegador |
+| Lectura de portada, nota y definición de I-03 | «la media es 1,14» junto a «no promediando valores individuales»; definición con 0,41 / 0,87 | «el promedio de los FWCI de cada publicación es 1,14 y la mediana 0,48»; cifras medidas |
+
+Dos causas detrás de los sellos. La fuente estaba escrita a mano por indicador y
+seis entradas no correspondían al campo. Y el sello de un corte del navegador
+cuenta publicaciones, pero tomaba la etiqueta de unidad del cálculo del build,
+que en P-07 son pares y en C-05 personas.
+
+El NaN tenía una causa de la clase que `D-126` prohíbe: el pre-renderizado tenía
+su propia copia del marcado, pedía un campo que el artefacto no trae y además
+rellenaba una tabla de autores sin contenedor, cuya excepción tragaba el `catch`.
+
+### Lo que NO se afirma sobre el FWCI
+
+El valor publicado es la media aritmética de los FWCI individuales, y la nota
+decía lo contrario. Se corrigió la descripción, no la cifra. Si esa media es o no
+la definición de SciVal para un conjunto no se pudo verificar: cuatro páginas de
+soporte de Elsevier consultadas no dan la fórmula. Por eso no se reescribieron
+`D-18`, `D-325`, la razón de `AU-04`, `docs/UX_UI.md` §4.2 ni el comentario de
+`explorador.js`, que se apoyan en «el FWCI de un conjunto no es el promedio»:
+quedan como pendiente.
+
+### La afiliación en revisión
+
+El artículo más citado del universo (2.726 citas) lista a Goosey-Tolfrey V.L.
+como autora UFT. En el export, «Affiliations» trae 7 líneas para 8 autores y
+Loughborough aparece pegada a los seis primeros firmantes: la UFT parece
+desplazada. No se resuelve (`D-08`). Se declara con su evidencia en
+`internal/afiliaciones_en_revision.yml`, que no se versiona, y la auditoría la
+encola en `internal/ambiguities_authors.csv`. Se probó una heurística para
+detectarlo solo y no sirve: marcaba 34 publicaciones, casi todas correctas, y no
+marcaba ésta.
+
+### Fuentes externas estaba desactualizado
+
+Al regenerar, `fuentes_externas.json` pasó de 436 a 275 obras. La versión
+publicada comparaba contra los 804 DOIs de la carga de julio; la de ahora, contra
+los 1.291 del universo 2020-2025, que es exactamente el número de DOIs distintos
+de `publications.json`. Las 161 que salen ya están en Scopus. No es efecto de
+estas correcciones: el artefacto se había quedado atrás de su insumo.
+
+### Verificación
+
+- Diferencia de contenido de cada artefacto contra el commit anterior, sin la
+  fecha de build: sólo cambian las fuentes, la cobertura de T-05, los textos de
+  I-03, temática y FWCI, y Fuentes externas. Publicaciones, autores, facetas,
+  jerarquía, meta y validación, idénticos.
+- Cada sello comprobado en `dist/`.
+- `node src/verify/run_all.mjs dist`: nueve pasos, exit 0.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-622 | La fuente de cada indicador es la del campo del que sale | `02_reconcile_sources.py` extrae acceso abierto, países, instituciones, número de autores y ASJC del export de SciVal. Seis sellos decían Scopus |
+| D-623 | T-05 declara su cobertura real | No toda publicación de SciVal trae área QS. El sello del build decía 100 % mientras la figura del navegador medía 98,1 % |
+| D-624 | El sello de un corte rotula publicaciones, y «No determinada» no cuenta como dato | `X.cobertura` cuenta publicaciones del recorte. Con la unidad del build publicaba «1.342 pares» y «1.342 personas», que no existen, y contando «No determinada» P-07 decía 99,6 % |
+| D-625 | Las cifras de Fuentes externas salen de un solo constructor puro | La copia del pre-renderizado publicaba «NaN · Autores UFT», una atribución por persona que la página dice que no publica (`D-126`) |
+| D-626 | I-03 se describe como lo que se calcula: promedio de los FWCI individuales, junto a su mediana | La nota decía lo contrario del valor. No se afirma que coincida con la definición de SciVal para un conjunto: no se encontró la fórmula |
+| D-627 | `D-18`, `D-325` y `AU-04` quedan abiertas, no reescritas | Se apoyan en una premisa sin verificar. Sus conclusiones pueden sostenerse por otras razones —n pequeño, DORA—, y eso lo decide una revisión, no una corrección de texto |
+| D-628 | Una afiliación dudosa se declara en `internal/` y la auditoría la encola | La heurística de detección probada no distingue el caso. Encolar no cambia nada publicado hasta que una persona decida (`D-08`) |
+| D-629 | `fuentes_externas.json` se regenera contra el universo 2020-2025 | Comparaba contra 804 DOIs de julio y listaba como fuera de Scopus 161 obras que están en él |
+| D-630 | `build_kit.mjs` calcula su raíz con `fileURLToPath` | Con `URL.pathname` no arrancaba en Windows, y la batería lo declaraba como fallo del generador |
+
+### Archivos
+
+- `src/build/common_build.py`, `src/build/02_indicators.py`, `src/analysis/indicator_feasibility.py`, `config/indicators.yml`
+- `web/assets/js/explorador.js`, `vista_explorador.js`, `vista.js`, `paginas.js`; `src/build/prerender.mjs`
+- `src/audit/04_author_population.py`
+- `docs/EJES.md`, `GLOSSARY.md`, `METHODOLOGY.md`, `INDICATORS.md`, `LECTURAS.md`
+- `src/design/build_kit.mjs`
+- `data/processed/` regenerado
+
+### Pendiente
+
+- Verificar la definición de SciVal del FWCI de un conjunto y revisar `D-18`, `D-325` y `AU-04` con ella.
+- `C-02` figura `publicar: true` y no se calcula en ningún lado.
+- La herramienta de revisión (`src/review/build_review.py`) no muestra todavía la cola `V-afiliacion_en_revision`.
+- Si se publicó un PDF del informe con la versión anterior, regenerarlo.
+- Etapas 2 a 5 del rediseño.
+
+
+## Rediseño con Stitch, etapa 2: la portada «Cockpit» (2026-09-16)
+
+La portada toma la estructura de tres pantallas de Stitch —la banda y la rejilla
+del «Cockpit», la tabla anual del «Dossier» y la tabla de más citadas de
+«Inicio»— y sigue siendo un explorador: todo lo de debajo de la banda se
+recalcula con el recorte y se pre-renderiza sin filtros con el mismo constructor.
+
+La especificación la escribió un agente y la revisaron dos críticos. De ahí
+salieron los cinco errores publicados que se corrigieron antes (`D-622` a
+`D-630`) y los cambios sobre la propuesta original que siguen.
+
+### Lo que hay ahora, de arriba abajo
+
+1. **Banda** en la paleta invertida de `.banda-contraste`: título, institución,
+   aviso de ventana y un recuadro «No cambia con el recorte» con fuentes, ventana
+   y fecha de corte. **Ninguna cifra.**
+2. **Las seis fichas en bento**: las dos primeras a media fila, las otras cuatro a
+   un cuarto.
+3. **Los cuatro cortes como tarjetas** de dos en dos, con su código.
+4. **Dinámica anual**: año, publicaciones, % del recorte y citas.
+5. **Publicaciones más citadas** (`I-07`): las diez del recorte con más citas,
+   con título enlazado, fuente, tipo, año, citas y FWCI de la publicación.
+6. La lectura, el bloque del PDF y el cierre, como estaban. `#lectura` deja de ser
+   un `<details>` sin `<summary>`, que el navegador rotulaba «Detalles».
+
+### Lo que se cambió sobre la propuesta, y por qué
+
+- **Sin el universo en la banda.** La línea de estado lo dice justo debajo, y
+  una cifra del total en la banda se lee como la del recorte.
+- **Sin «citas por publicación» en la tabla anual** (decisión del usuario). Por
+  año es una media que mueve una sola publicación: 2022 da 29,13, y 15,16 sin la
+  de 2.726 citas.
+- **Sin autores ni cuartil en la de más citadas** (decisión del usuario). Siete
+  de las nueve firmas del top no llegan a cinco publicaciones y una afiliación
+  está en revisión; el cuartil es de la revista, y las diez filas serían Q1.
+- **Oculta con recorte a una persona** (decisión del usuario), como la red.
+- **Dos sellos** en cada tabla: el listado sale de Scopus y las citas de SciVal.
+- **Sin serie de `I-07` en `series.json`**: sería una segunda implementación del
+  mismo ranking, la situación que produjo el cuartil invertido.
+
+### Lo que salió al verificar
+
+- La tabla anual se comparó con P-02 e I-01 en `coherencia.mjs`: seis años, sin
+  divergencias.
+- La batería de impresión cazó el enlace «Ver la autoría en el listado →» en el
+  PDF: un control de pantalla en papel. Se oculta en `@media print`.
+- La banda en papel se imprime en tinta sobre blanco, pero su reinicio no tocaba
+  los tokens de aviso: la advertencia de ventana, que ahora vive dentro, habría
+  salido verde claro sobre blanco. Se reinician también aviso, acción y cifra.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, nueve pasos. `flujos.mjs` gana las tablas de
+la portada: una fila por año de la ventana, diez filas de más citadas, ninguna
+cifra en la banda, una fila con un año elegido, todas del año elegido, y la tabla
+ausente con recorte a una persona.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-631 | La cabecera de portada es una banda «Cockpit» sin cifras | Estructura del diseño de Stitch con la paleta ya medida de `.banda-contraste`. Una cifra del total en la cabecera se lee como la del recorte: por eso la anterior las quitó |
+| D-632 | El universo no va en la banda | La línea de estado lo dice justo debajo. El «Cockpit» lo ponía junto a un crecimiento que el catálogo declara no calculable (X-04) |
+| D-633 | Las seis fichas de la portada van en rejilla bento, sin reordenar el marcado | La jerarquía la da el tamaño. Las secciones las conservan como estaban |
+| D-634 | «Dinámica anual» lleva año, publicaciones, % del recorte y citas, y nada más | Decisión del usuario sobre la media por año. Sin fila de total, que repetiría las fichas. Un año sin publicaciones sale con 0, no «sin dato» (D-24) |
+| D-635 | El aviso de ventana de citación tiene una sola redacción, sin nombrar la forma | La de la figura de Impacto hablaba de «barras», y la tabla no tiene. Dos textos para la misma advertencia divergen |
+| D-636 | `I-07` se declara en el catálogo y no emite serie propia | Publicado significa declarado (D-166). Una serie en `series.json` sería una segunda implementación del ranking sin nada que la compare |
+| D-637 | `I-07` ordena por citas totales, sin autores ni cuartil, con el FWCI de cada publicación | Decisiones del usuario. La lectura DORA/Leiden va junto a la tabla; el cálculo, en `indicators.yml` (D-51) |
+| D-638 | `I-07` no se dibuja con recorte a una persona | Decisión del usuario: sería un ranking de los trabajos de alguien, como la red de coautoría (C-05) |
+| D-639 | Las tablas de la portada llevan dos sellos, Scopus y SciVal | El listado y los años salen de Scopus; las citas y el FWCI, de SciVal |
+| D-640 | En papel, la banda reinicia también los tokens de aviso, acción y cifra | La advertencia de ventana vive ahora dentro de la banda y habría salido verde claro sobre blanco con los fondos apagados |
+
+### Archivos
+
+- `web/index.html`, `web/assets/js/vista_explorador.js`, `explorador.js`, `paginas.js`, `web/assets/css/app.css`
+- `src/build/prerender.mjs`, `src/build/common_build.py`, `src/analysis/indicator_feasibility.py`, `config/indicators.yml`
+- `docs/LECTURAS.md`, `docs/INDICATORS.md`
+- `src/verify/coherencia.mjs`, `src/verify/flujos.mjs`
+
+### Pendiente
+
+- `docs/UX_UI.md` describe todavía la portada y la navegación anteriores (§2, §3, §4.3, §4.4, §5.1, §13.1): se reescribe al cerrar el rediseño.
+- Medir el LCP de la portada con `src/verify/rendimiento.mjs`: la primera pantalla cambió.
+- Etapas 3 a 5.
+
+
+## Rediseño con Stitch, etapa 3: las secciones (2026-09-16)
+
+Las cuatro secciones explorables —producción, impacto, colaboración y
+temática— toman del «Dossier» de Stitch la cabecera editorial, y del «Cockpit»
+las tarjetas. Los gráficos no cambian.
+
+### Lo que cambió
+
+- **Cabecera editorial.** El título y lo que la sección responde a un lado; al
+  otro, **a la vista**, la tarjeta «Qué NO dice esta sección», en la familia de
+  la advertencia metodológica. Iba plegada detrás de un control. El texto sigue
+  saliendo de `ejes.json`: del Dossier se tomó la forma de su tarjeta «Compromiso
+  DORA & Leiden», no su texto, que afirmaba no usar métricas de revista en un
+  sitio que publica R-01.
+- **Cortes como tarjetas** de dos en dos, con su código junto al título.
+- **Los no publicados aparecen en producción y temática.** `diferidos()`
+  comparaba la clave de la página con la categoría del catálogo, y en esas dos
+  no coinciden (`produccion` es `descriptivo`; `tematica`, `tematico`). P-08,
+  X-03, X-04, T-02 y T-03 no se declaraban en ninguna página. Decisión del
+  usuario: corregirlo en esta etapa.
+
+### Lo que NO se hizo, y por qué
+
+La especificación proponía dos bloques más del Dossier: el acceso abierto (A-01)
+como tarjetas por vía y las áreas QS (T-05) como lista con barras. No entran:
+sustituirían figuras que tienen su tabla equivalente (`D-120`) por objetos
+gráficos que la batería no mide, y el de T-05 rompía la prueba del tooltip de
+`flujos.mjs`. Tampoco la fila de procedencia por sección: la barra de vigencia y
+el sello de cada corte ya la dan, y la primera versión de esa fila repetía la
+atribución de fuentes equivocada que se corrigió en `D-622`.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, nueve pasos en verde. `flujos.mjs` comprueba
+que el «qué NO dice» está a la vista y que producción declara P-08 y temática
+T-02 entre los no publicados. `impresion.mjs` ya exigía el cuerpo del panel en el
+PDF y sigue pasando.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-641 | El «qué NO dice» de cada sección va a la vista, en una tarjeta junto al título | Estructura editorial del Dossier. Es la parte que justifica el panel (`docs/EJES.md`), y plegada casi nadie la leía. Revisa la presentación de `D-179` y de `docs/UX_UI.md` §4 bis; el texto y su origen no cambian |
+| D-642 | Del Dossier se toma la forma de la tarjeta DORA/Leiden, no su texto | Afirmaba que el informe no usa métricas de revista, y el sitio publica R-01 |
+| D-643 | Los cortes de sección van como tarjetas de dos en dos, con su código | La misma rejilla que la portada (`D-633`). El código deja ligar cada figura con su fila del catálogo |
+| D-644 | La banda de no publicados traduce la clave de la sección a la categoría del catálogo | Decisión del usuario. Producción y temática no coincidían, y cinco indicadores no se declaraban en ninguna página |
+| D-645 | A-01 y T-05 conservan su figura; no se añade fila de procedencia por sección | Las formas del Dossier sustituirían figuras con tabla equivalente por objetos sin medir. La procedencia ya la dan la barra de vigencia y el sello de cada corte |
+
+### Archivos
+
+- `web/assets/js/vista_explorador.js` — `cabeceraSeccion()`, código en `corteUno()`, `diferidos()`
+- `web/produccion.html`, `impacto.html`, `colaboracion.html`, `tematica.html` — rejilla de tarjetas
+- `web/assets/css/app.css` — `.seccion-cab`, `.seccion-limite`
+- `src/verify/flujos.mjs`
+
+### Pendiente
+
+- Etapas 4 (Descarga de datos) y 5 (Metodología).
+- `docs/UX_UI.md`, al cerrar el rediseño.
+
+## Rediseño con Stitch, etapa 4: descarga de datos (2026-09-16)
+
+Cuarta de las cinco etapas. Base: la pantalla «Data Hub» del proyecto de Stitch,
+de la que se toma la estructura y no el contenido.
+
+### Lo que cambió
+
+- **Página nueva `datos.html`, «Descarga de datos»**, en el grupo Datos de la
+  navegación. Tres bloques: descargar, condiciones y procedencia, inventario.
+- **Sólo el CSV se descarga.** Decisión del usuario. El botón reutiliza
+  `exportar()`, el mismo del listado de publicaciones, y ya no hay dos listas
+  de columnas: las dos llaman a `COLUMNAS_CSV` de `vista.js`. Los JSON se listan
+  con su enlace, sin botón.
+- **El inventario se mide en el build.** `prerender.mjs` lee `dist/data`,
+  cuenta registros y bytes, y aborta si hay un archivo que no está ni declarado
+  ni en la lista de excluidos (`ejes.json`, `lecturas.json`, `informe.json`), si
+  falta uno declarado, o si una cifra sale NaN. Hoy son 13 filas: 1.342
+  publicaciones, 829 formas de firma y 829 fichas, 45 indicadores evaluados,
+  25 unidades, 30 reglas de validación, entre otras.
+- **Condiciones: sólo lo comprobable.** Los exports de Elsevier no se publican; qué
+  métricas derivadas permite la licencia está pendiente de confirmar
+  (`docs/DATA_LICENSE.md` §5); fecha de corte de SciVal; el export de Scopus no
+  declara la suya; la nota de P-01 sobre los duplicados pendientes.
+- **`hierarchy.json` no hereda la fecha de SciVal.** Sus citas son las del
+  export de Scopus, y su procedencia lo dice.
+- **Dos notas publicadas llevaban acentos graves de Markdown** que el sitio
+  mostraba tal cual: la de P-01 (`common_build.py`) y la de citas de
+  `hierarchy.json` (`07_hierarchy.py`), que además nombraba un campo interno.
+
+### Lo que NO se hizo, y por qué
+
+Del Data Hub quedan fuera las plantillas de consulta, el esquema de campos, la
+elección de formato, el historial de descargas, la API y el acceso con cuenta
+institucional: nada de eso existe en un sitio estático sin servidor. Tampoco la
+licencia CC BY que mostraba el diseño: la licencia de los derivados de Elsevier
+no está confirmada, y declararla sería inventarla.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, nueve pasos en verde. `datos.html` entra en
+contraste, estructura y responsive. `flujos.mjs` exige un inventario de al menos
+10 filas sin NaN y que el botón descargue un `publicaciones-*.csv` de verdad.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-646 | La descarga de datos tiene página propia, con la estructura del Data Hub | Los datos ya se servían, pero ninguna página los listaba ni decía de dónde venían |
+| D-647 | Sólo el CSV de publicaciones es descargable; los JSON se listan sin botón | Decisión del usuario. El CSV es lo que abre una hoja de cálculo; los JSON son el soporte del sitio |
+| D-648 | Las columnas del CSV se declaran una sola vez (`COLUMNAS_CSV`) | La página y el explorador descargan lo mismo; con dos listas terminarían divergiendo |
+| D-649 | El inventario se mide en el build y lo aborta si queda un archivo sin clasificar | Una página que dice listar lo que el sitio sirve no puede quedarse atrás en silencio |
+| D-650 | Las condiciones de uso declaran sólo lo comprobable: ni licencia ni sello | La licencia de los derivados de Elsevier está pendiente de confirmar (`docs/DATA_LICENSE.md` §5) |
+| D-651 | Del Data Hub no se toman plantillas, esquema, formatos, historial, API ni acceso con cuenta | Un sitio estático sin servidor no tiene nada de eso que ofrecer |
+| D-652 | Los textos publicados que salen del build van sin marcado Markdown | El sitio escapa el texto y no lo interpreta: los acentos graves se leían como parte de la frase |
+
+### Archivos
+
+- `web/datos.html` (nuevo)
+- `web/assets/js/vista.js` — `COLUMNAS_CSV`, `datosCsv()`, `datosCondiciones()`, `datosInventario()`
+- `web/assets/js/paginas.js` — `datos()`; `exportar()` usa `COLUMNAS_CSV`
+- `web/assets/js/core.js` — página, grupo de navegación e icono
+- `web/assets/css/app.css` — `.datos-disposicion`, `.datos-condiciones`
+- `src/build/prerender.mjs` — `CONJUNTOS`, `NO_LISTADOS`, `inventarioDatos()`
+- `src/build/common_build.py`, `src/build/07_hierarchy.py` — notas sin Markdown
+- `src/verify/contraste.mjs`, `estructura.mjs`, `responsive.mjs`, `flujos.mjs`
+
+### Pendiente
+
+- Etapa 5 (Metodología).
+- `docs/UX_UI.md`, al cerrar el rediseño.
+
+## Rediseño con Stitch, etapa 5: glosario y ficha técnica (2026-09-16)
+
+Última etapa. `metodologia.html` cierra con una banda «Glosario y ficha técnica»
+en dos columnas, el colofón del «Dossier» de Stitch, sin el sello, la firma, el
+QR ni el hash del diseño.
+
+### Lo que cambió
+
+- **Ficha técnica** en lugar de la lista «Procedencia de los datos». Sale entera
+  de `meta.json` y `validacion.json`, en cuatro bloques: fuentes y fechas,
+  denominadores, umbrales de lectura y auditoría. La lista anterior daba una sola
+  fecha de corte y se leía como si cubriera también a Scopus.
+- **Cada cifra lleva al lado lo que la matiza**, que es lo que pidieron los
+  críticos de la especificación: X-04 junto a las citas de SciVal; «el export no
+  lo declara» como corte de Scopus, con la nota de que los sellos de Scopus
+  muestran el corte de SciVal; la nota de P-01 junto al universo; V-10 junto a
+  los denominadores; y qué reglas fallan (E-06, D-02, X-04), no sólo cuántas.
+- **Denominadores rotulados como lo que son**: los declarados en la
+  configuración, no un recuento campo a campo. El 90 % se rotula como umbral del
+  sello, para no confundirlo con el 80 % de V-10.
+- **`meta` declara el Scopus Affiliation ID y las fechas de cada export.** El
+  corte de Scopus queda `null`, no la fecha de SciVal. Regenera todos los
+  artefactos: el bloque `meta` va en cada uno.
+- **Glosario como lista de definiciones**, con el id en cada entrada: los
+  enlaces `#slug` del tooltip y de otras páginas no cambian.
+- **Marcado Markdown que llegaba al lector.** Tres negritas y una cursiva del
+  glosario, un acento grave de las lecturas y otro de la auditoría. La negrita
+  partida entre dos líneas no la veía el patrón, que no cruzaba saltos. Un solo
+  `texto_plano()` limpia glosario, ejes y lecturas.
+- **`hierarchy.json` en Descarga de datos** usa sus dos advertencias, tomadas del
+  archivo: cuenta pares autor × publicación y suma citas de Scopus sobre ellos.
+
+### Lo que NO se hizo, y por qué
+
+- **La ficha no es fija.** Así lo proponía la especificación, pero mide más que
+  la pantalla, y fija dejaba su final fuera de alcance hasta terminar el
+  glosario. Se vio en la captura.
+- **Los sellos de Scopus no se corrigen aquí.** P-02, P-03, P-05, P-07, C-05 y
+  `hierarchy.json` muestran «Corte 2026-08-30», la fecha de SciVal, porque
+  `procedencia()` la toma por defecto. La ficha lo declara. Decidir qué debe decir
+  ese sello queda aparte.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, nueve pasos en verde. `flujos.mjs` gana
+«Glosario y ficha técnica»: cuatro bloques; universo, fecha de SciVal y export de
+Scopus contrastados con `meta.json`; ninguna fecha de corte atribuida a Scopus;
+las 15 entradas del glosario, y un enlace `#slug` que aterriza en su definición.
+`estructura.mjs` falla si en cualquier página queda a la vista una negrita o un
+acento grave de Markdown. `impresion.mjs` exige «Ficha técnica» y «Scopus
+Affiliation ID» en el anexo impreso. Los dos workflows exigen el
+pre-renderizado también de `datos` y `metodologia`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-653 | Metodología cierra con glosario y ficha técnica en dos columnas, sin sello, firma, QR ni hash | Estructura del colofón del Dossier. Un sello certificaría algo que el sitio no comprueba (`D-610`) |
+| D-654 | La ficha técnica sustituye a la lista «Procedencia de los datos» | La lista daba una sola fecha de corte y se leía como si cubriera también a Scopus, cuyo export no la declara (T-06) |
+| D-655 | `meta` declara el Scopus Affiliation ID y las fechas de cada export, con el corte de Scopus en `null` | Leídas solas, `fecha_corte_citas` y `fecha_export` parecen cubrir las dos fuentes. El identificador es público y lo usa la detección institucional (I-02) |
+| D-656 | Cada cifra de la ficha lleva al lado la advertencia que la matiza, y la auditoría nombra las reglas que fallan | Crítica a la especificación: el universo y las citas sin la nota que los matiza se leen como cifras firmes |
+| D-657 | Los denominadores se rotulan como declarados en la configuración, y el 90 % como umbral del sello | Salen de config y no se miden; con dos umbrales de cobertura sin rotular (90 % y 80 %), se leen como uno |
+| D-658 | Si `meta` no trae el Scopus Affiliation ID, la fila se omite | «No declarado» sería falso: el identificador está en la configuración y en el observado de I-08 |
+| D-659 | El glosario pasa a una lista de definiciones con el id en cada entrada | Quince h2 partían una banda compartida con la ficha. Los enlaces `#slug` no cambian |
+| D-660 | La ficha técnica no es fija | Mide más que la pantalla: fija, su final quedaba fuera de alcance hasta terminar el glosario |
+| D-661 | Un solo `texto_plano()` limpia el Markdown de glosario, ejes y lecturas, y la batería falla si queda a la vista | Amplía `D-652`. Había tres limpiezas, ninguna cruzaba saltos de línea, y ninguna quitaba cursivas ni acentos graves |
+| D-662 | Los sellos de indicadores de Scopus conservan por ahora la fecha de SciVal; la ficha lo declara | Qué debe decir ese sello es una decisión aparte, no parte del rediseño |
+
+### Archivos
+
+- `web/metodologia.html` — sin «Procedencia de los datos»; banda «Glosario y ficha técnica»
+- `web/assets/js/vista.js` — `fichaTecnica()` sustituye a `procedencia()`; `glosario()` como `<dl>`
+- `web/assets/js/paginas.js` — `metodologia()`
+- `web/assets/css/app.css` — `.glosario-ficha`, `.glosario-entrada`, `.ficha-tecnica`, `.ficha-datos`
+- `src/build/common_build.py` — `build_meta()`: `scopus_affiliation_id` y `exports`
+- `src/build/04_glossary.py` — `texto_plano()`
+- `src/audit/05_validation_rules.py` — observado de E-07 sin Markdown
+- `src/build/prerender.mjs` — rama de metodología; nota de `hierarchy.json`
+- `src/verify/flujos.mjs`, `estructura.mjs`, `impresion.mjs`
+- `.github/workflows/deploy.yml`, `publicar-site-publico.yml`
+- `docs/UX_UI.md` — §1, §2, §3, §4.3, §4.4, §4 bis, §5.1, §12.7, §13 y §13.1, que describían la disposición anterior
+- `data/processed/` — regenerado
+
+### Pendiente
+
+- Qué debe decir el sello de los indicadores de Scopus (`D-662`).
+- Medir el LCP de la portada con `src/verify/rendimiento.mjs`.
+- Verificar cómo define SciVal el FWCI de un conjunto (`D-18`, `D-325`, AU-04). El
+  glosario describe lo que se calcula, el promedio de los FWCI de cada
+  publicación; falta confirmar que coincide con la definición de SciVal.
+- C-02 figura publicable y no se calcula. La herramienta de revisión no muestra la
+  cola `V-afiliacion_en_revision`. Regenerar el PDF si se publicó uno con el
+  cuartil invertido.
+- Subir la rama y cerrar el PR #51 cuando el usuario lo decida.

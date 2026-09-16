@@ -18,16 +18,12 @@
     <h1>Metodología y limitaciones</h1>
     <p class="intro">Publicar indicadores sin sus límites es un error metodológico.
   Esta página reúne las definiciones de las métricas no triviales y la
-  procedencia exacta de los datos.</p>
+  procedencia exacta de los datos, en la <a href="#ficha-tecnica">ficha técnica</a>.</p>
   </header>
   </div></section>
 
   <section class="banda banda-papel-2"><div class="contenedor">
   <h2 class="solo-lectores">De dónde vienen los datos</h2>
-  <section class="modulo">
-    <h3>Procedencia de los datos</h3>
-    <div id="procedencia"></div>
-  </section>
   <section class="modulo" id="validacion-datos">
     <h3>Auditoría de datos</h3>
     <p>Antes de construir cualquier indicador, el pipeline corre 30 reglas de
@@ -55,7 +51,8 @@
     <p class="nota">Que sean exports y no consultas en vivo tiene una
     consecuencia que conviene saber al leer cualquier cifra: <strong>los datos
     son los del día en que se exportaron</strong>. No se actualizan solos. La
-    fecha de cada export está arriba, en la procedencia.</p>
+    fecha de cada export está en la <a href="#ficha-tecnica">ficha técnica</a>,
+    al final de esta página.</p>
 
     <h3>Se consultan por API</h3>
     <ul>
@@ -179,8 +176,18 @@
   </div></section>
 
   <section class="banda banda-papel-2"><div class="contenedor">
-    <h2>Glosario</h2>
-    <div id="glosario"></div>
+    <div class="banda-titulo">
+      <h2>Glosario y ficha técnica</h2>
+      <p>Qué significa cada métrica no trivial, y con qué datos se construyó esta
+      carga: fuentes, fechas, denominadores y estado de la auditoría.</p>
+    </div>
+    <div class="glosario-ficha">
+      <div id="glosario"></div>
+      <aside class="modulo ficha-tecnica" id="ficha-tecnica" aria-labelledby="ficha-tecnica-titulo">
+        <h3 id="ficha-tecnica-titulo">Ficha técnica</h3>
+        <div id="ficha-tecnica-datos"></div>
+      </aside>
+    </div>
   </div></section>
 </main>
 <footer class="pie" id="pie"></footer>

@@ -211,7 +211,7 @@ const CASOS = [
     // Sin explorador que cuente, pero el anexo es parte del informe que alguien
     // pidió: una hoja suelta que se declare «informe completo» contradice a las
     // demás del mismo PDF.
-    exige: ['Recorte aplicado', 'Año: 2024'],
+    exige: ['Recorte aplicado', 'Año: 2024', 'Ficha técnica', 'Scopus Affiliation ID'],
     prohibe: ['Sin filtros'],
   },
 ];

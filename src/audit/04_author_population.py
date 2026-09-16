@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 if sys.platform == "win32":
     # La consola de Windows usa cp1252 por defecto: revienta cualquier print()
@@ -340,6 +341,32 @@ def main() -> None:
                       if len(solas) > 1 else
                       "la publicación en que aparece, que quedaría")
                    + " sin autoría UFT nombrada")),
+            "resolucion": "NO_RESOLVER_AUTOMATICAMENTE",
+        })
+
+    # ── Afiliaciones que una persona declaró dudosas.
+    #
+    # No hay detector: el caso que lo abrió no se distingue por su forma de una
+    # publicación correcta (ver internal/afiliaciones_en_revision.yml). Por eso
+    # la sospecha se declara allí, con su evidencia, y aquí sólo se encola.
+    # Encolar no cambia nada publicado: la firma sigue contando hasta que una
+    # revisión humana decida (D-08). El archivo es opcional, como toda la capa
+    # interna en una máquina que no la tiene.
+    declaradas = c.INTERNAL / "afiliaciones_en_revision.yml"
+    casos = ((yaml.safe_load(declaradas.read_text(encoding="utf-8")) or {}).get("casos") or []
+             if declaradas.exists() else [])
+    for caso in casos:
+        eid, firma = caso["eid"], caso["firma"]
+        en_log = bool(((log["eid"] == eid) & (log["nombre_en_fuente"] == firma)).any())
+        amb.append({
+            "tipo": "V-afiliacion_en_revision", "severidad": "alta",
+            "clave": f"{eid}|{firma}", "nombre_en_fuente": firma,
+            "detalle": " ".join(str(caso["evidencia"]).split()),
+            # Si la firma ya no está en el log, la entrada sobra: se dice en vez
+            # de encolar una sospecha sobre algo que el pipeline ya no afirma.
+            "consecuencia": (" ".join(str(caso["consecuencia"]).split()) if en_log else
+                             "la firma ya no figura como UFT en esta publicación: "
+                             "la entrada de internal/afiliaciones_en_revision.yml sobra"),
             "resolucion": "NO_RESOLVER_AUTOMATICAMENTE",
         })
 

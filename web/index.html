@@ -16,7 +16,7 @@
        gráficos. La interacción se añade encima. Los `details` de los filtros
        se abren y se leen sin guion, que es la razón de usarlos. -->
   <header class="portada-cabecera">
-    <div id="titular"></div>
+    <div id="titular" class="cockpit banda-contraste"></div>
   </header>
 
   <div class="minifoco" id="minifoco" aria-label="Exploración rápida"></div>
@@ -34,9 +34,13 @@
       <div id="cifras"></div>
 
       <h2 class="titulo-seccion">Cómo se reparte</h2>
-      <div class="cortes" id="cortes"></div>
+      <div class="cortes cortes-bento" id="cortes"></div>
 
-      <details class="metodo" id="lectura"></details>
+      <div id="dinamica"></div>
+      <div id="mas-citadas"></div>
+
+      <!-- Antes un <details> sin <summary>: el navegador lo rotulaba «Detalles». -->
+      <div id="lectura"></div>
     </div>
   </div>
 

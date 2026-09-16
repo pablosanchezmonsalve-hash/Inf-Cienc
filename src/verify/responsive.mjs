@@ -9,7 +9,7 @@ import { abrir } from './navegador.mjs';
 
 const PUERTO = process.env.PUERTO || 8841;
 const PAGINAS = ['index', 'produccion', 'impacto', 'colaboracion', 'tematica',
-  'autores', 'publicaciones', 'fuentes-externas', 'indicadores', 'produccion-ampliada', 'metodologia', 'autor'];
+  'autores', 'publicaciones', 'fuentes-externas', 'datos', 'indicadores', 'produccion-ampliada', 'metodologia', 'autor'];
 
 const DIST = process.argv[2] || process.env.DIST || 'dist';
 const enDisco = (await readdir(DIST)).filter(f => f.endsWith('.html'));

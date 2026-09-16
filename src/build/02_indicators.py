@@ -257,6 +257,9 @@ def main() -> None:
         "T-04": series["T-04"]["con_ods"],
         "A-01": len(con_metricas) - oa["Sin dato declarado"],
         "R-01": sum(d["n"] for d in cuartiles if d["valor"] != "Sin dato declarado"),
+        # No toda publicación de SciVal trae área QS. Sin esta entrada el sello
+        # publicaba 100 % mientras la figura del navegador medía la real.
+        "T-05": int(sum(1 for v in uni["qs_area"] if b.split_multi(v))),
     }
     for code, blk in series.items():
         if code != "meta":
