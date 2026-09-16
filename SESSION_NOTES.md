@@ -14708,3 +14708,101 @@ sin fallos`, exit 0.
 Decidir qué gobierna `design/informe/`. Es lo único de la lista original que
 sigue sin tocarse, y ahora es lo único que queda entre la documentación y el
 producto.
+
+## Sesión 2026-09-16 (cont. 3) — `design/informe/` congelado como fuente histórica
+
+Última de las decisiones que el plan reconstruido dejó abiertas. Se eligió
+**congelar**, de las tres opciones (refrescar, congelar, retirar).
+
+### Por qué congelar y no refrescar
+
+Porque **la vía que esos artboards especificaban ya se recorrió sin ellos**. Su
+propia sección «vía de implementación acordada» pedía una hoja de impresión con
+0 KB de JavaScript servida al botón «Exportar», y la misma hoja usada por
+Playwright en el build. Eso está construido y verificado desde principios de
+septiembre: carátula, índice con hojas leídas del PDF compuesto, folio, unidad
+de lectura de cinco partes y `src/verify/impresion.mjs` comprobando sobre el
+texto del PDF.
+
+Refrescarlos no añadía nada al producto y creaba **dos fuentes para el mismo
+formato**, que es la condición para que diverjan. Y mantenerlos al día es
+trabajo recurrente por cada carga: `D-387` ya lo había declarado abierto.
+
+### Ni retirar
+
+Retirarlos habría perdido la trazabilidad del criterio. Las cinco reglas que
+separan este informe de uno que publica métricas sin sus límites —denominador
+visible, sello de procedencia, panel «responde / no responde», advertencia fuera
+de la familia del dato, apéndice no opcional— nacieron ahí. Siguen vivas en la
+hoja de impresión; el registro de por qué, no.
+
+### Qué se congela, medido y no citado
+
+Se leyeron los cuatro artboards en vez de fiarse del README:
+
+| | Los artboards | Lo vigente |
+|---|---|---|
+| Paleta | `D-381`: `#071e22`, `#1d7874`, `#f4c095`, papel `#fdf8f2` | Paleta H, vino y champán (`D-596`) |
+| Composición | La banda como unidad narrativa | Sustituida por el explorador (`D-597`) |
+| Corpus | 823 · 816 · 818 · 3.935 citas · 556 · 1.207 pares · 51,2 % · 36,2 % · 63,8 % | **1.342**, ventana 2020–2025 |
+| Consolidación | 63 formas → 30 personas | **94 → 39** |
+
+Ninguna cifra sobrevive. Y **una de sus dos reglas medidas es nula en el medio
+para el que se dibujó**: «la ausencia va sobre Ink Black, donde mide 4,71:1» no
+se cumple en papel, porque `D-552` imprime la banda de contraste en tinta sobre
+blanco. Ese suelo no existe donde el lienzo lo daba por hecho.
+
+### Dónde se puso el sello, y por qué no sólo en el README
+
+En **los cuatro `.dc.html`**, como comentario de cabecera, además del README y
+de una anotación nueva en `canvas.json`. Quien abre un artboard lo abre desde un
+editor de diseño, no pasando por el README de la carpeta: un aviso que hay que
+ir a buscar no protege de nada. El sello dice qué refleja, por qué no rige,
+dónde manda hoy el formato, y que no se refresque.
+
+Las tres anotaciones que ya tenía `canvas.json` hablaban en presente del sistema
+vigente. Van marcadas `[HISTÓRICO]`.
+
+### Verificación
+
+Comprobado que **ningún paso del pipeline lee `design/informe/`**: sólo lo
+referencian `.gitignore` —que versiona los `.dc.html` y excluye el ensamblado— y
+la propia `D-387`. `canvas.json` sigue siendo JSON válido tras editarlo.
+Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-607 | `design/informe/` se congela como **fuente histórica** y no se refresca | La vía de implementación que especificaba está construida y verificada desde septiembre, así que refrescarlo no añade nada al producto y crea dos fuentes para el mismo formato. Retirarlo perdería el registro del criterio, que es lo único que sigue valiendo de ahí. Cierra el pendiente que `D-387` dejó abierto sobre el apéndice: no se corrige, y ahora por decisión y no por omisión |
+| D-608 | La autoridad del formato del informe en papel es `app.css` más `informe_pdf.mjs` | Un formato con dos fuentes diverge; y de las dos, la que produce el PDF que la gente archiva es ésa. El lienzo pasa a registro, no a especificación |
+| D-609 | El sello de congelación va en **cada archivo**, no sólo en el README de la carpeta | Un artboard se abre desde un editor de diseño, no navegando la carpeta. Un aviso que hay que ir a buscar no protege a quien no sabe que tiene que buscarlo — que es exactamente el caso al que va dirigido |
+
+### Archivos
+
+- `design/informe/README.md` — reescrito como fuente congelada, con la tabla de
+  lo que refleja contra lo vigente
+- `design/informe/*.dc.html` — sello de congelación en los cuatro
+- `design/informe/canvas.json` — anotación de congelación y las tres antiguas
+  marcadas `[HISTÓRICO]`
+
+### Estado del plan reconstruido
+
+De las cuatro decisiones que quedaron abiertas tras la reconstrucción:
+
+- **Fase 0** (deriva documental) — hecha
+- **Fase 0b** (los dos archivos de `src/design/`) — hecha
+- **`make kit`** — reparado y dentro de la batería
+- **`design/informe/`** — congelado, aquí
+
+Queda **una sola**, y no se puede cerrar desde el repositorio: **el material de
+Stitch**. La cadena «stitch» no aparece ni una vez en el proyecto, así que la
+sección 2 del handoff perdido sigue sin reconstruirse. Si existía un rediseño de
+superficie propuesto con esa herramienta, tiene que venir de fuera.
+
+### Próximo paso recomendado
+
+Ninguno pendiente en el repositorio. Si aparece el material de Stitch, las
+restricciones medidas para cualquier propuesta están en la entrada del
+2026-09-16: 20,2 KB de margen de CSS comprimido, cero dependencias externas,
+`vista.js` sin DOM, y la paleta la fija el usuario (`D-381`, `D-382`).
