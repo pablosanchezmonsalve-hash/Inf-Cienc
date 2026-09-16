@@ -81,6 +81,8 @@ await pg.goto(`http://127.0.0.1:${P}/index.html`, { waitUntil: 'networkidle' });
 await pg.waitForTimeout(500);
 const antes = await pg.textContent('.ficha-valor[data-valor="publicaciones"]');
 ok(/^[\d.]+$/.test(antes.trim()), `las cifras llegan pre-renderizadas (${antes.trim()})`);
+// Los filtros son píldoras que nacen cerradas: hay que abrir la de año.
+await pg.click('details.dim:has(.chip[data-dim="anio"]) > summary');
 await pg.locator('.chip[data-dim="anio"]').first().click();
 await pg.waitForTimeout(400);
 const luego = await pg.textContent('.ficha-valor[data-valor="publicaciones"]');
@@ -96,6 +98,28 @@ await pg.waitForTimeout(400);
 await pg.click('#limpiar-recorte');
 await pg.waitForTimeout(400);
 ok(await pg.locator('.recorte-chip').count() === 0, '«Ver todo» limpia el recorte');
+
+// La barra superior y las píldoras de filtro. Los años de la barra recortan
+// igual que el chip de año; la píldora en la que se elige no se cierra al
+// repintar, porque elegir dos valores obligaba a abrirla dos veces.
+console.log('  Barra superior y píldoras');
+await pg.click('#recorte-anio-env button[data-anio="2024"]');
+await pg.waitForTimeout(400);
+ok(new URL(pg.url()).searchParams.get('anio') === '2024', 'el año de la barra recorta y viaja en la URL');
+ok(await pg.getAttribute('#recorte-anio-env button[data-anio="2024"]', 'aria-pressed') === 'true',
+   'el año elegido queda marcado');
+ok((await pg.textContent('#lateral-filtros')).includes('1 aplicado'),
+   'la barra lateral declara el filtro activo');
+await pg.click('details.dim:has(.chip[data-dim="tipo"]) > summary');
+await pg.locator('.chip[data-dim="tipo"]').first().click();
+await pg.waitForTimeout(400);
+ok(await pg.locator('details.dim[open]:has(.chip[data-dim="tipo"])').count() === 1,
+   'la píldora sigue abierta tras elegir un valor');
+await pg.keyboard.press('Escape');
+await pg.waitForTimeout(150);
+ok(await pg.locator('details.dim[open]').count() === 0, 'Escape cierra la píldora');
+await pg.click('#limpiar-recorte');
+await pg.waitForTimeout(400);
 
 // ─────────────────────────────────────────────────────────────────── filtros
 // Publicaciones usa EL MISMO motor que la portada y las secciones. Lo que se
@@ -177,6 +201,26 @@ await pg.waitForTimeout(800);
 ok(/autor\.html\?id=/.test(pg.url()), `navega a la ficha (${pg.url().split('/').pop()})`);
 ok(await pg.locator('h1').count() === 1, 'la ficha tiene su h1');
 ok(await pg.locator('.identificadores').count() === 1, 'trae el bloque de identificadores');
+
+// ───────────────────────────────────────────────────────── menú en un teléfono
+// Por debajo de 1040 px la barra lateral es un cajón. Tiene que nacer fuera del
+// orden de tabulación, abrirse con «Menú» y cerrarse con Escape.
+console.log('  Menú en teléfono');
+const movil = await b.newContext({ viewport: { width: 430, height: 900 } });
+const pm = await movil.newPage();
+pm.on('pageerror', e => err.push(e.message));
+await pm.goto(`http://127.0.0.1:${P}/impacto.html`, { waitUntil: 'networkidle' });
+await pm.waitForTimeout(400);
+const enlaceMenu = '.lateral .nav a[href="index.html"]';
+ok(!await pm.isVisible(enlaceMenu), 'la barra lateral nace cerrada');
+await pm.click('.nav-toggle');
+await pm.waitForTimeout(350);
+ok(await pm.isVisible(enlaceMenu), 'el botón «Menú» la abre');
+ok(await pm.getAttribute('.nav-toggle', 'aria-expanded') === 'true', 'aria-expanded sigue al estado');
+await pm.keyboard.press('Escape');
+await pm.waitForTimeout(350);
+ok(!await pm.isVisible(enlaceMenu), 'Escape la cierra');
+await movil.close();
 
 console.log(`\n  excepciones JS durante todo el recorrido: ${err.length}`);
 err.forEach(e => console.log(`    ✗ ${e}`));

@@ -256,12 +256,14 @@ export function controles(pubs, sel, { buscador = false } = {}) {
     <input type="search" id="q" name="q" value="${c.escapar(sel.q || '')}"
       placeholder="Escriba para filtrar…" autocomplete="off">
   </div>` : '';
-  return busca + `<div class="filtros-explorador">${X.DIMENSIONES.map(([clave, etiqueta], i) => {
+  // Las píldoras nacen cerradas: son listas desplegables sobre el resultado, y
+  // una abierta de partida taparía las cifras que se vienen a ver.
+  return busca + `<div class="filtros-explorador">${X.DIMENSIONES.map(([clave, etiqueta]) => {
     const cuenta = X.facetas(pubs, sel, clave);
     const elegidos = sel[clave] || [];
     const opciones = [...cuenta.entries()]
       .sort(clave === 'anio' ? (a, b) => a[0].localeCompare(b[0]) : (a, b) => b[1] - a[1]);
-    return `<details class="dim" ${i === 0 || elegidos.length ? 'open' : ''}>
+    return `<details class="dim">
       <summary><span class="dim-nombre">${c.escapar(etiqueta)}</span>${
         elegidos.length ? `<span class="dim-n">${elegidos.length}</span>` : ''}</summary>
       <div class="dim-ops">${clave === 'autor'

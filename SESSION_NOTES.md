@@ -14315,3 +14315,87 @@ servido: ninguna de las cifras viejas aparece ya en `indicadores.html` ni en
 
 - `src/analysis/indicator_feasibility.py` — nueve notas derivadas y la razón de `X-04`
 - `src/build/02_indicators.py` — el catálogo sirve la advertencia derivada
+
+
+## Rediseño con Stitch, etapa 1: barra lateral y barra superior (2026-09-14)
+
+El usuario conectó el servidor MCP de Stitch y pidió aplicar al sitio el
+proyecto «Institutional Scientific Productivity Dashboard», con quince pantallas
+generadas el mismo día. Antes de tocar nada se revisaron las quince contra
+`data/processed/`, y el resultado fijó el alcance.
+
+### Qué traía el diseño, y qué no puede entrar
+
+Buena parte de las cifras del «Dossier» son reales: 1.342 publicaciones, 14.245
+citas, FWCI 1,14, 49,8 % de colaboración internacional, 744 / 730 / 133 en
+acceso abierto y la serie anual 131…318. Otras son inventadas: la serie anual de
+la «Propuesta 1» (162/194/246/288/312/140), los cuartiles (612 en Q1 contra 578
+reales), las cifras por facultad, un investigador que no existe, artículos y DOIs
+ficticios, «Documento oficial de estado», SHA-256, depósito legal, alineación con
+ANID y conformidad WCAG declarada sin medir. Todas las pantallas cargan Tailwind y
+Google Fonts desde CDN y usan azul marino con Inter.
+
+El usuario decidió tomar **sólo la estructura** de cuatro pantallas —Cockpit
+bento, Dossier editorial, Inicio con barra lateral y Data Hub— y conservar la
+identidad del sitio y los datos reales. Sobre la navegación, que chocaba con la
+columna de filtros, pidió aplicarla **como en el diseño original**.
+
+### Lo que cambió
+
+La cabecera en banda roja se sustituye por una **barra lateral fija** —marca,
+ventana, navegación agrupada con iconos, filtros activos, tema y documentación—
+y una **barra superior** con buscador, años y «Descargar informe». Por debajo de
+1040 px la lateral es un cajón que abre «Menú».
+
+El explorador pasa a **una columna**: con la navegación y los filtros a la
+izquierda, el dato quedaba en unos 740 px. Los filtros son píldoras `<details>`
+sobre el resultado, que siguen abriéndose sin JavaScript, y el índice de sección
+es una fila de píldoras en la misma tarjeta.
+
+Todo color es un token existente de `app.css`. La navegación activa y el botón
+de descarga usan el par del botón primario, ya medido en los dos temas.
+
+### Dos defectos que salieron al mirarlo
+
+- **La lupa tapaba el texto del buscador.** `input[type="search"]`, más abajo en
+  la hoja y con la misma especificidad, anulaba el relleno izquierdo. Los
+  selectores del buscador llevan ahora el tipo.
+- **El script de la hoja abortó** porque el marcador final aparecía dos veces.
+  Aborta sin escribir, que es para lo que se hizo así.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist` pasa entera, exit 0, con la misma batería
+que el sitio anterior, también en verde. `flujos.mjs` abre la píldora de año
+antes de elegir y gana dos bloques: la barra superior con las píldoras, y el
+menú en un teléfono.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-610 | Del proyecto de Stitch se toma la estructura y no la identidad ni los datos | Decisión del usuario tras ver el cotejo. Varias cifras, personas y sellos del diseño son inventados, y su paleta y tipografía sustituirían un sistema medido. Un diseño externo es propuesta, no aplicación (`docs/DESIGN_SYNC_GUIDE.md` §7) |
+| D-611 | La navegación pasa a una barra lateral fija, como en la pantalla «Inicio» | Decisión explícita del usuario: «aplícalo justo como se entrega en el diseño original». Por debajo de 1040 px es un cajón, porque fija se come la pantalla de un teléfono (el mismo criterio de `D-125`) |
+| D-612 | La campana, el acceso SSO y el avatar del diseño no entran | El sitio es estático y público. Un control que no hace nada es una promesa falsa, el criterio de `D-121` |
+| D-613 | Los filtros del explorador dejan la columna lateral y pasan a píldoras sobre el resultado | Con dos columnas de interfaz a la izquierda el dato quedaba en unos 740 px. Se pierde tener causa y efecto lado a lado (`docs/UX_UI.md` §4.4); lo compensan los años de la barra superior y el bloque de filtros activos, siempre a la vista |
+| D-614 | Las píldoras nacen cerradas, la lista se despliega a lo ancho de la barra y la abierta sobrevive al repintado | Abiertas de partida taparían las cifras. Bajo la última píldora la lista se salía por la derecha. Y sin recordar cuál estaba abierta, elegir dos valores obligaba a abrirla dos veces |
+| D-615 | El índice de sección (`D-122`) pasa a una fila de píldoras en la tarjeta de filtros | Ya no hay columna lateral donde fijarlo. Conserva el ancla y el scroll-spy |
+| D-616 | El año de la barra es un grupo de botones: los tres más recientes y «Todos» | Así lo enseña el diseño. Un año elegido fuera de esos tres se añade marcado: si lo que se mira no aparece, el control diría que no hay filtro |
+| D-617 | Los iconos son trazos SVG escritos en `core.js` | El diseño usa Material Symbols, que se sirve desde un CDN (`D-30`) |
+| D-618 | El buscador global es un formulario GET a `publicaciones.html?q=` | Funciona sin JavaScript y usa el parámetro que el motor del explorador ya lee |
+
+### Archivos
+
+- `web/assets/js/core.js` — `navHtml()` con iconos, `cromo()` con barra lateral y superior, cajón del menú
+- `web/assets/js/paginas.js` — años como botones, filtros activos en la lateral, `repintarControles()`, cierre de píldoras
+- `web/assets/js/vista_explorador.js` — las píldoras nacen cerradas
+- `web/assets/css/app.css` — cromo nuevo, explorador en una columna, píldoras, índice en fila
+- `src/verify/flujos.mjs` — la píldora de año, la barra superior y el menú en teléfono
+
+### Pendiente
+
+Etapas 2 a 5 del mismo rediseño: portada cockpit, secciones editoriales, Data
+Hub y ficha técnica de metodología. `docs/UX_UI.md` §2, §3, §4.4 y §5.1 describen
+todavía la disposición anterior: se actualizan al cerrar el rediseño, en una
+pasada, para no reescribirlos cuatro veces.
+

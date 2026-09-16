@@ -124,43 +124,92 @@ function actualizarRecorteVivo(publicaciones, sel) {
      que es la que el cromo deja pre-renderizada. */
   const papel = document.getElementById('recorte-impreso');
   if (papel) papel.textContent = c.fraseRecorte(n, total, X.describir(sel));
+
+  /* Y al pie de la barra lateral, el bloque «Filtros activos» del diseño:
+     cuántas dimensiones recortan y cuáles. La redacción sale de
+     `X.describir(sel)`, la misma de la frase de pantalla y de la del papel. */
+  const lateral = document.getElementById('lateral-filtros');
+  if (lateral) {
+    const partes = X.describir(sel);
+    lateral.innerHTML = `<p class="lateral-filtros-cab"><span>Filtros activos</span><b>${
+        partes.length ? `${partes.length} ${partes.length === 1 ? 'aplicado' : 'aplicados'}` : 'ninguno'}</b></p>
+      <p class="lateral-filtros-que">${partes.length
+        ? partes.map(p => c.escapar(p)).join('<br>') : 'Sin filtros: el informe completo.'}</p>
+      <p class="lateral-filtros-n">${c.nf.format(n)} de ${c.nf.format(total)} publicaciones</p>`;
+    lateral.hidden = false;
+  }
 }
 
-/* Selector de año en la barra de vigencia. Al elegir un año se filtra el
-   explorador de la página de inmediato (mismo recorte que tocar el chip de
-   año en los controles). Se rellena con los años reales del corpus y se
-   preselecciona el año activo, si lo hay; en una página sin explorador nunca
-   se llama y el select queda oculto.
+/* Los controles se repintan enteros a cada cambio, y con eso se cerraba la
+   píldora en la que se estaba eligiendo: marcar dos años obligaba a abrirla dos
+   veces. Se recuerda cuáles estaban abiertas, por su nombre, y se reabren. */
+function repintarControles(zona, html) {
+  const abiertas = new Set([...zona.querySelectorAll('details.dim[open] .dim-nombre')]
+    .map(e => e.textContent));
+  zona.innerHTML = html;
+  zona.querySelectorAll('details.dim').forEach(d => {
+    if (abiertas.has(d.querySelector('.dim-nombre')?.textContent)) d.open = true;
+  });
+}
 
-   El `<select>` es un elemento estable de la barra común, así que el escucha
-   se engancha UNA vez y el contenido se redibuja en cada repintado — volver a
+/* Una píldora abierta se cierra con Escape o con un clic fuera de ella. Estos
+   escuchas se enganchan al cargar el módulo, antes que los del explorador, así
+   que un clic sobre un valor llega aquí con la píldora todavía en el documento
+   y no la cierra. */
+document.addEventListener('click', e => {
+  document.querySelectorAll('details.dim[open]').forEach(d => {
+    if (!d.contains(e.target)) d.open = false;
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const abierta = document.querySelector('details.dim[open]');
+  if (!abierta) return;
+  abierta.open = false;
+  abierta.querySelector('summary')?.focus();
+});
+
+/* Años de la barra superior. Al elegir uno se filtra el explorador de la
+   página de inmediato (mismo recorte que tocar el chip de año en los
+   controles). Son botones y no un `<select>` porque la barra del diseño los
+   enseña a la vista: los tres más recientes y «Todos». En una página sin
+   explorador nunca se llama y el grupo queda oculto.
+
+   El contenedor es un elemento estable de la barra común, así que el escucha
+   se engancha UNA vez y los botones se redibujan en cada repintado — volver a
    engancharlo a cada `pintar` acumularía manejadores. `actual()` devuelve el
    recorte vigente en cada momento y `cambiar(s)` lo sustituye y repinta. */
 function montarSelectorAnio(publicaciones, actual, cambiar) {
   const env = document.getElementById('recorte-anio-env');
-  const selAnio = document.getElementById('recorte-anio');
-  if (!env || !selAnio) return;
-  selAnio.addEventListener('change', () => {
-    const v = selAnio.value;
+  if (!env) return;
+  env.addEventListener('click', e => {
+    const b = e.target.closest('button[data-anio]');
+    if (!b) return;
     const s = { ...actual(), anio: undefined };
-    if (v) s.anio = [v];
+    if (b.dataset.anio) s.anio = [b.dataset.anio];
     cambiar(s);
   });
-  redibujarSelectorAnio(publicaciones, actual(), selAnio, env);
+  redibujarSelectorAnio(publicaciones, actual(), env);
 }
 
-/* Refresca las opciones del selector y el valor activo tras un repintado. */
-function redibujarSelectorAnio(publicaciones, sel, selAnio, env) {
-  if (!selAnio || !env) return;
+/* Refresca los botones y el activo tras un repintado. Un año elegido que no
+   esté entre los tres de la barra se añade: si lo que se mira no aparece
+   marcado, el control diría que no hay filtro. */
+function redibujarSelectorAnio(publicaciones, sel, env) {
+  if (!env) return;
   const años = X.facetas(publicaciones, sel, 'anio');
   const lista = [...años.keys()]
     .filter(a => a !== 'Sin dato declarado')
     .sort((a, b) => Number(b) - Number(a));
   if (lista.length < 2) { env.hidden = true; return; }
   env.hidden = false;
-  const activo = (sel.anio || [])[0] || '';
-  selAnio.innerHTML = '<option value="">Todo el periodo</option>'
-    + lista.map(a => `<option value="${a}"${a === activo ? ' selected' : ''}>${a}</option>`).join('');
+  const elegidos = sel.anio || [];
+  const visibles = lista.slice(0, 3);
+  elegidos.filter(a => !visibles.includes(a)).forEach(a => visibles.push(a));
+  const boton = (valor, txt, pulsado) =>
+    `<button type="button" data-anio="${c.escapar(valor)}" aria-pressed="${pulsado}">${c.escapar(txt)}</button>`;
+  env.innerHTML = visibles.map(a => boton(a, a, elegidos.includes(a))).join('')
+    + boton('', 'Todos', !elegidos.length);
 }
 
 /* Mini-foco de la portada: unos atajos de un toque para entrar al explorador
@@ -281,6 +330,10 @@ async function montarExplorador(claveSeccion) {
   }
 
   let sel = X.leerURL();
+  // La página pre-renderizada sin recorte no pasa por `pintar()`, y el bloque
+  // de filtros activos de la barra lateral se quedaría oculto hasta el primer
+  // filtro.
+  actualizarRecorteVivo(publicaciones, sel);
 
   function pintar({ nuevaEntrada = false } = {}) {
     const partes = claveSeccion
@@ -293,11 +346,10 @@ async function montarExplorador(claveSeccion) {
       .map(e => [e.dataset.valor, e.textContent]));
 
     zonas.estado.innerHTML = partes.estado;
-    zonas.controles.innerHTML = partes.controles;
+    repintarControles(zonas.controles, partes.controles);
     zonas.cifras.innerHTML = partes.cifras;
     actualizarRecorteVivo(publicaciones, sel);
-    redibujarSelectorAnio(publicaciones, sel,
-      document.getElementById('recorte-anio'), document.getElementById('recorte-anio-env'));
+    redibujarSelectorAnio(publicaciones, sel, document.getElementById('recorte-anio-env'));
     redibujarMiniFoco(publicaciones, sel, document.getElementById('minifoco'));
     // Los cortes se repintan DENTRO de la transición: hay que medir la
     // geometría antes y después del cambio, y el orden sólo se garantiza si el
@@ -502,7 +554,7 @@ async function publicaciones() {
       const antes = document.getElementById('q');
       const tenia = document.activeElement === antes;
       const pos = antes ? antes.selectionStart : null;
-      zonas.controles.innerHTML = VX.controles(pubs, sel, { buscador: true });
+      repintarControles(zonas.controles, VX.controles(pubs, sel, { buscador: true }));
       if (tenia) {
         const ahora = document.getElementById('q');
         ahora.focus();
