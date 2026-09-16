@@ -381,8 +381,16 @@ export const CAMPOS = {
     const t = TRAMOS_AUTORES.find(([a, b]) => n >= a && n <= b);
     return t ? [t[2]] : [];
   },
-  // El cuartil sale del percentil SJR de la revista. Q1 es el mejor, y el
-  // percentil alto es el mejor, así que el corte va de mayor a menor.
+  // El cuartil sale del percentil SJR de la revista, y en este export el
+  // percentil MENOR es la mejor posición: Q1 es percentil ≤ 25. Es el mismo
+  // corte con que 02_indicators.py calcula R-01 para series.json, verificado
+  // allí contra el propio SJR y contra CiteScore (docs/INDICATORS.md).
+  //
+  // Hasta el 2026-09-15 este corte iba al revés —«el percentil alto es el
+  // mejor»— y la figura de Impacto publicaba Q1 = 194 donde la serie dice 578.
+  // Dos implementaciones del mismo cálculo en direcciones opuestas, y ninguna
+  // comprobación que las comparara: ahora la hace src/verify/coherencia.mjs.
+  //
   // Sin percentil declarado, cuenta como 'Sin dato declarado' — el mismo
   // quinto valor que ya trae `cuartiles` en 02_indicators.py (R-01). Antes
   // esta rama devolvía [] y la publicación simplemente desaparecía del
@@ -394,7 +402,7 @@ export const CAMPOS = {
   cuartil: p => {
     const q = p.sjr_percentil;
     if (typeof q !== 'number') return ['Sin dato declarado'];
-    return [q >= 75 ? 'Q1' : q >= 50 ? 'Q2' : q >= 25 ? 'Q3' : 'Q4'];
+    return [q <= 25 ? 'Q1' : q <= 50 ? 'Q2' : q <= 75 ? 'Q3' : 'Q4'];
   },
 };
 

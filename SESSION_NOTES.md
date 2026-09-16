@@ -14399,3 +14399,65 @@ Hub y ficha técnica de metodología. `docs/UX_UI.md` §2, §3, §4.4 y §5.1 de
 todavía la disposición anterior: se actualizan al cerrar el rediseño, en una
 pasada, para no reescribirlos cuatro veces.
 
+
+## Corrección: el cuartil de revista se publicaba al revés (2026-09-15)
+
+Lo encontró la especificación de la portada del rediseño, al revisar de dónde
+saldría el cuartil de la tabla de publicaciones más citadas.
+
+### El defecto
+
+`R-01` se calcula dos veces. El build, en `02_indicators.py`, cuenta Q1 como
+percentil SJR ≤ 25: en este export el percentil menor es la mejor posición, y
+eso está verificado contra el propio SJR y contra CiteScore
+(`docs/INDICATORS.md`). Publica en `series.json` Q1 578, Q2 265, Q3 192, Q4 188 y
+119 sin dato.
+
+El navegador, en `CAMPOS.cuartil` de `explorador.js`, contaba Q1 como percentil
+≥ 75, con un comentario que afirmaba lo contrario de la verificación: «el
+percentil alto es el mejor». Da 194 / 194 / 292 / 543 / 119. Como el
+pre-renderizado usa el mismo motor, **eso es lo que publicaba la figura de
+Impacto** y su tabla equivalente, y lo que devolvía cada recorte.
+
+### Por qué no lo vio nadie
+
+Cada implementación pasaba todas las comprobaciones por su cuenta. La batería
+medía contraste, estructura, flujos y peso, pero nada comparaba las dos
+implementaciones de una misma cifra. La tabla de `series.json` era correcta; lo
+equivocado era la figura construida al lado.
+
+### La corrección
+
+- `CAMPOS.cuartil` usa el mismo corte que el build, con el comentario corregido y
+  el motivo.
+- `src/verify/coherencia.mjs` entra en la batería. Importa el motor del navegador
+  bajo Node y compara su reparto sin filtros con `series.json`, categoría a
+  categoría. Hoy cubre `R-01`. Hay un barrido en curso sobre el resto de los
+  indicadores que se calculan dos veces, y lo que confirme se añade aquí.
+
+### Verificación
+
+- `coherencia.mjs` **falla** contra la copia del sitio anterior (Q1 194 frente a
+  578) y **pasa** contra el corregido.
+- `dist/impacto.html` publica ahora 578 / 265 / 192 / 188 / 119.
+- `node src/verify/run_all.mjs dist` pasa entera, exit 0, con el paso nuevo.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-619 | `CAMPOS.cuartil` usa el corte del build: percentil SJR menor es mejor, Q1 ≤ 25 | Es la dirección verificada y documentada (`docs/INDICATORS.md`, `02_indicators.py`). El navegador contaba al revés, y la figura de Impacto, pre-renderizada con ese motor, publicaba Q1 = 194 donde la serie dice 578 |
+| D-620 | La batería compara el motor del navegador sin filtros con `series.json` | Dos implementaciones del mismo cálculo pasaban cada una todas sus comprobaciones. Sin una que las compare, una divergencia no la detecta nada |
+| D-621 | La corrección va aparte del rediseño | Decisión del usuario. Es un error publicado: no espera a la portada, y separado se revisa y se publica solo |
+
+### Archivos
+
+- `web/assets/js/explorador.js` — `CAMPOS.cuartil`
+- `src/verify/coherencia.mjs` — nuevo
+- `src/verify/run_all.mjs` — el paso `coherencia`
+
+### Pendiente
+
+- Si se generó y publicó un informe PDF con la versión anterior, su figura de
+  cuartiles también está invertida: hay que regenerarlo (`make informe`).
+- Ampliar `coherencia.mjs` con los indicadores que confirme el barrido.
