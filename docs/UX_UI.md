@@ -405,56 +405,95 @@ contenedor; la página nunca scrollea en horizontal.
 Implementado en `web/assets/css/app.css`, hoja única. Sin dependencias externas:
 ninguna fuente, hoja ni script se carga desde un CDN.
 
-### 12.1 Paleta: alto contraste, y el dato en una sola familia
+### 12.1 Paleta: cálida, con el dato en una sola familia
 
-La dirección es **científico moderno de alto contraste**: papel blanco puro o
-suelo casi negro, cifras enormes, y el color reservado al dato. Sustituye a una
-paleta cálida (Ink Black · Deep Ocean · Peach Glow) que a su vez había
-sustituido a una identidad roja.
+La paleta vigente es **H · vino y champán** (`D-596`). La eligió el usuario el
+2026-09-01 de una comparativa de ocho candidatas servida en vivo, y pidió
+tomarla **íntegra** —marca, dato y advertencia a la vez, no sólo la cabecera—.
 
-El motivo del cambio es legible en las cifras: la tinta pasa a **19,34:1** en
-claro y **16,58:1** en oscuro. Un informe que se lee en una sala de reuniones,
-en un proyector o con presbicia no puede permitirse menos.
+| | Claro | Oscuro |
+|---|---|---|
+| Papel · `--superficie` | `#fdf6ef` hueso | `#17080a` vino profundo |
+| Tinta · `--tinta` | `#241014` | `#f0e2d0` champán |
+| Dato · `--serie-1` | `#8a2430` bordeaux | `#e0a0a8` |
+| Marca · `--marca` | `#2c0c12` | `#180609` |
+| Advertencia · `--aviso-borde` | `#2e7d32` verde moneda | `#5a9e5f` |
 
-El dato es **azul índigo**: `#2b44d9` en claro, `#7c93ff` en oscuro. Se eligió
-por medición y no por gusto — ver más abajo la separación frente al ámbar de
-advertencia.
+**Antes de ésta hubo tres, y la genealogía importa porque una de las
+transiciones fue un error de proceso:** identidad roja → la paleta institucional
+que fijó el usuario (Ink Black · Deep Ocean · Jungle Teal · Peach Glow · Racing
+Red, `D-381`) → un índigo de alto contraste **aplicado sin consultarle**, que
+`D-381` registra como incidente → la H actual.
+
+> **Esta sección describió el índigo como sistema vigente hasta el 2026-09-16**,
+> dos semanas después de que dejara de estarlo. Daba el dato en `#2b44d9`, el
+> papel en blanco puro y una tabla entera de contrastes de una paleta que el
+> sitio ya no servía. Es el mismo defecto que `D-594` cerró en las notas de
+> factibilidad y `D-584`/`D-586` en dos indicadores: una cifra correcta el día
+> que se escribió, en una frase que sobrevive al cambio que la vuelve falsa.
+> Aquí era una paleta entera.
+
+#### Las razones de contraste, medidas
+
+Las **calcula** `python3 src/design/validar_paleta.py` a partir de los 44 tokens
+que lee de la hoja. Esta tabla es la foto de una corrida —2026-09-16, veredicto
+`SISTEMA CROMÁTICO VÁLIDO`—, no una fuente: si discrepan, manda el validador.
 
 | Token | Fondo | Claro | Oscuro | Piso |
 |---|---|---|---|---|
-| `--tinta` | `--superficie` | **19,34** | **16,58** | 4,5 (WCAG 1.4.3) |
-| `--tinta-2` | `--superficie` | 9,00 | 9,95 | 4,5 |
-| `--tinta-3` | `--superficie-2` | 5,22 | 6,07 | 4,5 |
-| `--cifra` | `--superficie` | 19,34 | 16,58 | 3,0 (texto grande) |
-| `--accion` | `--superficie` | 8,55 | 7,61 | 4,5 |
-| `--serie-1` | `--superficie` | 7,16 | 6,40 | 3,0 (WCAG 1.4.11) |
-| `--sin-dato` | `--superficie` | 3,42 | 3,78 | 3,0 |
-| `--ord-1` … `--ord-4` | `--superficie` | 14,91 … 3,21 | 14,07 … 3,34 | 3,0 |
-| `--marca-tinta` | `--marca` | 15,14 | 15,14 | 4,5 |
-| `--aviso-tinta` | `--aviso-fondo` | 7,84 | 10,43 | 4,5 |
+| `--tinta` | `--superficie` | **16,91** | **15,34** | 4,5 (WCAG 1.4.3) |
+| `--tinta-2` | `--superficie` | 10,47 | 11,34 | 4,5 |
+| `--tinta-3` | `--superficie-2` | 7,22 | 7,73 | 4,5 |
+| `--cifra` | `--superficie` | 9,50 | 14,78 | 3,0 (texto grande) |
+| `--accion` | `--superficie` | 8,25 | 14,78 | 4,5 |
+| `--serie-1` | `--superficie` | 8,25 | 9,08 | 3,0 (WCAG 1.4.11) |
+| `--serie-2` | `--superficie` | 3,81 | 3,74 | 3,0 |
+| `--sin-dato` | `--superficie` | 3,63 | 5,33 | 3,0 |
+| `--ord-1` … `--ord-4` | `--superficie` | 11,65 … 3,56 | 15,26 … 3,30 | 3,0 |
+| `--bento-acento` | `--superficie` | 6,24 | 6,93 | 4,5 |
+| `--marca-tinta` | `--marca` | 13,61 | 14,88 | 4,5 |
+| `--aviso-tinta` | `--aviso-fondo` | 8,84 | 11,12 | 4,5 |
 
-**La cifra no lleva color.** `--cifra` es tinta pura en los dos temas, a
-19,34:1. En un tablero donde el número es lo que se viene a ver, teñirlo lo
-convierte en decoración y le quita contraste; el color queda libre para lo único
-que codifica algo, que es el dato de los gráficos.
+**La cifra sí lleva color, y es un cambio respecto de la paleta anterior.**
+`--cifra` es vino `#7a2028` en claro y champán `#f0ddca` en oscuro, a 9,50:1 y
+14,78:1 sobre un piso de 3,0. El índigo la dejaba en tinta pura, con el
+argumento de que teñir la cifra la convierte en decoración y le quita contraste;
+la H se tomó íntegra y la tiñe. Ese argumento quedó derogado **de hecho, sin
+decisión que lo registrara** — se hace constar aquí.
 
-#### Las tres condiciones que el contraste solo no cubre
+#### Las cuatro condiciones que el contraste solo no cubre
 
-**Separación dato ↔ advertencia:** ΔE OKLab **36,0** en claro y **33,3** en
-oscuro, sobre un piso de 20. Es holgura, y viene de que las dos familias
-—índigo y ámbar— están lejos en el círculo. La paleta cálida anterior vivía al
-borde de este piso y una de sus versiones llegó a incumplirlo.
+**Separación dato ↔ advertencia:** ΔE OKLab **26,0** en claro y **22,2** en
+oscuro, sobre un piso de 20.
 
-**Rampa ordinal Q1–Q4:** paso mínimo ΔE **11,8** y **11,2**, sobre un piso de 8,
+> **Es la razón por la que la advertencia cambió de color.** Con el dato en
+> bordeaux, el ámbar de siempre —cálido, como el dato— caía a **ΔE 17,9**, bajo
+> el piso. Se movió a verde moneda, que es frío y separa. No se bajó el piso: se
+> movió el color. Quien busque «el ámbar de advertencia» en la hoja no lo va a
+> encontrar, y eso es la corrección, no un olvido.
+
+**Rampa ordinal Q1–Q4:** paso mínimo ΔE **8,1** y **11,3**, sobre un piso de 8,
 con luminosidad monótona. Un solo tono en cuatro pasos: cuatro tonos distintos
 habrían afirmado que Q1 y Q4 no tienen relación entre sí, cuando son posiciones
-de una misma escala.
+de una misma escala. En claro el paso mínimo queda **una décima por encima** del
+piso: la rampa no admite otro escalón sin rehacerse entera.
 
-**Par categórico bajo daltonismo:** peor caso ΔE **37,9** en claro y **22,0** en
-oscuro. El par se separa por **luminosidad** —índigo contra casi negro— y eso
-ninguna dicromacia lo colapsa.
+**Par categórico bajo daltonismo** (anillo `C-01`): peor caso ΔE **16,8** en
+claro y **18,2** en oscuro, sobre un piso de 8. En claro, normal 18,2 ·
+protanopía 19,7 · deuteranopía 18,2 · tritanopía 16,8.
 
-#### Dos correcciones que impuso la medición
+**Celdas de mapa** (`--mapa-1..5`): paso mínimo entre vecinas ΔE **6,9** en los
+dos temas, sobre un piso de 6. Las cinco son fijas y no invierten con el tema,
+porque un mapa es una hoja de datos y tiene que leerse igual en claro y en
+oscuro.
+
+#### Dos correcciones que impuso la medición · paleta índigo, retirada
+
+Las dos cifras de abajo son **históricas**: se midieron sobre el papel blanco
+del índigo, que ya no existe. Se conservan porque documentan para qué sirve el
+instrumento, no el estado de la hoja. Los valores vigentes de esos mismos
+tokens están en la tabla de arriba — `--ord-4` a 3,56 / 3,30 y `--sin-dato` a
+3,63 / 5,33.
 
 > **`--ord-4` no llegaba a 3:1.** El cuarto escalón de la rampa quedaba en
 > 1,94:1 sobre blanco. No bastaba con oscurecerlo: al hacerlo se comía la
@@ -609,13 +648,22 @@ El modo oscuro es una paleta **elegida y revalidada contra su propia
 superficie**, no una inversión. Invertir una paleta validada no produce una
 paleta validada.
 
-- **Claro:** papel blanco puro (`#ffffff`), tinta casi negra (`#0a0e14`).
-- **Oscuro:** suelo `#070a0f`, tarjetas levantadas sobre él en `#111721`.
+- **Claro:** suelo de página `#f7efe6`, tarjetas levantadas sobre él en papel
+  hueso `#fdf6ef`, tinta vino muy oscuro `#241014`.
+- **Oscuro:** suelo `#150507`, tarjetas en `#17080a`, tinta champán `#f0e2d0`.
 
-El color del dato **cambia de valor pero no de familia**: índigo en los dos
-temas, `#2b44d9` sobre blanco y `#7c93ff` sobre el suelo oscuro. Que la familia
-no cambie importa — un lector que alterna de tema no debería tener que reaprender
-qué significa el color.
+En los dos temas la tarjeta se levanta sobre el suelo de la página, y no al
+revés: la jerarquía de superficies es la misma y sólo cambia de registro.
+
+El color del dato **cambia de valor pero no de familia**: bordeaux en los dos
+temas, `#8a2430` sobre el papel hueso y `#e0a0a8` sobre el suelo oscuro. Que la
+familia no cambie importa — un lector que alterna de tema no debería tener que
+reaprender qué significa el color.
+
+La tinta **sí cambia de familia**, y es deliberado: vino en claro, champán en
+oscuro. No es una inversión del mismo valor, es el segundo color de la paleta
+ocupando el sitio del primero, que es lo que hace que el tema oscuro se lea como
+la misma identidad y no como su negativo.
 
 El selector de la cabecera tiene tres estados —automático, claro, oscuro—; el
 automático sigue al sistema operativo. La elección se recuerda y se aplica antes
@@ -646,8 +694,11 @@ de grises sobre el módulo entero.
 cabría esperar bajo el promedio mundial: por definición, el top *k* % de la
 distribución mundial contiene el *k* % de las publicaciones. Se lee de un
 vistazo que la institución queda **por debajo en el 1 %, el 5 % y el 10 %, y
-por encima en el 25 %**. Usa el mismo ámbar que la línea de `I-04`, porque
-ambas dicen lo mismo y aprenderlo una vez debe servir en todo el sitio.
+por encima en el 25 %**. Usa el mismo verde de referencia que la línea de `I-04`
+(`--aviso-tinta-grafico`), porque ambas dicen lo mismo y aprenderlo una vez debe
+servir en todo el sitio. Era ámbar hasta la paleta H, que movió toda la familia
+de la advertencia a verde moneda por la separación medida frente al dato
+bordeaux (§12.1).
 
 Cuando lo esperable cae a la derecha de la barra, la cifra se corre más allá de
 la marca: es el caso que más importa leer y taparlo lo volvería ilegible justo

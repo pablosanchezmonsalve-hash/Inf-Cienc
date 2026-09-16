@@ -14315,3 +14315,152 @@ servido: ninguna de las cifras viejas aparece ya en `indicadores.html` ni en
 
 - `src/analysis/indicator_feasibility.py` — nueve notas derivadas y la razón de `X-04`
 - `src/build/02_indicators.py` — el catálogo sirve la advertencia derivada
+
+## Sesión 2026-09-16 — La paleta que el producto servía y la documentación no
+
+Se pidió retomar desde un handoff en `.omc/handoffs/rediseno-stitch/HANDOFF.md`.
+**No existe en este entorno**: `.gitignore:76` excluye `.omc/` («estado
+operacional del asistente»), y esta sesión corre en un contenedor remoto que
+clonó el repositorio desde `origin`. Comprobado en el árbol, en la historia de
+todas las ramas (`--diff-filter=A`), en `git stash` y en el sistema de archivos
+entero: no está. El documento sigue en la máquina local del usuario.
+
+A falta de él, se reconstruyó el plan desde lo versionado y se ejecutó su
+primera fase, la única que no dependía de decisiones pendientes.
+
+### El hallazgo: tres paletas vivas a la vez
+
+| Artefacto | Paleta | Estado |
+|---|---|---|
+| `web/assets/css/app.css` — autoridad | H, vino + champán | vigente |
+| `docs/UX_UI.md` §12.1 y §12.6 | índigo `#2b44d9` sobre blanco puro | **describía una paleta muerta** |
+| `design/informe/*.dc.html` | `D-381`: `#071e22 · #1d7874 · #f4c095` | anterior a la H |
+
+La genealogía, de `D-381` y de la sesión del 2026-09-01: identidad roja → la
+paleta institucional que fijó el usuario → **un índigo aplicado sin
+consultarle**, que `D-381` registra como incidente → la H, elegida el
+2026-09-01 de ocho candidatas servidas en vivo y pedida «íntegra».
+
+`docs/UX_UI.md` §12.1 era la memoria de ese incidente que nadie borró: publicaba
+como sistema vigente exactamente la paleta que `D-381` declara perdida, con una
+tabla entera de contrastes de un producto que no existe. Y no era inocuo: `make
+kit` genera `design-system/` desde `app.css` (§16.1, «no puede desactualizarse
+respecto del producto»), así que el kit decía vino mientras el documento que lo
+explica decía índigo.
+
+### El hueco de memoria que se había reabierto
+
+`D-382` existe porque una elección cromática del usuario no estaba registrada y
+«nada la sostuvo cuando el rediseño cambió de rumbo. El hueco no era de código:
+era de memoria».
+
+**La Paleta H no estaba en el índice de decisiones.** Vivía sólo en la narrativa
+de `SESSION_NOTES.md`. `docs/DECISIONS.md` seguía declarando en `D-381` que la
+paleta institucional es Ink Black · Deep Ocean · Jungle Teal · Peach Glow ·
+Racing Red. El hueco que `D-382` abrió para no repetirse se repitió en la paleta
+siguiente.
+
+### Lo medido, que es lo que sustituye a lo escrito
+
+`python3 src/design/validar_paleta.py` → **SISTEMA CROMÁTICO VÁLIDO**, 44 tokens,
+0 fallos. Las cifras que la documentación daba contra las reales:
+
+| | Documentado (índigo) | Medido (H) |
+|---|---|---|
+| `--tinta` sobre `--superficie` | 19,34 / 16,58 | **16,91 / 15,34** |
+| `--cifra` | 19,34 / 16,58 | **9,50 / 14,78** |
+| `--serie-1`, el dato | 7,16 / 6,40 | **8,25 / 9,08** |
+| `--sin-dato` | 3,42 / 3,78 | **3,63 / 5,33** |
+| ΔE dato ↔ advertencia | 36,0 / 33,3 | **26,0 / 22,2** |
+| Rampa ordinal, paso mínimo | 11,8 / 11,2 | **8,1 / 11,3** |
+| Par categórico, daltonismo | 37,9 / 22,0 | **16,8 / 18,2** |
+
+Ninguna fila coincidía. Y tres afirmaciones del documento eran falsas, no
+inexactas:
+
+- **«La cifra no lleva color.»** `--cifra` es hoy `#7a2028`, vino. La H se tomó
+  íntegra y la tiñe; el argumento anterior quedó derogado de hecho, sin decisión
+  que lo registrara.
+- **«Las dos familias —índigo y ámbar— están lejos en el círculo.»** No hay
+  índigo y no hay ámbar. Con el dato en bordeaux el ámbar caía a **ΔE 17,9**,
+  bajo el piso de 20, y la advertencia se movió entera a verde moneda. El
+  documento presentaba como holgura la separación que había obligado a mover un
+  color.
+- **«Papel blanco puro `#ffffff`.»** Es `#fdf6ef`, hueso.
+
+### Dos sitios más, declarados y no corregidos
+
+Los dos son código, no documentación, y por eso quedan fuera de esta pasada: lo
+autorizado era corregir hechos sin tocar producto.
+
+**`src/design/build_kit.mjs`** calcula los contrastes desde los tokens de la
+hoja —eso está bien—, pero tiene **prosa con cifras congeladas** que el
+generador emite tal cual: «la advertencia ámbar, ΔE 28,6 / 21,2» (L213-215),
+«sobre Peach Glow el dato cae a 3,21:1 y la ausencia a 2,35:1» (L446), «papel
+teñido con Peach» (L425), «el trazo ámbar» (L555), «deuteranopía ΔE 12,2»
+(L488). Peach Glow no está en la paleta; `.banda-enfasis` es champán `#f0ddca`.
+Y L215 afirma que «el ámbar no se movió al cambiar el rojo», que es exactamente
+lo contrario de lo que pasó.
+
+Es el sitio más caro de los cinco, porque `make kit` publica esas fichas en
+`claude.ai/design` bajo la promesa de §16.1 de que el sistema de diseño «no
+puede desactualizarse respecto del producto».
+
+**`src/design/validar_paleta.py`**, en su propio encabezado: «el dato es rojo y
+la advertencia metodológica **ámbar**» (L21-22) y «el Peach del cierre» (L232).
+El instrumento mide bien —lee los tokens que haya— pero se describe con la
+paleta anterior.
+
+**No se corrigen aquí, a propósito.** Hacerlo bien exige medir los ámbitos de
+banda con la matemática del validador, y escribir una cifra sin medirla sería
+cometer el mismo defecto que esta sesión vino a cerrar. Quedan declarados con
+sus líneas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-596 | La paleta vigente es **H · vino y champán**, y queda registrada como decisión del usuario | La eligió el 2026-09-01 de una comparativa de ocho candidatas servidas en vivo y pidió tomarla íntegra. Vivía sólo en la narrativa: el índice seguía declarando la institucional de `D-381`. Es el hueco que `D-382` abrió para no repetirse, reabierto en la paleta siguiente — y `D-382` exige que una elección cromática del usuario se registre como decisión |
+| D-597 | `D-375` queda acotada: la banda **ya no** es la unidad de composición de las páginas narrativas | El explorador la sustituyó en la portada y en las cuatro secciones (`docs/UX_UI.md` §4 ter); sobrevive como suelo de contraste de los indicadores diferidos, que no responden al recorte. El índice de decisiones servía la regla retirada a quien lo consultara, que es de lo que el índice existe para proteger |
+| D-598 | La tabla de contrastes de `docs/UX_UI.md` se declara foto fechada y cede ante `validar_paleta.py` | Es una copia a mano de una salida calculada. Declararla foto con su fecha no impide que envejezca, pero impide que se lea como fuente y dice contra qué contrastarla. Mientras sea prosa, ninguna compuerta la mira: la batería pasó entera con el documento diciendo índigo y el producto sirviendo vino |
+
+### Archivos
+
+- `docs/UX_UI.md` — §12.1 reescrita contra el validador, §12.6 contra los tokens
+  reales, y la marca de valor esperado de §12.6 bis, que seguía diciendo ámbar
+- `SESSION_NOTES.md` — esta entrada
+- `docs/DECISIONS.md` — regenerado con `src/state/snapshot.py`
+
+### Verificación
+
+- `validar_paleta.py` → SISTEMA CROMÁTICO VÁLIDO, 0 fallos
+- `06_assemble_site.py` → 12 páginas, 829 fichas, capa interna no incluida
+- `node src/verify/run_all.mjs dist` → VERIFICACIÓN COMPLETA, sin fallos
+- `grep` de la paleta muerta en `docs/UX_UI.md`: las nueve apariciones que quedan
+  son referencias históricas explícitas, ninguna afirmación vigente
+
+### Supuestos descartados
+
+- Que el handoff estuviera versionado en alguna rama. No lo está, y `.omc/` está
+  ignorado a propósito.
+- Que `D-322` siguiera con su condición abierta («ver una paleta medida antes de
+  aplicarla»). Se cerró el 2026-09-01: la comparativa se sirvió en vivo y el
+  validador la declaró válida. La nota de `D-322` es anterior a ese cierre.
+
+### Ambigüedades abiertas
+
+- **`design/informe/` está en la paleta `D-381`**, con la banda como sistema y
+  cifras del corpus de 823. Tres derivas a la vez. Además su regla 2 —«la
+  ausencia va sobre Ink Black»— ya es nula en papel por `D-552`, que imprime la
+  banda de contraste en tinta sobre blanco. Requiere decisión: refrescar,
+  congelar como fuente histórica o retirar.
+- **`src/design/build_kit.mjs` y `src/design/validar_paleta.py`**, arriba: prosa
+  que describe la paleta anterior en los dos archivos del sistema de diseño.
+- **El «rediseño stitch» propiamente dicho** no se puede reconstruir: la cadena
+  «stitch» no aparece ni una vez en el repositorio.
+
+### Próximo paso recomendado
+
+Decidir qué gobierna `design/informe/`. Es lo que bloquea todo lo demás: mientras
+no se decida, hay dos fuentes de formato para el informe en papel y la
+implementada no es la documentada.
