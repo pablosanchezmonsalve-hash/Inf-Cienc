@@ -78,7 +78,7 @@ def main() -> None:
     rdata_unificado = c.read_rdata("rdata_unificado")
     if rdata_unificado is None:
         check("E-07", "alta", "Sin columnas residuales de join en fuentes activas",
-              True, "fuente de referencia no leída (paquete `rdata` ausente); "
+              True, "fuente de referencia no leída (paquete rdata ausente); "
                     "no afecta a las fuentes activas")
     else:
         residuo = [col for col in rdata_unificado.columns

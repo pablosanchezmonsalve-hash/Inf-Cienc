@@ -274,6 +274,29 @@ const [descarga] = await Promise.all([
 ok(/^publicaciones-.+\.csv$/.test(descarga.suggestedFilename()),
    `el botón descarga el CSV (${descarga.suggestedFilename()})`);
 
+// ───────────────────────────────────────────────── glosario y ficha técnica
+// La ficha se contrasta con meta.json, no con cifras escritas aquí: una prueba
+// con 1.342 a mano pasaría a mentir en la próxima carga.
+console.log('  Glosario y ficha técnica');
+await pg.goto(`http://127.0.0.1:${P}/metodologia.html`, { waitUntil: 'networkidle' });
+await pg.waitForTimeout(400);
+const metaM = await pg.evaluate(() => fetch('data/meta.json').then(r => r.json()));
+const nGlosario = await pg.evaluate(() => fetch('data/glossary.json').then(r => r.json()))
+  .then(g => g.entradas.length);
+const ficha = await pg.textContent('#ficha-tecnica');
+ok(await pg.locator('#ficha-tecnica dl.ficha-datos').count() === 4, 'la ficha tiene sus cuatro bloques');
+ok(ficha.includes(new Intl.NumberFormat('es-CL').format(metaM.denominadores.universo_total)),
+   'la ficha declara el universo de meta.json');
+ok(ficha.includes(metaM.fecha_corte_citas) && ficha.includes(metaM.exports.Scopus.fecha_export),
+   'la ficha da la fecha de SciVal y la del export de Scopus');
+ok(metaM.exports.Scopus.fecha_corte || ficha.includes('El export no lo declara'),
+   'la ficha no atribuye a Scopus el corte de SciVal');
+ok(await pg.locator('.glosario-entrada').count() === nGlosario,
+   `el glosario lista las ${nGlosario} entradas`);
+await pg.goto(`http://127.0.0.1:${P}/metodologia.html#fwci-field-weighted-citation-impact`,
+  { waitUntil: 'networkidle' });
+ok(await pg.locator('.glosario-entrada:target').count() === 1, 'un enlace #slug aterriza en su definición');
+
 console.log(`\n  excepciones JS durante todo el recorrido: ${err.length}`);
 err.forEach(e => console.log(`    ✗ ${e}`));
 await b.close();

@@ -983,14 +983,15 @@ async function fichaAutor() {
 /* =========================================================== metodología */
 async function metodologia() {
   const glosarioEl = document.getElementById('glosario');
-  const procedenciaEl = document.getElementById('procedencia');
+  const fichaEl = document.getElementById('ficha-tecnica-datos');
   const validacionEl = document.getElementById('validacion');
-  if (yaPintado(glosarioEl) && yaPintado(procedenciaEl) && yaPintado(validacionEl)) return;
-  const { entradas } = await c.cargar('glossary.json');
-  const meta = await c.cargar('meta.json');
+  if (yaPintado(glosarioEl) && yaPintado(fichaEl) && yaPintado(validacionEl)) return;
+  const [{ entradas }, meta, val, { kpis }] = await Promise.all([c.cargar('glossary.json'),
+    c.cargar('meta.json'), c.cargar('validacion.json'), c.cargar('kpis.json')]);
+  const notaP01 = (kpis.find(k => k.codigo === 'P-01') || {}).nota;
   glosarioEl.innerHTML = v.glosario(entradas);
-  procedenciaEl.innerHTML = v.procedencia(meta);
-  if (validacionEl) validacionEl.innerHTML = v.validacion(await c.cargar('validacion.json'));
+  fichaEl.innerHTML = v.fichaTecnica(meta, val, notaP01 && notaP01.texto);
+  validacionEl.innerHTML = v.validacion(val);
 
   // La cifra de cobertura de ORCID crece sola (T-19 corre por cron mensual):
   // escribirla a mano en el HTML es exactamente cómo terminó diciendo

@@ -87,12 +87,14 @@ const CONJUNTOS = [
     describe: 'Los valores de cada dimensión de filtro, con su recuento sobre el universo.',
     registros: (j) => Object.keys(j).filter((k) => k !== 'meta').length, procedencia: (j, m) => PROC_ELSEVIER(m) },
   { archivo: 'hierarchy.json', unidad: 'unidades',
-    describe: 'Producción por facultad y escuela, contada en pares autor × publicación.',
+    describe: 'Producción y citas por facultad y escuela.',
     registros: (j) => { const n = (x) => 1 + (x.hijos || []).reduce((a, h) => a + n(h), 0); return n(j.raiz) - 1; },
     // Sin fecha: el sello de este archivo hereda por defecto el corte de SciVal,
     // y sus citas son las del export de Scopus, que no declara fecha de corte.
     procedencia: (j) => `${j.procedencia.fuente} · citas del export de Scopus, que no declara fecha de corte`,
-    nota: (j) => j.metodologia.citas_totales },
+    // Las dos advertencias del propio archivo, no prosa aparte: cuenta pares y
+    // suma citas de Scopus sobre ellos, así que no es un total institucional.
+    nota: (j) => `${j.metodologia.n_publicaciones} ${j.metodologia.citas_totales}` },
   { archivo: 'validacion.json', unidad: 'reglas',
     describe: 'Las reglas de la auditoría de datos y el resultado de cada una.',
     registros: (j) => j.reglas.length, procedencia: (j, m) => `Auditoría del build del ${m.fecha_build}` },
@@ -286,9 +288,11 @@ async function main() {
       // esos enlaces aterrizaban en un contenedor vacío: el ancla no existía.
       const a = [];
       const { entradas } = await leerJSON('glossary.json');
+      const val = await leerJSON('validacion.json');
+      const notaP01 = (kpis.find((k) => k.codigo === 'P-01') || {}).nota;
       html = rellenar(html, 'glosario', v.glosario(entradas), a);
-      html = rellenar(html, 'procedencia', v.procedencia(meta), a);
-      html = rellenar(html, 'validacion', v.validacion(await leerJSON('validacion.json')), a);
+      html = rellenar(html, 'ficha-tecnica-datos', v.fichaTecnica(meta, val, notaP01 && notaP01.texto), a);
+      html = rellenar(html, 'validacion', v.validacion(val), a);
       // Misma razón que unidadPorPersona más abajo: esta cifra crece sola
       // (T-19 corre por cron), y sin pre-renderizarla un lector sin
       // JavaScript vería el hueco vacío que "hoy hay X de Y" deja al medio

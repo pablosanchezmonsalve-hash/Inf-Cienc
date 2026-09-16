@@ -558,9 +558,13 @@ def procedencia(code: str, cubiertas: int | None = None,
 def build_meta() -> dict:
     """Procedencia del build. Se incrusta en todos los artefactos."""
     scival = SOURCES["scival_export"]
+    scopus = SOURCES["scopus_export"]
     return {
         "institucion": INSTITUTION["institucion"]["nombre_canonico"],
         "institucion_corta": INSTITUTION["institucion"]["nombre_corto"],
+        # Identificador público. Lo usa la detección institucional (regla
+        # I-02); la ficha técnica de metodologia.html lo declara.
+        "scopus_affiliation_id": INSTITUTION["institucion"]["scopus_affiliation_id"],
         "titulo_plataforma": INSTITUTION["presentacion"]["titulo_plataforma"],
         "ventana": {
             "inicio": INSTITUTION["ventana_temporal"]["anio_inicio"],
@@ -569,6 +573,16 @@ def build_meta() -> dict:
         "fuentes": ["Scopus", "SciVal"],
         "fecha_corte_citas": scival["fecha_corte"],
         "fecha_export": scival["fecha_export"],
+        # Las dos fechas de las dos fuentes. `fecha_corte_citas` y
+        # `fecha_export` de arriba son las de SciVal, y leídas solas parecen
+        # cubrir también a Scopus, cuyo export no declara corte (T-06): aquí
+        # queda `null`, no la fecha de SciVal.
+        "exports": {
+            "Scopus": {"fecha_export": scopus["fecha_export"],
+                       "fecha_corte": scopus["fecha_corte"]},
+            "SciVal": {"fecha_export": scival["fecha_export"],
+                       "fecha_corte": scival["fecha_corte"]},
+        },
         "fecha_build": date.today().isoformat(),
         "denominadores": denominadores(),
         # Lo consume el explorador para decidir cuándo el sello de un corte

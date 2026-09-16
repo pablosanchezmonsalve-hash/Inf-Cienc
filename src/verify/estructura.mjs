@@ -42,6 +42,10 @@ for (const tema of ['light', 'dark']) {
 
     const est = await pg.evaluate(() => {
       const r = { dupes: [], ariaRoto: [], sinAlt: 0, h1: 0, saltos: [], botonSinNombre: [], anclasRotas: [] };
+      // Marcado Markdown que llegó al lector: el sitio escapa el texto y no lo
+      // interpreta, así que una negrita de los documentos se leía entre
+      // asteriscos (D-652). innerText deja fuera comentarios y atributos.
+      r.markdown = [...document.body.innerText.matchAll(/.{0,30}(\*\*|`).{0,30}/g)].map(m => m[0]);
       // Identificadores duplicados
       const vistos = new Map();
       document.querySelectorAll('[id]').forEach(e => {
@@ -83,6 +87,7 @@ for (const tema of ['light', 'dark']) {
     [...new Set(est.saltos)].forEach(s => anotar(`salto de encabezado ${s}`));
     est.botonSinNombre.forEach(x => anotar(`botón sin nombre accesible: ${x}`));
     [...new Set(est.anclasRotas)].forEach(x => anotar(`ancla interna rota ${x}`));
+    [...new Set(est.markdown)].forEach(x => anotar(`marcado Markdown a la vista: «${x}»`));
   }
   await ctx.close();
 }

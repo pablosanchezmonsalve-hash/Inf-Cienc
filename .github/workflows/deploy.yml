@@ -190,7 +190,7 @@ jobs:
       - name: Comprobar que el sitio tiene contenido sin JavaScript
         run: |
           set -e
-          for p in index impacto produccion colaboracion tematica; do
+          for p in index impacto produccion colaboracion tematica datos metodologia; do
             grep -q 'data-prerender="1"' "dist/$p.html" \
               || { echo "FALLA: dist/$p.html no está pre-renderizado"; exit 1; }
           done

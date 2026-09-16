@@ -1984,6 +1984,42 @@ svg.chart .trama { pointer-events: none; }
 }
 .tabla-catalogo tr.cat-motivo strong { color: var(--tinta); }
 
+/* Glosario y ficha técnica, la última banda de metodologia.html: el colofón
+   del Dossier. El glosario ancho a la izquierda y la ficha a su lado. No es
+   fija: mide más que la pantalla, y fija dejaba su final fuera de alcance
+   hasta terminar el glosario. */
+.glosario-ficha { display: grid; gap: var(--e5); }
+@media screen and (min-width: 1040px) {
+  .glosario-ficha { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: start; }
+}
+.glosario { margin: 0; }
+.glosario-entrada { padding: var(--e4) 0; border-top: 1px solid var(--linea); }
+@media (min-width: 900px) { .glosario-entrada { scroll-margin-top: 7.5rem; } }
+.glosario-entrada:first-child { border-top: 0; padding-top: 0; }
+.glosario-entrada dt { font: 700 var(--t-l)/1.3 var(--f-ui); color: var(--tinta); }
+.glosario-entrada dd { margin: var(--e2) 0 0; }
+.glosario-entrada dd p { margin: 0; max-width: 68ch; }
+.glosario-entrada dd .nota { margin-top: var(--e2); }
+.glosario-entrada:target {
+  outline: 2px solid var(--accion-viva); outline-offset: var(--e2); border-radius: var(--radio-s);
+}
+.ficha-tecnica h3 { margin: 0 0 var(--e3); }
+.ficha-tecnica h4 {
+  margin: var(--e4) 0 var(--e2); font: 700 var(--t-xs)/1.3 var(--f-ui);
+  letter-spacing: .07em; text-transform: uppercase; color: var(--tinta-2);
+}
+.ficha-datos { margin: 0; font-size: var(--t-s); }
+.ficha-datos > div {
+  display: grid; grid-template-columns: minmax(0, 10rem) minmax(0, 1fr); gap: var(--e3);
+  padding: var(--e2) 0; border-top: 1px solid var(--linea);
+}
+.ficha-datos > div:first-child { border-top: 0; }
+.ficha-datos dt { color: var(--tinta-2); }
+.ficha-datos dd { margin: 0; overflow-wrap: anywhere; }
+.ficha-datos dd .nota { display: block; margin-top: var(--e1); }
+.ficha-datos .mono { font-family: var(--f-mono); font-size: .92em; white-space: nowrap; }
+@media print { .ficha-tecnica { break-inside: avoid; } }
+
 /* Auditoría de datos, en metodologia.html (V2-27). */
 .val-resumen { font-size: var(--t-m); margin: 0 0 var(--e3); }
 .tabla-validacion { font-size: var(--t-s); }

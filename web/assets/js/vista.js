@@ -575,22 +575,67 @@ export function produccionDeclarada(datos) {
   return `${totalHTML}${pd01HTML}${pd02HTML}${pd03HTML}${pd04HTML}`;
 }
 
-/** La lista de procedencia de metodologia.html: fuentes, ventana temporal,
-    fecha de corte de citas, export de origen y build. Vivía inline en
-    paginas.js — se saca aquí por lo mismo que el resto del archivo: para que
-    el prerenderizado no tenga una segunda copia del marcado. */
-export function procedencia(meta) {
+/** Ficha técnica de metodologia.html: con qué datos se construyó esta carga.
+    Sale entera de meta.json y validacion.json. Sustituye a la lista de
+    procedencia, que daba una sola fecha de corte y se leía como si cubriera
+    también a Scopus. Cada cifra lleva al lado la advertencia que la matiza:
+    X-04 junto a las citas, la nota de P-01 junto al universo. Sin sello,
+    firma ni hash: certificarían algo que el sitio no comprueba. */
+export function fichaTecnica(meta, val, notaUniverso) {
+  const fila = (e, v, nota) => `<div><dt>${c.escapar(e)}</dt><dd>${v}${
+    nota ? `<span class="nota">${nota}</span>` : ''}</dd></div>`;
+  const regla = (cod) => val.reglas.find(r => r.regla === cod);
+  const fallan = val.reglas.filter(r => r.resultado === 'FALLA');
+  const x04 = fallan.find(r => r.regla === 'X-04');
+  const v10 = regla('V-10');
+  const bloqueantes = val.reglas.filter(r => r.severidad === 'bloqueante').length;
+  const scopus = (meta.exports || {}).Scopus;
+  const d = meta.denominadores;
   return `
-    <ul>
-      <li>Fuentes: ${meta.fuentes.join(', ')}</li>
-      <li>Ventana temporal: ${meta.ventana.inicio}–${meta.ventana.fin}</li>
-      <li>Citas actualizadas al: <strong>${meta.fecha_corte_citas}</strong></li>
-      <li>Export de origen: ${meta.fecha_export}</li>
-      <li>Publicaciones: ${c.nf.format(meta.denominadores.universo_total)} ·
-          con métricas: ${c.nf.format(meta.denominadores.con_metricas)} ·
-          con autoría detallada: ${c.nf.format(meta.denominadores.con_autoria_detallada)}</li>
-      <li>Build: ${meta.fecha_build}</li>
-    </ul>`;
+    <h4>Fuentes y fechas</h4>
+    <dl class="ficha-datos">
+      ${fila('Institución', c.escapar(meta.institucion))}
+      ${meta.scopus_affiliation_id
+        ? fila('Scopus Affiliation ID', `<span class="mono">${c.escapar(meta.scopus_affiliation_id)}</span>`) : ''}
+      ${fila('Fuentes', c.escapar(meta.fuentes.join(' · ')))}
+      ${fila('Ventana', `${meta.ventana.inicio}–${meta.ventana.fin}`)}
+      ${fila('Export de SciVal', c.escapar(meta.fecha_export))}
+      ${fila('Citas y métricas de SciVal al', c.escapar(meta.fecha_corte_citas), x04
+        ? `Scopus no suma las mismas citas que SciVal; la regla <span class="mono">X-04</span> falla: ${c.escapar(x04.observado)}.` : '')}
+      ${scopus ? fila('Export de Scopus', c.escapar(scopus.fecha_export)) : ''}
+      ${scopus ? fila('Corte de Scopus', scopus.fecha_corte ? c.escapar(scopus.fecha_corte) : 'El export no lo declara',
+        scopus.fecha_corte ? '' : 'Los sellos de los indicadores que salen de Scopus muestran el corte de SciVal.') : ''}
+      ${fila('Build de los datos', c.escapar(meta.fecha_build))}
+    </dl>
+    <h4>Denominadores</h4>
+    <dl class="ficha-datos">
+      ${fila('Universo', `${c.nf.format(d.universo_total)} publicaciones`,
+        notaUniverso ? c.escapar(notaUniverso) : '')}
+      ${fila('Con métricas', c.nf.format(d.con_metricas))}
+      ${fila('Con autoría detallada', c.nf.format(d.con_autoria_detallada))}
+      ${fila('Con área temática', c.nf.format(d.con_area_tematica))}
+      ${v10 ? fila('Campos bajo el umbral de la auditoría', c.escapar(v10.observado),
+        `Regla V-10 · ${c.escapar(v10.descripcion)}.`) : ''}
+    </dl>
+    <p class="nota">Los cuatro denominadores son los declarados en la configuración
+      del informe, no un recuento campo a campo: la cobertura real de cada campo va en
+      el sello de cada indicador.</p>
+    <h4>Umbrales de lectura</h4>
+    <dl class="ficha-datos">
+      ${fila('Cobertura para un sello sin advertencia', `${c.num(meta.cobertura_minima_sin_advertencia * 100)} %`)}
+      ${fila('Mínimo interpretable de un recorte por unidad', `${c.nf.format(meta.n_minimo_interpretable_unidad)} publicaciones`)}
+    </dl>
+    <h4>Auditoría de datos</h4>
+    <dl class="ficha-datos">
+      ${fila('Reglas evaluadas', `${c.nf.format(val.reglas_evaluadas)} · ${c.nf.format(val.pasan)} pasan · ${
+        c.nf.format(val.fallan)} falla${val.fallan === 1 ? '' : 'n'}`)}
+      ${fallan.length ? fila('Fallan', fallan.map(r => `<span class="mono">${c.escapar(r.regla)}</span>`).join(', ')) : ''}
+      ${fila('Bloqueantes', `${c.nf.format(bloqueantes)} reglas · ${c.nf.format(val.bloqueantes_fallando)} fallando`)}
+    </dl>
+    <p class="nota">Cada valor se lee al construir el sitio de <code>meta.json</code> y
+      <code>validacion.json</code>, los mismos archivos que lista
+      <a href="datos.html">Descarga de datos</a>.
+      <a href="#validacion-datos">Ver las ${c.nf.format(val.reglas_evaluadas)} reglas →</a></p>`;
 }
 
 /** Estado de la auditoría de datos (V2-27): la misma tabla de 30 reglas que
@@ -636,10 +681,12 @@ export function validacion(v) {
     pre-renderizarse: sin JavaScript, esos enlaces aterrizaban en un
     contenedor vacío y el ancla no existía. */
 export function glosario(entradas) {
-  return entradas.map(e => `
-    <section class="modulo" id="${e.slug}">
-      <h2>${c.escapar(e.termino)}</h2>
-      <p>${c.escapar(e.corto)}</p>
-      ${e.extendido ? `<p class="nota">${c.escapar(e.extendido)}</p>` : ''}
-    </section>`).join('');
+  // Una lista de definiciones y no un h2 por término: el glosario comparte
+  // banda con la ficha técnica y quince encabezados partían la página. El id
+  // sigue en cada entrada, así que los enlaces `#slug` no cambian.
+  return `<dl class="glosario">${entradas.map(e => `
+    <div class="glosario-entrada" id="${e.slug}">
+      <dt>${c.escapar(e.termino)}</dt>
+      <dd><p>${c.escapar(e.corto)}</p>${e.extendido ? `<p class="nota">${c.escapar(e.extendido)}</p>` : ''}</dd>
+    </div>`).join('')}</dl>`;
 }

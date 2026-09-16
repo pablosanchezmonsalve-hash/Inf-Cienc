@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `b47c40e` · Las secciones pasan a la cabecera editorial del diseño de Stitch
+Último commit: `83e6a89` · La descarga de datos pasa a página propia, con la estructura del Data 
 Snapshot: 2026-09-16
 
 ---
@@ -72,7 +72,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 652
+## Decisiones tomadas: 662
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

@@ -15266,3 +15266,98 @@ contraste, estructura y responsive. `flujos.mjs` exige un inventario de al menos
 
 - Etapa 5 (Metodología).
 - `docs/UX_UI.md`, al cerrar el rediseño.
+
+## Rediseño con Stitch, etapa 5: glosario y ficha técnica (2026-09-16)
+
+Última etapa. `metodologia.html` cierra con una banda «Glosario y ficha técnica»
+en dos columnas, el colofón del «Dossier» de Stitch, sin el sello, la firma, el
+QR ni el hash del diseño.
+
+### Lo que cambió
+
+- **Ficha técnica** en lugar de la lista «Procedencia de los datos». Sale entera
+  de `meta.json` y `validacion.json`, en cuatro bloques: fuentes y fechas,
+  denominadores, umbrales de lectura y auditoría. La lista anterior daba una sola
+  fecha de corte y se leía como si cubriera también a Scopus.
+- **Cada cifra lleva al lado lo que la matiza**, que es lo que pidieron los
+  críticos de la especificación: X-04 junto a las citas de SciVal; «el export no
+  lo declara» como corte de Scopus, con la nota de que los sellos de Scopus
+  muestran el corte de SciVal; la nota de P-01 junto al universo; V-10 junto a
+  los denominadores; y qué reglas fallan (E-06, D-02, X-04), no sólo cuántas.
+- **Denominadores rotulados como lo que son**: los declarados en la
+  configuración, no un recuento campo a campo. El 90 % se rotula como umbral del
+  sello, para no confundirlo con el 80 % de V-10.
+- **`meta` declara el Scopus Affiliation ID y las fechas de cada export.** El
+  corte de Scopus queda `null`, no la fecha de SciVal. Regenera todos los
+  artefactos: el bloque `meta` va en cada uno.
+- **Glosario como lista de definiciones**, con el id en cada entrada: los
+  enlaces `#slug` del tooltip y de otras páginas no cambian.
+- **Marcado Markdown que llegaba al lector.** Tres negritas y una cursiva del
+  glosario, un acento grave de las lecturas y otro de la auditoría. La negrita
+  partida entre dos líneas no la veía el patrón, que no cruzaba saltos. Un solo
+  `texto_plano()` limpia glosario, ejes y lecturas.
+- **`hierarchy.json` en Descarga de datos** usa sus dos advertencias, tomadas del
+  archivo: cuenta pares autor × publicación y suma citas de Scopus sobre ellos.
+
+### Lo que NO se hizo, y por qué
+
+- **La ficha no es fija.** Así lo proponía la especificación, pero mide más que
+  la pantalla, y fija dejaba su final fuera de alcance hasta terminar el
+  glosario. Se vio en la captura.
+- **Los sellos de Scopus no se corrigen aquí.** P-02, P-03, P-05, P-07, C-05 y
+  `hierarchy.json` muestran «Corte 2026-08-30», la fecha de SciVal, porque
+  `procedencia()` la toma por defecto. La ficha lo declara. Decidir qué debe decir
+  ese sello queda aparte.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, nueve pasos en verde. `flujos.mjs` gana
+«Glosario y ficha técnica»: cuatro bloques; universo, fecha de SciVal y export de
+Scopus contrastados con `meta.json`; ninguna fecha de corte atribuida a Scopus;
+las 15 entradas del glosario, y un enlace `#slug` que aterriza en su definición.
+`estructura.mjs` falla si en cualquier página queda a la vista una negrita o un
+acento grave de Markdown. `impresion.mjs` exige «Ficha técnica» y «Scopus
+Affiliation ID» en el anexo impreso. Los dos workflows exigen el
+pre-renderizado también de `datos` y `metodologia`.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-653 | Metodología cierra con glosario y ficha técnica en dos columnas, sin sello, firma, QR ni hash | Estructura del colofón del Dossier. Un sello certificaría algo que el sitio no comprueba (`D-610`) |
+| D-654 | La ficha técnica sustituye a la lista «Procedencia de los datos» | La lista daba una sola fecha de corte y se leía como si cubriera también a Scopus, cuyo export no la declara (T-06) |
+| D-655 | `meta` declara el Scopus Affiliation ID y las fechas de cada export, con el corte de Scopus en `null` | Leídas solas, `fecha_corte_citas` y `fecha_export` parecen cubrir las dos fuentes. El identificador es público y lo usa la detección institucional (I-02) |
+| D-656 | Cada cifra de la ficha lleva al lado la advertencia que la matiza, y la auditoría nombra las reglas que fallan | Crítica a la especificación: el universo y las citas sin la nota que los matiza se leen como cifras firmes |
+| D-657 | Los denominadores se rotulan como declarados en la configuración, y el 90 % como umbral del sello | Salen de config y no se miden; con dos umbrales de cobertura sin rotular (90 % y 80 %), se leen como uno |
+| D-658 | Si `meta` no trae el Scopus Affiliation ID, la fila se omite | «No declarado» sería falso: el identificador está en la configuración y en el observado de I-08 |
+| D-659 | El glosario pasa a una lista de definiciones con el id en cada entrada | Quince h2 partían una banda compartida con la ficha. Los enlaces `#slug` no cambian |
+| D-660 | La ficha técnica no es fija | Mide más que la pantalla: fija, su final quedaba fuera de alcance hasta terminar el glosario |
+| D-661 | Un solo `texto_plano()` limpia el Markdown de glosario, ejes y lecturas, y la batería falla si queda a la vista | Amplía `D-652`. Había tres limpiezas, ninguna cruzaba saltos de línea, y ninguna quitaba cursivas ni acentos graves |
+| D-662 | Los sellos de indicadores de Scopus conservan por ahora la fecha de SciVal; la ficha lo declara | Qué debe decir ese sello es una decisión aparte, no parte del rediseño |
+
+### Archivos
+
+- `web/metodologia.html` — sin «Procedencia de los datos»; banda «Glosario y ficha técnica»
+- `web/assets/js/vista.js` — `fichaTecnica()` sustituye a `procedencia()`; `glosario()` como `<dl>`
+- `web/assets/js/paginas.js` — `metodologia()`
+- `web/assets/css/app.css` — `.glosario-ficha`, `.glosario-entrada`, `.ficha-tecnica`, `.ficha-datos`
+- `src/build/common_build.py` — `build_meta()`: `scopus_affiliation_id` y `exports`
+- `src/build/04_glossary.py` — `texto_plano()`
+- `src/audit/05_validation_rules.py` — observado de E-07 sin Markdown
+- `src/build/prerender.mjs` — rama de metodología; nota de `hierarchy.json`
+- `src/verify/flujos.mjs`, `estructura.mjs`, `impresion.mjs`
+- `.github/workflows/deploy.yml`, `publicar-site-publico.yml`
+- `docs/UX_UI.md` — §1, §2, §3, §4.3, §4.4, §4 bis, §5.1, §12.7, §13 y §13.1, que describían la disposición anterior
+- `data/processed/` — regenerado
+
+### Pendiente
+
+- Qué debe decir el sello de los indicadores de Scopus (`D-662`).
+- Medir el LCP de la portada con `src/verify/rendimiento.mjs`.
+- Verificar cómo define SciVal el FWCI de un conjunto (`D-18`, `D-325`, AU-04). El
+  glosario describe lo que se calcula, el promedio de los FWCI de cada
+  publicación; falta confirmar que coincide con la definición de SciVal.
+- C-02 figura publicable y no se calcula. La herramienta de revisión no muestra la
+  cola `V-afiliacion_en_revision`. Regenerar el PDF si se publicó uno con el
+  cuartil invertido.
+- Subir la rama y cerrar el PR #51 cuando el usuario lo decida.

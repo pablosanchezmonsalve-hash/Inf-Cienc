@@ -25,6 +25,18 @@ if sys.platform == "win32":
 import common_build as b
 
 
+def texto_plano(s: str) -> str:
+    """El Markdown de los documentos, pasado a texto. El sitio escapa lo que
+    pinta y no interpreta marcado: una negrita que sobrevive llega al lector
+    entre asteriscos (D-652). Primero se une el párrafo, porque una negrita
+    partida entre dos líneas no la veía el patrón, que no cruza saltos."""
+    s = re.sub(r"\s+", " ", s)
+    s = re.sub(r"\*\*(.+?)\*\*", r"\1", s)
+    s = re.sub(r"(?<![\w*])\*(?!\s)([^*]+?)(?<!\s)\*(?![\w*])", r"\1", s)
+    s = re.sub(r"`([^`]+)`", r"\1", s)
+    return s.strip()
+
+
 def parse_glossary(text: str) -> list[dict]:
     entradas = []
     # Cada entrada es un bloque '## Título' con un párrafo '**Corto:**' y otro
@@ -40,16 +52,11 @@ def parse_glossary(text: str) -> list[dict]:
         if not corto:
             continue
 
-        def limpiar(s: str) -> str:
-            s = re.sub(r"\*\*(.+?)\*\*", r"\1", s)
-            s = re.sub(r"\n+", " ", s)
-            return re.sub(r"\s+", " ", s).strip()
-
         entradas.append({
             "termino": titulo,
             "slug": b.slugify(titulo),
-            "corto": limpiar(corto.group(1)),
-            "extendido": limpiar(extendido.group(1)) if extendido else None,
+            "corto": texto_plano(corto.group(1)),
+            "extendido": texto_plano(extendido.group(1)) if extendido else None,
         })
     return entradas
 
@@ -76,9 +83,8 @@ def parse_lecturas(text: str) -> dict[str, dict]:
         muestra = re.search(r"\*\*Muestra:\*\*\s*(.+?)(?=\n---|\Z)", cuerpo, re.S)
         if not muestra:
             continue
-        limpio = re.sub(r"\*\*(.+?)\*\*", r"\1", muestra.group(1))
-        limpio = re.sub(r"\s+", " ", limpio).strip()
-        lecturas[m.group(1)] = {"titulo": m.group(2).strip(), "muestra": limpio}
+        lecturas[m.group(1)] = {"titulo": m.group(2).strip(),
+                                "muestra": texto_plano(muestra.group(1))}
     return lecturas
 
 
@@ -163,7 +169,7 @@ def parse_ejes(text: str) -> dict[str, dict]:
                           cuerpo, re.S)
             if not m:
                 return None
-            return re.sub(r"\s+", " ", re.sub(r"\*\*(.+?)\*\*", r"\1", m.group(1))).strip()
+            return texto_plano(m.group(1))
 
         partes = {k: campo(e) for k, e in
                   (("titulo", "Título"), ("responde", "Responde"),
