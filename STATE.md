@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `83e6a89` · La descarga de datos pasa a página propia, con la estructura del Data 
+Último commit: `4e9eeb1` · feat: auditoria cienciometrica UFT 2020-2025, mejoras accesibilidad WC
 Snapshot: 2026-09-16
 
 ---
