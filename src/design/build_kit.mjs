@@ -24,9 +24,12 @@
 
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 
-const RAIZ = resolve(dirname(new URL(import.meta.url).pathname), '../..');
+// `fileURLToPath` y no `new URL(...).pathname`: la ruta de la URL conserva la
+// barra inicial y los caracteres codificados, y en Windows daba
+// «C:\C:\…\CIENCIOMETR%C3%8DA»: el generador no arrancaba en ese equipo.
+const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const SALIDA = resolve(process.argv[2] || join(RAIZ, 'design-system'));
 const DATOS = join(RAIZ, 'data', 'processed');
 
