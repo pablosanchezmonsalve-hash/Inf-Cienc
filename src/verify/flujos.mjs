@@ -259,6 +259,21 @@ for (const [pagina, codigo] of [['produccion', 'P-08'], ['tematica', 'T-02']]) {
      `${pagina}: declara ${codigo} entre los no publicados`);
 }
 
+// ────────────────────────────────────────────────────────── descarga de datos
+// El inventario se mide en el build; aquí se comprueba que llegó y que el
+// botón, que sólo existe con JavaScript, descarga de verdad el CSV.
+console.log('  Descarga de datos');
+await pg.goto(`http://127.0.0.1:${P}/datos.html`, { waitUntil: 'networkidle' });
+await pg.waitForTimeout(500);
+ok(await pg.locator('#datos-inventario tbody tr').count() >= 10, 'el inventario lista los archivos de datos');
+ok(!(await pg.textContent('#datos-inventario')).includes('NaN'), 'ningún recuento ni tamaño sale como NaN');
+const [descarga] = await Promise.all([
+  pg.waitForEvent('download', { timeout: 15000 }),
+  pg.click('#descargar-csv'),
+]);
+ok(/^publicaciones-.+\.csv$/.test(descarga.suggestedFilename()),
+   `el botón descarga el CSV (${descarga.suggestedFilename()})`);
+
 console.log(`\n  excepciones JS durante todo el recorrido: ${err.length}`);
 err.forEach(e => console.log(`    ✗ ${e}`));
 await b.close();

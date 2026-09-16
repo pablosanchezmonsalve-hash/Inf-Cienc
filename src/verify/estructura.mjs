@@ -10,7 +10,7 @@ const DIST = process.argv[2] || process.env.DIST || 'dist';
 const RUTAS = [
   ['index.html', ''], ['produccion.html', ''], ['impacto.html', ''],
   ['colaboracion.html', ''], ['tematica.html', ''], ['autores.html', ''],
-  ['publicaciones.html', ''], ['fuentes-externas.html', ''],
+  ['publicaciones.html', ''], ['fuentes-externas.html', ''], ['datos.html', ''],
   ['indicadores.html', ''],
   ['produccion-ampliada.html', ''],
   ['metodologia.html', ''],

@@ -2371,6 +2371,19 @@ svg.chart .trama { pointer-events: none; }
 }
 .seccion-limite p { margin: 0; }
 .seccion-limite .seccion-limite-tit { margin: 0 0 var(--e1); font-weight: 700; }
+
+/* ── Descarga de datos (estructura del «Data Hub» de Stitch) ──────────── */
+.datos-disposicion { display: grid; gap: var(--e5); margin-bottom: var(--e6); }
+@media (min-width: 60rem) {
+  .datos-disposicion { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
+}
+.datos-disposicion > section {
+  border: 1px solid var(--linea); border-radius: var(--bento-radio);
+  background: var(--superficie); box-shadow: var(--bento-sombra);
+  padding: var(--e4) var(--e5);
+}
+.datos-disposicion h2 { font-size: var(--t-l); }
+.datos-condiciones { margin: 0; padding-left: 1.1rem; display: grid; gap: var(--e2); font-size: var(--t-s); }
 .corte-cod {
   flex: none; font: 600 var(--t-xs)/1 var(--f-mono); letter-spacing: .04em;
   color: var(--tinta-3); background: var(--superficie-2);

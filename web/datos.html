@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head data-titulo="Descarga de datos — Informe Bibliométrico"
+      data-descripcion="Los archivos de datos que sirve el sitio, con sus registros, su tamaño y su procedencia, y la descarga en CSV."></head>
+<body data-pagina="datos">
+<a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+<header class="cabecera" id="cabecera"></header>
+<div class="vigencia" id="vigencia"></div>
+<main id="contenido" class="contenedor">
+  <!-- Estructura de la pantalla «Data Hub» del diseño de Stitch: descarga y
+       condiciones arriba, inventario debajo. Todo lo de esa pantalla que no
+       existe en un sitio estático —plantillas, esquema de campos elegible,
+       formatos que no se exportan, historial, API— queda fuera (D-646 y
+       siguientes). Los contenedores los rellena src/build/prerender.mjs con
+       registros y tamaños medidos sobre dist/data, no escritos aquí. -->
+  <header class="portada-cabecera">
+    <div class="portada-id">
+      <h1>Descarga de datos</h1>
+      <p class="portada-sub">Los datos que sirve este sitio: cuántos registros trae cada
+        archivo, cuánto pesa y de dónde sale.</p>
+    </div>
+  </header>
+
+  <div class="datos-disposicion">
+    <section aria-labelledby="t-descarga">
+      <h2 id="t-descarga">Descargar</h2>
+      <div id="datos-csv"></div>
+    </section>
+    <section aria-labelledby="t-condiciones">
+      <h2 id="t-condiciones">Condiciones y procedencia</h2>
+      <div id="datos-condiciones"></div>
+    </section>
+  </div>
+
+  <section aria-labelledby="t-archivos">
+    <h2 class="titulo-seccion" id="t-archivos">Archivos que sirve el sitio</h2>
+    <div id="datos-inventario"></div>
+  </section>
+
+  <section class="informe-pdf" id="informe-pdf" hidden></section>
+</main>
+<footer class="pie" id="pie"></footer>
+<script type="module" src="assets/js/paginas.js"></script>
+</body>
+</html>

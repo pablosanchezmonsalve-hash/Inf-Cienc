@@ -15195,3 +15195,74 @@ PDF y sigue pasando.
 
 - Etapas 4 (Descarga de datos) y 5 (Metodología).
 - `docs/UX_UI.md`, al cerrar el rediseño.
+
+## Rediseño con Stitch, etapa 4: descarga de datos (2026-09-16)
+
+Cuarta de las cinco etapas. Base: la pantalla «Data Hub» del proyecto de Stitch,
+de la que se toma la estructura y no el contenido.
+
+### Lo que cambió
+
+- **Página nueva `datos.html`, «Descarga de datos»**, en el grupo Datos de la
+  navegación. Tres bloques: descargar, condiciones y procedencia, inventario.
+- **Sólo el CSV se descarga.** Decisión del usuario. El botón reutiliza
+  `exportar()`, el mismo del listado de publicaciones, y ya no hay dos listas
+  de columnas: las dos llaman a `COLUMNAS_CSV` de `vista.js`. Los JSON se listan
+  con su enlace, sin botón.
+- **El inventario se mide en el build.** `prerender.mjs` lee `dist/data`,
+  cuenta registros y bytes, y aborta si hay un archivo que no está ni declarado
+  ni en la lista de excluidos (`ejes.json`, `lecturas.json`, `informe.json`), si
+  falta uno declarado, o si una cifra sale NaN. Hoy son 13 filas: 1.342
+  publicaciones, 829 formas de firma y 829 fichas, 45 indicadores evaluados,
+  25 unidades, 30 reglas de validación, entre otras.
+- **Condiciones: sólo lo comprobable.** Los exports de Elsevier no se publican; qué
+  métricas derivadas permite la licencia está pendiente de confirmar
+  (`docs/DATA_LICENSE.md` §5); fecha de corte de SciVal; el export de Scopus no
+  declara la suya; la nota de P-01 sobre los duplicados pendientes.
+- **`hierarchy.json` no hereda la fecha de SciVal.** Sus citas son las del
+  export de Scopus, y su procedencia lo dice.
+- **Dos notas publicadas llevaban acentos graves de Markdown** que el sitio
+  mostraba tal cual: la de P-01 (`common_build.py`) y la de citas de
+  `hierarchy.json` (`07_hierarchy.py`), que además nombraba un campo interno.
+
+### Lo que NO se hizo, y por qué
+
+Del Data Hub quedan fuera las plantillas de consulta, el esquema de campos, la
+elección de formato, el historial de descargas, la API y el acceso con cuenta
+institucional: nada de eso existe en un sitio estático sin servidor. Tampoco la
+licencia CC BY que mostraba el diseño: la licencia de los derivados de Elsevier
+no está confirmada, y declararla sería inventarla.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, nueve pasos en verde. `datos.html` entra en
+contraste, estructura y responsive. `flujos.mjs` exige un inventario de al menos
+10 filas sin NaN y que el botón descargue un `publicaciones-*.csv` de verdad.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-646 | La descarga de datos tiene página propia, con la estructura del Data Hub | Los datos ya se servían, pero ninguna página los listaba ni decía de dónde venían |
+| D-647 | Sólo el CSV de publicaciones es descargable; los JSON se listan sin botón | Decisión del usuario. El CSV es lo que abre una hoja de cálculo; los JSON son el soporte del sitio |
+| D-648 | Las columnas del CSV se declaran una sola vez (`COLUMNAS_CSV`) | La página y el explorador descargan lo mismo; con dos listas terminarían divergiendo |
+| D-649 | El inventario se mide en el build y lo aborta si queda un archivo sin clasificar | Una página que dice listar lo que el sitio sirve no puede quedarse atrás en silencio |
+| D-650 | Las condiciones de uso declaran sólo lo comprobable: ni licencia ni sello | La licencia de los derivados de Elsevier está pendiente de confirmar (`docs/DATA_LICENSE.md` §5) |
+| D-651 | Del Data Hub no se toman plantillas, esquema, formatos, historial, API ni acceso con cuenta | Un sitio estático sin servidor no tiene nada de eso que ofrecer |
+| D-652 | Los textos publicados que salen del build van sin marcado Markdown | El sitio escapa el texto y no lo interpreta: los acentos graves se leían como parte de la frase |
+
+### Archivos
+
+- `web/datos.html` (nuevo)
+- `web/assets/js/vista.js` — `COLUMNAS_CSV`, `datosCsv()`, `datosCondiciones()`, `datosInventario()`
+- `web/assets/js/paginas.js` — `datos()`; `exportar()` usa `COLUMNAS_CSV`
+- `web/assets/js/core.js` — página, grupo de navegación e icono
+- `web/assets/css/app.css` — `.datos-disposicion`, `.datos-condiciones`
+- `src/build/prerender.mjs` — `CONJUNTOS`, `NO_LISTADOS`, `inventarioDatos()`
+- `src/build/common_build.py`, `src/build/07_hierarchy.py` — notas sin Markdown
+- `src/verify/contraste.mjs`, `estructura.mjs`, `responsive.mjs`, `flujos.mjs`
+
+### Pendiente
+
+- Etapa 5 (Metodología).
+- `docs/UX_UI.md`, al cerrar el rediseño.

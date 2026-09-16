@@ -55,6 +55,69 @@ export function kpisFuentesExternas(meta, resumen) {
       <div class="etiqueta">DOIs en universo Scopus</div></article>`;
 }
 
+/* ═══════════════════════════════════════════════ descarga de datos ════ */
+
+/** Las columnas del CSV de publicaciones. Una sola lista para la exportación
+    del listado y para la página de descarga, que además las enumera: si una
+    cambia, la otra no puede quedarse describiendo el archivo anterior. */
+export const COLUMNAS_CSV = ['eid', 'anio', 'titulo', 'fuente', 'tipo', 'doi', 'citas',
+  'fwci', 'percentil_citacion', 'n_paises'];
+
+/** Recuadro de descarga. El botón NO va aquí: lo pone `paginas.js`, porque
+    el CSV se genera en el navegador y sin JavaScript sería un botón que no
+    hace nada (el criterio de D-121). Sin guion queda el camino del listado. */
+export function datosCsv(meta) {
+  const n = meta.denominadores.universo_total;
+  return `<p>Todas las publicaciones del universo, <b>${c.nf.format(n)}</b>, en CSV: una fila
+    por publicación con las columnas ${COLUMNAS_CSV.map(k => `<code>${k}</code>`).join(', ')}.
+    El archivo lleva en su cabecera las fuentes, la ventana y la fecha de corte.</p>
+    <p id="csv-accion"></p>
+    <p class="nota">Para descargar sólo un recorte, fíltrelo en
+      <a href="publicaciones.html">Publicaciones</a> y use «Exportar CSV».</p>`;
+}
+
+/** Condiciones y procedencia. Sólo lo que se puede comprobar: ni una licencia
+    que falta confirmar con Elsevier (docs/DATA_LICENSE.md §5) ni un sello de
+    conformidad. `notaUniverso` es la nota de P-01, que declara los duplicados
+    pendientes de revisión (D-593). */
+export function datosCondiciones(meta, notaUniverso) {
+  return `<ul class="datos-condiciones">
+    <li>Los exports originales de Scopus y SciVal <b>no se publican</b>: el sitio sirve
+      datos derivados de ellos.</li>
+    <li>Qué métricas derivadas de Elsevier permite publicar la licencia institucional
+      <b>está pendiente de confirmar</b> con la unidad que administra la suscripción.</li>
+    <li>Citas y métricas de SciVal al <b>${c.escapar(meta.fecha_corte_citas)}</b>. El export
+      de Scopus no declara fecha de corte.</li>
+    <li>Universo de ${c.nf.format(meta.denominadores.universo_total)} publicaciones, ventana
+      ${meta.ventana.inicio}–${meta.ventana.fin}, build del ${c.escapar(meta.fecha_build)}.
+      ${notaUniverso ? c.escapar(notaUniverso) : ''}</li>
+    <li>La producción fuera de Scopus viene de fuentes institucionales y abiertas, no de
+      Elsevier: su procedencia va en su propia fila del inventario.</li>
+  </ul>`;
+}
+
+/** Inventario de los archivos que sirve el sitio. Las filas llegan medidas
+    desde el pre-renderizado —registros y bytes reales de dist/data—; aquí sólo
+    se escriben. Los JSON se enlazan y no llevan botón de descarga: la política
+    de exportación declara sólo CSV (config/publication.yml). */
+export function datosInventario(filas, noListados) {
+  const peso = b => b < 1024 ? `${c.nf.format(b)} B` : `${c.nf.format(Math.round(b / 1024))} KB`;
+  return `<div class="tabla-envoltura tabla-datos"><table>
+    <caption class="solo-lectores">Archivos de datos que sirve el sitio</caption>
+    <thead><tr><th scope="col">Archivo</th><th scope="col">Qué contiene</th>
+      <th scope="col" class="num">Registros</th><th scope="col" class="num">Tamaño</th>
+      <th scope="col">Procedencia</th></tr></thead>
+    <tbody>${filas.map(f => `<tr>
+      <td>${f.ruta ? `<a href="${c.escapar(f.ruta)}">${c.escapar(f.archivo)}</a>` : `<code>${c.escapar(f.archivo)}</code>`}</td>
+      <td>${c.escapar(f.describe)}${f.nota ? `<br><span class="nota">${c.escapar(f.nota)}</span>` : ''}</td>
+      <td class="num">${c.nf.format(f.registros)}<br><span class="nota">${c.escapar(f.unidad)}</span></td>
+      <td class="num">${peso(f.bytes)}</td>
+      <td>${c.escapar(f.procedencia)}</td></tr>`).join('')}</tbody>
+  </table></div>
+  <p class="nota">No se listan, porque son textos o manifiestos de la interfaz y no datos:
+    ${noListados.map(n => `<code>data/${c.escapar(n.archivo)}</code> (${c.escapar(n.motivo)})`).join(', ')}.</p>`;
+}
+
 /** Banda de cierre de la portada: la salida a las secciones.
 
     Se genera en vez de escribirse en el HTML para que no pueda divergir de

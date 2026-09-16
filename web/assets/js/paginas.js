@@ -688,7 +688,7 @@ async function exportar(filas, { esSeleccion = false } = {}) {
       ? `# Selección manual: ${filas.length} ${filas.length === 1 ? 'publicación marcada' : 'publicaciones marcadas'} una por una, de ${meta.denominadores.universo_total} en total.`
       : `# Subconjunto exportado: ${filas.length} de ${meta.denominadores.universo_total} publicaciones`,
   ].join('\n');
-  const cols = ['eid', 'anio', 'titulo', 'fuente', 'tipo', 'doi', 'citas', 'fwci', 'percentil_citacion', 'n_paises'];
+  const cols = v.COLUMNAS_CSV;
   const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const csv = [cab, cols.join(','), ...filas.map(f => cols.map(k => esc(f[k])).join(','))].join('\n');
   const url = URL.createObjectURL(new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8' }));
@@ -1263,7 +1263,23 @@ async function fuentesexternas() {
 }
 
 /* ============================================================== arranque */
-const PAGINAS = { portada, seccion, publicaciones, autores, fichaAutor, metodologia, catalogo, fuentesexternas, produccionAmpliada };
+/* ===================================================== descarga de datos */
+/* La página llega pre-renderizada entera; aquí sólo se pone el botón del CSV,
+   que se genera en el navegador con la misma `exportar()` del listado. */
+async function datos() {
+  montarDescargaInforme();
+  const zona = document.getElementById('csv-accion');
+  if (!zona) return;
+  const meta = await c.cargar('meta.json');
+  zona.innerHTML = `<button type="button" class="boton boton-primario" id="descargar-csv">
+    Descargar CSV · ${c.nf.format(meta.denominadores.universo_total)} publicaciones</button>`;
+  zona.querySelector('button').addEventListener('click', async () => {
+    const { publicaciones: pubs } = await c.cargar('publications.json');
+    exportar(pubs);
+  });
+}
+
+const PAGINAS = { portada, seccion, publicaciones, autores, fichaAutor, metodologia, catalogo, fuentesexternas, produccionAmpliada, datos };
 
 /** C-05: fija (o suelta, si ya estaba fijado) el nodo `g` y resalta sus
     coautores directos — mismo patrón visual que el filtro atenúa las barras

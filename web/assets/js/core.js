@@ -129,6 +129,7 @@ export const PAGINAS = [
   ['autores.html', 'Autores'],
   ['publicaciones.html', 'Publicaciones'],
   ['fuentes-externas.html', 'Fuentes externas'],
+  ['datos.html', 'Descarga de datos'],
   ['indicadores.html', 'Indicadores'],
   ['produccion-ampliada.html', 'Producción ampliada'],
   ['metodologia.html', 'Metodología'],
@@ -144,7 +145,7 @@ export const NAV_GRUPOS = [
   },
   {
     nombre: 'Datos',
-    paginas: ['autores.html', 'publicaciones.html', 'fuentes-externas.html'],
+    paginas: ['autores.html', 'publicaciones.html', 'fuentes-externas.html', 'datos.html'],
   },
   {
     nombre: 'Sobre este informe',
@@ -164,7 +165,8 @@ const ICONOS = {
   'autores.html': 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
   'publicaciones.html': 'M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6',
   'fuentes-externas.html': 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
-  'indicadores.html': 'M10 6h10M10 12h10M10 18h10M4 6l1.2 1.2L7.5 5M4 12l1.2 1.2 2.3-2.2M4 18l1.2 1.2 2.3-2.2',
+  'datos.html': 'M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
+  'indicadores.html':'M10 6h10M10 12h10M10 18h10M4 6l1.2 1.2L7.5 5M4 12l1.2 1.2 2.3-2.2M4 18l1.2 1.2 2.3-2.2',
   'produccion-ampliada.html': 'M4 4h16v16H4zM12 8v8M8 12h8',
   'metodologia.html': 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4',
 };

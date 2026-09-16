@@ -451,7 +451,7 @@ def nota_p01(total: int) -> dict | None:
     t = (f"Recuento de registros del universo. {n_grupos} {plural} de registros "
          f"comparten DOI y esperan revisión humana: si se confirman como el mismo "
          f"trabajo, el total sobra en {sobrantes}. No se fusionan por su cuenta "
-         f"(`D-08`) y quedan visibles en la tabla de validación, regla `D-02`.")
+         f"(D-08) y quedan visibles en la tabla de validación, regla D-02.")
     return {"texto": t, "destacada": False}
 
 
