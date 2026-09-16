@@ -239,8 +239,9 @@ todas, y no describe a la publicación típica.
 
 **Muestra:** El FWCI compara las citas de cada publicación con las esperadas
 para su campo, su año y su tipo, y 1,00 es el promedio mundial. Se muestra la
-mediana del recorte y no el promedio, porque el promedio de los FWCI de un
-conjunto no es el FWCI del conjunto.
+mediana del recorte y no el promedio porque la distribución es muy asimétrica:
+unas pocas publicaciones muy citadas mueven el promedio y no la mediana, que
+describe la publicación típica.
 
 ---
 

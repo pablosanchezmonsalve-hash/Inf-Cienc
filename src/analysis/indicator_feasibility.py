@@ -212,9 +212,12 @@ def main() -> None:
     record("I-03", "FWCI institucional", "impacto", "sí",
            f"{int(fwci.notna().sum())}/{n_uni} · media={fwci.mean():.2f} "
            f"mediana={fwci.median():.2f}", "media", "V1",
-           "Se calcula sobre el conjunto, NUNCA como promedio de FWCI "
-           "individuales. Mediana (0,41) muy por debajo de la media (0,87): "
-           "distribución fuertemente asimétrica, mostrar ambas.")
+           # Lo que se calcula de verdad, con las cifras medidas. Decía «NUNCA
+           # como promedio de FWCI individuales» junto a un valor que es
+           # exactamente ese promedio, y citaba las cifras de la carga de julio.
+           "Promedio aritmético de los FWCI que SciVal asigna a cada publicación. "
+           + f"Mediana ({fwci.median():.2f}) muy por debajo de la media ({fwci.mean():.2f})".replace(".", ",")
+           + ": distribución fuertemente asimétrica, mostrar ambas.")
 
     sin_citas_2025 = int((citas[scival["Year"] == "2025"] == 0).sum())
     n_2025 = int((scival["Year"] == "2025").sum())

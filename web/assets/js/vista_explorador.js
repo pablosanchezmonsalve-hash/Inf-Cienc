@@ -378,8 +378,12 @@ function selloCorte(sub, campo, cod, proc) {
   const p = proc && proc[cod];
   if (!p) return '';
   const { n, cubiertas, pct } = X.cobertura(sub, campo);
+  // La unidad es SIEMPRE publicaciones, porque `X.cobertura` cuenta
+  // publicaciones del recorte. La de `series.json` es la del cálculo del build
+  // —pares autor × publicación en P-07, personas en C-05—, y puesta junto a este
+  // N el sello publicaba «1.342 pares» y «1.342 personas», que no existen.
   return c.sello({
-    fuente: p.fuente, corte: p.corte, unidad: p.unidad || 'publicaciones',
+    fuente: p.fuente, corte: p.corte, unidad: 'publicaciones',
     n, cubiertas, cobertura: pct,
     insuficiente: pct !== null && p.umbral != null && pct < p.umbral * 100,
   });

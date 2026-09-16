@@ -60,8 +60,10 @@ Consecuencias operativas:
 - 761 de las 829 entidades publicadas tienen menos de 5 publicaciones en la
   ventana. A ese n, las métricas normalizadas individuales no son
   interpretables.
-- El **FWCI de un conjunto se calcula sobre el conjunto**, nunca como promedio
-  de los FWCI individuales.
+- El FWCI institucional que publica este informe es el **promedio de los FWCI
+  que SciVal asigna a cada publicación**, y va siempre junto a su mediana: unas
+  pocas publicaciones muy citadas lo elevan. Sobre un recorte se publica sólo la
+  mediana (`docs/UX_UI.md` §4.2).
 
 Conforme a **DORA** y al **Manifiesto de Leiden**, toda métrica normalizada
 mostrada a nivel individual va acompañada de n, ventana temporal y advertencia

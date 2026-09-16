@@ -465,9 +465,13 @@ export function cobertura(pubs_sel, clave) {
   // criterio que `02_indicators.py` (R-01: la lista de barras SÍ trae el
   // bucket, la cobertura publicada NO lo cuenta). Por eso el sello, que mide
   // cobertura y no reparto, sigue excluyéndolo aquí.
+  // «No determinada» tampoco es dato: es la unidad académica que la afiliación
+  // no permitió identificar. Se dibuja como categoría (D-09), pero cubierta
+  // cuenta sólo la publicación con alguna unidad determinada, como la cobertura
+  // de P-07 en 02_indicators.py. Contándola, el sello de P-07 decía 99,6 %.
+  const SIN_DATO = new Set(['Sin dato declarado', 'No determinada']);
   for (const p of pubs_sel) {
-    const v = saca(p);
-    if (v.length && !(v.length === 1 && v[0] === 'Sin dato declarado')) cub++;
+    if (saca(p).some(v => !SIN_DATO.has(v))) cub++;
   }
   return { n, cubiertas: cub, pct: pct(cub) };
 }

@@ -19,8 +19,9 @@
 
 import * as c from './core.js';
 
-/* El FWCI mediano (0,41) frente a la media (0,87) es el dato que más fácilmente
-   se malinterpreta: se explicita en portada, no sólo en el módulo. */
+/* La mediana del FWCI frente a su promedio es el dato que más fácilmente se
+   malinterpreta: se explicita en portada, no sólo en el módulo. Las cifras
+   salen de kpis.json; el comentario anterior citaba las de la carga de julio. */
 export function lectura(kpisLista) {
   const fwci = kpisLista.find(k => k.codigo === 'I-03');
   if (!fwci) return '';
@@ -28,15 +29,30 @@ export function lectura(kpisLista) {
     <h2>Cómo leer estas cifras</h2>
     <p>El FWCI compara las citas recibidas con las esperadas para
     publicaciones del mismo campo, año y tipo: <strong>1,0 es el promedio
-    mundial</strong>. Aquí la media es ${c.num(fwci.valor, 2)} y la mediana
-    ${c.num(fwci.mediana, 2)}. La diferencia entre ambas indica una
-    distribución asimétrica: unas pocas publicaciones muy citadas elevan el
-    promedio.</p>
+    mundial</strong>. Aquí el promedio de los FWCI de cada publicación es
+    ${c.num(fwci.valor, 2)} y la mediana ${c.num(fwci.mediana, 2)}. La
+    diferencia entre ambas indica una distribución asimétrica: unas pocas
+    publicaciones muy citadas elevan el promedio.</p>
     ${c.nota(fwci.nota)}
     <p class="nota">Cada indicador declara sobre cuántas publicaciones se
     calcula. No todas las publicaciones tienen métricas: el denominador
     cambia según el indicador.</p>
   </div>`;
+}
+
+/** Las tres cifras de Fuentes externas. Una sola redacción para el
+    pre-renderizado y el navegador. El pre-renderizado tenía la suya, pedía
+    `resumen.total_autores` —que el artefacto no trae— y publicaba «NaN ·
+    Autores UFT»: una cifra de atribución por persona que la propia página dice
+    que no se publica. */
+export function kpisFuentesExternas(meta, resumen) {
+  return `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_publicaciones)}</div>
+      <div class="etiqueta">Publicaciones fuera de Scopus</div></article>
+    <article class="kpi"><div class="valor">${c.nf.format(resumen.atribuciones_retenidas)}</div>
+      <div class="etiqueta">Atribuciones obra-persona en revisión</div>
+      <div class="secundario">no se publican hasta confirmarse</div></article>
+    <article class="kpi"><div class="valor">${c.nf.format(meta.universo_scopus_dois)}</div>
+      <div class="etiqueta">DOIs en universo Scopus</div></article>`;
 }
 
 /** Banda de cierre de la portada: la salida a las secciones.

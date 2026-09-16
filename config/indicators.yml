@@ -93,7 +93,7 @@ indicadores:
   I-03: {nombre: "FWCI institucional", categoria: impacto, publicar: true,
          denominador: con_metricas, confiabilidad: media,
          mostrar_mediana: true,
-         advertencia: "1,0 es el promedio mundial. Se calcula sobre el conjunto, no promediando valores individuales."}
+         advertencia: "1,0 es el promedio mundial. Es el promedio de los FWCI que SciVal asigna a cada publicación: unas pocas muy citadas lo elevan, y por eso se publica junto a la mediana."}
   I-04: {nombre: "FWCI por año", categoria: impacto, publicar: true,
          denominador: con_metricas, confiabilidad: baja,
          advertencia_destacada: true,

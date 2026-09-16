@@ -126,10 +126,10 @@ categorías tampoco son excluyentes —una revista puede estar en varias— y po
 no reparten el total. Y la prominencia de un tema describe la atención que el
 campo recibe en el mundo, no el desempeño de quien publica en él.
 
-**Sobre qué:** Las áreas y categorías, sobre las publicaciones con área temática
+**Sobre qué:** Las áreas ASJC y QS, sobre las publicaciones con área temática
 asignada; los Objetivos de Desarrollo Sostenible, sobre las que tienen métricas.
-Hoy las dos cifras coinciden, pero por coincidencia y no por definición: son
-coberturas distintas y pueden separarse en la próxima carga. Al ser
-multivaluadas, la suma de las categorías supera el número de publicaciones.
+No toda publicación con área ASJC trae también área QS, y no todas tienen un ODS:
+cada gráfico dice en su sello sobre cuántas se calcula. Al ser multivaluadas, la
+suma de las categorías supera el número de publicaciones.
 
 **Denominadores:** con_area_tematica, con_metricas

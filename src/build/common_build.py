@@ -476,15 +476,21 @@ def nota(code: str) -> dict | None:
 # venía atribuyendo todo a «Scopus» mientras la metodología decía «Scopus y
 # SciVal», y sin SciVal no existirían el FWCI ni los percentiles de citación.
 # Decirlo por indicador es más preciso que decirlo una vez en el pie.
+#
+# La fuente es la del CAMPO del que sale cada indicador, y el campo lo fija
+# `src/audit/02_reconcile_sources.py`: título, año, tipo, fuente y autoría vienen
+# del export de Scopus; acceso abierto, países, instituciones, número de autores
+# y áreas ASJC y QS, del de SciVal. Hasta el 2026-09-15 A-01, C-01, C-03, C-04,
+# C-06 y T-01 figuraban aquí como Scopus, y sus sellos lo publicaban.
 FUENTE_POR_INDICADOR = {
     "P-01": "Scopus", "P-02": "Scopus", "P-03": "Scopus", "P-04": "Scopus",
     "P-05": "Scopus", "P-06": "Scopus", "P-07": "Scopus",
-    "A-01": "Scopus",
+    "A-01": "SciVal",
     "I-01": "SciVal", "I-02": "SciVal", "I-03": "SciVal",
     "I-04": "SciVal", "I-05": "SciVal",
     "R-01": "SciVal",
-    "C-01": "Scopus", "C-03": "Scopus", "C-04": "Scopus", "C-06": "Scopus", "C-05": "Scopus",
-    "T-01": "Scopus", "T-04": "SciVal", "T-05": "SciVal",
+    "C-01": "SciVal", "C-03": "SciVal", "C-04": "SciVal", "C-06": "SciVal", "C-05": "Scopus",
+    "T-01": "SciVal", "T-04": "SciVal", "T-05": "SciVal",
     # ORCID no está en ninguna de las dos fuentes: se recupera aparte. El
     # catálogo publica esta columna, así que dejarlo caer en el genérico
     # «Scopus · SciVal» sería publicar una procedencia falsa.

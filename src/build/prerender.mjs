@@ -208,26 +208,23 @@ async function main() {
       const a = [];
       try {
         const fe = await leerJSON('fuentes_externas.json');
-        const { meta: fm, resumen, publicaciones: fp, autores: fa } = fe;
+        const { meta: fm, resumen, publicaciones: fp } = fe;
         html = rellenar(html, 'aviso-fuentes',
           `<b>Sobre este listado</b> ${c.escapar(fm.advertencia)}`, a);
-        html = rellenar(html, 'kpis-fuentes',
-          `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_publicaciones)}</div><div class="etiqueta">Publicaciones fuera de Scopus</div></article>`
-          + `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_autores)}</div><div class="etiqueta">Autores UFT</div></article>`
-          + `<article class="kpi"><div class="valor">${c.nf.format(fm.universo_scopus_dois)}</div><div class="etiqueta">DOIs en universo Scopus</div></article>`, a);
+        // El mismo constructor que usa el navegador. Aquí había una copia que
+        // pedía `resumen.total_autores`, que el artefacto no trae, y publicaba
+        // «NaN · Autores UFT».
+        html = rellenar(html, 'kpis-fuentes', v.kpisFuentesExternas(fm, resumen), a);
         // Primera página de la tabla (50 filas), suficiente para sin-JS.
         const pag = fp.slice(0, 50);
         const tablaHtml = pag.map(p => `<tr><td>${p.anio || ''}</td>`
           + `<td>${p.doi ? `<a href="https://doi.org/${c.escapar(p.doi)}" target="_blank" rel="noopener">${c.escapar(p.titulo)}</a>` : c.escapar(p.titulo)}<br><span class="nota">${c.escapar(p.autor_uft)}</span></td>`
           + `<td>${c.escapar(p.fuente)}</td><td>${c.escapar(p.tipo)}</td></tr>`).join('');
         html = rellenar(html, 'tabla-cuerpo', tablaHtml, a);
-        // Autores
-        const autoresHtml = fa.map(au => `<tr><td>${c.escapar(au.nombre)}</td>`
-          + `<td class="num">${au.obras_facultad_medicina || ''}</td>`
-          + `<td class="num">${au.obras_dspace || ''}</td>`
-          + `<td class="num">${au.obras_autoarchivo || ''}</td>`
-          + `<td class="num">${au.total}</td></tr>`).join('');
-        html = rellenar(html, 'tabla-autores', autoresHtml, a);
+        // Aquí se rellenaba también una tabla de autores. La capa pública ya no
+        // trae `autores` ni la página tiene ese contenedor: la línea lanzaba
+        // una excepción que el `catch` de abajo tragaba, después de haber escrito
+        // lo anterior y sin que el build lo dijera.
       } catch (e) {
         console.error(`  fuentes-externas.html: sin datos fuentes_externas.json (${e.message})`);
       }

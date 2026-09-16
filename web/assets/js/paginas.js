@@ -1153,14 +1153,7 @@ async function fuentesexternas() {
   document.getElementById('aviso-fuentes').innerHTML =
     `<b>Sobre este listado</b> ${c.escapar(meta.advertencia)}`;
 
-  document.getElementById('kpis-fuentes').innerHTML =
-    `<article class="kpi"><div class="valor">${c.nf.format(resumen.total_publicaciones)}</div>
-      <div class="etiqueta">Publicaciones fuera de Scopus</div></article>
-    <article class="kpi"><div class="valor">${c.nf.format(resumen.atribuciones_retenidas)}</div>
-      <div class="etiqueta">Atribuciones obra-persona en revisión</div>
-      <div class="secundario">no se publican hasta confirmarse</div></article>
-    <article class="kpi"><div class="valor">${c.nf.format(meta.universo_scopus_dois)}</div>
-      <div class="etiqueta">DOIs en universo Scopus</div></article>`;
+  document.getElementById('kpis-fuentes').innerHTML = v.kpisFuentesExternas(meta, resumen);
 
   const fuentesCortas = { facmed: 'Fac. Medicina', dspace: 'DSpace', autoarchivo: 'Autoarchivo' };
   let sel = { fuente: [], anio: [], q: undefined };
