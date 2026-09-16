@@ -129,6 +129,8 @@ async function main() {
       html = rellenar(html, 'controles', vacio.controles, a);
       html = rellenar(html, 'cifras', vacio.cifras, a);
       html = rellenar(html, 'cortes', vacio.cortes, a);
+      html = rellenar(html, 'dinamica', vacio.dinamica, a);
+      html = rellenar(html, 'mas-citadas', vacio.masCitadas, a);
       html = rellenar(html, 'lectura', v.lectura(kpis), a);
       html = rellenar(html, 'cierre', v.cierrePortada(), a);
       if (a.length) faltantes.push(`${archivo}: ${a.join(', ')}`);

@@ -48,5 +48,12 @@ function comparar(cod, navegador, build) {
 // R-01 · cuartil de la revista: el mismo corte de percentil SJR en los dos lados.
 comparar('R-01', X.porCampo(publicaciones, 'cuartil'), series['R-01'].datos);
 
+// P-02 e I-01 · la tabla «Dinámica anual» de la portada contra las dos series.
+const dinamica = X.dinamicaAnual(publicaciones, series['P-02'].datos.map((d) => d.anio));
+comparar('P-02 · publicaciones por año (Dinámica anual)',
+  dinamica.map((f) => ({ valor: f.anio, n: f.n })), series['P-02'].datos.map((d) => ({ valor: d.anio, n: d.n })));
+comparar('I-01 · citas por año (Dinámica anual)',
+  dinamica.map((f) => ({ valor: f.anio, n: f.citas })), series['I-01'].datos.map((d) => ({ valor: d.anio, n: d.n })));
+
 console.log(`\n  TOTAL: ${fallos} divergencia(s) entre navegador y build`);
 process.exit(fallos ? 1 : 0);

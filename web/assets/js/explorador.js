@@ -507,6 +507,37 @@ export function medianaPorAnio(pubs_sel, campo) {
 /** Umbrales de percentil de citación. Son ANIDADOS: lo que está en el top 1 %
     está también en el top 5, el 10 y el 25. Se devuelven como tales para que
     el gráfico no invite a sumarlos. */
+/** Publicaciones y citas por año, sobre el recorte: la tabla «Dinámica anual»
+    de la portada. Los años los decide quien llama —sin filtro de año, los de
+    la ventana—, así que un año sin publicaciones sale con 0 en vez de
+    desaparecer. Las citas se suman sobre las publicaciones con métricas, y
+    `base` dice cuántas son, para distinguir «0 citas» de «sin dato».
+    `coherencia.mjs` la compara con P-02 e I-01 de series.json. */
+export function dinamicaAnual(pubs_sel, anios) {
+  const total = pubs_sel.length;
+  return anios.map(anio => {
+    const suyas = pubs_sel.filter(p => String(p.anio) === String(anio));
+    const conMetricas = suyas.filter(p => p.tiene_metricas && typeof p.citas === 'number');
+    return {
+      anio: String(anio), n: suyas.length,
+      pct: total ? 100 * suyas.length / total : null,
+      base: conMetricas.length,
+      citas: conMetricas.reduce((a, p) => a + p.citas, 0),
+    };
+  });
+}
+
+/** Las publicaciones del recorte con más citas totales al corte (I-07). Sin
+    normalizar, por decisión del usuario: la tabla lleva su advertencia. El
+    empate se resuelve por EID para que el orden no dependa del archivo. */
+export function masCitadas(pubs_sel, tope = 10) {
+  const base = pubs_sel.filter(p => p.tiene_metricas && typeof p.citas === 'number');
+  const filas = base.filter(p => p.citas > 0)
+    .sort((a, b) => b.citas - a.citas || a.eid.localeCompare(b.eid))
+    .slice(0, tope);
+  return { base: base.length, filas };
+}
+
 export function umbralesPercentil(pubs_sel) {
   const v = pubs_sel.map(p => p.percentil_citacion).filter(x => typeof x === 'number');
   return {

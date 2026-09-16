@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `c0c711d` · El generador del sistema de diseño no arrancaba en Windows
+Último commit: `02ef8b0` · Datos regenerados con las correcciones, y verificadas
 Snapshot: 2026-09-16
 
 ---
@@ -37,8 +37,8 @@ Cada cifra declara su **base**: sobre qué conjunto está medida. Donde la conso
 | Pares firma × publicación distintos | **1960** | sin repetir una firma dentro de la misma publicación |
 | Firmas con ORCID | **328** | sin consolidar · `data/enriched/authors_orcid.csv` |
 | Entidades con ORCID | **268** | tras consolidación humana · **la que sirve el sitio** |
-| Indicadores evaluados | **44** | `config/indicators.yml` |
-| Indicadores publicados | **32** | `config/indicators.yml`, `publicar: true` |
+| Indicadores evaluados | **45** | `config/indicators.yml` |
+| Indicadores publicados | **33** | `config/indicators.yml`, `publicar: true` |
 | Reglas de validación | **30** | `data/interim/validation_report.csv` |
 | Reglas bloqueantes fallando | **0** | ídem, severidad `bloqueante` |
 | Scopus Affiliation ID | **60105368** | `config/institution.yml` |
@@ -72,7 +72,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 630
+## Decisiones tomadas: 640
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

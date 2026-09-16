@@ -121,6 +121,30 @@ ok(await pg.locator('details.dim[open]').count() === 0, 'Escape cierra la píldo
 await pg.click('#limpiar-recorte');
 await pg.waitForTimeout(400);
 
+// Las dos tablas de la portada responden al recorte; la banda no lleva cifras.
+// Los años esperados salen de la ventana declarada, no de un número escrito aquí.
+console.log('  Tablas de la portada');
+const ventana = await pg.evaluate(async () => (await (await fetch('data/meta.json')).json()).ventana);
+ok(await pg.locator('#dinamica tbody tr').count() === ventana.fin - ventana.inicio + 1,
+   'la dinámica anual trae un año por fila de la ventana');
+ok(await pg.locator('#mas-citadas tbody tr').count() === 10, 'la tabla de más citadas trae diez filas');
+ok(await pg.locator('#titular [data-valor], #titular table').count() === 0,
+   'la banda de cabecera no lleva cifras del recorte');
+await pg.click('#recorte-anio-env button[data-anio="2024"]');
+await pg.waitForTimeout(500);
+ok(await pg.locator('#dinamica tbody tr').count() === 1, 'con un año elegido, la dinámica anual trae una fila');
+const aniosCitadas = await pg.locator('#mas-citadas tbody tr td:nth-child(5)').allTextContents();
+ok(aniosCitadas.length > 0 && aniosCitadas.every((t) => t.trim() === '2024'),
+   'las más citadas son del año elegido');
+await pg.click('#limpiar-recorte');
+await pg.waitForTimeout(400);
+await pg.goto(`http://127.0.0.1:${P}/index.html?autor=${encodeURIComponent('Mujika I.')}`,
+  { waitUntil: 'networkidle' });
+await pg.waitForTimeout(600);
+ok(await pg.locator('#mas-citadas tbody tr').count() === 0
+   && await pg.locator('#mas-citadas .vacio').count() === 1,
+   'recortada a una persona, la tabla de más citadas no se dibuja');
+
 // ─────────────────────────────────────────────────────────────────── filtros
 // Publicaciones usa EL MISMO motor que la portada y las secciones. Lo que se
 // comprueba aquí es justo eso: que un recorte hecho en el tablero llegue por la

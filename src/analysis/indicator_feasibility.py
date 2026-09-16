@@ -219,6 +219,14 @@ def main() -> None:
            + f"Mediana ({fwci.median():.2f}) muy por debajo de la media ({fwci.mean():.2f})".replace(".", ",")
            + ": distribución fuertemente asimétrica, mostrar ambas.")
 
+    con_citas = int((citas > 0).sum())
+    record("I-07", "Publicaciones más citadas", "impacto", "sí",
+           f"{con_citas}/{n_met} publicaciones con citas · máximo {int(citas.max())}",
+           "media", "V1",
+           "Las diez del recorte con más citas totales al corte, empate por EID. Sin "
+           "normalizar: favorece los primeros años de la ventana y las áreas y tipos "
+           "que citan más, y se publica con esa advertencia junto a la tabla.")
+
     sin_citas_2025 = int((citas[scival["Year"] == "2025"] == 0).sum())
     n_2025 = int((scival["Year"] == "2025").sum())
     record("I-04", "FWCI por año", "impacto", "parcial",

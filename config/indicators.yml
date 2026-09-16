@@ -101,6 +101,9 @@ indicadores:
   I-05: {nombre: "Publicaciones en el top 10 % de citación", categoria: impacto,
          publicar: true, denominador: con_metricas, confiabilidad: alta,
          advertencia: null}
+  I-07: {nombre: "Publicaciones más citadas", categoria: impacto, publicar: true,
+         denominador: con_metricas, confiabilidad: media,
+         advertencia: "Citas totales al corte, sin normalizar por año, área ni tipo documental."}
   I-06: {nombre: "Visualizaciones", categoria: impacto, publicar: false,
          version: V2, denominador: con_metricas, confiabilidad: media,
          advertencia: "Mide visibilidad, no impacto."}

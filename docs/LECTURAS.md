@@ -18,9 +18,9 @@ gráfico no se explicaba. Desde el 2026-09-09 se ve en los dos medios, con el
 mismo texto y distinta presentación —pie de figura en pantalla, bloque compacto
 en papel—.
 
-**Alcance: TODA figura y TODA cifra.** Veintiséis lecturas: los dieciocho cortes
+**Alcance: TODA figura y TODA cifra.** Veintiocho lecturas: los dieciocho cortes
 del explorador, las dos figuras bento de producción —el treemap y el mapa de
-calor— y las seis cifras grandes del tablero.
+calor—, las seis cifras grandes del tablero y las dos tablas de la portada.
 
 Las tres familias entraron por caminos distintos y la compuerta las descubre
 cada una donde de verdad está declarada, nunca en una lista escrita en la
@@ -119,6 +119,21 @@ también se cuenta en el 5 %, en el 10 % y en el 25 %.
 **Muestra:** Reparte las publicaciones del recorte según el cuartil de la revista
 en que salieron, medido por su percentil SJR. Cada publicación cae en un solo
 cuartil.
+
+---
+
+## I-07 — Publicaciones más citadas
+
+**Muestra:** Las publicaciones del recorte con más citas totales hasta la fecha
+de corte, de mayor a menor. Cada fila es una publicación, y su FWCI es el que
+SciVal le asigna a ella sola.
+
+---
+
+## dinamica — Dinámica anual
+
+**Muestra:** Cuántas publicaciones del recorte salieron cada año, qué parte del
+recorte representan y cuántas citas han recibido hasta la fecha de corte.
 
 ---
 

@@ -41,6 +41,7 @@ trabajo).
 | `I-03` | FWCI institucional | Impacto normalizado por campo, año y tipo | `mean(FWCI)` de cada publicación | `FWCI` | **sí** media 1,14 · **mediana 0,48** | media | ✅ | **Promedio de los FWCI individuales.** Distribución muy asimétrica: publicar siempre junto a la mediana |
 | `I-04` | FWCI por año | Serie anual de FWCI | `group by anio` | `FWCI`, `anio` | **parcial** 0,83/1,04/0,77 | **baja** | ⚠️ | **42 % de las publicaciones de 2025 aún sin citas.** El año reciente no es comparable |
 | `I-05` | Top 10 % de citación | Publicaciones en el decil superior | `count(percentil <= 10)` | `Outputs in Top Citation Percentiles` | **sí** 115/1.342 (8,6 %) | alta | ✅ | Semántica verificada empíricamente (§3) |
+| `I-07` | Publicaciones más citadas | Las diez del recorte con más citas | `sort(citas desc, eid)` top 10 | `Citations`, `DOI`, `Source title`, `FWCI` | **sí** | media | ✅ | **Sin normalizar**: favorece los primeros años y las áreas y tipos que citan más. Sin autores ni cuartil; no se dibuja recortada a una persona |
 | `I-06` | Visualizaciones | Views en Scopus | `sum(Views)` | `Views` | **sí** 100 % | media | V2 | **Visibilidad, no impacto.** Módulo separado |
 | `R-01` | Publicaciones en revistas Q1 | Percentil SJR ≤ 25 | `count(sjr_pct <= 25)` | `SJR percentile` | **parcial** 578/1.223 | media | ✅ | **Métrica de la revista, no del artículo** |
 | `R-02` | Percentil CiteScore | Posición de la fuente | `CiteScore percentile` | idem | **sí** 92,5 % | media | V2 | Redundante con `R-01`; elegir uno principal |

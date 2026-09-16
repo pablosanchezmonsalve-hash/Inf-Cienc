@@ -489,6 +489,8 @@ FUENTE_POR_INDICADOR = {
     "I-01": "SciVal", "I-02": "SciVal", "I-03": "SciVal",
     "I-04": "SciVal", "I-05": "SciVal",
     "R-01": "SciVal",
+    # El listado sale de Scopus y las citas de SciVal: la tabla lleva los dos sellos.
+    "I-07": "Scopus · SciVal",
     "C-01": "SciVal", "C-03": "SciVal", "C-04": "SciVal", "C-06": "SciVal", "C-05": "Scopus",
     "T-01": "SciVal", "T-04": "SciVal", "T-05": "SciVal",
     # ORCID no está en ninguna de las dos fuentes: se recupera aparte. El

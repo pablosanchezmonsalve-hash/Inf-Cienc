@@ -15048,3 +15048,89 @@ estas correcciones: el artefacto se había quedado atrás de su insumo.
 - La herramienta de revisión (`src/review/build_review.py`) no muestra todavía la cola `V-afiliacion_en_revision`.
 - Si se publicó un PDF del informe con la versión anterior, regenerarlo.
 - Etapas 2 a 5 del rediseño.
+
+
+## Rediseño con Stitch, etapa 2: la portada «Cockpit» (2026-09-16)
+
+La portada toma la estructura de tres pantallas de Stitch —la banda y la rejilla
+del «Cockpit», la tabla anual del «Dossier» y la tabla de más citadas de
+«Inicio»— y sigue siendo un explorador: todo lo de debajo de la banda se
+recalcula con el recorte y se pre-renderiza sin filtros con el mismo constructor.
+
+La especificación la escribió un agente y la revisaron dos críticos. De ahí
+salieron los cinco errores publicados que se corrigieron antes (`D-622` a
+`D-630`) y los cambios sobre la propuesta original que siguen.
+
+### Lo que hay ahora, de arriba abajo
+
+1. **Banda** en la paleta invertida de `.banda-contraste`: título, institución,
+   aviso de ventana y un recuadro «No cambia con el recorte» con fuentes, ventana
+   y fecha de corte. **Ninguna cifra.**
+2. **Las seis fichas en bento**: las dos primeras a media fila, las otras cuatro a
+   un cuarto.
+3. **Los cuatro cortes como tarjetas** de dos en dos, con su código.
+4. **Dinámica anual**: año, publicaciones, % del recorte y citas.
+5. **Publicaciones más citadas** (`I-07`): las diez del recorte con más citas,
+   con título enlazado, fuente, tipo, año, citas y FWCI de la publicación.
+6. La lectura, el bloque del PDF y el cierre, como estaban. `#lectura` deja de ser
+   un `<details>` sin `<summary>`, que el navegador rotulaba «Detalles».
+
+### Lo que se cambió sobre la propuesta, y por qué
+
+- **Sin el universo en la banda.** La línea de estado lo dice justo debajo, y
+  una cifra del total en la banda se lee como la del recorte.
+- **Sin «citas por publicación» en la tabla anual** (decisión del usuario). Por
+  año es una media que mueve una sola publicación: 2022 da 29,13, y 15,16 sin la
+  de 2.726 citas.
+- **Sin autores ni cuartil en la de más citadas** (decisión del usuario). Siete
+  de las nueve firmas del top no llegan a cinco publicaciones y una afiliación
+  está en revisión; el cuartil es de la revista, y las diez filas serían Q1.
+- **Oculta con recorte a una persona** (decisión del usuario), como la red.
+- **Dos sellos** en cada tabla: el listado sale de Scopus y las citas de SciVal.
+- **Sin serie de `I-07` en `series.json`**: sería una segunda implementación del
+  mismo ranking, la situación que produjo el cuartil invertido.
+
+### Lo que salió al verificar
+
+- La tabla anual se comparó con P-02 e I-01 en `coherencia.mjs`: seis años, sin
+  divergencias.
+- La batería de impresión cazó el enlace «Ver la autoría en el listado →» en el
+  PDF: un control de pantalla en papel. Se oculta en `@media print`.
+- La banda en papel se imprime en tinta sobre blanco, pero su reinicio no tocaba
+  los tokens de aviso: la advertencia de ventana, que ahora vive dentro, habría
+  salido verde claro sobre blanco. Se reinician también aviso, acción y cifra.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, nueve pasos. `flujos.mjs` gana las tablas de
+la portada: una fila por año de la ventana, diez filas de más citadas, ninguna
+cifra en la banda, una fila con un año elegido, todas del año elegido, y la tabla
+ausente con recorte a una persona.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-631 | La cabecera de portada es una banda «Cockpit» sin cifras | Estructura del diseño de Stitch con la paleta ya medida de `.banda-contraste`. Una cifra del total en la cabecera se lee como la del recorte: por eso la anterior las quitó |
+| D-632 | El universo no va en la banda | La línea de estado lo dice justo debajo. El «Cockpit» lo ponía junto a un crecimiento que el catálogo declara no calculable (X-04) |
+| D-633 | Las seis fichas de la portada van en rejilla bento, sin reordenar el marcado | La jerarquía la da el tamaño. Las secciones las conservan como estaban |
+| D-634 | «Dinámica anual» lleva año, publicaciones, % del recorte y citas, y nada más | Decisión del usuario sobre la media por año. Sin fila de total, que repetiría las fichas. Un año sin publicaciones sale con 0, no «sin dato» (D-24) |
+| D-635 | El aviso de ventana de citación tiene una sola redacción, sin nombrar la forma | La de la figura de Impacto hablaba de «barras», y la tabla no tiene. Dos textos para la misma advertencia divergen |
+| D-636 | `I-07` se declara en el catálogo y no emite serie propia | Publicado significa declarado (D-166). Una serie en `series.json` sería una segunda implementación del ranking sin nada que la compare |
+| D-637 | `I-07` ordena por citas totales, sin autores ni cuartil, con el FWCI de cada publicación | Decisiones del usuario. La lectura DORA/Leiden va junto a la tabla; el cálculo, en `indicators.yml` (D-51) |
+| D-638 | `I-07` no se dibuja con recorte a una persona | Decisión del usuario: sería un ranking de los trabajos de alguien, como la red de coautoría (C-05) |
+| D-639 | Las tablas de la portada llevan dos sellos, Scopus y SciVal | El listado y los años salen de Scopus; las citas y el FWCI, de SciVal |
+| D-640 | En papel, la banda reinicia también los tokens de aviso, acción y cifra | La advertencia de ventana vive ahora dentro de la banda y habría salido verde claro sobre blanco con los fondos apagados |
+
+### Archivos
+
+- `web/index.html`, `web/assets/js/vista_explorador.js`, `explorador.js`, `paginas.js`, `web/assets/css/app.css`
+- `src/build/prerender.mjs`, `src/build/common_build.py`, `src/analysis/indicator_feasibility.py`, `config/indicators.yml`
+- `docs/LECTURAS.md`, `docs/INDICATORS.md`
+- `src/verify/coherencia.mjs`, `src/verify/flujos.mjs`
+
+### Pendiente
+
+- `docs/UX_UI.md` describe todavía la portada y la navegación anteriores (§2, §3, §4.3, §4.4, §5.1, §13.1): se reescribe al cerrar el rediseño.
+- Medir el LCP de la portada con `src/verify/rendimiento.mjs`: la primera pantalla cambió.
+- Etapas 3 a 5.

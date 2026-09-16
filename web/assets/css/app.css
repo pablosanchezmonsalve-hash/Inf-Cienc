@@ -2308,6 +2308,58 @@ svg.chart .trama { pointer-events: none; }
 .portada-metodo { margin-top: var(--e3); border-top: 0; padding-top: 0; }
 .portada-metodo .metodo-cuerpo { max-width: 68ch; }
 
+/* ── Portada: la banda «Cockpit» ──────────────────────────────────────────
+   Estructura de la «Propuesta 1» del diseño de Stitch con la paleta invertida
+   de `.banda-contraste`, ya medida: la identidad a un lado y, al otro, lo que
+   NO cambia con el recorte. Ninguna cifra (ver `cabecera()`). */
+.cockpit {
+  display: grid; gap: var(--e4) var(--e6); align-items: start;
+  padding: var(--e6) clamp(var(--e4), 3vw, var(--e6));
+  border-radius: var(--bento-radio); box-shadow: var(--bento-sombra);
+}
+@media (min-width: 60rem) {
+  .cockpit { grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem); }
+  .cockpit .portada-metodo { grid-column: 1 / -1; }
+}
+.cockpit-lado {
+  border: 1px solid var(--linea-fuerte); border-radius: var(--radio);
+  background: var(--superficie); padding: var(--e3) var(--e4);
+}
+.cockpit-rotulo {
+  margin: 0 0 var(--e2); font: 700 var(--t-xs)/1.3 var(--f-ui);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-3);
+}
+.cockpit-fijo { margin: 0; display: grid; gap: var(--e2); }
+.cockpit-fijo div { display: flex; justify-content: space-between; gap: var(--e3); }
+.cockpit-fijo dt { color: var(--tinta-2); font-size: var(--t-s); }
+.cockpit-fijo dd {
+  margin: 0; font-size: var(--t-s); font-weight: 700; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Las seis cifras en rejilla bento: las dos primeras, grandes. El orden del
+   marcado no cambia; la jerarquía la da el tamaño. En las celdas de tres
+   columnas la cifra baja un escalón para que «14.245» no desborde. */
+@media (min-width: 64rem) {
+  .tablero-bento { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .tablero-bento > .ficha { grid-column: span 3; }
+  .tablero-bento > .ficha:nth-child(-n+2) { grid-column: span 6; }
+  .tablero-bento > .ficha:nth-child(n+3) .ficha-valor { font-size: var(--t-2xl); }
+}
+
+/* Los cortes de la portada como tarjetas de dos en dos, y las dos tablas
+   debajo con el mismo trato. */
+@media (min-width: 60rem) {
+  .cortes-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.cortes-bento > .corte, .tabla-portada { border-radius: var(--bento-radio); box-shadow: var(--bento-sombra); }
+.tabla-portada { margin-top: var(--e5); }
+.corte-cod {
+  flex: none; font: 600 var(--t-xs)/1 var(--f-mono); letter-spacing: .04em;
+  color: var(--tinta-3); background: var(--superficie-2);
+  border: 1px solid var(--linea); border-radius: var(--radio-s); padding: .3em .5em;
+}
+
 /* El símbolo no compite con la cifra: va menor y en la misma línea. */
 .ficha-sufijo { font-size: .5em; margin-left: .12em; font-weight: 700; }
 
@@ -2543,4 +2595,21 @@ svg.chart .trama { pointer-events: none; }
      banda, porque una hoja suelta tiene que seguir diciendo de qué informe
      salió. */
   body:has(.portada-informe) .vigencia { display: none; }
+}
+
+/* ── Portada en papel ───────────────────────────────────────────────────
+   El recuadro de invariantes repite lo que ya dice la línea de crédito del
+   informe. Y la banda se imprime en tinta sobre blanco, pero su reinicio de
+   papel no tocaba los tokens de aviso: la advertencia de ventana, que ahora
+   vive dentro de la banda, saldría verde claro sobre blanco. */
+@media print {
+  /* Un enlace en papel no lleva a ninguna parte: la batería de impresión lo
+     caza como control. */
+  .cockpit-lado, .enlace-autoria { display: none; }
+  .cockpit, .cortes-bento > .corte, .tabla-portada { box-shadow: none; }
+  .banda-contraste {
+    --aviso-fondo: #e9f1e0; --aviso-borde: #2e7d32; --aviso-tinta: #1d4a1e;
+    --aviso-tinta-grafico: #1f5d24;
+    --accion: #8a2430; --accion-viva: #a84455; --cifra: #7a2028;
+  }
 }

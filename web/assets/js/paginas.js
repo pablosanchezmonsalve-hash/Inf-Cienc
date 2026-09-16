@@ -258,6 +258,8 @@ async function montarExplorador(claveSeccion) {
     controles: document.getElementById('controles'),
     cifras: document.getElementById('cifras'),
     cortes: document.getElementById('cortes'),
+    dinamica: document.getElementById('dinamica'),
+    masCitadas: document.getElementById('mas-citadas'),
     // Sólo existen en produccion.html (Bento Grid). El resto de las
     // secciones no tiene estos contenedores y quedan en null — se
     // comprueban antes de usarlos, igual que zonas.diferidos.
@@ -355,6 +357,9 @@ async function montarExplorador(claveSeccion) {
     // geometría antes y después del cambio, y el orden sólo se garantiza si el
     // repintado ocurre en medio.
     anim.transicion(zonas.cortes, () => { zonas.cortes.innerHTML = partes.cortes; });
+    // Las dos tablas de la portada. Las secciones no tienen estos contenedores.
+    if (zonas.dinamica) zonas.dinamica.innerHTML = partes.dinamica || '';
+    if (zonas.masCitadas) zonas.masCitadas.innerHTML = partes.masCitadas || '';
 
     // El mapa de calor de temáticas (Bento Grid) reacciona al mismo recorte
     // que el resto de la página: mismo criterio, un solo filtro. No lleva
