@@ -14316,6 +14316,497 @@ servido: ninguna de las cifras viejas aparece ya en `indicadores.html` ni en
 - `src/analysis/indicator_feasibility.py` — nueve notas derivadas y la razón de `X-04`
 - `src/build/02_indicators.py` — el catálogo sirve la advertencia derivada
 
+## Sesión 2026-09-16 — La paleta que el producto servía y la documentación no
+
+Se pidió retomar desde un handoff en `.omc/handoffs/rediseno-stitch/HANDOFF.md`.
+**No existe en este entorno**: `.gitignore:76` excluye `.omc/` («estado
+operacional del asistente»), y esta sesión corre en un contenedor remoto que
+clonó el repositorio desde `origin`. Comprobado en el árbol, en la historia de
+todas las ramas (`--diff-filter=A`), en `git stash` y en el sistema de archivos
+entero: no está. El documento sigue en la máquina local del usuario.
+
+A falta de él, se reconstruyó el plan desde lo versionado y se ejecutó su
+primera fase, la única que no dependía de decisiones pendientes.
+
+### El hallazgo: tres paletas vivas a la vez
+
+| Artefacto | Paleta | Estado |
+|---|---|---|
+| `web/assets/css/app.css` — autoridad | H, vino + champán | vigente |
+| `docs/UX_UI.md` §12.1 y §12.6 | índigo `#2b44d9` sobre blanco puro | **describía una paleta muerta** |
+| `design/informe/*.dc.html` | `D-381`: `#071e22 · #1d7874 · #f4c095` | anterior a la H |
+
+La genealogía, de `D-381` y de la sesión del 2026-09-01: identidad roja → la
+paleta institucional que fijó el usuario → **un índigo aplicado sin
+consultarle**, que `D-381` registra como incidente → la H, elegida el
+2026-09-01 de ocho candidatas servidas en vivo y pedida «íntegra».
+
+`docs/UX_UI.md` §12.1 era la memoria de ese incidente que nadie borró: publicaba
+como sistema vigente exactamente la paleta que `D-381` declara perdida, con una
+tabla entera de contrastes de un producto que no existe. Y no era inocuo: `make
+kit` genera `design-system/` desde `app.css` (§16.1, «no puede desactualizarse
+respecto del producto»), así que el kit decía vino mientras el documento que lo
+explica decía índigo.
+
+### El hueco de memoria que se había reabierto
+
+`D-382` existe porque una elección cromática del usuario no estaba registrada y
+«nada la sostuvo cuando el rediseño cambió de rumbo. El hueco no era de código:
+era de memoria».
+
+**La Paleta H no estaba en el índice de decisiones.** Vivía sólo en la narrativa
+de `SESSION_NOTES.md`. `docs/DECISIONS.md` seguía declarando en `D-381` que la
+paleta institucional es Ink Black · Deep Ocean · Jungle Teal · Peach Glow ·
+Racing Red. El hueco que `D-382` abrió para no repetirse se repitió en la paleta
+siguiente.
+
+### Lo medido, que es lo que sustituye a lo escrito
+
+`python3 src/design/validar_paleta.py` → **SISTEMA CROMÁTICO VÁLIDO**, 44 tokens,
+0 fallos. Las cifras que la documentación daba contra las reales:
+
+| | Documentado (índigo) | Medido (H) |
+|---|---|---|
+| `--tinta` sobre `--superficie` | 19,34 / 16,58 | **16,91 / 15,34** |
+| `--cifra` | 19,34 / 16,58 | **9,50 / 14,78** |
+| `--serie-1`, el dato | 7,16 / 6,40 | **8,25 / 9,08** |
+| `--sin-dato` | 3,42 / 3,78 | **3,63 / 5,33** |
+| ΔE dato ↔ advertencia | 36,0 / 33,3 | **26,0 / 22,2** |
+| Rampa ordinal, paso mínimo | 11,8 / 11,2 | **8,1 / 11,3** |
+| Par categórico, daltonismo | 37,9 / 22,0 | **16,8 / 18,2** |
+
+Ninguna fila coincidía. Y tres afirmaciones del documento eran falsas, no
+inexactas:
+
+- **«La cifra no lleva color.»** `--cifra` es hoy `#7a2028`, vino. La H se tomó
+  íntegra y la tiñe; el argumento anterior quedó derogado de hecho, sin decisión
+  que lo registrara.
+- **«Las dos familias —índigo y ámbar— están lejos en el círculo.»** No hay
+  índigo y no hay ámbar. Con el dato en bordeaux el ámbar caía a **ΔE 17,9**,
+  bajo el piso de 20, y la advertencia se movió entera a verde moneda. El
+  documento presentaba como holgura la separación que había obligado a mover un
+  color.
+- **«Papel blanco puro `#ffffff`.»** Es `#fdf6ef`, hueso.
+
+### Dos sitios más, declarados y no corregidos
+
+Los dos son código, no documentación, y por eso quedan fuera de esta pasada: lo
+autorizado era corregir hechos sin tocar producto.
+
+**`src/design/build_kit.mjs`** calcula los contrastes desde los tokens de la
+hoja —eso está bien—, pero tiene **prosa con cifras congeladas** que el
+generador emite tal cual: «la advertencia ámbar, ΔE 28,6 / 21,2» (L213-215),
+«sobre Peach Glow el dato cae a 3,21:1 y la ausencia a 2,35:1» (L446), «papel
+teñido con Peach» (L425), «el trazo ámbar» (L555), «deuteranopía ΔE 12,2»
+(L488). Peach Glow no está en la paleta; `.banda-enfasis` es champán `#f0ddca`.
+Y L215 afirma que «el ámbar no se movió al cambiar el rojo», que es exactamente
+lo contrario de lo que pasó.
+
+Es el sitio más caro de los cinco, porque `make kit` publica esas fichas en
+`claude.ai/design` bajo la promesa de §16.1 de que el sistema de diseño «no
+puede desactualizarse respecto del producto».
+
+**`src/design/validar_paleta.py`**, en su propio encabezado: «el dato es rojo y
+la advertencia metodológica **ámbar**» (L21-22) y «el Peach del cierre» (L232).
+El instrumento mide bien —lee los tokens que haya— pero se describe con la
+paleta anterior.
+
+**No se corrigen aquí, a propósito.** Hacerlo bien exige medir los ámbitos de
+banda con la matemática del validador, y escribir una cifra sin medirla sería
+cometer el mismo defecto que esta sesión vino a cerrar. Quedan declarados con
+sus líneas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-596 | La paleta vigente es **H · vino y champán**, y queda registrada como decisión del usuario | La eligió el 2026-09-01 de una comparativa de ocho candidatas servidas en vivo y pidió tomarla íntegra. Vivía sólo en la narrativa: el índice seguía declarando la institucional de `D-381`. Es el hueco que `D-382` abrió para no repetirse, reabierto en la paleta siguiente — y `D-382` exige que una elección cromática del usuario se registre como decisión |
+| D-597 | `D-375` queda acotada: la banda **ya no** es la unidad de composición de las páginas narrativas | El explorador la sustituyó en la portada y en las cuatro secciones (`docs/UX_UI.md` §4 ter); sobrevive como suelo de contraste de los indicadores diferidos, que no responden al recorte. El índice de decisiones servía la regla retirada a quien lo consultara, que es de lo que el índice existe para proteger |
+| D-598 | La tabla de contrastes de `docs/UX_UI.md` se declara foto fechada y cede ante `validar_paleta.py` | Es una copia a mano de una salida calculada. Declararla foto con su fecha no impide que envejezca, pero impide que se lea como fuente y dice contra qué contrastarla. Mientras sea prosa, ninguna compuerta la mira: la batería pasó entera con el documento diciendo índigo y el producto sirviendo vino |
+
+### Archivos
+
+- `docs/UX_UI.md` — §12.1 reescrita contra el validador, §12.6 contra los tokens
+  reales, y la marca de valor esperado de §12.6 bis, que seguía diciendo ámbar
+- `SESSION_NOTES.md` — esta entrada
+- `docs/DECISIONS.md` — regenerado con `src/state/snapshot.py`
+
+### Verificación
+
+- `validar_paleta.py` → SISTEMA CROMÁTICO VÁLIDO, 0 fallos
+- `06_assemble_site.py` → 12 páginas, 829 fichas, capa interna no incluida
+- `node src/verify/run_all.mjs dist` → VERIFICACIÓN COMPLETA, sin fallos
+- `grep` de la paleta muerta en `docs/UX_UI.md`: las nueve apariciones que quedan
+  son referencias históricas explícitas, ninguna afirmación vigente
+
+### Supuestos descartados
+
+- Que el handoff estuviera versionado en alguna rama. No lo está, y `.omc/` está
+  ignorado a propósito.
+- Que `D-322` siguiera con su condición abierta («ver una paleta medida antes de
+  aplicarla»). Se cerró el 2026-09-01: la comparativa se sirvió en vivo y el
+  validador la declaró válida. La nota de `D-322` es anterior a ese cierre.
+
+### Ambigüedades abiertas
+
+- **`design/informe/` está en la paleta `D-381`**, con la banda como sistema y
+  cifras del corpus de 823. Tres derivas a la vez. Además su regla 2 —«la
+  ausencia va sobre Ink Black»— ya es nula en papel por `D-552`, que imprime la
+  banda de contraste en tinta sobre blanco. Requiere decisión: refrescar,
+  congelar como fuente histórica o retirar.
+- **`src/design/build_kit.mjs` y `src/design/validar_paleta.py`**, arriba: prosa
+  que describe la paleta anterior en los dos archivos del sistema de diseño.
+- **El «rediseño stitch» propiamente dicho** no se puede reconstruir: la cadena
+  «stitch» no aparece ni una vez en el repositorio.
+
+### Próximo paso recomendado
+
+Decidir qué gobierna `design/informe/`. Es lo que bloquea todo lo demás: mientras
+no se decida, hay dos fuentes de formato para el informe en papel y la
+implementada no es la documentada.
+
+## Sesión 2026-09-16 (cont.) — El generador del sistema de diseño, medido en vez de escrito
+
+Continuación de la anterior. Se autorizó corregir los dos archivos de
+`src/design/` que quedaron declarados: la prosa que describía la paleta
+retirada. Al ir a verificarlo aparecieron **dos defectos mayores que la prosa**.
+
+### Hallazgo 1: `make kit` lleva roto desde antes del explorador
+
+`node src/design/build_kit.mjs` aborta con `TypeError: v.kpisRestantes is not a
+function`. No es cosa de esta sesión: comprobado en `HEAD` limpio, con los
+cambios guardados aparte, falla igual.
+
+`build_kit.mjs` llama a seis funciones de `vista.js` —`hero`, `rail`, `kpis`,
+`kpisRestantes`, `modulo`, `RENDER`— de las que `vista.js` hoy no exporta
+ninguna: sólo tiene `lectura`, `cierrePortada`, `catalogo`,
+`produccionDeclarada`, `procedencia`, `validacion` y `glosario`. El generador
+está escrito contra la API **anterior al explorador**, que sustituyó el módulo
+por el corte y el índice lateral por los controles del recorte (`docs/UX_UI.md`
+§4 ter y §5).
+
+Las fechas lo confirman: `build_kit.mjs` no se toca desde el **2026-08-26** y
+`vista.js` cambió seis veces después.
+
+**Esto explica por qué la prosa se congeló.** `make kit` no está en la batería
+de verificación, así que nada lo corre; y como nada lo corre, nadie vio que sus
+fichas hablaran de Peach Glow y de ámbar. La promesa de §16.1 —«el sistema de
+diseño no puede desactualizarse respecto del producto; si divergen, es que no se
+ha vuelto a generar»— es cierta y vacía: no se puede volver a generar.
+
+**No se repara aquí.** Reescribir el generador contra la API del explorador es
+rehacer una funcionalidad, con decisiones de diseño propias (qué sustituye al
+«módulo» cuando la unidad es el corte), no corregir un hecho falso.
+
+### Hallazgo 2: el generador tenía el bug que el validador documenta haber corregido
+
+`build_kit.mjs` leía los tokens recorriendo **la hoja entera** y quedándose con
+la última aparición de cada uno. `.banda-contraste` redefine `--superficie`,
+`--superficie-2`, `--plano`, `--linea`, `--linea-fuerte` y `--red` en forma
+`light-dark()`, así que esos seis pisaban a los de `:root`.
+
+Consecuencia: la ficha de color medía la tinta de `:root` **contra el suelo
+oscuro de la banda** y publicaba razones de contraste que no le pasan a ningún
+lector. Medido en el banco de verificación: la ausencia sobre `--plano` daba
+**5,05:1** en vez de 3,42:1, y la separación entre los dos suelos de banda
+**ΔE 76,4** en vez de 3,9.
+
+Es exactamente el fallo que `validar_paleta.py` documenta haber corregido en su
+`_bloque()` —«declaraba 12 fallos inexistentes»— en el otro archivo del mismo
+sistema. Se arregló allí y siguió vivo aquí, porque este archivo no arranca.
+
+**Sí se corrige**, porque sin ello las cifras que ahora se derivan saldrían mal.
+
+### Lo que se hizo: derivar en vez de escribir
+
+Se portó a `build_kit.mjs` la matemática OKLab del validador (`oklab()`, `dE()`)
+para que las fichas calculen también las separaciones ΔE, no sólo los
+contrastes. Comprobado que da el mismo número que la de Python: eran dos
+matemáticas para la misma medida y habrían divergido.
+
+Con eso, once cifras que eran prosa pasan a derivarse: la separación dato ↔
+advertencia, el dato y la ausencia sobre la banda de énfasis, la ausencia sobre
+los dos suelos de banda, su ΔE y su borde, el blanco y la tinta del botón sobre
+`--accion`, las tres N del sello y las dos cifras de muestra de la ficha de
+tipografía.
+
+**Una regla cambió de razón al medirla.** «La banda de énfasis no lleva figuras»
+seguía siendo cierta, pero no por lo que decía: sobre el champán del cierre el
+dato mide **6,69:1**, de sobra. Quien no llega es la marca de ausencia, en
+**2,95:1**, bajo el piso de 3. La regla la sostiene `D-09` —lo no medido no
+puede parecerse a lo medido—, no el color del dato.
+
+### Verificación
+
+El generador no arranca, así que **no hay salida real que leer**. Se verificó
+con un banco que reproduce literalmente los helpers añadidos y evalúa las mismas
+llamadas escritas en las fichas, contrastando cada una contra
+`validar_paleta.py`: **17 de 17 coinciden**. Ese banco es el que encontró el
+Hallazgo 2, porque al reproducir el lector de tokens reprodujo también su fallo.
+
+`node --check src/design/build_kit.mjs` pasa, y el generador sigue muriendo en
+el mismo `v.kpisRestantes` preexistente y no en nada nuevo. `validar_paleta.py`
+→ SISTEMA CROMÁTICO VÁLIDO. Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-599 | `build_kit.mjs` lee los tokens **sólo del bloque `:root`** | Recorrer la hoja entera y quedarse con la última aparición hacía que los seis tokens que `.banda-contraste` redefine pisaran a los de `:root`: la ficha de color publicaba la tinta medida contra el suelo oscuro de la banda. Es el mismo fallo que `validar_paleta.py` corrigió en `_bloque()`, vivo aquí porque este archivo no arranca desde el 2026-08-26 |
+| D-600 | Las separaciones ΔE de las fichas se calculan al generar, con la matemática del validador portada | Eran prosa y sobrevivieron a un cambio de paleta entero: el kit publicaba «la advertencia ámbar, ΔE 28,6» con la advertencia ya en verde y la separación real en 26,0. Se porta en vez de reimplementarse para que las dos den el mismo número: dos matemáticas para la misma medida divergen |
+| D-601 | La banda de énfasis no lleva figuras **por la marca de ausencia**, no por el color del dato | Medido sobre el champán del cierre: el dato queda en 6,69:1 y cumple; `--sin-dato` cae a 2,95:1, bajo el piso de 3. La regla anterior daba una razón que la paleta H volvió falsa, y la regla seguía siendo correcta por otra causa. Una regla con el fundamento equivocado se deroga en cuanto alguien comprueba el fundamento |
+| D-602 | `make kit` se declara **inoperante** y no se repara en esta pasada | Llama a seis funciones que `vista.js` dejó de exportar al llegar el explorador. Reescribirlo contra la API nueva es rehacer una funcionalidad, con decisiones de diseño propias —qué sustituye al «módulo» cuando la unidad es el corte—, no corregir un hecho falso. Queda declarado con su error y su fecha |
+
+### Archivos
+
+- `src/design/build_kit.mjs` — lectura de `:root`, matemática OKLab portada, once
+  cifras derivadas y la prosa de la paleta retirada
+- `src/design/validar_paleta.py` — el encabezado y la nota de `papel-2` se
+  describían con el ámbar y el Peach
+- `SESSION_NOTES.md` — esta entrada
+
+### Ambigüedades abiertas
+
+- **`make kit` sigue sin correr** (`D-602`). Mientras siga así, las fichas no se
+  pueden ver ni publicar, y las cifras derivadas de esta sesión están
+  verificadas por banco pero no leídas de una salida real.
+- **`design/informe/`**, sin cambios desde la entrada anterior: sigue en la
+  paleta `D-381`, con la banda como sistema y cifras del corpus de 823.
+
+### Próximo paso recomendado
+
+Decidir si `make kit` se repara o se retira. Reparado, la batería debería
+correrlo: un generador que nadie ejecuta vuelve a congelarse, y es lo que acaba
+de pasar durante tres semanas.
+
+## Sesión 2026-09-16 (cont. 2) — `make kit` reparado, y metido en la batería
+
+Se autorizó reparar el generador declarado inoperante en `D-602` y meterlo en
+la batería, que era el próximo paso recomendado de la entrada anterior.
+
+### Por qué estaba roto, en una línea
+
+`build_kit.mjs` estaba escrito contra la API **anterior al explorador**: pedía
+`v.hero`, `v.rail`, `v.modulo`, `v.kpis`, `v.kpisRestantes` y `v.RENDER`, y
+dibujaba desde `series.json`. El explorador cambió el trato —el sitio deriva los
+gráficos de `publications.json`, el corte sustituyó al módulo y el índice lateral
+pasó a colgar de los filtros— y `vista.js` dejó de exportar las seis.
+
+### La reparación, y la regla que la gobierna
+
+**El kit no rearma componentes: enseña los del sitio.** Es la única forma de que
+la promesa de §16.1 signifique algo. Para eso hicieron falta dos aperturas en
+`vista_explorador.js`:
+
+- **`corteUno()`**, extraída del cuerpo del `map` de `cortesSeccion()` sin tocar
+  una línea del marcado. Es el componente completo: título, conmutador, las dos
+  vistas, la trama, la advertencia, el bloque de lectura y el sello.
+- **`dibujar()`**, que ya existía y era privada. Devuelve `{svg, datos}`, que es
+  lo que quieren las fichas del grupo «Gráficos».
+
+> **El refactor se comprobó por igualdad, no por confianza.** Se guardó la huella
+> MD5 de las 12 páginas de `dist/` antes de tocar nada y se reconstruyó después:
+> **idénticas byte a byte**. Extraer una función del cuerpo de un bucle es
+> exactamente el cambio que parece inocuo y no lo es.
+
+El generador ahora carga los mismos artefactos y con los mismos nombres que
+`src/build/prerender.mjs` —`publications.json`, `authors.json`, `lecturas.json`,
+`catalogo.json`, más `procedencias()` y `jerarquia`—, y busca la forma de cada
+gráfico en `SECCIONES`, que es donde `D-378` la declara.
+
+### Dos fichas que documentaban componentes inexistentes
+
+**«Anillo».** No hay ningún gráfico de anillo en el código: `proporcional()`
+dibuja una barra apilada de `<rect>`, y los únicos `<circle>` son nodos de la
+red. Además la ficha lo ilustraba con `C-01`, que hoy es `barrasH` de una sola
+serie. Era una ficha de un componente que no existe, ilustrada con un indicador
+que no lo usa. Sustituida por **«Red de coautoría»** (`C-05`, forma `red`), que
+es una figura real y era la única sin ficha.
+
+**«Conmutador Gráfico ⇄ Tabla».** Rearmaba a mano el marcado del módulo antiguo
+—`.modulo`, `.modulo-id`, `.vistas`— que el sitio dejó de emitir. Ahora enseña el
+corte real, donde las dos vistas están las dos en el DOM y `data-activa` decide
+cuál se ve: que es, literalmente, por qué sin JavaScript se leen ambas.
+
+### La compuerta
+
+`src/verify/kit.mjs` **ya existía**, a medias y sin conectar: no levantaba
+servidor, no estaba en `PASOS` y —lo decisivo— **no llamaba a `process.exit()`
+nunca**. Imprimía los fallos y salía 0. Una compuerta que no puede fallar no es
+una compuerta.
+
+Completada, comprueba cuatro cosas:
+
+1. **Que el generador corre.** Es la regresión que costó tres semanas.
+2. Que cada ficha se pinta en los dos temas con fondos distintos, que es lo que
+   prueba que `light-dark()` resuelve por contenedor.
+3. Que ninguna lanza excepciones.
+4. **Que la ficha de color mide contra `:root`** y no contra los tokens que una
+   banda redefine. Es el `D-599`, y no se ve mirando la ficha: hay que comparar
+   con la hoja.
+
+> **Se probó que falla.** Se reinyectó el bug de `D-599` y la compuerta lo cazó
+> con las tres discrepancias y sus valores («la ficha dice #200b0e · #200b0e y
+> :root dice #fdf6ef · #17080a»), exit 1. Se rompió el arranque del generador y
+> lo declaró con el error de Node, exit 1. Un verificador que nunca se ve fallar
+> no está verificado.
+
+Entra en `PASOS` como paso «sistema de diseño», con su propio servidor en otro
+puerto para no pisar al de `dist/`.
+
+### De paso
+
+- `validar_paleta.py` llamaba «anillo C-01» al par categórico en tres sitios. No
+  hay anillo, y `C-01` no gasta el par. Corregidas las etiquetas, no la medida.
+- Dos comentarios de `app.css` citaban «816» y la portada de 823 sin decir de qué
+  carga eran. El kit incrusta la hoja entera en cada ficha, así que esas cifras
+  se publican. Fechadas.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-603 | La batería **regenera** el sistema de diseño y lo comprueba | Un generador que nadie ejecuta se congela: éste llevaba tres semanas publicando una paleta retirada y nada lo decía. Comprobar el directorio sin regenerarlo habría validado la salida de una corrida vieja, que es el mismo hueco con otra forma |
+| D-604 | `corteUno()` y `dibujar()` se exportan para que el kit enseñe el componente REAL | El kit tenía su propia vía de dibujo y murió al cambiar la del sitio. Una segunda forma de dibujar lo mismo es la que diverge; exportar la del sitio es más barato que mantener dos. El refactor se comprobó dejando `dist/` idéntico byte a byte |
+| D-605 | La ficha «Anillo» se retira: no existe tal gráfico | `proporcional()` dibuja una barra apilada y `C-01` es `barrasH`. Una ficha de sistema de diseño que documenta un componente inexistente es peor que una ausencia: afirma que el sitio tiene algo que no tiene. Su hueco lo ocupa `C-05`, que sí es una forma publicada y no tenía ficha |
+| D-606 | La compuerta compara la ficha de color con `:root`, no sólo con que pinte | El fallo de `D-599` producía una ficha perfectamente pintada con las cifras equivocadas. Lo que no se compara contra la fuente no se comprueba |
+
+### Archivos
+
+- `web/assets/js/vista_explorador.js` — `corteUno()` extraída y exportada,
+  `dibujar()` exportada
+- `src/design/build_kit.mjs` — reescrito contra la API del explorador
+- `src/verify/kit.mjs` — completado: genera, sirve, comprueba y **falla**
+- `src/verify/run_all.mjs`, `Makefile` — el paso entra en la batería
+- `src/design/validar_paleta.py` — las etiquetas del anillo
+- `web/assets/css/app.css` — dos cifras de la carga anterior, fechadas
+
+### Verificación
+
+Batería entera, ocho pasos: contraste, estructura, flujos, responsive, impresión,
+higiene, peso y **sistema de diseño** (21 fichas, 21 s). `VERIFICACIÓN COMPLETA ·
+sin fallos`, exit 0.
+
+> **Un falso fallo, y de qué era.** Una corrida intermedia dio «VERIFICACIÓN
+> FALLIDA · responsive, impresión». No era el cambio: eran **dos baterías
+> solapadas** peleándose por el puerto 8841, lanzadas por error desde esta
+> sesión. Con una sola, las dos pasan. Vale la pena anotarlo porque el síntoma
+> —dos pasos de navegador fallando a la vez, sin relación con lo tocado— es
+> reconocible y no lleva a ninguna parte si se busca en el diff.
+
+### Ambigüedades abiertas
+
+- **`graficos/red.html` pesa 1,2 MB**, frente a los ~135 KB de las demás: la red
+  de coautoría lleva la hoja incrustada más el SVG de todos los nodos. No es un
+  fallo —`design-system/` no se versiona ni se sirve al público— pero conviene
+  saberlo antes de sincronizar con Claude Design.
+- **`design/informe/`** sigue igual: paleta `D-381`, banda como sistema y cifras
+  del corpus de 823. Es la decisión que sigue bloqueando lo demás.
+
+### Próximo paso recomendado
+
+Decidir qué gobierna `design/informe/`. Es lo único de la lista original que
+sigue sin tocarse, y ahora es lo único que queda entre la documentación y el
+producto.
+
+## Sesión 2026-09-16 (cont. 3) — `design/informe/` congelado como fuente histórica
+
+Última de las decisiones que el plan reconstruido dejó abiertas. Se eligió
+**congelar**, de las tres opciones (refrescar, congelar, retirar).
+
+### Por qué congelar y no refrescar
+
+Porque **la vía que esos artboards especificaban ya se recorrió sin ellos**. Su
+propia sección «vía de implementación acordada» pedía una hoja de impresión con
+0 KB de JavaScript servida al botón «Exportar», y la misma hoja usada por
+Playwright en el build. Eso está construido y verificado desde principios de
+septiembre: carátula, índice con hojas leídas del PDF compuesto, folio, unidad
+de lectura de cinco partes y `src/verify/impresion.mjs` comprobando sobre el
+texto del PDF.
+
+Refrescarlos no añadía nada al producto y creaba **dos fuentes para el mismo
+formato**, que es la condición para que diverjan. Y mantenerlos al día es
+trabajo recurrente por cada carga: `D-387` ya lo había declarado abierto.
+
+### Ni retirar
+
+Retirarlos habría perdido la trazabilidad del criterio. Las cinco reglas que
+separan este informe de uno que publica métricas sin sus límites —denominador
+visible, sello de procedencia, panel «responde / no responde», advertencia fuera
+de la familia del dato, apéndice no opcional— nacieron ahí. Siguen vivas en la
+hoja de impresión; el registro de por qué, no.
+
+### Qué se congela, medido y no citado
+
+Se leyeron los cuatro artboards en vez de fiarse del README:
+
+| | Los artboards | Lo vigente |
+|---|---|---|
+| Paleta | `D-381`: `#071e22`, `#1d7874`, `#f4c095`, papel `#fdf8f2` | Paleta H, vino y champán (`D-596`) |
+| Composición | La banda como unidad narrativa | Sustituida por el explorador (`D-597`) |
+| Corpus | 823 · 816 · 818 · 3.935 citas · 556 · 1.207 pares · 51,2 % · 36,2 % · 63,8 % | **1.342**, ventana 2020–2025 |
+| Consolidación | 63 formas → 30 personas | **94 → 39** |
+
+Ninguna cifra sobrevive. Y **una de sus dos reglas medidas es nula en el medio
+para el que se dibujó**: «la ausencia va sobre Ink Black, donde mide 4,71:1» no
+se cumple en papel, porque `D-552` imprime la banda de contraste en tinta sobre
+blanco. Ese suelo no existe donde el lienzo lo daba por hecho.
+
+### Dónde se puso el sello, y por qué no sólo en el README
+
+En **los cuatro `.dc.html`**, como comentario de cabecera, además del README y
+de una anotación nueva en `canvas.json`. Quien abre un artboard lo abre desde un
+editor de diseño, no pasando por el README de la carpeta: un aviso que hay que
+ir a buscar no protege de nada. El sello dice qué refleja, por qué no rige,
+dónde manda hoy el formato, y que no se refresque.
+
+Las tres anotaciones que ya tenía `canvas.json` hablaban en presente del sistema
+vigente. Van marcadas `[HISTÓRICO]`.
+
+### Verificación
+
+Comprobado que **ningún paso del pipeline lee `design/informe/`**: sólo lo
+referencian `.gitignore` —que versiona los `.dc.html` y excluye el ensamblado— y
+la propia `D-387`. `canvas.json` sigue siendo JSON válido tras editarlo.
+Batería completa sin fallos.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-607 | `design/informe/` se congela como **fuente histórica** y no se refresca | La vía de implementación que especificaba está construida y verificada desde septiembre, así que refrescarlo no añade nada al producto y crea dos fuentes para el mismo formato. Retirarlo perdería el registro del criterio, que es lo único que sigue valiendo de ahí. Cierra el pendiente que `D-387` dejó abierto sobre el apéndice: no se corrige, y ahora por decisión y no por omisión |
+| D-608 | La autoridad del formato del informe en papel es `app.css` más `informe_pdf.mjs` | Un formato con dos fuentes diverge; y de las dos, la que produce el PDF que la gente archiva es ésa. El lienzo pasa a registro, no a especificación |
+| D-609 | El sello de congelación va en **cada archivo**, no sólo en el README de la carpeta | Un artboard se abre desde un editor de diseño, no navegando la carpeta. Un aviso que hay que ir a buscar no protege a quien no sabe que tiene que buscarlo — que es exactamente el caso al que va dirigido |
+
+### Archivos
+
+- `design/informe/README.md` — reescrito como fuente congelada, con la tabla de
+  lo que refleja contra lo vigente
+- `design/informe/*.dc.html` — sello de congelación en los cuatro
+- `design/informe/canvas.json` — anotación de congelación y las tres antiguas
+  marcadas `[HISTÓRICO]`
+
+### Estado del plan reconstruido
+
+De las cuatro decisiones que quedaron abiertas tras la reconstrucción:
+
+- **Fase 0** (deriva documental) — hecha
+- **Fase 0b** (los dos archivos de `src/design/`) — hecha
+- **`make kit`** — reparado y dentro de la batería
+- **`design/informe/`** — congelado, aquí
+
+Queda **una sola**, y no se puede cerrar desde el repositorio: **el material de
+Stitch**. La cadena «stitch» no aparece ni una vez en el proyecto, así que la
+sección 2 del handoff perdido sigue sin reconstruirse. Si existía un rediseño de
+superficie propuesto con esa herramienta, tiene que venir de fuera.
+
+### Próximo paso recomendado
+
+Ninguno pendiente en el repositorio. Si aparece el material de Stitch, las
+restricciones medidas para cualquier propuesta están en la entrada del
+2026-09-16: 20,2 KB de margen de CSS comprimido, cero dependencias externas,
+`vista.js` sin DOM, y la paleta la fija el usuario (`D-381`, `D-382`).
+
 
 ## Rediseño con Stitch, etapa 1: barra lateral y barra superior (2026-09-14)
 

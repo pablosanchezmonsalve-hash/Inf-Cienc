@@ -18,16 +18,20 @@ QUÉ COMPRUEBA
      dibuja, con el piso que fija su USO y no el gusto: 4,5:1 texto normal
      (1.4.3), 3,0:1 texto grande y objeto gráfico (1.4.11).
 
-  2. SEPARACIÓN DATO ↔ ADVERTENCIA (OKLab ΔE ≥ 20). El dato es rojo y la
-     advertencia metodológica ámbar. Dos familias cálidas contiguas se pueden
-     confundir, y confundir «esto es el dato» con «esto es una advertencia
-     sobre el dato» es un fallo metodológico, no estético.
+  2. SEPARACIÓN DATO ↔ ADVERTENCIA (OKLab ΔE ≥ 20). El dato es bordeaux y la
+     advertencia metodológica verde moneda. Confundir «esto es el dato» con
+     «esto es una advertencia sobre el dato» es un fallo metodológico, no
+     estético.
+
+     La advertencia es verde PORQUE el dato es bordeaux. Hasta la paleta H era
+     ámbar, y dos familias cálidas contiguas caían a ΔE 17,9, bajo el piso: se
+     movió el color, no el piso. Esta comprobación es la que lo detectó.
 
   3. RAMPA ORDINAL (ΔE ≥ 8 entre escalones, luminosidad monótona). Q1–Q4 es una
      escala ORDENADA: tiene que verse ordenada, y los cuatro escalones tienen
      que distinguirse incluso impresos en gris.
 
-  4. PAR CATEGÓRICO EN USO bajo daltonismo. El anillo de C-01 gasta dos ranuras.
+  4. PAR CATEGÓRICO bajo daltonismo. --serie-1 y --serie-2 medidas como par.
      Se simula protanopía, deuteranopía y tritanopía y se exige separación en
      las tres — el peor caso es la deuteranopía, y es el que decide.
 
@@ -190,7 +194,7 @@ REGLAS = [
     ("--accion",              "--superficie",   4.5, "texto de enlace"),
     ("--accion",              "--superficie-2", 4.5, "enlace sobre superficie alterna"),
     ("--serie-1",             "--superficie",   3.0, "barra de dato"),
-    ("--serie-2",             "--superficie",   3.0, "segunda ranura · anillo C-01"),
+    ("--serie-2",             "--superficie",   3.0, "segunda ranura categórica"),
 ("--sin-dato", "--superficie",   3.0, "barra de ausencia"),
     ("--ord-1",    "--superficie",   3.0, "ordinal 1 · Q1"),
     ("--ord-2",    "--superficie",   3.0, "ordinal 2 · Q2"),
@@ -229,7 +233,9 @@ REGLAS_BENTO = [
 # El segundo suelo de banda lleva figuras, así que tiene que sostener la tinta
 # fina, el color del dato y —sobre todo— la marca de ausencia. Ese último piso
 # es el que fija cuánto puede oscurecerse el papel: es la regla que impide
-# repetir en papel-2 el error de poner figuras sobre el Peach del cierre.
+# repetir en papel-2 el error de poner figuras sobre el champán del cierre,
+# donde la ausencia no llega al piso de 3 (la banda de énfasis es sólo
+# tipográfica por eso, y no por el color del dato, que ahí sí cumple).
 REGLAS_BANDA_PAPEL_2 = [
     ("--tinta",    "--banda-papel-2", 4.5, "texto principal"),
     ("--tinta-3",  "--banda-papel-2", 4.5, "metadatos"),
@@ -345,7 +351,7 @@ def main() -> None:
               f"(piso {PISO_CELDA_MAPA:.0f}) · tinta legible ya medido en §1  {tema}")
 
     # ---- 4. El par categórico en uso, bajo daltonismo
-    print("\n  PAR CATEGÓRICO EN USO (anillo C-01) BAJO DALTONISMO")
+    print("\n  PAR CATEGÓRICO (--serie-1 · --serie-2) BAJO DALTONISMO")
     for tema in ("claro", "oscuro"):
         a, b = (val(t, tema) for t in PAR_CATEGORICO)
         medidas = {"normal": delta_e(a, b)}

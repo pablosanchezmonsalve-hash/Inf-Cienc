@@ -1,7 +1,62 @@
-# Formato del informe exportable a PDF
+# Formato del informe exportable a PDF · FUENTE HISTÓRICA CONGELADA
 
-Fuente del lienzo de diseño del **modo informe**: cuatro páginas A4 vertical
-(794×1123 px a 96 dpi) que definen el formato del PDF exportable.
+> **Congelado el 2026-09-16** (`D-607`). Esto **no describe el producto actual**.
+> Se conserva como registro del criterio con que se diseñó el informe en papel,
+> no como especificación de nada.
+>
+> **Dónde manda hoy el formato del papel:**
+> [`web/assets/css/app.css`](../../web/assets/css/app.css) (la hoja de
+> impresión, que es la fuente), [`src/build/informe_pdf.mjs`](../../src/build/informe_pdf.mjs)
+> (el generador del PDF institucional) y [`docs/UX_UI.md`](../../docs/UX_UI.md)
+> §12.7 bis (lo que ese formato tiene que conservar).
+
+---
+
+## Por qué se congela en vez de refrescarse
+
+Porque **la vía que estos artboards especificaban ya se recorrió sin ellos**.
+
+Su propia sección «vía de implementación acordada» pedía una hoja de estilo de
+impresión con 0 KB de JavaScript, servida al botón «Exportar» y usada por
+Playwright en el build para el PDF canónico. Eso está construido y verificado:
+carátula, índice con números de hoja leídos del PDF ya compuesto, folio, unidad
+de lectura de cinco partes por figura, y `src/verify/impresion.mjs` comprobando
+sobre el texto del PDF y no sobre el DOM.
+
+Refrescarlos no habría añadido nada al producto y habría creado **dos fuentes
+para el mismo formato**, que es la condición para que diverjan. Mantenerlos al
+día, además, es trabajo recurrente en cada carga de datos: `D-387` ya lo había
+declarado —«refrescarla es una tarea de diseño con su propio criterio de
+banda/paleta, no una corrección de una línea»— y lo dejó abierto. Esto lo cierra.
+
+## Qué refleja, y por qué ya no rige
+
+| | Lo que fijan estos artboards | Lo vigente |
+|---|---|---|
+| **Paleta** | La institucional de `D-381`: Ink Black `#071e22`, Deep Ocean `#1d7874`, Peach Glow `#f4c095`, papel `#fdf8f2` | **Paleta H, vino y champán** (`D-596`), desde el 2026-09-01 |
+| **Composición** | La banda como unidad narrativa | El explorador la sustituyó; sobrevive sólo como suelo de contraste de los diferidos (`D-597`) |
+| **Corpus** | 823 publicaciones · 3.935 citas · FWCI 0,87 · 51,2 % · 556 · 1.207 pares | **1.342 publicaciones**, ventana 2020–2025, 829 entidades |
+| **Consolidación** (apéndice) | 63 formas → 30 personas | **94 formas → 39 personas** |
+
+Y una de sus dos reglas medidas **es nula en el medio para el que se dibujó**:
+«la ausencia va sobre Ink Black, donde mide 4,71:1» no se cumple en papel,
+porque `D-552` decidió imprimir la banda de contraste **en tinta sobre blanco**
+—su tinta clara depende de un ajuste del diálogo de impresión que va apagado por
+defecto—. En el papel no hay suelo Ink Black sobre el que poner nada.
+
+## Qué se conserva de aquí, y dónde está vivo
+
+El criterio, no el marcado. Estas cinco reglas siguen gobernando el informe, y
+viven hoy en la hoja de impresión y en `docs/UX_UI.md` §12.7 bis:
+
+1. **Cada cifra lleva su denominador visible** (`D-16`).
+2. **Cada bloque lleva su sello de procedencia**: fuente y fecha de corte.
+3. **Cada eje lleva el panel «responde / no responde»**, de `docs/EJES.md`.
+4. **Las advertencias van fuera de la familia visual del dato.**
+5. **El apéndice metodológico no es opcional.** Un informe sin él no es
+   interpretable.
+
+## Los archivos
 
 | Archivo | Qué es |
 |---|---|
@@ -11,77 +66,14 @@ Fuente del lienzo de diseño del **modo informe**: cuatro páginas A4 vertical
 | `Apendice.dc.html` | Denominadores, evidencia de ORCID y limitaciones declaradas |
 | `canvas.json` | Disposición de los artboards y notas del encargo |
 
-## Lo que NO está aquí
+Cada `.dc.html` abre con el sello de congelación, para que no haga falta llegar
+hasta aquí para saberlo. El archivo ensamblado
+(`informe-cienciometrico-pdf.html`, ~2 MB) nunca se versionó: era el editor
+empaquetado alrededor de estos cinco y se regeneraba.
 
-El archivo ensamblado (`informe-cienciometrico-pdf.html`, ~2 MB) **no se
-versiona**: es el editor empaquetado alrededor de estos cinco archivos, y se
-regenera. Lo que importa y se revisa es la fuente.
+## Si alguna vez hace falta un lienzo vigente
 
-## Por qué estos datos son reales
-
-Las cifras que aparecen —823, 3.935, 4,82, FWCI 0,87, 51,2 %, 556, y las series
-de producción anual, áreas QS y tipo documental— salen de `data/processed/`, no
-son maqueta. Un formato probado con datos inventados no revela que una etiqueta
-no cabe, que una cifra desborda su columna o que un denominador es más largo de
-lo que el diseño supuso.
-
-## Sistema visual: narrativa por bandas
-
-Adopta el sistema del rediseño del sitio (lienzo «Rediseño Informe
-Bibliométrico»), no la paleta anterior. Tipografía **Newsreader** para titulares
-y cifras, **Public Sans** para interfaz y prosa.
-
-| Token | Valor | Qué admite |
-|---|---|---|
-| `papel` | `#fdf8f2` | Todo |
-| `papel-2` | `#f7efe5` | Todo |
-| `contraste` | `#071e22` | Todo. Es donde va la **ausencia** (4,71:1) |
-| `énfasis` | `#f4c095` | **Sólo titular y prosa** |
-| dato | `#1d7874` | Figuras sobre papel y contraste |
-
-**Las dos reglas medidas que gobiernan estas cuatro páginas:**
-
-1. **La banda Peach es tipográfica, nunca de datos.** Sobre ella el color del
-   dato cae a 3,21:1 y la marca de ausencia a **2,35:1**. La primera versión del
-   rediseño ponía la banda de la ausencia justo ahí: el único sitio donde esa
-   marca no se veía.
-2. **La ausencia va sobre Ink Black**, donde mide 4,71:1. Lo que el informe no
-   sabe ocupa el suelo más fuerte, no una nota al pie.
-
-**Reglas de composición** que estas páginas siguen: una afirmación por banda ·
-los fondos alternan y no se repiten seguidos · contraste y énfasis una vez por
-página · una figura por banda · el sello viaja con su figura, nunca agrupado al
-final · la advertencia va **antes** de la figura que califica.
-
-**Apertura y cierre se aplican al documento, no a cada hoja**: la portada abre,
-el apéndice cierra en Peach; las interiores son bandas de trabajo. Y la página
-de tabla mantiene la banda como marco dejando la tabla como superficie de
-consulta — el mismo criterio por el que el rediseño deja fuera a Publicaciones,
-Autores, la ficha y el catálogo.
-
-## Lo que el formato tiene que conservar al implementarse
-
-No son adornos; son las reglas que separan este informe de uno que presenta
-métricas sin sus límites:
-
-1. **Cada cifra lleva su denominador visible.** 823, 816 o 818 según el
-   indicador (`D-16`).
-2. **Cada bloque lleva su sello de procedencia**: fuente y fecha de corte.
-3. **Cada eje lleva el panel «responde / no responde»**, de `docs/EJES.md`.
-4. **Las advertencias van en el bloque ámbar**, fuera de la familia visual del
-   dato.
-5. **El apéndice metodológico no es opcional.** Un informe sin él no es
-   interpretable.
-
-## Decisión pendiente que el diseño refleja
-
-La marca de agua «BORRADOR — identidad visual sin validar» está tras un
-interruptor porque `color_primario` y `logo_path` de `config/institution.yml`
-siguen siendo placeholders. Se apaga cuando lleguen los definitivos.
-
-## Vía de implementación acordada
-
-Hoja de estilo de impresión (**0 KB de JavaScript añadido**) que sirve al botón
-«Exportar» del navegador, y **la misma hoja** usada por Playwright en el build
-para generar el PDF institucional canónico. Un origen, dos consumidores — el
-mismo patrón que `prerender.mjs` con `vista.js`.
+Se parte de la paleta y del sistema de **hoy**, no de éste. Copiar estos
+artboards y cambiarles los colores reproduciría además su composición por
+bandas, que el sitio ya no usa, y su regla de la ausencia, que el papel no
+admite. Serían tres errores heredados por ahorrarse un lienzo nuevo.

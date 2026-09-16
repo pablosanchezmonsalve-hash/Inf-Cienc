@@ -505,7 +505,11 @@ const MULTIVALUADO = new Set(['paises', 'instituciones', 'asjc', 'ods', 'qs_area
    mismos números para que no pueda decir otra cosa.
    `jerarquia` (Map/objeto escuela -> facultad, desde meta.json) sólo lo usan
    los campos 'unidad' y 'escuela'; el resto de los cortes lo ignora. */
-function dibujar(sub, corte, jerarquia) {
+/** La FIGURA de un corte, con sus datos: `{svg, datos}`, o null si no hay nada
+    que dibujar. Exportada para que `src/design/build_kit.mjs` enseñe en sus
+    fichas de gráfico la misma figura que sirve el sitio, en vez de rearmarla
+    con los primitivos de `core.js` por su cuenta. */
+export function dibujar(sub, corte, jerarquia) {
   const { campo, titulo, forma, tope } = corte;
   // 'unidad' y 'escuela' no pasan por `X.porCampo()` con el extractor
   // genérico: ese extractor da la unidad tal como la afiliación la nombró
@@ -794,8 +798,22 @@ export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, sel
   const elegidos = s.cortes.filter(corte =>
     X.graficoElegido(sel || {}, corte.seleccionCon || corte.cod || corte.campo));
   if (!elegidos.length) return sinGraficos();
-  return elegidos.map(corte => {
-    if (persona) {
+  return elegidos.map(corte =>
+    corteUno(sub, corte, { proc, jerarquia, unidadPorPersona, textos, persona })).join('');
+}
+
+/** UN corte, con todo lo que lo hace legible: título, conmutador, las dos
+    vistas, la trama si no suman, la advertencia, el bloque de lectura y el
+    sello.
+
+    Se extrajo del cuerpo de `cortesSeccion()` sin tocar una línea del marcado,
+    para que `src/design/build_kit.mjs` pueda enseñar el componente REAL en su
+    ficha en vez de rearmarlo. El generador del sistema de diseño tenía su
+    propia vía —`v.modulo()`, `v.RENDER[...]`— que murió con el explorador y se
+    quedó tres semanas publicando una paleta retirada sin que nadie lo viera
+    (`D-602`). Una segunda forma de dibujar lo mismo es la que diverge. */
+export function corteUno(sub, corte, { proc, jerarquia, unidadPorPersona, textos, persona } = {}) {
+  if (persona) {
       const personal = cortePersonal(corte, persona);
       if (personal) return personal;
     }
@@ -834,7 +852,6 @@ export function cortesSeccion(sub, clave, proc, unidadPorPersona, jerarquia, sel
         : ''}
       ${selloCorte(sub, campoSello, codSello, proc)}
     </section>`;
-  }).join('');
 }
 
 /** Índice de los cortes de la sección.

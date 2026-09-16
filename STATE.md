@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `06a4c3e` · Estado final del healthy audit
+Último commit: `df85e62` · Correcciones de errores publicados, SIN regenerar ni verificar
 Snapshot: 2026-09-16
 
 ---
@@ -72,7 +72,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 607
+## Decisiones tomadas: 621
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
