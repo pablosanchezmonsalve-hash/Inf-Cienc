@@ -74,3 +74,5 @@ informes/run/
 
 # Estado operacional del asistente (oh-my-claudecode): no es fuente ni derivado del proyecto.
 .omc/
+
+.env
