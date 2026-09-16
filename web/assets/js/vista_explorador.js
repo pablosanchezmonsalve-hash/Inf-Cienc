@@ -943,6 +943,7 @@ export function corteUno(sub, corte, { proc, jerarquia, unidadPorPersona, textos
       data-corte="${corte.campo}" tabindex="-1">
       <header class="corte-cab">
         <h3>${c.escapar(corte.titulo)}</h3>
+        ${corte.cod ? `<span class="corte-cod">${c.escapar(corte.cod)}</span>` : ''}
         ${r ? conmutador(id) : ''}
       </header>
       ${r ? `<div class="vista" id="${id}-grafico" data-vista="grafico" data-activa="true">
@@ -984,20 +985,30 @@ export function indice(clave) {
 
 /** La cabecera de una sección: qué responde y qué NO responde.
 
+    Estructura editorial del «Dossier» de Stitch: el título y lo que responde a
+    un lado, y al otro, A LA VISTA, lo que no responde. Iba plegado detrás de un
+    control, y es justo la parte que justifica el panel (`docs/EJES.md`): una
+    advertencia detrás de un clic es una advertencia que casi nadie lee. Del
+    Dossier se toma la forma de su tarjeta lateral, no su texto, que afirmaba
+    compromisos que el sitio no cumple.
+
     `eje` es la entrada de `ejes.json` para esta clave (`{titulo, responde,
     no_responde, sobre_que}`) — la misma fuente que `docs/EJES.md` declara y
     que `04_glossary.py` verifica contra los denominadores reales de cada
     indicador antes de publicarla. Sin `ejes.json` cargado (o sin panel para
     esta clave) se omite el bloque en vez de inventar un texto. */
 export function cabeceraSeccion(clave, titulo, eje) {
-  return `<div class="portada-id">
-    <h1>${c.escapar(titulo)}</h1>
-    <p class="portada-sub">${c.escapar(eje ? eje.responde : '')}</p>
-  </div>
-  ${eje ? `<details class="metodo portada-metodo">
-    <summary>Qué NO dice esta sección</summary>
-    <div class="metodo-cuerpo"><p>${c.escapar(eje.no_responde)}</p></div>
-  </details>` : ''}`;
+  const id = `limite-${c.escapar(clave)}`;
+  return `<div class="seccion-cab">
+    <div class="portada-id">
+      <h1>${c.escapar(titulo)}</h1>
+      <p class="portada-sub">${c.escapar(eje ? eje.responde : '')}</p>
+    </div>
+    ${eje ? `<aside class="seccion-limite" aria-labelledby="${id}">
+      <p class="seccion-limite-tit" id="${id}">Qué NO dice esta sección</p>
+      <p>${c.escapar(eje.no_responde)}</p>
+    </aside>` : ''}
+  </div>`;
 }
 
 /** Todo el cuerpo de una sección. `unidadPorPersona` (Map, opcional) sólo lo
@@ -1022,9 +1033,16 @@ export function seccion(pubs, sel, clave, proc, unidadPorPersona, jerarquia, met
     informe, y un hueco se leería como que el fenómeno no existe. Van sobre el
     suelo de contraste porque NO responden al recorte —no se calculan aquí— y
     mezclarlos con lo que sí responde haría creer que el filtro los cambia. */
+/* La clave de la página no es la categoría del catálogo en dos secciones:
+   producción es «descriptivo» y temática es «tematico». Comparándolas tal cual,
+   la banda nunca aparecía en esas dos páginas, y P-08, X-03, X-04, T-02 y T-03
+   no se declaraban en ninguna. */
+const CATEGORIA_DE_SECCION = { produccion: 'descriptivo', tematica: 'tematico' };
+
 export function diferidos(catalogo, clave) {
+  const categoria = CATEGORIA_DE_SECCION[clave] || clave;
   const filas = (catalogo.indicadores || []).filter(
-    r => r.categoria === clave && r.estado !== 'publicado');
+    r => r.categoria === categoria && r.estado !== 'publicado');
   if (!filas.length) return '';
   return `<section class="banda banda-contraste no-publicados">
     <div class="banda-titulo">

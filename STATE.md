@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `02ef8b0` · Datos regenerados con las correcciones, y verificadas
+Último commit: `b684d20` · La portada pasa a la estructura «Cockpit» del diseño de Stitch
 Snapshot: 2026-09-16
 
 ---
@@ -72,7 +72,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 640
+## Decisiones tomadas: 645
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

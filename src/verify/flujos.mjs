@@ -246,6 +246,19 @@ await pm.waitForTimeout(350);
 ok(!await pm.isVisible(enlaceMenu), 'Escape la cierra');
 await movil.close();
 
+// ─────────────────────────────────────── cabecera y no publicados de sección
+// El «qué NO dice» va a la vista, no plegado. Y producción y temática declaran
+// sus indicadores no publicados: la banda no aparecía nunca en esas dos páginas
+// porque su clave no coincide con la categoría del catálogo.
+console.log('  Cabecera y no publicados de las secciones');
+for (const [pagina, codigo] of [['produccion', 'P-08'], ['tematica', 'T-02']]) {
+  await pg.goto(`http://127.0.0.1:${P}/${pagina}.html`, { waitUntil: 'networkidle' });
+  await pg.waitForTimeout(400);
+  ok(await pg.isVisible('.seccion-limite'), `${pagina}: el «qué NO dice» está a la vista`);
+  ok(await pg.locator(`.no-publicados .codigo:text-is("${codigo}")`).count() === 1,
+     `${pagina}: declara ${codigo} entre los no publicados`);
+}
+
 console.log(`\n  excepciones JS durante todo el recorrido: ${err.length}`);
 err.forEach(e => console.log(`    ✗ ${e}`));
 await b.close();

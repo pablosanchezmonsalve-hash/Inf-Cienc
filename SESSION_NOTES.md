@@ -15134,3 +15134,64 @@ ausente con recorte a una persona.
 - `docs/UX_UI.md` describe todavía la portada y la navegación anteriores (§2, §3, §4.3, §4.4, §5.1, §13.1): se reescribe al cerrar el rediseño.
 - Medir el LCP de la portada con `src/verify/rendimiento.mjs`: la primera pantalla cambió.
 - Etapas 3 a 5.
+
+
+## Rediseño con Stitch, etapa 3: las secciones (2026-09-16)
+
+Las cuatro secciones explorables —producción, impacto, colaboración y
+temática— toman del «Dossier» de Stitch la cabecera editorial, y del «Cockpit»
+las tarjetas. Los gráficos no cambian.
+
+### Lo que cambió
+
+- **Cabecera editorial.** El título y lo que la sección responde a un lado; al
+  otro, **a la vista**, la tarjeta «Qué NO dice esta sección», en la familia de
+  la advertencia metodológica. Iba plegada detrás de un control. El texto sigue
+  saliendo de `ejes.json`: del Dossier se tomó la forma de su tarjeta «Compromiso
+  DORA & Leiden», no su texto, que afirmaba no usar métricas de revista en un
+  sitio que publica R-01.
+- **Cortes como tarjetas** de dos en dos, con su código junto al título.
+- **Los no publicados aparecen en producción y temática.** `diferidos()`
+  comparaba la clave de la página con la categoría del catálogo, y en esas dos
+  no coinciden (`produccion` es `descriptivo`; `tematica`, `tematico`). P-08,
+  X-03, X-04, T-02 y T-03 no se declaraban en ninguna página. Decisión del
+  usuario: corregirlo en esta etapa.
+
+### Lo que NO se hizo, y por qué
+
+La especificación proponía dos bloques más del Dossier: el acceso abierto (A-01)
+como tarjetas por vía y las áreas QS (T-05) como lista con barras. No entran:
+sustituirían figuras que tienen su tabla equivalente (`D-120`) por objetos
+gráficos que la batería no mide, y el de T-05 rompía la prueba del tooltip de
+`flujos.mjs`. Tampoco la fila de procedencia por sección: la barra de vigencia y
+el sello de cada corte ya la dan, y la primera versión de esa fila repetía la
+atribución de fuentes equivocada que se corrigió en `D-622`.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, nueve pasos en verde. `flujos.mjs` comprueba
+que el «qué NO dice» está a la vista y que producción declara P-08 y temática
+T-02 entre los no publicados. `impresion.mjs` ya exigía el cuerpo del panel en el
+PDF y sigue pasando.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-641 | El «qué NO dice» de cada sección va a la vista, en una tarjeta junto al título | Estructura editorial del Dossier. Es la parte que justifica el panel (`docs/EJES.md`), y plegada casi nadie la leía. Revisa la presentación de `D-179` y de `docs/UX_UI.md` §4 bis; el texto y su origen no cambian |
+| D-642 | Del Dossier se toma la forma de la tarjeta DORA/Leiden, no su texto | Afirmaba que el informe no usa métricas de revista, y el sitio publica R-01 |
+| D-643 | Los cortes de sección van como tarjetas de dos en dos, con su código | La misma rejilla que la portada (`D-633`). El código deja ligar cada figura con su fila del catálogo |
+| D-644 | La banda de no publicados traduce la clave de la sección a la categoría del catálogo | Decisión del usuario. Producción y temática no coincidían, y cinco indicadores no se declaraban en ninguna página |
+| D-645 | A-01 y T-05 conservan su figura; no se añade fila de procedencia por sección | Las formas del Dossier sustituirían figuras con tabla equivalente por objetos sin medir. La procedencia ya la dan la barra de vigencia y el sello de cada corte |
+
+### Archivos
+
+- `web/assets/js/vista_explorador.js` — `cabeceraSeccion()`, código en `corteUno()`, `diferidos()`
+- `web/produccion.html`, `impacto.html`, `colaboracion.html`, `tematica.html` — rejilla de tarjetas
+- `web/assets/css/app.css` — `.seccion-cab`, `.seccion-limite`
+- `src/verify/flujos.mjs`
+
+### Pendiente
+
+- Etapas 4 (Descarga de datos) y 5 (Metodología).
+- `docs/UX_UI.md`, al cerrar el rediseño.

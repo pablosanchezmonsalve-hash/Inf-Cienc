@@ -2354,6 +2354,23 @@ svg.chart .trama { pointer-events: none; }
 }
 .cortes-bento > .corte, .tabla-portada { border-radius: var(--bento-radio); box-shadow: var(--bento-sombra); }
 .tabla-portada { margin-top: var(--e5); }
+
+/* ── Secciones: cabecera editorial (estructura del «Dossier» de Stitch) ──
+   El «qué NO dice» deja de ir plegado: va a la vista, en la familia de la
+   advertencia metodológica —tokens ya medidos—, al lado del título en
+   pantalla ancha y debajo en un teléfono. */
+.seccion-cab { display: grid; gap: var(--e4) var(--e6); align-items: start; }
+@media (min-width: 60rem) {
+  .seccion-cab { grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem); }
+}
+.seccion-limite {
+  margin: 0; padding: var(--e3) var(--e4);
+  background: var(--aviso-fondo); color: var(--aviso-tinta);
+  border: 1px solid var(--aviso-borde); border-left-width: 3px; border-radius: var(--radio);
+  font-size: var(--t-s); line-height: 1.55;
+}
+.seccion-limite p { margin: 0; }
+.seccion-limite .seccion-limite-tit { margin: 0 0 var(--e1); font-weight: 700; }
 .corte-cod {
   flex: none; font: 600 var(--t-xs)/1 var(--f-mono); letter-spacing: .04em;
   color: var(--tinta-3); background: var(--superficie-2);
