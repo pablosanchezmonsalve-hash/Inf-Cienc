@@ -14952,3 +14952,99 @@ equivocado era la figura construida al lado.
 - Si se generó y publicó un informe PDF con la versión anterior, su figura de
   cuartiles también está invertida: hay que regenerarlo (`make informe`).
 - Ampliar `coherencia.mjs` con los indicadores que confirme el barrido.
+
+
+## Correcciones: cinco errores que el sitio publicaba (2026-09-16)
+
+Los encontraron los críticos de la especificación de las etapas 2 a 5 del
+rediseño, y cada uno se comprobó contra los datos antes de tocarlo. El usuario
+decidió corregirlos todos, aparte del rediseño.
+
+### Lo que se publicaba y lo que se publica
+
+| Dónde | Antes | Ahora |
+|---|---|---|
+| Sellos de A-01, C-01, C-03, C-04, C-06, T-01 | Fuente Scopus | **SciVal**: esos campos salen del export de SciVal (`02_reconcile_sources.py`) |
+| T-05, sello del build y texto de temática | 100 %, «las bases coinciden» | **98,1 %**: 1.317 de 1.342 traen área QS |
+| Sello de P-07 (sección y portada) | «N 1.342 pares autor × publicación, 99,6 %» | **«N 1.342 publicaciones, 64,9 % · 871 con dato»** |
+| Sello de C-05 | «N 1.342 personas» | «N 1.342 publicaciones» |
+| Fuentes externas, pre-renderizado | «NaN · Autores UFT» | las tres cifras que ya pintaba el navegador |
+| Lectura de portada, nota y definición de I-03 | «la media es 1,14» junto a «no promediando valores individuales»; definición con 0,41 / 0,87 | «el promedio de los FWCI de cada publicación es 1,14 y la mediana 0,48»; cifras medidas |
+
+Dos causas detrás de los sellos. La fuente estaba escrita a mano por indicador y
+seis entradas no correspondían al campo. Y el sello de un corte del navegador
+cuenta publicaciones, pero tomaba la etiqueta de unidad del cálculo del build,
+que en P-07 son pares y en C-05 personas.
+
+El NaN tenía una causa de la clase que `D-126` prohíbe: el pre-renderizado tenía
+su propia copia del marcado, pedía un campo que el artefacto no trae y además
+rellenaba una tabla de autores sin contenedor, cuya excepción tragaba el `catch`.
+
+### Lo que NO se afirma sobre el FWCI
+
+El valor publicado es la media aritmética de los FWCI individuales, y la nota
+decía lo contrario. Se corrigió la descripción, no la cifra. Si esa media es o no
+la definición de SciVal para un conjunto no se pudo verificar: cuatro páginas de
+soporte de Elsevier consultadas no dan la fórmula. Por eso no se reescribieron
+`D-18`, `D-325`, la razón de `AU-04`, `docs/UX_UI.md` §4.2 ni el comentario de
+`explorador.js`, que se apoyan en «el FWCI de un conjunto no es el promedio»:
+quedan como pendiente.
+
+### La afiliación en revisión
+
+El artículo más citado del universo (2.726 citas) lista a Goosey-Tolfrey V.L.
+como autora UFT. En el export, «Affiliations» trae 7 líneas para 8 autores y
+Loughborough aparece pegada a los seis primeros firmantes: la UFT parece
+desplazada. No se resuelve (`D-08`). Se declara con su evidencia en
+`internal/afiliaciones_en_revision.yml`, que no se versiona, y la auditoría la
+encola en `internal/ambiguities_authors.csv`. Se probó una heurística para
+detectarlo solo y no sirve: marcaba 34 publicaciones, casi todas correctas, y no
+marcaba ésta.
+
+### Fuentes externas estaba desactualizado
+
+Al regenerar, `fuentes_externas.json` pasó de 436 a 275 obras. La versión
+publicada comparaba contra los 804 DOIs de la carga de julio; la de ahora, contra
+los 1.291 del universo 2020-2025, que es exactamente el número de DOIs distintos
+de `publications.json`. Las 161 que salen ya están en Scopus. No es efecto de
+estas correcciones: el artefacto se había quedado atrás de su insumo.
+
+### Verificación
+
+- Diferencia de contenido de cada artefacto contra el commit anterior, sin la
+  fecha de build: sólo cambian las fuentes, la cobertura de T-05, los textos de
+  I-03, temática y FWCI, y Fuentes externas. Publicaciones, autores, facetas,
+  jerarquía, meta y validación, idénticos.
+- Cada sello comprobado en `dist/`.
+- `node src/verify/run_all.mjs dist`: nueve pasos, exit 0.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-622 | La fuente de cada indicador es la del campo del que sale | `02_reconcile_sources.py` extrae acceso abierto, países, instituciones, número de autores y ASJC del export de SciVal. Seis sellos decían Scopus |
+| D-623 | T-05 declara su cobertura real | No toda publicación de SciVal trae área QS. El sello del build decía 100 % mientras la figura del navegador medía 98,1 % |
+| D-624 | El sello de un corte rotula publicaciones, y «No determinada» no cuenta como dato | `X.cobertura` cuenta publicaciones del recorte. Con la unidad del build publicaba «1.342 pares» y «1.342 personas», que no existen, y contando «No determinada» P-07 decía 99,6 % |
+| D-625 | Las cifras de Fuentes externas salen de un solo constructor puro | La copia del pre-renderizado publicaba «NaN · Autores UFT», una atribución por persona que la página dice que no publica (`D-126`) |
+| D-626 | I-03 se describe como lo que se calcula: promedio de los FWCI individuales, junto a su mediana | La nota decía lo contrario del valor. No se afirma que coincida con la definición de SciVal para un conjunto: no se encontró la fórmula |
+| D-627 | `D-18`, `D-325` y `AU-04` quedan abiertas, no reescritas | Se apoyan en una premisa sin verificar. Sus conclusiones pueden sostenerse por otras razones —n pequeño, DORA—, y eso lo decide una revisión, no una corrección de texto |
+| D-628 | Una afiliación dudosa se declara en `internal/` y la auditoría la encola | La heurística de detección probada no distingue el caso. Encolar no cambia nada publicado hasta que una persona decida (`D-08`) |
+| D-629 | `fuentes_externas.json` se regenera contra el universo 2020-2025 | Comparaba contra 804 DOIs de julio y listaba como fuera de Scopus 161 obras que están en él |
+| D-630 | `build_kit.mjs` calcula su raíz con `fileURLToPath` | Con `URL.pathname` no arrancaba en Windows, y la batería lo declaraba como fallo del generador |
+
+### Archivos
+
+- `src/build/common_build.py`, `src/build/02_indicators.py`, `src/analysis/indicator_feasibility.py`, `config/indicators.yml`
+- `web/assets/js/explorador.js`, `vista_explorador.js`, `vista.js`, `paginas.js`; `src/build/prerender.mjs`
+- `src/audit/04_author_population.py`
+- `docs/EJES.md`, `GLOSSARY.md`, `METHODOLOGY.md`, `INDICATORS.md`, `LECTURAS.md`
+- `src/design/build_kit.mjs`
+- `data/processed/` regenerado
+
+### Pendiente
+
+- Verificar la definición de SciVal del FWCI de un conjunto y revisar `D-18`, `D-325` y `AU-04` con ella.
+- `C-02` figura `publicar: true` y no se calcula en ningún lado.
+- La herramienta de revisión (`src/review/build_review.py`) no muestra todavía la cola `V-afiliacion_en_revision`.
+- Si se publicó un PDF del informe con la versión anterior, regenerarlo.
+- Etapas 2 a 5 del rediseño.

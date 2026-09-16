@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `df85e62` · Correcciones de errores publicados, SIN regenerar ni verificar
+Último commit: `c0c711d` · El generador del sistema de diseño no arrancaba en Windows
 Snapshot: 2026-09-16
 
 ---
@@ -53,7 +53,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 | Cola | Entradas |
 |---|---|
-| `internal/ambiguities_authors.csv` | 721 |
+| `internal/ambiguities_authors.csv` | 722 |
 | `internal/ambiguities_publications.csv` | 6 |
 
 `make revision` reúne estas colas en 184 casos, de los que **184 siguen pendientes**: 0 ya se decidieron y quedan registrados en `internal/identity_decisions.csv`. Cifras de la última corrida de `make revision`, no de ahora mismo.
@@ -72,7 +72,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 621
+## Decisiones tomadas: 630
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
