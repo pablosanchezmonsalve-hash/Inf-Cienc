@@ -24,6 +24,11 @@
 <meta name="description" content="{{descripcion}}">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/app.css">
+<!-- Las fuentes NO se precargan. Se probó: con Inter y JetBrains Mono en
+     preload, el LCP de la portada en Slow 4G subía de 1.780 a 2.224 ms, porque
+     los 88 KB compiten con el HTML y la hoja por el mismo ancho de banda. Sin
+     precarga el texto se pinta con la fuente del sistema y cambia a Inter al
+     llegar (font-display: swap), que es el precio visible y aceptado (D-678). -->
 <!-- Estructural, cero color propio (ver la cabecera del archivo): puede
      cargarse en las once páginas sin que las que aún no usan Bento Grid
      cambien de aspecto. -->

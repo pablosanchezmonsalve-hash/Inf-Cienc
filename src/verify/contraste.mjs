@@ -29,12 +29,19 @@ const medir = () => {
   const ct = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + .05) / (y + .05); };
   const parse = s => {
     const m = String(s).match(/rgba?\(([^)]+)\)/);
-    if (!m) return null;
-    const p = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
-    return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+    if (m) {
+      const p = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+      return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+    }
+    // Chromium devuelve un color-mix() como `color(srgb r g b / a)`, en 0–1.
+    // Sin esto esos fondos contaban como transparentes y no se medían.
+    const k = String(s).match(/color\(srgb ([^)]+)\)/);
+    if (!k) return null;
+    const q = k[1].split(/[\s/]+/).filter(Boolean).map(Number);
+    return [q[0] * 255, q[1] * 255, q[2] * 255, q.length > 3 ? q[3] : 1];
   };
   const sobre = (f, b) => f.slice(0, 3).map((v, i) => v * f[3] + b[i] * (1 - f[3]));
-  const paradas = img => [...String(img).matchAll(/rgba?\([^)]+\)/g)]
+  const paradas = img => [...String(img).matchAll(/rgba?\([^)]+\)|color\(srgb [^)]+\)/g)]
     .map(m => parse(m[0])).filter(Boolean);
 
   /* Fondo efectivo de un elemento: se compone hacia arriba hasta encontrar

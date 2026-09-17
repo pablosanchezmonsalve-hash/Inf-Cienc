@@ -22,7 +22,7 @@
    Uso:  node src/design/build_kit.mjs [salida]     (por defecto design-system/)
 */
 
-import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm, cp } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 
@@ -165,9 +165,9 @@ const cr = (a, b, t) => ratio(TOKENS[a][t], TOKENS[b][t]);
 const miles = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 /* El fondo de una banda no es un token: vive en su propia regla, como
-   `background: light-dark(#f0ddca, #180609)`. Se lee de ahí en vez de
-   deducirlo de un token que hoy coincida —--marca-tinta vale ese mismo
-   champán—, porque esa coincidencia no la declara nadie y se rompería sola. */
+   `background: light-dark(#eff6ff, #00143d)`. Se lee de ahí en vez de
+   deducirlo de un token que hoy coincida, porque esa coincidencia no la
+   declara nadie y se rompería sola. */
 function fondoDeRegla(selector) {
   const m = css.match(
     new RegExp(`\\${selector}\\s*\\{[^}]*background:\\s*light-dark\\(\\s*(#[0-9a-f]{6})\\s*,\\s*(#[0-9a-f]{6})\\s*\\)`, 'i'));
@@ -324,7 +324,7 @@ añadir('fundamentos/color.html', ficha({
     ${muestrasColor([
       ['--ord-1', 'Q1', 3], ['--ord-2', 'Q2', 3], ['--ord-3', 'Q3', 3], ['--ord-4', 'Q4', 3],
     ], '--superficie')}
-    <p class="panel-etq" style="margin-top:var(--e5)">Advertencia metodológica · verde moneda, fuera de la familia del dato</p>
+    <p class="panel-etq" style="margin-top:var(--e5)">Advertencia metodológica · esmeralda, fuera de la familia del dato</p>
     ${muestrasColor([
       ['--aviso-borde', 'línea de referencia', null],
       ['--aviso-tinta-grafico', 'etiqueta de referencia', 4.5],
@@ -335,14 +335,13 @@ añadir('fundamentos/color.html', ficha({
       su posición: al filtrar, un color ligado al rango saltaría de una entidad a
       otra. Y si el nombre de la categoría ya es un color —Gold, Green, Bronze— el
       color deja de estar disponible para codificar.</p>
-    <p class="regla"><b>Separación dato ↔ advertencia.</b> El dato es bordeaux y la
-      advertencia verde moneda: familias opuestas en temperatura, no dos cálidos
-      contiguos. Medido en OKLab al generar esta ficha: ΔE
+    <p class="regla"><b>Separación dato ↔ advertencia.</b> El dato es azul marino y
+      la advertencia esmeralda, la paleta de Stitch (D-678): familias opuestas.
+      Medido en OKLab al generar esta ficha: ΔE
       <b>${sep('--serie-1', '--aviso-borde', 'claro')}</b> en claro y
       <b>${sep('--serie-1', '--aviso-borde', 'oscuro')}</b> en oscuro, sobre un piso
-      de 20. La advertencia es verde <em>porque</em> el dato es bordeaux: con el
-      ámbar anterior, cálido como el dato, la separación caía a 17,9 y no llegaba
-      al piso. No se bajó el piso, se movió el color.</p>
+      de 20. Cuando un color no llegó al piso se movió el color, no el piso: con el
+      dato en bordeaux, el ámbar caía a 17,9 y la advertencia pasó a verde.</p>
     <p class="regla"><b>Cuatro ranuras categóricas siguen reservadas y sin validar.</b>
       Nunca se han dibujado juntas. Quien las estrene debe revalidarlas para el
       número de ranuras que vaya a usar, no para seis.</p>`,
@@ -502,11 +501,11 @@ añadir('componentes/controles.html', ficha({
   grupo: 'Componentes', nombre: 'Controles', ancho: 900,
   subtitulo: 'Botones, pastillas de filtro, chips, conmutador de tema',
   intro: `El botón primario <strong>no puede llevar tinta blanca fija</strong>: el mismo
-    token de fondo es bordeaux hondo en tema claro y <em>champán claro</em> en oscuro,
-    donde el blanco caería a <b>${ratio('#ffffff', TOKENS['--accion'].oscuro)}:1</b>. Con
+    token de fondo es azul medio en tema claro y <em>azul claro</em> en oscuro,
+    donde el blanco caería a <b>${ratio('#ffffff', TOKENS['--boton'].oscuro)}:1</b>. Con
     <code style="display:inline">--boton-tinta</code>, que cambia con el tema igual que su
-    fondo, mide <b>${cr('--boton-tinta', '--accion', 'claro')}:1</b> en claro y
-    <b>${cr('--boton-tinta', '--accion', 'oscuro')}:1</b> en oscuro.`,
+    fondo, mide <b>${cr('--boton-tinta', '--boton', 'claro')}:1</b> en claro y
+    <b>${cr('--boton-tinta', '--boton', 'oscuro')}:1</b> en oscuro.`,
   cuerpo: `
     <div style="display:flex;gap:var(--e3);flex-wrap:wrap;align-items:center">
       <button class="boton">Limpiar filtros</button>
@@ -563,10 +562,10 @@ añadir('componentes/bandas.html', ficha({
     <p class="panel-etq" style="margin-top:0">Los cuatro suelos</p>
     <div class="banda banda-papel"><div style="padding:var(--e4)">
       <p class="banda-gancho">papel</p>
-      <p style="margin:0">El suelo por defecto. Papel hueso, teñido champán.</p></div></div>
+      <p style="margin:0">El suelo por defecto: el canvas de Stitch.</p></div></div>
     <div class="banda banda-papel-2"><div style="padding:var(--e4)">
       <p class="banda-gancho">papel-2</p>
-      <p style="margin:0">El segundo suelo, FRÍO. Admite figuras, incluida la marca de
+      <p style="margin:0">El segundo suelo. Admite figuras, incluida la marca de
       ausencia, que es el piso que fija cuánto puede oscurecerse.</p></div></div>
     <div class="banda banda-contraste"><div style="padding:var(--e4)">
       <p class="banda-gancho">contraste</p>
@@ -584,21 +583,21 @@ añadir('componentes/bandas.html', ficha({
       como la banda es oscura en los DOS temas, en claro conservaban su valor claro y
       caían sobre suelo oscuro, con --ord-1 en 1,06:1.</p>
 
-    <p class="regla">La banda de énfasis <b>no lleva figuras</b>, y lo que lo decide es
-      la marca de AUSENCIA, no el dato. Sobre el champán del cierre el dato aún mide
-      <b>${sobreBanda('--serie-1', BANDA_ENFASIS, 'claro')}:1</b>, de sobra; pero
-      <code style="display:inline">--sin-dato</code> cae a
-      <b>${sobreBanda('--sin-dato', BANDA_ENFASIS, 'claro')}:1</b>, bajo el piso de 3.
-      Una figura ahí dibujaría lo no medido de forma que se confunde con lo medido, que
-      es exactamente lo que <code style="display:inline">D-09</code> prohíbe. Por eso el
-      cierre es sólo tipografía y enlaces, y la regla queda escrita junto al componente.</p>
+    <p class="regla">La banda de énfasis <b>no lleva figuras</b>: es el cierre, sólo
+      tipografía y enlaces. La regla nació de una medida —con la paleta vino, la marca de
+      ausencia caía bajo el piso de 3 sobre ese suelo— y se conserva como regla de
+      composición. Hoy, sobre el azul claro del cierre, el dato mide
+      <b>${sobreBanda('--serie-1', BANDA_ENFASIS, 'claro')}:1</b> y
+      <code style="display:inline">--sin-dato</code>
+      <b>${sobreBanda('--sin-dato', BANDA_ENFASIS, 'claro')}:1</b>: si una figura
+      llegara ahí, habría que medirla antes, no suponer que cumple.</p>
 
     <p class="regla">El segundo papel <b>no puede oscurecerse más</b>, y el techo lo fija
       una medida, no el gusto: tiene que sostener la marca de ausencia con el dato
-      bordeaux encima. Hoy <code style="display:inline">--sin-dato</code> mide
+      azul marino encima. Hoy <code style="display:inline">--sin-dato</code> mide
       <b>${cr('--sin-dato', '--banda-papel-2', 'claro')}:1</b> sobre él, contra
       <b>${cr('--sin-dato', '--plano', 'claro')}:1</b> sobre el primer papel: un paso más
-      de champán y la ausencia cae bajo 3.</p>
+      de oscuridad y la ausencia se acerca al piso de 3.</p>
 
     <p class="regla">Los dos suelos de banda se separan poco por definición —son papel
       contra papel—: ΔE <b>${sep('--plano', '--banda-papel-2', 'claro')}</b> en claro y
@@ -785,6 +784,10 @@ for (const { ruta, contenido } of CARDS) {
   await writeFile(destino, contenido, 'utf8');
 }
 await writeFile(join(SALIDA, 'README.md'), LEEME, 'utf8');
+// Las fichas copian app.css entera, y sus @font-face apuntan a ../fonts/: sin
+// esta copia el kit se pintaba con la fuente del sistema y no enseñaba ni
+// Inter, ni JetBrains Mono, ni Newsreader (D-678).
+await cp(join(RAIZ, 'web/assets/fonts'), join(SALIDA, 'fonts'), { recursive: true });
 
 console.log(`\n  Paquete de sistema de diseño en ${SALIDA.replace(RAIZ + '/', '')}/\n`);
 let grupoActual = '';

@@ -18,14 +18,14 @@ QUÉ COMPRUEBA
      dibuja, con el piso que fija su USO y no el gusto: 4,5:1 texto normal
      (1.4.3), 3,0:1 texto grande y objeto gráfico (1.4.11).
 
-  2. SEPARACIÓN DATO ↔ ADVERTENCIA (OKLab ΔE ≥ 20). El dato es bordeaux y la
-     advertencia metodológica verde moneda. Confundir «esto es el dato» con
-     «esto es una advertencia sobre el dato» es un fallo metodológico, no
-     estético.
+  2. SEPARACIÓN DATO ↔ ADVERTENCIA (OKLab ΔE ≥ 20). El dato es azul marino y la
+     advertencia metodológica esmeralda (paleta de Stitch, D-678). Confundir
+     «esto es el dato» con «esto es una advertencia sobre el dato» es un fallo
+     metodológico, no estético.
 
-     La advertencia es verde PORQUE el dato es bordeaux. Hasta la paleta H era
-     ámbar, y dos familias cálidas contiguas caían a ΔE 17,9, bajo el piso: se
-     movió el color, no el piso. Esta comprobación es la que lo detectó.
+     Esta comprobación ya movió colores dos veces en vez de bajar el piso: con
+     el dato en bordeaux, el ámbar caía a ΔE 17,9 y la advertencia pasó a verde;
+     con Stitch, el acento del tablero en oscuro caía a 18,2 y se aclaró.
 
   3. RAMPA ORDINAL (ΔE ≥ 8 entre escalones, luminosidad monótona). Q1–Q4 es una
      escala ORDENADA: tiene que verse ordenada, y los cuatro escalones tienen
@@ -216,7 +216,11 @@ REGLAS_MAPA = [
     ("--marca-tinta",         "--marca",        4.5, "nav sobre la cabecera"),
     ("--aviso-tinta",         "--aviso-fondo",  4.5, "texto de advertencia"),
     ("--aviso-tinta-grafico", "--superficie",   4.5, "etiqueta de referencia"),
-    ("--boton-tinta",         "--accion",       4.5, "tinta del botón primario"),
+    ("--boton-tinta",         "--accion",       4.5, "tinta de la navegación activa"),
+    # El botón primario tiene su propio fondo desde el diseño de Stitch (D-678):
+    # en Stitch la navegación activa es azul marino y el botón, azul medio.
+    ("--boton-tinta",         "--boton",        4.5, "tinta del botón primario"),
+    ("--boton-tinta",         "--boton-vivo",   4.5, "tinta del botón primario al pasar"),
 ]
 
 # --bento-acento NO va en REGLAS: esa lista se mide también dentro de
@@ -233,7 +237,7 @@ REGLAS_BENTO = [
 # El segundo suelo de banda lleva figuras, así que tiene que sostener la tinta
 # fina, el color del dato y —sobre todo— la marca de ausencia. Ese último piso
 # es el que fija cuánto puede oscurecerse el papel: es la regla que impide
-# repetir en papel-2 el error de poner figuras sobre el champán del cierre,
+# repetir en papel-2 el error de poner figuras sobre la banda de énfasis del cierre,
 # donde la ausencia no llega al piso de 3 (la banda de énfasis es sólo
 # tipográfica por eso, y no por el color del dato, que ahí sí cumple).
 REGLAS_BANDA_PAPEL_2 = [

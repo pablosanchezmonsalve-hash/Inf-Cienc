@@ -443,149 +443,145 @@ contenedor; la página nunca scrollea en horizontal.
 
 ## 12. Sistema visual
 
-Implementado en `web/assets/css/app.css`, hoja única. Sin dependencias externas:
-ninguna fuente, hoja ni script se carga desde un CDN.
+Implementado en `web/assets/css/app.css`, hoja única, con el diseño del proyecto
+de Stitch (`D-678`). Sin dependencias externas: fuentes e iconos se alojan en el
+sitio, y ninguna hoja ni script se carga desde un CDN.
 
-### 12.1 Paleta: cálida, con el dato en una sola familia
+### 12.1 Paleta: la de Stitch, con el dato en una sola familia
 
-La paleta vigente es **H · vino y champán** (`D-596`). La eligió el usuario el
-2026-09-01 de una comparativa de ocho candidatas servida en vivo, y pidió
-tomarla **íntegra** —marca, dato y advertencia a la vez, no sólo la cabecera—.
+La paleta vigente es la del proyecto de Stitch **«Institutional Scientific
+Productivity Dashboard»**, aplicada **lo más fiel posible** por decisión del
+usuario el 2026-09-17 (`D-678`). Revisa `D-610`, que había tomado de Stitch sólo
+la estructura y conservaba la paleta vino y champán (`D-596`). Los valores base
+son los de su configuración: `primary-container` `#00205b`, `secondary`
+`#1c5fa8`, `accent-cobalt` `#2563eb`, `canvas-ground` `#f8fafc`,
+`text-primary` `#0a0e14` y el «benchmark» esmeralda `#059669`.
 
 | | Claro | Oscuro |
 |---|---|---|
-| Papel · `--superficie` | `#fdf6ef` hueso | `#17080a` vino profundo |
-| Tinta · `--tinta` | `#241014` | `#f0e2d0` champán |
-| Dato · `--serie-1` | `#8a2430` bordeaux | `#e0a0a8` |
-| Marca · `--marca` | `#2c0c12` | `#180609` |
-| Advertencia · `--aviso-borde` | `#2e7d32` verde moneda | `#5a9e5f` |
+| Suelo · `--plano` | `#f8fafc` | `#0a1128` azul noche |
+| Tarjeta · `--superficie` | `#ffffff` | `#111a33` |
+| Tinta · `--tinta` | `#0a0e14` | `#e6ecf6` |
+| Dato · `--serie-1` | `#00205b` azul marino | `#b2c5ff` |
+| Marca · `--marca` | `#00205b` | `#00143d` |
+| Botón · `--boton` | `#1c5fa8` | `#b2c5ff` |
+| Advertencia · `--aviso-borde` | `#059669` esmeralda | `#34d399` |
 
-**Antes de ésta hubo tres, y la genealogía importa porque una de las
-transiciones fue un error de proceso:** identidad roja → la paleta institucional
-que fijó el usuario (Ink Black · Deep Ocean · Jungle Teal · Peach Glow · Racing
-Red, `D-381`) → un índigo de alto contraste **aplicado sin consultarle**, que
-`D-381` registra como incidente → la H actual.
+**Stitch no define tema oscuro** —ninguna de sus pantallas tiene una sola clase
+`dark:`—. El oscuro se **deriva** de su `inverse-surface`, `inverse-primary` y
+`surface-dark`, y se mide igual que el claro.
 
-> **Esta sección describió el índigo como sistema vigente hasta el 2026-09-16**,
-> dos semanas después de que dejara de estarlo. Daba el dato en `#2b44d9`, el
-> papel en blanco puro y una tabla entera de contrastes de una paleta que el
-> sitio ya no servía. Es el mismo defecto que `D-594` cerró en las notas de
-> factibilidad y `D-584`/`D-586` en dos indicadores: una cifra correcta el día
-> que se escribió, en una frase que sobrevive al cambio que la vuelve falsa.
-> Aquí era una paleta entera.
+**Tres valores de Stitch se movieron un paso**, porque no despejaban su umbral:
+
+- el gris de ausencia (`missing-data` `#64748b`) medía 4,34:1 sobre la
+  superficie secundaria y pasa a `#5e6e84`;
+- el cuarto cuartil (`quartile-q4` `#60a5fa`) no llegaba a 3:1 como objeto
+  gráfico sobre blanco y pasa a `#3b82f6`;
+- el acento del tablero en oscuro quedaba a ΔE 18,2 del verde de advertencia,
+  bajo el piso de 20, y pasa a `#a5b4fc`.
+
+Tampoco es el color institucional oficial de la Universidad Finis Terrae, que
+no se pudo verificar: son tokens, y el día que exista el hex oficial se cambian.
+
+> **Genealogía.** Identidad roja → paleta institucional fijada por el usuario
+> (`D-381`) → un índigo aplicado sin consultarle, registrado como incidente →
+> vino y champán (`D-596`) → Stitch (`D-678`). Esta sección llegó a describir el
+> índigo dos semanas después de retirado: una paleta entera correcta el día que
+> se escribió y falsa desde el cambio siguiente.
 
 #### Las razones de contraste, medidas
 
-Las **calcula** `python3 src/design/validar_paleta.py` a partir de los 44 tokens
-que lee de la hoja. Esta tabla es la foto de una corrida —2026-09-16, veredicto
+Las **calcula** `python3 src/design/validar_paleta.py` a partir de los tokens
+que lee de la hoja. Esta tabla es la foto de una corrida —veredicto
 `SISTEMA CROMÁTICO VÁLIDO`—, no una fuente: si discrepan, manda el validador.
 
 | Token | Fondo | Claro | Oscuro | Piso |
 |---|---|---|---|---|
-| `--tinta` | `--superficie` | **16,91** | **15,34** | 4,5 (WCAG 1.4.3) |
-| `--tinta-2` | `--superficie` | 10,47 | 11,34 | 4,5 |
-| `--tinta-3` | `--superficie-2` | 7,22 | 7,73 | 4,5 |
-| `--cifra` | `--superficie` | 9,50 | 14,78 | 3,0 (texto grande) |
-| `--accion` | `--superficie` | 8,25 | 14,78 | 4,5 |
-| `--serie-1` | `--superficie` | 8,25 | 9,08 | 3,0 (WCAG 1.4.11) |
-| `--serie-2` | `--superficie` | 3,81 | 3,74 | 3,0 |
-| `--sin-dato` | `--superficie` | 3,63 | 5,33 | 3,0 |
-| `--ord-1` … `--ord-4` | `--superficie` | 11,65 … 3,56 | 15,26 … 3,30 | 3,0 |
-| `--bento-acento` | `--superficie` | 6,24 | 6,93 | 4,5 |
-| `--marca-tinta` | `--marca` | 13,61 | 14,88 | 4,5 |
-| `--aviso-tinta` | `--aviso-fondo` | 8,84 | 11,12 | 4,5 |
-
-**La cifra sí lleva color, y es un cambio respecto de la paleta anterior.**
-`--cifra` es vino `#7a2028` en claro y champán `#f0ddca` en oscuro, a 9,50:1 y
-14,78:1 sobre un piso de 3,0. El índigo la dejaba en tinta pura, con el
-argumento de que teñir la cifra la convierte en decoración y le quita contraste;
-la H se tomó íntegra y la tiñe. Ese argumento quedó derogado **de hecho, sin
-decisión que lo registrara** — se hace constar aquí.
+| `--tinta` | `--superficie` | 19,34 | 14,51 | 4,5 |
+| `--tinta-2` | `--superficie` | 10,35 | 10,55 | 4,5 |
+| `--tinta-3` | `--superficie-2` | 5,58 | 6,95 | 4,5 |
+| `--cifra` | `--superficie` | 15,47 | 13,76 | 3,0 |
+| `--accion` | `--superficie` | 15,47 | 10,11 | 4,5 |
+| `--serie-1` | `--superficie` | 15,47 | 10,11 | 3,0 |
+| `--serie-2` | `--superficie` | 5,17 | 4,68 | 3,0 |
+| `--sin-dato` | `--superficie` | 5,20 | 5,83 | 3,0 |
+| `--ord-4` | `--superficie` | 3,68 | 4,68 | 3,0 |
+| `--bento-acento` | `--plano` | 4,94 | 9,37 | 4,5 |
+| `--boton-tinta` | `--boton` | 6,46 | 10,56 | 4,5 |
+| `--marca-tinta` | `--marca` | 15,47 | 17,99 | 4,5 |
+| `--aviso-tinta` | `--aviso-fondo` | 7,29 | 11,53 | 4,5 |
 
 #### Las cuatro condiciones que el contraste solo no cubre
 
-**Separación dato ↔ advertencia:** ΔE OKLab **26,0** en claro y **22,2** en
-oscuro, sobre un piso de 20.
+**Separación dato ↔ advertencia:** ΔE OKLab **37,5** en claro y
+**20,4** en oscuro, sobre un piso de 20. El dato es azul marino y la
+advertencia esmeralda: familias opuestas.
 
-> **Es la razón por la que la advertencia cambió de color.** Con el dato en
-> bordeaux, el ámbar de siempre —cálido, como el dato— caía a **ΔE 17,9**, bajo
-> el piso. Se movió a verde moneda, que es frío y separa. No se bajó el piso: se
-> movió el color. Quien busque «el ámbar de advertencia» en la hoja no lo va a
-> encontrar, y eso es la corrección, no un olvido.
+**Rampa ordinal Q1–Q4:** los cuartiles de Stitch en un solo tono, paso mínimo
+ΔE **8,2** y **10,2** sobre un piso de 8, con
+luminosidad monótona.
 
-**Rampa ordinal Q1–Q4:** paso mínimo ΔE **8,1** y **11,3**, sobre un piso de 8,
-con luminosidad monótona. Un solo tono en cuatro pasos: cuatro tonos distintos
-habrían afirmado que Q1 y Q4 no tienen relación entre sí, cuando son posiciones
-de una misma escala. En claro el paso mínimo queda **una décima por encima** del
-piso: la rampa no admite otro escalón sin rehacerse entera.
+**Par categórico bajo daltonismo** (anillo `C-01`): peor caso ΔE
+**29,1** en claro y **21,4** en oscuro, sobre un piso de 8.
 
-**Par categórico bajo daltonismo** (anillo `C-01`): peor caso ΔE **16,8** en
-claro y **18,2** en oscuro, sobre un piso de 8. En claro, normal 18,2 ·
-protanopía 19,7 · deuteranopía 18,2 · tritanopía 16,8.
-
-**Celdas de mapa** (`--mapa-1..5`): paso mínimo entre vecinas ΔE **6,9** en los
-dos temas, sobre un piso de 6. Las cinco son fijas y no invierten con el tema,
-porque un mapa es una hoja de datos y tiene que leerse igual en claro y en
-oscuro.
-
-#### Dos correcciones que impuso la medición · paleta índigo, retirada
-
-Las dos cifras de abajo son **históricas**: se midieron sobre el papel blanco
-del índigo, que ya no existe. Se conservan porque documentan para qué sirve el
-instrumento, no el estado de la hoja. Los valores vigentes de esos mismos
-tokens están en la tabla de arriba — `--ord-4` a 3,56 / 3,30 y `--sin-dato` a
-3,63 / 5,33.
-
-> **`--ord-4` no llegaba a 3:1.** El cuarto escalón de la rampa quedaba en
-> 1,94:1 sobre blanco. No bastaba con oscurecerlo: al hacerlo se comía la
-> separación con `--ord-3`. La rampa entera se rebalanceó con la matemática del
-> validador hasta que los cuatro escalones cumplieran a la vez el piso de
-> contraste y el de ΔE.
->
-> **La marca de ausencia se quedaba corta.** `--sin-dato` medía 2,56:1 sobre
-> blanco y 2,95 sobre el segundo suelo. Un gris que no se ve es peor que no
-> marcar la ausencia, porque la deja pasar por dato.
+**Celdas de mapa** (`--mapa-1..5`): paso mínimo entre vecinas ΔE
+**7,7**, sobre un piso de 6. Son fijas y no invierten con el tema:
+un mapa es una hoja de datos.
 
 #### El validador estaba midiendo otra paleta
 
 `validar_paleta.py` leía la hoja entera y se quedaba con la **última** aparición
 de cada token. Desde que `.banda-contraste` redefine `--superficie`,
-`--superficie-2` y `--plano` en su ámbito, esos valores pisaban los de `:root`:
-el validador comparaba tinta clara contra suelo oscuro y declaraba **12 fallos
-inexistentes**. Ahora lee sólo el bloque `:root`.
-
-No es cosmético. Un instrumento que da falsos positivos se deja de mirar, y
-entonces tampoco atrapa los verdaderos — que era el caso:
-
-> Al medir la banda de contraste **como ámbito propio**, aparecieron cuatro
-> fallos reales. La banda redefine `--serie-1`, `--serie-2` y `--sin-dato` pero
-> se había olvidado de la rampa ordinal y de la tinta del botón. Como la banda
-> es oscura en los **dos** temas, en claro esos tokens conservaban su valor
-> claro y caían sobre un suelo oscuro: `--ord-1` medía **1,06:1**, o sea
-> invisible.
+`--superficie-2` y `--plano` en su ámbito, esos valores pisaban los de `:root` y
+el validador declaraba **12 fallos inexistentes**. Ahora lee sólo `:root`, y la
+banda se mide como ámbito propio. Así aparecieron cuatro fallos reales: la banda
+había olvidado redefinir la rampa ordinal y la tinta del botón, y `--ord-1`
+llegó a medir 1,06:1.
 
 ### 12.2 Tipografía
 
-**La escala subió entera.** La anterior arrancaba en 11 px y ponía las notas a
-12,5 y las tablas a 14: por debajo de los 16 px que las guías de accesibilidad
-dan como suelo de lectura cómoda, y el primer texto que deja de leerse cuando la
-vista cambia con la edad.
+**Tres familias de Stitch, alojadas en el sitio** (`D-678`):
 
-| Token | Valor | Uso |
+| Familia | Papel | Dónde |
 |---|---|---|
-| `--t-xs` | 13 px | códigos, micro-etiquetas |
-| `--t-s` | 15 px | notas, pie |
-| `--t-m` | 16 px | tablas, controles |
-| `--t-base` | 17 px | prosa |
-| `--t-l` | 20 px | — |
-| `--t-xl` | 24 px | título de módulo |
-| `--t-2xl` | 2–3,25 rem | h1 |
-| `--t-cifra` | 2,75–4,5 rem | valor de ficha |
-| `--t-display` | 3,5–7 rem | cifra de titular |
+| **Inter** | interfaz y lectura | todo el texto |
+| **JetBrains Mono** | rótulos «mono-seal», sellos, códigos | cabeceras de tabla, sellos, grupos de navegación, vigencia |
+| **Newsreader** | serif editorial del Dossier | títulos de las secciones y de la metodología |
+
+Se sirven desde `web/assets/fonts/` —Fontsource 5.3.0, subconjuntos latin y
+latin-ext, licencia OFL, con sus licencias al lado—. **Nada se carga de un CDN**
+(`D-30`): en la red cerrada de la institución una fuente de Google no llegaría y
+el sitio se vería con otra letra. Con la cursiva y el griego de Inter pesan unos
+350 KB. Usan `font-display: swap`: el texto se pinta con la fuente del sistema y
+cambia a Inter al llegar, sin bloquear.
+
+> **Las fuentes no se precargan, y está medido.** La primera versión precargaba
+> Inter y JetBrains Mono en `_cabecera.html`. En *Slow 4G* el LCP de la portada
+> subió de 1.708 a 2.224 ms: los 88 KB de la precarga competían con el HTML y
+> la hoja por el mismo ancho de banda. Cambiar `swap` por `optional` no movía
+> nada (2.180 ms); quitar la precarga, sí (1.796 ms). El precio visible es que el
+> texto cambia de letra un instante al llegar la fuente.
+
+La portada, los listados y la descarga de datos son superficies de **consulta** y
+van en Inter, como en Stitch. La serif sólo entra donde el sitio se **lee**.
+
+La escala es la de Stitch, en `rem`:
+
+| Token | Valor | Nombre en Stitch |
+|---|---|---|
+| `--t-xs` | 13 px | caption-xs |
+| `--t-s` | 15 px | body-table |
+| `--t-m` | 16 px | controles |
+| `--t-base` | 17 px | body-base |
+| `--t-l` | 20 px | title-md |
+| `--t-xl` | 24 px | title-lg |
+| `--t-2xl` | 1,75–2,25 rem | headline-xl |
+| `--t-cifra` | 2,5–3,5 rem | display-kpi |
 
 **Todo en `rem`, nunca en `px`.** WCAG 1.4.4 exige que el texto llegue al 200 %
 sin perder contenido ni función, y eso sólo se cumple si la escala entera cuelga
-del tamaño raíz que el lector puede cambiar en su navegador.
+del tamaño raíz que el lector puede cambiar en su navegador. Los rótulos
+«mono-seal» son la excepción visual que no lo es: 12 px escritos como `.75rem`.
 
 Las cifras usan `tabular-nums`. En un explorador el número cambia a cada filtro,
 y con cifras proporcionales el bloque entero salta a cada pulsación.
@@ -595,15 +591,20 @@ y con cifras proporcionales el bloque entero salta a cada pulsación.
 > él el medidor de ancho de etiqueta de `core.js`, porque si esos dos números se
 > separan las etiquetas se recortan donde no toca.
 
+**Iconos.** Material Symbols Outlined, los mismos símbolos que usa Stitch para
+cada destino. Sus trazos oficiales (Apache 2.0) están copiados en `core.js`: la
+fuente de iconos se sirve desde un CDN.
+
 ### 12.3 Espacio y trazo
 
-Escala de espacio de 4 px, de `--e1` (4 px) a `--e7` (48 px). Sin valores
+Escala de espacio de 4 px, de `--e1` (4 px) a `--e8` (72 px). Sin valores
 sueltos fuera de la escala.
 
-Radios contenidos (8 px) y **sombra mínima**: la separación entre superficies la
-hace el filete, no la elevación. Una interfaz analítica no flota. Por la misma
-razón la cabecera es color plano de marca con un descenso sutil, sin degradados
-de color ni resplandores.
+Radios de Stitch: `--radio-s` 4 px en códigos y sellos, `--radio-m` 8 px
+(`rounded-lg`) en navegación, campos y botones, y `--radio` 12 px (`rounded-xl`)
+en tarjetas. Las tarjetas KPI llevan la franja cobalto de 4 px de Stitch, y la
+barra lateral y la superior se separan del contenido con una sombra suave, no
+con un filete. La banda de la portada es el degradado azul marino del Cockpit.
 
 ### 12.4 Reglas de color en gráficos
 
@@ -685,30 +686,24 @@ con 51 filas en pantalla, una flecha arriba del todo se pierde.
 
 ### 12.6 Modo claro y oscuro
 
-El modo oscuro es una paleta **elegida y revalidada contra su propia
-superficie**, no una inversión. Invertir una paleta validada no produce una
-paleta validada.
+El modo oscuro es una paleta **derivada y revalidada contra su propia
+superficie**, no una inversión: Stitch no trae tema oscuro, y invertir una
+paleta validada no produce una paleta validada.
 
-- **Claro:** suelo de página `#f7efe6`, tarjetas levantadas sobre él en papel
-  hueso `#fdf6ef`, tinta vino muy oscuro `#241014`.
-- **Oscuro:** suelo `#150507`, tarjetas en `#17080a`, tinta champán `#f0e2d0`.
+- **Claro:** suelo `#f8fafc`, tarjetas blancas, tinta `#0a0e14`.
+- **Oscuro:** suelo azul noche `#0a1128`, tarjetas `#111a33`, tinta `#e6ecf6`.
 
-En los dos temas la tarjeta se levanta sobre el suelo de la página, y no al
-revés: la jerarquía de superficies es la misma y sólo cambia de registro.
+En los dos temas la tarjeta se levanta sobre el suelo, y no al revés: la
+jerarquía de superficies es la misma y sólo cambia de registro.
 
-El color del dato **cambia de valor pero no de familia**: bordeaux en los dos
-temas, `#8a2430` sobre el papel hueso y `#e0a0a8` sobre el suelo oscuro. Que la
-familia no cambie importa — un lector que alterna de tema no debería tener que
-reaprender qué significa el color.
+El dato **cambia de valor pero no de familia**: azul marino `#00205b` en claro y
+azul claro `#b2c5ff` en oscuro. Un lector que alterna de tema no debería tener
+que reaprender qué significa el color.
 
-La tinta **sí cambia de familia**, y es deliberado: vino en claro, champán en
-oscuro. No es una inversión del mismo valor, es el segundo color de la paleta
-ocupando el sitio del primero, que es lo que hace que el tema oscuro se lea como
-la misma identidad y no como su negativo.
-
-El selector de la cabecera tiene tres estados —automático, claro, oscuro—; el
-automático sigue al sistema operativo. La elección se recuerda y se aplica antes
-de pintar, para que la página no aparezca un instante con el tema equivocado.
+El selector de la barra lateral tiene tres estados —automático, claro,
+oscuro—; el automático sigue al sistema operativo. La elección se recuerda y se
+aplica antes de pintar, para que la página no aparezca un instante con el tema
+equivocado.
 
 ### 12.6 bis Codificación por naturaleza del dato
 
@@ -1111,15 +1106,21 @@ compartido es ruido —la primera medición publicada dio 776 ms y la siguiente
 
 | Página | LCP sin pre-render | LCP pre-renderizado | Mejora |
 |---|---|---|---|
-| `index` | 2.664 ms [2.656–2.664] | **1.424 ms** [1.416–1.448] | −47 % |
-| `impacto` | 2.652 ms [2.636–2.664] | **1.432 ms** [1.428–1.444] | −46 % |
-| `tematica` | 2.664 ms [2.652–2.668] | **1.428 ms** [1.420–1.452] | −46 % |
+| `index` | 3.636 ms [3.608–3.656] | **1.796 ms** [1.764–1.812] | −51 % |
+| `impacto` | 3.624 ms [3.600–3.644] | **1.804 ms** [1.760–1.812] | −50 % |
+| `tematica` | 3.652 ms [3.624–3.660] | **1.800 ms** [1.772–1.852] | −51 % |
 
-Las cifras absolutas subieron respecto de la medición anterior —780 ms de
-portada contra 1.424— porque el contenedor donde se mide no es el mismo y su
-carga varía; lo comparable es la columna de mejora y la relación entre páginas,
-que se miden en la misma corrida. Las tres se comportan igual, que es lo que
-esta tabla tiene que enseñar.
+Medido el 2026-09-17 con el diseño de Stitch y sus fuentes alojadas. Las cifras
+absolutas cambian de una máquina a otra —la primera medición publicada dio
+780 ms de portada, la del 2026-09-16 1.708— porque el entorno donde se mide no
+es el mismo y su carga varía; lo comparable es la columna de mejora y la
+relación entre páginas, que se miden en la misma corrida.
+
+> **Una medición no vale si comparte máquina.** La del 2026-09-17 se repitió
+> tres veces: con dos revisores usando el navegador en paralelo, la portada dio
+> 2.136 ms, y en Windows un servidor de una corrida anterior seguía escuchando
+> en el mismo puerto. Sólo cuenta la corrida con los puertos libres y sin otra
+> carga.
 
 **El bloque de descarga del informe casi duplicó el LCP de la portada, y por eso
 está donde está.** Puesto bajo el titular, medía 3.156 ms contra 1.420 ms, y el
@@ -1228,16 +1229,18 @@ después:
 
 | Medición | Resultado | Umbral |
 |---|---|---|
-| LCP en *Slow 4G*, portada | **1.596 ms** | 2.500 ms (Core Web Vitals) |
-| LCP en *Slow 4G*, impacto | 1.620 ms | 2.500 ms |
-| LCP en *Slow 4G*, temática | 1.592 ms | 2.500 ms |
+| LCP en *Slow 4G*, portada | **1.796 ms** | 2.500 ms (Core Web Vitals) |
+| LCP en *Slow 4G*, impacto | 1.804 ms | 2.500 ms |
+| LCP en *Slow 4G*, temática | 1.800 ms | 2.500 ms |
 | Latencia al recortar el conjunto | **21–37 ms** | 200 ms (INP) |
 
-Medido el 2026-09-10 sobre el corpus de **1.342 publicaciones**, no sobre el
-anterior: subir un techo citando una medición vieja es el defecto que
-`peso.mjs` existe para impedir (`D-588`). Con las 823 de julio el LCP era de
-1.424 ms, así que **duplicar el corpus costó 172 ms** y el margen sigue en el
-36 %. El peso de los datos es el precio de la arquitectura —cualquier pregunta
+Las tres cifras de LCP son del 2026-09-17, con el diseño de Stitch y sus fuentes
+(§14.1); el margen sobre el umbral es del 28 %. La latencia, del 2026-09-10 sobre
+el corpus de **1.342 publicaciones**, no sobre el anterior: subir un techo
+citando una medición vieja es el defecto que `peso.mjs` existe para impedir
+(`D-588`). Con las 823 de julio el LCP era de 1.424 ms, y **duplicar el corpus
+costó 172 ms**; el diseño de Stitch, con sus fuentes, unos 90 ms más medidos en
+la misma máquina. El peso de los datos es el precio de la arquitectura —cualquier pregunta
 se responde sin volver al servidor— y está comprado con margen.
 
 #### La decisión de no recortar el dataset

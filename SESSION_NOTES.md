@@ -15467,3 +15467,111 @@ sellos de Scopus con «Export», 15 de SciVal con «Corte»).
 - Comprobación empírica del FWCI: leer en SciVal el FWCI de la entidad UFT
   2020-2025 el mismo día de un export.
 - Aplicar el diseño visual de Stitch (siguiente sección).
+
+## Diseño visual de Stitch, aplicado entero (2026-09-17)
+
+El usuario pidió usar el diseño de Stitch **lo más fiel posible**: su paleta, su
+tipografía, sus iconos y su composición, no sólo la estructura (que era lo
+decidido en `D-610`). Con fuentes alojadas en el sitio y datos reales.
+
+### Lo que cambió
+
+- **Paleta de Stitch en los tokens de `app.css`:** azul marino `#00205b`,
+  secondary `#1c5fa8`, cobalto `#2563eb`, canvas `#f8fafc` y el «benchmark»
+  esmeralda. El tema oscuro, que Stitch no define, se deriva de su
+  inverse-surface, inverse-primary y surface-dark. `validar_paleta.py` termina
+  en válido. Hubo que mover cinco valores: el gris de ausencia, el Q4, el acento
+  del tablero en oscuro, la rampa de celdas de mapa y el segundo suelo de banda
+  en oscuro.
+- **Tipografía:** Inter, JetBrains Mono (rótulos «mono-seal», sellos, cabeceras
+  de tabla, códigos) y Newsreader (títulos de secciones y metodología). Están
+  alojadas en `web/assets/fonts/`: Fontsource 5.3.0, latin y latin-ext, más la
+  cursiva y el griego de Inter, con sus licencias OFL. Escala de Stitch
+  (display-kpi, headline-xl, title-lg…).
+- **Iconos Material Symbols Outlined**, los mismos que usa Stitch para cada
+  destino, copiados como trazos en `core.js` (Apache 2.0).
+- **Componentes con la forma de Stitch:**
+  - barra lateral con sombra, activo relleno y rótulos mono;
+  - barra superior sin filete, con buscador y años segmentados;
+  - botón primario azul medio (token nuevo `--boton`);
+  - tarjetas KPI con franja cobalto de 4 px;
+  - guías de lectura en caja;
+  - paneles de cristal en la banda del Cockpit;
+  - cabecera editorial del Dossier en serif grande.
+- **Commits ajenos revertidos** (`91684d5`, decisión del usuario): una portada
+  Tailwind con CDN, un dataset con columnas estimadas y un script con métricas
+  escritas en el código.
+
+### Revisión independiente
+
+Dos revisores de solo lectura compararon cada página con su pantalla de Stitch
+y buscaron regresiones en el diff. Se aplicaron sus hallazgos verificados, entre
+ellos:
+- **Ilegibles en oscuro:** las etiquetas del treemap y las cifras de los tramos
+  acumulados.
+- **Nota destacada:** partía la frase en rótulos cada vez que había una negrita.
+- **Impresión:** los códigos salían en blanco sobre nada.
+- **Kit de diseño:** se generaba sin las fuentes.
+- **`contraste.mjs`:** no leía los fondos con `color-mix()` y los daba por
+  transparentes.
+
+Quedan fuera tres:
+- **Reescalar el texto de los gráficos:** exige cambiar cómo se dibujan los SVG,
+  también en el pre-renderizado.
+- **Quitar el subrayado de los enlaces en tablas:** el subrayado evita que el
+  enlace dependa sólo del color (WCAG 1.4.1).
+- **Un subconjunto propio de flechas:** necesita `pyftsubset` y el TTF, que no
+  se tienen.
+
+### Rendimiento, medido
+
+- **Resultado final:** LCP en *Slow 4G* de la portada 1.796 ms, impacto 1.804 y
+  temática 1.800, un 50–51 % menos que sin pre-renderizar. Antes del diseño
+  visual eran 1.708 ms.
+- **La primera versión precargaba dos fuentes** y la portada subió a 2.224 ms.
+  Con `font-display: optional` no cambiaba nada (2.180); sin precarga, 1.796. Se
+  quitó la precarga.
+- **Dos mediciones previas no valen:** una compartió máquina con los revisores,
+  y en otra un servidor de una corrida anterior seguía escuchando en el mismo
+  puerto.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, diez pasos en verde, tras cada tanda de
+cambios y con la medición de contraste ampliada. `validar_paleta.py` en válido,
+con dos reglas nuevas para el botón primario.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-678 | El diseño de Stitch se aplica entero —paleta, tipografía, iconos y composición— con datos reales | Decisión del usuario. Revisa `D-610` y la paleta vino y champán (`D-596`) |
+| D-679 | Fuentes e iconos se alojan en el sitio; nada desde un CDN | `D-30`: el sitio tiene que verse igual en la red cerrada. Descarga autorizada por el usuario (Fontsource 5.3.0 y google/material-design-icons) |
+| D-680 | El tema oscuro se deriva de la paleta de Stitch y se valida como el claro | Stitch no define tema oscuro, y el sitio conserva claro, oscuro y automático |
+| D-681 | Los valores de Stitch que no cumplen un umbral se mueven un paso y se declara cuál | Gris de ausencia, Q4, acento oscuro, rampa de mapa y segundo suelo oscuro. Se mueve el color, no el piso |
+| D-682 | El botón primario tiene su propio token (`--boton`), separado de la navegación activa | En Stitch la navegación activa es azul marino y el botón azul medio. El validador mide los dos pares |
+| D-683 | Newsreader sólo en las páginas de lectura; portada, listados y datos en Inter | Stitch usa la serif en el Dossier, no en el Cockpit ni en el Data Hub |
+| D-684 | De la revisión independiente no se aplican: reescalar el texto de los gráficos, quitar el subrayado en tablas ni el subconjunto de flechas | El primero cambia el dibujo de los SVG y queda pendiente; el segundo va contra WCAG 1.4.1; el tercero exige herramientas que no hay |
+| D-685 | `contraste.mjs` lee los colores `color(srgb …)` de Chromium | Los fondos con `color-mix()` contaban como transparentes y no se medían |
+| D-686 | Se revierten los commits ajenos 4e9eeb1, cda7a3b y 1ef8c36; se conservan el PRD y la línea `.env` | Decisión del usuario. Cargaban Tailwind y Google Fonts por CDN, traían columnas estimadas y un «Audit Registry» inexistente |
+| D-687 | Las fuentes no se precargan | Medido: la precarga llevaba la portada de 1.708 a 2.224 ms en Slow 4G; sin ella, 1.796 |
+
+### Archivos
+
+- `web/assets/css/app.css`, `modern-ui.css` — tokens, @font-face, componentes, capa de detalles de Stitch
+- `web/assets/fonts/` (nuevo) — ocho woff2 y tres licencias OFL
+- `web/assets/js/core.js` — iconos Material Symbols; `visualizations/heatmap.js`, `treemap.js`
+- `web/_cabecera.html`
+- `src/design/validar_paleta.py`, `src/design/build_kit.mjs`, `src/verify/contraste.mjs`
+- `docs/UX_UI.md` — §12.1, §12.2, §12.3, §12.6, §14.1, §15.1
+
+### Pendiente
+
+- **Texto de los gráficos:** a veces se ve a menos de 13 px, porque el SVG se
+  encoge a la tarjeta. Arreglarlo exige dibujar con el ancho real, también en el
+  pre-renderizado.
+- **Riesgo alto:** falta `internal/identity_decisions.csv`. No correr
+  `revisar-identidad.ps1` ni `apply_decisions.py` sin `--dry-run` hasta
+  recuperarlo.
+- **P-04:** figura publicado y ninguna página lo lee.
+- **Publicación:** subir la rama y cerrar el PR #51 cuando el usuario lo decida.

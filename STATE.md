@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `91684d5` · Revierte la portada Tailwind y el dataset estimado añadidos fuera del 
+Último commit: `4b115ad` · C-02 no calculable, FWCI de conjunto verificado, cola de afiliaciones 
 Snapshot: 2026-09-17
 
 ---
@@ -72,7 +72,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 677
+## Decisiones tomadas: 687
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 
