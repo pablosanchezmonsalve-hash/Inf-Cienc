@@ -143,7 +143,8 @@ for p in sorted(DIST.glob('*.html')):
 kpis = {k['codigo'] for k in json.loads((DIST / 'data/kpis.json').read_text(encoding='utf-8'))['kpis']}
 lecturas = json.loads((DIST / 'data/lecturas.json').read_text(encoding='utf-8'))['lecturas']
 SIN_ARTEFACTO_PROPIO = {
-    'P-04': 'series.json → P-05.total_fuentes; ninguna página lo lee (pendiente)',
+    'P-04': 'series.json → P-05.total_fuentes; se lee en la nota de recorte del corte P-05, '
+            'y coherencia.mjs contrasta la cifra (D-688)',
 }
 for r in catalogo['indicadores']:
     cod = r['codigo']

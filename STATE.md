@@ -4,7 +4,7 @@
 
 **Este es el punto de entrada.** Leer sólo este archivo basta para retomar el trabajo. El resto de la documentación es consulta puntual: ver el mapa de lectura al final.
 
-Último commit: `4b115ad` · C-02 no calculable, FWCI de conjunto verificado, cola de afiliaciones 
+Último commit: `b9b0b8d` · El sitio adopta el diseño visual de Stitch: paleta, tipografía e icono
 Snapshot: 2026-09-17
 
 ---
@@ -72,7 +72,7 @@ Capa interna. Ninguna se resuelve automáticamente (decisión `D-08`). Se enumer
 
 ---
 
-## Decisiones tomadas: 687
+## Decisiones tomadas: 690
 
 Índice completo en **`docs/DECISIONS.md`**. Las de mayor alcance:
 

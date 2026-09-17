@@ -15575,3 +15575,61 @@ con dos reglas nuevas para el botón primario.
   recuperarlo.
 - **P-04:** figura publicado y ninguna página lo lee.
 - **Publicación:** subir la rama y cerrar el PR #51 cuando el usuario lo decida.
+
+## Fuentes por identificador, P-04 visible y archivo de decisiones de identidad (2026-09-17)
+
+### Lo que cambió
+
+- **Los cortes con tope declaran de cuántos valores muestran los primeros.**
+  P-05, C-03, C-04, T-01 y T-04 dibujaban «las 15 con más publicaciones» sin
+  decir de cuántas. Ahora cada uno lleva «Se muestran las 15 primeras de 713
+  fuentes distintas», recalculado con el recorte. En P-05 ese total es **P-04
+  «Fuentes distintas»**, que figuraba publicado y ninguna página mostraba.
+- **Las fuentes se agrupan por su Scopus Source ID.** La prueba nueva de
+  coherencia dio 722 fuentes en el navegador frente a 713 en el build. La causa:
+  el export escribe la misma revista con espacio final («Nutrients »), con otra
+  capitalización («PLoS ONE» / «PLOS ONE») o con un nombre anterior. **P-05
+  publicaba Nutrients partida en dos barras** (10 y 9) y PLoS ONE en 8 + 1. Ahora
+  `load_universe()` da a cada `source_id` un título: el más frecuente sin
+  espacios sobrantes y, a igualdad, el de la publicación más reciente. Nutrients
+  queda con 19 y PLoS ONE entra en el ranking con 9. El identificador está
+  completo en las 1.342 publicaciones y ningún título corresponde a dos
+  identificadores.
+
+### El archivo de decisiones de identidad
+
+Falta `internal/identity_decisions.csv`. Se buscó sin modificar nada:
+- **`Documents/Default Project/Inf-Cienc/internal/`**, otra copia del proyecto
+  en `main`, del 2026-09-04: tiene 420 decisiones. Aplicado en una copia
+  aislada, reproduce exactamente `firmas_e09_resueltas.yml` y
+  `orcid_revisado.yml`, pero da 38 grupos de identidad en vez de 39 y otra
+  cobertura de ORCID. **No reproduce el estado actual de `config/`** (424
+  decisiones, 2026-09-03), así que no se restauró.
+- **`Descargas`:** cuatro exportaciones más antiguas (110 a 303 decisiones), todas
+  contenidas en la anterior.
+- **Artefactos de CI:** sólo guardan informes de verificación y el sitio; no
+  `internal/`.
+
+Este repositorio tampoco tiene `internal/identity_candidates.csv` ni los
+candidatos de ORCID, DSpace y autoarchivo: el trabajo de revisión se hizo en la
+otra copia.
+
+### Verificación
+
+`coherencia.mjs`: P-04 da 713 en el navegador y en el build. `flujos.mjs`
+comprueba que P-05 declara esas 713 fuentes.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-688 | Los cortes con tope declaran el total de valores distintos del recorte; en P-05 ese total publica P-04 | Un ranking recortado sin su total se lee como si fuera completo (`docs/UX_UI.md` §5). P-04 figuraba publicado sin que ninguna página lo mostrara |
+| D-689 | Las fuentes se identifican por su Scopus Source ID, con un título único por identificador | El título del export varía en espacios, capitalización y nombre histórico. P-05 partía revistas en dos barras y P-04 difería entre navegador y build (722 frente a 713) |
+| D-690 | No se restaura el archivo de decisiones de identidad de la otra copia del proyecto | Reproduce dos de los tres YAML, pero no el de identidades (38 grupos frente a 39). Restaurarlo y aplicarlo perdería decisiones humanas (D-08, D-263) |
+
+### Pendiente
+
+- **Archivo de decisiones:** el usuario tiene que localizar la exportación con
+  424 decisiones (del 2026-09-03 o posterior) o decidir que la copia de
+  `Default Project` sea la de trabajo. Mientras tanto, no aplicar decisiones
+  desde este repositorio.

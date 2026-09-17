@@ -138,8 +138,31 @@ def split_multi(value) -> list[str]:
     return [p.strip() for p in str(v).split("|") if p.strip() and p.strip() != "-"]
 
 
+def titulos_de_fuente(uni: pd.DataFrame) -> dict[str, str]:
+    """Un título por fuente, decidido por su Scopus Source ID.
+
+    El export escribe la misma revista de varias formas: con espacio final
+    («Nutrients »), con otra capitalización («PLoS ONE» y «PLOS ONE») o con un
+    nombre anterior. Contadas por título, P-05 partía una revista en dos barras
+    y P-04 daba 722 fuentes donde el identificador cuenta 713 (D-688). La
+    identidad es el `source_id`; el título sólo la nombra: el más frecuente sin
+    espacios sobrantes y, a igualdad, el de la publicación más reciente, que es
+    el nombre vigente de la revista."""
+    t = uni[["source_id", "fuente_titulo", "anio"]].dropna(subset=["source_id", "fuente_titulo"]).copy()
+    t["titulo"] = t["fuente_titulo"].str.strip()
+    t["anio_n"] = pd.to_numeric(t["anio"], errors="coerce")
+    resumen = (t.groupby(["source_id", "titulo"])
+                .agg(n=("titulo", "size"), ultimo=("anio_n", "max")).reset_index()
+                .sort_values(["source_id", "n", "ultimo", "titulo"],
+                             ascending=[True, False, False, True]))
+    return dict(resumen.drop_duplicates("source_id")[["source_id", "titulo"]].values)
+
+
 def load_universe() -> pd.DataFrame:
-    return pd.read_csv(INTERIM / "publications_universe.csv", dtype=str)
+    uni = pd.read_csv(INTERIM / "publications_universe.csv", dtype=str)
+    uni["fuente_titulo"] = (uni["source_id"].map(titulos_de_fuente(uni))
+                            .fillna(uni["fuente_titulo"].str.strip()))
+    return uni
 
 
 # ─────────────────────────────────────────── consolidación de identidades

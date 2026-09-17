@@ -611,6 +611,26 @@ export const SECCIONES = {
    el código visual que el sitio ya enseña. */
 const MULTIVALUADO = new Set(['paises', 'instituciones', 'asjc', 'ods', 'qs_area', 'unidad', 'escuela', 'open_access']);
 
+/* Un corte con tope dibuja los N primeros valores. Sin decir de cuántos, «las
+   15 fuentes con más publicaciones» se lee como si fueran todas: el recorte se
+   declara con el total de valores distintos del recorte, recalculado con él.
+   En P-05 ese total es P-04, «Fuentes distintas», que así se publica donde se
+   lee (D-688). Sustantivo y concordancia por campo. */
+const DISTINTOS = {
+  fuente: ['fuentes', 'distintas', 'las', 'primeras'],
+  paises: ['países', 'distintos', 'los', 'primeros'],
+  instituciones: ['instituciones', 'distintas', 'las', 'primeras'],
+  asjc: ['áreas ASJC', 'distintas', 'las', 'primeras'],
+  ods: ['ODS', 'distintos', 'los', 'primeros'],
+};
+function notaRecorte(r, campo) {
+  const d = DISTINTOS[campo];
+  if (!r || !d || !(r.distintos > r.datos.length)) return '';
+  const [nombre, distinto, art, primero] = d;
+  return `<p class="nota nota-recorte">Se muestran ${art} ${c.nf.format(r.datos.length)} ${primero}
+    de ${c.nf.format(r.distintos)} ${nombre} ${distinto}.</p>`;
+}
+
 /* Devuelve el gráfico Y sus datos. La TABLA equivalente no es un extra: es la
    vía alternativa al gráfico para quien no puede leerlo, y se construye de los
    mismos números para que no pueda decir otra cosa.
@@ -653,6 +673,7 @@ export function dibujar(sub, corte, jerarquia) {
   }
   const datos = X.porCampo(sub, campo, { tope: tope || 0 });
   if (!datos.length) return null;
+  const distintos = tope ? X.porCampo(sub, campo).length : datos.length;
   if (forma === 'proporcional') return { svg: c.proporcional(datos, { titulo }), datos };
   if (forma === 'distribucion') {
     return { svg: c.distribucion(datos, { titulo, etiquetaEje: 'autores por publicación' }), datos };
@@ -661,7 +682,7 @@ export function dibujar(sub, corte, jerarquia) {
     return { svg: c.barrasV(datos.map(d => ({ anio: d.valor, n: d.n })),
       { titulo, etiquetaX: 'anio', etiquetaY: 'n' }), datos };
   }
-  return { svg: c.barrasH(datos, { titulo, trama: MULTIVALUADO.has(campo) }), datos };
+  return { svg: c.barrasH(datos, { titulo, trama: MULTIVALUADO.has(campo) }), datos, distintos };
 }
 
 /** Gráfico y tabla, conmutables. Sin JavaScript se muestran los dos, que es lo
@@ -953,6 +974,7 @@ export function corteUno(sub, corte, { proc, jerarquia, unidadPorPersona, textos
         ${c.tablaEquivalente(r.datos)}
       </div>`
       : '<p class="vacio">Ninguna publicación con este dato en el recorte.</p>'}
+      ${notaRecorte(r, corte.campo)}
       ${MULTIVALUADO.has(corte.campo)
         ? '<p class="leyenda-trama">Barras rayadas: no son partes de un total y no suman.</p>' : ''}
       ${corte.aviso ? `<p class="nota">${c.escapar(corte.aviso)}</p>` : ''}

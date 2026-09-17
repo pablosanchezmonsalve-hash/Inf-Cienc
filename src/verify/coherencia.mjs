@@ -55,6 +55,16 @@ comparar('P-02 · publicaciones por año (Dinámica anual)',
 comparar('I-01 · citas por año (Dinámica anual)',
   dinamica.map((f) => ({ valor: f.anio, n: f.citas })), series['I-01'].datos.map((d) => ({ valor: d.anio, n: d.n })));
 
+// P-04 · fuentes distintas: la nota de recorte del corte P-05 la calcula en el
+// navegador y el build la guarda en series.json; tienen que dar lo mismo (D-688).
+const fuentesNavegador = X.porCampo(publicaciones, 'fuente').length;
+if (fuentesNavegador === series['P-05'].total_fuentes) {
+  console.log(`  · P-04 · fuentes distintas: ${fuentesNavegador} en el navegador y en el build`);
+} else {
+  fallos++;
+  console.log(`  ✗ P-04 · fuentes distintas: navegador ${fuentesNavegador} · build ${series['P-05'].total_fuentes}`);
+}
+
 // I-03 · FWCI institucional: media aritmética de los FWCI de cada publicación,
 // que es la definición de SciVal para un conjunto (Research Metrics Guidebook
 // 2019, §5.5.2; D-665), y la mediana, la misma función que usa el recorte.

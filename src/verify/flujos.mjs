@@ -251,6 +251,16 @@ await movil.close();
 // sus indicadores no publicados: la banda no aparecía nunca en esas dos páginas
 // porque su clave no coincide con la categoría del catálogo. Colaboración
 // declara C-02, que figuró publicado sin que nada lo calculara (D-663).
+console.log('  Nota de recorte de los cortes con tope');
+await pg.goto(`http://127.0.0.1:${P}/produccion.html`, { waitUntil: 'networkidle' });
+await pg.waitForTimeout(400);
+{
+  const totalFuentes = await pg.evaluate(() => fetch('data/series.json').then(r => r.json()))
+    .then(s => s['P-05'].total_fuentes);
+  const nota = await pg.locator('#P-05 .nota-recorte').textContent().catch(() => '');
+  ok(nota.replace(/\s+/g, ' ').includes(`${new Intl.NumberFormat('es-CL').format(totalFuentes)} fuentes distintas`),
+     `P-05 declara de cuántas fuentes muestra las primeras (P-04: ${totalFuentes})`);
+}
 console.log('  Cabecera y no publicados de las secciones');
 for (const [pagina, codigo] of [['produccion', 'P-08'], ['tematica', 'T-02'], ['colaboracion', 'C-02']]) {
   await pg.goto(`http://127.0.0.1:${P}/${pagina}.html`, { waitUntil: 'networkidle' });
