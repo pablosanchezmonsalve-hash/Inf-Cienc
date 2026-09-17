@@ -133,14 +133,52 @@ for p in sorted(DIST.glob('*.html')):
             fallos.append(f'{p.name} pide {cod} ({comor}) y el HTML '
                           f'pre-renderizado no lo contiene')
 
+# Y al revés: lo que el catálogo declara publicado tiene que salir de algún
+# artefacto. `C-02` figuró publicado hasta el 2026-09-16 sin que ninguna etapa
+# lo calculara, y el catálogo decía «Se calcula y se muestra en el sitio»; nada
+# lo miraba desde este lado (D-663). Vale lo que tiene serie, cifra en
+# kpis.json o lectura —la compuerta de 04_glossary.py exige una por figura—.
+# Las fichas de autor (AU-) y la producción declarada (PD-) no llevan el código
+# en ningún artefacto y quedan fuera; cualquier otra excepción se declara aquí.
+kpis = {k['codigo'] for k in json.loads((DIST / 'data/kpis.json').read_text(encoding='utf-8'))['kpis']}
+lecturas = json.loads((DIST / 'data/lecturas.json').read_text(encoding='utf-8'))['lecturas']
+SIN_ARTEFACTO_PROPIO = {
+    'P-04': 'series.json → P-05.total_fuentes; ninguna página lo lee (pendiente)',
+}
+for r in catalogo['indicadores']:
+    cod = r['codigo']
+    if r.get('estado') != 'publicado' or cod.startswith(('AU-', 'PD-')):
+        continue
+    if (cod not in series and cod not in kpis and cod not in lecturas
+            and cod not in SIN_ARTEFACTO_PROPIO):
+        fallos.append(f'catalogo.json declara {cod} publicado y no está en '
+                      f'series.json, kpis.json ni lecturas.json')
+
 # ---- 6. La capa interna no puede haber viajado
 PROHIBIDOS = ['matching_log', 'ambiguities_', 'orcid_conflicts', 'identity_candidates',
-              'identity_decisions', 'orcid_candidatos_afiliacion']
+              'identity_decisions', 'orcid_candidatos_afiliacion',
+              # La cola de afiliaciones en revisión nombra a una persona y una
+              # sospecha sin resolver: ni su archivo, ni su tipo, ni sus casos.
+              'afiliaciones_en_revision', 'afiliacion_en_revision', 'afilrev-',
+              'revision_identidad']
 for term in PROHIBIDOS:
     colados = [str(p.relative_to(DIST)) for p in DIST.rglob('*')
                if p.is_file() and term in p.read_bytes()[:2_000_000].decode('utf-8', 'ignore')]
     if colados:
         fallos.append(f'término interno «{term}» presente en: {colados[:4]}')
+
+# ---- 7. La premisa descartada sobre el FWCI de un conjunto no vuelve a viajar
+# SciVal define el FWCI de un conjunto como la media de los FWCI de sus
+# publicaciones (Research Metrics Guidebook 2019, §5.5.2; D-665). El sitio llegó
+# a afirmar lo contrario en la ficha de autor, el catálogo y la jerarquía.
+PREMISA = ['no es el promedio de los FWCI', 'no es el promedio de sus publicaciones',
+           'con aspecto de FWCI']
+for frase in PREMISA:
+    con_frase = [str(p.relative_to(DIST)) for p in DIST.rglob('*')
+                 if p.suffix in ('.html', '.js', '.json')
+                 and frase in p.read_text(encoding='utf-8', errors='ignore')]
+    if con_frase:
+        fallos.append(f'premisa descartada «{frase}» publicada en: {con_frase[:4]}')
 
 print()
 if fallos:

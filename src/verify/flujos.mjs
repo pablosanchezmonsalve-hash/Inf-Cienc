@@ -249,9 +249,10 @@ await movil.close();
 // ─────────────────────────────────────── cabecera y no publicados de sección
 // El «qué NO dice» va a la vista, no plegado. Y producción y temática declaran
 // sus indicadores no publicados: la banda no aparecía nunca en esas dos páginas
-// porque su clave no coincide con la categoría del catálogo.
+// porque su clave no coincide con la categoría del catálogo. Colaboración
+// declara C-02, que figuró publicado sin que nada lo calculara (D-663).
 console.log('  Cabecera y no publicados de las secciones');
-for (const [pagina, codigo] of [['produccion', 'P-08'], ['tematica', 'T-02']]) {
+for (const [pagina, codigo] of [['produccion', 'P-08'], ['tematica', 'T-02'], ['colaboracion', 'C-02']]) {
   await pg.goto(`http://127.0.0.1:${P}/${pagina}.html`, { waitUntil: 'networkidle' });
   await pg.waitForTimeout(400);
   ok(await pg.isVisible('.seccion-limite'), `${pagina}: el «qué NO dice» está a la vista`);
@@ -267,6 +268,13 @@ await pg.goto(`http://127.0.0.1:${P}/datos.html`, { waitUntil: 'networkidle' });
 await pg.waitForTimeout(500);
 ok(await pg.locator('#datos-inventario tbody tr').count() >= 10, 'el inventario lista los archivos de datos');
 ok(!(await pg.textContent('#datos-inventario')).includes('NaN'), 'ningún recuento ni tamaño sale como NaN');
+// hierarchy.json suma citas del export de Scopus: su fila se fecha por ese
+// export, no por el corte de SciVal (T-06). Las fechas, de meta.json.
+const { exports: ex } = await pg.evaluate(() => fetch('data/meta.json').then(r => r.json()));
+const filaJerarquia = await pg.locator('#datos-inventario tr', { hasText: 'hierarchy.json' }).textContent();
+ok(filaJerarquia.includes(ex.Scopus.fecha_corte || ex.Scopus.fecha_export)
+   && !filaJerarquia.includes(ex.SciVal.fecha_corte),
+   'la fila de hierarchy.json lleva la fecha de Scopus, no el corte de SciVal');
 const [descarga] = await Promise.all([
   pg.waitForEvent('download', { timeout: 15000 }),
   pg.click('#descargar-csv'),

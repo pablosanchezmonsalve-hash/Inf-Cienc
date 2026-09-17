@@ -69,6 +69,13 @@ VOCABULARIO: dict[str, tuple[str, str]] = {
                           "de T-02)"),
     "unidad_no_corresponde": ("No es su unidad",
                               "descarta el candidato; no cambia nada"),
+    "afiliacion_confirmada": ("Sí es UFT en esta publicación",
+                              "conserva la autoría y cierra el caso; no cambia "
+                              "ningún dato"),
+    "afiliacion_no_corresponde": ("No es UFT en esta publicación",
+                                  "registra que la afiliación UFT de esa firma en "
+                                  "esa publicación no es suya; RETIRARLA del "
+                                  "recuento es un paso aparte, no automático"),
 }
 
 # Los veredictos que ofrece cada cola. Lo que no está aquí usa `POR_DEFECTO`.
@@ -82,6 +89,7 @@ COLAS: dict[str, list[str]] = {
     "Inventario de autoarchivo discrepa": ["orcid_correcto", "orcid_incorrecto"],
     "Firma sin ORCID": ["orcid_encontrado", "orcid_no_encontrado"],
     "Candidato de unidad académica por autoarchivo": ["unidad_confirmada", "unidad_no_corresponde"],
+    "Afiliación en revisión": ["afiliacion_confirmada", "afiliacion_no_corresponde"],
 }
 
 # Colas cuyo veredicto necesita que además se teclee un identificador.

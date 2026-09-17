@@ -15361,3 +15361,109 @@ pre-renderizado también de `datos` y `metodologia`.
   cola `V-afiliacion_en_revision`. Regenerar el PDF si se publicó uno con el
   cuartil invertido.
 - Subir la rama y cerrar el PR #51 cuando el usuario lo decida.
+
+## Correcciones: C-02, FWCI de un conjunto, cola de afiliaciones y sello de Scopus (2026-09-17)
+
+Cinco pendientes que el usuario pidió resolver. Cuatro análisis de solo lectura
+prepararon cada cambio con evidencia; se aplicaron con fragmentos verificados y
+una sola reconstrucción.
+
+### Lo que cambió
+
+- **Rendimiento de la portada**, medido tras el rediseño de estructura: LCP con
+  pre-renderizado 1.708 ms frente a 3.148 ms sin él (−46 %). Impacto −45 % y
+  temática −45 %. Es la misma mejora relativa de §14.1. El diseño visual de Stitch
+  añadirá fuentes web, así que se vuelve a medir después.
+- **C-02 no es calculable, y el catálogo decía que se publicaba.** Ninguna etapa lo
+  calculaba. La cifra de factibilidad (una sola institución en SciVal, 213) no
+  prueba que no participara otra: SciVal lista sólo las instituciones que
+  reconoce, y 17 de esas 213 tienen autores de otro país. En el vocabulario de
+  SciVal «colaboración institucional» es justo lo contrario del nombre antiguo, y
+  tampoco era el complemento de C-01. Se declara no calculable, con su motivo y lo
+  que falta, y se renombra.
+- **El FWCI de un conjunto SÍ es el promedio de los de sus publicaciones.**
+  *Research Metrics Guidebook* (Elsevier, 2019), §5.5.2 y ejemplo 5, paso 5:
+  «Take arithmetic mean». La guía de 2014 y el *Snowball Metrics Recipe Book*
+  coinciden. La premisa contraria sostenía D-18, D-325, AU-04 y un comentario de
+  §4.2, y se publicaba en la ficha de autor, el catálogo y la jerarquía. I-03
+  (1,14) ya se calculaba así y no cambia. Las tres decisiones se mantienen, con
+  fundamentos verificados.
+- **La cola de afiliaciones en revisión aparece en la herramienta interna**, con
+  EID, título, afiliación declarada, porqué, consecuencia y las otras firmas UFT,
+  y con dos veredictos. Aplicar un veredicto sólo lo registra: retirar una autoría
+  del recuento es un paso aparte. El veredicto se guarda en `internal/` y no en
+  `config/`, como proponía el análisis, porque nombra a una persona con una
+  sospecha (D-SEC-01).
+- **Los sellos de Scopus rotulan «Export» con la fecha de su export.** P-02, P-03,
+  P-05, P-07, C-05 y `hierarchy.json` publicaban «Corte 2026-08-30», la fecha de
+  SciVal. Decisión del usuario.
+
+### Commits ajenos revertidos
+
+En la rama aparecieron cuatro commits hechos fuera de esta sesión, entre las 16:39
+y las 16:54 del 2026-09-16. Por decisión del usuario se revirtieron tres
+(`91684d5`):
+- `web/index.html` cargaba Tailwind y Google Fonts desde CDN y dejaba de usar el
+  explorador;
+- un dataset traía columnas estimadas sin fuente;
+- un resumen declaraba un «Scopus / SciVal Audit Registry» inexistente;
+- un script escribía las métricas en el código.
+
+Se conservan `docs/PRD_BRIEF_EJECUTIVO_UFT.md` y la línea `.env` del
+`.gitignore`. `dist/` también había quedado sobrescrito; se reconstruyó.
+
+### Verificación
+
+`node src/verify/run_all.mjs dist`, con un paso nuevo: `procedencia.mjs` (11
+sellos de Scopus con «Export», 15 de SciVal con «Corte»).
+- **Pruebas negativas, antes de reconstruir:** `higiene.py` detectó C-02 publicado
+  sin artefacto y la premisa del FWCI en `catalogo.json`, `hierarchy.json` y
+  `explorador.js`.
+- **`coherencia.mjs`:** comprueba que I-03 es la media y la mediana de
+  `publications.json`.
+- **Revisión interna:** pasan las autopruebas de `apply_decisions.py` y
+  `merge_decisions.py`. `build_review.py` genera la cola con 1 caso (185 en
+  total).
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-663 | C-02 pasa a no calculable y se renombra «Publicaciones sin colaboración con otras instituciones» | Figuraba publicado y nada lo calculaba. SciVal lista sólo las instituciones que reconoce: 17 de 213 publicaciones con una sola institución tienen autores de otro país, y el export no trae el tipo de colaboración |
+| D-664 | La batería exige que todo indicador publicado salga de `series.json`, `kpis.json` o `lecturas.json` | `higiene.py` sólo validaba del lado página→artefacto, y por eso C-02 pasó sin detectarse |
+| D-665 | En SciVal el FWCI de un conjunto es la media de los FWCI de sus publicaciones; I-03 ya lo cumple | *Research Metrics Guidebook* 2019, §5.5.2 y ejemplo 5; guía de 2014 y *Snowball Metrics Recipe Book* |
+| D-666 | D-18 se mantiene (AU-04 no se publica), con otro fundamento | SciVal mide al investigador sobre todo su perfil, también fuera de la UFT, y las firmas no están consolidadas en personas (D-08) |
+| D-667 | D-325 se mantiene (sin FWCI por unidad), con otro fundamento | La jerarquía agrega pares autor × publicación: un promedio sobre pares no es el FWCI de ningún conjunto, y 19 de 25 unidades tienen menos de 20 publicaciones |
+| D-668 | En un recorte se sigue publicando la mediana del FWCI | El promedio sí es el FWCI del recorte, pero con pocas publicaciones una muy citada lo arrastra. Se retira la atribución al Manifiesto de Leiden, que no se verificó |
+| D-669 | Los sellos de Scopus muestran «Export» con la fecha de su export | Decisión del usuario. Revisa D-662: el export de Scopus no declara corte (T-06) |
+| D-670 | `procedencia()` lleva `corte` null y `export` para la fuente Scopus; el sello rotula lo que haya | Un modelo para el build, el pre-renderizado, el navegador y el kit. Si T-06 se cierra, el sello vuelve a «Corte» sin tocar código |
+| D-671 | El inventario de Descarga de datos fecha cada export con la regla del sello | Sólo daba la fecha de SciVal |
+| D-672 | La vigencia, el crédito impreso y la cabecera de portada siguen diciendo «Citas al» con el corte de SciVal | Sigue siendo cierto: las citas son de SciVal |
+| D-673 | `procedencia.mjs` entra en la batería | Contrasta cada sello con `meta.json` usando las funciones compartidas |
+| D-674 | La cola V-afiliacion_en_revision se revisa en la herramienta interna, con veredictos propios | La pregunta es por la afiliación de una firma en una publicación, no por identidad |
+| D-675 | El EID viaja en el caso_id (`afilrev-<eid>\|<firma>`) | Evita tocar la exportación del navegador y la fusión; mismo recurso que el ORCID |
+| D-676 | El veredicto de afiliación se guarda en `internal/afiliaciones_revisadas.yml` y no cambia el build | Nombra a una persona con una sospecha (D-SEC-01). Retirar una autoría cambia P-06 y fichas: se decide aparte |
+| D-677 | `higiene.py` prohíbe en `dist/` los términos de la cola de afiliaciones | Es capa interna, y la batería debe detectar si se cuela |
+
+### Archivos
+
+- `config/indicators.yml`, `src/analysis/indicator_feasibility.py`, `src/build/02_indicators.py`, `src/build/07_hierarchy.py`, `src/build/common_build.py`, `src/build/prerender.mjs`, `src/design/build_kit.mjs`
+- `web/assets/js/core.js`, `vista.js`, `vista_explorador.js`, `explorador.js`, `paginas.js`, `web/assets/css/app.css`
+- `src/review/decisiones.py`, `build_review.py`, `apply_decisions.py`, `internal/README.md`
+- `src/verify/procedencia.mjs` (nuevo), `higiene.py`, `coherencia.mjs`, `flujos.mjs`, `run_all.mjs`
+- `docs/INDICATORS.md`, `UX_UI.md`, `GLOSSARY.md`, `METHODOLOGY.md`, `AUTHOR_PROFILE.md`, `INFORME_POR_INVESTIGADOR.md`, `LECTURAS.md`
+
+### Pendiente
+
+- **Riesgo alto, anterior a esta sesión:** falta `internal/identity_decisions.csv`, y
+  `config/identidades_consolidadas.yml` se generó con 424 decisiones. Correr
+  `scripts/revisar-identidad.ps1` o `apply_decisions.py` sin `--dry-run` en esta
+  copia regeneraría las identidades incompletas (el fallo de D-263). Hay que
+  recuperar ese CSV antes de aplicar decisiones.
+- P-04 «Fuentes distintas» figura publicado y ninguna página lo lee; queda como
+  excepción declarada en `higiene.py`.
+- El veredicto sobre Goosey-Tolfrey V. L. en 2-s2.0-85124144803 lo toma una
+  persona contra el artículo (D-08).
+- Comprobación empírica del FWCI: leer en SciVal el FWCI de la entidad UFT
+  2020-2025 el mismo día de un export.
+- Aplicar el diseño visual de Stitch (siguiente sección).

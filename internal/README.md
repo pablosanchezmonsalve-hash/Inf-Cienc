@@ -83,6 +83,7 @@ solo.
 |---|---|---|
 | `matching_log.csv` | Trazabilidad de cada par autor × publicación: cadena de afiliación cruda, método de detección, confianza | `make auditoria` |
 | `ambiguities_authors.csv` | Cola de revisión humana de identidad de autor (reglas P-03, P-04, P-05, I-06) | `make auditoria` |
+| `afiliaciones_en_revision.yml` | Afiliaciones UFT que una persona declaró dudosas, con su evidencia. La auditoría las encola como `V-afiliacion_en_revision` y `revision_identidad.html` las presenta en la cola «Afiliación en revisión» | edición humana |
 | `ambiguities_publications.csv` | Cola de revisión de publicaciones (reglas X-01, X-02, X-03, P-01) | `make auditoria` |
 | `hallazgos_corpus.md` | Hallazgos del corpus en forma de lectura | `src/review/build_hallazgos.py` |
 

@@ -92,13 +92,16 @@ Cuando el autor tiene **n < 5 publicaciones** (761 de 829), se añade:
 `PROJECT_SPEC.md` pide «FWCI u otra métrica normalizada **sólo si existe
 realmente**». No existe a nivel autor en este export.
 
-El FWCI de un conjunto no es el promedio de los FWCI de sus elementos: se
-calcula comparando citas observadas contra esperadas del conjunto completo.
-Promediar los FWCI individuales produciría un número plausible y equivocado.
+SciVal define el FWCI de un conjunto como el promedio de los FWCI de sus
+publicaciones (*Research Metrics Guidebook*, 2019, §5.5.2). Pero el conjunto de
+un investigador en SciVal son todas las publicaciones de su perfil de Scopus,
+también las firmadas fuera de la UFT (§2.5), y este export trae sólo las
+afiliadas a la UFT, en firmas que no están consolidadas en personas (`D-08`).
+Promediar ese subconjunto daría otra cifra con el mismo nombre.
 
 Conforme a `CLAUDE.md`, se declara como no calculable y se explica qué falta:
-un export de SciVal a nivel de autor, o el cálculo con los denominadores de
-campo que SciVal no publica en este archivo.
+un export de SciVal a nivel de investigador, sobre perfiles de autor
+confirmados por revisión humana.
 
 La ficha muestra en su lugar «Publicaciones en el top 10 % de citación», que sí
 es normalizado por campo y **sí está disponible por publicación** (`I-05`).

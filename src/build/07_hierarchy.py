@@ -15,10 +15,12 @@ QUÉ AÑADE, Y CON QUÉ CUIDADO
     de escondido.
 
     Deliberadamente NO incluye FWCI ni percentil de citación agregados por
-    unidad. `D-18` ya estableció que el FWCI de un autor no es el promedio de
-    sus publicaciones — agregarlo por facultad es el mismo error de
-    composición. Sumar citas crudas es una operación aditiva; promediar un
-    índice normalizado por campo no lo es.
+    unidad. El promedio de los FWCI de un conjunto de publicaciones sí es el
+    FWCI de SciVal (`D-665`), pero aquí las filas son parejas
+    autor×publicación: una publicación con dos firmas de la misma escuela
+    pesa dos veces, y ese promedio no es el FWCI de ningún conjunto. La suma
+    de citas arrastra el mismo doble conteo y lo declara; un promedio lo
+    escondería.
 
 Salida:
     data/processed/hierarchy.json
@@ -137,8 +139,9 @@ def construir(authorship: pd.DataFrame, uni: pd.DataFrame) -> dict:
                 "autor × publicación que cuenta la producción — hereda su mismo "
                 "efecto de doble conteo entre unidades.",
             "excluido_a_proposito": "FWCI y percentil de citación agregados por "
-                "unidad. D-18: el FWCI de un autor no es el promedio de sus "
-                "publicaciones; agregarlo por facultad repetiría ese error.",
+                "unidad. El FWCI de un conjunto es el promedio de los de sus "
+                "publicaciones, pero aquí cada publicación cuenta una vez por "
+                "firma de la unidad: ese promedio no sería el FWCI de la unidad.",
         },
         "advertencia": b.nota("P-07")["texto"] if b.nota("P-07") else None,
         "procedencia": b.procedencia(

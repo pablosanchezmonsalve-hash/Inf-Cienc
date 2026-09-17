@@ -480,9 +480,14 @@ export function sello(p) {
   const clase = p.insuficiente ? 'sello sello-aviso' : 'sello';
   const aviso = p.insuficiente
     ? `<span class="sello-alerta">cobertura baja</span>` : '';
+  // La fecha es la que declara la fuente. El export de Scopus no declara corte
+  // (T-06): su sello da la fecha del export y la rotula como tal. Con el corte
+  // de SciVal ahí, se le atribuía a Scopus una fecha que no es suya (D-669).
+  const fecha = p.corte ? `<span><b>Corte</b> ${escapar(p.corte)}</span>`
+    : p.export ? `<span><b>Export</b> ${escapar(p.export)}</span>` : '';
   return `<p class="${clase}">
     <span><b>Fuente</b> ${escapar(p.fuente)}</span>
-    <span><b>Corte</b> ${escapar(p.corte)}</span>
+    ${fecha}
     <span><b>N</b> ${nf.format(p.n)} ${escapar(p.unidad || 'publicaciones')}</span>
     ${hayCob ? `<span><b>Cobertura</b> ${cob} · ${nf.format(p.cubiertas)} con dato</span>` : ''}
     ${aviso}</p>`;

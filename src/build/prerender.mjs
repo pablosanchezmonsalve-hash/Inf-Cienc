@@ -60,7 +60,11 @@ function rellenar(html, id, contenido, aviso) {
    archivo de dist/data que no esté ni en CONJUNTOS ni en NO_LISTADOS, o uno
    declarado que falte, aborta el build: una página que dice listar lo que el
    sitio sirve no puede quedarse atrás en silencio. */
-const PROC_ELSEVIER = (m) => `${m.fuentes.join(' · ')} · citas al ${m.fecha_corte_citas}`;
+// Cada export con la fecha que declara, como el sello: Scopus no declara corte
+// (T-06) y se fecha por su export; las citas son las de SciVal, a su corte.
+const PROC_ELSEVIER = (m) => `Scopus, ${m.exports.Scopus.fecha_corte
+  ? `corte ${m.exports.Scopus.fecha_corte}` : `export ${m.exports.Scopus.fecha_export}`}`
+  + ` · SciVal, citas al ${m.fecha_corte_citas}`;
 const CONJUNTOS = [
   { archivo: 'publications.json', unidad: 'publicaciones',
     describe: 'Una fila por publicación del universo, con sus metadatos y sus métricas.',
@@ -89,9 +93,11 @@ const CONJUNTOS = [
   { archivo: 'hierarchy.json', unidad: 'unidades',
     describe: 'Producción y citas por facultad y escuela.',
     registros: (j) => { const n = (x) => 1 + (x.hijos || []).reduce((a, h) => a + n(h), 0); return n(j.raiz) - 1; },
-    // Sin fecha: el sello de este archivo hereda por defecto el corte de SciVal,
-    // y sus citas son las del export de Scopus, que no declara fecha de corte.
-    procedencia: (j) => `${j.procedencia.fuente} · citas del export de Scopus, que no declara fecha de corte`,
+    // Sus citas son las del export de Scopus, que no declara fecha de corte: la
+    // fecha es la de ese export, tomada de la procedencia del propio archivo.
+    procedencia: (j) => (j.procedencia.corte
+      ? `${j.procedencia.fuente} · citas al ${j.procedencia.corte}`
+      : `${j.procedencia.fuente} · citas del export del ${j.procedencia.export}, que no declara fecha de corte`),
     // Las dos advertencias del propio archivo, no prosa aparte: cuenta pares y
     // suma citas de Scopus sobre ellos, así que no es un total institucional.
     nota: (j) => `${j.metodologia.n_publicaciones} ${j.metodologia.citas_totales}` },

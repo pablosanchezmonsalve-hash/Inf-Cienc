@@ -519,7 +519,7 @@ FUENTE_POR_INDICADOR = {
 def procedencia(code: str, cubiertas: int | None = None,
                 n: int | None = None, unidad: str = "publicaciones",
                 corte: str | None = None) -> dict:
-    """Sello de procedencia de un indicador: fuente, corte, N y cobertura.
+    """Sello de procedencia de un indicador: fuente, fecha, N y cobertura.
 
     El N NO es global: cambia según el indicador —823 en producción, 816 en
     impacto, 818 en autoría— y publicarlo con un denominador genérico sería
@@ -527,11 +527,17 @@ def procedencia(code: str, cubiertas: int | None = None,
     publicaciones tienen realmente el dato; si es None se asume el denominador
     completo.
 
-    `corte` por defecto es la fecha de corte de SciVal — válido para
-    cualquier indicador Scopus/SciVal, pero engañoso para uno que no viene de
-    ninguna de las dos (p. ej. PD-01, producción declarada por una Facultad):
-    mostraría una fecha de corte que no tiene relación con ese dato. Un
-    llamador con su propia fecha de referencia la pasa explícita.
+    `corte` por defecto es la fecha de corte que declara el export de la
+    fuente del indicador. El de Scopus no declara ninguna (T-06): un indicador
+    de Scopus lleva `corte` en null y en `export` la fecha de su export, la
+    única que ese archivo declara, y el sello la rotula «Export». Hasta el
+    2026-09-17 caía en el corte de SciVal, que no es suyo (D-669). SciVal y la
+    fuente mixta «Scopus · SciVal» conservan el corte de SciVal.
+
+    Ese defecto es engañoso para un indicador que no viene de ninguna de las
+    dos (p. ej. PD-01, producción declarada por una Facultad): mostraría una
+    fecha de corte que no tiene relación con ese dato. Un llamador con su
+    propia fecha de referencia la pasa explícita.
     """
     spec = INDICATORS["indicadores"].get(code, {})
     # El denominador de config está en publicaciones. Un indicador que se
@@ -542,9 +548,16 @@ def procedencia(code: str, cubiertas: int | None = None,
         n = denominadores().get(spec.get("denominador"), 0)
     cub = n if cubiertas is None else cubiertas
     umbral = INDICATORS["reglas_transversales"]["cobertura_minima_sin_advertencia"]
+    fuente = FUENTE_POR_INDICADOR.get(code, "Scopus · SciVal")
+    # Cada fuente Elsevier con la fecha que declara SU export. Si un día el de
+    # Scopus declara corte, `corte` lo trae y el sello vuelve a «Corte» solo.
+    scopus = corte is None and fuente == "Scopus"
+    if corte is None:
+        corte = SOURCES["scopus_export" if scopus else "scival_export"]["fecha_corte"]
     return {
-        "fuente": FUENTE_POR_INDICADOR.get(code, "Scopus · SciVal"),
-        "corte": corte if corte is not None else SOURCES["scival_export"]["fecha_corte"],
+        "fuente": fuente,
+        "corte": corte,
+        "export": SOURCES["scopus_export"]["fecha_export"] if scopus else None,
         "n": n,
         "cubiertas": cub,
         "unidad": unidad,

@@ -363,7 +363,7 @@ export function procedencias(series, meta) {
   const m = {};
   for (const [cod, bloque] of Object.entries(series || {})) {
     const p = bloque && bloque.procedencia;
-    if (p) m[cod] = { fuente: p.fuente, corte: p.corte, unidad: p.unidad, umbral };
+    if (p) m[cod] = { fuente: p.fuente, corte: p.corte, export: p.export, unidad: p.unidad, umbral };
   }
   return m;
 }
@@ -371,9 +371,9 @@ export function procedencias(series, meta) {
 /** Sello de procedencia de un corte, medido sobre el recorte que se mira.
 
     QUÉ ES INVARIANTE Y QUÉ NO
-    `fuente` y `corte` son propiedades de la fuente y no cambian al filtrar:
-    vienen de `series.json`, que las calcula el build. `N` y la cobertura SÍ
-    cambian, y por eso se recalculan aquí sobre el subconjunto.
+    `fuente`, `corte` y `export` son propiedades de la fuente y no cambian al
+    filtrar: vienen de `series.json`, que las calcula el build. `N` y la
+    cobertura SÍ cambian, y por eso se recalculan aquí sobre el subconjunto.
 
     Repetir el N del total mientras el lector mira un recorte es exactamente el
     error que la cabecera de este archivo describe: enseñar «una cifra del
@@ -391,7 +391,7 @@ function selloCorte(sub, campo, cod, proc) {
   // —pares autor × publicación en P-07, personas en C-05—, y puesta junto a este
   // N el sello publicaba «1.342 pares» y «1.342 personas», que no existen.
   return c.sello({
-    fuente: p.fuente, corte: p.corte, unidad: 'publicaciones',
+    fuente: p.fuente, corte: p.corte, export: p.export, unidad: 'publicaciones',
     n, cubiertas, cobertura: pct,
     insuficiente: pct !== null && p.umbral != null && pct < p.umbral * 100,
   });

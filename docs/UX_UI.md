@@ -106,15 +106,16 @@ en la tabla al seguir el enlace.
 
 ### 4.2 Qué NO recalcula, y por qué
 
-**El FWCI y los percentiles no se promedian sobre un recorte.** Son métricas
-*normalizadas* que SciVal computa contra el mundo; promediarlas sobre un
-subconjunto arbitrario daría un número con aspecto de FWCI que no lo es. Sobre
-un recorte se informa la **mediana** de los valores que la fuente ya asignó a
-cada publicación, y se dice que es eso.
+**Sobre un recorte el FWCI se informa por su mediana, no por su promedio.** El
+promedio de los FWCI de las publicaciones de un conjunto *es* el FWCI de ese
+conjunto según SciVal (*Research Metrics Guidebook*, 2019, §5.5.2), así que
+calcularlo no inventa nada. Lo descarta su inestabilidad: la propia guía
+advierte que con pocas publicaciones una o dos muy citadas lo inflan. Se informa
+la **mediana** de los valores que la fuente ya asignó a cada publicación, y se
+dice que es eso (`D-668`).
 
-Confundir «promedio de FWCI» con «FWCI del conjunto» es exactamente el error que
-el Leiden Manifesto pide no cometer, y la tentación aparece justo aquí: el dato
-está disponible y sumar es fácil.
+Los percentiles no se promedian: SciVal los agrega contando cuántas
+publicaciones del conjunto entran en cada umbral (§5.5.3).
 
 La mediana, además, no es una preferencia: la distribución del FWCI es
 asimétrica —unas pocas publicaciones muy citadas tiran del promedio— y sobre el
@@ -745,7 +746,9 @@ la marca: es el caso que más importa leer y taparlo lo volvería ilegible justo
 ahí.
 
 **Sello de procedencia.** Franja monoespaciada bajo cada gráfico con fuente,
-corte, N y cobertura. El N **no es global**: 1.342 en producción y 1.342 en
+fecha, N y cobertura. La fecha es el corte que declara el export de la fuente;
+el de Scopus no declara ninguno (`T-06`) y su sello rotula «Export» con la
+fecha del export, no el corte de SciVal (`D-669`). El N **no es global**: 1.342 en producción y 1.342 en
 impacto —que en esta carga coinciden, y no tienen por qué—, pero 1.962
 apariciones firma × publicación en `P-07`. Publicar un denominador genérico
 sería el error que este proyecto persigue.
@@ -863,7 +866,7 @@ y las cinco caben en la misma hoja:
 | 2 | La figura | el mismo SVG de la pantalla, con tope de 90 mm de alto |
 | 3 | La tabla equivalente | la figura en cifras, con su encabezado repetido si se parte |
 | 4 | **Qué muestra** y **Cuidado** | `docs/LECTURAS.md` y la advertencia del catálogo |
-| 5 | El sello | fuente, fecha de corte, N y cobertura **del recorte** |
+| 5 | El sello | fuente, fecha de corte o de export, N y cobertura **del recorte** |
 
 **Qué muestra** es la pieza que faltaba, y va en los dos medios. La línea dice
 qué cuenta cada barra, cada punto o cada segmento, y sobre qué. Vive en

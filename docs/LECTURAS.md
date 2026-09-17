@@ -42,7 +42,7 @@ tres cosas distintas y el papel las lleva en este orden:
 
 1. **Qué muestra** — esta lectura.
 2. **Cuidado** — la advertencia del catálogo, cuando la hay.
-3. **El sello** — fuente, fecha de corte, N y cobertura del recorte.
+3. **El sello** — fuente, fecha de corte o de export, N y cobertura del recorte.
 
 **Criterio de escritura.** Una o dos frases. Se nombra la unidad que se cuenta
 —publicaciones, pares, firmas— porque es donde nacen los malentendidos, y se

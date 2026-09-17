@@ -936,8 +936,9 @@ async function fichaAutor() {
       ${kpi(i.publicaciones_top10, 'En el top 10 % de citación', 0, 'Percentil de citación')}
     </div>
 
-    <p class="nota">El FWCI no se muestra a nivel de autor: no es el promedio de los
-    FWCI de sus publicaciones y la fuente no lo entrega a nivel de persona.
+    <p class="nota">El FWCI no se muestra a nivel de autor: SciVal lo calcula sobre
+    todas las publicaciones de la persona, también las firmadas fuera de la UFT,
+    y la fuente no lo entrega a nivel de persona.
     En su lugar se reporta la presencia en el top 10 % de citación, que sí está
     normalizado por campo. Ver <a href="metodologia.html">metodología</a>.</p>
 

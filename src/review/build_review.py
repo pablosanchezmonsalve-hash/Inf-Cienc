@@ -822,6 +822,46 @@ def casos(d: dict, perf: dict) -> list[dict]:
             "firmas": [f] if f else [], "cruces": None,
         })
 
+    # ── Afiliaciones que una persona declaró dudosas (V-afiliacion_en_revision).
+    #
+    # No pregunta por identidad sino por la afiliación de UNA firma en UNA
+    # publicación. Por eso el caso trae lo que se coteja contra el artículo
+    # —EID, título, DOI y la cadena de afiliación tal como la dejó el export—
+    # y no señales entre firmas. La sospecha la escribe una persona en
+    # internal/afiliaciones_en_revision.yml; aquí sólo se presenta (D-08).
+    pubs = ({} if d["uni"] is None else
+            {r["eid"]: (r.get("anio"), r.get("titulo"), r.get("doi"))
+             for _, r in d["uni"].iterrows()})
+    ven = d["amb"][d["amb"].tipo == "V-afiliacion_en_revision"]
+    for _, r in ven.iterrows():
+        eid, firma = r["clave"].split("|", 1)
+        anio, titulo, doi = pubs.get(eid, (None, None, None))
+        en_eid = d["log"][d["log"].eid == eid]
+        propia = en_eid[en_eid.nombre_en_fuente == firma]
+        # La auditoría recorta la cadena a 300 caracteres (03_affiliation_variants.py).
+        afil = (f"«{propia['afiliacion_declarada_raw'].iloc[0]}»" if len(propia)
+                else "ninguna: la firma ya no figura en el log")
+        otras = sorted(set(en_eid.nombre_en_fuente) - {firma})
+        f = perf.get(firma)
+        out.append({
+            # Urgente, como un ORCID ya publicado sin confirmar: la firma cuenta
+            # hoy como UFT, y si no lo es el error ya está en el sitio.
+            "id": f"afilrev-{r['clave']}", "cola": "Afiliación en revisión",
+            "prioridad": 1,
+            "titulo": f"{firma} en {eid}: ¿es UFT en esta publicación?",
+            "contexto": (f"«{titulo or '(sin título en el universo)'}» ({anio or '—'}). "
+                         f"Afiliación que el export asigna a esta firma: {afil}. "
+                         f"Por qué está en revisión: {r['detalle']} "
+                         f"Si no es UFT: {r['consecuencia']}"
+                         + (f" Otras firmas UFT en la publicación: {' · '.join(otras)}"
+                            if otras else " Es la única firma UFT de la publicación.")),
+            "firmas": [f] if f else [], "cruces": None,
+            # Con la forma que espera `obras_html`: la publicación en duda, y
+            # sólo ésa. Las de la firma no sirven: se enseñan seis y la que se
+            # revisa puede no estar entre ellas.
+            "obra": {"nombre": firma, "obras": [(eid, anio, titulo, doi)]},
+        })
+
     # ── Un nombre con varios Scopus Author ID (P-04): perfil fragmentado u homonimia.
     p04 = d["amb"][d["amb"].tipo.str.startswith("P-04")]
     for _, r in p04.iterrows():
@@ -976,8 +1016,10 @@ padding:.6rem .85rem;margin-bottom:.9rem}
 .obras .anio{font-variant-numeric:tabular-nums;color:var(--tinta3);margin-right:.3rem}
 .obras .sindoi{color:var(--tinta3);font-style:italic}
 .dec button[aria-pressed="true"][data-v="orcid_correcto"],
-.dec button[aria-pressed="true"][data-v="orcid_encontrado"]{background:var(--si);color:#fff;border-color:var(--si)}
-.dec button[aria-pressed="true"][data-v="orcid_incorrecto"]{background:var(--no);color:#fff;border-color:var(--no)}
+.dec button[aria-pressed="true"][data-v="orcid_encontrado"],
+.dec button[aria-pressed="true"][data-v="afiliacion_confirmada"]{background:var(--si);color:#fff;border-color:var(--si)}
+.dec button[aria-pressed="true"][data-v="orcid_incorrecto"],
+.dec button[aria-pressed="true"][data-v="afiliacion_no_corresponde"]{background:var(--no);color:#fff;border-color:var(--no)}
 .dec button[aria-pressed="true"][data-v="orcid_no_encontrado"]{background:var(--tinta2);color:#fff;border-color:var(--tinta2)}
 .dec input.orcid{flex:0 0 auto;min-width:250px;font-family:ui-monospace,Menlo,Consolas,monospace}
 .dec input.orcid.malo{border-color:var(--no);background:#fdeaed}
@@ -1384,8 +1426,8 @@ def render(cs: list[dict], meta: dict) -> str:
       <p class="ctx">{html.escape(c['contexto'])}</p>
       {señales_html(c['cruces'])}
       {tabla_firmas(c['firmas'])}
-      {"".join(enlaces_html(f) for f in c['firmas']) if orc else ""}
-      {obras_html(c['firmas']) if orc else ""}
+      {"".join(enlaces_html(f) for f in c['firmas']) if orc or c.get('obra') else ""}
+      {obras_html(c['firmas']) if orc else obras_html([c['obra']] if c.get('obra') else [])}
       <div class="dec">
         {botones(c)}
         <button type="button" data-v="pendiente" aria-pressed="false">Sigo sin saber</button>

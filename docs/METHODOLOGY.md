@@ -61,9 +61,10 @@ Consecuencias operativas:
   ventana. A ese n, las métricas normalizadas individuales no son
   interpretables.
 - El FWCI institucional que publica este informe es el **promedio de los FWCI
-  que SciVal asigna a cada publicación**, y va siempre junto a su mediana: unas
-  pocas publicaciones muy citadas lo elevan. Sobre un recorte se publica sólo la
-  mediana (`docs/UX_UI.md` §4.2).
+  que SciVal asigna a cada publicación**, que es como el propio SciVal calcula
+  el FWCI de un conjunto (*Research Metrics Guidebook*, 2019, §5.5.2). Va
+  siempre junto a su mediana: unas pocas publicaciones muy citadas lo elevan.
+  Sobre un recorte se publica sólo la mediana (`docs/UX_UI.md` §4.2).
 
 Conforme a **DORA** y al **Manifiesto de Leiden**, toda métrica normalizada
 mostrada a nivel individual va acompañada de n, ventana temporal y advertencia
@@ -165,7 +166,8 @@ Se reportan por separado de las citas y nunca como sinónimo de impacto.
 ## 9. Trazabilidad
 
 Todo indicador publicado declara: **fuente, fecha de corte, ventana temporal, n
-y método de conteo**. El registro de fuentes vive en `config/sources.yml` y es
+y método de conteo**. Si la fuente no declara corte —el export de Scopus,
+`T-06`— declara la fecha de su export, rotulada como tal, y no la de otra fuente. El registro de fuentes vive en `config/sources.yml` y es
 parte del entregable, no documentación accesoria.
 
 ## 10. Reglas de matching y conciliación son capa interna
@@ -186,3 +188,5 @@ declaración de sus límites, no el proceso de depuración.
   science mapping analysis*. Journal of Informetrics 11(4).
 - Documentación oficial de Scopus y SciVal (Elsevier) sobre FWCI, SNIP,
   CiteScore, SJR y Topic Prominence.
+- Elsevier (2019). *Research Metrics Guidebook*, §5.5.2 y ejemplo 5: el FWCI de
+  un conjunto de N publicaciones es la media aritmética de los FWCI de cada una.

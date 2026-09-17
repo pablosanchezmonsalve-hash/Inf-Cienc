@@ -118,8 +118,10 @@ El recorte enlaza a la ficha en su pie.
 
 ### 4.4 Lo que no se hace, y por qué
 
-- **No se calcula el FWCI de la persona.** Decisión `D-18`: el FWCI de un
-  conjunto no es el promedio de los FWCI de sus elementos. En su lugar va
+- **No se calcula el FWCI de la persona.** Decisión `D-18`, con el fundamento
+  de `D-666`: SciVal lo calcula sobre todas las publicaciones de su perfil, no
+  sólo las de la UFT, y las firmas no están consolidadas en personas (`D-08`).
+  En su lugar va
   «publicaciones en el top 10 %», que sí está normalizado por campo y sí existe
   por publicación.
 - **No se publica ningún indicador nuevo por autor.** El catálogo ya declara

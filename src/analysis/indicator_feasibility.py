@@ -288,9 +288,21 @@ def main() -> None:
 
     ninst = numeric(scival, "Number of Institutions")
     solo = int((ninst == 1).sum())
-    record("C-02", "Publicaciones sin colaboración institucional", "colaboracion", "sí",
-           f"{solo}/{n_met} ({100 * solo / n_met:.1f} %)", "alta", "V1",
-           "Una sola institución participante. Complemento de C-01.")
+    # Una institución en SciVal no es «ninguna otra en la firma»: `Institutions`
+    # lista sólo las afiliaciones con perfil de institución en SciVal, y los
+    # países se cuentan sobre todas. Una publicación con una sola institución y
+    # más de un país prueba que a la lista le falta alguna, y ésas se MIDEN.
+    # Tampoco era el complemento de C-01: el de «internacional» es «nacional».
+    solo_varios_paises = int(((ninst == 1) & (npais > 1)).sum())
+    record("C-02", "Publicaciones sin colaboración con otras instituciones", "colaboracion", "no",
+           f"{solo}/{n_met} con una sola institución en SciVal; "
+           f"{solo_varios_paises} de ellas con autores de más de un país",
+           "no disponible", "descartado V1",
+           f"No calculable. SciVal sólo lista las instituciones que reconoce: "
+           f"{solo_varios_paises} de las {solo} publicaciones con una sola "
+           f"institución tienen autores de otro país, así que esa cifra no "
+           f"prueba que no participara otra. El export no trae el tipo de "
+           f"colaboración que SciVal asigna a cada publicación.")
 
     record("C-03", "Países colaboradores", "colaboracion", "sí",
            f"{int(npais.notna().sum())}/{n_met} · media={npais.mean():.2f} países",
@@ -421,9 +433,10 @@ def main() -> None:
 
     record("AU-04", "FWCI por autor", "impacto", "no", "—", "no aplicable",
            "descartado",
-           "El FWCI de un autor no es el promedio de los FWCI de sus "
-           "publicaciones. SciVal no entrega FWCI a nivel autor en este "
-           "export. Calcularlo sería inventar una métrica. Se declara no "
+           "SciVal calcula el FWCI de un investigador como el promedio de los "
+           "FWCI de sus publicaciones, pero sobre todo su perfil de Scopus; "
+           "este export trae sólo lo afiliado a la UFT y en firmas sin "
+           "consolidar (D-08). Promediarlo no sería su FWCI. Se declara no "
            "disponible (CLAUDE.md: placeholder metodológico).")
 
     record("AU-05", "ORCID en ficha de autor", "descriptivo", "no",

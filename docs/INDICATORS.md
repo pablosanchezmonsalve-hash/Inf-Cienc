@@ -38,7 +38,7 @@ trabajo).
 |---|---|---|---|---|---|---|---|---|
 | `I-01` | Citas totales | Citas acumuladas al corte | `sum(Citations)` | `Citations` | **sí** 14.245 | alta | ✅ | Fuente única SciVal, corte 2026-08-30 |
 | `I-02` | Citas por publicación | Media de citas | `sum(citas)/1342` | `Citations` | **sí** 10,61 | alta | ✅ | Denominador 1.342: universo y publicaciones con métrica coinciden. Declararlo junto al valor |
-| `I-03` | FWCI institucional | Impacto normalizado por campo, año y tipo | `mean(FWCI)` de cada publicación | `FWCI` | **sí** media 1,14 · **mediana 0,48** | media | ✅ | **Promedio de los FWCI individuales.** Distribución muy asimétrica: publicar siempre junto a la mediana |
+| `I-03` | FWCI institucional | Impacto normalizado por campo, año y tipo | `mean(FWCI)` de cada publicación | `FWCI` | **sí** media 1,14 · **mediana 0,48** | media | ✅ | **Promedio de los FWCI individuales**, que es la definición de SciVal para un conjunto. Distribución muy asimétrica: publicar siempre junto a la mediana |
 | `I-04` | FWCI por año | Serie anual de FWCI | `group by anio` | `FWCI`, `anio` | **parcial** 0,83/1,04/0,77 | **baja** | ⚠️ | **42 % de las publicaciones de 2025 aún sin citas.** El año reciente no es comparable |
 | `I-05` | Top 10 % de citación | Publicaciones en el decil superior | `count(percentil <= 10)` | `Outputs in Top Citation Percentiles` | **sí** 115/1.342 (8,6 %) | alta | ✅ | Semántica verificada empíricamente (§3) |
 | `I-07` | Publicaciones más citadas | Las diez del recorte con más citas | `sort(citas desc, eid)` top 10 | `Citations`, `DOI`, `Source title`, `FWCI` | **sí** | media | ✅ | **Sin normalizar**: favorece los primeros años y las áreas y tipos que citan más. Sin autores ni cuartil; no se dibuja recortada a una persona |
@@ -52,7 +52,7 @@ trabajo).
 | Cód. | Indicador | Definición | Lógica | Campos requeridos | Disp. | Confiab. | V1 | Nota metodológica |
 |---|---|---|---|---|---|---|---|---|
 | `C-01` | Colaboración internacional | Publicaciones con más de un país | `count(n_paises > 1)` | `Number of Countries` | **sí** 668/1.342 (49,8 %) | alta | ✅ | Indicador robusto: cobertura 100 % |
-| `C-02` | Sin colaboración institucional | Una sola institución | `count(n_inst == 1)` | `Number of Institutions` | **sí** 213 (15,9 %) | alta | ✅ | Complemento de `C-01` |
+| `C-02` | Sin colaboración con otras instituciones | Una sola institución | `count(n_inst == 1)` | `Number of Institutions` | **no** 213 con una sola institución, 17 de ellas con más de un país | no disponible | — | **No calculable (2026-09-16, `D-663`).** SciVal lista sólo las instituciones que reconoce y cuenta los países sobre todas las afiliaciones. Tampoco es el complemento de `C-01`: corta sus dos barras. Ver §1.7 |
 | `C-03` | Países colaboradores | Ranking de países | `explode(Country/Region)` | `Country/Region` | **sí** 100 % | alta | ✅ | Multivaluado: **no sumable** |
 | `C-04` | Instituciones colaboradoras | Ranking de instituciones | `explode(Institution IDs)` | `Institution IDs` | **sí** 100 % | alta | ✅ | SciVal advierte truncamiento en nombres: usar IDs |
 | `C-06` | Autores por publicación | Tamaño de equipo | `Number of Authors` | idem | **sí** media 7,3 · mediana 5 | alta | ✅ | Asimétrica: **preferir mediana** |
@@ -78,7 +78,7 @@ trabajo).
 | `AU-06` | Evolución temporal del autor | Publicaciones por año | `group by autor, anio` | `Autoria` | **sí** | media | ✅ | 6 puntos: **barras, no línea de tendencia** |
 | `AU-03` | h-index en ventana | h sobre 2020–2025 | h clásico sobre el subconjunto | `Autoria` + `Citations` | **parcial** | **baja** | ⚠️ | **675 de las 829 entidades tienen h ≤ 1 (81 %): sobre el conjunto no discrimina**[^au03]. Entre las 68 fichas donde sí se publica (n ≥ 5) la mediana es 4, el máximo 20 y sólo 5 quedan en h ≤ 1. Sólo en ficha, siempre etiquetado |
 | `AU-05` | ORCID | Identificador persistente | emparejamiento por apellido+inicial | Crossref + registro de ORCID | **parcial** 328/888 firmas · 268/829 entidades | media | ✅ | Ya no es placeholder: se publicó al cerrarse `T-01` (2026-08-01); revisiones de identidad posteriores consolidaron más grupos y retiraron asignaciones erróneas. Cada asignación viaja con su veredicto; sin ORCID se muestra «no disponible», no se oculta |
-| `AU-04` | FWCI por autor | Impacto normalizado del autor | — | — | **no** | no aplicable | ❌ | **Descartado.** El FWCI de un autor no es el promedio de sus publicaciones y SciVal no lo entrega a nivel autor. Calcularlo sería inventar la métrica |
+| `AU-04` | FWCI por autor | Impacto normalizado del autor | — | — | **no** | no aplicable | ❌ | **Descartado.** SciVal lo calcula como promedio de los FWCI de todas las publicaciones del perfil del autor, también las firmadas fuera de la UFT; este export trae sólo las de la UFT y en firmas sin consolidar (`D-08`). Promediarlas daría otra cifra con el mismo nombre (`D-666`) |
 
 [^au03]: Recalculado el 2026-09-09 con la **misma** función `h_index()` de `src/build/03_authors.py`, aplicada a las `publicaciones` de las 829 fichas: reproduce sin una sola discrepancia los 68 valores que el sitio publica, así que no es otra métrica sino la misma sobre toda la base. El reparto es 221 entidades con h = 0, 454 con h = 1, 75 con h = 2 y 79 con h ≥ 3. Que se calcule para el análisis no cambia lo que se publica: la ficha sigue mostrando h sólo con n ≥ 5 (`D-396`). La cifra anterior —729 de 888— la produce `src/analysis/indicator_feasibility.py` sobre **formas de firma sin consolidar**, que es otra población; se conserva ahí como nota interna de factibilidad (`D-397`) y sólo cambia si se re-corre ese análisis.
 
@@ -96,6 +96,7 @@ trabajo).
 | `X-02` | Benchmarking interinstitucional | Sin datos de instituciones comparables | Fuera de alcance V1 por `PROJECT_SPEC` |
 | `X-03` | Financiamiento | Cobertura 36,5 % | Fuente complementaria |
 | `X-04` | Tendencia de largo plazo | Ventana 2020–2025 | Datos previos a 2020 |
+| `C-02` | Sin colaboración con otras instituciones | SciVal lista sólo las instituciones que reconoce: 17 de las 213 publicaciones con una sola institución tienen autores de otro país, y el export no trae el tipo de colaboración de SciVal | Export del indicador *Collaboration* de SciVal, o revisión humana de las afiliaciones (`D-08`) |
 
 ---
 
@@ -133,7 +134,9 @@ exigidos por `PROJECT_SPEC.md` y llevan advertencia visible.
 `AU-04`, `X-01` a `X-04` (5 no calculables o fuera de alcance).
 `C-05` se publicó después, el 2026-08-26 (`T-10`), cuando se cerró el
 pendiente que lo bloqueaba (`T-03`); esta lista describe la decisión de
-Fase 2 tal como se tomó, no el estado actual del sitio.
+Fase 2 tal como se tomó, no el estado actual del sitio. `C-02` hizo el
+camino inverso: figuró como publicado hasta el 2026-09-16 sin calcularse en
+ninguna etapa, y se declaró no calculable (§1.7, `D-663`).
 
 ### Recuento
 
@@ -193,7 +196,8 @@ resultado real y debe presentarse, no suavizarse.
    en 1.342, porque ninguna publicación queda fuera de las banderas de
    disponibilidad; declararlo sigue siendo obligatorio, no opcional.
 2. **FWCI institucional = promedio de los FWCI individuales, junto a su mediana.**
-   Sobre un recorte se publica sólo la mediana (`docs/UX_UI.md` §4.2).
+   Es la fórmula de SciVal para un conjunto (`D-665`). Sobre un recorte se
+   publica sólo la mediana (`docs/UX_UI.md` §4.2).
 3. **Multivaluados no suman al total.** ASJC, QS, ODS, países e instituciones
    producen más asignaciones que publicaciones. Prohibido presentarlos como
    partición porcentual.

@@ -23,7 +23,7 @@ referencia mundial equivalente. Un valor de 1,0 significa exactamente el
 promedio mundial; 0,5, la mitad.
 
 El FWCI institucional de este informe es el **promedio de los FWCI de cada
-publicación**, y por eso se publica junto a la mediana. Es inestable con pocas publicaciones o ventanas cortas: no debe
+publicación** —así define SciVal el FWCI de un conjunto—, y por eso se publica junto a la mediana. Es inestable con pocas publicaciones o ventanas cortas: no debe
 usarse para comparar personas.
 
 En este informe: media **1,14**, mediana **0,48** sobre 1.342 publicaciones. La

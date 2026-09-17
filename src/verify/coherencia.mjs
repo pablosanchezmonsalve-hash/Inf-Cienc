@@ -55,5 +55,19 @@ comparar('P-02 · publicaciones por año (Dinámica anual)',
 comparar('I-01 · citas por año (Dinámica anual)',
   dinamica.map((f) => ({ valor: f.anio, n: f.citas })), series['I-01'].datos.map((d) => ({ valor: d.anio, n: d.n })));
 
+// I-03 · FWCI institucional: media aritmética de los FWCI de cada publicación,
+// que es la definición de SciVal para un conjunto (Research Metrics Guidebook
+// 2019, §5.5.2; D-665), y la mediana, la misma función que usa el recorte.
+const i03 = (await leer('kpis.json')).kpis.find((k) => k.codigo === 'I-03');
+const fw = publicaciones.map((p) => p.fwci).filter((v) => typeof v === 'number');
+const r2 = (v) => Math.round(v * 100) / 100;
+const mediaFw = r2(fw.reduce((a, v) => a + v, 0) / fw.length);
+if (i03.valor === mediaFw && i03.mediana === r2(X.mediana(fw))) {
+  console.log(`  · I-03: media ${mediaFw} y mediana sobre ${fw.length} publicaciones coinciden`);
+} else {
+  fallos++;
+  console.log(`  ✗ I-03: kpis.json ${i03.valor}/${i03.mediana} · publicaciones ${mediaFw}/${r2(X.mediana(fw))}`);
+}
+
 console.log(`\n  TOTAL: ${fallos} divergencia(s) entre navegador y build`);
 process.exit(fallos ? 1 : 0);

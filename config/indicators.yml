@@ -93,7 +93,7 @@ indicadores:
   I-03: {nombre: "FWCI institucional", categoria: impacto, publicar: true,
          denominador: con_metricas, confiabilidad: media,
          mostrar_mediana: true,
-         advertencia: "1,0 es el promedio mundial. Es el promedio de los FWCI que SciVal asigna a cada publicación: unas pocas muy citadas lo elevan, y por eso se publica junto a la mediana."}
+         advertencia: "1,0 es el promedio mundial. Es el promedio de los FWCI que SciVal asigna a cada publicación, que es como SciVal define el FWCI de un conjunto: unas pocas muy citadas lo elevan, y por eso se publica junto a la mediana."}
   I-04: {nombre: "FWCI por año", categoria: impacto, publicar: true,
          denominador: con_metricas, confiabilidad: baja,
          advertencia_destacada: true,
@@ -120,8 +120,17 @@ indicadores:
   C-01: {nombre: "Colaboración internacional", categoria: colaboracion, publicar: true,
          denominador: con_metricas, confiabilidad: alta,
          advertencia: "Definida como más de un país participante. No mide intensidad."}
-  C-02: {nombre: "Publicaciones sin colaboración institucional", categoria: colaboracion,
-         publicar: true, denominador: con_metricas, confiabilidad: alta, advertencia: null}
+  # No calculable desde el 2026-09-16 (D-663). Figuraba publicado y ninguna
+  # etapa lo calculaba: el catálogo decía «Se calcula y se muestra en el sitio».
+  # La cifra de la ficha de factibilidad —una sola institución en SciVal— no
+  # dice lo que el nombre prometía: SciVal lista sólo las instituciones que
+  # reconoce y cuenta los países sobre todas las afiliaciones. Y en su
+  # vocabulario «colaboración institucional» es justo ese caso —varios autores
+  # de una misma institución—, así que el nombre anterior decía lo contrario.
+  C-02: {nombre: "Publicaciones sin colaboración con otras instituciones", categoria: colaboracion,
+         publicar: false, estado: no_calculable,
+         razon: "SciVal lista sólo las instituciones que reconoce y cuenta los países sobre todas las afiliaciones: hay publicaciones con una sola institución y autores de otro país. Una sola institución en la lista no prueba que no participara otra, y el export no trae el tipo de colaboración que SciVal asigna a cada publicación.",
+         que_falta: "Exportar de SciVal el indicador Collaboration (internacional, nacional, institucional, autoría única) para este universo, o que una persona revise las afiliaciones de Scopus distintas de la UFT en esas publicaciones (D-08)."}
   C-03: {nombre: "Países colaboradores", categoria: colaboracion, publicar: true,
          denominador: con_metricas, confiabilidad: alta, multivaluado: true,
          advertencia: "Multivaluado: no sumable al total."}
@@ -179,8 +188,8 @@ indicadores:
   # --------------------------------------- no calculables: placeholders
   AU-04: {nombre: "FWCI por autor", categoria: impacto, publicar: false,
           estado: no_calculable,
-          razon: "El FWCI de un autor no es el promedio de los FWCI de sus publicaciones, y SciVal no lo entrega a nivel autor en este export.",
-          que_falta: "Export de SciVal a nivel autor, o los denominadores de campo."}
+          razon: "SciVal calcula el FWCI de un investigador como el promedio de los FWCI de sus publicaciones, pero sobre todas las de su perfil de Scopus, también las firmadas fuera de la UFT. Este export trae sólo las afiliadas a la UFT, y en firmas sin consolidar en personas (D-08): su promedio sería otra cifra con el mismo nombre.",
+          que_falta: "Export de SciVal a nivel investigador, sobre perfiles de autor confirmados por revisión humana."}
   # Dejó de ser placeholder el 2026-08-01, al cerrarse T-01. La entrada seguía
   # diciendo que ORCID «no existe en ninguna de las fuentes» porque nada leía
   # estos campos: eran metadatos dormidos. El catálogo los publica, así que una

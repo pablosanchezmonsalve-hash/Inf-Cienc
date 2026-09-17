@@ -350,10 +350,9 @@ def catalogo() -> None:
             # La procedencia se afirma sólo de lo que se calcula. Un indicador
             # no calculable no tiene fuente: tiene un motivo, y ese motivo va en
             # su propia fila. Poner «Scopus · SciVal» sugeriría que el dato
-            # vendría de ahí, y de los cuatro no calculables sólo es cierto para
-            # dos —a `X-03` le falla la cobertura y a `X-04` la ventana, no la
-            # fuente—. Una etiqueta única para los cuatro sería falsa en la
-            # mitad.
+            # vendría de ahí, y de los no calculables no es cierto para todos
+            # —a `X-03` le falla la cobertura y a `X-04` la ventana, no la
+            # fuente—. Una etiqueta única para todos sería falsa en parte.
             "fuente": (b.FUENTE_POR_INDICADOR.get(code, "Scopus · SciVal")
                        if estado in ("publicado", "diferido") else None),
             "denominador": nombre_den,

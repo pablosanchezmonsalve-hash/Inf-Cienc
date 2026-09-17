@@ -8,6 +8,7 @@ QUÉ HACE
       config/identidades_consolidadas.yml   variantes declaradas la misma persona
       config/firmas_e09_resueltas.yml       firmas que no son personas
       config/orcid_revisado.yml             veredictos sobre asignaciones de ORCID
+      internal/afiliaciones_revisadas.yml     veredictos sobre afiliaciones en revisión
       data/enriched/authors_orcid.csv       asignaciones que la revisión confirma
 
 QUÉ NO HACE
@@ -345,6 +346,31 @@ def resueltas_e09(d: pd.DataFrame, veredicto: str) -> list[tuple[str, str]]:
     return sorted(vistas.items())
 
 
+# `afilrev-<eid>|<firma>`, como lo compone build_review.py con la `clave` de la
+# auditoría. El CSV no tiene columna de EID y añadirla obligaría a tocar la
+# exportación del navegador y la fusión: viaja en el caso_id, igual que el
+# ORCID en `_orcid_del_caso`.
+_CASO_AFILIACION = re.compile(r"^afilrev-([^|]+)\|(.+)$")
+
+
+def resueltas_afiliacion(d: pd.DataFrame, veredicto: str) -> list[tuple[str, str, str]]:
+    """(eid, firma, nota) de la cola «Afiliación en revisión» con un veredicto.
+
+    Por publicación y no por firma: lo que se decide es si la UFT que la fuente
+    pega a una firma en UN trabajo es suya, y la misma persona puede serlo en
+    otro. Una fila cuyo caso_id no trae EID no entra; `main` la avisa.
+    """
+    vistas: dict[tuple[str, str], str] = {}
+    for _, r in d[d.veredicto == veredicto].iterrows():
+        m = _CASO_AFILIACION.match(str(r["caso_id"]))
+        if not m:
+            continue
+        nota = str(r.get("nota") or "").strip()
+        if m.groups() not in vistas or (not vistas[m.groups()] and nota):
+            vistas[m.groups()] = nota
+    return sorted((e, f, n) for (e, f), n in vistas.items())
+
+
 def veredictos_orcid(d: pd.DataFrame, vigente: dict[str, str]) -> dict:
     """Traduce los cuatro veredictos de ORCID a lo que hay que escribir.
 
@@ -571,6 +597,44 @@ def yaml_e09(descartadas: list[tuple[str, str]], confirmadas: list[tuple[str, st
     return "\n".join(lineas) + "\n"
 
 
+def yaml_afiliaciones(no_corresponde: list[tuple[str, str, str]],
+                      confirmadas: list[tuple[str, str, str]], fecha: str) -> str:
+    """Escrito a mano, como los otros: se lee tanto como se ejecuta."""
+    lineas = [
+        "# Veredictos humanos sobre afiliaciones en revisión.",
+        "#",
+        "# GENERADO por src/review/apply_decisions.py desde",
+        "# internal/identity_decisions.csv. No editar a mano: se regenera.",
+        "#",
+        "# DE DÓNDE VIENEN",
+        "#   Una persona sospecha que la fuente pegó la afiliación UFT a la firma",
+        "#   equivocada y lo declara en internal/afiliaciones_en_revision.yml; la",
+        "#   auditoría lo encola como V-afiliacion_en_revision. Aquí llega sólo lo",
+        "#   que alguien cotejó contra el texto de la publicación.",
+        "#",
+        "# no_corresponde  la afiliación UFT de esa firma en ESA publicación no es",
+        "#                 suya. Retirarla del recuento es un paso aparte, no",
+        "#                 automático.",
+        "# confirmadas     la afiliación es correcta. Sólo cierra el caso.",
+        "#",
+        "# QUÉ NO AUTORIZA",
+        "#   Tocar internal/matching_log.csv: la auditoría lo regenera desde la",
+        "#   fuente en cada corrida, y la regla bloqueante I-01 se calcula sobre él.",
+        "#",
+        f"# No corresponden: {len(no_corresponde)} · confirmadas: {len(confirmadas)}",
+        f"# Fecha de la revisión: {fecha}",
+        "",
+    ]
+    for clave, entradas in (("no_corresponde", no_corresponde), ("confirmadas", confirmadas)):
+        lineas.append(f"{clave}:" if entradas else f"{clave}: []")
+        for eid, firma, nota in entradas:
+            lineas.append(f"  - eid: {_escalar(eid)}")
+            lineas.append(f"    firma: {_escalar(firma)}")
+            if nota:
+                lineas.append(f"    nota: {_escalar(nota)}")
+    return "\n".join(lineas) + "\n"
+
+
 def yaml_consolidacion(grupos: list[list[str]], fecha: str, n_dec: int,
                        frec: dict[str, int],
                        origen: dict[int, str] | None = None) -> str:
@@ -784,6 +848,28 @@ def autotest() -> int:
                   vuelta["descartadas"] == [{"firma": "O'Brien \"Bob\" A.", "nota": dura}]
                   and vuelta["confirmadas"] is None,
                   vuelta))
+
+    # 10e. Afiliación en revisión: el EID viaja en el caso_id, cada veredicto va
+    #      a su lista y un caso_id sin EID no se aplica.
+    da = df([("afilrev-2-s2.0-85124144803|Goosey-Tolfrey V.L.", "Afiliación en revisión",
+              "Goosey-Tolfrey V.L.", "afiliacion_no_corresponde"),
+             ("afilrev-2-s2.0-1|Gómez P.", "Afiliación en revisión", "Gómez P.",
+              "afiliacion_confirmada"),
+             ("afilrev-Soto B.", "Afiliación en revisión", "Soto B.",
+              "afiliacion_no_corresponde")])
+    casos.append(("afiliación no UFT se registra por publicación",
+                  resueltas_afiliacion(da, "afiliacion_no_corresponde")
+                  == [("2-s2.0-85124144803", "Goosey-Tolfrey V.L.", "")],
+                  resueltas_afiliacion(da, "afiliacion_no_corresponde")))
+    casos.append(("afiliación confirmada no cuenta como no UFT",
+                  [f for _, f, _ in resueltas_afiliacion(da, "afiliacion_confirmada")]
+                  == ["Gómez P."], resueltas_afiliacion(da, "afiliacion_confirmada")))
+    vuelta = yaml.safe_load(yaml_afiliaciones(
+        [("2-s2.0-1", "O'Brien \"Bob\" A.", dura)], [], "2026-01-01"))
+    casos.append(("el YAML de afiliaciones se relee intacto",
+                  vuelta["no_corresponde"] == [{"eid": "2-s2.0-1",
+                                                "firma": "O'Brien \"Bob\" A.", "nota": dura}]
+                  and vuelta["confirmadas"] == [], vuelta))
 
     # 11. Descartar una firma NO la mete en ningún grupo de identidad: son dos
     #     preguntas distintas y el veredicto de una no puede responder la otra.
@@ -1018,6 +1104,27 @@ def main() -> int:
     print(f"  firmas descartadas  : {len(desc)} (probables fragmentos)")
     print(f"  confirmadas persona : {len(conf)} (se conservan, salen de la cola)")
 
+    # Una firma no puede ser y no ser UFT en la misma publicación.
+    afil_no = resueltas_afiliacion(d, "afiliacion_no_corresponde")
+    afil_si = resueltas_afiliacion(d, "afiliacion_confirmada")
+    choque = sorted({(e, f) for e, f, _ in afil_no} & {(e, f) for e, f, _ in afil_si})
+    if choque:
+        print("\n  CONTRADICCIONES:")
+        for e, f in choque:
+            print(f"    «{f}» en {e} se declara UFT y a la vez no UFT")
+        sys.exit("\nNo se aplica nada. Resuelva la contradicción y vuelva a exportar.")
+    sin_eid = [r["caso_id"] for _, r in d[d.veredicto.isin(
+                   ["afiliacion_no_corresponde", "afiliacion_confirmada"])].iterrows()
+               if not _CASO_AFILIACION.match(str(r["caso_id"]))]
+    if sin_eid:
+        print(f"\n  AVISO · {len(sin_eid)} decisión(es) de afiliación sin EID en su "
+              "caso_id, que no se pueden aplicar:")
+        for cid in sin_eid:
+            print(f"    {cid}")
+    print(f"  afiliación no UFT   : {len(afil_no)} (se registran; retirarlas del "
+          "recuento es un paso aparte)")
+    print(f"  afiliación sí UFT   : {len(afil_si)} (cierran el caso)")
+
     cpath = INTERNAL / "orcid_candidatos_afiliacion.csv"
     cand = pd.read_csv(cpath, dtype=str) if cpath.exists() else None
     dspath = INTERNAL / "dspace_candidatos.csv"
@@ -1080,6 +1187,8 @@ def main() -> int:
         yaml_e09(desc, conf, hoy), encoding="utf-8")
     (CONFIG / "orcid_revisado.yml").write_text(
         yaml_orcid(orc, hoy), encoding="utf-8")
+    (INTERNAL / "afiliaciones_revisadas.yml").write_text(
+        yaml_afiliaciones(afil_no, afil_si, hoy), encoding="utf-8")
 
     if len(nuevas):
         salida = pd.concat([vig_efectiva, nuevas], ignore_index=True)
@@ -1092,6 +1201,8 @@ def main() -> int:
     print(f"       config/orcid_revisado.yml        "
           f"({len(orc['confirmadas'])} confirmadas · {len(orc['retiradas'])} "
           f"retiradas · {len(orc['sin_registro'])} sin registro)")
+    print(f"       internal/afiliaciones_revisadas.yml "
+          f"({len(afil_no)} no corresponden · {len(afil_si)} confirmadas)")
     if len(nuevas):
         print(f"       data/enriched/authors_orcid.csv  (+{len(nuevas)})")
     print("\n  Reconstruya el sitio para que surta efecto:  make sitio")

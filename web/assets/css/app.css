@@ -1858,7 +1858,7 @@ svg.chart .trama { pointer-events: none; }
        2. la figura,
        3. la tabla equivalente, que es la figura en cifras,
        4. qué muestra y qué cuidado exige,
-       5. el sello: fuente, corte, N y cobertura del recorte.
+       5. el sello: fuente, fecha, N y cobertura del recorte.
 
      `.corte` no estaba en ninguna regla de corte de página —sólo `.modulo`, que
      es de las páginas antiguas—, así que una sección podía dejar la figura al

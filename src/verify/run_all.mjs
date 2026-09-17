@@ -31,6 +31,8 @@
                    porque es como viajan
      coherencia    los indicadores que se calculan dos veces —en el build y
                    en el motor del navegador— dan lo mismo sin filtros
+     procedencia   cada sello lleva la fecha de su fuente: Scopus la de su
+                   export, SciVal su corte, contrastadas con meta.json
 
    `rendimiento.mjs` queda FUERA de la batería por diseño: mide LCP con cinco
    corridas por página contra dos servidores y tarda minutos. Se corre a mano
@@ -73,6 +75,9 @@ const PASOS = [
   ['peso', 'node', ['src/verify/peso.mjs', DIST]],
   // Tampoco necesita servidor: importa el motor del navegador bajo Node.
   ['coherencia', 'node', ['src/verify/coherencia.mjs', DIST]],
+  // Ni éste: compone los sellos con las funciones del pre-renderizado y del
+  // navegador y contrasta su fecha con meta.json (D-669).
+  ['procedencia', 'node', ['src/verify/procedencia.mjs', DIST]],
   // Regenera el sistema de diseño y lo comprueba. Está DENTRO de la batería
   // porque un generador que nadie ejecuta se congela: `build_kit.mjs` llevaba
   // tres semanas sin arrancar, publicando fichas de una paleta retirada, y no

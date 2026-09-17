@@ -454,7 +454,7 @@ añadir('componentes/vistas.html', ficha({
 
 añadir('componentes/sello.html', ficha({
   grupo: 'Componentes', nombre: 'Sello de procedencia', ancho: 900,
-  subtitulo: 'Fuente, corte, N y cobertura · con su variante de advertencia',
+  subtitulo: 'Fuente, fecha, N y cobertura · con sus variantes de export y de advertencia',
   intro: `Responde, sin que haya que buscarlo, a las cuatro preguntas que deciden si una
     cifra puede citarse. <strong>El N no es global</strong> —${miles(series['P-02'].procedencia.n)}
     en producción, ${miles(series['I-05'].procedencia.n)} en impacto,
@@ -463,8 +463,11 @@ añadir('componentes/sello.html', ficha({
     de <code style="display:inline">series.json</code> al generar esta ficha: escritas a
     mano sobrevivían a la carga que las volvía falsas, que es justo lo que el sello
     existe para impedir. Por debajo del umbral de cobertura declarado en configuración,
-    el sello cambia de registro y pasa a advertir. Lo decide el dato.`,
-  cuerpo: [c.sello(series['I-05'].procedencia), c.sello(series['T-04'].procedencia)].join(''),
+    el sello cambia de registro y pasa a advertir. Lo decide el dato. La fecha es la que
+    declara la fuente: el export de Scopus no declara corte, y el sello de
+    <code style="display:inline">P-02</code>, el tercero, rotula la de su export.`,
+  cuerpo: [c.sello(series['I-05'].procedencia), c.sello(series['T-04'].procedencia),
+    c.sello(series['P-02'].procedencia)].join(''),
 }));
 
 añadir('componentes/notas.html', ficha({
