@@ -15361,3 +15361,104 @@ pre-renderizado también de `datos` y `metodologia`.
   cola `V-afiliacion_en_revision`. Regenerar el PDF si se publicó uno con el
   cuartil invertido.
 - Subir la rama y cerrar el PR #51 cuando el usuario lo decida.
+
+## Sesión 2026-09-16 (cont. 4) — `main` en rojo tras cuatro fusiones, y por qué
+
+Tras fusionar el PR #51 se fusionaron tres ramas más en seis minutos. El
+despliegue falló las tres veces y `main` quedó en rojo: el sitio no se publica.
+
+### La causa, del log
+
+```
+BUILD ABORTADO: la cabecera no se expandió en todas las páginas.
+  PÁGINAS SIN MARCADOR DE CABECERA:
+    · index.html
+    · index_auditado.html
+```
+
+`expandir_cabeceras()` (`D-224`) exige que toda página declare
+`<head data-titulo="…" data-descripcion="…"></head>`, y expande la plantilla
+única desde ahí. Dos páginas dejaron de tenerlo.
+
+### De quién es, medido commit a commit
+
+| Commit | Marcador en `web/index.html` |
+|---|---|
+| `9ce98b7` main anterior | presente |
+| `0d14bce` rama del PR #51 | presente |
+| `b684d20` portada «Cockpit» de Stitch | presente |
+| **`1ef8c36`** *audited content + WCAG 2.1* | **perdido aquí** |
+
+**El rediseño de Stitch no rompió nada.** `b684d20` entregó una portada de **74
+líneas correctamente integrada**: marcador puesto, cero dependencias externas,
+estilos desde `app.css` vía plantilla. Lo que rompió el build fue `1ef8c36`,
+que pegó encima una **exportación autónoma de 453 líneas**:
+
+| | Stitch integrado (`7726845`) | `1ef8c36` |
+|---|---|---|
+| Marcador de cabecera | sí | **no** |
+| `cdn.tailwindcss.com` · Google Fonts | 0 | **4 referencias** |
+| Referencias a `app.css` | — (vía plantilla) | 0 |
+| Líneas | 74 | 453 |
+
+Las cuatro dependencias de CDN contradicen `docs/UX_UI.md` §12 —«ninguna fuente,
+hoja ni script se carga desde un CDN»—, y esa regla **vive sólo en prosa: no hay
+compuerta que la mire**. Es el mismo defecto que esta sesión vino cerrando, en
+un sitio más.
+
+`web/index_auditado.html` resultó ser un **duplicado exacto** de `index.html`
+—453 líneas, cero diferencias— y **nadie lo enlaza**.
+
+### El arreglo
+
+Devolver `web/index.html` a `7726845` —la portada de Stitch en su forma
+integrada— y retirar el duplicado. No es una decisión de diseño: es restaurar el
+trabajo que ya estaba bien hecho y que una exportación sobrescribió.
+
+Verificado: ensamblado con **13 páginas** (incluida `datos.html`, del Data Hub
+de Stitch) y batería completa de **nueve pasos** —el `coherencia` que llegó en
+paralelo incluido— sin fallos.
+
+### Hallazgo aparte, declarado y NO corregido
+
+`data/uft_bibliometria_dataset.csv`, que llegó en `4e9eeb1`, publica una columna
+`Citas_Acumuladas_Est` **inventada**. Las publicaciones por año son correctas;
+las citas no:
+
+| año | citas reales (`I-01`) | CSV |
+|---|---|---|
+| 2020 | 1.645 | 1.391 |
+| 2021 | 2.675 | 2.112 |
+| 2022 | **5.652** | 2.059 |
+| 2023 | 1.579 | 2.410 |
+| 2024 | 1.778 | 2.898 |
+| 2025 | 916 | **3.375** |
+
+La suma cuadra (14.245) porque **el total se repartió proporcionalmente**:
+comprobado en los seis años, `citas(año) = publicaciones(año) × 14245/1342`.
+
+No es una estimación de nada. Y lo que destruye es justo la advertencia central
+del proyecto: la serie real **cae** en los años recientes por ventana de
+citación —`I-01` lo declara en el sitio— y la inventada **sube**, que es la
+lectura contraria. Un lector de ese CSV concluiría que el impacto crece cuando
+lo que crece es el volumen.
+
+No lo toco en esta pasada: no lo consume el pipeline —sólo
+`scripts/process_scientometrics.py`, que es quien lo generó— y decidir qué pasa
+con ese archivo y con `docs/INFORME_EJECUTIVO_AUDITADO_2020_2025.md`, que bebe
+de él, es del usuario.
+
+### Decisiones
+
+| # | Decisión | Fundamento |
+|---|---|---|
+| D-663 | `web/index.html` vuelve a la portada integrada de Stitch (`7726845`) | `1ef8c36` no era una mejora de esa portada sino una exportación autónoma pegada encima: perdió el marcador de `D-224` —y con él el build— e introdujo cuatro dependencias de CDN que `UX_UI.md` §12 prohíbe. Revertir restaura trabajo que ya estaba bien integrado, no descarta un rediseño |
+| D-664 | `web/index_auditado.html` se retira | Duplicado exacto de `index.html` —453 líneas, cero diferencias— sin un solo enlace entrante. Una segunda portada idéntica en `web/` entra en el ensamblado y rompe el build sin aportar nada |
+| D-665 | La regla «sin dependencias de CDN» necesita compuerta, y queda declarada sin ella | Vive sólo en `docs/UX_UI.md` §12. Una exportación con Tailwind y Google Fonts entró en `main` sin que nada avisara; el build sólo se quejó del marcador. Es el defecto que `D-598` describe para la tabla de contrastes, aquí sobre una regla de arquitectura |
+| D-666 | El CSV de citas por año repartidas se declara inventado y no se corrige aquí | `citas(año) = publicaciones(año) × 14245/1342`, comprobado en los seis. Invierte la curva real y borra la advertencia de ventana de citación. Qué hacer con ese archivo y con el informe que bebe de él es decisión del usuario, no una corrección mecánica |
+
+### Archivos
+
+- `web/index.html` — restaurado a `7726845`
+- `web/index_auditado.html` — retirado
+- `SESSION_NOTES.md`, `docs/DECISIONS.md`
